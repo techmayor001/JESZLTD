@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club De Stars - Join Our Cooperative</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                 
+                <div>
+                    <img src="log.png" alt="" width="10%" height="10%">
+                    <h1 class="text-1xl font-bold text-gray-900">CLUB DE STARS</h1>
+                    <p class="text-sm text-gray-600">Multipurpose Cooperative Society Ltd</p>
+                </div>
+                
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid lg:grid-cols-2 gap-12 items-start">
+            <!-- Left Side - Info -->
+            <div class="fade-in">
+                <div class="gradient-bg rounded-3xl p-8 text-white mb-8">
+                    <h2 class="text-3xl font-bold mb-4">Join Our Cooperative</h2>
+                    <p class="text-blue-50 mb-6">
+                        Become a member of Club De Stars Multipurpose Cooperative Society Ltd and unlock financial opportunities that will transform your future.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold mb-1">High Interest Savings</h4>
+                                <p class="text-blue-50 text-sm">Earn competitive returns on your savings</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold mb-1">Quick Loan Access</h4>
+                                <p class="text-blue-50 text-sm">Apply for loans with flexible terms</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold mb-1">Asset Management</h4>
+                                <p class="text-blue-50 text-sm">Track and grow your financial assets</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100">
+                    <h3 class="font-bold text-gray-900 text-lg mb-3">Membership Requirements</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            One-time registration fee: ₦2,000
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            Valid identification
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            Active email and phone number
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            Admin approval required
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right Side - Forms -->
+            <div class="fade-in">
+                <!-- Toggle Buttons -->
+    <!-- Tabs -->
+<div class="bg-white rounded-2xl p-2 shadow-sm mb-6 flex">
+  <button onclick="showForm('register')" id="registerTab"
+          class="flex-1 py-3 px-6 rounded-xl font-semibold transition gradient-bg text-white">
+    Register
+  </button>
+  <button onclick="showForm('login')" id="loginTab"
+          class="flex-1 py-3 px-6 rounded-xl font-semibold transition text-gray-600 hover:bg-gray-50">
+    Login
+  </button>
+</div>
+
+<!-- Registration Form -->
+<div id="registerForm" class="bg-white rounded-2xl shadow-lg p-8">
+  <h2 class="text-2xl font-bold text-gray-900 mb-6">Create Your Account</h2>
+
+  <!-- Step 1: Personal Details -->
+  <form id="registrationForm" class="space-y-4" enctype="multipart/form-data">
+    <div id="step1" class="space-y-4">
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">First Name *</label>
+          <input type="text" required name="firstName"
+                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900">
+        </div>
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Last Name *</label>
+          <input type="text" required name="lastName"
+                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Email Address *</label>
+        <input type="email" required name="email"
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900"
+               placeholder="Enter Email Address">
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Phone Number *</label>
+        <input type="tel" required name="phone"
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900"
+               placeholder="+234 XXX XXX XXXX">
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Date of Birth *</label>
+        <input type="date" required name="dob"
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900">
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">State *</label>
+            <select id="state" name="state" required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900">
+            <option value="">Select State</option>
+            <option value="Abia">Abia</option>
+            <option value="Adamawa">Adamawa</option>
+            <option value="Akwa Ibom">Akwa Ibom</option>
+            <option value="Anambra">Anambra</option>
+            <option value="Bauchi">Bauchi</option>
+            <option value="Bayelsa">Bayelsa</option>
+            <option value="Benue">Benue</option>
+            <option value="Borno">Borno</option>
+            <option value="Cross River">Cross River</option>
+            <option value="Delta">Delta</option>
+            <option value="Ebonyi">Ebonyi</option>
+            <option value="Edo">Edo</option>
+            <option value="Ekiti">Ekiti</option>
+            <option value="Enugu">Enugu</option>
+            <option value="Gombe">Gombe</option>
+            <option value="Imo">Imo</option>
+            <option value="Jigawa">Jigawa</option>
+            <option value="Kaduna">Kaduna</option>
+            <option value="Kano">Kano</option>
+            <option value="Katsina">Katsina</option>
+            <option value="Kebbi">Kebbi</option>
+            <option value="Kogi">Kogi</option>
+            <option value="Kwara">Kwara</option>
+            <option value="Lagos">Lagos</option>
+            <option value="Nasarawa">Nasarawa</option>
+            <option value="Niger">Niger</option>
+            <option value="Ogun">Ogun</option>
+            <option value="Ondo">Ondo</option>
+            <option value="Osun">Osun</option>
+            <option value="Oyo">Oyo</option>
+            <option value="Plateau">Plateau</option>
+            <option value="Rivers">Rivers</option>
+            <option value="Sokoto">Sokoto</option>
+            <option value="Taraba">Taraba</option>
+            <option value="Yobe">Yobe</option>
+            <option value="Zamfara">Zamfara</option>
+            <option value="FCT">Federal Capital Territory (Abuja)</option>
+            </select>
+
+        </div>
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">LGA *</label>
+              <input type="text" required name="lga"
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Address *</label>
+        <textarea required name="address" rows="2"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900"
+                  placeholder="Your full address"></textarea>
+      </div>
+
+
+      <button type="button" onclick="nextStep()"
+              class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg hover:shadow-xl transition transform hover:scale-105">
+        Next: KYC Information →
+      </button>
+    </div>
+
+    <!-- Step 2: KYC Info -->
+    <div id="step2" class="hidden space-y-4">
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Proof of Address *</label>
+        <input type="file" required name="addressProof"
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900">
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Passport Photograph *</label>
+        <input type="file" required name="passportPhoto"
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900">
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Means of Identification *</label>
+        <select name="idType" required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900">
+          <option value="">Select ID Type</option>
+          <option value="nin">National ID (NIN)</option>
+          <option value="passport">International Passport</option>
+          <option value="drivers">Driver's License</option>
+          <option value="voters">Voter's Card</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">ID Number *</label>
+        <input type="text" required name="idNumber"
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900"
+               placeholder="Enter your ID number">
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Upload ID Document *</label>
+        <input type="file" required name="idFile"
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900">
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Upload Signature *</label>
+        <input type="file" required name="signature"
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900">
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Refferal Code *</label>
+        <input type="text" required name="referralCode"
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900"
+               placeholder="Enter your Refferal Code">
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Password*</label>
+        <input type="password" required name="password"
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900"
+               placeholder="****************">
+      </div>
+
+      <div class="flex justify-between">
+        <button type="button" onclick="prevStep()"
+                class="px-6 py-3 bg-gray-200 rounded-lg font-semibold hover:bg-gray-300 transition">
+          ← Back
+        </button>
+        <button type="submit"
+                class="px-6 py-3 gradient-bg text-white rounded-lg font-semibold hover:shadow-xl transition">
+          Proceed to Payment (₦2,000)
+        </button>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  // Step navigation
+  function nextStep() {
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+  }
+  function prevStep() {
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step1').classList.remove('hidden');
+  }
+
+</script>
+
+
+                <!-- Login Form -->
+                <div id="loginForm" class="bg-white rounded-2xl shadow-lg p-8 hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Welcome Back</h2>
+                    <form id="loginFormElement" class="space-y-6" method="post" action="/login">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Email Address</label>
+                            <input type="email" name="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent" placeholder="your@email.com">
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Password</label>
+                            <input type="password" name="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent" placeholder="Enter your password">
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="remember" class="w-4 h-4 text-blue-900 border-gray-300 rounded focus:ring-blue-900">
+                                <label for="remember" class="ml-2 text-sm text-gray-700">Remember me</label>
+                            </div>
+                            <a href="#" class="text-sm text-blue-900 hover:underline">Forgot Password?</a>
+                        </div>
+
+                        <button type="submit" class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg hover:shadow-xl transition transform hover:scale-105">
+                            Login to Account
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="back" style="height: 40px; display: flex; align-items:center; justify-content: center; margin-top: 20px;">
+
+            <a href="/"  class="text-blue-900 hover:text-blue-700 font-medium"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+        </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">Payment Successful!</h3>
+            <p class="text-gray-600 mb-6">
+                Your registration has been submitted successfully. Our admin team will review your application within 24-48 hours.
+            </p>
+            <p class="text-sm text-gray-600 mb-6">
+                You will receive an email notification once your application is approved. Please check your inbox regularly.
+            </p>
+            <button onclick="closeModal()" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:shadow-lg transition">
+                Got it, Thanks!
+            </button>
+        </div>
+    </div>
+
+    <!-- Pending Modal -->
+    <div id="pendingModal" class="modal">
+        <div class="modal-content bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">Application Under Review</h3>
+            <p class="text-gray-600 mb-6">
+                Your application is currently being reviewed by our admin team. This usually takes 24-48 hours.
+            </p>
+            <p class="text-sm text-gray-600 mb-6">
+                You'll receive an email at <strong id="userEmail"></strong> once your application is approved.
+            </p>
+            <button onclick="closeModal()" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:shadow-lg transition">
+                Okay
+            </button>
+        </div>
+    </div>
+
+    <!-- Approved Modal -->
+    <div id="approvedModal" class="modal">
+        <div class="modal-content bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">Congratulations! 🎉</h3>
+            <p class="text-gray-600 mb-6">
+                Your membership application has been approved! Welcome to Club De Stars Multipurpose Cooperative Society.
+            </p>
+            <p class="text-sm text-gray-600 mb-6">
+                A confirmation email with your login details has been sent to your email address.
+            </p>
+            <a href="user.html">
+                <button class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:shadow-lg transition mb-3">
+                    Go to Dashboard
+                </button>
+            </a>
+            <button onclick="closeModal()" class="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8 px-4 sm:px-6 lg:px-8 mt-16">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="text-gray-400 mb-2">CLUB DE STARS MULTIPURPOSE COOPERATIVE SOCIETY LTD</p>
+            <p class="text-sm text-gray-500">Powered by <a href="/" class="text-blue-400 hover:text-blue-300">JESZ LTD</a></p>
+            <div class="mt-4 flex justify-center space-x-6 text-sm text-gray-400">
+                <a href="#" class="hover:text-white transition">Privacy Policy</a>
+                <a href="#" class="hover:text-white transition">Terms of Service</a>
+                <a href="#" class="hover:text-white transition">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+
+<script>
+document.getElementById("registrationForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+
+  const response = await fetch("/signup", {
+    method: "POST",
+    body: formData
+  });
+
+  const result = await response.json();
+  if (result.status) {
+    window.location.href = result.authorization_url; // Redirect to Paystack
+  } else {
+    alert(result.message || "Error initializing payment.");
+  }
+});
+</script>
+
+
+
+    <script>
+                // Form Toggle
+        function showForm(formType) {
+            const registerForm = document.getElementById('registerForm');
+            const loginForm = document.getElementById('loginForm');
+            const registerTab = document.getElementById('registerTab');
+            const loginTab = document.getElementById('loginTab');
+
+            if (formType === 'register') {
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                registerTab.classList.add('gradient-bg', 'text-white');
+                registerTab.classList.remove('text-gray-600');
+                loginTab.classList.remove('gradient-bg', 'text-white');
+                loginTab.classList.add('text-gray-600');
+            } else {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                loginTab.classList.add('gradient-bg', 'text-white');
+                loginTab.classList.remove('text-gray-600');
+                registerTab.classList.remove('gradient-bg', 'text-white');
+                registerTab.classList.add('text-gray-600');
+            }
+        }
+    </script>
+</body>
+</html>

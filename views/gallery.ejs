@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - JESZ LIMITED</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Gallery Animations */
+        .gallery-item {
+            opacity: 0;
+            animation: scaleIn 0.6s ease forwards;
+        }
+        .gallery-item:nth-child(1) { animation-delay: 0.1s; }
+        .gallery-item:nth-child(2) { animation-delay: 0.2s; }
+        .gallery-item:nth-child(3) { animation-delay: 0.3s; }
+        .gallery-item:nth-child(4) { animation-delay: 0.4s; }
+        .gallery-item:nth-child(5) { animation-delay: 0.5s; }
+        .gallery-item:nth-child(6) { animation-delay: 0.6s; }
+        .gallery-item:nth-child(7) { animation-delay: 0.7s; }
+        .gallery-item:nth-child(8) { animation-delay: 0.8s; }
+
+        .gallery-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .gallery-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(30, 58, 138, 0.2);
+        }
+        .gallery-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.7) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+        .gallery-card:hover::before {
+            opacity: 1;
+        }
+        
+        /* Mobile: Show gradient when in view */
+        @media (max-width: 768px) {
+            .gallery-card.in-view::before {
+                opacity: 1;
+            }
+        }
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 2;
+            color: white;
+        }
+        .gallery-card:hover .gallery-overlay {
+            transform: translateY(0);
+        }
+        
+        /* Mobile: Show overlay on scroll into view */
+        @media (max-width: 768px) {
+            .gallery-card.in-view .gallery-overlay {
+                transform: translateY(0);
+            }
+        }
+        .gallery-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .gallery-card:hover .gallery-img {
+            transform: scale(1.1);
+        }
+
+        /* Filter Buttons */
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #e5e7eb;
+        }
+        .filter-btn:hover {
+            border-color: #1e40af;
+            background: #eff6ff;
+            color: #1e40af;
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+        .lightbox-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            position: relative;
+            animation: scaleIn 0.3s ease;
+        }
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 1rem;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: -3rem;
+            right: 0;
+            background: white;
+            color: #1e3a8a;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .lightbox-close:hover {
+            transform: rotate(90deg);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 40;
+        }
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 85%;
+            max-width: 400px;
+            background: white;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 50;
+            overflow-y: auto;
+        }
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+
+        /* Placeholder Images */
+        .img-placeholder {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        /* Grid Layouts */
+        .grid-masonry {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .grid-masonry {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+        @media (min-width: 1024px) {
+            .grid-masonry {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="fixed w-full top-0 z-50 glass-effect shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
+                        <img src="media/assets/logo/jesz.jpg" alt="">
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">JESZ<span class="gradient-text"> LIMITED</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="index.html" class="text-gray-600 hover:text-blue-900 transition font-medium">Home</a>
+                    <a href="#services" class="text-gray-600 hover:text-blue-900 transition font-medium">Services</a>
+                    <a href="#cooperative" class="text-gray-600 hover:text-blue-900 transition font-medium">Cooperative</a>
+                    <a href="#sap" class="text-gray-600 hover:text-blue-900 transition font-medium">SAP Solutions</a>
+                    <a href="#projects" class="text-gray-600 hover:text-blue-900 transition font-medium">Projects</a>
+                    <a href="/gallery" class="text-blue-900 hover:text-blue-900 transition font-bold">Gallery</a>
+                    <a href="#contact" class="px-6 py-2.5 gradient-bg text-white rounded-full font-semibold hover:shadow-lg transition">
+                        Contact
+                    </a>
+                </div>
+                <button id="mobileMenuBtn" class="md:hidden text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenuOverlay" class="mobile-menu-overlay"></div>
+
+    <!-- Mobile Menu -->
+      <div id="mobileMenu" class="mobile-menu">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <a href="/">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center">
+                            <img src="media/assets/logo/jesz.jpg" alt="">
+                        </div>
+                        <span class="text-xl font-bold text-gray-900">JESZ LIMITED</span>
+                    </div>
+                </a>
+                <button id="closeMobileMenu" class="p-2 rounded-lg hover:bg-gray-100 transition">
+                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <nav class="space-y-1">
+                <a href="#services" class="mobile-nav-link block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition font-medium">
+                    <i class="fas fa-cogs w-6"></i> Services
+                </a>
+                <a href="/onboard/club-de-star-cooperative" class="mobile-nav-link block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition font-medium">
+                    <i class="fas fa-hands-helping w-6"></i> Cooperative
+                </a>
+                <a href="#sap" class="mobile-nav-link block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition font-medium">
+                    <i class="fas fa-chart-line w-6"></i> SAP Solutions
+                </a>
+                <a href="#projects" class="mobile-nav-link block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition font-medium">
+                    <i class="fas fa-project-diagram w-6"></i> Projects
+                </a>
+                <a href="/about-us" class="mobile-nav-link block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition font-medium">
+                    <i class="fas fa-info-circle w-6"></i> About Us
+                </a>
+                <a href="/gallery" class="mobile-nav-link block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition font-medium">
+                    <i class="fas fa-images w-6"></i> Gallery
+                </a>
+              
+            </nav>
+
+            <div class="mt-20">
+                <a href="#contact">
+                    <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                        Contact Us
+                    </button>
+                </a>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-gray-200">
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-3 text-gray-600">
+                        <i class="fas fa-phone text-purple-600"></i>
+                        <span class="text-sm">+234 806 927 5059</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-gray-600">
+                        <i class="fas fa-envelope text-purple-600"></i>
+                        <span class="text-sm">info@jeszltd.com</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-center space-x-4">
+                <a href="https://web.facebook.com/techmayorco" class="text-gray-400 hover:text-blue-600">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                </a>
+                <a href="https://x.com/TechmayorCo" class="text-gray-400 hover:text-blue-600">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/techmayorco/" class="text-gray-400 hover:text-blue-600">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="inline-flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-full mb-6 border border-blue-100" style="animation: fadeInUp 0.6s ease forwards;">
+                <span class="w-2 h-2 bg-blue-900 rounded-full animate-pulse"></span>
+                <span class="text-blue-900 text-sm font-semibold">Our Journey in Pictures</span>
+            </div>
+            <h1 class="text-5xl sm:text-6xl font-bold text-gray-900 mb-6" style="animation: fadeInUp 0.8s ease forwards; animation-delay: 0.2s; opacity: 0;">
+                Gallery <span class="gradient-text">Showcase</span>
+            </h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto" style="animation: fadeInUp 1s ease forwards; animation-delay: 0.4s; opacity: 0;">
+                Explore our workspace, meet our talented team, and discover the innovative projects we've delivered
+            </p>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-wrap justify-center gap-3">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-th mr-2"></i>All
+                </button>
+                <button class="filter-btn" data-filter="staff">
+                    <i class="fas fa-users mr-2"></i>Staff
+                </button>
+                <button class="filter-btn" data-filter="projects">
+                    <i class="fas fa-laptop-code mr-2"></i>Projects
+                </button>
+                <button class="filter-btn" data-filter="workspace">
+                    <i class="fas fa-building mr-2"></i>Workspace
+                </button>
+                <button class="filter-btn" data-filter="teams">
+                    <i class="fas fa-user-friends mr-2"></i>Teams
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Grid -->
+    <section class="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid-masonry" id="galleryGrid">
+                <!-- Staff Items -->
+                <div class="gallery-item gallery-card" data-category="staff" data-title="Senior Developer - Jane Doe" data-desc="Leading our frontend development team">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=800&fit=crop" alt="Senior Developer" class="gallery-img h-80 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">Senior Developer</h3>
+                        <p class="text-sm opacity-90">Jane Doe - Frontend Lead</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item gallery-card" data-category="staff" data-title="Project Manager - John Smith" data-desc="Coordinating complex IT projects">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&h=900&fit=crop" alt="Project Manager" class="gallery-img h-96 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">Project Manager</h3>
+                        <p class="text-sm opacity-90">John Smith - Operations</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item gallery-card" data-category="staff" data-title="SAP Consultant - Maria Garcia" data-desc="Certified SAP expert">
+                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&h=700&fit=crop" alt="SAP Consultant" class="gallery-img h-72 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">SAP Consultant</h3>
+                        <p class="text-sm opacity-90">Maria Garcia - Enterprise Solutions</p>
+                    </div>
+                </div>
+
+                <!-- Project Items -->
+                <div class="gallery-item gallery-card" data-category="projects" data-title="E-Commerce Platform" data-desc="Full-stack web application">
+                    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=800&fit=crop" alt="E-Commerce Platform" class="gallery-img h-80 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">E-Commerce Platform</h3>
+                        <p class="text-sm opacity-90">Custom online shopping solution</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item gallery-card" data-category="projects" data-title="Asset Management System" data-desc="Enterprise resource tracking">
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=900&fit=crop" alt="Asset Management System" class="gallery-img h-96 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">Asset Management</h3>
+                        <p class="text-sm opacity-90">Real-time tracking system</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item gallery-card" data-category="projects" data-title="Mobile Banking App" data-desc="Fintech solution">
+                    <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&h=700&fit=crop" alt="Mobile Banking App" class="gallery-img h-72 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">Mobile Banking</h3>
+                        <p class="text-sm opacity-90">Secure financial transactions</p>
+                    </div>
+                </div>
+
+                <!-- Workspace Items -->
+                <div class="gallery-item gallery-card" data-category="workspace" data-title="Modern Office Space" data-desc="Our collaborative environment">
+                    <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=800&fit=crop" alt="Modern Office Space" class="gallery-img h-80 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">Office Space</h3>
+                        <p class="text-sm opacity-90">Collaborative work environment</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item gallery-card" data-category="workspace" data-title="Development Lab" data-desc="Innovation hub">
+                    <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&h=700&fit=crop" alt="Development Lab" class="gallery-img h-72 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">Development Lab</h3>
+                        <p class="text-sm opacity-90">Where innovation happens</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item gallery-card" data-category="workspace" data-title="Meeting Room" data-desc="Strategy and planning">
+                    <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=600&h=900&fit=crop" alt="Meeting Room" class="gallery-img h-96 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">Meeting Room</h3>
+                        <p class="text-sm opacity-90">Strategic planning space</p>
+                    </div>
+                </div>
+
+                <!-- Teams Items -->
+                <div class="gallery-item gallery-card" data-category="teams" data-title="Development Team" data-desc="Our coding experts">
+                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=800&fit=crop" alt="Development Team" class="gallery-img h-80 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">Development Team</h3>
+                        <p class="text-sm opacity-90">Building tomorrow's solutions</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item gallery-card" data-category="teams" data-title="SAP Consultants" data-desc="Enterprise specialists">
+                    <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&h=900&fit=crop" alt="SAP Consultants" class="gallery-img h-96 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">SAP Team</h3>
+                        <p class="text-sm opacity-90">Certified enterprise experts</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item gallery-card" data-category="teams" data-title="Support Team" data-desc="24/7 customer service">
+                    <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&h=700&fit=crop" alt="Support Team" class="gallery-img h-72 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">Support Team</h3>
+                        <p class="text-sm opacity-90">Always here to help</p>
+                    </div>
+                </div>
+
+                <!-- Additional Mixed Items -->
+                <div class="gallery-item gallery-card" data-category="staff" data-title="UI/UX Designer - Alex Chen" data-desc="Creating beautiful interfaces">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop" alt="UI/UX Designer" class="gallery-img h-80 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">UI/UX Designer</h3>
+                        <p class="text-sm opacity-90">Alex Chen - Design Lead</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item gallery-card" data-category="projects" data-title="SAP Implementation" data-desc="Enterprise system deployment">
+                    <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=900&fit=crop" alt="SAP Implementation" class="gallery-img h-96 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">SAP Deployment</h3>
+                        <p class="text-sm opacity-90">Enterprise transformation</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item gallery-card" data-category="workspace" data-title="Innovation Center" data-desc="Research and development">
+                    <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600&h=700&fit=crop" alt="Innovation Center" class="gallery-img h-72 w-full object-cover">
+                    <div class="gallery-overlay">
+                        <h3 class="text-xl font-bold mb-1">Innovation Center</h3>
+                        <p class="text-sm opacity-90">R&D headquarters</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-20">
+                <div class="inline-block w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-image text-4xl text-gray-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">No items found</h3>
+                <p class="text-gray-600">Try selecting a different filter</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox">
+        <div class="lightbox-content">
+            <div class="lightbox-close" id="closeLightbox">
+                <i class="fas fa-times text-2xl"></i>
+            </div>
+            <img id="lightboxImg" class="lightbox-img" src="" alt="">
+            <div class="text-center mt-6">
+                <h3 id="lightboxTitle" class="text-2xl font-bold text-white mb-2"></h3>
+                <p id="lightboxDesc" class="text-gray-300"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-4 gap-12 mb-12">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-xl">J</span>
+                        </div>
+                        <span class="text-2xl font-bold">JESZ LIMITED</span>
+                    </div>
+                    <p class="text-gray-400">Our team of certified SAP Consultants and IT professionals combines deep industry knowledge with technical expertise to deliver solutions tailored to each client's unique requirements.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Services</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#services" class="hover:text-white transition">Software Development</a></li>
+                        <li><a href="#services" class="hover:text-white transition">Asset Management</a></li>
+                        <li><a href="#sap" class="hover:text-white transition">SAP Consulting</a></li>
+                        <li><a href="#sap" class="hover:text-white transition">Training</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Company</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#contact" class="hover:text-white transition">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-white transition">About</a></li>
+                        <li><a href="gallery.html" class="hover:text-white transition">Gallery</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Contact</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><i class="fas fa-phone mr-2"></i>+234 806 927 5059</li>
+                        <li><i class="fas fa-envelope mr-2"></i>info@jeszltd.com</li>
+                        <li><i class="fas fa-map-marker-alt mr-2"></i>Port Harcourt, Nigeria</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm">&copy; 2025 JESZ LIMITED. All rights reserved.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeMobileMenu = document.getElementById('closeMobileMenu');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenuFunc() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        closeMobileMenu.addEventListener('click', closeMobileMenuFunc);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenuFunc);
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenuFunc);
+        });
+
+        // Filter Functionality
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const galleryItems = document.querySelectorAll('.gallery-item');
+        const emptyState = document.getElementById('emptyState');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons
+                filterBtns.forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                btn.classList.add('active');
+
+                const filter = btn.getAttribute('data-filter');
+                let visibleCount = 0;
+
+                galleryItems.forEach((item, index) => {
+                    const category = item.getAttribute('data-category');
+                    
+                    if (filter === 'all' || category === filter) {
+                        item.style.display = 'block';
+                        // Re-trigger animation
+                        item.style.animation = 'none';
+                        setTimeout(() => {
+                            item.style.animation = `scaleIn 0.6s ease forwards`;
+                            item.style.animationDelay = `${visibleCount * 0.1}s`;
+                        }, 10);
+                        visibleCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Show/hide empty state
+                if (visibleCount === 0) {
+                    emptyState.classList.remove('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                }
+            });
+        });
+
+        // Lightbox Functionality
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxTitle = document.getElementById('lightboxTitle');
+        const lightboxDesc = document.getElementById('lightboxDesc');
+        const closeLightbox = document.getElementById('closeLightbox');
+
+        galleryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const title = item.getAttribute('data-title');
+                const desc = item.getAttribute('data-desc');
+                const imgElement = item.querySelector('.gallery-img');
+                
+                if (imgElement) {
+                    lightboxImg.src = imgElement.src;
+                    lightboxTitle.textContent = title;
+                    lightboxDesc.textContent = desc;
+                    lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+        });
+
+        closeLightbox.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Keyboard navigation for lightbox
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const targetPosition = target.offsetTop - offset;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Navbar scroll effect
+        let lastScroll = 0;
+        const navbar = document.querySelector('nav');
+        navbar.style.transition = 'transform 0.3s ease';
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll <= 0) {
+                navbar.style.transform = 'translateY(0)';
+            } else if (currentScroll > lastScroll && currentScroll > 100) {
+                navbar.style.transform = 'translateY(-100%)';
+            } else if (currentScroll < lastScroll) {
+                navbar.style.transform = 'translateY(0)';
+            }
+            
+            lastScroll = currentScroll;
+        });
+
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    
+                    // On mobile, show overlay when scrolled into view
+                    if (window.innerWidth <= 768) {
+                        entry.target.classList.add('in-view');
+                        
+                        // Optional: Remove the in-view class after animation completes
+                        // to create a cleaner look when scrolling back up
+                        setTimeout(() => {
+                            if (!entry.isIntersecting) {
+                                entry.target.classList.remove('in-view');
+                            }
+                        }, 300);
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // Observe gallery items on initial load
+        setTimeout(() => {
+            galleryItems.forEach(item => observer.observe(item));
+        }, 100);
+        
+        // Enhanced mobile overlay behavior
+        if (window.innerWidth <= 768) {
+            const mobileObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                    } else {
+                        // Optional: keep overlay visible even when scrolled past
+                        // Comment out the line below if you want overlays to stay visible
+                        entry.target.classList.remove('in-view');
+                    }
+                });
+            }, {
+                threshold: 0.3,
+                rootMargin: '-10% 0px -10% 0px'
+            });
+            
+            galleryItems.forEach(item => mobileObserver.observe(item));
+        }
+
+        // Add hover effect for filter buttons
+        filterBtns.forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                if (!btn.classList.contains('active')) {
+                    btn.style.transform = 'scale(1.05)';
+                }
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'scale(1)';
+            });
+        });
+
+        // Add scroll to top button
+        const scrollTopBtn = document.createElement('button');
+        scrollTopBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+        scrollTopBtn.className = 'fixed bottom-8 right-8 w-14 h-14 bg-blue-900 text-white rounded-full shadow-lg hover:bg-blue-800 transition transform hover:scale-110 z-40 hidden';
+        scrollTopBtn.style.transition = 'all 0.3s ease';
+        document.body.appendChild(scrollTopBtn);
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                scrollTopBtn.classList.remove('hidden');
+            } else {
+                scrollTopBtn.classList.add('hidden');
+            }
+        });
+
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Add loading animation
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+        });
+
+        // Performance: Lazy load images (if real images are added later)
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                            imageObserver.unobserve(img);
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('img[data-src]').forEach(img => {
+                imageObserver.observe(img);
+            });
+        }
+    </script>
+</body>
+</html>

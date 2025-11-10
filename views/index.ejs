@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JESZ LIMITED - Innovative Software Solutions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        .slide-in-right {
+            animation: slideInRight 0.8s ease-out forwards;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(30, 58, 138, 0.15);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .mesh-gradient {
+            background: 
+                radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(30, 64, 175, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(30, 58, 138, 0.08) 0px, transparent 50%);
+        }
+        .tech-pattern {
+            background-image: 
+                linear-gradient(90deg, rgba(30, 58, 138, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(30, 58, 138, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+    </style>
+       <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-pulse-slow { animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .mobile-menu-enter { animation: slideIn 0.3s ease-out; }
+        
+        .gradient-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .gradient-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .gradient-accent {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-3d:hover {
+            transform: translateY(-12px) rotateX(5deg);
+        }
+        
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .blob {
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            animation: blob 7s ease-in-out infinite;
+        }
+        @keyframes blob {
+            0%, 100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+            25% { border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%; }
+            50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
+            75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
+        }
+
+        /* Mobile Menu Overlay */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 40;
+        }
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 85%;
+            max-width: 400px;
+            background: white;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 50;
+            overflow-y: auto;
+        }
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="fixed w-full top-0 z-50 glass-effect shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
+                        <img src="media/assets/logo/jesz.jpg" alt="">
+                        <!-- <span class="text-white font-bold text-xl">J</span> -->
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">JESZ<span class="gradient-text"> LIMITED</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#services" class="text-gray-600 hover:text-blue-900 transition font-medium">Services</a>
+                    <a href="/onboard/club-de-star-cooperative" class="text-gray-600 hover:text-blue-900 transition font-medium">Cooperative</a>
+                    <a href="#sap" class="text-gray-600 hover:text-blue-900 transition font-medium">SAP Solutions</a>
+                    <a href="#contact" class="text-gray-600 hover:text-blue-900 transition font-medium">Projects</a>
+                    <a href="/gallery" class="text-gray-600 hover:text-blue-900 transition font-medium">Gallery</a>
+                    <a href="/about-us" class="text-gray-600 hover:text-blue-900 transition font-medium">About Us</a>
+                    <!-- <a href="#contact" class="text-gray-600 hover:text-blue-900 transition font-medium">Contact</a> -->
+                    <a href="#contact" class="px-6 py-2.5 gradient-bg text-white rounded-full font-semibold hover:shadow-lg transition">
+                        Contact
+                    </a>
+                </div>
+                <button id="mobileMenuBtn" class="lg:hidden text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+        <!-- Mobile Menu Overlay -->
+    <div id="mobileMenuOverlay" class="mobile-menu-overlay"></div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="mobile-menu">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center">
+                        <img src="media/assets/logo/jesz.jpg" alt="">
+                    </div>
+                    <span class="text-xl font-bold text-gray-900">JESZ LIMITED</span>
+                </div>
+                <button id="closeMobileMenu" class="p-2 rounded-lg hover:bg-gray-100 transition">
+                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <nav class="space-y-1">
+                <a href="#services" class="mobile-nav-link block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition font-medium">
+                    <i class="fas fa-cogs w-6"></i> Services
+                </a>
+                <a href="/onboard/club-de-star-cooperative" class="mobile-nav-link block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition font-medium">
+                    <i class="fas fa-hands-helping w-6"></i> Cooperative
+                </a>
+                <a href="#sap" class="mobile-nav-link block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition font-medium">
+                    <i class="fas fa-chart-line w-6"></i> SAP Solutions
+                </a>
+                <a href="#projects" class="mobile-nav-link block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition font-medium">
+                    <i class="fas fa-project-diagram w-6"></i> Projects
+                </a>
+                <a href="/about-us" class="mobile-nav-link block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition font-medium">
+                    <i class="fas fa-info-circle w-6"></i> About Us
+                </a>
+                <a href="/gallery" class="mobile-nav-link block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition font-medium">
+                    <i class="fas fa-images w-6"></i> Gallery
+                </a>
+              
+            </nav>
+
+            <div class="mt-20">
+                <a href="#contact">
+                    <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                        Contact Us
+                    </button>
+                </a>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-gray-200">
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-3 text-gray-600">
+                        <i class="fas fa-phone text-purple-600"></i>
+                        <span class="text-sm">+234 806 927 5059</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-gray-600">
+                        <i class="fas fa-envelope text-purple-600"></i>
+                        <span class="text-sm">info@jeszltd.com</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-center space-x-4">
+                <a href="https://web.facebook.com/techmayorco" class="text-gray-400 hover:text-blue-600">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                </a>
+                <a href="https://x.com/TechmayorCo" class="text-gray-400 hover:text-blue-600">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                </a>
+                <a href="https://www.instagram.com/techmayorco/" class="text-gray-400 hover:text-blue-600">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
+<!-- Hero Section -->
+<section
+  class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 mesh-gradient tech-pattern bg-gradient-to-br from-gray-50 to-blue-50 overflow-hidden"
+>
+  <div class="max-w-7xl mx-auto">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <!-- Left Content -->
+      <div
+        class="fade-in-up opacity-0 translate-y-10 transition-all duration-1000"
+      >
+        <div
+          class="inline-flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-full mb-6 border border-blue-100 animate-fade-in"
+        >
+          <span
+            class="w-2 h-2 bg-blue-900 rounded-full animate-pulse"
+          ></span>
+          <span class="text-blue-900 text-sm font-semibold"
+            >Next Level IT, Suitable Result</span
+          >
+        </div>
+
+        <h1
+          class="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight"
+        >
+          Empowering<br />
+          <span class="gradient-text">Digital Success</span>
+        </h1>
+
+        <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+          JESZ Limited was incorporated in 2025. We are a professional
+          Information Technology company capable of delivering integrated
+          solutions across the spectrum of IT.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <button
+            id="openModalBtn"
+            class="inline-flex items-center justify-center px-8 py-4 gradient-bg text-white rounded-full font-semibold hover:shadow-xl transition transform hover:scale-105"
+          >
+            Book your Training
+            <svg
+              class="w-5 h-5 ml-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 8l4 4m0 0l-4 4m4-4H3"
+              ></path>
+            </svg>
+          </button>
+
+          <a
+            href="#services"
+            class="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-900 rounded-full font-semibold border-2 border-gray-200 hover:border-blue-900 hover:shadow-lg transition"
+          >
+            Explore Services
+          </a>
+        </div>
+
+        <!-- Counters -->
+        <div class="mt-12 flex flex-wrap items-center gap-8">
+          <div>
+            <div
+              class="text-3xl font-bold text-gray-900 counter"
+              data-target="20"
+            >
+              0
+            </div>
+            <div class="text-sm text-gray-600">Projects Delivered</div>
+          </div>
+          <div class="h-12 w-px bg-gray-300"></div>
+          <div>
+            <div
+              class="text-3xl font-bold text-gray-900 counter"
+              data-target="98"
+            >
+              0
+            </div>
+            <div class="text-sm text-gray-600">Client Satisfaction</div>
+          </div>
+          <div class="h-12 w-px bg-gray-300"></div>
+          <div>
+            <div
+              class="text-3xl font-bold text-gray-900"
+              data-static="true"
+            >
+              24/7
+            </div>
+            <div class="text-sm text-gray-600">Support Available</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Image / Cards -->
+      <div
+        class="slide-in-right hidden lg:block opacity-0 translate-x-10 transition-all duration-1000 delay-300"
+      >
+        <div class="relative">
+          <div
+            class="absolute top-0 right-0 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"
+          ></div>
+          <div
+            class="absolute bottom-0 left-0 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse delay-1000"
+          ></div>
+          <div
+            class="relative bg-white rounded-3xl shadow-2xl p-8 border border-gray-100"
+          >
+            <div class="space-y-6">
+              <div
+                class="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-50 to-gray-50 rounded-xl border border-blue-100"
+              >
+                <div
+                  class="w-12 h-12 gradient-bg rounded-lg flex items-center justify-center flex-shrink-0"
+                >
+                  <svg
+                    class="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-bold text-gray-900">
+                    Software Development
+                  </div>
+                  <div class="text-sm text-gray-600">Custom Solutions</div>
+                </div>
+              </div>
+
+              <div
+                class="flex items-center space-x-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border border-gray-200"
+              >
+                <div
+                  class="w-12 h-12 gradient-bg rounded-lg flex items-center justify-center flex-shrink-0"
+                >
+                  <svg
+                    class="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-bold text-gray-900">Finance Platform</div>
+                  <div class="text-sm text-gray-600">Save & Grow Money</div>
+                </div>
+              </div>
+
+              <div
+                class="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-50 to-gray-50 rounded-xl border border-blue-100"
+              >
+                <div
+                  class="w-12 h-12 gradient-bg rounded-lg flex items-center justify-center flex-shrink-0"
+                >
+                  <svg
+                    class="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-bold text-gray-900">SAP Consulting</div>
+                  <div class="text-sm text-gray-600">Certified Experts</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Booking Modal -->
+<div
+  id="bookingModal"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"
+>
+  <div class="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl">
+    <h2 class="text-2xl font-bold mb-4 text-gray-900">Book Your Training</h2>
+    <form id="bookingForm" class="space-y-4">
+      <input
+        type="text"
+        placeholder="Full Name"
+        required
+        class="w-full border border-gray-300 rounded-lg p-3"
+      />
+      <input
+        type="email"
+        placeholder="Email Address"
+        required
+        class="w-full border border-gray-300 rounded-lg p-3"
+      />
+      <input
+        type="text"
+        placeholder="Training Course"
+        required
+        class="w-full border border-gray-300 rounded-lg p-3"
+      />
+      <textarea
+        placeholder="Additional Notes"
+        class="w-full border border-gray-300 rounded-lg p-3"
+      ></textarea>
+      <div class="flex justify-end gap-4">
+        <button
+          type="button"
+          id="closeModalBtn"
+          class="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="px-5 py-2 rounded-lg bg-blue-900 text-white hover:bg-blue-800"
+        >
+          Submit
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Animation + Counter + Modal Script -->
+<script>
+  // Intersection Observer for fade/slide animations
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.remove("opacity-0", "translate-y-10", "translate-x-10");
+        }
+      });
+    },
+    { threshold: 0.2 }
+  );
+
+  document.querySelectorAll(".fade-in-up, .slide-in-right").forEach((el) => observer.observe(el));
+
+  // Counter Animation
+  const counters = document.querySelectorAll(".counter");
+  const speed = 1000; // smaller = faster
+
+  const runCounters = () => {
+    counters.forEach((counter) => {
+      const target = +counter.getAttribute("data-target");
+      const updateCount = () => {
+        const count = +counter.innerText;
+        const increment = target / speed;
+        if (count < target) {
+          counter.innerText = Math.ceil(count + increment);
+          requestAnimationFrame(updateCount);
+        } else {
+          counter.innerText = target + "+";
+        }
+      };
+      updateCount();
+    });
+  };
+
+  // Run counters when visible
+  const counterObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) runCounters();
+      });
+    },
+    { threshold: 0.4 }
+  );
+  counters.forEach((el) => counterObserver.observe(el));
+
+  // Modal Logic
+  const modal = document.getElementById("bookingModal");
+  const openBtn = document.getElementById("openModalBtn");
+  const closeBtn = document.getElementById("closeModalBtn");
+
+  openBtn.addEventListener("click", () => {
+    modal.classList.remove("hidden");
+  });
+
+  closeBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === modal) modal.classList.add("hidden");
+  });
+</script>
+
+
+    <!-- Services Section -->
+    <section id="services" class="py-24 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">Our Core Services</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Comprehensive technology solutions designed to accelerate your business growth</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card-hover bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+                    <div class="w-16 h-16 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Software Development</h3>
+                    <p class="text-gray-600 mb-6">Build powerful, scalable applications tailored to your unique business needs with modern technologies and best practices.</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-gray-700">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            Web Applications
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            Mobile Solutions
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            Enterprise Systems
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-hover bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+                    <div class="w-16 h-16 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Asset Management</h3>
+                    <p class="text-gray-600 mb-6">Track, manage, and optimize your business assets with intelligent systems that provide real-time insights and analytics.</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-gray-700">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            Real-time Tracking
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            Analytics Dashboard
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            Automated Reports
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-hover bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+                    <div class="w-16 h-16 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">ERP Solutions</h3>
+                    <p class="text-gray-600 mb-6">Certified SAP agents delivering enterprise-grade implementation, integration, and consulting services for your business.</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-gray-700">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            SAP Implementation
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            Expert Consulting
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            24/7 Support
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-hover bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+                    <div class="w-16 h-16 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-house" style="color: white; font-size: 20px;"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Real Estate</h3>
+                    <p class="text-gray-600 mb-6">Trusted real estate experts providing premium property sales, leasing, and investment solutions tailored to your goals.</p>
+                   <ul class="space-y-3">
+    <li class="flex items-center text-gray-700">
+        <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+        Residential & Commercial Listings
+    </li>
+    <li class="flex items-center text-gray-700">
+        <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+        Expert Property Valuation
+    </li>
+    <li class="flex items-center text-gray-700">
+        <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+        Dedicated Client Support
+    </li>
+</ul>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Finance Platform Section -->
+
+    <!-- SAP Section -->
+    <section id="sap" class="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <div class="inline-block bg-blue-100 text-blue-900 px-4 py-2 rounded-full font-semibold mb-4">
+                    Certified SAP Partner
+                </div>
+                <h2 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">SAP Solutions & Consulting</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    As certified SAP agents and consultants, we bring enterprise-grade solutions to businesses of all sizes
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-900 hover:shadow-lg transition">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                        </svg>
+                    </div>
+                    <h4 class="font-bold text-lg text-gray-900 mb-2">SAP Implementation</h4>
+                    <p class="text-gray-600">End-to-end SAP deployment and configuration</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-900 hover:shadow-lg transition">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="font-bold text-lg text-gray-900 mb-2">System Integration</h4>
+                    <p class="text-gray-600">Seamless integration with existing systems</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-900 hover:shadow-lg transition">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    <h4 class="font-bold text-lg text-gray-900 mb-2">Training & Support</h4>
+                    <p class="text-gray-600">Comprehensive training and ongoing support</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-900 hover:shadow-lg transition">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="font-bold text-lg text-gray-900 mb-2">Optimization</h4>
+                    <p class="text-gray-600">Performance tuning and process optimization</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-24 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">Ready to Transform Your Business?</h2>
+            <p class="text-xl text-gray-600 mb-8">
+                Let's discuss how JESZ LIMITED can help you achieve your goals with software solutions
+            </p>
+            <a href="#contact" class="inline-flex items-center justify-center px-10 py-4 gradient-bg text-white rounded-full font-bold text-lg hover:shadow-2xl transform hover:scale-105 transition duration-300">
+                Get Started Today
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                </svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">Get in Touch</h2>
+                <p class="text-xl text-gray-600">We'd love to hear from you</p>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-12">
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                    <form class="space-y-6">
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Full Name</label>
+                            <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent" placeholder="Your name">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Email Address</label>
+                            <input type="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent" placeholder="your@email.com">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Phone Number</label>
+                            <input type="tel" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent" placeholder="+234 XXX XXX XXXX">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Message</label>
+                            <textarea rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent" placeholder="How can we help you?"></textarea>
+                        </div>
+                        <button type="submit" class="w-full gradient-bg text-white px-8 py-4 rounded-lg font-bold hover:shadow-xl transform hover:scale-105 transition duration-300">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Contact Information</h3>
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="w-12 h-12 gradient-bg rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 text-lg mb-1">Email</h4>
+                                    <p class="text-gray-600">info@jeszltd.com</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-12 h-12 gradient-bg rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 text-lg mb-1">Phone</h4>
+                                    <p class="text-gray-600">+234 806 927 5059</p>
+                                    <p class="text-gray-600">+234 703 294 0305</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-12 h-12 gradient-bg rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 text-lg mb-1">Office</h4>
+                                    <p class="text-gray-600">Port Harcourt, Rivers State</p>
+                                    <p class="text-gray-600">Nigeria</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-50 to-gray-50 p-8 rounded-2xl border border-blue-100">
+                        <h4 class="font-bold text-gray-900 text-xl mb-4">Business Hours</h4>
+                        <div class="space-y-2 text-gray-600">
+                            <p class="flex justify-between"><span>Monday - Friday:</span> <span class="font-semibold">8:00 AM - 6:00 PM</span></p>
+                            <p class="flex justify-between"><span>Saturday:</span> <span class="font-semibold">9:00 AM - 2:00 PM</span></p>
+                            <p class="flex justify-between"><span>Sunday:</span> <span class="font-semibold">Closed</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-4 gap-12 mb-12">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-xl">J</span>
+                        </div>
+                        <span class="text-2xl font-bold">JESZ LIMITED</span>
+                    </div>
+                    <p class="text-gray-400">Our team of certified SAP Consultants and IT professionals combines deep industry knowledge with technical
+expertise to deliver solutions tailored to each client’s unique requirements. 
+</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Services</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#services" class="hover:text-white transition">Software Development</a></li>
+                        <li><a href="#services" class="hover:text-white transition">Asset Management</a></li>
+                        <li><a href="#sap" class="hover:text-white transition">SAP Consulting</a></li>
+                        <li><a href="#sap" class="hover:text-white transition">Training</a></li>
+                        <li><a href="#sap" class="hover:text-white transition">Equipment Supply</a></li>
+                        <li><a href="#sap" class="hover:text-white transition">Installations</a></li>
+                    </ul>
+                </div>
+           
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Company</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#contact" class="hover:text-white transition">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-white transition">About</a></li>
+                        <li><a href="#" class="hover:text-white transition">Careers</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm">&copy; 2025 JESZ LIMITED. All rights reserved.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeMobileMenu = document.getElementById('closeMobileMenu');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenuFunc() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        closeMobileMenu.addEventListener('click', closeMobileMenuFunc);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenuFunc);
+
+        // Close mobile menu when clicking nav links
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenuFunc);
+        });
+
+
+
+        openBtn.addEventListener('click', () => {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const targetPosition = target.offsetTop - offset;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Navbar scroll effect
+        let lastScroll = 0;
+        const navbar = document.querySelector('nav');
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll <= 0) {
+                navbar.style.transform = 'translateY(0)';
+            } else if (currentScroll > lastScroll && currentScroll > 100) {
+                navbar.style.transform = 'translateY(-100%)';
+            } else if (currentScroll < lastScroll) {
+                navbar.style.transform = 'translateY(0)';
+            }
+            
+            lastScroll = currentScroll;
+        });
+
+        navbar.style.transition = 'transform 0.3s ease';
+    </script>
+</body>
+</html>
