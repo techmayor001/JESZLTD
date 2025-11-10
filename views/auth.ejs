@@ -459,25 +459,30 @@
             </div>
         </div>
     </footer>
-
 <script>
 document.getElementById("registrationForm").addEventListener("submit", async function(e) {
   e.preventDefault();
   const formData = new FormData(this);
 
-  const response = await fetch("/signup", {
-    method: "POST",
-    body: formData
-  });
+  try {
+    const response = await fetch("/signup", { method: "POST", body: formData });
+    const result = await response.json();
+    console.log(result); // debug
 
-  const result = await response.json();
-  if (result.status) {
-    window.location.href = result.authorization_url; // Redirect to Paystack
-  } else {
-    alert(result.message || "Error initializing payment.");
+    if (result.status && result.authorization_url) {
+      // Open Paystack page
+      window.location.href = result.authorization_url;
+      // or window.open(result.authorization_url, "_self");
+    } else {
+      alert(result.message || "Error initializing payment.");
+    }
+  } catch (err) {
+    console.error("Signup error:", err);
+    alert("Unable to process signup. Try again.");
   }
 });
 </script>
+
 
 
 
