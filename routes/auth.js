@@ -103,13 +103,12 @@ router.post(
 
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      // Generate membershipID starting from 001 (all NCD by default)
       const lastUser = await User.findOne({}).sort({ createdAt: -1 });
       const nextNumber = lastUser
         ? parseInt(lastUser.membershipID?.slice(-3)) + 1
         : 1;
       const membershipID = `NCD${String(nextNumber).padStart(3, "0")}`;
-      const newReferralCode = membershipID; // same as membershipID
+      const newReferralCode = membershipID;
 
       // Create User
       const newUser = await User.create({
@@ -130,7 +129,7 @@ router.post(
         referralCode: newReferralCode,
         membershipID,
         password: hashedPassword,
-        status: "pending", // default pending until admin approves
+        status: "pending",
       });
 
       // Auto-login
@@ -141,7 +140,7 @@ router.post(
       // Create Account for the user
       const account = await Account.create({
         user: newUser._id,
-        accountType: "NCD", // default non-club member
+        accountType: "NCD", 
         balance: 0,
         interestRate: 10, // 10% for NCD
       });
