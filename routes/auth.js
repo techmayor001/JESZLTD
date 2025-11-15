@@ -272,12 +272,8 @@ router.post("/paystack/webhook", express.json(), async (req, res) => {
 
 
 // USER SIGN-UP LOGIC 
-router.get("/", (req, res) => {
-  res.render("Auth/signin");
-});
-
 router.get("/login", (req, res) => {
-  res.render("auth");
+  res.render("auth/login");
 });
 
 
@@ -285,13 +281,42 @@ router.get("/login", (req, res) => {
 
 router.post("/login", (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
-    if (err) return res.status(500).send("Server error.");
-    if (!user) return res.status(401).render("login", { error: info?.message || "Invalid credentials" });
+
+    if (err) {
+      return res.status(500).render("auth/login", { 
+        error: "An error occurred. Please try again." 
+      });
+    }
+
+    if (!user) {
+      if (info?.message === "No user found") {
+        return res.status(401).render("auth/login", { 
+          error: "Email not found. Please register first.",
+          info: "Need an account? Click Register Here below."
+        });
+      } 
+      else if (info?.message === "Incorrect password") {
+        return res.status(401).render("auth/login", { 
+          error: "Incorrect password. Please try again." 
+        });
+      } 
+      else if (info?.message === "Invalid email") {
+        return res.status(401).render("auth/login", { 
+          error: "Please enter a valid email address." 
+        });
+      }
+      return res.status(401).render("auth/login", { 
+        error: info?.message || "Invalid credentials" 
+      });
+    }
 
     req.logIn(user, (err) => {
-      if (err) return res.status(500).send("Login failed.");
+      if (err) {
+        return res.status(500).render("auth/login", { 
+          error: "Login failed. Please try again." 
+        });
+      }
 
-      // ✅ Redirect directly to dashboard based on role
       if (user.role === "admin") {
         return res.redirect("/admin-dashboard");
       } else {

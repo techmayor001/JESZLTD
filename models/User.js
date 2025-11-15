@@ -50,14 +50,14 @@ const userSchema = mongoose.Schema({
   },
 
   idType: {
-      type: String,
-      enum: ["nin", "passport", "drivers", "voters"],
-      required: true,
-   },
+    type: String,
+    enum: ["nin", "passport", "drivers", "voters"],
+    required: true,
+  },
    
   idNumber: {
-     type: String,
-   },
+    type: String,
+  },
 
   idFile: {
     type: String,
@@ -75,12 +75,12 @@ const userSchema = mongoose.Schema({
     { type: mongoose.Schema.Types.ObjectId, ref: "Loan" }
   ],
 
- account: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
+  account: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
 
   status: {
-      type: String,
-      enum: ["pending", "active", "rejected"],
-      default: "pending",
+    type: String,
+    enum: ["pending", "active", "rejected"],
+    default: "pending",
   },
 
   referralCode: {
@@ -103,6 +103,12 @@ const userSchema = mongoose.Schema({
       ref: "User",
     },
   ],
+
+  role: {
+    type: String,
+    enum: ["admin", "member", "staff", "superadmin"],
+    default: "member",
+  },
 
   createdAt: {
     type: Date,

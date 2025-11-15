@@ -22,7 +22,7 @@ router.get('/about-us', (req,res)=>{
 })
 
 router.get('/onboard/club-de-star-cooperative', (req,res)=>{
-    res.render("auth")
+    res.render("auth/auth")
 })
 
 // router.get('/club-de-star-cooperative/dashboard', (req,res)=>{
@@ -31,25 +31,59 @@ router.get('/onboard/club-de-star-cooperative', (req,res)=>{
 
 
 router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.redirect("/login");
-  }
+  if (!req.isAuthenticated()) return res.redirect("/login");
 
   try {
     const user = await User.findById(req.user._id)
-      .populate("Payment")
       .populate("loans")
       .populate("account")
       .exec();
 
     if (!user) return res.redirect("/login");
 
-    res.render("dashboard/user-dashboard", { user });
+    // 1. Fetch ALL user payments
+    const userPayments = await Payment.find({ user: user._id });
+
+    // Member's total savings
+    const userTotalSavings = userPayments.reduce(
+      (sum, p) => sum + (p.amount || 0),
+      0
+    );
+
+    // 2. Total savings by ALL members
+    const allMembersPayments = await Payment.find({});
+    const allMembersTotalSavings = allMembersPayments.reduce(
+      (sum, p) => sum + (p.amount || 0),
+      0
+    );
+
+    // 3. Sum of loan interest (all members, this month)
+    const allLoans = await Loan.find({});
+    const totalLoanInterest = allLoans.reduce(
+      (sum, loan) => sum + (loan.monthlyInterest || 0),
+      0
+    );
+
+    // 4. Final formula
+    const memberShare =
+      allMembersTotalSavings > 0
+        ? (userTotalSavings / allMembersTotalSavings) *
+          totalLoanInterest *
+          0.9 // remove 10%
+        : 0;
+
+    res.render("dashboard/user-dashboard", {
+      user,
+      userTotalSavings,
+      memberShare,
+    });
+
   } catch (err) {
     console.error("Dashboard fetch error:", err);
     res.redirect("/login");
   }
 });
+
 
 router.get("/club-de-star-cooperative/transaction", async (req, res) => {
   try {

@@ -456,19 +456,19 @@
     </div>
 
 <!-- Top Navbar -->
-<div class="top-navbar">
-    <i class="fas fa-bars d-lg-none me-3"
-       style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-       onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3"
+        style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+        onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
 
-    <!-- This will only show on lg and above -->
-    <div class="flex-grow-1 d-none d-lg-block">
-        <h5 class="mb-0 fw-bold" style="color: var(--primary)">Welcome back, <%= user.firstName %>! 👋</h5>
-        <small class="text-muted">
-            Member ID: <%= user.membershipID %> | <%= new Date(user.createdAt).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
-        </small>
+        <!-- This will only show on lg and above -->
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Welcome back, <%= user.firstName %>! 👋</h5>
+            <small class="text-muted">
+                Member ID: <%= user.membershipID %> | <%= new Date(user.createdAt).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
+            </small>
+        </div>
     </div>
-</div>
 
 
     <!-- Main Content -->
@@ -479,8 +479,8 @@
             <div class="welcome-card position-relative">
                 <div class="row align-items-center position-relative" style="z-index: 1;">
                     <div class="col-md-8">
-                        <h2 class="mb-3 fw-bold">Great to see you again! 🎉</h2>
-                        <p class="mb-3 opacity-90 fs-5">Track your savings, manage loans, and grow your wealth with <b>Club De Stars Multipurpose Cooperative Society Limited</b></p>
+                        <h2 class="mb-3 fw-bold">Great to see you again <%= user.firstName %>!</h2>
+                        <!-- <p class="mb-3 opacity-90 fs-5">Track your savings, manage loans, and grow your wealth with <b>Club De Stars Multipurpose Cooperative Society Limited</b></p> -->
                         <div class="d-flex gap-3 flex-wrap">
                             <div class="member-badge">
                                 <i class="fas fa-id-card"></i>
@@ -544,7 +544,7 @@
                     <h3 class="mb-2 fw-bold">₦<%= user.account?.balance.toLocaleString() || 0 %></h3>
                     <% if (user.account) { %>
                     <small class="text-success fw-semibold">
-                        <i class="fas fa-arrow-up me-1"></i>₦<%= user.account.monthlyIncrease?.toLocaleString() || 0 %> this month
+                        <i class="fas fa-arrow-up me-1"></i>₦<%= memberShare.toLocaleString(undefined, { minimumFractionDigits: 2 }) %> this month
                     </small>
                     <% } %>
             </div>

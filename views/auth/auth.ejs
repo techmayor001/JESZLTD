@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club De Stars - Join Our Cooperative</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            animation: fadeIn 0.3s ease-out;
+        }
+        .error-message {
+            display: none;
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .error-message.show {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .success-message {
+            display: none;
+            background-color: #d1fae5;
+            border-left: 4px solid #10b981;
+            color: #065f46;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .success-message.show {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .input-error {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2;
+        }
+        .field-error {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+        .field-error.show {
+            display: block;
+        }
+        .loading-spinner {
+            display: none;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <img src="log.png" alt="" width="10%" height="10%">
+                    <h1 class="text-1xl font-bold text-gray-900">CLUB DE STARS</h1>
+                    <p class="text-sm text-gray-600">Multipurpose Cooperative Society Ltd</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid lg:grid-cols-2 gap-12 items-start">
+            <!-- Left Side - Info -->
+            <div class="fade-in">
+                <div class="gradient-bg rounded-3xl p-8 text-white mb-8">
+                    <h2 class="text-3xl font-bold mb-4">Join Our Cooperative</h2>
+                    <p class="text-blue-50 mb-6">
+                        Become a member of Club De Stars Multipurpose Cooperative Society Ltd and unlock financial opportunities that will transform your future.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold mb-1">High Interest Savings</h4>
+                                <p class="text-blue-50 text-sm">Earn competitive returns on your savings</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold mb-1">Quick Loan Access</h4>
+                                <p class="text-blue-50 text-sm">Apply for loans with flexible terms</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <h4 class="font-semibold mb-1">Asset Management</h4>
+                                <p class="text-blue-50 text-sm">Track and grow your financial assets</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100">
+                    <h3 class="font-bold text-gray-900 text-lg mb-3">Membership Requirements</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            One-time registration fee: ₦2,000
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            Valid identification
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            Active email and phone number
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-blue-900 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            Admin approval required
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right Side - Forms -->
+            <div class="fade-in">
+                <!-- Registration Form -->
+                <div id="registerForm" class="bg-white rounded-2xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Create Your Account</h2>
+
+                    <!-- Error/Success Messages -->
+                    <div id="errorMessage" class="error-message">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span id="errorText"></span>
+                    </div>
+
+                    <div id="successMessage" class="success-message">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span id="successText"></span>
+                    </div>
+
+                    <!-- Step 1: Personal Details -->
+                    <form id="registrationForm" class="space-y-4" enctype="multipart/form-data">
+                        <div id="step1" class="space-y-4">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">First Name *</label>
+                                    <input type="text" required name="firstName" id="firstName"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                                           placeholder="Enter first name">
+                                    <p class="field-error" id="firstNameError"></p>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Last Name *</label>
+                                    <input type="text" required name="lastName" id="lastName"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                                           placeholder="Enter last name">
+                                    <p class="field-error" id="lastNameError"></p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Email Address *</label>
+                                <input type="email" required name="email" id="email"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                                       placeholder="example@email.com">
+                                <p class="field-error" id="emailError"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Phone Number *</label>
+                                <input type="tel" required name="phone" id="phone"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                                       placeholder="+234 XXX XXX XXXX">
+                                <p class="field-error" id="phoneError"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Date of Birth *</label>
+                                <input type="date" required name="dob" id="dob"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent">
+                                <p class="field-error" id="dobError"></p>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">State *</label>
+                                    <select id="state" name="state" required
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent">
+                                        <option value="">Select State</option>
+                                        <option value="Abia">Abia</option>
+                                        <option value="Adamawa">Adamawa</option>
+                                        <option value="Akwa Ibom">Akwa Ibom</option>
+                                        <option value="Anambra">Anambra</option>
+                                        <option value="Bauchi">Bauchi</option>
+                                        <option value="Bayelsa">Bayelsa</option>
+                                        <option value="Benue">Benue</option>
+                                        <option value="Borno">Borno</option>
+                                        <option value="Cross River">Cross River</option>
+                                        <option value="Delta">Delta</option>
+                                        <option value="Ebonyi">Ebonyi</option>
+                                        <option value="Edo">Edo</option>
+                                        <option value="Ekiti">Ekiti</option>
+                                        <option value="Enugu">Enugu</option>
+                                        <option value="Gombe">Gombe</option>
+                                        <option value="Imo">Imo</option>
+                                        <option value="Jigawa">Jigawa</option>
+                                        <option value="Kaduna">Kaduna</option>
+                                        <option value="Kano">Kano</option>
+                                        <option value="Katsina">Katsina</option>
+                                        <option value="Kebbi">Kebbi</option>
+                                        <option value="Kogi">Kogi</option>
+                                        <option value="Kwara">Kwara</option>
+                                        <option value="Lagos">Lagos</option>
+                                        <option value="Nasarawa">Nasarawa</option>
+                                        <option value="Niger">Niger</option>
+                                        <option value="Ogun">Ogun</option>
+                                        <option value="Ondo">Ondo</option>
+                                        <option value="Osun">Osun</option>
+                                        <option value="Oyo">Oyo</option>
+                                        <option value="Plateau">Plateau</option>
+                                        <option value="Rivers">Rivers</option>
+                                        <option value="Sokoto">Sokoto</option>
+                                        <option value="Taraba">Taraba</option>
+                                        <option value="Yobe">Yobe</option>
+                                        <option value="Zamfara">Zamfara</option>
+                                        <option value="FCT">Federal Capital Territory (Abuja)</option>
+                                    </select>
+                                    <p class="field-error" id="stateError"></p>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">LGA *</label>
+                                    <input type="text" required name="lga" id="lga"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                                           placeholder="Enter LGA">
+                                    <p class="field-error" id="lgaError"></p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Address *</label>
+                                <textarea required name="address" id="address" rows="2"
+                                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                                          placeholder="Your full address"></textarea>
+                                <p class="field-error" id="addressError"></p>
+                            </div>
+
+                            <button type="button" onclick="validateAndNextStep()" id="nextBtn"
+                                    class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg hover:shadow-xl transition transform hover:scale-105 flex items-center justify-center gap-2">
+                                <span>Next: KYC Information</span>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                                <div class="loading-spinner" id="nextSpinner"></div>
+                            </button>
+                        </div>
+
+                        <!-- Step 2: KYC Info -->
+                        <div id="step2" class="hidden space-y-4">
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Proof of Address *</label>
+                                <input type="file" required name="addressProof" id="addressProof" accept="image/*,.pdf"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent">
+                                <p class="text-xs text-gray-500 mt-1">Accepted: Utility bill, bank statement (PDF or Image, max 5MB)</p>
+                                <p class="field-error" id="addressProofError"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Passport Photograph *</label>
+                                <input type="file" required name="passportPhoto" id="passportPhoto" accept="image/*"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent">
+                                <p class="text-xs text-gray-500 mt-1">Accepted: JPG, PNG (max 5MB)</p>
+                                <p class="field-error" id="passportPhotoError"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Means of Identification *</label>
+                                <select name="idType" id="idType" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent">
+                                    <option value="">Select ID Type</option>
+                                    <option value="nin">National ID (NIN)</option>
+                                    <option value="passport">International Passport</option>
+                                    <option value="drivers">Driver's License</option>
+                                    <option value="voters">Voter's Card</option>
+                                </select>
+                                <p class="field-error" id="idTypeError"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">ID Number *</label>
+                                <input type="text" required name="idNumber" id="idNumber"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                                       placeholder="Enter your ID number">
+                                <p class="field-error" id="idNumberError"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Upload ID Document *</label>
+                                <input type="file" required name="idFile" id="idFile" accept="image/*,.pdf"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent">
+                                <p class="text-xs text-gray-500 mt-1">Accepted: PDF or Image (max 5MB)</p>
+                                <p class="field-error" id="idFileError"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Upload Signature *</label>
+                                <input type="file" required name="signature" id="signature" accept="image/*"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent">
+                                <p class="text-xs text-gray-500 mt-1">Accepted: JPG, PNG (max 2MB)</p>
+                                <p class="field-error" id="signatureError"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Referral Code (Optional)</label>
+                                <input type="text" name="referralCode" id="referralCode"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                                       placeholder="Enter referral code if you have one">
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Password *</label>
+                                <input type="password" required name="password" id="password"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                                       placeholder="Minimum 8 characters">
+                                <p class="text-xs text-gray-500 mt-1">Must contain at least 8 characters</p>
+                                <p class="field-error" id="passwordError"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Confirm Password *</label>
+                                <input type="password" required name="confirmPassword" id="confirmPassword"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-transparent"
+                                       placeholder="Re-enter password">
+                                <p class="field-error" id="confirmPasswordError"></p>
+                            </div>
+
+                            <div class="flex items-start">
+                                <input type="checkbox" required name="terms" id="terms" class="mt-1 mr-2">
+                                <label for="terms" class="text-sm text-gray-700">
+                                    I agree to the <a href="#" class="text-blue-600 hover:underline">Terms and Conditions</a> and <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a>
+                                </label>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <button type="button" onclick="prevStep()"
+                                        class="px-6 py-3 bg-gray-200 rounded-lg font-semibold hover:bg-gray-300 transition flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                    Back
+                                </button>
+                                <button type="submit" id="submitBtn"
+                                        class="flex-1 px-6 py-3 gradient-bg text-white rounded-lg font-semibold hover:shadow-xl transition flex items-center justify-center gap-2">
+                                    <span>Proceed to Payment (₦2,000)</span>
+                                    <div class="loading-spinner" id="submitSpinner"></div>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="back" style="height: 40px; display: flex; align-items:center; justify-content: center; margin-top: 20px;">
+            <a href="/" class="text-blue-900 hover:text-blue-700 font-medium">
+                <i class="fa-solid fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8 px-4 sm:px-6 lg:px-8 mt-16">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="text-gray-400 mb-2">CLUB DE STARS MULTIPURPOSE COOPERATIVE SOCIETY LTD</p>
+            <p class="text-sm text-gray-500">Powered by <a href="/" class="text-blue-400 hover:text-blue-300">JESZ LTD</a></p>
+            <div class="mt-4 flex justify-center space-x-6 text-sm text-gray-400">
+                <a href="#" class="hover:text-white transition">Privacy Policy</a>
+                <a href="#" class="hover:text-white transition">Terms of Service</a>
+                <a href="#" class="hover:text-white transition">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Clear all error messages
+        function clearErrors() {
+            document.querySelectorAll('.field-error').forEach(el => {
+                el.classList.remove('show');
+                el.textContent = '';
+            });
+            document.querySelectorAll('.input-error').forEach(el => {
+                el.classList.remove('input-error');
+            });
+            document.getElementById('errorMessage').classList.remove('show');
+            document.getElementById('successMessage').classList.remove('show');
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorMsg = document.getElementById('errorMessage');
+            document.getElementById('errorText').textContent = message;
+            errorMsg.classList.add('show');
+            errorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Show field error
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(fieldId + 'Error');
+            field.classList.add('input-error');
+            error.textContent = message;
+            error.classList.add('show');
+        }
+
+        // Validate email format
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // Validate phone number
+        function isValidPhone(phone) {
+            const re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+            return re.test(phone.replace(/\s/g, ''));
+        }
+
+        // Validate age (must be at least 18)
+        function isValidAge(dob) {
+            const today = new Date();
+            const birthDate = new Date(dob);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age >= 18;
+        }
+
+        // Validate file size
+        function isValidFileSize(file, maxSizeMB) {
+            return file && file.size <= maxSizeMB * 1024 * 1024;
+        }
+
+        // Validate Step 1
+        function validateStep1() {
+            clearErrors();
+            let isValid = true;
+
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const dob = document.getElementById('dob').value;
+            const state = document.getElementById('state').value;
+            const lga = document.getElementById('lga').value.trim();
+            const address = document.getElementById('address').value.trim();
+
+            if (!firstName || firstName.length < 2) {
+                showFieldError('firstName', 'First name must be at least 2 characters');
+                isValid = false;
+            }
+
+            if (!lastName || lastName.length < 2) {
+                showFieldError('lastName', 'Last name must be at least 2 characters');
+                isValid = false;
+            }
+
+            if (!email) {
+                showFieldError('email', 'Email address is required');
+                isValid = false;
+            } else if (!isValidEmail(email)) {
+                showFieldError('email', 'Please enter a valid email address');
+                isValid = false;
+            }
+
+            if (!phone) {
+                showFieldError('phone', 'Phone number is required');
+                isValid = false;
+            } else if (!isValidPhone(phone)) {
+                showFieldError('phone', 'Please enter a valid phone number');
+                isValid = false;
+            }
+
+            if (!dob) {
+                showFieldError('dob', 'Date of birth is required');
+                isValid = false;
+            } else if (!isValidAge(dob)) {
+                showFieldError('dob', 'You must be at least 18 years old to register');
+                isValid = false;
+            }
+
+            if (!state) {
+                showFieldError('state', 'Please select your state');
+                isValid = false;
+            }
+
+            if (!lga || lga.length < 2) {
+                showFieldError('lga', 'Please enter your LGA');
+                isValid = false;
+            }
+
+            if (!address || address.length < 10) {
+                showFieldError('address', 'Please enter your complete address (minimum 10 characters)');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Check if email exists
+        async function checkEmailExists(email) {
+            try {
+                const response = await fetch('/check-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email })
+                });
+                const result = await response.json();
+                return result.exists;
+            } catch (error) {
+                console.error('Error checking email:', error);
+                return false;
+            }
+        }
+
+        // Validate and move to next step
+        async function validateAndNextStep() {
+            if (!validateStep1()) {
+                return;
+            }
+
+            const nextBtn = document.getElementById('nextBtn');
+            const nextSpinner = document.getElementById('nextSpinner');
+            
+            // Disable button and show spinner
+            nextBtn.disabled = true;
+            nextSpinner.style.display = 'inline-block';
+
+            // Check if email already exists
+            const email = document.getElementById('email').value.trim();
+            const emailExists = await checkEmailExists(email);
+
+            nextBtn.disabled = false;
+            nextSpinner.style.display = 'none';
+
+            if (emailExists) {
+                showFieldError('email', 'This email is already registered');
+                showError('An account with this email already exists. Please login or use a different email.');
+                return;
+            }
+
+            // Move to step 2
+            nextStep();
+        }
+
+        // Move to next step
+        function nextStep() {
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Move to previous step
+        function prevStep() {
+            clearErrors();
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Validate Step 2
+        function validateStep2() {
+            clearErrors();
+            let isValid = true;
+
+            const addressProof = document.getElementById('addressProof').files[0];
+            const passportPhoto = document.getElementById('passportPhoto').files[0];
+            const idType = document.getElementById('idType').value;
+            const idNumber = document.getElementById('idNumber').value.trim();
+            const idFile = document.getElementById('idFile').files[0];
+            const signature = document.getElementById('signature').files[0];
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const terms = document.getElementById('terms').checked;
+
+            if (!addressProof) {
+                showFieldError('addressProof', 'Proof of address is required');
+                isValid = false;
+            } else if (!isValidFileSize(addressProof, 5)) {
+                showFieldError('addressProof', 'File size must not exceed 5MB');
+                isValid = false;
+            }
+
+            if (!passportPhoto) {
+                showFieldError('passportPhoto', 'Passport photograph is required');
+                isValid = false;
+            } else if (!isValidFileSize(passportPhoto, 5)) {
+                showFieldError('passportPhoto', 'File size must not exceed 5MB');
+                isValid = false;
+            }
+
+            if (!idType) {
+                showFieldError('idType', 'Please select ID type');
+                isValid = false;
+            }
+
+            if (!idNumber || idNumber.length < 5) {
+                showFieldError('idNumber', 'Please enter a valid ID number');
+                isValid = false;
+            }
+
+            if (!idFile) {
+                showFieldError('idFile', 'ID document is required');
+                isValid = false;
+            } else if (!isValidFileSize(idFile, 5)) {
+                showFieldError('idFile', 'File size must not exceed 5MB');
+                isValid = false;
+            }
+
+            if (!signature) {
+                showFieldError('signature', 'Signature is required');
+                isValid = false;
+            } else if (!isValidFileSize(signature, 2)) {
+                showFieldError('signature', 'File size must not exceed 2MB');
+                isValid = false;
+            }
+
+            if (!password || password.length < 8) {
+                showFieldError('password', 'Password must be at least 8 characters');
+                isValid = false;
+            }
+
+            if (password !== confirmPassword) {
+                showFieldError('confirmPassword', 'Passwords do not match');
+                isValid = false;
+            }
+
+            if (!terms) {
+                showError('You must agree to the Terms and Conditions to continue');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Handle form submission
+        document.getElementById("registrationForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            if (!validateStep2()) {
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitSpinner = document.getElementById('submitSpinner');
+            const formData = new FormData(this);
+
+            // Disable button and show spinner
+            submitBtn.disabled = true;
+            submitSpinner.style.display = 'inline-block';
+
+            try {
+                const response = await fetch("/signup", { 
+                    method: "POST", 
+                    body: formData 
+                });
+                
+                const result = await response.json();
+                console.log(result);
+
+                submitBtn.disabled = false;
+                submitSpinner.style.display = 'none';
+
+                if (response.ok && result.status) {
+                    if (result.authorization_url) {
+                        // Redirect to payment page
+                        window.location.href = result.authorization_url;
+                    } else {
+                        showError('Payment initialization failed. Please try again.');
+                    }
+                } else {
+                    // Show error message from server
+                    const errorMessage = result.message || 'Registration failed. Please try again.';
+                    
+                    // Check if it's an email exists error
+                    if (errorMessage.toLowerCase().includes('email') && 
+                        errorMessage.toLowerCase().includes('exist')) {
+                        prevStep();
+                        showFieldError('email', 'This email is already registered');
+                    }
+                    
+                    showError(errorMessage);
+                }
+            } catch (err) {
+                console.error("Signup error:", err);
+                submitBtn.disabled = false;
+                submitSpinner.style.display = 'none';
+                showError("Unable to process registration. Please check your connection and try again.");
+            }
+        });
+
+        // Real-time validation for email
+        document.getElementById('email').addEventListener('blur', async function() {
+            const email = this.value.trim();
+            if (email && isValidEmail(email)) {
+                const emailExists = await checkEmailExists(email);
+                if (emailExists) {
+                    showFieldError('email', 'This email is already registered');
+                }
+            }
+        });
+
+        // Real-time validation for password match
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                showFieldError('confirmPassword', 'Passwords do not match');
+            } else {
+                const error = document.getElementById('confirmPasswordError');
+                error.classList.remove('show');
+                this.classList.remove('input-error');
+            }
+        });
+    </script>
+</body>
+</html>
