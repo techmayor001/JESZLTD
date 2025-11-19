@@ -1296,20 +1296,36 @@
         </div>
     </div>
 
-    <!-- Distribute ROI Modal -->
-    <div class="modal fade" id="distributeROIModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-percentage me-2" style="color: var(--info);"></i>Distribute ROI</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert-warning-custom mb-3">
-                        <small><i class="fas fa-exclamation-triangle me-2"></i><strong>Confirm before distributing:</strong> This action cannot be undone</small>
-                    </div>
-                    <div class="card mb-3" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Total Interest Pool</span>
-                                <strong>₦4,200,000
+    <script>
+// Open modal and populate fields
+function openApproveMemberModal(memberName = "Sarah Johnson", membershipType = "club") {
+    // Set values inside the modal
+    document.querySelector('#approveMemberModal input[type="text"]').value = memberName;
+    document.querySelector('#approveMemberModal select').value = membershipType;
+
+    // Open modal using Bootstrap's modal API
+    let modal = new bootstrap.Modal(document.getElementById('approveMemberModal'));
+    modal.show();
+}
+
+// Approve member function
+function approveMember() {
+    let name = document.querySelector('#approveMemberModal input[type="text"]').value;
+    let membership = document.querySelector('#approveMemberModal select').value;
+    let notes = document.querySelector('#approveMemberModal textarea').value;
+
+    // Example: Do something (AJAX request, console log, etc.)
+    console.log("Approving member:");
+    console.log("Name:", name);
+    console.log("Type:", membership);
+    console.log("Notes:", notes);
+
+    // Close modal after approving
+    let modal = bootstrap.Modal.getInstance(document.getElementById('approveMemberModal'));
+    modal.hide();
+}
+</script>
+
+
+</body>
+</html>

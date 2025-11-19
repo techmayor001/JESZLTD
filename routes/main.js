@@ -38,6 +38,7 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
     const user = await User.findById(req.user._id)
       .populate("loans")
       .populate("account")
+      .populate("referredUsers") // populate referrals
       .exec();
 
     if (!user) return res.redirect("/login");
@@ -79,7 +80,13 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
     // --- 7. Determine account interest rate for display ---
     const interestRate = user.account.accountType === "CD" ? 5 : 10; // percent
 
-    // --- 8. Send data to frontend ---
+    // --- 8. Referral Program ---
+    const referralCode = user.referralCode;
+    const referralLink = `${req.protocol}://${req.get("host")}/register?ref=${referralCode}`;
+    const totalReferrals = user.referredUsers.length;
+    const referralEarning = totalReferrals * 5000; // ₦5,000 per successful referral
+
+    // --- 9. Render dashboard with all data ---
     res.render("dashboard/user-dashboard", {
       user,
       users,
@@ -90,8 +97,15 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
       totalLoanInterest,
       ROI,
       monthsSinceJoin,
-      loan: activeLoan,      // pass active loan to template
-      interestRate,         // pass interest rate for display
+      loan: activeLoan,
+      interestRate,
+
+      // Referral data
+      referralCode,
+      referralLink,
+      totalReferrals,
+      referralEarning,
+      referredUsers: user.referredUsers,
     });
 
   } catch (err) {
@@ -99,6 +113,7 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
     res.redirect("/login");
   }
 });
+
 
 
 
@@ -146,7 +161,10 @@ router.get("/club-de-star-cooperative/transaction", async (req, res) => {
   }
 });
 
-
+// ADMIN DASHBOARD ---------------------TECHMAYOR CO 
+router.get("/admin-dashboard", (req,res)=>{
+  res.render("dashboard/admin")
+})
 
 
 

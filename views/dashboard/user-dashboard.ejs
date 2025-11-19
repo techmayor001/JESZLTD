@@ -988,55 +988,81 @@
         </div>
 
         <!-- Referral Section -->
-        <div id="referral" class="content-section" style="display:none;">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-users me-2"></i>Referral Program</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-4">
-                        <div class="col-lg-6">
-                            <div class="gradient-bg text-white p-4 rounded-3">
-                                <h5 class="fw-bold mb-3"><i class="fas fa-gift me-2"></i>Refer & Earn!</h5>
-                                <p class="mb-4">Invite friends to join Club De Stars and earn rewards for each successful referral</p>
-                                <div class="bg-white bg-opacity-20 p-3 rounded-3 mb-3">
-                                    <small class="opacity-75 d-block mb-1">Your Referral Code</small>
-                                    <h4 class="mb-0 fw-bold">CDS001-REF</h4>
-                                </div>
-                                <button class="btn btn-light w-100 fw-semibold">
-                                    <i class="fas fa-copy me-2"></i>Copy Referral Link
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <h6 class="fw-bold mb-3" style="color: var(--primary);">Your Referrals</h6>
-                            <div class="row g-3 mb-4">
-                                <div class="col-6">
-                                    <div class="p-3 rounded-3 text-center" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
-                                        <h3 class="mb-0 fw-bold text-success">5</h3>
-                                        <small class="text-muted">Total Referrals</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="p-3 rounded-3 text-center" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
-                                        <h3 class="mb-0 fw-bold text-warning">₦25,000</h3>
-                                        <small class="text-muted">Earned</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="alert-info-custom">
-                                <h6 class="fw-bold mb-2">Referral Benefits</h6>
-                                <ul class="small mb-0 ps-3">
-                                    <li class="mb-2">Earn ₦5,000 per successful referral</li>
-                                    <li class="mb-2">Referee gets ₦2,500 signup bonus</li>
-                                    <li class="mb-0">Bonus credited after first deposit</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+       <div id="referral" class="content-section" style="display:none;">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0 fw-bold"><i class="fas fa-users me-2"></i>Referral Program</h5>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-4">
+
+        <!-- Left: Referral Code -->
+        <div class="col-lg-6">
+          <div class="gradient-bg text-white p-4 rounded-3">
+            <h5 class="fw-bold mb-3"><i class="fas fa-gift me-2"></i>Refer & Earn!</h5>
+            <p class="mb-4">Invite friends to join Club De Stars and earn rewards for each successful referral</p>
+
+            <div class="bg-white bg-opacity-20 p-3 rounded-3 mb-3">
+              <small class="opacity-75 d-block mb-1">Your Referral Code</small>
+              <h4 class="mb-0 fw-bold"><%= referralCode %></h4>
             </div>
+
+            <button class="btn btn-light w-100 fw-semibold" onclick="copyReferralLink()">
+              <i class="fas fa-copy me-2"></i>Copy Referral Link
+            </button>
+
+            <input type="hidden" id="refLink" value="<%= referralLink %>">
+          </div>
         </div>
+
+        <!-- Right: Referrals Stats -->
+        <div class="col-lg-6">
+          <h6 class="fw-bold mb-3">Your Referrals</h6>
+
+          <div class="row g-3 mb-4">
+            <div class="col-6">
+              <div class="p-3 rounded-3 text-center" style="background: #d1fae5;">
+                <h3 class="fw-bold text-success mb-0"><%= totalReferrals %></h3>
+                <small>Total Referrals</small>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="p-3 rounded-3 text-center" style="background: #fde68a;">
+                <h3 class="fw-bold text-warning mb-0">₦<%= referralEarning.toLocaleString() %></h3>
+                <small>Earned</small>
+              </div>
+            </div>
+          </div>
+
+          <% if (referredUsers.length > 0) { %>
+            <ul class="list-group">
+              <% referredUsers.forEach(r => { %>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span><%= r.firstName %> <%= r.lastName %></span>
+                  <span class="text-muted"><%= r.email %></span>
+                </li>
+              <% }) %>
+            </ul>
+          <% } else { %>
+            <p class="text-muted">No referrals yet.</p>
+          <% } %>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function copyReferralLink() {
+  const link = document.getElementById("refLink").value;
+  navigator.clipboard.writeText(link);
+  alert("Referral link copied!");
+}
+</script>
+
     </div>
 
     <!-- Powered By Footer -->
