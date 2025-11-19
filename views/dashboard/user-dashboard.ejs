@@ -793,7 +793,7 @@
                             <form>
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Loan Amount (₦)</label>
-                                    <input type="number" class="form-control" id="calcAmount" placeholder="100000" max="1350000" onchange="calculateLoan()">
+                                    <input type="number" class="form-control" id="calcAmount" placeholder="100000" onchange="calculateLoan()">
                                     <small class="text-muted">Max: ₦<%= user.account?.balance 
                                 ? (user.account.balance * 3).toLocaleString() 
                                 : '0' %></small>
@@ -1582,28 +1582,35 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Loan Calculator
-        function calculateLoan() {
-            const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
-            const duration = parseInt(document.getElementById('calcDuration').value) || 12;
-            const rate = parseFloat(document.getElementById('calcRate').value) || 5;
-            
-            if (amount > 0) {
-                if (amount > 1350000) {
-                    alert('Loan amount exceeds maximum eligible amount of ₦1,350,000 (3x your savings)');
-                    document.getElementById('calcAmount').value = 1350000;
-                    return;
-                }
-                
-                const interest = (amount * rate * duration) / (100 * 12);
-                const total = amount + interest;
-                const monthly = total / duration;
-                
-                document.getElementById('calcResult').style.display = 'block';
-                document.getElementById('monthlyPay').textContent = '₦' + monthly.toLocaleString('en-NG', {maximumFractionDigits: 2});
-                document.getElementById('totalInt').textContent = '₦' + interest.toLocaleString('en-NG', {maximumFractionDigits: 2});
-                document.getElementById('totalRep').textContent = '₦' + total.toLocaleString('en-NG', {maximumFractionDigits: 2});
-            }
+function calculateLoan() {
+    const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
+    const duration = parseInt(document.getElementById('calcDuration').value) || 1;
+    const rate = parseFloat(document.getElementById('calcRate').value) || 5;
+
+    if (amount > 0) {
+        const maxLoan = parseFloat("<%= user.account.balance %>") * 3;
+
+        if (amount > maxLoan) {
+            alert(`Loan amount exceeds your max eligible amount of ₦${maxLoan.toLocaleString()}`);
+            document.getElementById('calcAmount').value = maxLoan;
+            return;
         }
+
+        // Interest for ONE MONTH ONLY
+        const interest = (amount * rate) / 100;
+
+        // Total repayment
+        const total = amount + interest;
+
+        // Monthly payment
+        const monthly = total / duration;
+
+        document.getElementById('calcResult').style.display = 'block';
+        document.getElementById('monthlyPay').textContent = '₦' + monthly.toLocaleString('en-NG', { maximumFractionDigits: 2 });
+        document.getElementById('totalInt').textContent = '₦' + interest.toLocaleString('en-NG', { maximumFractionDigits: 2 });
+        document.getElementById('totalRep').textContent = '₦' + total.toLocaleString('en-NG', { maximumFractionDigits: 2 });
+    }
+}
 
         // Withdrawal Fee Calculator
 
