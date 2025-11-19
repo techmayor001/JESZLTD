@@ -799,22 +799,22 @@
         <div class="stats-row">
             <div class="stat-box">
                 <div class="text-success"><i class="fas fa-arrow-down"></i></div>
-                <h4 class="text-success">₦450,000</h4>
+                <h4 class="text-success">₦<%= totalDeposits.toLocaleString() %></h4>
                 <small>Total Deposits</small>
             </div>
             <div class="stat-box">
                 <div class="text-danger"><i class="fas fa-arrow-up"></i></div>
-                <h4 class="text-danger">₦50,000</h4>
+                <h4 class="text-danger">₦<%= totalWithdrawals.toLocaleString() %></h4>
                 <small>Total Withdrawals</small>
             </div>
             <div class="stat-box">
                 <div class="text-warning"><i class="fas fa-hand-holding-usd"></i></div>
-                <h4 class="text-warning">₦52,500</h4>
+                <h4 class="text-warning">₦<%= totalLoanPayments.toLocaleString() %></h4>
                 <small>Loan Payments</small>
             </div>
             <div class="stat-box">
                 <div class="text-info"><i class="fas fa-percentage"></i></div>
-                <h4 class="text-info">₦11,250</h4>
+                <h4 class="text-info">₦<%= roiEarned.toLocaleString() %></h4>
                 <small>ROI Earned</small>
             </div>
         </div>
@@ -898,33 +898,17 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
- <script>
-    // Render transactions from backend via EJS
+<script>
+    // Backend transactions
     const transactions = <%- JSON.stringify(transactions) %>;
-
     let filteredTransactions = [...transactions];
 
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-    }
-
-    function closeSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-    }
-
+    // Utility functions (icons, classes, date formatting)
     function getTransactionIcon(type) {
         const icons = {
             deposit: '<i class="fas fa-arrow-down"></i>',
             withdrawal: '<i class="fas fa-arrow-up"></i>',
-            loan: '<i class="fas fa-hand-holding-usd"></i>',
-            payment: '<i class="fas fa-credit-card"></i>',
-            roi: '<i class="fas fa-percentage"></i>'
+            loan_payment: '<i class="fas fa-hand-holding-usd"></i>'
         };
         return icons[type] || '<i class="fas fa-exchange-alt"></i>';
     }
@@ -933,9 +917,7 @@
         const classes = {
             deposit: 'deposit-icon',
             withdrawal: 'withdrawal-icon',
-            loan: 'loan-icon',
-            payment: 'payment-icon',
-            roi: 'roi-icon'
+            loan_payment: 'payment-icon'
         };
         return classes[type] || 'deposit-icon';
     }
@@ -951,6 +933,7 @@
         });
     }
 
+    // Main render function
     function renderTransactions() {
         const container = document.getElementById('transactionsList');
         
@@ -971,7 +954,7 @@
                         ${getTransactionIcon(txn.type)}
                     </div>
                     <div class="transaction-details">
-                        <h6>${txn.description || txn.type}</h6>
+                        <h6>${txn.description || txn.type.replace('_', ' ')}</h6>
                         <div class="transaction-meta">
                             <i class="fas fa-calendar me-1"></i>${formatDate(txn.createdAt)}
                             <span class="mx-1">•</span>
@@ -979,8 +962,8 @@
                         </div>
                     </div>
                     <div class="transaction-amount-section">
-                        <div class="transaction-amount ${txn.type === 'withdrawal' || txn.type === 'payment' ? 'negative' : 'positive'}">
-                            ${txn.type === 'withdrawal' || txn.type === 'payment' ? '-' : '+'}₦${txn.amount.toLocaleString()}
+                        <div class="transaction-amount ${txn.type === 'withdrawal' || txn.type === 'loan_payment' ? 'negative' : 'positive'}">
+                            ${txn.type === 'withdrawal' || txn.type === 'loan_payment' ? '-' : '+'}₦${txn.amount.toLocaleString()}
                         </div>
                         <span class="status-badge status-${txn.status || 'pending'}">${txn.status || 'pending'}</span>
                     </div>
@@ -989,6 +972,57 @@
         `).join('');
     }
 
+    // Filter logic
+    function filterTransactions() {
+        const typeFilter = document.getElementById('filterType').value;
+        const statusFilter = document.getElementById('filterStatus').value;
+        const dateFilter = document.getElementById('filterDate').value;
+
+        filteredTransactions = transactions.filter(txn => {
+            // Type filter
+            let typeMatch = true;
+            if (typeFilter === 'deposit') typeMatch = txn.type === 'deposit';
+            if (typeFilter === 'withdrawal') typeMatch = txn.type === 'withdrawal';
+            if (typeFilter === 'payment') typeMatch = txn.type === 'loan_payment';
+            if (typeFilter === 'loan') typeMatch = false; // no loan type in transactions table
+            if (typeFilter === 'roi') typeMatch = false; // no roi type in transactions table
+            if (typeFilter === 'all') typeMatch = true;
+
+            // Status filter
+            const statusMatch = statusFilter === 'all' ? true : (txn.status === statusFilter);
+
+            // Date filter
+            const now = new Date();
+            const txnDate = new Date(txn.createdAt);
+            let dateMatch = true;
+
+            if (dateFilter === 'today') {
+                dateMatch = txnDate.toDateString() === now.toDateString();
+            } else if (dateFilter === 'week') {
+                const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+                dateMatch = txnDate >= startOfWeek;
+            } else if (dateFilter === 'month') {
+                dateMatch = txnDate.getMonth() === now.getMonth() && txnDate.getFullYear() === now.getFullYear();
+            } else if (dateFilter === 'year') {
+                dateMatch = txnDate.getFullYear() === now.getFullYear();
+            }
+
+            return typeMatch && statusMatch && dateMatch;
+        });
+
+        renderTransactions();
+    }
+
+    // Reset filters
+    function resetFilters() {
+        document.getElementById('filterType').value = 'all';
+        document.getElementById('filterStatus').value = 'all';
+        document.getElementById('filterDate').value = 'all';
+        filteredTransactions = [...transactions];
+        renderTransactions();
+    }
+
+    // Show transaction detail modal
     function showTransactionDetail(txnId) {
         const txn = transactions.find(t => t._id === txnId);
         if (!txn) return;
@@ -1000,15 +1034,13 @@
                     <p>Multipurpose Cooperative Society Limited</p>
                     <p style="font-size: 0.75rem;">Powered by JESZ LIMITED</p>
                 </div>
-                
                 <div class="receipt-amount-section">
                     <div class="transaction-icon ${getTransactionClass(txn.type)}">
                         ${getTransactionIcon(txn.type)}
                     </div>
-                    <h5>${txn.description || txn.type}</h5>
-                    <h2>${txn.type === 'withdrawal' || txn.type === 'payment' ? '-' : '+'}₦${txn.amount.toLocaleString()}</h2>
+                    <h5>${txn.description || txn.type.replace('_', ' ')}</h5>
+                    <h2>${txn.type === 'withdrawal' || txn.type === 'loan_payment' ? '-' : '+'}₦${txn.amount.toLocaleString()}</h2>
                 </div>
-
                 <div class="receipt-row">
                     <span class="receipt-label">Transaction ID</span>
                     <span class="receipt-value">${txn._id}</span>
@@ -1023,7 +1055,7 @@
                 </div>
                 <div class="receipt-row">
                     <span class="receipt-label">Type</span>
-                    <span class="receipt-value" style="text-transform: capitalize;">${txn.type}</span>
+                    <span class="receipt-value" style="text-transform: capitalize;">${txn.type.replace('_', ' ')}</span>
                 </div>
                 <div class="receipt-row">
                     <span class="receipt-label">Method</span>
@@ -1038,14 +1070,12 @@
                     <span class="receipt-label">Status</span>
                     <span class="status-badge status-${txn.status || 'pending'}">${txn.status || 'pending'}</span>
                 </div>
-
                 <div class="receipt-footer">
                     <p><i class="fas fa-shield-alt"></i> This is an official transaction receipt</p>
                     <p style="font-size: 0.75rem;">Generated on ${new Date().toLocaleString()}</p>
                 </div>
             </div>
         `;
-
         document.getElementById('transactionDetail').innerHTML = detailHtml;
         document.getElementById('transactionModal').classList.add('show');
     }
@@ -1057,15 +1087,12 @@
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
         renderTransactions();
-
-        // Close modal when clicking outside
         document.getElementById('transactionModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
+            if (e.target === this) closeModal();
         });
     });
 </script>
+
     <script>
     // Close sidebar when clicking outside (for mobile view)
     document.addEventListener('click', function (event) {

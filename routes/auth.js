@@ -55,8 +55,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 2 * 1024 * 1024 },
-  fileFilter
+  limits: { fileSize: 2 * 1024 * 1024 }
 
  });
 
@@ -277,6 +276,15 @@ router.get("/login", (req, res) => {
 });
 
 
+router.get("/forgot-password", (req, res) => {
+  res.render("auth/recovery");
+});
+
+router.get("/terms", (req, res) => {
+  res.render("auth/terms");
+});
+
+
 
 
 router.post("/login", (req, res, next) => {
@@ -334,7 +342,7 @@ router.get("/logout", (req, res) => {
       console.error("Logout error:", err);
       return res.redirect("/dashboard?error=logout_failed");
     }
-    res.redirect("/");
+    res.redirect("/login");
   });
 });
 

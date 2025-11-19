@@ -5,10 +5,9 @@ const Account = require("../models/Account");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 
-// Initialize Deposit
+
 router.post("/deposit/init", async (req, res) => {
   try {
-    // Must be logged in
     if (!req.isAuthenticated()) {
       return res.status(401).json({ status: false, message: "You must be logged in to make a deposit." });
     }
@@ -20,7 +19,6 @@ router.post("/deposit/init", async (req, res) => {
       return res.status(400).json({ status: false, message: "Invalid amount entered." });
     }
 
-    // ✅ Initialize Paystack payment (same pattern as signup)
     const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
@@ -29,7 +27,7 @@ router.post("/deposit/init", async (req, res) => {
       },
       body: JSON.stringify({
         email: user.email,
-        amount: amount * 100, // Convert ₦ to kobo
+        amount: amount * 100,
         metadata: { userId: user._id, type: "deposit" },
         callback_url: `${process.env.BASE_URL}/deposit/verify`,
       }),
@@ -38,7 +36,6 @@ router.post("/deposit/init", async (req, res) => {
     const data = await paystackRes.json();
     if (!data.status || !data.data) throw new Error("Failed to initialize payment with Paystack.");
 
-    // ✅ Record deposit in Payment collection
     await Payment.create({
       user: user._id,
       email: user.email,
@@ -47,7 +44,6 @@ router.post("/deposit/init", async (req, res) => {
       status: "pending",
     });
 
-    // ✅ Return Paystack redirect URL
     res.json({ status: true, authorization_url: data.data.authorization_url });
   } catch (err) {
     console.error("Deposit initialization error:", err);
@@ -77,6 +73,7 @@ router.get("/deposit/verify", async (req, res) => {
     }
 
     const transaction = data.data;
+
     const payment = await Payment.findOne({ reference }).populate("user");
     if (!payment) return res.redirect("/club-de-star-cooperative/dashboard?deposit=not-found");
 
@@ -98,21 +95,39 @@ router.get("/deposit/verify", async (req, res) => {
       }
 
       const depositAmount = payment.amount / 100;
+
       account.balance += depositAmount;
       await account.save();
 
+      // ✅ CREATE TRANSACTION WITH STATUS, METHOD & REFERENCE
       await Transaction.create({
         user: payment.user._id,
         type: "deposit",
         amount: depositAmount,
-        description: `Deposit via Paystack (Ref: ${reference})`,
+        description: `Deposit (Ref: ${reference})`,
+        reference: reference,
+        method: "Paystack",
+        status: "successful",
       });
 
       console.log(`✅ Deposit recorded: ₦${depositAmount} for ${payment.user.email}`);
       return res.redirect("/club-de-star-cooperative/dashboard?deposit=success");
+
     } else {
+      // ❌ Payment failed → store failed transaction
+      await Transaction.create({
+        user: payment.user._id,
+        type: "deposit",
+        amount: payment.amount / 100,
+        description: `Deposit Failed (Ref: ${reference})`,
+        reference: reference,
+        method: "Paystack",
+        status: "failed",
+      });
+
       return res.redirect("/club-de-star-cooperative/dashboard?deposit=failed");
     }
+
   } catch (err) {
     console.error("Deposit verification error:", err);
     res.redirect("/club-de-star-cooperative/dashboard?deposit=failed");

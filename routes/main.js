@@ -34,6 +34,7 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
   if (!req.isAuthenticated()) return res.redirect("/login");
 
   try {
+    // --- Fetch user with account and loans ---
     const user = await User.findById(req.user._id)
       .populate("loans")
       .populate("account")
@@ -41,41 +42,56 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
 
     if (!user) return res.redirect("/login");
 
-    // 1. Fetch ALL user payments
-    const userPayments = await Payment.find({ user: user._id });
+    // --- Fetch ALL users (for guarantor dropdown) ---
+    const users = await User.find({});
 
-    // Member's total savings
-    const userTotalSavings = userPayments.reduce(
-      (sum, p) => sum + (p.amount || 0),
+    // --- 1. User account balance ---
+    const accountBalance = user.account.balance || 0;
+    const monthlyROI = user.account.monthlyROI || 0;
+    const accumulativeROI = user.account.accumulativeROI || 0;
+
+    // --- 2. Total savings by all members ---
+    const allAccounts = await Account.find({});
+    const allMembersTotalSavings = allAccounts.reduce(
+      (sum, acc) => sum + (acc.balance || 0),
       0
     );
 
-    // 2. Total savings by ALL members
-    const allMembersPayments = await Payment.find({});
-    const allMembersTotalSavings = allMembersPayments.reduce(
-      (sum, p) => sum + (p.amount || 0),
-      0
-    );
+    // --- 3. Sum of all approved loan interests ---
+    const allLoans = await Loan.find({ status: "approved" }).populate("user account");
+    const totalLoanInterest = allLoans.reduce((sum, loan) => {
+      const rate = loan.user.account.accountType === "CD" ? 0.05 : 0.10;
+      return sum + loan.amount * rate;
+    }, 0);
 
-    // 3. Sum of loan interest (all members, this month)
-    const allLoans = await Loan.find({});
-    const totalLoanInterest = allLoans.reduce(
-      (sum, loan) => sum + (loan.monthlyInterest || 0),
-      0
-    );
+    // --- 4. Calculate ROI for this user ---
+    const ROI = allMembersTotalSavings > 0
+      ? (accountBalance / allMembersTotalSavings) * totalLoanInterest * 0.9
+      : 0;
 
-    // 4. Final formula
-    const memberShare =
-      allMembersTotalSavings > 0
-        ? (userTotalSavings / allMembersTotalSavings) *
-          totalLoanInterest *
-          0.9 // remove 10%
-        : 0;
+    // --- 5. Loan eligibility: months since registration ---
+    const today = new Date();
+    const monthsSinceJoin = Math.floor((today - user.createdAt) / (1000 * 60 * 60 * 24 * 30));
 
+    // --- 6. Get user's active loan (if any) ---
+    const activeLoan = user.loans.find(l => l.status === "active") || null;
+
+    // --- 7. Determine account interest rate for display ---
+    const interestRate = user.account.accountType === "CD" ? 5 : 10; // percent
+
+    // --- 8. Send data to frontend ---
     res.render("dashboard/user-dashboard", {
       user,
-      userTotalSavings,
-      memberShare,
+      users,
+      accountBalance,
+      monthlyROI,
+      accumulativeROI,
+      allMembersTotalSavings,
+      totalLoanInterest,
+      ROI,
+      monthsSinceJoin,
+      loan: activeLoan,      // pass active loan to template
+      interestRate,         // pass interest rate for display
     });
 
   } catch (err) {
@@ -83,6 +99,7 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
     res.redirect("/login");
   }
 });
+
 
 
 router.get("/club-de-star-cooperative/transaction", async (req, res) => {
@@ -93,17 +110,36 @@ router.get("/club-de-star-cooperative/transaction", async (req, res) => {
 
     const user = req.user;
 
-    // Fetch user transactions, most recent first
+    // Fetch transactions, latest first
     const transactions = await Transaction.find({ user: user._id }).sort({ createdAt: -1 });
 
-    // Fetch user account (to show balance, etc.)
+    // Fetch user account
     const account = await Account.findOne({ user: user._id });
 
+    // --- Calculate dynamic statistics ---
+    let totalDeposits = 0;
+    let totalWithdrawals = 0;
+    let totalLoanPayments = 0;
+
+    transactions.forEach(tx => {
+      if (tx.type === 'deposit') totalDeposits += tx.amount;
+      else if (tx.type === 'withdrawal') totalWithdrawals += tx.amount;
+      else if (tx.type === 'loan_payment') totalLoanPayments += tx.amount;
+    });
+
+    const roiEarned = account?.accumulativeROI || 0;
+
+    // Render template with statistics
     res.render("dashboard/transaction", {
       user,
       account,
       transactions,
+      totalDeposits,
+      totalWithdrawals,
+      totalLoanPayments,
+      roiEarned
     });
+
   } catch (err) {
     console.error("Transaction fetch error:", err);
     res.status(500).send("Error fetching transactions.");

@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club De Stars - Loan Management | Powered by JESZ LIMITED</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --sidebar-width: 280px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+            transform: translateX(0);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+        
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(239, 68, 68, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 70px;
+            padding: 1.5rem;
+            min-height: calc(100vh - 70px);
+            transition: all 0.3s;
+        }
+        
+        .welcome-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            background: white;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 1.25rem;
+            border-radius: 16px 16px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .table {
+            font-size: 0.9rem;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            white-space: nowrap;
+        }
+        
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .powered-by {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            background: white;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+        
+        .filter-tab:hover {
+            background: rgba(30, 58, 138, 0.05);
+        }
+        
+        .filter-tab.active {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .loan-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-item {
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-radius: 10px;
+            border: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .detail-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+        
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .welcome-card {
+                padding: 1.5rem;
+            }
+            
+            .stat-card {
+                padding: 1.25rem;
+            }
+            
+            .powered-by {
+                bottom: 10px;
+                right: 10px;
+                font-size: 0.7rem;
+                padding: 8px 12px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .top-navbar {
+                height: 60px;
+                padding: 0 1rem;
+            }
+            
+            .main-content {
+                margin-top: 60px;
+                padding: 0.75rem;
+            }
+            
+            .welcome-card {
+                padding: 1.25rem;
+                border-radius: 16px;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4rem;
+            }
+            
+            .card-header {
+                padding: 1rem;
+            }
+            
+            .filter-tab {
+                font-size: 0.75rem;
+                padding: 0.4rem 0.8rem;
+            }
+            
+            .table {
+                font-size: 0.8rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-buttons .btn {
+                width: 100%;
+            }
+        }
+        
+        .modal-content {
+            border-radius: 16px;
+        }
+        
+        .modal-header {
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .alert-info-custom {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 1rem;
+            color: #1e40af;
+        }
+        
+        .alert-warning-custom {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 1rem;
+            color: #92400e;
+        }
+        
+        .alert-success-custom {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border: 2px solid #10b981;
+            border-radius: 12px;
+            padding: 1rem;
+            color: #065f46;
+        }
+        
+        .alert-danger-custom {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border: 2px solid #ef4444;
+            border-radius: 12px;
+            padding: 1rem;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">C</div>
+                <div>
+                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                </div>
+            </div>
+            <div class="admin-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>Super Admin</span>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="#dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="#members">
+                <i class="fas fa-users"></i> Members
+            </a>
+            <a href="#transactions">
+                <i class="fas fa-exchange-alt"></i> Transactions
+            </a>
+            <a href="#loans" class="active">
+                <i class="fas fa-hand-holding-usd"></i> Loan Management
+            </a>
+            <a href="#roi">
+                <i class="fas fa-chart-pie"></i> ROI Distribution
+            </a>
+            <a href="#withdrawals">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="#reports">
+                <i class="fas fa-file-alt"></i> Reports
+            </a>
+            <a href="#settings">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="#" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3"
+           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+           onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+        
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Loan Management</h5>
+            <small class="text-muted">Manage loan applications and active loans</small>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="position-relative">
+                <i class="fas fa-bell" style="color: var(--primary); font-size: 1.25rem; cursor: pointer;"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">15</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Welcome Card -->
+        <div class="welcome-card position-relative">
+            <div class="row align-items-center position-relative" style="z-index: 1;">
+                <div class="col-md-8">
+                    <h2 class="mb-2 fw-bold">Loan Management Center</h2>
+                    <p class="mb-3 opacity-90">Review applications, approve loans, and manage repayments</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <div class="badge bg-light text-dark">
+                            <i class="fas fa-calendar me-1"></i>
+                            <span id="currentDate"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-light fw-semibold" onclick="generateLoanReport()">
+                        <i class="fas fa-download me-2"></i>Export Loan Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-3 col-md-6 col-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold small">Pending Applications</p>
+                    <h3 class="mb-1 fw-bold">15</h3>
+                    <small class="text-warning fw-semibold"><i class="fas fa-clock me-1"></i>Needs Review</small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold small">Active Loans</p>
+                    <h3 class="mb-1 fw-bold">342</h3>
+                    <small class="text-success fw-semibold"><i class="fas fa-arrow-up me-1"></i>₦28.7M</small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold small">Overdue Payments</p>
+                    <h3 class="mb-1 fw-bold">8</h3>
+                    <small class="text-danger fw-semibold"><i class="fas fa-exclamation me-1"></i>₦1.2M</small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold small">Rollover Requests</p>
+                    <h3 class="mb-1 fw-bold">5</h3>
+                    <small class="text-info fw-semibold"><i class="fas fa-clock me-1"></i>Pending</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterLoans('all')">
+                <i class="fas fa-th-large me-1"></i> All Loans
+            </button>
+            <button class="filter-tab" onclick="filterLoans('pending')">
+                <i class="fas fa-clock me-1"></i> Pending (15)
+            </button>
+            <button class="filter-tab" onclick="filterLoans('approved')">
+                <i class="fas fa-check me-1"></i> Approved (342)
+            </button>
+            <button class="filter-tab" onclick="filterLoans('rejected')">
+                <i class="fas fa-times me-1"></i> Rejected (23)
+            </button>
+            <button class="filter-tab" onclick="filterLoans('overdue')">
+                <i class="fas fa-exclamation-triangle me-1"></i> Overdue (8)
+            </button>
+            <button class="filter-tab" onclick="filterLoans('rollover')">
+                <i class="fas fa-sync-alt me-1"></i> Rollover (5)
+            </button>
+        </div>
+
+        <!-- Loan Applications Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-hand-holding-usd me-2"></i>Loan Applications</h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <input type="search" class="form-control form-control-sm" placeholder="Search loans..." style="max-width: 200px;" id="searchInput">
+                    <select class="form-select form-select-sm" style="max-width: 150px;" onchange="sortLoans(this.value)">
+                        <option value="date">Sort by Date</option>
+                        <option value="amount">Sort by Amount</option>
+                        <option value="member">Sort by Member</option>
+                        <option value="status">Sort by Status</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="loansTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Member</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Purpose</th>
+                                <th>Interest</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <small class="fw-semibold">Nov 17, 2025</small>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">David Wilson</div>
+                                    <small class="text-muted">CDS078</small>
+                                </td>
+                                <td><span class="badge bg-success">Club</span></td>
+                                <td class="fw-bold">₦300,000</td>
+                                <td><small>Business expansion</small></td>
+                                <td><span class="badge bg-info-subtle text-info">5%</span></td>
+                                <td>6 months</td>
+                                <td><span class="badge bg-warning">Pending</span></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-info" onclick="viewLoanDetails('CDS087-001')" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-danger" onclick="sendReminder('CDS087-001')" title="Send Reminder">
+                                            <i class="fas fa-bell"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <small class="fw-semibold">Nov 13, 2025</small>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">James Anderson</div>
+                                    <small class="text-muted">NCDS045</small>
+                                </td>
+                                <td><span class="badge bg-warning">Non-Club</span></td>
+                                <td class="fw-bold">₦100,000</td>
+                                <td><small>Personal</small></td>
+                                <td><span class="badge bg-warning-subtle text-warning">10%</span></td>
+                                <td>3 months</td>
+                                <td><span class="badge bg-secondary">Rejected</span></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-info" onclick="viewLoanDetails('NCDS045-001')" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <small class="fw-semibold">Nov 12, 2025</small>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">Patricia White</div>
+                                    <small class="text-muted">CDS156</small>
+                                </td>
+                                <td><span class="badge bg-success">Club</span></td>
+                                <td class="fw-bold">₦250,000</td>
+                                <td><small>Equipment purchase</small></td>
+                                <td><span class="badge bg-info-subtle text-info">5%</span></td>
+                                <td>9 months</td>
+                                <td><span class="badge bg-primary">Rollover</span></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-info" onclick="viewLoanDetails('CDS156-001')" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-warning" onclick="processRollover('CDS156-001')" title="Process Rollover">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <nav>
+                    <ul class="pagination pagination-sm mb-0 justify-content-center">
+                        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Powered By Footer -->
+    <div class="powered-by">
+        Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+    </div>
+
+    <!-- View Loan Details Modal -->
+    <div class="modal fade" id="viewLoanModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-file-invoice-dollar me-2"></i>Loan Application Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Member Information -->
+                    <div class="alert-info-custom mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="fw-bold mb-1">David Wilson</h6>
+                                <small>Member ID: CDS078</small><br>
+                                <small>Email: david.wilson@email.com</small><br>
+                                <small>Phone: +234 803 456 7890</small>
+                            </div>
+                            <span class="badge bg-success">Club Member</span>
+                        </div>
+                    </div>
+
+                    <!-- Loan Details -->
+                    <h6 class="fw-bold mb-3" style="color: var(--primary);">Loan Information</h6>
+                    <div class="loan-details-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Loan Amount</div>
+                            <div class="detail-value">₦300,000</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Interest Rate</div>
+                            <div class="detail-value">5%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Duration</div>
+                            <div class="detail-value">6 Months</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Total Repayment</div>
+                            <div class="detail-value">₦315,000</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Monthly Payment</div>
+                            <div class="detail-value">₦52,500</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Application Date</div>
+                            <div class="detail-value" style="font-size: 0.9rem;">Nov 17, 2025</div>
+                        </div>
+                    </div>
+
+                    <!-- Purpose -->
+                    <div class="mt-3">
+                        <h6 class="fw-bold mb-2" style="color: var(--primary);">Loan Purpose</h6>
+                        <p class="mb-0">Business expansion - Purchase of new equipment and inventory for retail store</p>
+                    </div>
+
+                    <!-- Member Financial Summary -->
+                    <div class="mt-3">
+                        <h6 class="fw-bold mb-2" style="color: var(--primary);">Member Financial Summary</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="alert-success-custom py-2">
+                                    <small class="d-block">Total Savings</small>
+                                    <strong>₦450,000</strong>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="alert-warning-custom py-2">
+                                    <small class="d-block">Current Loans</small>
+                                    <strong>₦200,000</strong>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="alert-info-custom py-2">
+                                    <small class="d-block">Loan Eligibility</small>
+                                    <strong>₦675,000</strong>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="alert-success-custom py-2">
+                                    <small class="d-block">Payment History</small>
+                                    <strong>100% On-time</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guarantor Information -->
+                    <div class="mt-3">
+                        <h6 class="fw-bold mb-2" style="color: var(--primary);">Guarantor Information</h6>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Name:</strong> John Smith<br>
+                                        <strong>Member ID:</strong> CDS023<br>
+                                        <strong>Phone:</strong> +234 802 345 6789
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Email:</strong> john.smith@email.com<br>
+                                        <strong>Relationship:</strong> Business Partner<br>
+                                        <span class="badge bg-success mt-1">Verified</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Notes -->
+                    <div class="mt-3">
+                        <h6 class="fw-bold mb-2" style="color: var(--primary);">Admin Notes</h6>
+                        <textarea class="form-control" rows="3" placeholder="Add notes about this loan application..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" onclick="rejectLoanFromModal()">
+                        <i class="fas fa-times me-2"></i>Reject
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="approveLoanFromModal()">
+                        <i class="fas fa-check me-2"></i>Approve Loan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approve Loan Modal -->
+    <div class="modal fade" id="approveLoanModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-check-circle me-2" style="color: var(--success);"></i>Approve Loan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert-success-custom mb-3">
+                        <small><i class="fas fa-info-circle me-2"></i><strong>Confirm loan approval</strong></small>
+                    </div>
+                    
+                    <div class="card mb-3" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-2">Loan Summary</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Member:</small><br>
+                                    <strong>David Wilson</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Amount:</small><br>
+                                    <strong>₦300,000</strong>
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <small class="text-muted">Interest Rate:</small><br>
+                                    <strong>5%</strong>
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <small class="text-muted">Duration:</small><br>
+                                    <strong>6 Months</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Disbursement Method</label>
+                        <select class="form-select" required>
+                            <option value="">Select method...</option>
+                            <option value="bank">Bank Transfer</option>
+                            <option value="cash">Cash Payment</option>
+                            <option value="check">Cheque</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Disbursement Date</label>
+                        <input type="date" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Approval Notes</label>
+                        <textarea class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+                    </div>
+
+                    <div class="alert-warning-custom">
+                        <small><i class="fas fa-exclamation-triangle me-2"></i>Member will be notified via email and SMS upon approval</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="confirmApproval()">
+                        <i class="fas fa-check me-2"></i>Confirm Approval
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Loan Modal -->
+    <div class="modal fade" id="rejectLoanModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-times-circle me-2" style="color: var(--danger);"></i>Reject Loan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert-danger-custom mb-3">
+                        <small><i class="fas fa-exclamation-triangle me-2"></i><strong>Please provide a reason for rejection</strong></small>
+                    </div>
+
+                    <div class="card mb-3" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 38, 0.05) 100%);">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-2">Loan Details</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Member:</small><br>
+                                    <strong>David Wilson</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Amount:</small><br>
+                                    <strong>₦300,000</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rejection Reason <span class="text-danger">*</span></label>
+                        <select class="form-select mb-2" id="rejectionReason" required>
+                            <option value="">Select reason...</option>
+                            <option value="insufficient_savings">Insufficient Savings Balance</option>
+                            <option value="existing_loan">Outstanding Loan Balance</option>
+                            <option value="poor_history">Poor Repayment History</option>
+                            <option value="incomplete_docs">Incomplete Documentation</option>
+                            <option value="invalid_guarantor">Invalid/Unverified Guarantor</option>
+                            <option value="other">Other (Specify below)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Additional Details</label>
+                        <textarea class="form-control" rows="3" placeholder="Provide detailed explanation..." required></textarea>
+                    </div>
+
+                    <div class="alert-info-custom">
+                        <small><i class="fas fa-info-circle me-2"></i>Member will receive notification with the rejection reason</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmRejection()">
+                        <i class="fas fa-times me-2"></i>Confirm Rejection
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rollover Request Modal -->
+    <div class="modal fade" id="rolloverModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-sync-alt me-2" style="color: var(--warning);"></i>Process Loan Rollover</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert-warning-custom mb-3">
+                        <small><i class="fas fa-info-circle me-2"></i><strong>Review rollover request carefully</strong></small>
+                    </div>
+
+                    <div class="card mb-3" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%);">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-2">Current Loan Details</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Member:</small><br>
+                                    <strong>Patricia White</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Original Amount:</small><br>
+                                    <strong>₦250,000</strong>
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <small class="text-muted">Outstanding:</small><br>
+                                    <strong class="text-danger">₦125,000</strong>
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <small class="text-muted">Paid:</small><br>
+                                    <strong class="text-success">₦125,000</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">New Interest Rate</label>
+                        <select class="form-select" required>
+                            <option value="5">5% (Standard)</option>
+                            <option value="7">7% (Rollover Rate)</option>
+                            <option value="10">10% (Premium)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Extension Period</label>
+                        <select class="form-select" required>
+                            <option value="3">3 Months</option>
+                            <option value="6">6 Months</option>
+                            <option value="12">12 Months</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rollover Notes</label>
+                        <textarea class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger me-auto" onclick="rejectRollover()">
+                        <i class="fas fa-times me-2"></i>Reject
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="approveRollover()">
+                        <i class="fas fa-check me-2"></i>Approve Rollover
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Repayments Modal -->
+    <div class="modal fade" id="repaymentsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-list me-2" style="color: var(--primary);"></i>Loan Repayment Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert-info-custom mb-3">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <small>Member:</small><br>
+                                <strong>Robert Taylor</strong>
+                            </div>
+                            <div class="col-md-3">
+                                <small>Loan Amount:</small><br>
+                                <strong>₦500,000</strong>
+                            </div>
+                            <div class="col-md-3">
+                                <small>Paid:</small><br>
+                                <strong class="text-success">₦210,000</strong>
+                            </div>
+                            <div class="col-md-3">
+                                <small>Outstanding:</small><br>
+                                <strong class="text-warning">₦315,000</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Due Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Paid Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Month 1</td>
+                                    <td>Dec 15, 2024</td>
+                                    <td>₦43,750</td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                    <td>Dec 14, 2024</td>
+                                </tr>
+                                <tr>
+                                    <td>Month 2</td>
+                                    <td>Jan 15, 2025</td>
+                                    <td>₦43,750</td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                    <td>Jan 15, 2025</td>
+                                </tr>
+                                <tr>
+                                    <td>Month 3</td>
+                                    <td>Feb 15, 2025</td>
+                                    <td>₦43,750</td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                    <td>Feb 13, 2025</td>
+                                </tr>
+                                <tr>
+                                    <td>Month 4</td>
+                                    <td>Mar 15, 2025</td>
+                                    <td>₦43,750</td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                    <td>Mar 15, 2025</td>
+                                </tr>
+                                <tr>
+                                    <td>Month 5</td>
+                                    <td>Apr 15, 2025</td>
+                                    <td>₦43,750</td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                    <td>Apr 14, 2025</td>
+                                </tr>
+                                <tr class="table-warning">
+                                    <td>Month 6</td>
+                                    <td>May 15, 2025</td>
+                                    <td>₦43,750</td>
+                                    <td><span class="badge bg-warning">Due Soon</span></td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Month 7</td>
+                                    <td>Jun 15, 2025</td>
+                                    <td>₦43,750</td>
+                                    <td><span class="badge bg-secondary">Upcoming</span></td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Month 8</td>
+                                    <td>Jul 15, 2025</td>
+                                    <td>₦43,750</td>
+                                    <td><span class="badge bg-secondary">Upcoming</span></td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Month 9</td>
+                                    <td>Aug 15, 2025</td>
+                                    <td>₦43,750</td>
+                                    <td><span class="badge bg-secondary">Upcoming</span></td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Month 10</td>
+                                    <td>Sep 15, 2025</td>
+                                    <td>₦43,750</td>
+                                    <td><span class="badge bg-secondary">Upcoming</span></td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Month 11</td>
+                                    <td>Oct 15, 2025</td>
+                                    <td>₦43,750</td>
+                                    <td><span class="badge bg-secondary">Upcoming</span></td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Month 12</td>
+                                    <td>Nov 15, 2025</td>
+                                    <td>₦43,750</td>
+                                    <td><span class="badge bg-secondary">Upcoming</span></td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="recordPayment()">
+                        <i class="fas fa-plus me-2"></i>Record Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Set current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+
+        // Filter loans function
+        function filterLoans(status) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            event.target.closest('.filter-tab').classList.add('active');
+            
+            // In a real application, this would filter the table
+            console.log('Filtering by:', status);
+        }
+
+        // Sort loans function
+        function sortLoans(sortBy) {
+            console.log('Sorting by:', sortBy);
+            // In a real application, this would sort the table
+        }
+
+        // View loan details
+        function viewLoanDetails(loanId) {
+            console.log('Viewing loan:', loanId);
+            const modal = new bootstrap.Modal(document.getElementById('viewLoanModal'));
+            modal.show();
+        }
+
+        // Approve loan
+        function approveLoan(loanId) {
+            console.log('Approving loan:', loanId);
+            const modal = new bootstrap.Modal(document.getElementById('approveLoanModal'));
+            modal.show();
+        }
+
+        // Approve loan from modal
+        function approveLoanFromModal() {
+            const viewModal = bootstrap.Modal.getInstance(document.getElementById('viewLoanModal'));
+            viewModal.hide();
+            const approveModal = new bootstrap.Modal(document.getElementById('approveLoanModal'));
+            approveModal.show();
+        }
+
+        // Confirm approval
+        function confirmApproval() {
+            alert('Loan approved successfully! Member has been notified.');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('approveLoanModal'));
+            modal.hide();
+        }
+
+        // Reject loan
+        function rejectLoan(loanId) {
+            console.log('Rejecting loan:', loanId);
+            const modal = new bootstrap.Modal(document.getElementById('rejectLoanModal'));
+            modal.show();
+        }
+
+        // Reject loan from modal
+        function rejectLoanFromModal() {
+            const viewModal = bootstrap.Modal.getInstance(document.getElementById('viewLoanModal'));
+            viewModal.hide();
+            const rejectModal = new bootstrap.Modal(document.getElementById('rejectLoanModal'));
+            rejectModal.show();
+        }
+
+      </script>
