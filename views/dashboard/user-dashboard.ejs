@@ -431,18 +431,9 @@
             <a href="#" onclick="showSection('roi', event)">
                 <i class="fas fa-chart-line"></i> ROI Calculator
             </a>
-            <a href="#" onclick="showSection('profile', event)">
+            <a href="/club-de-star-cooperative/profile">
                 <i class="fas fa-user-circle"></i> My Profile
             </a>
-            <!-- <a href="#" onclick="openModal('depositModal')">
-                <i class="fas fa-plus-circle"></i> Make Deposit
-            </a>
-            <a href="#" onclick="openModal('withdrawModal')">
-                <i class="fas fa-minus-circle"></i> Request Withdrawal
-            </a>
-            <a href="#" onclick="openModal('loanRequestModal')">
-                <i class="fas fa-file-invoice-dollar"></i> Apply for Loan
-            </a> -->
             <a href="#" onclick="showSection('referral', event)">
                 <i class="fas fa-users"></i> Referral Program
             </a>
@@ -885,7 +876,7 @@
                 <div class="card-body">
                     <div class="alert-info-custom mb-4">
                         <h6 class="fw-bold mb-3">How ROI is Calculated</h6>
-                        <p class="mb-2">Monthly ROI = (Your Cumulative Savings from First Month to Current) / (Total Savings by All Members up to Current Month) × Interest for the Month × 90%</p>
+                        <p class="mb-2">Monthly ROI = (Your Cumulative Savings from First Month to Current) / (Total Savings by All Members up to Current Month) × Interest for the Month - 10%(company charge)</p>
                         <p class="mb-0 small"><strong>Note:</strong> 10% of the monthly interest pool is retained as operating charges</p>
                     </div>
 
@@ -893,25 +884,26 @@
                         <div class="col-md-3">
                             <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
                                 <small class="text-muted d-block mb-2">Your Cumulative Savings</small>
-                                <h3 class="mb-0 fw-bold" style="color: var(--primary);">₦450,000</h3>
+                                <h3 class="mb-0 fw-bold" style="color: var(--primary);">₦<%= accountBalance.toLocaleString() %></h3>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
                                 <small class="text-muted d-block mb-2">Total Member Savings</small>
-                                <h3 class="mb-0 fw-bold" style="color: var(--primary);">₦3,600,000</h3>
+                                <h3 class="mb-0 fw-bold" style="color: var(--primary);">₦<%= allMembersTotalSavings.toLocaleString() %></h3>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
                                 <small class="text-muted d-block mb-2">Your Share</small>
-                                <h3 class="mb-0 fw-bold text-warning">12.5%</h3>
+                                <% let sharePercentage = allMembersTotalSavings > 0 ? ((accountBalance / allMembersTotalSavings) * 100).toFixed(2) : 0; %>
+                                <h3 class="mb-0 fw-bold text-warning"><%= sharePercentage %>%</h3>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
                                 <small class="text-muted d-block mb-2">This Month's ROI</small>
-                                <h3 class="mb-0 fw-bold text-success">₦3,750</h3>
+                                <h3 class="mb-0 fw-bold text-success">₦<%= ROI.toLocaleString(undefined, {maximumFractionDigits: 2}) %></h3>
                             </div>
                         </div>
                     </div>

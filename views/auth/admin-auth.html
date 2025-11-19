@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club De Stars - Admin Registration | Powered by JESZ LIMITED</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .registration-container {
+            width: 100%;
+            max-width: 550px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .registration-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(30, 58, 138, 0.15);
+            overflow: hidden;
+            border: 1px solid rgba(30, 58, 138, 0.08);
+        }
+        
+        .registration-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .registration-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo-box {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .registration-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .registration-header p {
+            opacity: 0.9;
+            margin-bottom: 0;
+            font-size: 0.95rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(239, 68, 68, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .registration-body {
+            padding: 2.5rem 2rem;
+        }
+        
+        .alert-info-custom {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 1rem;
+            color: #1e40af;
+            margin-bottom: 1.5rem;
+        }
+        
+        .alert-warning-custom {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 1rem;
+            color: #92400e;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 0.75rem 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.15);
+        }
+        
+        .input-group-text {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            color: var(--primary);
+        }
+        
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(30, 58, 138, 0.3);
+        }
+        
+        .btn-outline-secondary {
+            border: 2px solid rgba(30, 58, 138, 0.2);
+            color: var(--primary);
+            border-radius: 12px;
+            padding: 0.875rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .password-toggle {
+            cursor: pointer;
+            color: var(--primary);
+            transition: color 0.3s;
+        }
+        
+        .password-toggle:hover {
+            color: var(--primary-light);
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        
+        .form-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .powered-by {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+        
+        .password-strength {
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .password-strength-bar {
+            height: 100%;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+        
+        .password-requirements {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+        
+        .password-requirements li {
+            color: #6b7280;
+            transition: color 0.3s;
+        }
+        
+        .password-requirements li.valid {
+            color: var(--success);
+        }
+        
+        .password-requirements li i {
+            width: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .registration-header {
+                padding: 2rem 1.5rem;
+            }
+            
+            .registration-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .registration-body {
+                padding: 2rem 1.5rem;
+            }
+            
+            .logo-box {
+                width: 50px;
+                height: 50px;
+                font-size: 1.75rem;
+            }
+            
+            .powered-by {
+                bottom: 10px;
+                right: 10px;
+                font-size: 0.7rem;
+                padding: 8px 12px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .registration-header {
+                padding: 1.75rem 1.25rem;
+            }
+            
+            .registration-header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .registration-body {
+                padding: 1.75rem 1.25rem;
+            }
+            
+            .btn-primary, .btn-outline-secondary {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="registration-container">
+        <div class="registration-card">
+            <!-- Header -->
+            <div class="registration-header">
+                <div class="logo-container">
+                    <div class="logo-box">C</div>
+                    <div>
+                        <h1 class="mb-0">Club De Stars</h1>
+                    </div>
+                </div>
+                <p>Administrator Registration</p>
+                <div class="admin-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Super Admin Access</span>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="registration-body">
+                <div class="alert-info-custom">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Important:</strong> This registration is for authorized administrators only. All fields are required.
+                </div>
+
+                <form id="registrationForm" onsubmit="handleSubmit(event)">
+                    <!-- Email and Password -->
+                    <div class="form-section">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="email" class="form-label">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="form-control" id="email" placeholder="admin@example.com" required>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <label for="password" class="form-label">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                    <input type="password" class="form-control" id="password" placeholder="Enter password" required oninput="checkPasswordStrength()">
+                                    <span class="input-group-text password-toggle" onclick="togglePassword('password')">
+                                        <i class="fas fa-eye" id="passwordIcon"></i>
+                                    </span>
+                                </div>
+                                <div class="password-strength">
+                                    <div class="password-strength-bar" id="strengthBar"></div>
+                                </div>
+                                <ul class="password-requirements list-unstyled mt-2">
+                                    <li id="length"><i class="fas fa-circle"></i> At least 8 characters</li>
+                                    <li id="uppercase"><i class="fas fa-circle"></i> One uppercase letter</li>
+                                    <li id="lowercase"><i class="fas fa-circle"></i> One lowercase letter</li>
+                                    <li id="number"><i class="fas fa-circle"></i> One number</li>
+                                    <li id="special"><i class="fas fa-circle"></i> One special character</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                    <input type="password" class="form-control" id="confirmPassword" placeholder="Re-enter password" required>
+                                    <span class="input-group-text password-toggle" onclick="togglePassword('confirmPassword')">
+                                        <i class="fas fa-eye" id="confirmPasswordIcon"></i>
+                                    </span>
+                                </div>
+                                <small class="text-muted" id="passwordMatch"></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="form-section">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" style="color: var(--primary); font-weight: 600;">Terms and Conditions</a> and acknowledge that I will maintain the confidentiality of all administrative access credentials.
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="alert-warning-custom">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Security Notice:</strong> Your account will be reviewed before activation. You will receive an email notification once approved.
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='admin-login.html'">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Login
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-2"></i>Register Admin
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Powered By Footer -->
+    <div class="powered-by">
+        Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle password visibility
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + 'Icon');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Check password strength
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthBar = document.getElementById('strengthBar');
+            
+            let strength = 0;
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[^A-Za-z0-9]/.test(password)
+            };
+            
+            // Update requirements list
+            Object.keys(requirements).forEach(req => {
+                const element = document.getElementById(req);
+                if (requirements[req]) {
+                    element.classList.add('valid');
+                    element.querySelector('i').classList.remove('fa-circle');
+                    element.querySelector('i').classList.add('fa-check-circle');
+                    strength++;
+                } else {
+                    element.classList.remove('valid');
+                    element.querySelector('i').classList.remove('fa-check-circle');
+                    element.querySelector('i').classList.add('fa-circle');
+                }
+            });
+            
+            // Update strength bar
+            const percentage = (strength / 5) * 100;
+            strengthBar.style.width = percentage + '%';
+            
+            if (strength <= 2) {
+                strengthBar.style.background = '#ef4444';
+            } else if (strength <= 3) {
+                strengthBar.style.background = '#f59e0b';
+            } else if (strength <= 4) {
+                strengthBar.style.background = '#06b6d4';
+            } else {
+                strengthBar.style.background = '#10b981';
+            }
+            
+            checkPasswordMatch();
+        }
+
+        // Check if passwords match
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const matchElement = document.getElementById('passwordMatch');
+            
+            if (confirmPassword.length > 0) {
+                if (password === confirmPassword) {
+                    matchElement.textContent = '✓ Passwords match';
+                    matchElement.style.color = '#10b981';
+                } else {
+                    matchElement.textContent = '✗ Passwords do not match';
+                    matchElement.style.color = '#ef4444';
+                }
+            } else {
+                matchElement.textContent = '';
+            }
+        }
+
+        // Add event listener to confirm password field
+        document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
+
+        // Handle form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return false;
+            }
+            
+            // Check password requirements
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[^A-Za-z0-9]/.test(password)
+            };
+            
+            const allValid = Object.values(requirements).every(req => req === true);
+            
+            if (!allValid) {
+                alert('Password does not meet all requirements!');
+                return false;
+            }
+            
+            // Collect form data
+            const formData = {
+                email: document.getElementById('email').value,
+                password: password
+            };
+            
+            console.log('Registration Data:', formData);
+            
+            // Show success message (in real implementation, this would be an API call)
+            alert('Registration submitted successfully! Your account will be reviewed and you will receive an email notification once approved.');
+            
+            // Reset form
+            document.getElementById('registrationForm').reset();
+            document.getElementById('strengthBar').style.width = '0%';
+            document.getElementById('passwordMatch').textContent = '';
+            
+            return false;
+        }
+    </script>
+</body>
+</html>

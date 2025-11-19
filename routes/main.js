@@ -163,6 +163,40 @@ router.get("/club-de-star-cooperative/transaction", async (req, res) => {
   }
 });
 
+// Profile route
+router.get("/club-de-star-cooperative/profile", async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) return res.redirect("/login");
+
+    // Fetch the logged-in user with account info
+    const user = await User.findById(req.user._id)
+      .populate("account")  // Include account details
+      .populate("loans")    // Include loans if you want active loan info
+      .populate("referredUsers") // Include referrals
+      .exec();
+
+    if (!user) return res.redirect("/login");
+
+    // Compute dynamic stats for Quick Stats
+    const accountBalance = user.account?.balance || 0;
+    const activeLoan = user.loans.find(l => l.status === "active") || null;
+    const ROI = user.account?.monthlyROI || 0;
+    const totalReferrals = user.referredUsers.length;
+
+    res.render("dashboard/profile", {
+      user,
+      accountBalance,
+      loan: activeLoan,
+      ROI,
+      totalReferrals
+    });
+  } catch (err) {
+    console.error("Profile fetch error:", err);
+    res.status(500).send("Error fetching profile details.");
+  }
+});
+
+
 // ADMIN DASHBOARD ---------------------TECHMAYOR CO 
 router.get("/admin-dashboard", (req,res)=>{
   res.render("dashboard/admin")
