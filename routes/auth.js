@@ -82,7 +82,7 @@ router.post(
         address,
         idType,
         idNumber,
-        referralCode,
+        referralCode, // referral code from signup form
         password,
       } = req.body;
 
@@ -102,6 +102,7 @@ router.post(
 
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+      // Generate membershipID and referral code
       const lastUser = await User.findOne({}).sort({ createdAt: -1 });
       const nextNumber = lastUser
         ? parseInt(lastUser.membershipID?.slice(-3)) + 1
@@ -109,7 +110,7 @@ router.post(
       const membershipID = `NCD${String(nextNumber).padStart(3, "0")}`;
       const newReferralCode = membershipID;
 
-      // Create User
+      // Create new user
       const newUser = await User.create({
         firstName,
         lastName,
@@ -131,6 +132,15 @@ router.post(
         status: "pending",
       });
 
+      // Handle referral if provided
+      if (referralCode) {
+        const referringUser = await User.findOne({ referralCode });
+        if (referringUser) {
+          referringUser.referredUsers.push(newUser._id);
+          await referringUser.save();
+        }
+      }
+
       // Auto-login
       req.login(newUser, (err) => {
         if (err) console.error("Auto-login error:", err);
@@ -139,9 +149,9 @@ router.post(
       // Create Account for the user
       const account = await Account.create({
         user: newUser._id,
-        accountType: "NCD", 
+        accountType: "NCD", // default NCD
         balance: 0,
-        interestRate: 10, // 10% for NCD
+        interestRate: 10,
       });
 
       // Link account to user
@@ -159,7 +169,7 @@ router.post(
           },
           body: JSON.stringify({
             email,
-            amount: 200000, // amount in kobo
+            amount: 200000, // in kobo
             metadata: { firstName, lastName, userId: newUser._id },
             callback_url: `${process.env.BASE_URL}/payment/verify`,
           }),
@@ -190,6 +200,7 @@ router.post(
     }
   }
 );
+
 
 
 

@@ -21,9 +21,11 @@ router.get('/about-us', (req,res)=>{
     res.render("about")
 })
 
-router.get('/onboard/club-de-star-cooperative', (req,res)=>{
-    res.render("auth/auth")
-})
+router.get('/onboard/club-de-star-cooperative', (req, res) => {
+    const referralCode = req.query.ref || ""; // get referral code from query string
+    res.render("auth/auth", { referralCode });
+});
+
 
 // router.get('/club-de-star-cooperative/dashboard', (req,res)=>{
 //     res.render("dashboard/user-dashboard")
@@ -82,7 +84,7 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
 
     // --- 8. Referral Program ---
     const referralCode = user.referralCode;
-    const referralLink = `${req.protocol}://${req.get("host")}/register?ref=${referralCode}`;
+    const referralLink = `${req.protocol}://${req.get("host")}/onboard/club-de-star-cooperative?ref=${referralCode}`;
     const totalReferrals = user.referredUsers.length;
     const referralEarning = totalReferrals * 5000; // ₦5,000 per successful referral
 
