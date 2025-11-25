@@ -6,6 +6,12 @@
     <title>Club De Stars - Admin Dashboard | Powered by JESZ LIMITED</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
         :root {
             --primary: #1e3a8a;
@@ -459,7 +465,7 @@
             </div>
             <div class="admin-badge">
                 <i class="fas fa-shield-alt"></i>
-                <span>Super Admin</span>
+                <span><%= admin.role %></span>
             </div>
         </div>
         <div class="sidebar-menu">
@@ -485,6 +491,9 @@
                 <i class="fas fa-file-alt"></i> Reports
             </a>
             <a href="#" onclick="showSection('settings', event)">
+                <i class="fas fa-cog"></i> Payments
+            </a>
+            <a href="#" onclick="showSection('settings', event)">
                 <i class="fas fa-cog"></i> Settings
             </a>
             <a href="#" class="mt-3" style="color: rgba(255,255,255,0.6);">
@@ -501,7 +510,7 @@
         
         <div class="flex-grow-1 d-none d-lg-block">
             <h5 class="mb-0 fw-bold" style="color: var(--primary)">Admin Dashboard</h5>
-            <small class="text-muted">Welcome back, Administrator 👋</small>
+            <small class="text-muted">Welcome back, <%= admin.fullName %></small>
         </div>
         
         <div class="d-flex align-items-center gap-3">
@@ -521,7 +530,7 @@
                 <div class="row align-items-center position-relative" style="z-index: 1;">
                     <div class="col-md-8">
                         <h2 class="mb-2 fw-bold">Admin Overview</h2>
-                        <p class="mb-3 opacity-90">Monitor and manage all cooperative activities</p>
+                        <p class="mb-3 opacity-90">Welcome back <b><%= admin.fullName %></b> <br> Monitor and manage all cooperative activities</p>
                         <div class="d-flex gap-2 flex-wrap">
                             <div class="badge bg-light text-dark">
                                 <i class="fas fa-calendar me-1"></i>
@@ -530,9 +539,11 @@
                         </div>
                     </div>
                     <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                        <button class="btn btn-light fw-semibold" onclick="showSection('reports', event)">
-                            <i class="fas fa-download me-2"></i>Generate Report
-                        </button>
+                        <a href="/generate-report">
+                            <button class="btn btn-light fw-semibold">
+                                <i class="fas fa-file-alt me-2"></i>Generate Report
+                            </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -545,8 +556,8 @@
                             <i class="fas fa-users"></i>
                         </div>
                         <p class="text-muted mb-1 fw-semibold small">Total Members</p>
-                        <h3 class="mb-1 fw-bold">1,247</h3>
-                        <small class="text-success fw-semibold"><i class="fas fa-arrow-up me-1"></i>+23 this month</small>
+                        <h3 class="mb-1 fw-bold"><%= totalMembers.toLocaleString() %></h3>
+                        <small class="text-success fw-semibold"><i class="fas fa-arrow-up me-1"></i>+<%= newMembersThisMonth %> this month</small>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-6">
@@ -555,7 +566,7 @@
                             <i class="fas fa-wallet"></i>
                         </div>
                         <p class="text-muted mb-1 fw-semibold small">Total Savings</p>
-                        <h3 class="mb-1 fw-bold">₦45.2M</h3>
+                        <h3 class="mb-1 fw-bold">₦<%= totalSavings.toLocaleString() %></h3>
                         <small class="text-success fw-semibold"><i class="fas fa-arrow-up me-1"></i>+8.5%</small>
                     </div>
                 </div>
@@ -565,8 +576,8 @@
                             <i class="fas fa-hand-holding-usd"></i>
                         </div>
                         <p class="text-muted mb-1 fw-semibold small">Active Loans</p>
-                        <h3 class="mb-1 fw-bold">₦28.7M</h3>
-                        <small class="text-warning fw-semibold"><i class="fas fa-clock me-1"></i>342 loans</small>
+                        <h3 class="mb-1 fw-bold">₦<%= totalActiveLoans.toLocaleString() %></h3>
+                        <small class="text-warning fw-semibold"><i class="fas fa-clock me-1"></i><%= activeLoanCount %> loans</small>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-6">
@@ -575,8 +586,8 @@
                             <i class="fas fa-chart-line"></i>
                         </div>
                         <p class="text-muted mb-1 fw-semibold small">Monthly ROI</p>
-                        <h3 class="mb-1 fw-bold">₦3.8M</h3>
-                        <small class="text-info fw-semibold"><i class="fas fa-percentage me-1"></i>10% distributed</small>
+                        <h3 class="mb-1 fw-bold">₦<%= monthlyROI.toLocaleString() %></h3>
+                        <small class="text-info fw-semibold"><i class="fas fa-percentage me-1"></i><%= distributedPercentage %>% distributed</small>
                     </div>
                 </div>
             </div>
@@ -648,43 +659,41 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                    <% recentTransactions.forEach(tx => { %>
                                         <tr>
-                                            <td>
-                                                <div class="fw-semibold">John Doe</div>
-                                                <small class="text-muted">CDS001</small>
-                                            </td>
-                                            <td><span class="badge bg-success-subtle text-success">Deposit</span></td>
-                                            <td class="fw-bold">₦50,000</td>
-                                            <td><span class="badge bg-success">Completed</span></td>
+                                        <td>
+                                            <div class="fw-semibold"><%= tx.user?.firstName || "Unknown User" %></div>
+                                            <small class="text-muted"><%= tx.user?.membershipID || "N/A" %></small>
+                                        </td>
+
+                                        <!-- Transaction Type -->
+                                        <td>
+                                            <% if (tx.type === "deposit") { %>
+                                            <span class="badge bg-success-subtle text-success">Deposit</span>
+                                            <% } else if (tx.type === "withdrawal") { %>
+                                            <span class="badge bg-danger-subtle text-danger">Withdrawal</span>
+                                            <% } else { %>
+                                            <span class="badge bg-warning-subtle text-warning">Loan Payment</span>
+                                            <% } %>
+                                        </td>
+
+                                        <!-- Amount -->
+                                        <td class="fw-bold">₦<%= tx.amount.toLocaleString() %></td>
+
+                                        <!-- Status -->
+                                        <td>
+                                            <% if (tx.status === "successful") { %>
+                                            <span class="badge bg-success">Completed</span>
+                                            <% } else if (tx.status === "pending") { %>
+                                            <span class="badge bg-warning">Pending</span>
+                                            <% } else { %>
+                                            <span class="badge bg-danger">Failed</span>
+                                            <% } %>
+                                        </td>
                                         </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="fw-semibold">Jane Smith</div>
-                                                <small class="text-muted">CDS002</small>
-                                            </td>
-                                            <td><span class="badge bg-warning-subtle text-warning">Loan Payment</span></td>
-                                            <td class="fw-bold">₦8,750</td>
-                                            <td><span class="badge bg-success">Completed</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="fw-semibold">Michael Brown</div>
-                                                <small class="text-muted">NCDS015</small>
-                                            </td>
-                                            <td><span class="badge bg-danger-subtle text-danger">Withdrawal</span></td>
-                                            <td class="fw-bold">₦30,000</td>
-                                            <td><span class="badge bg-warning">Pending</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="fw-semibold">Sarah Johnson</div>
-                                                <small class="text-muted">CDS025</small>
-                                            </td>
-                                            <td><span class="badge bg-success-subtle text-success">Deposit</span></td>
-                                            <td class="fw-bold">₦75,000</td>
-                                            <td><span class="badge bg-success">Completed</span></td>
-                                        </tr>
+                                    <% }) %>
                                     </tbody>
+
                                 </table>
                             </div>
                         </div>
@@ -731,16 +740,12 @@
         </div>
 
         <!-- Members Section -->
-        <div id="members" class="content-section" style="display:none;">
+        <div id="members" class="content-section"m style="margin-top: 20px;">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-users me-2"></i>Member Management</h5>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <input type="search" class="form-control form-control-sm" placeholder="Search members..." style="max-width: 200px;">
-                        <button class="btn btn-sm btn-primary" onclick="openModal('addMemberModal')">
-                            <i class="fas fa-plus me-1"></i>Add Member
-                        </button>
-                    </div>
+                    <h5 class="mb-0 fw-bold" style="color: var(--primary);">
+                        <i class="fas fa-users me-2"></i>Management Pending Members
+                    </h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -757,74 +762,202 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <% users.forEach(user => { %>
                                 <tr>
-                                    <td class="fw-semibold">CDS001</td>
+                                    <td class="fw-semibold"><%= user.membershipID %></td>
                                     <td>
-                                        <div class="fw-semibold">John Doe</div>
-                                        <small class="text-muted">john.doe@email.com</small>
+                                        <div class="fw-semibold"><%= user.firstName %> <%= user.lastName %></div>
+                                        <small class="text-muted"><%= user.email %></small>
                                     </td>
-                                    <td><span class="badge bg-success">Club Member</span></td>
-                                    <td class="fw-bold">₦450,000</td>
-                                    <td class="fw-bold text-warning">₦200,000</td>
-                                    <td><span class="badge bg-success">Active</span></td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="openModal('viewMemberModal')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
+                                        <% if(user.account?.accountType === 'NCD') { %>
+                                            <span class="badge bg-warning">Non-Club</span>
+                                        <% } else { %>
+                                            <span class="badge bg-success">Club Member</span>
+                                        <% } %>
                                     </td>
+
+                                    <td class="fw-bold">₦<%= user.account?.balance?.toLocaleString() || 0 %></td>
+                                    <td class="fw-bold text-warning">₦<%= user.loans?.reduce((sum, loan) => sum + (loan.amount || 0), 0).toLocaleString() || 0 %></td>
+                                    <td>
+                                        <% if(user.status === 'active') { %>
+                                            <span class="badge bg-success">Active</span>
+                                        <% } else if(user.status === 'pending') { %>
+                                            <span class="badge bg-warning">Pending</span>
+                                        <% } else { %>
+                                            <span class="badge bg-danger">Rejected</span>
+                                        <% } %>
+                                    </td>
+        <td>
+            <!-- Always show View button -->
+            <button class="btn btn-sm btn-outline-primary" 
+                    onclick="openMemberModal('<%= user._id %>')">
+                <i class="fas fa-eye"></i>
+            </button>
+
+            <!-- Show Approve button only if pending -->
+            <% if(user.status === 'pending') { %>
+                <button class="btn btn-sm btn-outline-success" 
+                        onclick="approveMemberModal('<%= user._id %>')">
+                    <i class="fas fa-check"></i>
+                </button>
+            <% } %>
+        </td>
+
+
+
                                 </tr>
-                                <tr>
-                                    <td class="fw-semibold">NCDS015</td>
-                                    <td>
-                                        <div class="fw-semibold">Jane Smith</div>
-                                        <small class="text-muted">jane.smith@email.com</small>
-                                    </td>
-                                    <td><span class="badge bg-warning">Non-Club</span></td>
-                                    <td class="fw-bold">₦280,000</td>
-                                    <td class="fw-bold text-warning">₦150,000</td>
-                                    <td><span class="badge bg-success">Active</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="openModal('viewMemberModal')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-semibold">CDS025</td>
-                                    <td>
-                                        <div class="fw-semibold">Michael Brown</div>
-                                        <small class="text-muted">michael.b@email.com</small>
-                                    </td>
-                                    <td><span class="badge bg-success">Club Member</span></td>
-                                    <td class="fw-bold">₦620,000</td>
-                                    <td class="fw-bold text-warning">₦0</td>
-                                    <td><span class="badge bg-success">Active</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="openModal('viewMemberModal')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-semibold">CDS042</td>
-                                    <td>
-                                        <div class="fw-semibold">Sarah Johnson</div>
-                                        <small class="text-muted">sarah.j@email.com</small>
-                                    </td>
-                                    <td><span class="badge bg-success">Club Member</span></td>
-                                    <td class="fw-bold">₦180,000</td>
-                                    <td class="fw-bold text-warning">₦90,000</td>
-                                    <td><span class="badge bg-warning">Pending</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-success" onclick="approveMember()">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    </td>
-                                </tr>
+                                <% }) %>
                             </tbody>
                         </table>
                     </div>
                 </div>
+
+        <!-- Member Details Modal -->
+        <div class="modal fade" id="memberModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content shadow-lg border-0 rounded-4">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-user me-2"></i>Member Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Name:</strong> <span id="modalFullName"></span></p>
+                    <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+                    <p><strong>Phone:</strong> <span id="modalPhone"></span></p>
+                    <p><strong>DOB:</strong> <span id="modalDOB"></span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>State:</strong> <span id="modalState"></span></p>
+                    <p><strong>LGA:</strong> <span id="modalLGA"></span></p>
+                    <p><strong>Address:</strong> <span id="modalAddress"></span></p>
+                    <p><strong>Membership ID:</strong> <span id="modalMembershipID"></span></p>
+                    <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+                </div>
+                </div>
+
+                <hr>
+                <h6 class="mb-2">Documents</h6>
+                <div class="row text-center g-2">
+                <div class="col-md-3">
+                    <img id="modalAddressProofImg" src="" alt="Address Proof" class="img-fluid rounded shadow-sm border">
+                    <p class="mt-1"><small>Address Proof</small></p>
+                </div>
+                <div class="col-md-3">
+                    <img id="modalPassportPhotoImg" src="" alt="Passport" class="img-fluid rounded shadow-sm border">
+                    <p class="mt-1"><small>Passport Photo</small></p>
+                </div>
+                <div class="col-md-3">
+                    <img id="modalIDFileImg" src="" alt="ID File" class="img-fluid rounded shadow-sm border">
+                    <p class="mt-1"><small>ID File</small></p>
+                </div>
+                <div class="col-md-3">
+                    <img id="modalSignatureImg" src="" alt="Signature" class="img-fluid rounded shadow-sm border">
+                    <p class="mt-1"><small>Signature</small></p>
+                </div>
+                </div>
+
+                <hr>
+                <div class="mb-3">
+                <label for="accountTypeSelect" class="form-label"><strong>Set Account Type</strong></label>
+                <select id="accountTypeSelect" class="form-select">
+                    <option value="" selected disabled>Select account type</option>
+                    <option value="CD">CD (5% interest)</option>
+                    <option value="NCD">NCD (10% interest)</option>
+                </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="approveBtn" class="btn btn-success d-none" onclick="approveMemberModal()">Approve & Set Type</button>
+            </div>
+            </div>
+        </div>
+        </div>
+
+        <script>
+        async function openMemberModal(userId) {
+            try {
+                const res = await fetch(`/member/${userId}`);
+                const data = await res.json();
+                if (!data.status) return alert(data.message);
+
+                const user = data.user;
+
+                // Populate text details
+                document.getElementById('modalFullName').textContent = `${user.firstName} ${user.lastName}`;
+                document.getElementById('modalEmail').textContent = user.email;
+                document.getElementById('modalPhone').textContent = user.phone || 'N/A';
+                document.getElementById('modalDOB').textContent = user.dob || 'N/A';
+                document.getElementById('modalState').textContent = user.state;
+                document.getElementById('modalLGA').textContent = user.lga;
+                document.getElementById('modalAddress').textContent = user.address;
+                document.getElementById('modalMembershipID').textContent = user.membershipID;
+                document.getElementById('modalStatus').textContent = user.status;
+
+                // Display documents inline — use /media/uploads/ prefix
+                document.getElementById('modalAddressProofImg').src = '/' + user.addressProof;
+                document.getElementById('modalPassportPhotoImg').src = '/' + user.passportPhoto;
+                document.getElementById('modalIDFileImg').src = '/' + user.idFile;
+                document.getElementById('modalSignatureImg').src = '/' + user.signature;
+
+                // Show approve button only if pending
+                const approveBtn = document.getElementById('approveBtn');
+                if(user.status === 'pending') {
+                    approveBtn.classList.remove('d-none');
+                    approveBtn.dataset.userId = user._id;
+                } else {
+                    approveBtn.classList.add('d-none');
+                }
+
+                new bootstrap.Modal(document.getElementById('memberModal')).show();
+            } catch (err) {
+                console.error(err);
+                alert('Failed to fetch member details.');
+            }
+        }
+
+        async function approveMemberModal() {
+            const btn = document.getElementById('approveBtn');
+            const userId = btn.dataset.userId;
+            const accountType = document.getElementById('accountTypeSelect').value;
+
+            if(!accountType) return alert('Please select an account type before approving.');
+
+            try {
+                const res = await fetch(`/member/approve/${userId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accountType })
+                });
+                const data = await res.json();
+
+                if(data.status){
+                    alert(data.message);
+                    btn.classList.add('d-none');
+                    document.getElementById('modalStatus').textContent = 'active';
+                    location.reload(); // refresh table
+                } else {
+                    alert(data.message || 'Failed to approve member');
+                }
+            } catch(err) {
+                console.error(err);
+                alert('Error approving member');
+            }
+        }
+        </script>
+
+
+
+
+
+
+
+
                 <div class="card-footer">
                     <nav>
                         <ul class="pagination pagination-sm mb-0 justify-content-center">
@@ -838,6 +971,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Transactions Section -->
         <div id="transactions" class="content-section" style="display:none;">
@@ -911,7 +1045,7 @@
         </div>
 
         <!-- Loans Section -->
-        <div id="loans" class="content-section" style="display:none;">
+        <div id="loans" class="content-section" style="margin-top: 20px;">
             <div class="row g-3 mb-3">
                 <div class="col-md-3 col-6">
                     <div class="stat-card">
@@ -1106,7 +1240,7 @@
         </div>
 
         <!-- Withdrawals Section -->
-        <div id="withdrawals" class="content-section" style="display:none;">
+        <div id="withdrawals" class="content-section" style="margin-top: 20px;">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-money-check-alt me-2"></i>Withdrawal Requests</h5>
@@ -1184,7 +1318,7 @@
         </div>
 
         <!-- Reports Section -->
-        <div id="reports" class="content-section" style="display:none;">
+        <div id="reports" class="content-section" >
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-file-alt me-2"></i>Generate Reports</h5>

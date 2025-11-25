@@ -1,28 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 
-
-const mongoose = require("mongoose");
-
-
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-
-router.use(session({
-    secret: "TOP_SECRET",
-    resave: false,
-    saveUninitialized: true
-}));
-
-router.use(passport.initialize());
-router.use(passport.session());
-
-
-
 
 const User = require("../models/User");
 const Payment = require("../models/Payment");
@@ -299,7 +282,7 @@ router.get("/terms", (req, res) => {
 
 
 router.post("/login", (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
+  passport.authenticate("user-local", (err, user, info) => {
 
     if (err) {
       return res.status(500).render("auth/login", { 
@@ -357,46 +340,6 @@ router.get("/logout", (req, res) => {
   });
 });
 
-
-
-passport.use(
-  new LocalStrategy(
-    { usernameField: "email" }, // 👈 tells Passport to expect "email"
-    async function verify(email, password, done) {
-      try {
-        // Case-insensitive search
-        const foundUser = await User.findOne({ email: email.toLowerCase() });
-
-        if (!foundUser) {
-          return done(null, false, { message: "No user found with that email" });
-        }
-
-        const match = await bcrypt.compare(password, foundUser.password);
-        if (!match) {
-          return done(null, false, { message: "Incorrect password" });
-        }
-
-        return done(null, foundUser);
-      } catch (err) {
-        return done(err);
-      }
-    }
-  )
-);
-
-
-passport.serializeUser((user, done) =>{
-    done(null, user);
-})
-
-passport.deserializeUser(async (user, done) => {
-  try {
-    const fullUser = await User.findById(user._id).populate('role');
-    done(null, fullUser);
-  } catch (err) {
-    done(err);
-  }
-});
 
 
 

@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club De Stars - Payments Management | Powered by JESZ LIMITED</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --sidebar-width: 280px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+            transform: translateX(0);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+        
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(239, 68, 68, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 70px;
+            padding: 1.5rem;
+            min-height: calc(100vh - 70px);
+            transition: all 0.3s;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        .alert-card {
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        
+        .alert-danger-custom {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        
+        .alert-warning-custom {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        
+        .alert-success-custom {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-color: #10b981;
+            color: #065f46;
+        }
+        
+        .payment-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+            position: relative;
+        }
+        
+        .payment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        }
+        
+        .payment-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+        
+        .status-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .countdown-timer {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+            border: 2px solid #ef4444;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .countdown-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #ef4444;
+            line-height: 1;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            background: white;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 1.25rem;
+            border-radius: 16px 16px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .table {
+            font-size: 0.9rem;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            white-space: nowrap;
+        }
+        
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .powered-by {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+        
+        .penalty-banner {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .service-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .service-detail:last-child {
+            border-bottom: none;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .page-header {
+                padding: 1.5rem;
+            }
+            
+            .payment-card {
+                padding: 1.25rem;
+            }
+            
+            .countdown-number {
+                font-size: 2.5rem;
+            }
+            
+            .powered-by {
+                bottom: 10px;
+                right: 10px;
+                font-size: 0.7rem;
+                padding: 8px 12px;
+            }
+            
+            .table-responsive {
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .top-navbar {
+                height: 60px;
+                padding: 0 1rem;
+            }
+            
+            .main-content {
+                margin-top: 60px;
+                padding: 0.75rem;
+            }
+            
+            .page-header {
+                padding: 1.25rem;
+                border-radius: 16px;
+            }
+            
+            .payment-card {
+                padding: 1rem;
+            }
+            
+            .payment-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4rem;
+            }
+            
+            .countdown-number {
+                font-size: 2rem;
+            }
+            
+            .card-header {
+                padding: 1rem;
+            }
+            
+            .sidebar-header {
+                padding: 1.25rem;
+            }
+            
+            .logo-box {
+                width: 40px;
+                height: 40px;
+                font-size: 1.25rem;
+            }
+            
+            .sidebar-title {
+                font-size: 1rem;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .content-section {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .progress-custom {
+            height: 8px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.05);
+        }
+
+        .progress-custom .progress-bar {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">C</div>
+                <div>
+                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                </div>
+            </div>
+            <div class="admin-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>Super Admin</span>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="#dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="#members">
+                <i class="fas fa-users"></i> Members
+            </a>
+            <a href="#transactions">
+                <i class="fas fa-exchange-alt"></i> Transactions
+            </a>
+            <a href="#loans">
+                <i class="fas fa-hand-holding-usd"></i> Loan Management
+            </a>
+            <a href="#roi">
+                <i class="fas fa-chart-pie"></i> ROI Distribution
+            </a>
+            <a href="#withdrawals">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="#reports">
+                <i class="fas fa-file-alt"></i> Reports
+            </a>
+            <a href="#payments" class="active">
+                <i class="fas fa-credit-card"></i> Payments
+            </a>
+            <a href="#settings">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="#" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3"
+           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+           onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+        
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Payments Management</h5>
+            <small class="text-muted">Track all service subscriptions & renewals</small>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="position-relative">
+                <i class="fas fa-bell" style="color: var(--primary); font-size: 1.25rem; cursor: pointer;"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">3</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header position-relative">
+            <div class="row align-items-center position-relative" style="z-index: 1;">
+                <div class="col-md-8">
+                    <h2 class="mb-2 fw-bold"><i class="fas fa-credit-card me-2"></i>Payments & Subscriptions</h2>
+                    <p class="mb-3 opacity-90">Manage all hosting, domain, and maintenance payments</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <div class="badge bg-light text-dark">
+                            <i class="fas fa-calendar me-1"></i>
+                            <span id="currentDate"></span>
+                        </div>
+                        <div class="badge bg-light text-dark">
+                            <i class="fas fa-building me-1"></i>
+                            Techmayorco Team
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-light fw-semibold" onclick="openPaymentModal()">
+                        <i class="fas fa-plus me-2"></i>Record Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Countdown Timer -->
+        <div class="countdown-timer">
+            <div class="row align-items-center">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h6 class="fw-bold mb-2" style="color: #991b1b;">
+                        <i class="fas fa-clock me-2"></i>TIME UNTIL RENEWAL
+                    </h6>
+                    <div class="countdown-number" id="daysLeft">310</div>
+                    <small class="fw-semibold" style="color: #991b1b;">Days Remaining</small>
+                </div>
+                <div class="col-md-8">
+                    <h6 class="fw-bold mb-2" style="color: #991b1b;">All Payments Due: October 1-7, 2026</h6>
+                    <div class="progress-custom mb-2">
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: 15%" id="timeProgress"></div>
+                    </div>
+                    <small class="fw-semibold" style="color: #991b1b;">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Renew on time to avoid automatic site shutdown after 1 week
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Critical Alerts -->
+        <div class="penalty-banner">
+            <h6 class="fw-bold mb-3" style="color: #92400e;">
+                <i class="fas fa-shield-alt me-2"></i>IMPORTANT: Renewal & Penalty Policy
+            </h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fas fa-exclamation-circle" style="color: #f59e0b; font-size: 1.5rem;"></i>
+                        <div>
+                            <strong>1 Week Grace Period</strong>
+                            <p class="mb-0 small">Sites automatically stop after 1 week of non-payment. Penalty fees apply for reactivation.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fas fa-ban" style="color: #ef4444; font-size: 1.5rem;"></i>
+                        <div>
+                            <strong>2 Week Deletion</strong>
+                            <p class="mb-0 small">After 2 weeks of expiration, all data will be permanently deleted.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fas fa-tools" style="color: #06b6d4; font-size: 1.5rem;"></i>
+                        <div>
+                            <strong>Maintenance Charges</strong>
+                            <p class="mb-0 small">Custom maintenance: ₦100,000+ per page. Contact Techmayorco Team.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Payment Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="payment-card">
+                    <span class="status-badge bg-success text-white">
+                        <i class="fas fa-check-circle me-1"></i>Paid
+                    </span>
+                    <div class="payment-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Domain Registration</h6>
+                    <p class="text-muted small mb-3">Hostinger</p>
+                    <div class="service-detail">
+                        <span class="text-muted small">Provider:</span>
+                        <span class="fw-semibold">Hostinger</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Domain:</span>
+                        <span class="fw-semibold">clubdestars.com</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Due Date:</span>
+                        <span class="fw-bold text-danger">Oct 7, 2026</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Last Paid:</span>
+                        <span class="text-success">Oct 5, 2025</span>
+                    </div>
+                    <button class="btn btn-outline-primary btn-sm w-100 mt-3">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="payment-card">
+                    <span class="status-badge bg-success text-white">
+                        <i class="fas fa-check-circle me-1"></i>Paid
+                    </span>
+                    <div class="payment-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Email Hosting</h6>
+                    <p class="text-muted small mb-3">Hostinger</p>
+                    <div class="service-detail">
+                        <span class="text-muted small">Provider:</span>
+                        <span class="fw-semibold">Hostinger</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Plan:</span>
+                        <span class="fw-semibold">Business Email</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Due Date:</span>
+                        <span class="fw-bold text-danger">Oct 5, 2026</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Last Paid:</span>
+                        <span class="text-success">Oct 3, 2025</span>
+                    </div>
+                    <button class="btn btn-outline-primary btn-sm w-100 mt-3">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="payment-card">
+                    <span class="status-badge bg-success text-white">
+                        <i class="fas fa-check-circle me-1"></i>Paid
+                    </span>
+                    <div class="payment-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Database Hosting</h6>
+                    <p class="text-muted small mb-3">MongoDB</p>
+                    <div class="service-detail">
+                        <span class="text-muted small">Provider:</span>
+                        <span class="fw-semibold">MongoDB Atlas</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Plan:</span>
+                        <span class="fw-semibold">M10 Cluster</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Due Date:</span>
+                        <span class="fw-bold text-danger">Oct 3, 2026</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Last Paid:</span>
+                        <span class="text-success">Oct 1, 2025</span>
+                    </div>
+                    <button class="btn btn-outline-primary btn-sm w-100 mt-3">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="payment-card">
+                    <span class="status-badge bg-success text-white">
+                        <i class="fas fa-check-circle me-1"></i>Paid
+                    </span>
+                    <div class="payment-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white;">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Server Hosting</h6>
+                    <p class="text-muted small mb-3">Render</p>
+                    <div class="service-detail">
+                        <span class="text-muted small">Provider:</span>
+                        <span class="fw-semibold">Render</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Plan:</span>
+                        <span class="fw-semibold">Pro Plan</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Due Date:</span>
+                        <span class="fw-bold text-danger">Oct 1, 2026</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Last Paid:</span>
+                        <span class="text-success">Sep 29, 2025</span>
+                    </div>
+                    <button class="btn btn-outline-primary btn-sm w-100 mt-3">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment History Table -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-history me-2"></i>Payment History</h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <select class="form-select form-select-sm" style="max-width: 150px;">
+                        <option>All Services</option>
+                        <option>Domain

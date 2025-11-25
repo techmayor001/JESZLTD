@@ -350,10 +350,10 @@
                         <h1 class="mb-0">Club De Stars</h1>
                     </div>
                 </div>
-                <p>Administrator Registration</p>
+                <p>Administrator Page</p>
                 <div class="admin-badge">
                     <i class="fas fa-shield-alt"></i>
-                    <span>Super Admin Access</span>
+                    <span>Admin Access</span>
                 </div>
             </div>
 
@@ -361,10 +361,10 @@
             <div class="registration-body">
                 <div class="alert-info-custom">
                     <i class="fas fa-info-circle me-2"></i>
-                    <strong>Important:</strong> This registration is for authorized administrators only. All fields are required.
+                    <strong>Important:</strong> This page is for authorized administrators only. All fields are required.
                 </div>
 
-                <form id="registrationForm" onsubmit="handleSubmit(event)">
+                <form id="registrationForm" method="post" action="/admin-login">
                     <!-- Email and Password -->
                     <div class="form-section">
                         <div class="row g-3">
@@ -372,7 +372,7 @@
                                 <label for="email" class="form-label">Email Address</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                    <input type="email" class="form-control" id="email" placeholder="admin@example.com" required>
+                                    <input type="email" name="email" class="form-control" id="email" placeholder="admin@example.com" required>
                                 </div>
                             </div>
                             
@@ -380,62 +380,20 @@
                                 <label for="password" class="form-label">Password</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-key"></i></span>
-                                    <input type="password" class="form-control" id="password" placeholder="Enter password" required oninput="checkPasswordStrength()">
+                                    <input type="password" name="password" class="form-control" id="password" placeholder="Enter password" required oninput="checkPasswordStrength()">
                                     <span class="input-group-text password-toggle" onclick="togglePassword('password')">
                                         <i class="fas fa-eye" id="passwordIcon"></i>
                                     </span>
                                 </div>
-                                <div class="password-strength">
-                                    <div class="password-strength-bar" id="strengthBar"></div>
-                                </div>
-                                <ul class="password-requirements list-unstyled mt-2">
-                                    <li id="length"><i class="fas fa-circle"></i> At least 8 characters</li>
-                                    <li id="uppercase"><i class="fas fa-circle"></i> One uppercase letter</li>
-                                    <li id="lowercase"><i class="fas fa-circle"></i> One lowercase letter</li>
-                                    <li id="number"><i class="fas fa-circle"></i> One number</li>
-                                    <li id="special"><i class="fas fa-circle"></i> One special character</li>
-                                </ul>
-                            </div>
-                            
-                            <div class="col-md-12">
-                                <label for="confirmPassword" class="form-label">Confirm Password</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-key"></i></span>
-                                    <input type="password" class="form-control" id="confirmPassword" placeholder="Re-enter password" required>
-                                    <span class="input-group-text password-toggle" onclick="togglePassword('confirmPassword')">
-                                        <i class="fas fa-eye" id="confirmPasswordIcon"></i>
-                                    </span>
-                                </div>
-                                <small class="text-muted" id="passwordMatch"></small>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Terms and Conditions -->
-                    <div class="form-section">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="terms" required>
-                            <label class="form-check-label" for="terms">
-                                I agree to the <a href="#" style="color: var(--primary); font-weight: 600;">Terms and Conditions</a> and acknowledge that I will maintain the confidentiality of all administrative access credentials.
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="alert-warning-custom">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Security Notice:</strong> Your account will be reviewed before activation. You will receive an email notification once approved.
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='admin-login.html'">
-                                <i class="fas fa-arrow-left me-2"></i>Back to Login
-                            </button>
-                        </div>
-                        <div class="col-md-6">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-user-plus me-2"></i>Register Admin
+                                <i class="fas fa-user-plus me-2"></i>Login Admin
                             </button>
                         </div>
                     </div>

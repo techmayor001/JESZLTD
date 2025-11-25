@@ -1,49 +1,83 @@
-import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local";
-import bcrypt from "bcrypt";
-import User from "../models/User.js"; // adjust path if needed
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
+const bcrypt = require("bcrypt");
 
-// Local Strategy (login with email + password)
-passport.use(new LocalStrategy(
-  {
-    usernameField: "email",
-    passwordField: "password",
-  },
-  async (email, password, done) => {
-    try {
-      // Find user by email
-      const user = await User.findOne({ email });
-      if (!user) {
-        return done(null, false, { message: "No user found with that email" });
+const User = require("../models/User");
+const Admin = require("../models/Admin");
+
+/* ============================================================
+   USER STRATEGY (role = member)
+============================================================ */
+passport.use(
+  "user-local",
+  new LocalStrategy(
+    { usernameField: "email" },
+    async (email, password, done) => {
+      try {
+        const user = await User.findOne({ email: email.toLowerCase() });
+
+        if (!user)
+          return done(null, false, { message: "No user found" });
+
+        const match = await bcrypt.compare(password, user.password);
+
+        if (!match)
+          return done(null, false, { message: "Incorrect password" });
+
+        return done(null, user);
+
+      } catch (err) {
+        return done(err);
       }
-
-      // Compare password
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return done(null, false, { message: "Incorrect password" });
-      }
-
-      // Success
-      return done(null, user);
-    } catch (err) {
-      return done(err);
     }
-  }
-));
+  )
+);
 
-// Serialize user -> store user ID in session
+/* ============================================================
+   ADMIN STRATEGY (admin, staff, superadmin)
+============================================================ */
+passport.use(
+  "admin-local",
+  new LocalStrategy(
+    { usernameField: "email" },
+    async (email, password, done) => {
+      try {
+        const admin = await Admin.findOne({ email: email.toLowerCase() });
+
+        if (!admin)
+          return done(null, false, { message: "Admin not found" });
+
+        const match = await bcrypt.compare(password, admin.password);
+
+        if (!match)
+          return done(null, false, { message: "Incorrect password" });
+
+        return done(null, admin);
+
+      } catch (err) {
+        return done(err);
+      }
+    }
+  )
+);
+
+
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  const type = user instanceof Admin ? "admin" : "user";
+  done(null, { id: user._id, type });
 });
 
-// Deserialize user -> retrieve user by ID from session
-passport.deserializeUser(async (id, done) => {
+passport.deserializeUser(async (obj, done) => {
   try {
-    const user = await User.findById(id);
-    done(null, user);
+    if (obj.type === "admin") {
+      const admin = await Admin.findById(obj.id);
+      return done(null, admin);
+    }
+
+    const user = await User.findById(obj.id);
+    return done(null, user);
+
   } catch (err) {
-    done(err, null);
+    done(err);
   }
 });
-
-export default passport;

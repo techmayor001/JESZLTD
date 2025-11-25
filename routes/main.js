@@ -198,9 +198,197 @@ router.get("/club-de-star-cooperative/profile", async (req, res) => {
 
 
 // ADMIN DASHBOARD ---------------------TECHMAYOR CO 
-router.get("/admin-dashboard", (req,res)=>{
-  res.render("dashboard/admin")
-})
+// Middleware to protect routes for admin/staff/superadmin
+function ensureAdmin(req, res, next) {
+  if (req.isAuthenticated() && ["admin", "staff", "superadmin"].includes(req.user.role)) {
+    return next();
+  }
+  return res.status(403).send("Access denied. Admins only.");
+}
+
+// Admin dashboard route
+router.get("/admin-dashboard", ensureAdmin, async (req, res) => {
+  try {
+    // Fetch all users with populated fields
+    const users = await User.find()
+      .populate("Payment")
+      .populate("account")
+      .populate("loans")
+      .populate("referredUsers");
+
+    const admin = req.user;
+
+    // Total Members
+    const totalMembers = users.length;
+
+    // New Members This Month
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const newMembersThisMonth = users.filter(u => u.createdAt >= startOfMonth).length;
+
+    // Total Savings (sum of all account balances)
+    const accounts = await Account.find();
+    const totalSavings = accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
+
+    // Active Loans
+    const loans = await Loan.find({ status: "active" });
+    const totalActiveLoans = loans.reduce((sum, loan) => sum + (loan.amount || 0), 0);
+    const activeLoanCount = loans.length;
+
+    // ------------------- Monthly ROI -------------------
+    // 1. Sum of member savings for current month
+    const monthlySavings = accounts.reduce((sum, acc) => {
+      if (acc.createdAt >= startOfMonth) return sum + (acc.balance || 0);
+      return sum;
+    }, 0);
+
+    // 2. Total savings of all members up to current month
+    const totalSavingsAllTime = totalSavings;
+
+    // 3. Interest for the month (sum of all active loan interests)
+    const monthlyInterest = loans.reduce((sum, loan) => sum + (loan.interest || 0), 0);
+
+    // 4. Apply ROI formula
+    let monthlyROI = 0;
+    if (totalSavingsAllTime > 0) {
+      monthlyROI = (monthlySavings / totalSavingsAllTime) * monthlyInterest;
+      monthlyROI = monthlyROI - monthlyROI * 0.10;
+    }
+
+    // Calculate distributed percentage
+    let distributedPercentage = 0;
+    if (monthlyInterest > 0) {
+      distributedPercentage = ((monthlyROI / monthlyInterest) * 100).toFixed(2); // in %
+    }
+
+    const recentTransactions = await Transaction.find()
+      .populate("user")
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
+
+    res.render("dashboard/admin/admin", {
+      users,
+      admin,
+      totalMembers,
+      newMembersThisMonth,
+      totalSavings,
+      totalActiveLoans,
+      activeLoanCount,
+      monthlyROI,
+      distributedPercentage,
+      recentTransactions
+    });
+  } catch (err) {
+    console.error("Error fetching dashboard data:", err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+
+
+
+
+
+
+// Get single member details
+router.get('/member/:id', ensureAdmin, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate('Payment')
+      .populate('account')
+      .populate('loans')
+      .populate('referredUsers');
+
+    if (!user) return res.status(404).json({ status: false, message: 'User not found' });
+
+    // Convert Windows-style slashes to URL-friendly slashes
+    const normalizePath = (filePath) => {
+      if (!filePath) return '';
+      return filePath.replace(/^public[\\/]/, '').replace(/\\/g, '/'); // Remove 'public\' prefix
+    };
+
+    const userData = {
+      ...user._doc,
+      addressProof: normalizePath(user.addressProof),
+      passportPhoto: normalizePath(user.passportPhoto),
+      idFile: normalizePath(user.idFile),
+      signature: normalizePath(user.signature),
+    };
+
+    res.json({ status: true, user: userData });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: false, message: 'Server error' });
+  }
+});
+
+
+// Approve member
+router.post('/member/approve/:id', ensureAdmin, async (req, res) => {
+  const { accountType } = req.body;
+
+  if (!accountType) {
+    return res.status(400).json({ status: false, message: 'Account type is required' });
+  }
+
+  try {
+    const user = await User.findById(req.params.id).populate('account');
+    if (!user) return res.status(404).json({ status: false, message: 'User not found' });
+
+    let baseNumber = 1;
+    let unique = false;
+
+    while (!unique) {
+      const candidateID = `${accountType}${String(baseNumber).padStart(3, '0')}`;
+      const exists = await User.findOne({
+        $or: [{ membershipID: candidateID }, { referralCode: candidateID }],
+        _id: { $ne: user._id }
+      });
+
+      if (exists) {
+        baseNumber++;
+      } else {
+        user.membershipID = candidateID;
+        user.referralCode = candidateID;
+        unique = true;
+      }
+    }
+
+    user.status = 'active';
+    user.accountType = accountType;
+    await user.save();
+
+    let account = user.account;
+    if (!account) {
+      const interestRate = accountType === 'CD' ? 0.05 : 0.10;
+      account = await Account.create({
+        user: user._id,
+        accountType,
+        balance: 0,
+        interestRate
+      });
+      user.account = account._id;
+      await user.save();
+    } else {
+      account.accountType = accountType;
+      account.interestRate = accountType === 'CD' ? 0.05 : 0.10;
+      await account.save();
+    }
+
+    res.json({
+      status: true,
+      message: `Member approved and set to ${accountType} successfully`,
+      membershipID: user.membershipID,
+      referralCode: user.referralCode,
+      accountID: account._id
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: false, message: 'Server error' });
+  }
+});
+
 
 
 

@@ -11,7 +11,7 @@ const paymentSchema = new mongoose.Schema({
     default: "pending",
   },
 
-  paystackResponse: { type: Object }, // store Paystack transaction data
+  paystackResponse: { type: Object },
   createdAt: { type: Date, default: Date.now },
 });
 
