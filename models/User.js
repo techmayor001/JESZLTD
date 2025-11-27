@@ -1,5 +1,13 @@
 const mongoose = require("mongoose");
 
+const guarantorRequestSchema = new mongoose.Schema({
+  borrower: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  amount: { type: Number, required: true },
+  status: { type: String, enum: ["pending", "accepted", "declined"], default: "pending" },
+  createdAt: { type: Date, default: Date.now },
+  respondedAt: { type: Date },
+});
+
 const userSchema = mongoose.Schema({
   firstName: {
     type: String,
@@ -68,7 +76,10 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-
+  
+  displayPicture: {
+    type: String,
+  },
   Payment: { type: mongoose.Schema.Types.ObjectId, ref: "Payment" },
 
   loans: [
@@ -108,6 +119,42 @@ const userSchema = mongoose.Schema({
     type: String,
     enum: ["member"],
     default: "member",
+  },
+
+  bankDetails: {
+    bankName: {
+      type: String,
+    },
+    accountNumber: {
+      type: String,
+    },
+    accountName: {
+      type: String,
+    }
+  },
+
+  nextOfKin: {
+    fullName: {
+      type: String,
+    },
+    relationship: {
+      type: String,
+    },
+    phone: {
+      type: String,
+    },
+    address: {
+      type: String,
+    }
+  },
+
+  guarantorRequests: [guarantorRequestSchema],
+
+  guarantorRequestStats: {
+    totalReceived: { type: Number, default: 0 },
+    totalAccepted: { type: Number, default: 0 },
+    totalDeclined: { type: Number, default: 0 },
+    totalAmountApproved: { type: Number, default: 0 },
   },
 
   createdAt: {

@@ -14,6 +14,8 @@ const Account = require("../models/Account");
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path')
+const fetch = require("node-fetch");
+
 
 // MULTER CONFIGURATIONs
 const storage = multer.diskStorage({
@@ -274,13 +276,8 @@ router.get("/forgot-password", (req, res) => {
   res.render("auth/recovery");
 });
 
-router.get("/terms", (req, res) => {
-  res.render("auth/terms");
-});
 
-
-
-
+// LOGIN ROUTE
 router.post("/login", (req, res, next) => {
   passport.authenticate("user-local", (err, user, info) => {
 
@@ -329,7 +326,7 @@ router.post("/login", (req, res, next) => {
 });
 
 
-
+// LOGOUT ROUTE 
 router.get("/logout", (req, res) => {
   req.logout((err) => {
     if (err) {
@@ -341,6 +338,198 @@ router.get("/logout", (req, res) => {
 });
 
 
+// CHANGE PASSWORD ROUTE
+router.post("/club-de-star-cooperative/changePassword", async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ success: false, error: "Not authenticated" });
+
+  const { password, newPassword } = req.body;
+
+  try {
+    const user = await User.findById(req.user._id)
+      .populate("account")
+      .populate("loans")
+      .populate("referredUsers");
+
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+
+    // Check current password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.json({ success: false, error: "Current password is incorrect." });
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    return res.json({ success: true, message: "✅ Password changed successfully! You will be logged out in 5 seconds." });
+
+  } catch (err) {
+    console.error("Change password error:", err);
+    return res.json({ success: false, error: "An error occurred. Please try again." });
+  }
+});
+
+
+// EDIT PROFILE ROUTE 
+router.post('/club-de-star-cooperative/updateProfile', async (req, res) => {
+  if (!req.isAuthenticated()) 
+    return res.status(401).json({ success: false, error: "Not authenticated" });
+
+  const allowedFields = ['firstName', 'lastName', 'email', 'phone', 'dob', 'address'];
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) 
+      return res.status(404).json({ success: false, error: "User not found" });
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined && req.body[field] !== user[field]) {
+        user[field] = req.body[field];
+      }
+    });
+
+    await user.save();
+    return res.json({ success: true, message: "Profile updated successfully!" });
+
+  } catch (err) {
+    console.error("Update profile error:", err);
+    return res.json({ success: false, error: "Failed to update profile." });
+  }
+});
+
+
+// EDIT PROFILE PICTURE ROUTE
+router.post(
+  '/club-de-star-cooperative/uploadAvatar',
+  upload.single('avatar'),
+  async (req, res) => {
+    if (!req.isAuthenticated()) return res.redirect('/login');
+
+    try {
+      const user = await User.findById(req.user._id);
+      if (!user) return res.redirect('/login');
+
+      if (!req.file) {
+        // No file uploaded
+        return res.redirect('/club-de-star-cooperative/profile?error=No file selected');
+      }
+
+      user.displayPicture = `/media/uploads/${req.file.filename}`;
+      await user.save();
+
+      res.redirect('/club-de-star-cooperative/profile?success=Avatar updated successfully');
+    } catch (err) {
+      console.error("Upload avatar error:", err);
+      res.redirect('/club-de-star-cooperative/profile?error=Failed to upload avatar');
+    }
+  }
+);
+
+
+router.get("/club-de-star-cooperative/verifyBankAccount", async (req, res) => {
+  if (!req.isAuthenticated()) 
+    return res.json({ success: false, error: "Not authenticated" });
+
+  const { bank, accountNumber } = req.query;
+
+  if (!bank || !accountNumber)
+    return res.json({ success: false, error: "Bank and account number are required" });
+
+  try {
+    const bankCodes = {
+      "Access Bank": "044",
+      "Citibank Nigeria": "023",
+      "Ecobank Nigeria": "050",
+      "Fidelity Bank": "070",
+      "First Bank of Nigeria": "011",
+      "FCMB": "214",
+      "GTB": "058",
+      "Guaranty Trust Bank (GTB)": "058",
+      "Heritage Bank": "030",
+      "Keystone Bank": "082",
+      "Providus Bank": "101",
+      "Polaris Bank": "076",
+      "Stanbic IBTC Bank": "221",
+      "Standard Chartered Bank": "068",
+      "Sterling Bank": "232",
+      "Union Bank of Nigeria": "032",
+      "UBA": "033",
+      "Unity Bank": "215",
+      "Wema Bank": "035",
+      "Zenith Bank": "057",
+
+      // Digital banks
+      "Opay": "999991", 
+      "Kuda Bank": "50211",
+      "Rubies Bank": "125",
+      "VFD Microfinance Bank": "566",
+      "Moniepoint": "150",
+      "PalmPay": "999992"
+    };
+
+    const bankCode = bankCodes[bank];
+    if (!bankCode) return res.json({ success: false, error: "Unsupported bank" });
+
+    const url = `https://api.paystack.co/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`;
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    const data = await response.json();
+
+    if (data.status) {
+      return res.json({ success: true, accountName: data.data.account_name });
+    } else {
+      return res.json({ success: false, error: data.message });
+    }
+
+  } catch (err) {
+    console.error(err);
+    return res.json({ success: false, error: "Verification failed" });
+  }
+});
+
+// UPDATE BANK DETAILS
+router.post("/club-de-star-cooperative/updateBankDetails", async (req, res) => {
+    try {
+        const { bankName, accountNumber, accountName } = req.body;
+
+        // Validate
+        if (!bankName || !accountNumber || !accountName) {
+            return res.status(400).json({ success: false, message: "All fields are required." });
+        }
+
+        if (accountNumber.length !== 10) {
+            return res.status(400).json({ success: false, message: "Account number must be 10 digits." });
+        }
+
+        // Get logged-in user
+        const userId = req.user?._id;
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Unauthorized." });
+        }
+
+        // Update MongoDB
+        await User.findByIdAndUpdate(userId, {
+            bankDetails: {
+                bankName,
+                accountNumber,
+                accountName
+            }
+        });
+        return res.redirect("/club-de-star-cooperative/profile");
+
+    } catch (err) {
+        console.error("Error updating bank details:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Server error updating bank details."
+        });
+    }
+});
 
 
 module.exports = router;

@@ -7,7 +7,7 @@ const transactionSchema = mongoose.Schema({
   status: {
     type: String,
     enum: ["successful", "failed", "pending"],
-    default: "successful"   // <— recommended
+    default: "successful"
   },
   description: { type: String },
   reference: { type: String },

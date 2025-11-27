@@ -56,26 +56,477 @@
             justify-content: center;
         }
     </style>
+        <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+        }
+        
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 75px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 75px;
+            padding: 2rem;
+            min-height: calc(100vh - 75px);
+            transition: all 0.3s;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .welcome-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        }
+        
+        .stat-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            background: white;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 1.5rem;
+            border-radius: 20px 20px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            padding: 0.7rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 12px;
+            padding: 0.7rem 1.75rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .member-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .club-member-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .non-club-badge {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .quick-action {
+            text-align: center;
+            padding: 1.75rem;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .quick-action:hover {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(30, 58, 138, 0.25);
+            border-color: transparent;
+        }
+        
+        .quick-action i {
+            font-size: 2.2rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        
+        .loan-info-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 1.75rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        .savings-goal-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 1.75rem;
+        }
+        
+        .alert-warning-custom {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            padding: 1.25rem;
+            color: #92400e;
+        }
+        
+        .alert-info-custom {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 16px;
+            padding: 1.25rem;
+            color: #1e40af;
+        }
+        
+        .powered-by {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+        
+        .loan-rules-list {
+            background: rgba(30, 58, 138, 0.02);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 2px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .loan-rules-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .loan-rules-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .print-button {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .print-button:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                left: calc(-1 * var(--sidebar-width));
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .powered-by {
+                bottom: 10px;
+                right: 10px;
+                font-size: 0.75rem;
+                padding: 8px 12px;
+            }
+        }
+
+        @media print {
+            .sidebar, .top-navbar, .btn, .quick-action, .powered-by {
+                display: none !important;
+            }
+            
+            .main-content {
+                margin: 0;
+                padding: 0;
+            }
+            
+            .card {
+                break-inside: avoid;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm no-print">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">CLUB DE STARS</h1>
-                    <p class="text-sm text-gray-600">Multipurpose Cooperative Society Ltd</p>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">
+
+                    <img src="/media/assets/logo/log.png" alt="" width="100%" height="100%">
                 </div>
-                <div class="text-right">
-                    <p class="text-xs text-gray-500">Registration No.</p>
-                    <p class="text-sm font-semibold text-gray-700">BN/CRCS/14864</p>
+                <div>
+                    <h5 class="mb-0 fw-bold" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75">COOPERATIVE SOCIETY LIMITED</small>
                 </div>
             </div>
+            <div class="member-badge mt-2 <%= user.membershipID.startsWith('CD') ? 'club-member-badge' : 'non-club-member-badge' %>">
+                <i class="fas <%= user.membershipID.startsWith('CD') ? 'fa-star' : 'fa-user' %>"></i>
+                <span><%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Non-Club Member' %></span>
+            </div>
+
         </div>
-    </header>
+        <div class="sidebar-menu">
+            <a href="/club-de-star-cooperative/dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="/club-de-star-cooperative/transaction">
+                <i class="fas fa-exchange-alt"></i> Transactions
+            </a>
+            <!-- <a href="#" onclick="showSection('savings', event)">
+                <i class="fas fa-piggy-bank"></i> My Savings
+            </a> -->
+            <a href="/club-de-star-cooperative/loan">
+                <i class="fas fa-hand-holding-usd"></i> My Loans
+            </a>
+            <a href="/club-de-star-cooperative/guarantorRequest">
+                <i class="fas fa-user-friends"></i> Guarantor Requests
+                <% 
+                const pendingCount = user.guarantorRequests
+                    ? user.guarantorRequests.filter(r => r.status === "pending").length
+                    : 0; 
+                %>
+                <% if (pendingCount > 0) { %>
+                    <span class="badge bg-danger ms-2"><%= pendingCount %></span>
+                <% } %>
+            </a>
+
+            <a href="/club-de-star-cooperative/roiCalculator">
+                <i class="fas fa-chart-line"></i> ROI Calculator
+            </a>
+            <a href="/club-de-star-cooperative/profile">
+                <i class="fas fa-user-circle"></i> My Profile
+            </a>
+            <a href="/club-de-star-cooperative/referral">
+                <i class="fas fa-users"></i> Referral Program
+            </a>
+            <a href="/club-de-star-cooperative/memberContract" class="active">
+                <i class="fas fa-file-contract"></i> Terms & Conditions
+            </a>
+
+            <a href="/logout" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3"
+        style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+        onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+
+        <!-- This will only show on lg and above -->
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Welcome back, <%= user.firstName %>! 👋</h5>
+            <small class="text-muted">
+                Member ID: <%= user.membershipID %> | <%= new Date(user.createdAt).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
+            </small>
+        </div>
+    </div>
+
 
     <!-- Main Content -->
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="main-content">
         <div class="bg-white rounded-xl shadow-lg overflow-hidden fade-in">
             <!-- Document Header -->
             <div class="gradient-bg text-white p-6 sm:p-8">
@@ -100,8 +551,8 @@
                         </div>
 
                         <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-600">
-                            <p class="font-semibold text-gray-900 mb-2" id="memberName">MEMBER NAME</p>
-                            <p class="text-gray-700">A member of the Cooperative, residing at <span id="memberAddress" class="font-medium">Member Address</span>, with membership number <span id="membershipNumber" class="font-semibold">XXXXX</span> (hereinafter referred to as <strong>"The Member"</strong>).</p>
+                            <p class="font-semibold text-gray-900 mb-2" ><%= user.firstName %> <%= user.lastName %></p>
+                            <p class="text-gray-700">A member of the Cooperative, residing at <span class="font-medium"><%= user.address %>, <%= user.lga %>, <%= user.state %> State, Nigeria</span>, with membership number <span class="font-semibold"><%= user.membershipID %></span> (hereinafter referred to as <strong>"The Member"</strong>).</p>
                         </div>
                     </div>
                 </div>
@@ -269,66 +720,98 @@
                 </section>
 
                 <!-- Signatures Section -->
-                <section class="mt-12">
-                    <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                        <span class="bg-blue-900 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">9</span>
-                        Signatures
-                    </h3>
-                    <div class="">
-                        <p class="text-gray-700 mb-8 text-sm sm:text-base">By signing below, both parties acknowledge that they have read, understood, and agreed to the terms of this MOU.</p>
+             <section class="mt-12">
+    <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
+        <span class="bg-blue-900 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">9</span>
+        Signatures
+    </h3>
 
-                        <div class="grid sm:grid-cols-2 gap-8 mb-8">
-                            <!-- Cooperative Signature -->
-                            <div class="border-t-2 border-gray-300 pt-4">
-                                <p class="font-semibold text-gray-900">For the Cooperative:</p>
-                                <p class="text-sm text-gray-700 mt-2">Name: <span class="font-medium">Adi Stanilus Duniya</span></p>
-                                <p class="text-sm text-gray-700">Position: <span class="font-medium">Director</span></p>
-                                <p class="text-sm text-gray-700">Date: <span class="font-medium" id="coopDate">16/03/2025</span></p>
-                            </div>
+    <div>
+        <p class="text-gray-700 mb-8 text-sm sm:text-base">
+            By signing below, all parties acknowledge that they have read, understood, and agreed to the terms outlined in this document.
+        </p>
 
-                            <!-- Operating Company Signature -->
-                            <div class="border-t-2 border-gray-300 pt-4">
-                                <p class="font-semibold text-gray-900">For the Operating Company:</p>
-                                <p class="text-sm text-gray-700 mt-2">Name: <span class="font-medium">Eraer Paul Kulugh</span></p>
-                                <p class="text-sm text-gray-700">Position: <span class="font-medium">Manager</span></p>
-                                <p class="text-sm text-gray-700">Date: <span class="font-medium" id="operatingDate">16/03/2025</span></p>
-                            </div>
-                        </div>
+        <!-- Cooperative + Operating Company Signatures -->
+        <div class="grid sm:grid-cols-2 gap-8 mb-8">
 
-                        <!-- Member Signature -->
-                        <div class="border-2 border-blue-200 rounded-lg p-6 bg-blue-50" style="width: 100%;">
-                            <p class="font-semibold text-gray-900 mb-4">For the Member:</p>
-                            
-                            <div class="bg-white p-4 rounded-lg mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Digital Signature *</label>
-                                <p class="text-xs text-gray-500 mb-2">Sign below using your finger or mouse</p>
-                                <canvas id="signaturePad" class="signature-pad w-full" width="600" height="200" style="max-width: 100%;"></canvas>
-                                <div class="flex gap-2 mt-3">
-                                    <button type="button" onclick="clearSignature()" class="text-sm px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition flex items-center gap-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                        Clear
-                                    </button>
-                                </div>
-                            </div>
+            <!-- Cooperative Signature -->
+            <div class="border-t-2 border-gray-300 pt-4">
+                <p class="font-semibold text-gray-900">For the Cooperative:</p>
+                <p class="text-sm text-gray-700 mt-2">Name: <span class="font-medium">Adi Stanilus Duniya</span></p>
+                <p class="text-sm text-gray-700">Position: <span class="font-medium">Director</span></p>
+                <p class="text-sm text-gray-700">Date: <span class="font-medium">16/03/2025</span></p>
 
-                            <div class="space-y-2 text-sm text-gray-700">
-                                <p>Name: <span class="font-semibold" id="signatureName">__________________________</span></p>
-                                <p>Membership No.: <span class="font-semibold" id="signatureMembershipNo">__________________________</span></p>
-                                <p>Date: <span class="font-semibold" id="signatureDate">__________________________</span></p>
-                            </div>
-                        </div>
+                <!-- Optional: Cooperative Signature Image -->
+                <div class="mt-3">
+                    <img src="/images/staff-signatures/cooperative-sign.png" alt="Cooperative Signature" class="h-16 object-contain opacity-90">
+                </div>
+            </div>
 
-                        <!-- Agreement Checkbox -->
-                        <div class="mt-6 flex items-start">
-                            <input type="checkbox" id="agreeTerms" class="mt-1 mr-3 w-5 h-5 text-blue-900 rounded focus:ring-2 focus:ring-blue-900">
-                            <label for="agreeTerms" class="text-sm sm:text-base text-gray-700">
-                                I hereby confirm that I have read, understood, and agree to all the terms and conditions outlined in this Memorandum of Understanding and the Cooperative's Bylaws.
-                            </label>
-                        </div>
+            <!-- Operating Company Signature -->
+            <div class="border-t-2 border-gray-300 pt-4">
+                <p class="font-semibold text-gray-900">For the Operating Company:</p>
+                <p class="text-sm text-gray-700 mt-2">Name: <span class="font-medium">Eraer Paul Kulugh</span></p>
+                <p class="text-sm text-gray-700">Position: <span class="font-medium">Manager</span></p>
+                <p class="text-sm text-gray-700">Date: <span class="font-medium">16/03/2025</span></p>
+
+                <!-- Optional: Operating Company Signature Image -->
+                <div class="mt-3">
+                    <img src="/images/staff-signatures/operating-sign.png" alt="Operating Company Signature" class="h-16 object-contain opacity-90">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Member Signature Block -->
+        <div class="border-2 border-blue-200 rounded-lg p-6 bg-blue-50">
+            <p class="font-semibold text-gray-900 mb-4">For the Member:</p>
+
+            <!-- Signature Image -->
+            <div class="mb-4">
+                <% if (user.signature) { %>
+                    <img 
+                        src="<%= user.signature.replace('public\\', '/').replace(/\\/g, '/') %>" 
+                        alt="Member Signature" 
+                        class="h-20 object-contain mx-auto"
+                        style="max-width: 250px;"
+                    >
+                <% } else { %>
+                    <div class="h-20 flex items-center justify-center text-gray-500 italic">
+                        No signature uploaded yet
                     </div>
-                </section>
+                <% } %>
+            </div>
+
+
+            <!-- Member Details -->
+            <div class="space-y-2 text-sm text-gray-700">
+                <p>Name: 
+                    <span class="font-semibold">
+                        <%= user.firstName %> <%= user.lastName %>
+                    </span>
+                </p>
+
+                <p>Membership No.: 
+                    <span class="font-semibold">
+                        <%= user.membershipID %>
+                    </span>
+                </p>
+
+                <p>Date: 
+                    <span class="font-semibold">
+                        <%= new Date().toLocaleDateString("en-US", { 
+                            weekday: "long", 
+                            year: "numeric", 
+                            month: "long", 
+                            day: "numeric" 
+                        }) %>
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
 
                 <!-- Action Buttons -->
                 <div class="mt-8 flex flex-col sm:flex-row gap-4 no-print">
@@ -338,53 +821,10 @@
                         </svg>
                         Print Document
                     </button>
-                    <button onclick="submitAgreement()" id="submitBtn" class="flex-1 px-6 py-3 gradient-bg hover:shadow-xl text-white rounded-lg font-semibold transition flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Accept & Submit Agreement
-                    </button>
-                </div>
-
-                <!-- Error Message -->
-                <div id="errorMessage" class="mt-4 hidden bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded" role="alert">
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span id="errorText"></span>
-                    </div>
                 </div>
             </div>
         </div>
     </main>
-
-    <!-- Success Modal -->
-    <div id="successModal" class="success-modal">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 fade-in">
-            <div class="text-center">
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-                    <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-2">Agreement Accepted!</h3>
-                <p class="text-gray-600 mb-6">Your membership agreement has been successfully submitted and recorded.</p>
-                <button onclick="redirectToDashboard()" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:shadow-lg transition">
-                    Continue to Dashboard
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8 mt-16 no-print">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-gray-400 mb-2">CLUB DE STARS MULTIPURPOSE COOPERATIVE SOCIETY LTD</p>
-            <p class="text-sm text-gray-500">Registered Office: Makurdi, Benue State, Nigeria</p>
-            <p class="text-xs text-gray-600 mt-4">Registration No: BN/CRCS/14864</p>
-        </div>
-    </footer>
 
     <script>
         // Initialize signature pad

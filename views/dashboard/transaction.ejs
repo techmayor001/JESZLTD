@@ -740,26 +740,38 @@
 
         </div>
         <div class="sidebar-menu">
-            <a href="/club-de-star-cooperative/dashboard" class="active">
+            <a href="/club-de-star-cooperative/dashboard">
                 <i class="fas fa-home"></i> Dashboard
             </a>
-            <a href="/club-de-star-cooperative/transaction">
+            <a href="/club-de-star-cooperative/transaction" class="active">
                 <i class="fas fa-exchange-alt"></i> Transactions
             </a>
-            <a href="#" onclick="showSection('loans', event)">
+            <a href="/club-de-star-cooperative/loan">
                 <i class="fas fa-hand-holding-usd"></i> My Loans
             </a>
-            <a href="#" onclick="showSection('roi', event)">
+            <a href="/club-de-star-cooperative/guarantorRequest">
+                <i class="fas fa-user-friends"></i> Guarantor Requests
+                <% 
+                const pendingCount = user.guarantorRequests
+                    ? user.guarantorRequests.filter(r => r.status === "pending").length
+                    : 0; 
+                %>
+                <% if (pendingCount > 0) { %>
+                    <span class="badge bg-danger ms-2"><%= pendingCount %></span>
+                <% } %>
+            </a>
+
+            <a href="/club-de-star-cooperative/roiCalculator">
                 <i class="fas fa-chart-line"></i> ROI Calculator
             </a>
             <a href="/club-de-star-cooperative/profile">
                 <i class="fas fa-user-circle"></i> My Profile
             </a>
-            <a href="#" onclick="showSection('referral', event)">
+            <a href="/club-de-star-cooperative/referral">
                 <i class="fas fa-users"></i> Referral Program
             </a>
-            <a href="#">
-                <i class="fas fa-cog"></i> Settings
+            <a href="/club-de-star-cooperative/memberContract">
+                <i class="fas fa-file-contract"></i> Terms & Conditions
             </a>
             <a href="/logout" class="mt-3" style="color: rgba(255,255,255,0.6);">
                 <i class="fas fa-sign-out-alt"></i> Logout

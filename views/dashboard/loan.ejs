@@ -416,7 +416,7 @@
 
         </div>
         <div class="sidebar-menu">
-            <a href="/club-de-star-cooperative/dashboard" class="active">
+            <a href="/club-de-star-cooperative/dashboard">
                 <i class="fas fa-home"></i> Dashboard
             </a>
             <a href="/club-de-star-cooperative/transaction">
@@ -425,7 +425,7 @@
             <!-- <a href="#" onclick="showSection('savings', event)">
                 <i class="fas fa-piggy-bank"></i> My Savings
             </a> -->
-            <a href="/club-de-star-cooperative/loan">
+            <a href="/club-de-star-cooperative/loan"  class="active">
                 <i class="fas fa-hand-holding-usd"></i> My Loans
             </a>
             <a href="/club-de-star-cooperative/guarantorRequest">
@@ -529,148 +529,88 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Important Notice -->
-            <div class="alert-warning-custom mb-4">
-                <h6 class="fw-bold mb-2"><i class="fas fa-exclamation-triangle me-2"></i>Withdrawal Window</h6>
-                <p class="mb-0">Regular withdrawals are available from <strong>1st - 10th December</strong>. Force withdrawal available with 2.5% charge (50% initial, remaining after 30 days).</p>
-            </div>
-
-            <!-- Stats Cards -->
-            <div class="row g-4 mb-4">
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                            <i class="fas fa-piggy-bank"></i>
-                        </div>
-
-                        <p class="text-muted mb-1 fw-semibold">Total Savings</p>
-
-                        <!-- Total account balance -->
-                        <h3 class="mb-2 fw-bold">
-                            ₦<%= user.account?.balance ? user.account.balance.toLocaleString() : "0" %>
-                        </h3>
-
-                        <!-- ROI / Member Share -->
-                        <% if (user.account && typeof ROI !== "undefined") { %>
-                            <small class="text-success fw-semibold">
-                                <i class="fas fa-arrow-up me-1"></i>
-                                ₦<%= ROI.toLocaleString(undefined, { minimumFractionDigits: 2 }) %>
-                            </small>
-                        <% } else { %>
-                            <small class="text-muted fw-semibold">₦0.00</small>
-                        <% } %>
-                    </div>
-
-
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
-                            <i class="fas fa-hand-holding-usd"></i>
-                        </div>
-
-                        <p class="text-muted mb-1 fw-semibold">Active Loans</p>
-
-                        <!-- Total active loans -->
-                        <h3 class="mb-2 fw-bold">
-                            ₦<%= user.loans?.length 
-                                ? user.loans.reduce((sum, loan) => sum + (loan.status === 'active' ? loan.amount : 0), 0).toLocaleString() 
-                                : '0' %>
-                        </h3>
-
-                        <!-- Max loan = 3 × account balance -->
-                        <small class="text-warning fw-semibold">
-                            <i class="fas fa-clock me-1"></i>
-                            Max: ₦<%= user.account?.balance 
-                                ? (user.account.balance * 3).toLocaleString() 
-                                : '0' %>
-                        </small>
-                    </div>
-
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white;">
-                            <i class="fas fa-percentage"></i>
-                        </div>
-
-                        <p class="text-muted mb-1 fw-semibold">Monthly ROI</p>
-
-                        <!-- Display monthly ROI from account, fallback to 0 -->
-                        <h3 class="mb-2 fw-bold">
-                            ₦<%= user.account?.monthlyROI ? user.account.monthlyROI.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00' %>
-                        </h3>
-
-                        <small class="text-info fw-semibold">
-                            <i class="fas fa-chart-line me-1"></i>% of Shares
-                        </small>
-                    </div>
-                </div>
-
-
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-
-                    <p class="text-muted mb-1 fw-semibold">Next Payment</p>
-                    <h3 class="mb-2 fw-bold">
-                        ₦<%= user.nextPayment?.amount ? user.nextPayment.amount.toLocaleString() : '0' %>
-                    </h3>
-
-                    <!-- Display due date -->
-                    <small style="color: var(--primary);" class="fw-semibold">
-                        <i class="fas fa-calendar me-1"></i>
-                        Due 
-                        <%= user.nextPayment?.dueDate 
-                            ? new Date(user.nextPayment.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
-                            : 'N/A' %>
-                    </small>
-                </div>
-            </div>
-
-
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-bolt me-2" style="color: var(--primary);"></i>Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-lg-3 col-md-6 col-6">
-                            <a href="#" class="quick-action" onclick="openModal('depositModal')">
-                                <i class="fas fa-plus-circle" style="color: #10b981;"></i>
-                                <h6 class="mb-0 fw-semibold">Make Deposit</h6>
-                            </a>
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-6">
-                            <a href="#" class="quick-action" onclick="openModal('withdrawModal')">
-                                <i class="fas fa-minus-circle" style="color: #ef4444;"></i>
-                                <h6 class="mb-0 fw-semibold">Withdraw</h6>
-                            </a>
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-6">
-                            <a href="#" class="quick-action" onclick="openModal('loanRequestModal')">
-                                <i class="fas fa-file-invoice-dollar" style="color: #f59e0b;"></i>
-                                <h6 class="mb-0 fw-semibold">Apply for Loan</h6>
-                            </a>
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-6">
-                            <a href="#" class="quick-action" onclick="openModal('paymentModal')">
-                                <i class="fas fa-money-check-alt" style="color: #06b6d4;"></i>
-                                <h6 class="mb-0 fw-semibold">Loan Payment</h6>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
         </div>
+
+        <div class="row g-4 mb-4">
+
+    <!-- ELIGIBLE LOAN AMOUNT -->
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                <i class="fas fa-wallet"></i>
+            </div>
+
+            <p class="text-muted mb-1 fw-semibold">Eligible Loan Amount</p>
+
+            <!-- Eligibility = 3 × savings if monthsSinceJoin >= 3 -->
+            <h3 class="mb-2 fw-bold">
+                ₦<%= monthsSinceJoin >= 3 
+                    ? (user.account.balance * 3).toLocaleString()
+                    : "0" %>
+            </h3>
+
+            <small class="text-success fw-semibold">
+                <i class="fas fa-info-circle me-1"></i>
+                <%= monthsSinceJoin >= 3 
+                    ? "Eligible"
+                    : `Available after ${3 - monthsSinceJoin} month(s)` %>
+            </small>
+        </div>
+    </div>
+
+
+
+    <!-- ACTIVE LOAN -->
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                <i class="fas fa-hand-holding-usd"></i>
+            </div>
+
+            <p class="text-muted mb-1 fw-semibold">Active Loan</p>
+
+            <h3 class="mb-2 fw-bold">
+                ₦<%= loan ? loan.amount.toLocaleString() : "0" %>
+            </h3>
+
+            <small class="text-warning fw-semibold">
+                <i class="fas fa-clock me-1"></i>
+                Status: <%= loan ? loan.status.toUpperCase() : "NONE" %>
+            </small>
+        </div>
+    </div>
+
+
+
+    <!-- NEXT PAYMENT -->
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+
+            <p class="text-muted mb-1 fw-semibold">Next Payment</p>
+
+            <h3 class="mb-2 fw-bold">
+                ₦<%= loan?.nextPayment?.amount 
+                    ? loan.nextPayment.amount.toLocaleString() 
+                    : "0" %>
+            </h3>
+
+            <small style="color: var(--primary);" class="fw-semibold">
+                <i class="fas fa-calendar me-1"></i>
+                Due 
+                <%= loan?.nextPayment?.dueDate
+                    ? new Date(loan.nextPayment.dueDate).toLocaleDateString("en-US", {
+                        month: "short", day: "numeric", year: "numeric"
+                      })
+                    : "N/A" %>
+            </small>
+        </div>
+    </div>
+
+</div>
+
 
         <!-- Loans Section -->
         <div id="loans" class="content-section" style="display:u;">
@@ -701,76 +641,76 @@
 
                             <!-- Active Loan -->
                        <div class="card mb-3" style="border: 3px solid #3350b0; border-radius: 20px;">
-    <div class="card-body">
-        <% if (loan) { %>
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                    <h5 class="mb-1 fw-bold">Personal Loan</h5>
-                    <small class="text-muted">
-                        Approved: <%= loan.approvedAt ? loan.approvedAt.toLocaleDateString('en-US') : '-' %> |
-                        Expires: <%= loan.dueDate ? loan.dueDate.toLocaleDateString('en-US') : '-' %>
-                    </small>
-                </div>
-                <span class="badge bg-warning text-dark px-3 py-2"><%= loan.status.charAt(0).toUpperCase() + loan.status.slice(1) %></span>
-            </div>
+                            <div class="card-body">
+                                <% if (loan) { %>
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <h5 class="mb-1 fw-bold">Personal Loan</h5>
+                                            <small class="text-muted">
+                                                Approved: <%= loan.approvedAt ? loan.approvedAt.toLocaleDateString('en-US') : '-' %> |
+                                                Expires: <%= loan.dueDate ? loan.dueDate.toLocaleDateString('en-US') : '-' %>
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-warning text-dark px-3 py-2"><%= loan.status.charAt(0).toUpperCase() + loan.status.slice(1) %></span>
+                                    </div>
 
-            <div class="row g-3 mb-3">
-                <div class="col-md-3 col-6">
-                    <small class="text-muted d-block">Loan Amount</small>
-                    <h6 class="mb-0 fw-bold">₦<%= loan.amount.toLocaleString() %></h6>
-                </div>
-                <div class="col-md-3 col-6">
-                    <small class="text-muted d-block">Outstanding</small>
-                    <h6 class="mb-0 fw-bold text-danger">₦<%= loan.outstandingBalance.toLocaleString() %></h6>
-                </div>
-                <div class="col-md-3 col-6">
-                    <small class="text-muted d-block">Interest Amount</small>
-                    <h6 class="mb-0 fw-bold">₦<%= loan.amount * (user.account.accountType === "CD" ? 0.05 : 0.1) %></h6>
-                </div>
-                <div class="col-md-3 col-6">
-                    <small class="text-muted d-block">Interest Rate</small>
-                    <h6 class="mb-0 fw-bold"><%= interestRate %>% p.a.</h6>
-                </div>
-            </div>
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-3 col-6">
+                                            <small class="text-muted d-block">Loan Amount</small>
+                                            <h6 class="mb-0 fw-bold">₦<%= loan.amount.toLocaleString() %></h6>
+                                        </div>
+                                        <div class="col-md-3 col-6">
+                                            <small class="text-muted d-block">Outstanding</small>
+                                            <h6 class="mb-0 fw-bold text-danger">₦<%= loan.outstandingBalance.toLocaleString() %></h6>
+                                        </div>
+                                        <div class="col-md-3 col-6">
+                                            <small class="text-muted d-block">Interest Amount</small>
+                                            <h6 class="mb-0 fw-bold">₦<%= loan.amount * (user.account.accountType === "CD" ? 0.05 : 0.1) %></h6>
+                                        </div>
+                                        <div class="col-md-3 col-6">
+                                            <small class="text-muted d-block">Interest Rate</small>
+                                            <h6 class="mb-0 fw-bold"><%= interestRate %>% p.a.</h6>
+                                        </div>
+                                    </div>
 
-            <div class="alert-warning-custom mb-3">
-                <small>
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong>Payment Due in <%= loan.daysUntilDue || '-' %> days!</strong> Avoid 0.5% daily penalty
-                </small>
-            </div>
+                                    <div class="alert-warning-custom mb-3">
+                                        <small>
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <strong>Payment Due in <%= loan.daysUntilDue || '-' %> days!</strong> Avoid 0.5% daily penalty
+                                        </small>
+                                    </div>
 
-            <div class="mb-3">
-                <div class="d-flex justify-content-between mb-2">
-                    <small class="fw-semibold">Repayment Progress</small>
-                    <small class="fw-bold"><%= loan.repaymentProgress || 0 %>% Paid</small>
-                </div>
-                <div class="progress" style="height: 12px;">
-                    <div class="progress-bar bg-success" style="width: <%= loan.repaymentProgress || 0 %>%"></div>
-                </div>
-            </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <small class="fw-semibold">Repayment Progress</small>
+                                            <small class="fw-bold"><%= loan.repaymentProgress || 0 %>% Paid</small>
+                                        </div>
+                                        <div class="progress" style="height: 12px;">
+                                            <div class="progress-bar bg-success" style="width: <%= loan.repaymentProgress || 0 %>%"></div>
+                                        </div>
+                                    </div>
 
-            <div class="d-flex gap-2">
-                <button class="btn btn-primary flex-grow-1" onclick="openModal('paymentModal')">
-                    <i class="fas fa-credit-card me-2"></i>Make Payment
-                </button>
-                <button class="btn btn-outline-primary" onclick="openModal('rolloverModal')">
-                    <i class="fas fa-sync-alt me-2"></i>Rollover
-                </button>
-            </div>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-primary flex-grow-1" onclick="openModal('paymentModal')">
+                                            <i class="fas fa-credit-card me-2"></i>Make Payment
+                                        </button>
+                                        <button class="btn btn-outline-primary" onclick="openModal('rolloverModal')">
+                                            <i class="fas fa-sync-alt me-2"></i>Rollover
+                                        </button>
+                                    </div>
 
-        <% } else { %>
-            <div class="text-center py-4">
-                <h6 class="fw-bold text-muted">No Active Loans</h6>
-                <p>You currently have no active loans.</p>
-            </div>
-        <% } %>
-    </div>
-</div>
+                                <% } else { %>
+                                    <div class="text-center py-4">
+                                        <h6 class="fw-bold text-muted">No Active Loans</h6>
+                                        <p>You currently have no active loans.</p>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
 
 
                             <!-- Loan History -->
-                            <!-- <h6 class="mb-3 text-muted fw-semibold">Loan History</h6>
+                            <h6 class="mb-3 text-muted fw-semibold">Loan History</h6>
                             <div class="card">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center">
@@ -784,7 +724,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div> -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -879,185 +819,8 @@
             </div>
         </div>
 
-        <!-- ROI Section -->
-        <div id="roi" class="content-section" style="display:none;">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-chart-line me-2"></i>ROI Calculator & Distribution</h5>
-                </div>
-                <div class="card-body">
-                    <div class="alert-info-custom mb-4">
-                        <h6 class="fw-bold mb-3">How ROI is Calculated</h6>
-                        <p class="mb-2">Monthly ROI = (Your Cumulative Savings from First Month to Current) / (Total Savings by All Members up to Current Month) × Interest for the Month - 10%(company charge)</p>
-                        <p class="mb-0 small"><strong>Note:</strong> 10% of the monthly interest pool is retained as operating charges</p>
-                    </div>
 
-                    <div class="row g-4 mb-4">
-                        <div class="col-md-3">
-                            <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
-                                <small class="text-muted d-block mb-2">Your Cumulative Savings</small>
-                                <h3 class="mb-0 fw-bold" style="color: var(--primary);">₦<%= accountBalance.toLocaleString() %></h3>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
-                                <small class="text-muted d-block mb-2">Total Member Savings</small>
-                                <h3 class="mb-0 fw-bold" style="color: var(--primary);">₦<%= allMembersTotalSavings.toLocaleString() %></h3>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
-                                <small class="text-muted d-block mb-2">Your Share</small>
-                                <% let sharePercentage = allMembersTotalSavings > 0 ? ((accountBalance / allMembersTotalSavings) * 100).toFixed(2) : 0; %>
-                                <h3 class="mb-0 fw-bold text-warning"><%= sharePercentage %>%</h3>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
-                                <small class="text-muted d-block mb-2">This Month's ROI</small>
-                                <h3 class="mb-0 fw-bold text-success">₦<%= ROI.toLocaleString(undefined, {maximumFractionDigits: 2}) %></h3>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row g-4">
-                        <div class="col-lg-6">
-                            <h6 class="fw-bold mb-3" style="color: var(--primary);">Monthly Breakdown</h6>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);">
-                                        <tr>
-                                            <th>Month</th>
-                                            <th>Interest Pool</th>
-                                            <th>Your ROI (90%)</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Oct 2025</td>
-                                            <td>₦30,000</td>
-                                            <td class="text-success fw-bold">₦3,750</td>
-                                            <td><span class="badge bg-success-subtle text-success">Credited</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Sep 2025</td>
-                                            <td>₦28,500</td>
-                                            <td class="text-success fw-bold">₦3,563</td>
-                                            <td><span class="badge bg-success-subtle text-success">Credited</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Aug 2025</td>
-                                            <td>₦27,000</td>
-                                            <td class="text-success fw-bold">₦3,375</td>
-                                            <td><span class="badge bg-success-subtle text-success">Credited</span></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6">
-                            <h6 class="fw-bold mb-3" style="color: var(--primary);">Interest Sources</h6>
-                            <div class="loan-rules-list">
-                                <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
-                                    <div>
-                                        <small class="text-muted d-block">Total Loan Interest</small>
-                                        <h5 class="mb-0 fw-bold" style="color: var(--primary);">₦30,000</h5>
-                                    </div>
-                                    <div class="text-end">
-                                        <small class="text-muted d-block">From All Members</small>
-                                        <small class="fw-semibold">Current Month</small>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <small>Distributed to Members (90%)</small>
-                                        <strong>₦27,000</strong>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <small>Operating Charges (10%)</small>
-                                        <strong>₦3,000</strong>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="alert-warning-custom mt-3">
-                                <small><i class="fas fa-info-circle me-2"></i><strong>Note:</strong> ROI is calculated and credited on the 1st of each month</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Referral Section -->
-       <div id="referral" class="content-section" style="display:none;">
-  <div class="card">
-    <div class="card-header">
-      <h5 class="mb-0 fw-bold"><i class="fas fa-users me-2"></i>Referral Program</h5>
-    </div>
-
-    <div class="card-body">
-      <div class="row g-4">
-
-        <!-- Left: Referral Code -->
-        <div class="col-lg-6">
-          <div class="gradient-bg text-white p-4 rounded-3">
-            <h5 class="fw-bold mb-3"><i class="fas fa-gift me-2"></i>Refer & Earn!</h5>
-            <p class="mb-4">Invite friends to join Club De Stars and earn rewards for each successful referral</p>
-
-            <div class="bg-gray-200 bg-opacity-20 p-3 rounded-3 mb-3">
-              <small class="opacity-75 d-block mb-1">Your Referral Code</small>
-              <h4 class="mb-0 fw-bold"><%= referralCode %></h4>
-            </div>
-
-            <button class="btn btn-light w-100 fw-semibold" onclick="copyReferralLink()">
-              <i class="fas fa-copy me-2"></i>Copy Referral Link
-            </button>
-
-            <input type="hidden" id="refLink" value="<%= referralLink %>">
-          </div>
-        </div>
-
-        <!-- Right: Referrals Stats -->
-        <div class="col-lg-6">
-          <h6 class="fw-bold mb-3">Your Referrals</h6>
-
-          <div class="row g-3 mb-4">
-            <div class="col-6">
-              <div class="p-3 rounded-3 text-center" style="background: #d1fae5;">
-                <h3 class="fw-bold text-success mb-0"><%= totalReferrals %></h3>
-                <small>Total Referrals</small>
-              </div>
-            </div>
-
-            <div class="col-6">
-              <div class="p-3 rounded-3 text-center" style="background: #fde68a;">
-                <h3 class="fw-bold text-warning mb-0">₦<%= referralEarning.toLocaleString() %></h3>
-                <small>Earned</small>
-              </div>
-            </div>
-          </div>
-
-          <% if (referredUsers.length > 0) { %>
-            <ul class="list-group">
-              <% referredUsers.forEach(r => { %>
-                <li class="list-group-item d-flex justify-content-between">
-                  <span><%= r.firstName %> <%= r.lastName %></span>
-                  <span class="text-muted"><%= r.email %></span>
-                </li>
-              <% }) %>
-            </ul>
-          <% } else { %>
-            <p class="text-muted">No referrals yet.</p>
-          <% } %>
-
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
 function copyReferralLink() {
@@ -1097,14 +860,6 @@ function copyReferralLink() {
 
             <div class="modal-body">
 
-                <% const eligible = monthsSinceJoin >= 1; %>
-
-                <% if (!eligible) { %>
-                    <div class="alert-danger-custom mb-3">
-                        <small>You must have been a member for at least 1 month before applying for a loan.</small>
-                    </div>
-                <% } %>
-
                 <div class="alert-info-custom mb-3">
                     <small>
                         <strong>Maximum Eligible:</strong> ₦<%= (user.account.balance * 3).toLocaleString() %> 
@@ -1115,43 +870,37 @@ function copyReferralLink() {
                 <div class="alert-warning-custom mb-4">
                     <small>
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Requirements:</strong> Must have been a member for at least 1 month. Two guarantors required.
+                        <strong>Requirements:</strong> Two guarantors required for loan approval.
                     </small>
                 </div>
 
-                <form>
+                <form action="/club-de-star-cooperative/apply-loan" method="POST">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Loan Amount (₦)</label>
-                            <input type="number" class="form-control" id="loanAmount" 
+                            <input type="number" class="form-control" name="amount"
                                    max="<%= user.account.balance * 3 %>" 
                                    placeholder="Enter amount" 
-                                   required
-                                   <%= !eligible ? "disabled" : "" %>>
+                                   required>
                             <small class="text-muted">Max: ₦<%= (user.account.balance * 3).toLocaleString() %></small>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Repayment Period</label>
-                            <select class="form-select" id="loanDuration" required <%= !eligible ? "disabled" : "" %>>
+                            <select class="form-select" name="duration" required>
                                 <option value="1" selected>1 month</option>
-                                <option value="3">3 months (Special Loan)</option>
+                                <!-- <option value="3">3 months (Special Loan)</option>
                                 <option value="6">6 months (Special Loan)</option>
-                                <option value="11">11 months (Special Loan)</option>
+                                <option value="11">11 months (Special Loan)</option> -->
                             </select>
                         </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Purpose of Loan</label>
-                        <textarea class="form-control" rows="2" placeholder="Brief description" required <%= !eligible ? "disabled" : "" %>></textarea>
                     </div>
 
                     <!-- GUARANTORS DROPDOWNS -->
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Guarantor 1</label>
-                            <select class="form-select guarantorSelect" id="guarantor1" required <%= !eligible ? "disabled" : "" %>>
+                            <select class="form-select" name="guarantor1" required>
                                 <option value="">Select guarantor...</option>
                                 <% users.forEach(u => { if(u._id.toString() !== user._id.toString()){ %>
                                     <option value="<%= u._id %>"><%= u.firstName %> — <%= u.phone %></option>
@@ -1161,7 +910,7 @@ function copyReferralLink() {
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Guarantor 2</label>
-                            <select class="form-select guarantorSelect" id="guarantor2" required <%= !eligible ? "disabled" : "" %>>
+                            <select class="form-select" name="guarantor2" required>
                                 <option value="">Select guarantor...</option>
                                 <% users.forEach(u => { if(u._id.toString() !== user._id.toString()){ %>
                                     <option value="<%= u._id %>"><%= u.firstName %> — <%= u.phone %></option>
@@ -1171,24 +920,25 @@ function copyReferralLink() {
                     </div>
 
                     <div class="form-check mt-3">
-                        <input class="form-check-input" type="checkbox" id="agreeTerms" required <%= !eligible ? "disabled" : "" %>>
+                        <input class="form-check-input" type="checkbox" name="agreeTerms" id="agreeTerms" required>
                         <label class="form-check-label" for="agreeTerms">
                             I agree to the loan terms: 5% interest rate for CD, 10% for NCD, 0.5% daily penalty for late payment.
                         </label>
+                    </div>
+
+                    <div class="modal-footer mt-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Application</button>
                     </div>
 
                 </form>
 
             </div>
 
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="submitLoanRequest()" <%= !eligible ? "disabled" : "" %>>Submit Application</button>
-            </div>
-
         </div>
     </div>
 </div>
+
 
 <!-- JS: Prevent selecting same guarantor twice -->
 <script>
@@ -1206,249 +956,7 @@ document.querySelectorAll('.guarantorSelect').forEach(select => {
 </script>
 
 
-    <!-- Withdrawal Modal -->
-<div class="modal fade" id="withdrawModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content" style="border-radius: 20px;">
-            <div class="modal-header" style="border-radius: 20px 20px 0 0;">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-minus-circle me-2 text-danger"></i>Request Withdrawal
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
 
-            <div class="modal-body">
-
-                <!-- Withdrawal Window -->
-                <div class="alert-warning-custom mb-3">
-                    <small><i class="fas fa-calendar-alt me-2"></i>
-                        <strong>Withdrawal Window:</strong> December 1st - 10th
-                    </small>
-                </div>
-
-                <!-- Real Account Balance -->
-                <div class="alert-info-custom mb-4">
-                    <div class="d-flex justify-content-between mb-2">
-                        <small>Available Balance:</small>
-                        <strong id="realBalanceDisplay">₦<%= user.account?.balance?.toLocaleString() || 0 %></strong>
-                    </div>
-                    <small>
-                        <strong>Force Withdrawal:</strong> Available anytime with 
-                        <span class="text-danger">2.5% charge</span> 
-                        (50% now, 50% after 30 days)
-                    </small>
-                </div>
-
-                <form>
-                    <!-- Withdrawal Type -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Withdrawal Type</label>
-                        <select class="form-select" id="withdrawalType" required onchange="updateWithdrawalFee()">
-                            <option value="">Choose withdrawal type...</option>
-                            <option value="regular">Regular Withdrawal (Dec 1-10 only)</option>
-                            <option value="force">Force Withdrawal (2.5% charge)</option>
-                        </select>
-                    </div>
-
-                    <!-- Amount -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Amount (₦)</label>
-                        <input type="number" class="form-control" id="withdrawAmount" placeholder="Enter amount" 
-                               max="<%= user.account?.balance || 0 %>" required onchange="updateWithdrawalFee()">
-                    </div>
-
-                    <!-- Fee Breakdown -->
-                    <div class="mb-3" id="withdrawalFeeInfo" style="display: none;">
-                        <div class="alert-warning-custom">
-
-                            <div class="d-flex justify-content-between mb-1">
-                                <small>Withdrawal Amount:</small>
-                                <strong id="withdrawAmountDisplay">₦0</strong>
-                            </div>
-
-                            <div class="d-flex justify-content-between mb-1">
-                                <small>Initial Charge (2.5%):</small>
-                                <strong id="initialFee">₦0</strong>
-                            </div>
-
-                            <div class="d-flex justify-content-between mb-1">
-                                <small>30-Day Charge (2.5%):</small>
-                                <strong id="secondFee">₦0</strong>
-                            </div>
-
-                            <hr class="my-2">
-                            <div class="d-flex justify-content-between">
-                                <small class="fw-bold">You'll Receive (50% now):</small>
-                                <strong id="netAmount">₦0</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Withdrawal Method -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Withdrawal Method</label>
-                        <select class="form-select" required>
-                            <option value="">Choose method...</option>
-                            <option>Bank Transfer</option>
-                            <option>Cash Pickup</option>
-                            <option>Mobile Money</option>
-                        </select>
-                    </div>
-
-                    <!-- Reason -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Reason for Withdrawal</label>
-                        <textarea class="form-control" rows="2" placeholder="Brief reason" required></textarea>
-                    </div>
-
-                    <div class="alert-info-custom">
-                        <small><i class="fas fa-clock me-2"></i>Processing time: 24-48 hours for regular withdrawals</small>
-                    </div>
-                </form>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="submitWithdrawal()">Submit Request</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-function updateWithdrawalFee() {
-    const type = document.getElementById('withdrawalType').value;
-    const amountInput = document.getElementById('withdrawAmount');
-    const feeInfo = document.getElementById('withdrawalFeeInfo');
-
-    const realBalance = <%= user.account?.balance || 0 %>;
-
-    // FORCE WITHDRAWAL → auto-fill full balance + readonly
-    if (type === 'force') {
-        amountInput.value = realBalance;
-        amountInput.readOnly = true;
-    } else {
-        amountInput.readOnly = false;
-    }
-
-    const amount = parseFloat(amountInput.value) || 0;
-
-    if (!type || amount <= 0) {
-        feeInfo.style.display = 'none';
-        return;
-    }
-
-    let initialFee = 0, secondFee = 0, netAmount = 0;
-
-    if (type === 'force') {
-        initialFee = amount * 0.025;
-        secondFee = amount * 0.025;
-        netAmount = (amount - (initialFee + secondFee)) / 2; // 50% now
-    } else {
-        netAmount = amount;
-    }
-
-    feeInfo.style.display = 'block';
-    document.getElementById('withdrawAmountDisplay').innerText = `₦${amount.toLocaleString()}`;
-    document.getElementById('initialFee').innerText = `₦${initialFee.toLocaleString(undefined, {minimumFractionDigits:2})}`;
-    document.getElementById('secondFee').innerText = `₦${secondFee.toLocaleString(undefined, {minimumFractionDigits:2})}`;
-    document.getElementById('netAmount').innerText = `₦${netAmount.toLocaleString(undefined, {minimumFractionDigits:2})}`;
-}
-</script>
-
-
-
-
-    <!-- Deposit Modal -->
-    <div class="modal fade" id="depositModal" tabindex="-1">
-        <div class="modal-dialog">
-<div class="modal-content" style="border-radius: 20px;">
-  <div class="modal-header" style="border-radius: 20px 20px 0 0;">
-    <h5 class="modal-title fw-bold">
-      <i class="fas fa-plus-circle me-2 text-success"></i>Make Deposit
-    </h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-  </div>
-
-  <div class="modal-body">
-    <form id="depositForm">
-      <div class="mb-3">
-        <label class="form-label fw-semibold">Amount (₦)</label>
-        <input
-          type="number"
-          name="amount"
-          id="depositAmount"
-          class="form-control"
-          placeholder="Enter amount"
-          min="100"
-          required
-        >
-      </div>
-
-      <div class="alert-info-custom">
-        <small>
-          <i class="fas fa-info-circle me-2"></i>
-          Your current savings balance:
-          ₦<%= user.account?.balance?.toLocaleString() || 0 %>
-        </small>
-      </div>
-
-      <div class="modal-footer px-0 pb-0">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-success">Proceed to Deposit</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const depositForm = document.getElementById("depositForm");
-
-  depositForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const amount = parseFloat(document.getElementById("depositAmount").value);
-    if (!amount || amount <= 0) {
-      alert("Please enter a valid deposit amount.");
-      return;
-    }
-
-    try {
-      // Disable the button to prevent multiple clicks
-      const button = depositForm.querySelector("button[type='submit']");
-      button.disabled = true;
-      button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-
-      const response = await fetch("/deposit/init", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount })
-      });
-
-      const result = await response.json();
-
-      if (result.status && result.authorization_url) {
-        window.location.href = result.authorization_url; // Redirect to Paystack
-      } else {
-        alert(result.message || "Error initializing deposit.");
-        button.disabled = false;
-        button.innerHTML = "Proceed to Deposit";
-      }
-    } catch (err) {
-      console.error("Deposit initialization failed:", err);
-      alert("Unable to process deposit. Please try again.");
-      const button = depositForm.querySelector("button[type='submit']");
-      button.disabled = false;
-      button.innerHTML = "Proceed to Deposit";
-    }
-  });
-});
-</script>
-
-
-        </div>
-    </div>
 
     <!-- Payment Modal -->
     <div class="modal fade" id="paymentModal" tabindex="-1">
@@ -1566,19 +1074,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
     </div>
 
-    <!-- Other sections (transactions, savings, profile, referral) remain hidden by default -->
-    <div id="transactions" class="content-section" style="display:none;">
-        <!-- Same transaction section as before but with updated styling -->
-    </div>
-
-    <div id="savings" class="content-section" style="display:none;">
-        <!-- Same savings section as before but with updated styling -->
-    </div>
-
-    <div id="profile" class="content-section" style="display:none;">
-        <!-- Same profile section as before but with updated styling -->
-    </div>
-
+ 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
         // Navigation
