@@ -341,7 +341,7 @@
                 document.getElementById('password').classList.add('shake');
                 setTimeout(() => document.getElementById('password').classList.remove('shake'), 500);
                 isValid = false;
-            } else if (password.length < 6) {
+            } else if (password.length < 3) {
                 passwordError.textContent = 'Password must be at least 6 characters';
                 passwordError.classList.remove('hidden');
                 document.getElementById('password').classList.add('shake');

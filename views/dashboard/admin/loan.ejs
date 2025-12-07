@@ -463,29 +463,41 @@
                 <span>Super Admin</span>
             </div>
         </div>
-        <div class="sidebar-menu">
-            <a href="#dashboard">
+           <div class="sidebar-menu">
+            <a href="/admin-dashboard">
                 <i class="fas fa-home"></i> Dashboard
             </a>
-            <a href="#members">
+
+            <a href="/admin/manage/members">
                 <i class="fas fa-users"></i> Members
             </a>
-            <a href="#transactions">
+            <a href="/admin/manage/memberType">
+                <i class="fas fa-id-card"></i> Membership Types
+            </a>
+            <a href="#" >
                 <i class="fas fa-exchange-alt"></i> Transactions
             </a>
-            <a href="#loans" class="active">
+            <a href="/admin/manage-loan" class="active">
                 <i class="fas fa-hand-holding-usd"></i> Loan Management
             </a>
-            <a href="#roi">
+
+            <a href="/admin/loan/settings">
+                <i class="fas fa-cogs"></i> Loan Settings
+            </a>
+
+            <a href="#" onclick="showSection('roi', event)">
                 <i class="fas fa-chart-pie"></i> ROI Distribution
             </a>
-            <a href="#withdrawals">
+            <a href="#" onclick="showSection('withdrawals', event)">
                 <i class="fas fa-money-check-alt"></i> Withdrawals
             </a>
-            <a href="#reports">
+            <a href="#" onclick="showSection('reports', event)">
                 <i class="fas fa-file-alt"></i> Reports
             </a>
-            <a href="#settings">
+            <a href="#" onclick="showSection('settings', event)">
+                <i class="fas fa-cog"></i> Payments
+            </a>
+            <a href="/admin/settings">
                 <i class="fas fa-cog"></i> Settings
             </a>
             <a href="#" class="mt-3" style="color: rgba(255,255,255,0.6);">
@@ -625,87 +637,109 @@
                                 <th>Member</th>
                                 <th>Type</th>
                                 <th>Amount</th>
-                                <th>Purpose</th>
                                 <th>Interest</th>
                                 <th>Duration</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <small class="fw-semibold">Nov 17, 2025</small>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold">David Wilson</div>
-                                    <small class="text-muted">CDS078</small>
-                                </td>
-                                <td><span class="badge bg-success">Club</span></td>
-                                <td class="fw-bold">₦300,000</td>
-                                <td><small>Business expansion</small></td>
-                                <td><span class="badge bg-info-subtle text-info">5%</span></td>
-                                <td>6 months</td>
-                                <td><span class="badge bg-warning">Pending</span></td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-info" onclick="viewLoanDetails('CDS087-001')" title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="btn btn-danger" onclick="sendReminder('CDS087-001')" title="Send Reminder">
-                                            <i class="fas fa-bell"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <small class="fw-semibold">Nov 13, 2025</small>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold">James Anderson</div>
-                                    <small class="text-muted">NCDS045</small>
-                                </td>
-                                <td><span class="badge bg-warning">Non-Club</span></td>
-                                <td class="fw-bold">₦100,000</td>
-                                <td><small>Personal</small></td>
-                                <td><span class="badge bg-warning-subtle text-warning">10%</span></td>
-                                <td>3 months</td>
-                                <td><span class="badge bg-secondary">Rejected</span></td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-info" onclick="viewLoanDetails('NCDS045-001')" title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <small class="fw-semibold">Nov 12, 2025</small>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold">Patricia White</div>
-                                    <small class="text-muted">CDS156</small>
-                                </td>
-                                <td><span class="badge bg-success">Club</span></td>
-                                <td class="fw-bold">₦250,000</td>
-                                <td><small>Equipment purchase</small></td>
-                                <td><span class="badge bg-info-subtle text-info">5%</span></td>
-                                <td>9 months</td>
-                                <td><span class="badge bg-primary">Rollover</span></td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-info" onclick="viewLoanDetails('CDS156-001')" title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="btn btn-warning" onclick="processRollover('CDS156-001')" title="Process Rollover">
-                                            <i class="fas fa-sync-alt"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
+<tbody>
+<% loans.forEach(loan => { %>
+
+    <% 
+        // Dynamic Account Type
+        const accType = loan?.user?.account?.accountType?.name || "Unknown";
+
+        // Badge text mapping
+        const isClub = accType.toLowerCase().includes("club"); 
+    %>
+
+    <tr>
+
+        <!-- DATE -->
+        <td>
+            <small class="fw-semibold">
+                <%= loan.createdAt.toDateString() %>
+            </small>
+        </td>
+
+        <!-- MEMBER -->
+        <td>
+            <div class="fw-semibold">
+                <%= loan.user.firstName %> <%= loan.user.lastName %>
+            </div>
+            <small class="text-muted"><%= loan.user.membershipID %></small>
+        </td>
+
+        <!-- ACCOUNT TYPE (FULLY DYNAMIC) -->
+        <td>
+            <span class="badge <%= isClub ? 'bg-success' : 'bg-warning' %>">
+                <%= accType %>
+            </span>
+        </td>
+
+        <!-- AMOUNT -->
+        <td class="fw-bold">
+            ₦<%= loan.amount.toLocaleString() %>
+        </td>
+
+       
+
+        <!-- INTEREST RATE (DYNAMIC FROM loan.interestRate) -->
+        <td>
+            <span class="badge 
+                <%= isClub ? 'bg-info-subtle text-info' : 'bg-warning-subtle text-warning' %>">
+                <%= loan.interestRate %>%
+            </span>
+        </td>
+
+        <!-- DURATION (DYNAMIC LoanSettings) -->
+        <td>
+            <%= loan.duration ? loan.duration.duration : 'N/A' %> months
+        </td>
+
+        <!-- STATUS (DYNAMIC BADGE COLORS) -->
+        <td>
+            <% 
+                const statusColors = {
+                    pending: "bg-warning",
+                    approved: "bg-success",
+                    rejected: "bg-danger",
+                    paid: "bg-primary",
+                };
+            %>
+
+            <span class="badge <%= statusColors[loan.status] %>">
+                <%= loan.status.toUpperCase() %>
+            </span>
+        </td>
+
+        <!-- ACTIONS -->
+        <td>
+            <div class="btn-group btn-group-sm">
+           <button class="btn btn-info viewLoanBtn"
+        data-loan='<%- JSON.stringify(loan) %>'
+        title="View Details">
+    <i class="fas fa-eye"></i>
+</button>
+
+
+                <% if (loan.status === "approved") { %>
+                <button class="btn btn-danger"
+                        onclick="sendReminder('<%= loan._id %>')"
+                        title="Send Reminder">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <% } %>
+            </div>
+        </td>
+
+    </tr>
+
+<% }) %>
+</tbody>
+
+
                     </table>
                 </div>
             </div>
@@ -728,265 +762,308 @@
         Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
     </div>
 
-    <!-- View Loan Details Modal -->
-    <div class="modal fade" id="viewLoanModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-file-invoice-dollar me-2"></i>Loan Application Details</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Member Information -->
-                    <div class="alert-info-custom mb-3">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="fw-bold mb-1">David Wilson</h6>
-                                <small>Member ID: CDS078</small><br>
-                                <small>Email: david.wilson@email.com</small><br>
-                                <small>Phone: +234 803 456 7890</small>
-                            </div>
-                            <span class="badge bg-success">Club Member</span>
-                        </div>
-                    </div>
+<div class="modal fade" id="viewLoanModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
+                <h5 class="modal-title fw-bold"><i class="fas fa-file-invoice-dollar me-2"></i>Loan Application Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
 
-                    <!-- Loan Details -->
-                    <h6 class="fw-bold mb-3" style="color: var(--primary);">Loan Information</h6>
-                    <div class="loan-details-grid">
-                        <div class="detail-item">
-                            <div class="detail-label">Loan Amount</div>
-                            <div class="detail-value">₦300,000</div>
+                <!-- Member Information -->
+                <div class="alert-info-custom mb-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="fw-bold mb-1" id="loanMemberName"></h6>
+                            <small id="loanMemberID"></small><br>
+                            <small id="loanMemberEmail"></small><br>
+                            <small id="loanMemberPhone"></small>
                         </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Interest Rate</div>
-                            <div class="detail-value">5%</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Duration</div>
-                            <div class="detail-value">6 Months</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Total Repayment</div>
-                            <div class="detail-value">₦315,000</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Monthly Payment</div>
-                            <div class="detail-value">₦52,500</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Application Date</div>
-                            <div class="detail-value" style="font-size: 0.9rem;">Nov 17, 2025</div>
-                        </div>
-                    </div>
-
-                    <!-- Purpose -->
-                    <div class="mt-3">
-                        <h6 class="fw-bold mb-2" style="color: var(--primary);">Loan Purpose</h6>
-                        <p class="mb-0">Business expansion - Purchase of new equipment and inventory for retail store</p>
-                    </div>
-
-                    <!-- Member Financial Summary -->
-                    <div class="mt-3">
-                        <h6 class="fw-bold mb-2" style="color: var(--primary);">Member Financial Summary</h6>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <div class="alert-success-custom py-2">
-                                    <small class="d-block">Total Savings</small>
-                                    <strong>₦450,000</strong>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="alert-warning-custom py-2">
-                                    <small class="d-block">Current Loans</small>
-                                    <strong>₦200,000</strong>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="alert-info-custom py-2">
-                                    <small class="d-block">Loan Eligibility</small>
-                                    <strong>₦675,000</strong>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="alert-success-custom py-2">
-                                    <small class="d-block">Payment History</small>
-                                    <strong>100% On-time</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Guarantor Information -->
-                    <div class="mt-3">
-                        <h6 class="fw-bold mb-2" style="color: var(--primary);">Guarantor Information</h6>
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <strong>Name:</strong> John Smith<br>
-                                        <strong>Member ID:</strong> CDS023<br>
-                                        <strong>Phone:</strong> +234 802 345 6789
-                                    </div>
-                                    <div class="col-md-6">
-                                        <strong>Email:</strong> john.smith@email.com<br>
-                                        <strong>Relationship:</strong> Business Partner<br>
-                                        <span class="badge bg-success mt-1">Verified</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Admin Notes -->
-                    <div class="mt-3">
-                        <h6 class="fw-bold mb-2" style="color: var(--primary);">Admin Notes</h6>
-                        <textarea class="form-control" rows="3" placeholder="Add notes about this loan application..."></textarea>
+                        <span id="loanAccountBadge" class="badge"></span>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" onclick="rejectLoanFromModal()">
-                        <i class="fas fa-times me-2"></i>Reject
-                    </button>
-                    <button type="button" class="btn btn-success" onclick="approveLoanFromModal()">
-                        <i class="fas fa-check me-2"></i>Approve Loan
-                    </button>
+
+                <!-- Loan Details -->
+                <h6 class="fw-bold mb-3" style="color: var(--primary);">Loan Information</h6>
+                <div class="loan-details-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Loan Amount</div>
+                        <div class="detail-value" id="loanAmount"></div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Interest Rate</div>
+                        <div class="detail-value" id="loanInterest"></div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Duration</div>
+                        <div class="detail-value" id="loanDuration"></div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Total Repayment</div>
+                        <div class="detail-value" id="loanTotalRepay"></div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Application Date</div>
+                        <div class="detail-value" id="loanCreatedAt" style="font-size: 0.9rem;"></div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Repayment Date</div>
+                        <div class="detail-value" id="loanRepayDate" style="font-size: 0.9rem;"></div>
+                    </div>
                 </div>
+
+                <!-- Guarantor Information -->
+                <div class="mt-3">
+                    <h6 class="fw-bold mb-2" style="color: var(--primary);">Guarantor Information</h6>
+                    <div id="guarantorList"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" onclick="rejectLoanFromModal(selectedLoan._id)">
+                    <i class="fas fa-times me-2"></i>Reject
+                </button>
+                <button type="button" class="btn btn-success" onclick="approveLoan(selectedLoan._id)">
+    <i class="fas fa-check me-2"></i>Approve Loan
+</button>
+
             </div>
         </div>
     </div>
+</div>
+<script>
+function viewLoan(loan) {
+    // Member Info
+    document.getElementById("loanMemberName").innerText =
+        `${loan.user.firstName} ${loan.user.lastName}`;
+
+    document.getElementById("loanMemberID").innerText =
+        `Member ID: ${loan.user.membershipID}`;
+
+    document.getElementById("loanMemberEmail").innerText =
+        `Email: ${loan.user.email || 'N/A'}`;
+
+    document.getElementById("loanMemberPhone").innerText =
+        `Phone: ${loan.user.phone || 'N/A'}`;
+
+    // Account Type Badge
+    const accType = loan?.user?.account?.accountType?.name || "Unknown";
+    const badge = document.getElementById("loanAccountBadge");
+
+    badge.innerText = accType;
+    badge.className = "badge " + 
+        (accType.toLowerCase().includes("club") ? "bg-success" : "bg-warning");
+
+    // Loan Details
+    document.getElementById("loanAmount").innerText =
+        "₦" + loan.amount.toLocaleString();
+
+    document.getElementById("loanInterest").innerText =
+        loan.interestRate + "%";
+
+    document.getElementById("loanDuration").innerText =
+        loan.duration?.duration + " Months";
+
+    document.getElementById("loanTotalRepay").innerText =
+        "₦" + loan.totalRepay.toLocaleString();
+
+    const createdDate = new Date(loan.createdAt);
+    document.getElementById("loanCreatedAt").innerText =
+        createdDate.toDateString();
+
+    const repayDate = new Date(createdDate);
+    repayDate.setMonth(repayDate.getMonth() + loan.duration.duration);
+    document.getElementById("loanRepayDate").innerText =
+        repayDate.toDateString();
+
+    // Guarantors Section
+    const gList = document.getElementById("guarantorList");
+    gList.innerHTML = "";
+
+    if (!loan.guarantors || loan.guarantors.length === 0) {
+        gList.innerHTML =
+            `<p class="text-muted">No guarantors attached.</p>`;
+    } else {
+        loan.guarantors.forEach(g => {
+            const bal = g.guarantor?.account?.balance || 0;
+
+            gList.innerHTML += `
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Name:</strong> ${g.guarantor.firstName} ${g.guarantor.lastName}<br>
+                                <strong>Member ID:</strong> ${g.guarantor.membershipID}<br>
+                                <strong>Phone:</strong> ${g.guarantor.phone || 'N/A'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Email:</strong> ${g.guarantor.email || 'N/A'}<br>
+                                <strong>Account Balance:</strong> ₦${bal.toLocaleString()}<br>
+                                <strong>Status:</strong> ${g.status}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // Show Modal
+    const modal = new bootstrap.Modal(document.getElementById("viewLoanModal"));
+    modal.show();
+}
+
+// Global function
+window.viewLoan = viewLoan;
+
+// Dataset-based click handlers
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".viewLoanBtn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const loan = JSON.parse(btn.dataset.loan);
+            viewLoan(loan);
+        });
+    });
+});
+</script>
+
 
     <!-- Approve Loan Modal -->
-    <div class="modal fade" id="approveLoanModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-check-circle me-2" style="color: var(--success);"></i>Approve Loan</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="approveLoanModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-check-circle me-2" style="color: var(--success);"></i>
+                    Approve Loan
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-success-custom mb-3">
+                    <small><i class="fas fa-info-circle me-2"></i><strong>Confirm loan approval</strong></small>
                 </div>
-                <div class="modal-body">
-                    <div class="alert-success-custom mb-3">
-                        <small><i class="fas fa-info-circle me-2"></i><strong>Confirm loan approval</strong></small>
-                    </div>
-                    
-                    <div class="card mb-3" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);">
-                        <div class="card-body">
-                            <h6 class="fw-bold mb-2">Loan Summary</h6>
-                            <div class="row">
-                                <div class="col-6">
-                                    <small class="text-muted">Member:</small><br>
-                                    <strong>David Wilson</strong>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-muted">Amount:</small><br>
-                                    <strong>₦300,000</strong>
-                                </div>
-                                <div class="col-6 mt-2">
-                                    <small class="text-muted">Interest Rate:</small><br>
-                                    <strong>5%</strong>
-                                </div>
-                                <div class="col-6 mt-2">
-                                    <small class="text-muted">Duration:</small><br>
-                                    <strong>6 Months</strong>
-                                </div>
+
+                <div class="card mb-3" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.05));">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-2">Loan Summary</h6>
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">Member:</small><br>
+                                <strong id="approveMemberName"></strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Amount:</small><br>
+                                <strong id="approveLoanAmount"></strong>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <small class="text-muted">Interest Rate:</small><br>
+                                <strong id="approveLoanInterest"></strong>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <small class="text-muted">Duration:</small><br>
+                                <strong id="approveLoanDuration"></strong>
                             </div>
                         </div>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Disbursement Method</label>
-                        <select class="form-select" required>
-                            <option value="">Select method...</option>
-                            <option value="bank">Bank Transfer</option>
-                            <option value="cash">Cash Payment</option>
-                            <option value="check">Cheque</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Disbursement Date</label>
-                        <input type="date" class="form-control" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Approval Notes</label>
-                        <textarea class="form-control" rows="2" placeholder="Optional notes..."></textarea>
-                    </div>
-
-                    <div class="alert-warning-custom">
-                        <small><i class="fas fa-exclamation-triangle me-2"></i>Member will be notified via email and SMS upon approval</small>
-                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-success" onclick="confirmApproval()">
-                        <i class="fas fa-check me-2"></i>Confirm Approval
-                    </button>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Disbursement Method</label>
+                    <select class="form-select" id="disbursementMethod" required>
+                        <option value="">Select method...</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="cash">Cash Payment</option>
+                        <option value="check">Cheque</option>
+                    </select>
                 </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Disbursement Date</label>
+                    <input type="date" class="form-control" id="disbursementDate" required>
+                </div>
+
+                <div class="alert-warning-custom">
+                    <small><i class="fas fa-exclamation-triangle me-2"></i>Notify Member via email and SMS upon approval</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="confirmApproval()">
+                    <i class="fas fa-check me-2"></i>Confirm Approval
+                </button>
             </div>
         </div>
     </div>
+</div>
+
+    
 
     <!-- Reject Loan Modal -->
-    <div class="modal fade" id="rejectLoanModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-times-circle me-2" style="color: var(--danger);"></i>Reject Loan</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="rejectLoanModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-times-circle me-2" style="color: var(--danger);"></i>Reject Loan
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-danger-custom mb-3">
+                    <small>
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Please provide a reason for rejection</strong>
+                    </small>
                 </div>
-                <div class="modal-body">
-                    <div class="alert-danger-custom mb-3">
-                        <small><i class="fas fa-exclamation-triangle me-2"></i><strong>Please provide a reason for rejection</strong></small>
-                    </div>
 
-                    <div class="card mb-3" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 38, 0.05) 100%);">
-                        <div class="card-body">
-                            <h6 class="fw-bold mb-2">Loan Details</h6>
-                            <div class="row">
-                                <div class="col-6">
-                                    <small class="text-muted">Member:</small><br>
-                                    <strong>David Wilson</strong>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-muted">Amount:</small><br>
-                                    <strong>₦300,000</strong>
-                                </div>
+                <div class="card mb-3" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(220, 38, 38, 0.05));">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-2">Loan Details</h6>
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">Member:</small><br>
+                                <strong id="rejectMemberName"></strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Amount:</small><br>
+                                <strong id="rejectLoanAmount"></strong>
                             </div>
                         </div>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Rejection Reason <span class="text-danger">*</span></label>
-                        <select class="form-select mb-2" id="rejectionReason" required>
-                            <option value="">Select reason...</option>
-                            <option value="insufficient_savings">Insufficient Savings Balance</option>
-                            <option value="existing_loan">Outstanding Loan Balance</option>
-                            <option value="poor_history">Poor Repayment History</option>
-                            <option value="incomplete_docs">Incomplete Documentation</option>
-                            <option value="invalid_guarantor">Invalid/Unverified Guarantor</option>
-                            <option value="other">Other (Specify below)</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Additional Details</label>
-                        <textarea class="form-control" rows="3" placeholder="Provide detailed explanation..." required></textarea>
-                    </div>
-
-                    <div class="alert-info-custom">
-                        <small><i class="fas fa-info-circle me-2"></i>Member will receive notification with the rejection reason</small>
-                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" onclick="confirmRejection()">
-                        <i class="fas fa-times me-2"></i>Confirm Rejection
-                    </button>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Rejection Reason <span class="text-danger">*</span></label>
+                    <select class="form-select mb-2" id="rejectionReason" required>
+                        <option value="">Select reason...</option>
+                        <option value="insufficient_savings">Insufficient Savings Balance</option>
+                        <option value="existing_loan">Outstanding Loan Balance</option>
+                        <option value="poor_history">Poor Repayment History</option>
+                        <option value="incomplete_docs">Incomplete Documentation</option>
+                        <option value="invalid_guarantor">Invalid/Unverified Guarantor</option>
+                        <option value="other">Other (Specify below)</option>
+                    </select>
                 </div>
+
+                <div class="alert-info-custom">
+                    <small>
+                        <i class="fas fa-info-circle me-2"></i>
+                        Member will receive notification with the rejection reason
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmRejection()">
+                    <i class="fas fa-times me-2"></i>Confirm Rejection
+                </button>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Rollover Request Modal -->
     <div class="modal fade" id="rolloverModal" tabindex="-1">
@@ -1202,77 +1279,193 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Set current date
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
+<script>
+    let selectedLoan = null;
+
+// When user clicks Approve in View Loan modal
+function approveLoan(loanId) {
+    if (!selectedLoan || selectedLoan._id !== loanId) return;
+
+    // Populate Approve Loan modal fields dynamically
+    document.getElementById("approveMemberName").innerText =
+        `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}`;
+    document.getElementById("approveLoanAmount").innerText =
+        "₦" + selectedLoan.amount.toLocaleString();
+    document.getElementById("approveLoanInterest").innerText =
+        selectedLoan.interestRate + "%";
+    document.getElementById("approveLoanDuration").innerText =
+        selectedLoan.duration.duration + " Months";
+
+    // Reset disbursement fields
+    document.getElementById("disbursementMethod").value = "";
+    document.getElementById("disbursementDate").value = "";
+
+    // Hide view modal and show approve modal
+    const viewModal = bootstrap.Modal.getInstance(document.getElementById("viewLoanModal"));
+    viewModal.hide();
+
+    const approveModal = new bootstrap.Modal(document.getElementById("approveLoanModal"));
+    approveModal.show();
+}
+
+// Confirm Approval
+async function confirmApproval() {
+    if (!selectedLoan) {
+        alert("No loan selected.");
+        return;
+    }
+
+    const method = document.getElementById("disbursementMethod").value;
+    const date = document.getElementById("disbursementDate").value;
+
+    if (!method || !date) {
+        alert("Please select a disbursement method and date.");
+        return;
+    }
+
+    // Prepare payload
+    const payload = {
+        loanId: selectedLoan._id,
+        disbursementMethod: method,
+        disbursementDate: date
+    };
+
+    try {
+        const response = await fetch("/api/loans/approve", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                // Add authorization header if needed, e.g.:
+                // "Authorization": "Bearer YOUR_TOKEN"
+            },
+            body: JSON.stringify(payload)
         });
 
-        // Filter loans function
-        function filterLoans(status) {
-            // Remove active class from all tabs
-            document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Add active class to clicked tab
-            event.target.closest('.filter-tab').classList.add('active');
-            
-            // In a real application, this would filter the table
-            console.log('Filtering by:', status);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to approve loan.");
         }
 
-        // Sort loans function
-        function sortLoans(sortBy) {
-            console.log('Sorting by:', sortBy);
-            // In a real application, this would sort the table
-        }
+        const result = await response.json();
+        console.log("Loan approved successfully:", result);
 
-        // View loan details
-        function viewLoanDetails(loanId) {
-            console.log('Viewing loan:', loanId);
-            const modal = new bootstrap.Modal(document.getElementById('viewLoanModal'));
-            modal.show();
-        }
+        alert(`Loan for ${selectedLoan.user.firstName} approved successfully! Member has been notified.`);
 
-        // Approve loan
-        function approveLoan(loanId) {
-            console.log('Approving loan:', loanId);
-            const modal = new bootstrap.Modal(document.getElementById('approveLoanModal'));
-            modal.show();
-        }
+        // Hide modal
+        const approveModal = bootstrap.Modal.getInstance(document.getElementById("approveLoanModal"));
+        approveModal.hide();
 
-        // Approve loan from modal
-        function approveLoanFromModal() {
-            const viewModal = bootstrap.Modal.getInstance(document.getElementById('viewLoanModal'));
-            viewModal.hide();
-            const approveModal = new bootstrap.Modal(document.getElementById('approveLoanModal'));
-            approveModal.show();
-        }
+        // Optionally, refresh loan list or update UI
+        // loadLoans();
 
-        // Confirm approval
-        function confirmApproval() {
-            alert('Loan approved successfully! Member has been notified.');
-            const modal = bootstrap.Modal.getInstance(document.getElementById('approveLoanModal'));
-            modal.hide();
-        }
+    } catch (error) {
+        console.error("Error approving loan:", error);
+        alert(`Error: ${error.message}`);
+    }
+}
 
-        // Reject loan
-        function rejectLoan(loanId) {
-            console.log('Rejecting loan:', loanId);
-            const modal = new bootstrap.Modal(document.getElementById('rejectLoanModal'));
-            modal.show();
-        }
+
+// Update viewLoan to set selectedLoan
+function viewLoan(loan) {
+    selectedLoan = loan;
+
+    // populate the View Loan modal fields (same as your code)
+    document.getElementById("loanMemberName").innerText =
+        `${loan.user.firstName} ${loan.user.lastName}`;
+    document.getElementById("loanMemberID").innerText = `Member ID: ${loan.user.membershipID}`;
+    document.getElementById("loanMemberEmail").innerText = `Email: ${loan.user.email || 'N/A'}`;
+    document.getElementById("loanMemberPhone").innerText = `Phone: ${loan.user.phone || 'N/A'}`;
+
+    const accType = loan?.user?.account?.accountType?.name || "Unknown";
+    const badge = document.getElementById("loanAccountBadge");
+    badge.innerText = accType;
+    badge.className = "badge " + (accType.toLowerCase().includes("club") ? "bg-success" : "bg-warning");
+
+    document.getElementById("loanAmount").innerText = "₦" + loan.amount.toLocaleString();
+    document.getElementById("loanInterest").innerText = loan.interestRate + "%";
+    document.getElementById("loanDuration").innerText = loan.duration.duration + " Months";
+    document.getElementById("loanTotalRepay").innerText = "₦" + loan.totalRepay.toLocaleString();
+
+    const createdDate = new Date(loan.createdAt);
+    document.getElementById("loanCreatedAt").innerText = createdDate.toDateString();
+    const repayDate = new Date(createdDate);
+    repayDate.setMonth(repayDate.getMonth() + loan.duration.duration);
+    document.getElementById("loanRepayDate").innerText = repayDate.toDateString();
+
+    const gList = document.getElementById("guarantorList");
+    gList.innerHTML = "";
+    if (!loan.guarantors || loan.guarantors.length === 0) {
+        gList.innerHTML = `<p class="text-muted">No guarantors attached.</p>`;
+    } else {
+        loan.guarantors.forEach(g => {
+            const bal = g.guarantor?.account?.balance || 0;
+            gList.innerHTML += `
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Name:</strong> ${g.guarantor.firstName} ${g.guarantor.lastName}<br>
+                                <strong>Member ID:</strong> ${g.guarantor.membershipID}<br>
+                                <strong>Phone:</strong> ${g.guarantor.phone || 'N/A'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Email:</strong> ${g.guarantor.email || 'N/A'}<br>
+                                <strong>Account Balance:</strong> ₦${bal.toLocaleString()}<br>
+                                <strong>Status:</strong> ${g.status}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    }
+
+    // Show the View Loan modal
+    const modal = new bootstrap.Modal(document.getElementById("viewLoanModal"));
+    modal.show();
+}
 
         // Reject loan from modal
-        function rejectLoanFromModal() {
-            const viewModal = bootstrap.Modal.getInstance(document.getElementById('viewLoanModal'));
-            viewModal.hide();
-            const rejectModal = new bootstrap.Modal(document.getElementById('rejectLoanModal'));
-            rejectModal.show();
-        }
+// Reject loan from modal
+function rejectLoanFromModal() {
+    if (!selectedLoan) return;
 
-      </script>
+    // Populate Reject Loan modal dynamically
+    document.getElementById("rejectMemberName").innerText =
+        `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}`;
+    document.getElementById("rejectLoanAmount").innerText =
+        "₦" + selectedLoan.amount.toLocaleString();
+
+    // Reset form fields
+    document.getElementById("rejectionReason").value = "";
+    document.getElementById("rejectionDetails").value = "";
+
+    // Hide View Loan modal and show Reject Loan modal
+    const viewModal = bootstrap.Modal.getInstance(document.getElementById("viewLoanModal"));
+    viewModal.hide();
+
+    const rejectModal = new bootstrap.Modal(document.getElementById("rejectLoanModal"));
+    rejectModal.show();
+}
+
+// Confirm Rejection
+function confirmRejection() {
+    const reason = document.getElementById("rejectionReason").value;
+    const details = document.getElementById("rejectionDetails").value.trim();
+
+    if (!reason || !details) {
+        alert("Please provide a rejection reason and additional details.");
+        return;
+    }
+
+    console.log("Loan rejected:", selectedLoan._id, reason, details);
+
+    alert(`Loan for ${selectedLoan.user.firstName} has been rejected.`);
+
+    const rejectModal = bootstrap.Modal.getInstance(document.getElementById("rejectLoanModal"));
+    rejectModal.hide();
+}
+
+</script>
+
+</body>
+</html>

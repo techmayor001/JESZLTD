@@ -440,8 +440,9 @@
                 <% } %>
             </a>
 
-            <a href="/club-de-star-cooperative/roiCalculator">
-                <i class="fas fa-chart-line"></i> ROI Calculator
+                 <!-- KIDDIES ACCOUNT  -->
+            <a href="/club-de-star-cooperative/profile">
+                <i class="fas fa-users"></i> Kiddies Account
             </a>
             <a href="/club-de-star-cooperative/profile">
                 <i class="fas fa-user-circle"></i> My Profile
@@ -498,9 +499,10 @@
                             <div class="member-badge club-member-badge">
                                 <i class="fas fa-star"></i>
                                 <span>
-                                    <%= user.membershipID && user.membershipID.startsWith('CD') ? '5%' : '10%' %> Loan Interest Rate
+                                    <%= interestRate %>% Loan Interest Rate
                                 </span>
                             </div>
+
                         </div>
                     </div>
                     <div class="col-md-4 text-md-end mt-3 mt-md-0">
@@ -542,72 +544,83 @@
 
             <p class="text-muted mb-1 fw-semibold">Eligible Loan Amount</p>
 
-            <!-- Eligibility = 3 × savings if monthsSinceJoin >= 3 -->
+            <!-- Eligibility = 3 × savings -->
             <h3 class="mb-2 fw-bold">
-                ₦<%= monthsSinceJoin >= 3 
-                    ? (user.account.balance * 3).toLocaleString()
-                    : "0" %>
+                ₦<%= (user.account.balance * 3).toLocaleString() %>
             </h3>
 
             <small class="text-success fw-semibold">
                 <i class="fas fa-info-circle me-1"></i>
-                <%= monthsSinceJoin >= 3 
-                    ? "Eligible"
-                    : `Available after ${3 - monthsSinceJoin} month(s)` %>
+                Available
             </small>
         </div>
     </div>
 
 
 
-    <!-- ACTIVE LOAN -->
-    <div class="col-lg-4 col-md-6">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
-                <i class="fas fa-hand-holding-usd"></i>
-            </div>
+<!-- ACTIVE LOAN -->
+<div class="col-lg-4 col-md-6">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+            <i class="fas fa-hand-holding-usd"></i>
+        </div>
 
-            <p class="text-muted mb-1 fw-semibold">Active Loan</p>
+        <p class="text-muted mb-1 fw-semibold">Active Loan</p>
 
-            <h3 class="mb-2 fw-bold">
-                ₦<%= loan ? loan.amount.toLocaleString() : "0" %>
-            </h3>
+        <h3 class="mb-2 fw-bold">
+            ₦<%= loan && loan.amount ? loan.amount.toLocaleString() : "0" %>
+        </h3>
 
+        <% if (loan) { %>
             <small class="text-warning fw-semibold">
                 <i class="fas fa-clock me-1"></i>
-                Status: <%= loan ? loan.status.toUpperCase() : "NONE" %>
+                Status: <%= loan.status.toUpperCase() %>
             </small>
-        </div>
+        <% } else { %>
+            <small class="text-secondary fw-semibold">
+                No active loan
+            </small>
+        <% } %>
     </div>
+</div>
 
 
 
-    <!-- NEXT PAYMENT -->
-    <div class="col-lg-4 col-md-6">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
-                <i class="fas fa-calendar-check"></i>
-            </div>
 
-            <p class="text-muted mb-1 fw-semibold">Next Payment</p>
 
-            <h3 class="mb-2 fw-bold">
-                ₦<%= loan?.nextPayment?.amount 
-                    ? loan.nextPayment.amount.toLocaleString() 
-                    : "0" %>
-            </h3>
+    <!-- TOTAL PAYMENT -->
+<div class="col-lg-4 col-md-6">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+            <i class="fas fa-calendar-check"></i>
+        </div>
 
-            <small style="color: var(--primary);" class="fw-semibold">
-                <i class="fas fa-calendar me-1"></i>
+        <p class="text-muted mb-1 fw-semibold">Total Payment</p>
+
+        <h3 class="mb-2 fw-bold">
+            <% if (loan && loan.status === "approved") { %>
+                ₦<%= loan.totalRepay.toLocaleString() %>
+            <% } else { %>
+                ₦0
+            <% } %>
+        </h3>
+
+        <small style="color: var(--primary);" class="fw-semibold">
+            <i class="fas fa-calendar me-1"></i>
+
+            <% if (loan && loan.status === "approved" && dueDate) { %>
                 Due 
-                <%= loan?.nextPayment?.dueDate
-                    ? new Date(loan.nextPayment.dueDate).toLocaleDateString("en-US", {
-                        month: "short", day: "numeric", year: "numeric"
-                      })
-                    : "N/A" %>
-            </small>
-        </div>
+                <%= new Date(dueDate).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                }) %>
+            <% } else { %>
+                No due date
+            <% } %>
+        </small>
     </div>
+</div>
 
 </div>
 
@@ -661,24 +674,30 @@
                                         </div>
                                         <div class="col-md-3 col-6">
                                             <small class="text-muted d-block">Outstanding</small>
-                                            <h6 class="mb-0 fw-bold text-danger">₦<%= loan.outstandingBalance.toLocaleString() %></h6>
+                                            <h6 class="mb-0 fw-bold text-danger">₦<%= loan.totalRepay.toLocaleString() %></h6>
                                         </div>
                                         <div class="col-md-3 col-6">
                                             <small class="text-muted d-block">Interest Amount</small>
-                                            <h6 class="mb-0 fw-bold">₦<%= loan.amount * (user.account.accountType === "CD" ? 0.05 : 0.1) %></h6>
+                                            <h6 class="mb-0 fw-bold">
+                                                ₦<%= (loan.amount * (user.account?.accountType?.interestRate || 0) / 100).toLocaleString() %>
+                                            </h6>
                                         </div>
+
                                         <div class="col-md-3 col-6">
                                             <small class="text-muted d-block">Interest Rate</small>
                                             <h6 class="mb-0 fw-bold"><%= interestRate %>% p.a.</h6>
                                         </div>
                                     </div>
-
                                     <div class="alert-warning-custom mb-3">
                                         <small>
                                             <i class="fas fa-exclamation-triangle me-2"></i>
-                                            <strong>Payment Due in <%= loan.daysUntilDue || '-' %> days!</strong> Avoid 0.5% daily penalty
+                                            <strong>
+                                                Payment Due in <%= daysUntilDue ?? '-' %> days!
+                                            </strong>
+                                            Avoid <%= loan.duration.penaltyPercentage %>% daily penalty
                                         </small>
                                     </div>
+
 
                                     <div class="mb-3">
                                         <div class="d-flex justify-content-between mb-2">
@@ -707,100 +726,77 @@
                                 <% } %>
                             </div>
                         </div>
-
-
-                            <!-- Loan History -->
-                            <h6 class="mb-3 text-muted fw-semibold">Loan History</h6>
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1 fw-semibold">Emergency Loan #L000</h6>
-                                            <small class="text-muted">Jan 10, 2024 - Dec 20, 2024</small>
-                                        </div>
-                                        <div class="text-end">
-                                            <h6 class="mb-1 fw-bold">₦300,000</h6>
-                                            <span class="badge bg-success-subtle text-success px-3 py-2">Fully Paid</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-lg-4">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h6 class="mb-3 fw-bold" style="color: var(--primary);"><i class="fas fa-calculator me-2"></i>Loan Calculator</h6>
-                            <form>
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Loan Amount (₦)</label>
-                                    <input type="number" class="form-control" id="calcAmount" placeholder="100000" onchange="calculateLoan()">
-                                    <small class="text-muted">Max: ₦<%= user.account?.balance 
-                                ? (user.account.balance * 3).toLocaleString() 
-                                : '0' %></small>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Duration (months)</label>
-                                    <select class="form-select" id="calcDuration" onchange="calculateLoan()">
-                                        <option value="1" selected>1 months</option>
-                                        <option disabled value="2">2 months</option>
-                                        <option disabled value="3">3 months</option>
-                                        <option disabled value="4">4 months</option>
-                                        <option disabled value="5">5 months</option>
-                                        <option disabled value="6">6 months</option>
-                                        <option disabled value="7">7 months</option>
-                                        <option disabled value="8">8 months</option>
-                                        <option disabled value="9">9 months</option>
-                                        <option disabled value="10">10 months</option>
-                                        <option disabled value="11">11 months</option>
-                                    </select>
-                                </div>
-                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Interest Rate (%)</label>
-                                <input type="number" class="form-control" id="calcRate" readonly step="0.1">
-                                <small id="rateInfo" class="text-success"><i class="fas fa-star me-1"></i></small>
-                            </div>
+                 <div class="card mb-4">
+    <div class="card-body">
+        <h6 class="mb-3 fw-bold" style="color: var(--primary);">
+            <i class="fas fa-calculator me-2"></i>Loan Calculator
+        </h6>
 
-                            <script>
-                                const accountType = "<%= user.account.accountType %>";
-                                const calcRateInput = document.getElementById('calcRate');
-                                const rateInfo = document.getElementById('rateInfo');
+        <form>
+            <!-- AMOUNT -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Loan Amount (₦)</label>
+                <input type="number" class="form-control" id="calcAmount"
+                       placeholder="100000" onchange="calculateLoan()">
 
-                                if(accountType === 'CD') {
-                                    calcRateInput.value = 5;
-                                    rateInfo.textContent = "Club Member Rate";
-                                    rateInfo.classList.remove('text-danger');
-                                    rateInfo.classList.add('text-success');
-                                } else if(accountType === 'NCD') {
-                                    calcRateInput.value = 10;
-                                    rateInfo.textContent = "Non-Club Member Rate";
-                                    rateInfo.classList.remove('text-success');
-                                    rateInfo.classList.add('text-danger');
-                                } else {
-                                    calcRateInput.value = 0;
-                                    rateInfo.textContent = "Unknown Account Type";
-                                }
-                            </script>
+                <small class="text-muted">
+                    Max: ₦<%= user.account?.balance 
+                        ? (user.account.balance * 3).toLocaleString() 
+                        : '0' %>
+                </small>
+            </div>
 
-                            </form>
-                            <div class="alert-info-custom" id="calcResult" style="display:none;">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <small class="fw-semibold">Monthly Payment:</small>
-                                    <strong id="monthlyPay">₦0</strong>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <small class="fw-semibold">Total Interest:</small>
-                                    <strong id="totalInt">₦0</strong>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <small class="fw-semibold">Total Repayment:</small>
-                                    <strong id="totalRep">₦0</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- DURATION (DYNAMIC FROM SETTINGS) -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Duration (months)</label>
+                <select class="form-select" id="calcDuration" onchange="calculateLoan()">
+                    <% loanSettings.forEach(setting => { %>
+                        <% if(setting.status === 'active') { %>
+                            <option value="<%= setting.duration %>">
+                                <%= setting.loanName %> — <%= setting.duration %> months
+                            </option>
+                        <% } %>
+                    <% }) %>
+                </select>
+            </div>
+
+            <!-- INTEREST RATE -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Interest Rate (%)</label>
+                <input type="number" class="form-control" id="calcRate"
+                       value="<%= user.account.accountType.interestRate %>"
+                       readonly>
+
+                <small id="rateInfo" class="text-success">
+                    <i class="fas fa-star me-1"></i>
+                    <%= user.account.accountType.name %> Rate
+                </small>
+            </div>
+        </form>
+
+        <!-- RESULT -->
+        <div class="alert-info-custom" id="calcResult" style="display:none;">
+            <div class="d-flex justify-content-between mb-2">
+                <small class="fw-semibold">Monthly Payment:</small>
+                <strong id="monthlyPay">₦0</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <small class="fw-semibold">Total Interest:</small>
+                <strong id="totalInt">₦0</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+                <small class="fw-semibold">Total Repayment:</small>
+                <strong id="totalRep">₦0</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
 
                     <div class="card">
                         <div class="card-body">
@@ -860,13 +856,6 @@ function copyReferralLink() {
 
             <div class="modal-body">
 
-                <div class="alert-info-custom mb-3">
-                    <small>
-                        <strong>Maximum Eligible:</strong> ₦<%= (user.account.balance * 3).toLocaleString() %> 
-                        (3x your savings of ₦<%= user.account.balance.toLocaleString() %>)
-                    </small>
-                </div>
-
                 <div class="alert-warning-custom mb-4">
                     <small>
                         <i class="fas fa-exclamation-triangle me-2"></i>
@@ -874,33 +863,85 @@ function copyReferralLink() {
                     </small>
                 </div>
 
-                <form action="/club-de-star-cooperative/apply-loan" method="POST">
+                <% 
+                    const now = new Date();
+                    const joinDate = new Date(user.createdAt);
+
+                    const isEligibleForLoan = (unit, value) => {
+                        if (unit === "daily") return true;
+                        let elapsed;
+                        switch(unit) {
+                            case "weeks":
+                                elapsed = Math.floor((now - joinDate) / (1000*60*60*24*7));
+                                break;
+                            case "months":
+                                elapsed = (now.getFullYear() - joinDate.getFullYear()) * 12 + (now.getMonth() - joinDate.getMonth());
+                                break;
+                            default:
+                                elapsed = 0;
+                        }
+                        return elapsed >= value;
+                    };
+
+                    const eligibleLoan = loanSettings.find(ls => 
+                        ls.status === "active" && isEligibleForLoan(ls.eligibilityUnit, ls.eligibilityValue)
+                    );
+
+                    const isEligible = !!eligibleLoan;
+
+                    // ---- NEW: Block loan application if user already has a loan ----
+                    const canApply = isEligible && !loan;
+                %>
+
+                <% if (loan) { %>
+                    <div class="alert alert-danger mb-3">
+                        <i class="fas fa-ban me-2"></i>
+                        You already have an active or pending loan. You cannot apply for a new loan until it is fully cleared.
+                    </div>
+                <% } %>
+
+                <% if (!isEligible && !loan) { %>
+                    <div class="alert alert-danger mb-3">
+                        You are not eligible to apply for a loan yet. Remain on the platform for the required duration.
+                    </div>
+                <% } %>
+
+                <form id="loanForm" action="/club-de-star-cooperative/apply-loan" method="POST">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Loan Amount (₦)</label>
                             <input type="number" class="form-control" name="amount"
                                    max="<%= user.account.balance * 3 %>" 
                                    placeholder="Enter amount" 
-                                   required>
+                                   required
+                                   <%= !canApply ? "disabled" : "" %>>
                             <small class="text-muted">Max: ₦<%= (user.account.balance * 3).toLocaleString() %></small>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Repayment Period</label>
-                            <select class="form-select" name="duration" required>
-                                <option value="1" selected>1 month</option>
-                                <!-- <option value="3">3 months (Special Loan)</option>
-                                <option value="6">6 months (Special Loan)</option>
-                                <option value="11">11 months (Special Loan)</option> -->
+                            <select class="form-select" name="duration" required <%= !canApply ? "disabled" : "" %>>
+                                <% loanSettings.forEach(setting => { %>
+                                    <% if (setting.status === "active") { %>
+                                        <option value="<%= setting._id %>"
+                                            <%= !isEligibleForLoan(setting.eligibilityUnit, setting.eligibilityValue) ? "disabled" : "" %>>
+                                            <%= setting.loanName %> - <%= setting.duration %> months
+                                            <% if(setting.eligibilityUnit !== 'daily' && !isEligibleForLoan(setting.eligibilityUnit, setting.eligibilityValue)) { %>
+                                                (Not yet eligible)
+                                            <% } %>
+                                        </option>
+                                    <% } %>
+                                <% }) %>
                             </select>
                         </div>
                     </div>
 
-                    <!-- GUARANTORS DROPDOWNS -->
+                    <!-- GUARANTORS -->
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Guarantor 1</label>
-                            <select class="form-select" name="guarantor1" required>
+                            <select id="guarantor1" class="form-select guarantorSelect" 
+                                name="guarantor1" required <%= !canApply ? "disabled" : "" %>>
                                 <option value="">Select guarantor...</option>
                                 <% users.forEach(u => { if(u._id.toString() !== user._id.toString()){ %>
                                     <option value="<%= u._id %>"><%= u.firstName %> — <%= u.phone %></option>
@@ -910,7 +951,8 @@ function copyReferralLink() {
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Guarantor 2</label>
-                            <select class="form-select" name="guarantor2" required>
+                            <select id="guarantor2" class="form-select guarantorSelect" 
+                                name="guarantor2" required <%= !canApply ? "disabled" : "" %>>
                                 <option value="">Select guarantor...</option>
                                 <% users.forEach(u => { if(u._id.toString() !== user._id.toString()){ %>
                                     <option value="<%= u._id %>"><%= u.firstName %> — <%= u.phone %></option>
@@ -920,17 +962,21 @@ function copyReferralLink() {
                     </div>
 
                     <div class="form-check mt-3">
-                        <input class="form-check-input" type="checkbox" name="agreeTerms" id="agreeTerms" required>
+                        <input class="form-check-input" type="checkbox" name="agreeTerms" id="agreeTerms" 
+                            required <%= !canApply ? "disabled" : "" %>>
                         <label class="form-check-label" for="agreeTerms">
-                            I agree to the loan terms: 5% interest rate for CD, 10% for NCD, 0.5% daily penalty for late payment.
+                            I agree to the loan terms: 
+                            <%= user.account.accountType.name %> account — <%= user.account.accountType.interestRate %>% interest rate,
+                            0.5% daily penalty for late payment.
                         </label>
                     </div>
 
                     <div class="modal-footer mt-4">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Submit Application</button>
+                        <button type="submit" class="btn btn-primary" <%= !canApply ? "disabled" : "" %>>
+                            Submit Application
+                        </button>
                     </div>
-
                 </form>
 
             </div>
@@ -939,77 +985,146 @@ function copyReferralLink() {
     </div>
 </div>
 
-
-<!-- JS: Prevent selecting same guarantor twice -->
 <script>
-document.querySelectorAll('.guarantorSelect').forEach(select => {
-    select.addEventListener('change', function() {
+    // Prevent selecting the same guarantor twice
+    document.querySelectorAll('.guarantorSelect').forEach(select => {
+        select.addEventListener('change', function() {
+            const g1 = document.getElementById('guarantor1').value;
+            const g2 = document.getElementById('guarantor2').value;
+
+            if (g1 && g2 && g1 === g2) {
+                alert("You cannot select the same guarantor twice.");
+                this.value = "";
+            }
+        });
+    });
+
+    document.getElementById('loanForm').addEventListener('submit', function(e) {
         const g1 = document.getElementById('guarantor1').value;
         const g2 = document.getElementById('guarantor2').value;
 
         if (g1 && g2 && g1 === g2) {
             alert("You cannot select the same guarantor twice.");
-            this.value = "";
+            e.preventDefault();
         }
     });
-});
 </script>
 
 
 
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: 20px;">
+            <div class="modal-header" style="border-radius: 20px 20px 0 0;">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-credit-card me-2 text-primary"></i>Make Loan Payment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
 
-    <!-- Payment Modal -->
-    <div class="modal fade" id="paymentModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content" style="border-radius: 20px;">
-                <div class="modal-header" style="border-radius: 20px 20px 0 0;">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2" style="color: var(--primary);"></i>Make Loan Payment</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="card mb-3" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted fw-semibold">Outstanding Balance</span>
-                                    <strong>₦200,000</strong>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted fw-semibold">Next Payment Due</span>
-                                    <strong class="text-danger">₦8,750</strong>
-                                </div>
+            <div class="modal-body">
+                <form id="loanPaymentForm">
+                    <div class="card mb-3" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted fw-semibold">Outstanding Balance</span>
+                                <strong>
+                                    ₦<%= loan ? loan.totalRepay.toLocaleString() : '0' %>
+                                </strong>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Payment Amount (₦)</label>
-                            <input type="number" class="form-control" value="8750" min="8750" max="200000" required>
-                            <small class="text-muted">Minimum payment: ₦8,750</small>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Payment Amount (₦)</label>
+                        <input 
+                            type="number" 
+                            name="amount"
+                            id="paymentAmount" 
+                            class="form-control" 
+                            value="<%= loan ? Math.ceil(loan.totalRepay / 12) : 0 %>" 
+                            min="<%= loan ? Math.ceil(loan.totalRepay / 12) : 0 %>" 
+                            max="<%= loan ? loan.totalRepay : 0 %>" 
+                            required
+                        >
+                        <small class="text-muted">
+                            Minimum payment: ₦<%= loan ? Math.ceil(loan.totalRepay / 12).toLocaleString() : '0' %>
+                        </small>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Payment Method</label>
-                            <select class="form-select" required>
-                                <option value="">Choose payment method...</option>
-                                <option>Bank Transfer</option>
-                                <option>Debit Card</option>
-                                <option>Deduct from Savings</option>
-                                <option>Cash Payment</option>
-                            </select>
-                        </div>
+                    <input type="hidden" name="loanId" value="<%= loan ? loan._id : '' %>">
+                    <input type="hidden" name="dueDate" value="<%= loan ? loan.dueDate.toISOString() : '' %>">
 
-                        <div class="alert-warning-custom">
-                            <small><i class="fas fa-exclamation-triangle me-2"></i><strong>Due in 3 days!</strong> Avoid 0.5% daily penalty</small>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="submitPayment()">Make Payment</button>
-                </div>
+                    <div class="alert-warning-custom">
+                        <small>
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>
+                                Due 
+                                <%= loan ? new Date(loan.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A' %>!
+                            </strong> 
+                            Avoid 0.5% daily penalty
+                        </small>
+                    </div>
+
+                    <div class="modal-footer px-0 pb-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Make Payment</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("loanPaymentForm");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const amount = parseFloat(document.getElementById("paymentAmount").value);
+        const loanId = form.querySelector('input[name="loanId"]').value;
+        const dueDate = form.querySelector('input[name="dueDate"]').value;
+
+        if (!amount || amount <= 0) {
+            alert("Please enter a valid payment amount.");
+            return;
+        }
+
+        const button = form.querySelector("button[type='submit']");
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+        try {
+            const response = await fetch("/loan/payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount, loanId, dueDate })
+            });
+
+            const result = await response.json();
+
+            if (result.status && result.authorization_url) {
+                // redirect to Paystack if backend returns URL
+                window.location.href = result.authorization_url;
+            } else if (result.status) {
+                alert("Payment successful!");
+                window.location.reload();
+            } else {
+                alert(result.message || "Failed to process payment.");
+                button.disabled = false;
+                button.innerHTML = "Make Payment";
+            }
+        } catch (err) {
+            console.error("Loan payment failed:", err);
+            alert("Unable to process payment. Please try again.");
+            button.disabled = false;
+            button.innerHTML = "Make Payment";
+        }
+    });
+});
+</script>
 
     <!-- Rollover Modal -->
     <div class="modal fade" id="rolloverModal" tabindex="-1">
@@ -1024,51 +1139,52 @@ document.querySelectorAll('.guarantorSelect').forEach(select => {
                         <h6 class="fw-bold mb-2">Rollover Requirements</h6>
                         <ul class="small mb-0 ps-3">
                             <li class="mb-2">Pay current month's interest before expiration</li>
-                            <li class="mb-2">Interest rate increases by 1% (from 5% to 6%)</li>
+                            <li class="mb-2">Interest rate increases by <%= loan.duration.rolloverPercentage %> %</li>
                             <li class="mb-0">Request must be approved before due date</li>
                         </ul>
                     </div>
-                    <form>
+                    <form action="/club-de-star-cooperative/rollover-loan" method="POST">
                         <div class="card mb-3" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="text-muted fw-semibold">Current Outstanding</span>
-                                    <strong>₦200,000</strong>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted fw-semibold">Interest to Pay</span>
-                                    <strong>₦8,750</strong>
+                                    <strong>₦<%= loan.totalRepay.toLocaleString() %></strong>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <span class="text-muted fw-semibold">New Interest Rate</span>
-                                    <strong class="text-warning">6% p.a.</strong>
+                                    <strong class="text-warning">
+                                    <%= loan.duration.rolloverPercentage + loan.interestRate %>% p.a.
+                                    </strong>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Extended Duration (months)</label>
-                            <select class="form-select" required>
-                                <option value="">Choose duration...</option>
-                                <option value="3">3 months</option>
-                                <option value="6">6 months</option>
-                                <option value="12">12 months</option>
+                            <select class="form-select" name="duration" required>
+                            <% loanSettings.forEach(setting => { %>
+                                <option value="<%= setting._id %>">
+                                <%= setting.loanName %> — <%= setting.duration %> months
+                                </option>
+                            <% }) %>
                             </select>
-                        </div>
 
+
+                        </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Reason for Rollover</label>
-                            <textarea class="form-control" rows="2" placeholder="Brief reason" required></textarea>
+                            <label class="form-label fw-semibold">Loan Amount (₦)</label>
+                            <input type="number" class="form-control" name="amount"
+                                   value="<%= loan.totalRepay %>" 
+                                   readonly 
+                                   required
+                                   >
+                            <small class="text-muted">Max: ₦<%= (user.account.balance * 3).toLocaleString() %></small>
                         </div>
-
-                        <div class="alert-warning-custom">
-                            <small><i class="fas fa-info-circle me-2"></i>Interest payment of ₦8,750 will be processed immediately upon approval</small>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-warning">Submit Rollover Request</button>
                         </div>
                     </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-warning" onclick="submitRollover()">Submit Rollover Request</button>
                 </div>
             </div>
         </div>
@@ -1108,35 +1224,43 @@ document.querySelectorAll('.guarantorSelect').forEach(select => {
         }
 
         // Loan Calculator
-function calculateLoan() {
-    const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
-    const duration = parseInt(document.getElementById('calcDuration').value) || 1;
-    const rate = parseFloat(document.getElementById('calcRate').value) || 5;
 
-    if (amount > 0) {
+    function calculateLoan() {
+        const amountInput = document.getElementById('calcAmount');
+        const durationInput = document.getElementById('calcDuration');
+        const rateInput = document.getElementById('calcRate');
+
+        const amount = parseFloat(amountInput.value) || 0;
+        const duration = parseInt(durationInput.value) || 1;
+        const rate = parseFloat(rateInput.value) || 0;
+
+        // Max loan amount
         const maxLoan = parseFloat("<%= user.account.balance %>") * 3;
 
         if (amount > maxLoan) {
             alert(`Loan amount exceeds your max eligible amount of ₦${maxLoan.toLocaleString()}`);
-            document.getElementById('calcAmount').value = maxLoan;
+            amountInput.value = maxLoan;
             return;
         }
 
-        // Interest for ONE MONTH ONLY
-        const interest = (amount * rate) / 100;
+        if (amount <= 0) return;
 
-        // Total repayment
+        // Interest is based on selected duration
+        const interest = (amount * (rate / 100)) * duration;
+
         const total = amount + interest;
-
-        // Monthly payment
         const monthly = total / duration;
 
         document.getElementById('calcResult').style.display = 'block';
-        document.getElementById('monthlyPay').textContent = '₦' + monthly.toLocaleString('en-NG', { maximumFractionDigits: 2 });
-        document.getElementById('totalInt').textContent = '₦' + interest.toLocaleString('en-NG', { maximumFractionDigits: 2 });
-        document.getElementById('totalRep').textContent = '₦' + total.toLocaleString('en-NG', { maximumFractionDigits: 2 });
+        document.getElementById('monthlyPay').textContent =
+            '₦' + monthly.toLocaleString('en-NG', { minimumFractionDigits: 2 });
+
+        document.getElementById('totalInt').textContent =
+            '₦' + interest.toLocaleString('en-NG', { minimumFractionDigits: 2 });
+
+        document.getElementById('totalRep').textContent =
+            '₦' + total.toLocaleString('en-NG', { minimumFractionDigits: 2 });
     }
-}
 
         // Withdrawal Fee Calculator
 
@@ -1187,12 +1311,6 @@ function calculateLoan() {
             bootstrap.Modal.getInstance(document.getElementById('loanRequestModal')).hide();
         }
 
-        function submitRollover() {
-            if (confirm('This will pay ₦8,750 interest and extend your loan with 6% interest rate. Continue?')) {
-                alert('✅ Rollover request submitted!\n\nInterest payment of ₦8,750 will be processed.\nNew interest rate: 6% p.a.\nYou will be notified once approved.');
-                bootstrap.Modal.getInstance(document.getElementById('rolloverModal')).hide();
-            }
-        }
 
         // Animation on load
         document.addEventListener('DOMContentLoaded', function() {

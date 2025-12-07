@@ -1,0 +1,2425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membership Management | Club De Stars Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        .page-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            transition: transform 0.3s;
+            height: 100%;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+        }
+        
+        .table-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .filter-section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+        
+        .table thead th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+        
+        .badge {
+            padding: 0.5rem 0.875rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .action-btn {
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.3);
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            padding-left: 2.5rem;
+            border-radius: 10px;
+            border: 2px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+        }
+        
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+        }
+        
+        .modal-header {
+            border-radius: 20px 20px 0 0;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control,
+        .form-select {
+            border-radius: 10px;
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 0.65rem 1rem;
+        }
+        
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.1);
+        }
+        
+        .pagination {
+            margin-top: 1.5rem;
+        }
+        
+        .page-link {
+            color: var(--primary);
+            border-radius: 8px;
+            margin: 0 0.25rem;
+            border: 2px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .page-link:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .page-item.active .page-link {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .document-preview {
+            width: 100%;
+            max-width: 200px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .document-preview:hover {
+            transform: scale(1.05);
+        }
+        
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        
+        @media (max-width: 1200px) {
+            .table {
+                font-size: 0.9rem;
+            }
+            
+            .action-btn {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .page-header {
+                padding: 1.5rem;
+            }
+            
+            .stat-card {
+                padding: 1.25rem;
+            }
+            
+            .filter-section {
+                padding: 1rem;
+            }
+            
+            /* Make table scrollable on mobile */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .table {
+                min-width: 800px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+            
+            .stat-card h3 {
+                font-size: 1.5rem;
+            }
+            
+            .page-header h3 {
+                font-size: 1.5rem;
+            }
+            
+            .filter-section .row {
+                gap: 0.5rem;
+            }
+            
+            .btn-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            
+            .action-btn {
+                width: 100%;
+            }
+            
+            .member-avatar {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .doc-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 0.75rem;
+                margin-top: 60px;
+            }
+            
+            .page-header {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .filter-section {
+                padding: 0.75rem;
+            }
+            
+            .table {
+                font-size: 0.8rem;
+            }
+            
+            .table thead th {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .table tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .badge {
+                font-size: 0.65rem;
+                padding: 0.35rem 0.6rem;
+            }
+            
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+            
+            .modal-body {
+                padding: 1rem;
+            }
+        }
+    </style>
+        <style>
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+            transform: translateX(0);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+        
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(239, 68, 68, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 70px;
+            padding: 1.5rem;
+            min-height: calc(100vh - 70px);
+            transition: all 0.3s;
+        }
+        
+        .welcome-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            background: white;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 1.25rem;
+            border-radius: 16px 16px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .table {
+            font-size: 0.9rem;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            white-space: nowrap;
+        }
+        
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .powered-by {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+
+        .membership-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: 2px solid rgba(30, 58, 138, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .membership-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        }
+
+        .membership-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+
+        .membership-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .membership-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .membership-price {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .membership-features {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+
+        .membership-features li {
+            padding: 0.5rem 0;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .membership-features li i {
+            color: var(--success);
+            font-size: 0.85rem;
+        }
+
+        .membership-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+
+        .btn-outline-primary {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-danger {
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            background: transparent;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-outline-danger:hover {
+            background: var(--danger);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .welcome-card {
+                padding: 1.5rem;
+            }
+            
+            .stat-card {
+                padding: 1.25rem;
+            }
+            
+            .powered-by {
+                bottom: 10px;
+                right: 10px;
+                font-size: 0.7rem;
+                padding: 8px 12px;
+            }
+            
+            .table-responsive {
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .top-navbar {
+                height: 60px;
+                padding: 0 1rem;
+            }
+            
+            .main-content {
+                margin-top: 60px;
+                padding: 0.75rem;
+            }
+            
+            .welcome-card {
+                padding: 1.25rem;
+                border-radius: 16px;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4rem;
+            }
+            
+            .card-header {
+                padding: 1rem;
+            }
+            
+            .sidebar-header {
+                padding: 1.25rem;
+            }
+            
+            .logo-box {
+                width: 40px;
+                height: 40px;
+                font-size: 1.25rem;
+            }
+            
+            .sidebar-title {
+                font-size: 1rem;
+            }
+
+            .membership-card {
+                padding: 1.25rem;
+            }
+
+            .membership-price {
+                font-size: 1.5rem;
+            }
+
+            .membership-actions {
+                flex-direction: column;
+            }
+
+            .membership-actions button {
+                width: 100%;
+            }
+        }
+        
+        .modal-content {
+            border-radius: 16px;
+        }
+        
+        .modal-header {
+            border-radius: 16px 16px 0 0;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-spinner.active {
+            display: flex;
+        }
+
+        .content-section {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.15);
+        }
+
+        .feature-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-input-group input {
+            flex: 1;
+        }
+
+        #featuresList {
+            margin-top: 0.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-item span {
+            flex: 1;
+        }
+
+        .feature-item button {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+/* ---------- DESKTOP DEFAULTS ---------- */
+#sidebar {
+    transform: translateX(0); /* Always visible on desktop */
+}
+
+/* Overlay hidden on desktop */
+.sidebar-overlay {
+    display: none;
+}
+
+/* ---------- MOBILE BEHAVIOR ---------- */
+@media (max-width: 992px) {
+
+    /* Sidebar hidden by default on mobile */
+    #sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 1040;
+        height: 100vh;
+    }
+
+    /* Sidebar open state */
+    #sidebar.active {
+        transform: translateX(0);
+    }
+
+    /* Overlay only on mobile */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(0,0,0,0.4);
+        z-index: 1035;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    /* Navbar moves to full width on mobile */
+    .top-navbar {
+        left: 0 !important;
+    }
+
+    /* Main content shifts */
+    .main-content {
+        margin-left: 0 !important;
+    }
+}
+.section-title {
+    color: var(--primary);
+}
+
+.doc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 20px;
+}
+
+.document-preview {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.document-preview:hover {
+    transform: scale(1.05);
+}
+
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">C</div>
+                <div>
+                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                </div>
+            </div>
+            <div class="admin-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>Super Admin</span>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="/admin-dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="/admin/manage/members" class="active">
+                <i class="fas fa-users"></i> Members
+            </a>
+            <a href="/admin/manage/memberType">
+                <i class="fas fa-id-card"></i> Membership Types
+            </a>
+            <a href="#">
+                <i class="fas fa-exchange-alt"></i> Transactions
+            </a>
+            <a href="#">
+                <i class="fas fa-hand-holding-usd"></i> Loan Management
+            </a>
+            <a href="#">
+                <i class="fas fa-chart-pie"></i> ROI Distribution
+            </a>
+            <a href="#">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="#">
+                <i class="fas fa-file-alt"></i> Reports
+            </a>
+            <a href="#">
+                <i class="fas fa-cog"></i> Payments
+            </a>
+            <a href="#">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="#" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+       <i class="fas fa-bars d-lg-none me-3"
+   style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+   onclick="toggleSidebar()"></i>
+
+        
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Membership Type Management</h5>
+            <small class="text-muted">Create and manage membership tiers and benefits</small>
+        </div>
+    </div>
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Mobile Menu Toggle -->
+        <button class="btn btn-primary d-lg-none mb-3" onclick="toggleSidebar()">
+            <i class="fas fa-bars me-2"></i>Menu
+        </button>
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h3 class="mb-1 fw-bold" style="color: var(--primary);">
+                        <i class="fas fa-users me-2"></i>Member Management
+                    </h3>
+                    <p class="text-muted mb-0">Manage all cooperative members and their accounts</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('addMemberModal')">
+                    <i class="fas fa-user-plus me-2"></i><span class="d-none d-sm-inline">Add New </span>Member
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold">Total Members</p>
+                    <h3 class="mb-0 fw-bold" id="totalMembers">0</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold">Active Members</p>
+                    <h3 class="mb-0 fw-bold text-primary" id="activeMembers">0</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                        <i class="fas fa-user-clock"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold">Pending Approval</p>
+                    <h3 class="mb-0 fw-bold text-warning" id="pendingMembers">0</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold">Rejected</p>
+                    <h3 class="mb-0 fw-bold text-danger" id="rejectedMembers">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-section">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label">Search Members</label>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search by name, email, or ID...">
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="pending">Pending</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label">Member Type</label>
+                    <select class="form-select" id="typeFilter">
+                        <option value="">All Types</option>
+                        <% memberTypes.forEach(type => { %>
+                            <option value="<%= type.shortCode %>"><%= type.name %> (<%= type.shortCode %>)</option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label">Sort By</label>
+                    <select class="form-select" id="sortFilter">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="name">Name (A-Z)</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <button class="btn btn-outline-primary w-100" onclick="resetFilters()">
+                        <i class="fas fa-redo me-2"></i>Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Members Table -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                            </th>
+                            <th>Member</th>
+                            <th>Member ID</th>
+                            <th>Type</th>
+                            <th>Contact</th>
+                            <th>Status</th>
+                            <th>Balance</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="membersTableBody">
+                        <!-- Sample Data - Replace with dynamic data -->
+                        <tr>
+                            <td><input type="checkbox" class="member-checkbox" data-id="1"></td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="https://ui-avatars.com/api/?name=John+Doe&background=1e3a8a&color=fff" 
+                                         alt="Avatar" class="member-avatar">
+                                    <div>
+                                        <div class="fw-semibold">John Doe</div>
+                                        <small class="text-muted">john.doe@email.com</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-primary-subtle text-primary">CDS001234</span></td>
+                            <td><span class="badge" style="background: #10b981; color: white;">Club Member</span></td>
+                            <td>
+                                <div class="small">
+                                    <div><i class="fas fa-phone me-1"></i> 080-1234-5678</div>
+                                    <div class="text-muted"><i class="fas fa-map-marker-alt me-1"></i> Lagos, Nigeria</div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-success">Active</span></td>
+                            <td><strong>₦450,000</strong></td>
+                            <td>Jan 15, 2024</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="action-btn btn btn-sm btn-primary" onclick="viewMember(1)" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn btn btn-sm btn-warning" onclick="editMember(1)" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn btn btn-sm btn-danger" onclick="deleteMember(1)" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="member-checkbox" data-id="2"></td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=f59e0b&color=fff" 
+                                         alt="Avatar" class="member-avatar">
+                                    <div>
+                                        <div class="fw-semibold">Jane Smith</div>
+                                        <small class="text-muted">jane.smith@email.com</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-warning-subtle text-warning">NCDS005678</span></td>
+                            <td><span class="badge" style="background: #f59e0b; color: white;">Non-Club</span></td>
+                            <td>
+                                <div class="small">
+                                    <div><i class="fas fa-phone me-1"></i> 080-9876-5432</div>
+                                    <div class="text-muted"><i class="fas fa-map-marker-alt me-1"></i> Abuja, Nigeria</div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-warning">Pending</span></td>
+                            <td><strong>₦0</strong></td>
+                            <td>Dec 10, 2024</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="action-btn btn btn-sm btn-success" onclick="approveMember(2)" title="Approve">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="action-btn btn btn-sm btn-danger" onclick="rejectMember(2)" title="Reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <button class="action-btn btn btn-sm btn-primary" onclick="viewMember(2)" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="p-3 border-top">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div class="text-muted">
+                        Showing <strong>1-10</strong> of <strong>45</strong> members
+                    </div>
+                    <nav>
+                        <ul class="pagination mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">4</a></li>
+                            <li class="page-item"><a class="page-link" href="#">5</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- View Member Modal -->
+<div class="modal fade" id="viewMemberModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <!-- Header -->
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user me-2"></i> Member Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <div class="row g-4">
+
+                    <!-- Left Column -->
+                    <div class="col-lg-4 text-center">
+                        <img id="view_avatar"
+                             class="rounded-circle mb-3"
+                             style="width: 150px; height: 150px; object-fit: cover;">
+                        
+                        <h5 class="fw-bold" id="view_fullname"></h5>
+                        <p class="text-muted mb-1" id="view_membershipId"></p>
+                        <span class="badge mb-3" id="view_status_badge"></span>
+
+                        <div class="d-grid gap-2 mt-3">
+                            <button class="btn btn-primary btn-sm" id="editMemberBtn">
+                                <i class="fas fa-edit me-2"></i>Edit Member
+                            </button>
+                            <button class="btn btn-danger btn-sm" id="deleteMemberBtn">
+                                <i class="fas fa-trash me-2"></i>Delete Member
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-lg-8">
+
+                        <!-- PERSONAL INFO -->
+                        <h6 class="fw-bold mb-3 section-title">Personal Information</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <small class="text-muted">Email</small>
+                                <strong id="view_email"></strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">Phone</small>
+                                <strong id="view_phone"></strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">Date of Birth</small>
+                                <strong id="view_dob"></strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">State / LGA</small>
+                                <strong id="view_state_lga"></strong>
+                            </div>
+                            <div class="col-12">
+                                <small class="text-muted">Address</small>
+                                <strong id="view_address"></strong>
+                            </div>
+                        </div>
+
+                        <!-- BANK INFO -->
+                        <h6 class="fw-bold mb-3 section-title">Bank Details</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <small class="text-muted">Bank Name</small>
+                                <strong id="view_bankName"></strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">Account Number</small>
+                                <strong id="view_accountNumber"></strong>
+                            </div>
+                            <div class="col-md-12">
+                                <small class="text-muted">Account Name</small>
+                                <strong id="view_accountName"></strong>
+                            </div>
+                        </div>
+
+                        <!-- DOCUMENTS -->
+                        <h6 class="fw-bold mb-3 section-title">KYC Documents</h6>
+                        <div id="view_documents" class="doc-grid mb-4"></div>
+
+                        <!-- NEXT OF KIN -->
+                        <h6 class="fw-bold mb-3 section-title">Next of Kin</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <small class="text-muted">Full Name</small>
+                                <strong id="view_nok_name"></strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">Relationship</small>
+                                <strong id="view_nok_relationship"></strong>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">Phone</small>
+                                <strong id="view_nok_phone"></strong>
+                            </div>
+                            <div class="col-md-12">
+                                <small class="text-muted">Address</small>
+                                <strong id="view_nok_address"></strong>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Document Preview Modal -->
+<div class="modal fade" id="documentModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="doc_title"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <iframe id="doc_frame" style="width:100%; height:80vh; border:0;"></iframe>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+    <!-- Document Viewer Modal -->
+    <!-- <div class="modal fade" id="documentViewerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="documentTitle">Document</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center p-0">
+                    <img id="documentImage" src="" class="img-fluid" style="max-height: 80vh;">
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Edit Member Modal -->
+    <div class="modal fade" id="editMemberModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Member</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editMemberForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" value="John" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" value="Doe" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" value="john.doe@email.com" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" value="08012345678" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Member Type</label>
+                                <select class="form-select" required>
+                                    <option value="CD" selected>Club Member (CD) - 5% Interest</option>
+                                    <option value="NCD">Non-Club Member (NCD) - 10% Interest</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" required>
+                                    <option value="active" selected>Active</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">State</label>
+                                <input type="text" class="form-control" value="Lagos" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">LGA</label>
+                                <input type="text" class="form-control" value="Victoria Island" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Address</label>
+                                <textarea class="form-control" rows="2" required>123 Main Street, Victoria Island, Lagos</textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveEditMember()">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+<div class="modal fade" id="addMemberModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Add New Member</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addMemberForm" enctype="multipart/form-data">
+                    <div class="row g-3">
+
+                        <!-- User Details -->
+                        <div class="col-md-6">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="firstName" class="form-control" placeholder="Enter first name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="lastName" class="form-control" placeholder="Enter last name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="member@email.com" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" name="phone" class="form-control" placeholder="080-XXXX-XXXX" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" name="dob" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Member Type</label>
+                            <select name="memberTypeId" class="form-select" required>
+                                <option value="">Select type...</option>
+                                <% memberTypes.forEach(type => { %>
+                                    <option value="<%= type.id %>"><%= type.name %> (<%= type.shortCode %>) - <%= type.interestRate %>% ROI</option>
+                                <% }) %>
+                            </select>
+                        </div>
+
+                        <!-- Address & ID -->
+                        <div class="col-md-6">
+                            <label class="form-label">State</label>
+                            <input type="text" name="state" class="form-control" placeholder="Enter state" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">LGA</label>
+                            <input type="text" name="lga" class="form-control" placeholder="Enter LGA" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Address</label>
+                            <textarea name="address" class="form-control" rows="2" placeholder="Enter full address" required></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">ID Type</label>
+                            <select name="idType" class="form-select" required>
+                                <option value="">Select ID type...</option>
+                                <option value="nin">NIN</option>
+                                <option value="passport">International Passport</option>
+                                <option value="drivers">Driver's License</option>
+                                <option value="voters">Voter's Card</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">ID Number</label>
+                            <input type="text" name="idNumber" class="form-control" placeholder="Enter ID number" required>
+                        </div>
+
+                        <!-- File uploads -->
+                        <div class="col-md-6">
+                            <label class="form-label">Proof of Address</label>
+                            <input type="file" name="addressProof" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Passport Photo</label>
+                            <input type="file" name="passportPhoto" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">ID Document</label>
+                            <input type="file" name="idFile" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Signature</label>
+                            <input type="file" name="signature" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Display Picture (optional)</label>
+                            <input type="file" name="displayPicture" class="form-control">
+                        </div>
+
+                        <!-- Bank & account -->
+                       
+                        <div class="col-md-4">
+                            <label class="form-label">Opening Balance</label>
+                            <input type="number" name="openingBalance" class="form-control" placeholder="Enter opening balance" value="0" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Monthly ROI</label>
+                            <input type="number" name="monthlyROI" class="form-control" placeholder="e.g. 5">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Accumulative ROI</label>
+                            <input type="number" name="accumulativeROI" class="form-control" placeholder="Default 0" value="0">
+                        </div>
+
+                        <!-- Password -->
+                        <div class="col-12">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveNewMember()">
+                    <i class="fas fa-save me-2"></i>Add Member
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Are you sure you want to delete this member? This action cannot be undone.</p>
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <small><i class="fas fa-info-circle me-2"></i>All associated data including savings, loans, and transactions will be permanently deleted.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                        <i class="fas fa-trash me-2"></i>Delete Member
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Actions Modal -->
+    <div class="modal fade" id="bulkActionsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-tasks me-2"></i>Bulk Actions</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Selected: <strong id="selectedCount">0</strong> members</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success" onclick="bulkApprove()">
+                            <i class="fas fa-check me-2"></i>Approve Selected
+                        </button>
+                        <button class="btn btn-warning" onclick="bulkChangeType()">
+                            <i class="fas fa-exchange-alt me-2"></i>Change Member Type
+                        </button>
+                        <button class="btn btn-danger" onclick="bulkDelete()">
+                            <i class="fas fa-trash me-2"></i>Delete Selected
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approve Member Modal -->
+    <div class="modal fade" id="approveMemberModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-user-check me-2"></i>Approve Member</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Important:</strong> You must assign a membership type before approving this member.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-star me-2" style="color: var(--primary);"></i>Select Membership Type
+                        </label>
+                        <select class="form-select" id="approvalMemberType" required>
+                            <option value="">Choose membership type...</option>
+
+                            <% memberTypes.forEach(type => { %>
+                                <option 
+                                    value="<%= type._id %>"
+                                    data-short="<%= type.shortCode %>"
+                                    data-rate="<%= type.interestRate %>"
+                                >
+                                    <%= type.name %> (<%= type.shortCode %>) - <%= type.interestRate %>% Interest Rate
+                                </option>
+                            <% }) %>
+                        </select>
+
+                        <small class="text-muted d-block mt-2">
+                            <% memberTypes.forEach(type => { %>
+                                <strong><%= type.shortCode %> Members:</strong>
+                                <%= type.name %> — <%= type.interestRate %>% Loan Interest Rate<br>
+                            <% }) %>
+                        </small>
+
+                    </div>
+
+                    <div class="card" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%); border: 2px solid rgba(30, 58, 138, 0.1);">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-2">Member Information</h6>
+                            <div class="row g-2 small">
+                                <div class="col-6">
+                                    <strong>Name:</strong>
+                                </div>
+                                <div class="col-6 text-end" id="approvalMemberName">-</div>
+                                <div class="col-6">
+                                    <strong>Email:</strong>
+                                </div>
+                                <div class="col-6 text-end" id="approvalMemberEmail">-</div>
+                                <div class="col-6">
+                                    <strong>Phone:</strong>
+                                </div>
+                                <div class="col-6 text-end" id="approvalMemberPhone">-</div>
+                                <div class="col-6">
+                                    <strong>Registration Status:</strong>
+                                </div>
+                                <div class="col-6 text-end" id="approvalRegStatus">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <small>
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Once approved, the member will receive email notification and can access their dashboard.
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="confirmApproval()">
+                        <i class="fas fa-check me-2"></i>Approve Member
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+let members = <%- JSON.stringify(users.map(u => {
+    const account = u.account || null; // Make sure account exists
+    return {
+        id: String(u._id),
+        firstName: u.firstName || "",
+        lastName: u.lastName || "",
+        email: u.email || "",
+        phone: u.phone || "",
+        dob: u.dob || null,
+        memberID: u.membershipID || (account?.memberID || "N/A"),
+        // type uses account.accountType.shortCode if available, else fallback
+        type: account?.accountType?.shortCode || "N/A",
+        status: u.status || "pending",
+        registrationStatus: u.registrationStatus || "pending",
+        balance: account?.balance || 0,
+        state: u.state || "",
+        lga: u.lga || "",
+        address: u.address || "",
+        joinDate: u.createdAt || new Date(),
+        // Photos & documents
+        displayPicture: u.displayPicture || null,
+        passportPhoto: u.passportPhoto || null,
+        idFile: u.idFile || null,
+        addressProof: u.addressProof || null,
+        signature: u.signature || null,
+        // bank & nextOfKin
+        bankDetails: u.bankDetails || {},
+        nextOfKin: u.nextOfKin || {},
+        // Include the account with populated accountType for dynamic badge
+        account: account ? {
+            memberID: account.memberID || "N/A",
+            balance: account.balance || 0,
+            accountType: account.accountType ? {
+                name: account.accountType.name,
+                shortCode: account.accountType.shortCode,
+                interestRate: account.accountType.interestRate
+            } : null
+        } : null,
+        // include raw user object if you need more later
+        _raw: u
+    };
+})) %>;
+
+
+
+    let memberTypes = <%- JSON.stringify(memberTypes.map(m => ({
+        id: m._id,
+        name: m.name,
+        shortCode: m.shortCode,
+        interestRate: m.interestRate
+    }))) %>;
+
+        let currentMemberId = null;
+        let selectedMembers = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            renderMembers();
+            attachFilterListeners();
+        });
+
+        // Update statistics
+        function updateStats() {
+            const total = members.length;
+            const active = members.filter(m => m.status === 'active').length;
+            const pending = members.filter(m => m.status === 'pending').length;
+            const rejected = members.filter(m => m.status === 'rejected').length;
+
+            document.getElementById('totalMembers').textContent = total;
+            document.getElementById('activeMembers').textContent = active;
+            document.getElementById('pendingMembers').textContent = pending;
+            document.getElementById('rejectedMembers').textContent = rejected;
+        }
+
+        // Render members table
+        function renderMembers(filteredMembers = members) {
+            const tbody = document.getElementById('membersTableBody');
+            tbody.innerHTML = '';
+
+            if (filteredMembers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No members found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filteredMembers.forEach(member => {
+                const row = document.createElement('tr');
+                
+function getMemberTypeBadge(member) {
+    const account = member.account;
+    const type = account && account.accountType;
+
+    if (!type) {
+        return `
+            <span class="badge" style="background:#6b7280; color:white;">
+                No Membership
+            </span>
+        `;
+    }
+
+    const typeName = type.name;
+    const shortCode = type.shortCode; 
+
+    // Assign colors dynamically
+    const colors = {
+        CDS: "#10b981",      // green
+        NCDS: "#f59e0b",     // orange
+        DEFAULT: "#6366f1"   // indigo
+    };
+
+    const color = colors[shortCode] || colors.DEFAULT;
+
+    return `
+        <span class="badge" style="background:${color}; color:white;">
+            ${typeName}
+        </span>
+    `;
+}
+
+                
+                const statusBadge = {
+                    'active': '<span class="badge bg-success">Active</span>',
+                    'pending': '<span class="badge bg-warning">Pending</span>',
+                    'rejected': '<span class="badge bg-danger">Rejected</span>'
+                }[member.status];
+
+            const typeBadge = getMemberTypeBadge(member);
+
+
+                const actionButtons = member.status === 'pending'
+                    ? `
+                        <button class="action-btn btn btn-sm btn-success" onclick="showApprovalModal('${member.id}')" title="Approve">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="action-btn btn btn-sm btn-danger" onclick="rejectMember('${member.id}')" title="Reject">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    `
+                    : `
+                        <button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn btn btn-sm btn-warning" onclick="showApprovalModal('${member.id}')" title="Approve">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn btn btn-sm btn-danger" onclick="deleteMember('${member.id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+
+                row.innerHTML = `
+                    <td><input type="checkbox" class="member-checkbox" data-id="${member.id}" onchange="updateSelection()"></td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="${member.displayPicture}" alt="Avatar" class="member-avatar">
+                            <div>
+                                <div class="fw-semibold">${member.firstName} ${member.lastName}</div>
+                                <small class="text-muted">${member.email}</small>
+                            </div>
+                        </div>
+                    </td>
+                   <td>
+    <span class="badge bg-primary-subtle text-primary">
+        ${member.memberID || '-'}
+    </span>
+</td>
+<td>
+    ${getMemberTypeBadge(member)}
+</td>
+
+                    <td>
+                        <div class="small">
+                            <div><i class="fas fa-phone me-1"></i> ${member.phone}</div>
+                            <div class="text-muted"><i class="fas fa-map-marker-alt me-1"></i> ${member.state}, Nigeria</div>
+                        </div>
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td><strong>₦${member.balance.toLocaleString()}</strong></td>
+                    <td>${new Date(member.joinDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                    <td>
+                        <div class="btn-group">
+                            ${actionButtons}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Filter functionality
+        function attachFilterListeners() {
+            const searchInput = document.getElementById('searchInput');
+            const statusFilter = document.getElementById('statusFilter');
+            const typeFilter = document.getElementById('typeFilter');
+            const sortFilter = document.getElementById('sortFilter');
+
+            [searchInput, statusFilter, typeFilter, sortFilter].forEach(element => {
+                element.addEventListener('change', applyFilters);
+                if (element === searchInput) {
+                    element.addEventListener('keyup', applyFilters);
+                }
+            });
+        }
+
+        function applyFilters() {
+            let filtered = [...members];
+
+            // Search filter
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm) {
+                filtered = filtered.filter(m => 
+                    m.firstName.toLowerCase().includes(searchTerm) ||
+                    m.lastName.toLowerCase().includes(searchTerm) ||
+                    m.email.toLowerCase().includes(searchTerm) ||
+                    m.memberID.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Status filter
+            const status = document.getElementById('statusFilter').value;
+            if (status) {
+                filtered = filtered.filter(m => m.status === status);
+            }
+
+            // Type filter
+            const type = document.getElementById('typeFilter').value;
+            if (type) {
+                filtered = filtered.filter(m => m.type === type);
+            }
+
+            // Sort
+            const sort = document.getElementById('sortFilter').value;
+            if (sort === 'newest') {
+                filtered.sort((a, b) => new Date(b.joinDate) - new Date(a.joinDate));
+            } else if (sort === 'oldest') {
+                filtered.sort((a, b) => new Date(a.joinDate) - new Date(b.joinDate));
+            } else if (sort === 'name') {
+                filtered.sort((a, b) => a.firstName.localeCompare(b.firstName));
+            }
+
+            renderMembers(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('sortFilter').value = 'newest';
+            renderMembers();
+        }
+
+        // Selection management
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.member-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            updateSelection();
+        }
+
+        function updateSelection() {
+            const checkboxes = document.querySelectorAll('.member-checkbox:checked');
+            selectedMembers = Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
+            
+            if (selectedMembers.length > 0) {
+                // Show bulk actions button or notification
+                console.log('Selected members:', selectedMembers);
+            }
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            const modal = new bootstrap.Modal(document.getElementById(modalId));
+            modal.show();
+        }
+
+        function viewDocument(src, title) {
+            document.getElementById('documentImage').src = src;
+            document.getElementById('documentTitle').textContent = title;
+            openModal('documentViewerModal');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+function viewMember(id) {
+    const member = members.find(m => m.id == id);
+    if (!member) return;
+
+    // Avatar: prefer displayPicture, then passportPhoto, then ui-avatar
+    const avatarUrl = member.displayPicture || member.passportPhoto ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(member.firstName + ' ' + member.lastName)}&background=1e3a8a&color=fff&size=150`;
+
+    document.getElementById("view_avatar").src = avatarUrl;
+    document.getElementById("view_fullname").innerText = `${member.firstName} ${member.lastName}`.trim() || "No name";
+    document.getElementById("view_membershipId").innerText = member.memberID || "No ID";
+
+    // Status badge
+    const statusBadgeEl = document.getElementById("view_status_badge");
+    statusBadgeEl.className = "badge " + (member.status === "active" ? "bg-success" : member.status === "pending" ? "bg-warning" : "bg-danger");
+    statusBadgeEl.innerText = member.status ? member.status.charAt(0).toUpperCase() + member.status.slice(1) : "Unknown";
+
+    // Personal Info
+    document.getElementById("view_email").innerText = member.email || "---";
+    document.getElementById("view_phone").innerText = member.phone || "---";
+    document.getElementById("view_dob").innerText = member.dob ? (new Date(member.dob)).toLocaleDateString() : "---";
+    document.getElementById("view_state_lga").innerText = (member.state || "---") + (member.lga ? (", " + member.lga) : "");
+    document.getElementById("view_address").innerText = member.address || "---";
+
+    // Bank Details (show dashes if empty)
+    document.getElementById("view_bankName").innerText = member.bankDetails?.bankName || "---";
+    document.getElementById("view_accountNumber").innerText = member.bankDetails?.accountNumber || "---";
+    document.getElementById("view_accountName").innerText = member.bankDetails?.accountName || "---";
+
+    // Next of Kin
+    document.getElementById("view_nok_name").innerText = member.nextOfKin?.fullName || "---";
+    document.getElementById("view_nok_relationship").innerText = member.nextOfKin?.relationship || "---";
+    document.getElementById("view_nok_phone").innerText = member.nextOfKin?.phone || "---";
+    document.getElementById("view_nok_address").innerText = member.nextOfKin?.address || "---";
+
+function normalizeDocPath(p) {
+  if (!p) return null;
+  // convert backslashes → forward slashes
+  p = p.replace(/\\/g, "/");
+
+  // remove "public" if files are served from /media/ not /public/media/
+  if (p.startsWith("public/")) {
+    p = p.replace("public/", "/");
+  }
+
+  // ensure it begins with a /
+  if (!p.startsWith("/")) {
+    p = "/" + p;
+  }
+
+  return p;
+}
+
+    // Build documents list (only include existing ones)
+const docs = [
+  { label: "Passport Photo", src: normalizeDocPath(member.passportPhoto) },
+  { label: "ID Document",    src: normalizeDocPath(member.idFile) },
+  { label: "Address Proof",  src: normalizeDocPath(member.addressProof) },
+  { label: "Signature",      src: normalizeDocPath(member.signature) },
+];
+
+
+    const docContainer = document.getElementById("view_documents");
+    docContainer.innerHTML = "";
+
+    docs.forEach(doc => {
+        if (!doc.src) return; // skip missing
+
+        // create element: thumbnail clickable to preview
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = `
+            <small class="text-muted d-block mb-2">${doc.label}</small>
+            <div class="doc-thumb" style="cursor:pointer">
+                <img src="${doc.src}" class="document-preview" alt="${doc.label}">
+            </div>
+        `;
+        // attach click handler to open preview
+        wrapper.querySelector('.doc-thumb').addEventListener('click', () => viewDocument(doc.src, doc.label));
+        docContainer.appendChild(wrapper);
+    });
+
+    // Wire Edit/Delete buttons
+    document.getElementById("editMemberBtn").onclick = () => editMember(id);
+    document.getElementById("deleteMemberBtn").onclick = () => deleteMember(id);
+
+    // Show modal
+    new bootstrap.Modal(document.getElementById('viewMemberModal')).show();
+}
+
+
+// Document Preview
+function viewDocument(url, title) {
+    const docTitle = document.getElementById("doc_title");
+    const docFrame = document.getElementById("doc_frame");
+    docTitle.innerText = title || "Document Preview";
+
+    // If PDF -> load in iframe (works if served with correct headers)
+    // If image -> use data URL in iframe OR open in new tab for best UX
+    // For other unknown types, open in new tab
+    const lower = url.split('?')[0].toLowerCase();
+    if (lower.endsWith(".pdf")) {
+        docFrame.src = url;
+        new bootstrap.Modal(document.getElementById("documentModal")).show();
+    } else if (lower.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/)) {
+        // show image inside iframe (works) or use an <img> inside modal — we use iframe for simplicity
+        docFrame.src = url;
+        new bootstrap.Modal(document.getElementById("documentModal")).show();
+    } else {
+        // Unknown file type — try to open in new tab (safer fallback)
+        window.open(url, "_blank");
+    }
+}
+
+
+
+        function editMember(id) {
+            currentMemberId = id;
+            const member = members.find(m => m.id == id);
+            if (!member) return;
+
+            // Populate edit form with member data
+            // This is simplified - you would populate all fields
+            openModal('editMemberModal');
+        }
+
+        function deleteMember(id) {
+            currentMemberId = id;
+            openModal('deleteConfirmModal');
+        }
+
+async function confirmDelete() {
+    try {
+        const response = await fetch(`/members/delete/${currentMemberId}`, {
+            method: "POST",
+        });
+
+        const result = await response.json();
+
+        if (result.status) {
+            members = members.filter(m => m.id !== currentMemberId);
+            updateStats();
+            renderMembers();
+            bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+            alert("Member deleted successfully!");
+        } else {
+            alert(result.message || "Failed to delete member.");
+        }
+    } catch (err) {
+        console.error("Error deleting member:", err);
+        alert("An error occurred while deleting member.");
+    }
+}
+
+
+        function showApprovalModal(id) {
+            currentMemberId = id;
+            const member = members.find(m => m.id == id);
+            if (!member) return;
+
+            // Populate member info in approval modal
+            document.getElementById('approvalMemberName').textContent = `${member.firstName} ${member.lastName}`;
+            document.getElementById('approvalMemberEmail').textContent = member.email;
+            document.getElementById('approvalMemberPhone').textContent = member.phone;
+            document.getElementById('approvalRegStatus').textContent = member.registrationStatus;
+            document.getElementById('approvalMemberType').value = '';
+
+            openModal('approveMemberModal');
+        }
+
+async function confirmApproval() {
+    const memberTypeId = document.getElementById('approvalMemberType').value;
+
+    if (!memberTypeId) {
+        alert("❌ Please select a membership type before approving!");
+        return;
+    }
+
+    if (!currentMemberId) {
+        alert("❌ No member selected!");
+        return;
+    }
+
+    // Make Request to Backend
+    try {
+        const response = await fetch(`/admin/members/approve/${currentMemberId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ memberTypeId })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(`❌ Error: ${result.message}`);
+            return;
+        }
+
+        // Close Modal
+        bootstrap.Modal.getInstance(
+            document.getElementById("approveMemberModal")
+        ).hide();
+
+        // Success Message
+        alert(`✅ Member approved successfully!
+Membership Type: ${result.memberTypeName}
+Member ID: ${result.membershipID}
+Email notification sent to: ${result.email}`);
+
+        // Reload page to update UI
+        location.reload();
+
+    } catch (err) {
+        console.error("Approval error:", err);
+        alert("❌ Server error approving member");
+    }
+}
+
+
+        function approveMember(id) {
+            showApprovalModal(id);
+        }
+async function rejectMember(id) {
+    if (!confirm('Are you sure you want to delete this member? This action cannot be undone.')) return;
+
+    try {
+        const response = await fetch(`/admin/members/delete/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.status) {
+            // Remove member from the local members array
+            const index = members.findIndex(m => m.id === id);
+            if (index !== -1) {
+                members.splice(index, 1);
+                updateStats();
+                renderMembers();
+            }
+            alert('Member deleted successfully!');
+        } else {
+            alert(`Failed to delete member: ${result.message}`);
+        }
+    } catch (err) {
+        console.error('Error deleting member:', err);
+        alert('An error occurred while deleting the member.');
+    }
+}
+
+        function saveEditMember() {
+            // Send PUT request to API with form data
+            // Update local data
+            alert('Member updated successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('editMemberModal')).hide();
+            renderMembers();
+        }
+
+        async function saveNewMember() {
+            const form = document.getElementById("addMemberForm");
+            const formData = new FormData(form);
+
+            for (let pair of formData.entries()) {
+                console.log(pair[0], pair[1]);
+            }
+
+            try {
+                const response = await fetch("/add", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.status) {
+                    alert("New member added successfully!");
+                    bootstrap.Modal.getInstance(document.getElementById('addMemberModal')).hide();
+                } else {
+                    alert(result.message || "Failed to add member.");
+                }
+            } catch (error) {
+                console.error("Error adding member:", error);
+                alert("An error occurred while adding member.");
+            }
+        }
+
+
+        // Bulk actions
+        function bulkApprove() {
+            if (selectedMembers.length === 0) {
+                alert('Please select members first');
+                return;
+            }
+            if (confirm(`Approve ${selectedMembers.length} members?`)) {
+                selectedMembers.forEach(id => {
+                    const member = members.find(m => m.id == id);
+                    if (member) member.status = 'active';
+                });
+                updateStats();
+                renderMembers();
+                alert('Members approved successfully!');
+            }
+        }
+
+        function bulkChangeType() {
+            if (selectedMembers.length === 0) {
+                alert('Please select members first');
+                return;
+            }
+            // Show type selection modal
+            alert('Bulk type change feature');
+        }
+
+        function bulkDelete() {
+            if (selectedMembers.length === 0) {
+                alert('Please select members first');
+                return;
+            }
+            if (confirm(`Delete ${selectedMembers.length} members? This action cannot be undone.`)) {
+                members = members.filter(m => !selectedMembers.includes(m.id));
+                selectedMembers = [];
+                updateStats();
+                renderMembers();
+                alert('Members deleted successfully!');
+            }
+        }
+
+
+        // Make table mobile-friendly with horizontal scroll indicator
+        const tableContainer = document.querySelector('.table-responsive');
+        if (tableContainer) {
+            tableContainer.addEventListener('scroll', function() {
+                const scrollLeft = this.scrollLeft;
+                const scrollWidth = this.scrollWidth;
+                const clientWidth = this.clientWidth;
+                
+                if (scrollLeft + clientWidth >= scrollWidth - 10) {
+                    this.classList.add('scrolled-end');
+                } else {
+                    this.classList.remove('scrolled-end');
+                }
+            });
+        }
+    </script>
+
+    <script>
+function toggleSidebar() {
+    if (window.innerWidth <= 992) {
+        document.getElementById("sidebar").classList.toggle("active");
+        document.getElementById("sidebarOverlay").classList.toggle("active");
+    }
+}
+
+function closeSidebar() {
+    document.getElementById("sidebar").classList.remove("active");
+    document.getElementById("sidebarOverlay").classList.remove("active");
+}
+</script>
+
+</body>
+</html>

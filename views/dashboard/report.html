@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club De Stars - Reports | Powered by JESZ LIMITED</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+        }
+        
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 75px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 75px;
+            padding: 2rem;
+            min-height: calc(100vh - 75px);
+            transition: all 0.3s;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            background: white;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 1.5rem;
+            border-radius: 20px 20px 0 0 !important;
+        }
+        
+        .filter-section {
+            background: white;
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            padding: 0.7rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 12px;
+            padding: 0.7rem 1.75rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.7rem 1.75rem;
+            font-weight: 600;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            border-radius: 12px;
+            padding: 0.7rem 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.1);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 16px;
+        }
+        
+        .data-table {
+            width: 100%;
+            margin-bottom: 0;
+        }
+        
+        .data-table thead {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+        
+        .data-table th {
+            padding: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            border: none;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+        
+        .data-table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.05);
+            font-size: 0.9rem;
+        }
+        
+        .data-table tbody tr {
+            transition: all 0.3s;
+        }
+        
+        .data-table tbody tr:hover {
+            background: rgba(30, 58, 138, 0.02);
+        }
+        
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        
+        .badge-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .badge-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        .badge-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        
+        .badge-info {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+        }
+        
+        .badge-secondary {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+        }
+        
+        .powered-by {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #64748b;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .filter-chip i {
+            cursor: pointer;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                left: calc(-1 * var(--sidebar-width));
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .page-header {
+                padding: 1.5rem;
+            }
+            
+            .stat-card {
+                margin-bottom: 1rem;
+            }
+            
+            .filter-section {
+                padding: 1.25rem;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 0.75rem;
+                font-size: 0.85rem;
+            }
+            
+            .powered-by {
+                bottom: 10px;
+                right: 10px;
+                font-size: 0.75rem;
+                padding: 8px 12px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .data-table th,
+            .data-table td {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+            
+            .badge {
+                font-size: 0.7rem;
+                padding: 0.4rem 0.8rem;
+            }
+            
+            .btn {
+                padding: 0.6rem 1.25rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media print {
+            .sidebar, .top-navbar, .btn, .filter-section, .powered-by {
+                display: none !important;
+            }
+            
+            .main-content {
+                margin: 0;
+                padding: 0;
+            }
+            
+            .card {
+                break-inside: avoid;
+                box-shadow: none;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75">COOPERATIVE SOCIETY LIMITED</small>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="/club-de-star-cooperative/dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="/club-de-star-cooperative/transaction">
+                <i class="fas fa-exchange-alt"></i> Transactions
+            </a>
+            <a href="/club-de-star-cooperative/loan">
+                <i class="fas fa-hand-holding-usd"></i> My Loans
+            </a>
+            <a href="/club-de-star-cooperative/guarantorRequest">
+                <i class="fas fa-user-friends"></i> Guarantor Requests
+            </a>
+            <a href="/club-de-star-cooperative/profile">
+                <i class="fas fa-users"></i> Kiddies Account
+            </a>
+            <a href="/club-de-star-cooperative/profile">
+                <i class="fas fa-user-circle"></i> My Profile
+            </a>
+            <a href="/club-de-star-cooperative/referral">
+                <i class="fas fa-user"></i> Referral Program
+            </a>
+            <a href="/club-de-star-cooperative/memberContract">
+                <i class="fas fa-file-contract"></i> Terms & Conditions
+            </a>
+            <a href="#" class="active">
+                <i class="fas fa-chart-line"></i> Reports
+            </a>
+            <a href="/logout" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3"
+        style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+        onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Reports & Analytics 📊</h5>
+            <small class="text-muted">View and export your transaction history</small>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header position-relative">
+            <div class="row align-items-center position-relative" style="z-index: 1;">
+                <div class="col-md-8">
+                    <h2 class="mb-2 fw-bold">Transaction Reports</h2>
+                    <p class="mb-0 opacity-90">Comprehensive overview of all your financial activities</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-light me-2" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>Print
+                    </button>
+                    <button class="btn btn-success" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel me-2"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold">Total Deposits</p>
+                    <h3 class="mb-1 fw-bold" id="totalDeposits">₦0</h3>
+                    <small class="text-success fw-semibold"><span id="depositCount">0</span> transactions</small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold">Total Withdrawals</p>
+                    <h3 class="mb-1 fw-bold" id="totalWithdrawals">₦0</h3>
+                    <small class="text-danger fw-semibold"><span id="withdrawalCount">0</span> transactions</small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold">Total Loans</p>
+                    <h3 class="mb-1 fw-bold" id="totalLoans">₦0</h3>
+                    <small class="text-warning fw-semibold">
+                        <span id="approvedLoans">0</span> approved / 
+                        <span id="declinedLoans">0</span> declined
+                    </small>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold">Net Activity</p>
+                    <h3 class="mb-1 fw-bold" id="netActivity">₦0</h3>
+                    <small class="fw-semibold" style="color: var(--primary);" id="netActivityLabel">Balance change</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <h5 class="mb-3 fw-bold" style="color: var(--primary);">
+                <i class="fas fa-filter me-2"></i>Filter Reports
+            </h5>
+            <div class="row g-3">
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">Transaction Type</label>
+                    <select class="form-select" id="filterType">
+                        <option value="all">All Transactions</option>
+                        <option value="deposit">Deposits Only</option>
+                        <option value="withdrawal">Withdrawals Only</option>
+                        <option value="loan">Loans Only</option>
+                        <option value="loan_payment">Loan Payments</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label fw-semibold">Status</label>
+                    <select class="form-select" id="filterStatus">
+                        <option value="all">All Status</option>
+                        <option value="completed">Completed</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="declined">Declined</option>
+                        <option value="processing">Processing</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label fw-semibold">From Date</label>
+                    <input type="date" class="form-control" id="filterFromDate">
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label fw-semibold">To Date</label>
+                    <input type="date" class="form-control" id="filterToDate">
+                </div>
+                <div class="col-lg-3 col-md-12">
+                    <label class="form-label fw-semibold d-block">&nbsp;</label>
+                    <button class="btn btn-primary w-100" onclick="applyFilters()">
+                        <i class="fas fa-search me-2"></i>Apply Filters
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Active Filters Display -->
+            <div id="activeFilters" class="mt-3" style="display: none;">
+                <small class="text-muted fw-semibold d-block mb-2">Active Filters:</small>
+                <div id="filterChips"></div>
+            </div>
+        </div>
+
+        <!-- Transaction Table -->
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-list me-2" style="color: var(--primary);"></i>Transaction History
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" style="width: auto;" id="sortBy" onchange="sortTable()">
+                            <option value="date_desc">Latest First</option>
+                            <option value="date_asc">Oldest First</option>
+                            <option value="amount_desc">Highest Amount</option>
+                            <option value="amount_asc">Lowest Amount</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-container">
+                    <table class="data-table" id="transactionTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th class="text-end">Amount</th>
+                                <th>Status</th>
+                                <th>Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <i class="fas fa-inbox"></i>
+                    <h5 class="mt-3 fw-bold">No Transactions Found</h5>
+                    <p class="text-muted">Try adjusting your filters or date range</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+            <small class="text-muted">Showing <span id="showingCount">0</span> of <span id="totalCount">0</span> transactions</small>
+            <div class="btn-group" id="pagination">
+                <!-- Pagination buttons will be added by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Powered By Footer -->
+    <div class="powered-by">
+        Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sample data - In production, this would come from your backend
+        let allTransactions = [
+            { id: 1, date: '2024-12-05', type: 'deposit', description: 'Monthly Savings Deposit', amount: 50000, status: 'completed', reference: 'DEP-001' },
+            { id: 2, date: '2024-12-03', type: 'withdrawal', description: 'Regular Withdrawal', amount: 30000, status: 'completed', reference: 'WTH-001' },
+            { id: 3, date: '2024-12-01', type: 'loan', description: 'Personal Loan Application', amount: 200000, status: 'approved', reference: 'LOAN-001' },
+            { id: 4, date: '2024-11-28', type: 'deposit', description: 'Savings Contribution', amount: 45000, status: 'completed', reference: 'DEP-002' },
+            { id: 5, date: '2024-11-25', type: 'loan_payment', description: 'Loan Repayment - LOAN-001', amount: 8750, status: 'completed', reference: 'PAY-001' },
+            { id: 6, date: '2024-11-20', type: 'deposit', description: 'Monthly Savings Deposit', amount: 50000, status: 'completed', reference: 'DEP-003' },
+            { id: 7, date: '2024-11-15', type: 'withdrawal', description: 'Force Withdrawal (2.5% charge)', amount: 25000, status: 'processing', reference: 'WTH-002' },
+            { id: 8, date: '2024-11-10', type: 'loan', description: 'Business Loan Application', amount: 150000, status: 'declined', reference: 'LOAN-002' },
+            { id: 9, date: '2024-11-05', type: 'deposit', description: 'Savings Contribution', amount: 40000, status: 'completed', reference: 'DEP-004' },
+            { id: 10, date: '2024-10-30', type: 'loan_payment', description: 'Loan Repayment - LOAN-001', amount: 8750, status: 'completed', reference: 'PAY-002' },
+            { id: 11, date: '2024-10-25', type: 'deposit', description: 'Monthly Savings Deposit', amount: 50000, status: 'completed', reference: 'DEP-005' },
+            { id: 12, date: '2024-10-20', type: 'withdrawal', description: 'Regular Withdrawal', amount: 35000, status: 'completed', reference: 'WTH-003' },
+            { id: 13, date: '2024-10-15', type: 'deposit', description: 'Savings Contribution', amount: 48000, status: 'completed', reference: 'DEP-006' },
+            { id: 14, date: '2024-10-10', type: 'loan', description: 'Education Loan Application', amount: 180000, status: 'pending', reference: 'LOAN-003' },
+            { id: 15, date: '2024-10-05', type: 'loan_payment', description: 'Loan Repayment - LOAN-001', amount: 8750, status: 'completed', reference: 'PAY-003' }
+        ];
+
+        let filteredTransactions = [...allTransactions];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date range (last 3 months)
+            const today = new Date();
+            const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate());
+            
+            document.getElementById('filterToDate').valueAsDate = today;
+            document.getElementById('filterFromDate').valueAsDate = threeMonthsAgo;
+            
+            applyFilters();
+            
+            // Close sidebar on outside click (mobile)
+            document.addEventListener('click', function(event) {
+                const sidebar = document.getElementById('sidebar');
+                const toggleButton = document.querySelector('.fa-bars');
+                
+                if (window.innerWidth <= 992) {
+                    if (sidebar.classList.contains('active') &&
+                        !sidebar.contains(event.target) &&
+                        !toggleButton.contains(event.target)) {
+                        sidebar.classList.remove('active');
+                    }
+                }
+            });
+        });
+
+        function applyFilters() {
+            const type = document.getElementById('filterType').value;
+            const status = document.getElementById('filterStatus').value;
+            const fromDate = document.getElementById('filterFromDate').value;
+            const toDate = document.getElementById('filterToDate').value;
+
+            filteredTransactions = allTransactions.filter(transaction => {
+                let matches = true;
+
+                // Type filter
+                if (type !== 'all' && transaction.type !== type) {
+                    matches = false;
+                }
+
+                // Status filter
+                if (status !== 'all' && transaction.status !== status) {
+                    matches = false;
+                }
+
+                // Date range filter
+                if (fromDate && transaction.date < fromDate) {
+                    matches = false;
+                }
+                if (toDate && transaction.date > toDate) {
+                    matches = false;
+                }
+
+                return matches;
+            });
+
+            currentPage = 1;
+            updateFilterChips();
+            updateSummaryStats();
+            renderTable();
+            renderPagination();
+        }
+
+        function updateFilterChips() {
+            const type = document.getElementById('filterType').value;
+            const status = document.getElementById('filterStatus').value;
+            const fromDate = document.getElementById('filterFromDate').value;
+            const toDate = document.getElementById('filterToDate').value;
+
+            const activeFilters = document.getElementById('activeFilters');
+            const filterChips = document.getElementById('filterChips');
+            filterChips.innerHTML = '';
+
+            let hasFilters = false;
+
+            if (type !== 'all') {
+                hasFilters = true;
+                filterChips.innerHTML += `
+                    <span class="filter-chip">
+                        Type: ${type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}
+                        <i class="fas fa-times" onclick="clearFilter('type')"></i>
+                    </span>
+                `;
+            }
+
+            if (status !== 'all') {
+                hasFilters = true;
+                filterChips.innerHTML += `
+                    <span class="filter-chip">
+                        Status: ${status.charAt(0).toUpperCase() + status.slice(1)}
+                        <i class="fas fa-times" onclick="clearFilter('status')"></i>
+                    </span>
+                `;
+            }
+
+            if (fromDate || toDate) {
+                hasFilters = true;
+                const dateRange = fromDate && toDate 
+                    ? `${formatDate(fromDate)} to ${formatDate(toDate)}`
+                    : fromDate 
+                        ? `From ${formatDate(fromDate)}`
+                        : `Until ${formatDate(toDate)}`;
+                
+                filterChips.innerHTML += `
+                    <span class="filter-chip">
+                        ${dateRange}
+                        <i class="fas fa-times" onclick="clearFilter('date')"></i>
+                    </span>
+                `;
+            }
+
+            activeFilters.style.display = hasFilters ? 'block' : 'none';
+        }
+
+        function clearFilter(type) {
+            if (type === 'type') {
+                document.getElementById('filterType').value = 'all';
+            } else if (type === 'status') {
+                document.getElementById('filterStatus').value = 'all';
+            } else if (type === 'date') {
+                document.getElementById('filterFromDate').value = '';
+                document.getElementById('filterToDate').value = '';
+            }
+            applyFilters();
+        }
+
+        function updateSummaryStats() {
+            let totalDeposits = 0;
+            let depositCount = 0;
+            let totalWithdrawals = 0;
+            let withdrawalCount = 0;
+            let totalLoans = 0;
+            let approvedLoans = 0;
+            let declinedLoans = 0;
+
+            filteredTransactions.forEach(transaction => {
+                if (transaction.type === 'deposit') {
+                    totalDeposits += transaction.amount;
+                    depositCount++;
+                } else if (transaction.type === 'withdrawal') {
+                    totalWithdrawals += transaction.amount;
+                    withdrawalCount++;
+                } else if (transaction.type === 'loan') {
+                    totalLoans += transaction.amount;
+                    if (transaction.status === 'approved') approvedLoans++;
+                    if (transaction.status === 'declined') declinedLoans++;
+                }
+            });
+
+            const netActivity = totalDeposits - totalWithdrawals;
+
+            document.getElementById('totalDeposits').textContent = '₦' + totalDeposits.toLocaleString();
+            document.getElementById('depositCount').textContent = depositCount;
+            document.getElementById('totalWithdrawals').textContent = '₦' + totalWithdrawals.toLocaleString();
+            document.getElementById('withdrawalCount').textContent = withdrawalCount;
+            document.getElementById('totalLoans').textContent = '₦' + totalLoans.toLocaleString();
+            document.getElementById('approvedLoans').textContent = approvedLoans;
+            document.getElementById('declinedLoans').textContent = declinedLoans;
+            document.getElementById('netActivity').textContent = '₦' + Math.abs(netActivity).toLocaleString();
+            
+            const netLabel = document.getElementById('netActivityLabel');
+            if (netActivity > 0) {
+                netLabel.textContent = '↑ Net Increase';
+                netLabel.style.color = '#10b981';
+            } else if (netActivity < 0) {
+                netLabel.textContent = '↓ Net Decrease';
+                netLabel.style.color = '#ef4444';
+            } else {
+                netLabel.textContent = 'No change';
+                netLabel.style.color = '#64748b';
+            }
+        }
+
+        function sortTable() {
+            const sortBy = document.getElementById('sortBy').value;
+
+            filteredTransactions.sort((a, b) => {
+                if (sortBy === 'date_desc') {
+                    return new Date(b.date) - new Date(a.date);
+                } else if (sortBy === 'date_asc') {
+                    return new Date(a.date) - new Date(b.date);
+                } else if (sortBy === 'amount_desc') {
+                    return b.amount - a.amount;
+                } else if (sortBy === 'amount_asc') {
+                    return a.amount - b.amount;
+                }
+            });
+
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (filteredTransactions.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                document.getElementById('showingCount').textContent = '0';
+                document.getElementById('totalCount').textContent = '0';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageTransactions = filteredTransactions.slice(startIndex, endIndex);
+
+            tbody.innerHTML = pageTransactions.map(transaction => {
+                const statusBadge = getStatusBadge(transaction.status);
+                const typeIcon = getTypeIcon(transaction.type);
+                const amountClass = transaction.type === 'deposit' ? 'text-success' : 
+                                   transaction.type === 'withdrawal' ? 'text-danger' : 
+                                   'text-warning';
+
+                return `
+                    <tr>
+                        <td><small class="fw-semibold">${formatDate(transaction.date)}</small></td>
+                        <td>
+                            <span class="d-inline-flex align-items-center gap-2">
+                                <i class="${typeIcon}"></i>
+                                <small class="fw-semibold">${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1).replace('_', ' ')}</small>
+                            </span>
+                        </td>
+                        <td><small>${transaction.description}</small></td>
+                        <td class="text-end ${amountClass}">
+                            <strong>₦${transaction.amount.toLocaleString()}</strong>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td><small class="text-muted">${transaction.reference}</small></td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('showingCount').textContent = Math.min(endIndex, filteredTransactions.length);
+            document.getElementById('totalCount').textContent = filteredTransactions.length;
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            // Previous button
+            paginationHTML += `
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="changePage(${currentPage - 1})" 
+                        ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    paginationHTML += `
+                        <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-outline-primary'}" 
+                                onclick="changePage(${i})">
+                            ${i}
+                        </button>
+                    `;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    paginationHTML += `<span class="btn btn-sm btn-outline-primary disabled">...</span>`;
+                }
+            }
+
+            // Next button
+            paginationHTML += `
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="changePage(${currentPage + 1})" 
+                        ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            renderTable();
+            renderPagination();
+            
+            // Scroll to top of table
+            document.getElementById('transactionTable').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'completed': '<span class="badge badge-success">Completed</span>',
+                'pending': '<span class="badge badge-warning">Pending</span>',
+                'approved': '<span class="badge badge-success">Approved</span>',
+                'declined': '<span class="badge badge-danger">Declined</span>',
+                'processing': '<span class="badge badge-info">Processing</span>'
+            };
+            return badges[status] || '<span class="badge badge-secondary">Unknown</span>';
+        }
+
+        function getTypeIcon(type) {
+            const icons = {
+                'deposit': 'fas fa-arrow-up text-success',
+                'withdrawal': 'fas fa-arrow-down text-danger',
+                'loan': 'fas fa-hand-holding-usd text-warning',
+                'loan_payment': 'fas fa-credit-card text-info'
+            };
+            return icons[type] || 'fas fa-circle';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function exportToExcel() {
+            // Create CSV content
+            let csv = 'Date,Type,Description,Amount,Status,Reference\n';
+            
+            filteredTransactions.forEach(transaction => {
+                csv += `${transaction.date},${transaction.type},${transaction.description},${transaction.amount},${transaction.status},${transaction.reference}\n`;
+            });
+
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Club_De_Stars_Report_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            // Show success message
+            alert('✅ Report exported successfully!');
+        }
+    </script>
+</body>
+</html>

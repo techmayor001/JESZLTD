@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Club De Stars Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --sidebar-width: 280px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+            transform: translateX(0);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+        
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(239, 68, 68, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        /* Top Navbar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 70px;
+            padding: 2rem;
+            transition: all 0.3s;
+            min-height: calc(100vh - 70px);
+        }
+
+        .settings-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
+        }
+
+        .page-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            font-size: 1rem;
+            opacity: 0.95;
+            margin: 0;
+        }
+
+        .settings-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title .icon-badge {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: white;
+        }
+
+        .settings-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.08);
+            border: 1px solid rgba(30, 58, 138, 0.05);
+            transition: all 0.3s;
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-card:hover {
+            box-shadow: 0 12px 35px rgba(30, 58, 138, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .card-header-custom {
+            border-bottom: 2px solid rgba(30, 58, 138, 0.08);
+            padding-bottom: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-header-custom h5 {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header-custom p {
+            color: var(--secondary);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .icon-box {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.75rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-label i {
+            color: var(--primary-light);
+            font-size: 0.9rem;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid rgba(30, 58, 138, 0.12);
+            border-radius: 12px;
+            padding: 0.875rem 1.25rem;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(30, 58, 138, 0.1);
+        }
+
+        .input-group-text {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
+            border: 2px solid rgba(30, 58, 138, 0.12);
+            border-right: none;
+            color: var(--primary);
+            font-weight: 700;
+            border-radius: 12px 0 0 12px;
+            padding: 0.875rem 1rem;
+        }
+
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            padding: 0.875rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(30, 58, 138, 0.35);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .current-value {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%);
+            border: 2px solid rgba(16, 185, 129, 0.2);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .current-value-label {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .current-value-amount {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .current-value-amount i {
+            font-size: 1.5rem;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(30, 58, 138, 0.15), transparent);
+            margin: 2rem 0;
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-top: 0.75rem;
+            display: flex;
+            align-items: start;
+            gap: 8px;
+            line-height: 1.5;
+        }
+
+        .help-text i {
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .alert-info-custom {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            color: #1e40af;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: start;
+            gap: 12px;
+        }
+
+        .alert-info-custom i {
+            font-size: 1.25rem;
+            margin-top: 2px;
+        }
+
+        .success-toast {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1.25rem 1.75rem;
+            border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+            z-index: 9999;
+            display: none;
+            animation: slideIn 0.3s ease;
+            min-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1035;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        .powered-by {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 20px rgba(30, 58, 138, 0.15);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .settings-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .top-navbar {
+                left: 0;
+                padding: 0 1.5rem;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .page-header {
+                padding: 2rem;
+            }
+
+            .page-header h2 {
+                font-size: 1.75rem;
+            }
+
+            .settings-card {
+                padding: 1.75rem;
+            }
+
+            .section-title {
+                font-size: 1.35rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1.25rem;
+            }
+
+            .page-header {
+                padding: 1.75rem;
+                margin-bottom: 2rem;
+            }
+
+            .page-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .page-header p {
+                font-size: 0.9rem;
+            }
+
+            .settings-card {
+                padding: 1.5rem;
+                border-radius: 16px;
+                margin-bottom: 1.25rem;
+            }
+
+            .section-title {
+                font-size: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .section-title .icon-badge {
+                width: 45px;
+                height: 45px;
+                font-size: 1.25rem;
+            }
+
+            .card-header-custom {
+                padding-bottom: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .card-header-custom h5 {
+                font-size: 1.15rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .current-value {
+                padding: 1rem 1.25rem;
+            }
+
+            .current-value-amount {
+                font-size: 1.5rem;
+            }
+
+            .btn-primary, .btn-secondary {
+                padding: 0.75rem 2rem;
+                font-size: 0.95rem;
+                width: 100%;
+            }
+
+            .action-buttons {
+                flex-direction: column-reverse;
+            }
+
+            .success-toast {
+                right: 15px;
+                left: 15px;
+                min-width: auto;
+            }
+
+            .powered-by {
+                bottom: 15px;
+                right: 15px;
+                font-size: 0.75rem;
+                padding: 10px 16px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .top-navbar {
+                height: 60px;
+                padding: 0 1rem;
+            }
+
+            .main-content {
+                margin-top: 60px;
+                padding: 1rem;
+            }
+
+            .page-header {
+                padding: 1.5rem;
+                border-radius: 16px;
+                margin-bottom: 1.5rem;
+            }
+
+            .page-header h2 {
+                font-size: 1.35rem;
+            }
+
+            .page-header .btn {
+                padding: 0.65rem 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            .settings-card {
+                padding: 1.25rem;
+            }
+
+            .section-title {
+                font-size: 1.15rem;
+            }
+
+            .section-title .icon-badge {
+                width: 40px;
+                height: 40px;
+                font-size: 1.15rem;
+            }
+
+            .icon-box {
+                width: 40px;
+                height: 40px;
+                font-size: 1.15rem;
+            }
+
+            .card-header-custom h5 {
+                font-size: 1.05rem;
+            }
+
+            .form-control, .form-select {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .input-group-text {
+                padding: 0.75rem 0.875rem;
+                font-size: 0.9rem;
+            }
+
+            .current-value-amount {
+                font-size: 1.35rem;
+            }
+
+            .sidebar-header {
+                padding: 1.25rem;
+            }
+            
+            .logo-box {
+                width: 40px;
+                height: 40px;
+                font-size: 1.25rem;
+            }
+            
+            .sidebar-title {
+                font-size: 1rem;
+            }
+
+            .divider {
+                margin: 1.5rem 0;
+            }
+
+            .alert-info-custom {
+                padding: 1rem 1.25rem;
+                font-size: 0.9rem;
+            }
+
+            .help-text {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">C</div>
+                <div>
+                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                </div>
+            </div>
+            <div class="admin-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>SUPER ADMIN</span>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="/admin-dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="members.html">
+                <i class="fas fa-users"></i> Members
+            </a>
+            <a href="transactions.html">
+                <i class="fas fa-exchange-alt"></i> Transactions
+            </a>
+            <a href="loans.html">
+                <i class="fas fa-hand-holding-usd"></i> Loan Management
+            </a>
+            <a href="roi.html">
+                <i class="fas fa-chart-pie"></i> ROI Distribution
+            </a>
+            <a href="withdrawals.html">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="reports.html">
+                <i class="fas fa-file-alt"></i> Reports
+            </a>
+            <a href="payments.html">
+                <i class="fas fa-credit-card"></i> Payments
+            </a>
+            <a href="#" class="active">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="logout.html" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3"
+           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+           onclick="toggleSidebar()"></i>
+        
+        <div class="flex-grow-1">
+            <h5 class="mb-0 fw-bold d-none d-md-block" style="color: var(--primary)">System Settings</h5>
+            <h6 class="mb-0 fw-bold d-md-none" style="color: var(--primary)">Settings</h6>
+            <small class="text-muted d-none d-sm-block">Configure system parameters</small>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="position-relative">
+                <i class="fas fa-bell" style="color: var(--primary); font-size: 1.25rem; cursor: pointer;"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">5</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="settings-container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h2 class="mb-2 fw-bold">
+                            <i class="fas fa-cog me-2"></i>System Settings
+                        </h2>
+                        <p class="mb-0 opacity-90">Configure system parameters and fee structures for your cooperative</p>
+                    </div>
+                    <a href="dashboard.html" class="text-decoration-none">
+                        <button class="btn btn-light fw-semibold">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </button>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Interest Rates Settings -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <div class="icon-badge" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    Interest Rate Configuration
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header-custom">
+                        <h5>
+                            <i class="fas fa-chart-line"></i>
+                            Annual Interest Rates
+                        </h5>
+                        <p>Set interest rates for different membership types and loan products</p>
+                    </div>
+
+                    <div class="settings">
+                                <!-- Interest Rates Settings -->
+                        <div class="settings-card">
+                            <div class="row g-3">
+
+                                <!-- Club Member Rate -->
+                                <div class="col-md-6">
+                                    <div class="current-value">
+                                        <div class="current-value-label">Current Club Member Rate</div>
+                                        <div class="current-value-amount"><%= settings.interestRates.clubMemberRate %>%</div>
+                                    </div>
+
+                                    <label class="form-label">Club Member Interest Rate (Annual)</label>
+                                    <div class="input-group">
+                                        <input type="number"
+                                            class="form-control"
+                                            id="clubRate"
+                                            value="<%= settings.interestRates.clubMemberRate %>"
+                                            step="0.1"
+                                            min="0"
+                                            max="100">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+
+                                    <div class="help-text">
+                                        <i class="fas fa-info-circle me-1"></i>Applied to CDS (Club De Stars) members
+                                    </div>
+                                </div>
+
+                                <!-- Non-Club Member Rate -->
+                                <div class="col-md-6">
+                                    <div class="current-value">
+                                        <div class="current-value-label">Current Non-Club Member Rate</div>
+                                        <div class="current-value-amount"><%= settings.interestRates.nonClubMemberRate %>%</div>
+                                    </div>
+
+                                    <label class="form-label">Non-Club Member Interest Rate (Annual)</label>
+                                    <div class="input-group">
+                                        <input type="number"
+                                            class="form-control"
+                                            id="nonClubRate"
+                                            value="<%= settings.interestRates.nonClubMemberRate %>"
+                                            step="0.1"
+                                            min="0"
+                                            max="100">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+
+                                    <div class="help-text">
+                                        <i class="fas fa-info-circle me-1"></i>Applied to NCDS (Non-Club De Stars) members
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="divider"></div>
+
+                            <div class="d-flex gap-2 justify-content-end flex-wrap">
+                                <button class="btn btn-secondary" onclick="resetInterestRates()">
+                                    <i class="fas fa-undo me-2"></i>Reset
+                                </button>
+                                <button class="btn btn-primary" onclick="updateInterestRates()">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </div>
+
+
+                        <!-- Membership Registration Fees -->
+                        <div class="settings-card">
+                            <div class="card-header-custom">
+                                <h5>
+                                    <div class="icon-box" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                                        <i class="fas fa-user-plus"></i>
+                                    </div>
+                                    Membership Registration Fees
+                                </h5>
+                                <p>Configure one-time registration fees for new members</p>
+                            </div>
+
+                            <div class="settings-grid">
+                                <div>
+                                    <div class="current-value">
+                                        <div class="current-value-label">Current Registration Fee</div>
+                                        <div class="current-value-amount">₦<%= settings.registrationFees.adultRegistrationFee.toLocaleString() %></div>
+                                    </div>
+                                    <label class="form-label">Adult Membership Registration Fee</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₦</span>
+                                        <input type="number" class="form-control" id="adultRegFee" value="<%= settings.registrationFees.adultRegistrationFee %>" step="100" min="0">
+                                    </div>
+                                    <div class="help-text">
+                                        <i class="fas fa-info-circle me-1"></i>One-time fee for adult members (18+ years)
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="current-value">
+                                        <div class="current-value-label">Current Kiddies Fee</div>
+                                        <div class="current-value-amount">₦<%= settings.registrationFees.kiddiesRegistrationFee.toLocaleString() %></div>
+                                    </div>
+                                    <label class="form-label">Kiddies Account Registration Fee</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₦</span>
+                                        <input type="number" class="form-control" id="kiddiesRegFee" value="<%= settings.registrationFees.kiddiesRegistrationFee %>" step="100" min="0">
+                                    </div>
+                                    <div class="help-text">
+                                        <i class="fas fa-info-circle me-1"></i>One-time fee for kiddies accounts
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="divider"></div>
+
+                            <div class="d-flex gap-2 justify-content-end flex-wrap">
+                                <button class="btn btn-secondary" onclick="resetRegFees()">
+                                    <i class="fas fa-undo me-2"></i>Reset
+                                </button>
+                                <button class="btn btn-primary" onclick="updateRegFees()">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </div>
+                      
+
+                       
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kiddies Account Settings -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <div class="icon-badge" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);">
+                        <i class="fas fa-child"></i>
+                    </div>
+                    Kiddies Account Configuration
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header-custom">
+                        <h5>
+                            <i class="fas fa-piggy-bank"></i>
+                            Children's Savings Account Settings
+                        </h5>
+                        <p>Configure parameters for children's savings accounts including age limits, fees, and upgrade rules</p>
+                    </div>
+
+                    <div class="alert-info-custom">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>About Kiddies Accounts:</strong> Special savings accounts designed for minors with automatic upgrade to adult accounts upon reaching the specified age threshold. Includes preferential interest rates and reduced fees.
+                        </div>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-hourglass-start"></i>
+                                Minimum Age Requirement
+                            </label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="minAge" value="<%= settings.kiddiesSettings.minAge %>" min="0" max="17">
+                                <span class="input-group-text">years</span>
+                            </div>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Minimum age required to open a kiddies savings account</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-hourglass-end"></i>
+                                Maximum Age Limit
+                            </label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="maxAge" value="<%= settings.kiddiesSettings.maxAge %>" min="1" max="25">
+                                <span class="input-group-text">years</span>
+                            </div>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Maximum age for maintaining a kiddies account before mandatory upgrade</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-level-up-alt"></i>
+                                Auto-Upgrade Age Threshold
+                            </label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="upgradeAge" value="<%= settings.kiddiesSettings.upgradeAge %>" min="16" max="25">
+                                <span class="input-group-text">years</span>
+                            </div>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Account automatically converts to adult account at this age</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-percentage"></i>
+                                Kiddies Interest Rate (Annual)
+                            </label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="kiddiesInterest" value="<%= settings.kiddiesSettings.kiddiesInterestRate %>" step="0.1" min="0" max="100">
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Special preferential interest rate for kiddies savings accounts</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-alt"></i>
+                                Monthly Account Maintenance Fee
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">₦</span>
+                                <input type="number" class="form-control" id="kiddiesMonthlyFee" value="<%= settings.kiddiesSettings.monthlyMaintenanceFee %>" step="50" min="0">
+                            </div>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Monthly fee charged for account maintenance and administration</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-exchange-alt"></i>
+                                Account Upgrade Processing Fee
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">₦</span>
+                                <input type="number" class="form-control" id="upgradeFee" value="<%= settings.kiddiesSettings.upgradeProcessingFee %>" step="100" min="0">
+                            </div>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i>
+                                <span>One-time fee charged when converting kiddies account to adult account</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-bell"></i>
+                            Auto-Upgrade Notification Period
+                        </label>
+                        <select class="form-select" id="autoUpgradeNotif">
+                            <option value="30" <%= settings.kiddiesSettings.autoUpgradeNotificationDays == 30 ? 'selected' : '' %>>Notify 30 days before birthday</option>
+                            <option value="60" <%= settings.kiddiesSettings.autoUpgradeNotificationDays == 60 ? 'selected' : '' %>>Notify 60 days before birthday</option>
+                            <option value="90" <%= settings.kiddiesSettings.autoUpgradeNotificationDays == 90 ? 'selected' : '' %>>Notify 90 days before birthday</option>
+                        </select>
+
+                        <div class="help-text">
+                            <i class="fas fa-info-circle"></i>
+                            <span>When to send notification to account holder about upcoming automatic upgrade to adult account</span>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="resetKiddiesSettings()">
+                            <i class="fas fa-undo me-2"></i>Reset to Default
+                        </button>
+                        <button class="btn btn-primary" onclick="updateKiddiesSettings()">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+          
+            
+            <div class="settings-section">
+                <div class="section-title">
+                    <div class="icon-badge" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    Additional Fees & Charges
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header-custom">
+                        <h5>
+                            <i class="fas fa-money-bill-wave"></i>
+                            Service Fees & Transaction Charges
+                        </h5>
+                        <p>Configure withdrawal penalties, loan processing fees, and operational charges</p>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Force Withdrawal Penalty
+                            </label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="forceWithdrawalFee" value="<%= settings.otherFees.forceWithdrawalCharge %>" step="0.1" min="0" max="100">
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Percentage penalty charged on emergency or forced withdrawals before maturity</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-stamp"></i>
+                                Loan Processing Fee
+                            </label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="loanProcessingFee" value="<%= settings.otherFees.loanProcessingFee || 1.5 %>" step="0.1" min="0" max="100">
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i>
+                                <span>One-time administrative fee charged as percentage of approved loan amount</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-building"></i>
+                                ROI Operating Charge
+                            </label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="roiOperatingCharge" value="<%= settings.otherFees.roiOperatingCharge %>" step="0.5" min="0" max="50">
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Percentage of interest income retained for cooperative operating expenses and administration</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="resetOtherFees()">
+                            <i class="fas fa-undo me-2"></i>Reset to Default
+                        </button>
+                        <button class="btn btn-primary" onclick="updateOtherFees()">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Powered By Footer -->
+    <div class="powered-by">
+        Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="success-toast" id="successToast">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-check-circle fa-lg"></i>
+            <span id="toastMessage" class="fw-semibold">Settings updated successfully!</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle sidebar on mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // Show success toast
+        function showToast(message) {
+            const toast = document.getElementById('successToast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3500);
+        }
+
+        // Interest Rates Functions
+        async function updateInterestRates() {
+            const clubRate = document.getElementById('clubRate').value;
+            const nonClubRate = document.getElementById('nonClubRate').value;
+
+            try {
+                const response = await fetch('/admin/settings/interest-rates', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ clubRate, nonClubRate })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Interest rates updated successfully!');
+                } else {
+                    showToast('Failed to update interest rates!');
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast('An error occurred while updating interest rates');
+            }
+        }
+
+        function resetInterestRates() {
+            document.getElementById('clubRate').value = '5.0';
+            document.getElementById('nonClubRate').value = '10.0';
+            showToast('Interest rates reset to default values');
+        }
+
+        // Registration Fees Functions
+            async function updateRegFees() {
+                const adultFee = document.getElementById('adultRegFee').value;
+                const kiddiesFee = document.getElementById('kiddiesRegFee').value;
+
+                try {
+                    const response = await fetch('/admin/settings/registration-fees', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ adultFee, kiddiesFee })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showToast("Registration fees updated successfully!");
+                    } else {
+                        showToast("Failed to update registration fees.");
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    showToast("Error updating registration fees.");
+                }
+            }
+
+        function resetRegFees() {
+            document.getElementById('adultRegFee').value = '5000';
+            document.getElementById('kiddiesRegFee').value = '2500';
+            showToast('Registration fees reset to default values');
+        }
+
+        function updateMemberRegFee() {
+            const memberId = document.getElementById('selectMemberToEdit').value;
+            const newFee = document.getElementById('editMemberRegFee').value;
+            
+            if (!memberId) {
+                alert('Please select a member first');
+                return;
+            }
+            
+            if (!newFee) {
+                alert('Please enter a new fee amount');
+                return;
+            }
+            
+            // Add your API call here
+            console.log('Updating member registration fee:', { memberId, newFee });
+            showToast(`Registration fee updated for member ${memberId}`);
+            
+            // Clear fields
+            document.getElementById('selectMemberToEdit').value = '';
+            document.getElementById('editMemberRegFee').value = '';
+        }
+
+        async function updateKiddiesSettings() {
+            const settings = {
+                minAge: document.getElementById('minAge').value,
+                maxAge: document.getElementById('maxAge').value,
+                upgradeAge: document.getElementById('upgradeAge').value,
+                monthlyFee: document.getElementById('kiddiesMonthlyFee').value,
+                upgradeFee: document.getElementById('upgradeFee').value,
+                interestRate: document.getElementById('kiddiesInterest').value,
+                notificationDays: document.getElementById('autoUpgradeNotif').value
+            };
+
+            try {
+                const response = await fetch('/admin/settings/kiddies-settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Kiddies account settings updated successfully!');
+                } else {
+                    showToast('Failed to update kiddies settings.');
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast('Error while updating kiddies settings.');
+            }
+        }
+
+
+        function resetKiddiesSettings() {
+            document.getElementById('minAge').value = '0';
+            document.getElementById('maxAge').value = '17';
+            document.getElementById('upgradeAge').value = '18';
+            document.getElementById('kiddiesMonthlyFee').value = '100';
+            document.getElementById('upgradeFee').value = '1000';
+            document.getElementById('kiddiesInterest').value = '7.5';
+            document.getElementById('autoUpgradeNotif').value = '60';
+            showToast('Kiddies settings reset to default values');
+        }
+
+        // Other Fees Functions
+        async function updateOtherFees() {
+            const fees = {
+                forceWithdrawal: document.getElementById('forceWithdrawalFee').value,
+                loanProcessing: document.getElementById('loanProcessingFee').value,
+                roiOperating: document.getElementById('roiOperatingCharge').value
+            };
+
+            try {
+                const response = await fetch('/admin/settings/other-fees', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fees)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Additional fees updated successfully!');
+                } else {
+                    showToast('Failed to update additional fees.');
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast('Error while updating additional fees.');
+            }
+        }
+
+
+        function resetOtherFees() {
+            document.getElementById('forceWithdrawalFee').value = '2.5';
+            document.getElementById('loanProcessingFee').value = '1.5';
+            document.getElementById('roiOperatingCharge').value = '10';
+            showToast('Additional fees reset to default values');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.getElementById('overlay').addEventListener('click', function() {
+            toggleSidebar();
+        });
+    </script>
+</body>
+</html>

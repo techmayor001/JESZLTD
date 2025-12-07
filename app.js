@@ -45,3 +45,4 @@ app.use(require("./routes/main"));
 app.use(require("./routes/auth"));
 app.use(require("./routes/admin"));
 app.use(require("./routes/transaction"));
+app.use(require("./routes/kiddies"));

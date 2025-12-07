@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Settings - Club De Stars | Powered by JESZ LIMITED</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --sidebar-width: 280px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+            transform: translateX(0);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+        
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(239, 68, 68, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 70px;
+            padding: 1.5rem;
+            min-height: calc(100vh - 70px);
+            transition: all 0.3s;
+        }
+        
+        .welcome-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            background: white;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 1.25rem;
+            border-radius: 16px 16px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .table {
+            font-size: 0.9rem;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            white-space: nowrap;
+        }
+        
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .powered-by {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+        
+        .settings-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            border: 1px solid rgba(30, 58, 138, 0.05);
+            transition: all 0.3s;
+        }
+        
+        .settings-card:hover {
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.15);
+        }
+        
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .settings-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .settings-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-box {
+            padding: 0.75rem;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-radius: 8px;
+            border: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .detail-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s;
+            border-radius: 28px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        input:checked + .toggle-slider {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+        
+        .action-button-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .alert-info-custom {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 1rem;
+            color: #1e40af;
+        }
+        
+        .alert-warning-custom {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 1rem;
+            color: #92400e;
+        }
+        
+        .alert-danger-custom {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border: 2px solid #ef4444;
+            border-radius: 12px;
+            padding: 1rem;
+            color: #991b1b;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .welcome-card {
+                padding: 1.5rem;
+            }
+            
+            .stat-card {
+                padding: 1.25rem;
+            }
+            
+            .settings-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .action-button-group {
+                width: 100%;
+            }
+            
+            .action-button-group .btn {
+                flex: 1;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .top-navbar {
+                height: 60px;
+                padding: 0 1rem;
+            }
+            
+            .main-content {
+                margin-top: 60px;
+                padding: 0.75rem;
+            }
+            
+            .welcome-card {
+                padding: 1.25rem;
+                border-radius: 16px;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4rem;
+            }
+            
+            .settings-card {
+                padding: 1rem;
+            }
+            
+            .settings-details {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .powered-by {
+                bottom: 10px;
+                right: 10px;
+                font-size: 0.7rem;
+                padding: 8px 12px;
+            }
+        }
+        
+        .modal-content {
+            border-radius: 16px;
+        }
+        
+        .modal-header {
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state h5 {
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state p {
+            color: #94a3b8;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">C</div>
+                <div>
+                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                </div>
+            </div>
+            <div class="admin-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>Super Admin</span>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="#" onclick="showSection('dashboard', event)">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+
+            <a href="/admin/manage/members">
+                <i class="fas fa-users"></i> Members
+            </a>
+            <a href="/admin/manage/memberType">
+                <i class="fas fa-id-card"></i> Membership Types
+            </a>
+            <a href="#" >
+                <i class="fas fa-exchange-alt"></i> Transactions
+            </a>
+            <a href="/admin/manage-loan">
+                <i class="fas fa-hand-holding-usd"></i> Loan Management
+            </a>
+
+            <a href="/admin/loan/settings" class="active">
+                <i class="fas fa-cogs"></i> Loan Settings
+            </a>
+
+            <a href="#" onclick="showSection('roi', event)">
+                <i class="fas fa-chart-pie"></i> ROI Distribution
+            </a>
+            <a href="#" onclick="showSection('withdrawals', event)">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="#" onclick="showSection('reports', event)">
+                <i class="fas fa-file-alt"></i> Reports
+            </a>
+            <a href="#" onclick="showSection('settings', event)">
+                <i class="fas fa-cog"></i> Payments
+            </a>
+            <a href="/admin/settings">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="#" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3"
+           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+           onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+        
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Loan Settings</h5>
+            <small class="text-muted">Configure loan duration and interest rates</small>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="position-relative">
+                <i class="fas fa-bell" style="color: var(--primary); font-size: 1.25rem; cursor: pointer;"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">15</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Welcome Card -->
+        <div class="welcome-card position-relative">
+            <div class="row align-items-center position-relative" style="z-index: 1;">
+                <div class="col-md-8">
+                    <h2 class="mb-2 fw-bold">Loan Configuration Center</h2>
+                    <p class="mb-3 opacity-90">Manage loan durations, interest rates, and eligibility criteria</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <div class="badge bg-light text-dark">
+                            <i class="fas fa-calendar me-1"></i>
+                            <span id="currentDate"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-light fw-semibold" onclick="showAddSettingModal()">
+                        <i class="fas fa-plus me-2"></i>Add New Configuration
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Club Member Loans Tab -->
+            <div class="tab-pane fade show active" id="club" role="tabpanel">
+                <div id="clubLoanSettings">
+                    <!-- Club loan settings will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Powered By Footer -->
+    <div class="powered-by">
+        Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+    </div>
+
+    <!-- Add/Edit Loan Setting Modal -->
+<div class="modal fade" id="loanSettingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
+                <h5 class="modal-title fw-bold" id="modalTitle">
+                    <i class="fas fa-plus-circle me-2"></i>Add Loan Configuration
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="loanSettingForm">
+                    <input type="hidden" id="settingId">
+
+                    <!-- Loan Name -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Loan Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="configName" placeholder="e.g., Short Term Loan" required>
+                        <small class="text-muted">Give this loan setting a descriptive name</small>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Duration (Months) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="duration" min="1" max="60" placeholder="e.g., 6" required>
+                        <small class="text-muted">1–60 months</small>
+                    </div>
+
+                    <!-- Penalty -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Penalty Percentage (%)</label>
+                        <input type="number" class="form-control" id="penaltyPercentage" min="0" max="100" step="0.1" placeholder="e.g., 2.5">
+                        <small class="text-muted">Applied when a user fails to pay on time</small>
+                    </div>
+
+                    <!-- Rollover -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rollover Percentage (%)</label>
+                        <input type="number" class="form-control" id="rolloverPercentage" min="0" max="100" step="0.1" placeholder="e.g., 5.0">
+                        <small class="text-muted">Applied when a user rolls over their loan</small>
+                    </div>
+
+                    <!-- Eligibility -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Eligibility Requirement <span class="text-danger">*</span></label>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <select class="form-select" id="eligibilityUnit" required>
+                                    <option value="">Select unit...</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="days">Days</option>
+                                    <option value="weeks">Weeks</option>
+                                    <option value="months">Months</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <input type="number" class="form-control" id="eligibilityValue" min="1" placeholder="Enter value" required>
+                            </div>
+                        </div>
+                        <small class="text-muted">Minimum membership duration before a member can apply.</small>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Status</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="isActive" checked>
+                            <label class="form-check-label" for="isActive">
+                                <span class="fw-semibold">Active</span>
+                                <small class="d-block text-muted">
+                                    Enable this configuration for new loan applications
+                                </small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="alert-info-custom">
+                        <small><i class="fas fa-lightbulb me-2"></i>
+                            Members will see this option when applying if it's active.
+                        </small>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveLoanSetting()">
+                    <i class="fas fa-save me-2"></i>Save Configuration
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+    <!-- Delete Confirmation Modal -->
+    8<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form id="deleteForm" method="POST" action="/api/loan/settings/delete" class="modal-content">
+            <input type="hidden" name="id" id="deleteSettingId">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-trash-alt me-2 text-danger"></i>Delete Configuration
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-danger-custom mb-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning!</strong> This action cannot be undone.
+                </div>
+                <p>Are you sure you want to delete this loan configuration?</p>
+                <div class="card">
+                    <div class="card-body">
+                        <strong id="deleteConfigName"></strong>
+                        <p class="mb-0 text-muted small mt-1" id="deleteConfigDetails"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash me-2"></i>Delete Configuration
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Convert backend data to match the frontend structure
+        let loanSettings = <%- JSON.stringify(loanSettings) %>.map(s => ({
+            id: s._id,
+            name: s.loanName,
+            duration: s.duration,
+            penaltyPercentage: s.penaltyPercentage,
+            rolloverPercentage: s.rolloverPercentage,
+            eligibility: `${s.eligibilityValue} ${s.eligibilityUnit}`,
+            isActive: s.status === "active",
+            type: "club" // temporary until you decide club/nonclub logic
+        }));
+
+
+        let editingId = null;
+        let deleteId = null;
+
+        // Set current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+
+        // Initialize
+        function init() {
+            renderLoanSettings();
+            updateStats();
+        }
+
+        // Render loan settings
+        function renderLoanSettings() {
+            const clubSettings = loanSettings.filter(s => s.type === 'club');
+            const nonClubSettings = loanSettings.filter(s => s.type === 'non-club');
+
+            renderSettingsList('clubLoanSettings', clubSettings);
+            renderSettingsList('nonClubLoanSettings', nonClubSettings);
+        }
+
+        // Render settings list
+        function renderSettingsList(containerId, settings) {
+            const container = document.getElementById(containerId);
+            
+            if (settings.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h5>No Configurations Found</h5>
+                        <p>Add your first loan configuration to get started</p>
+                        <button class="btn btn-primary" onclick="showAddSettingModal()">
+                            <i class="fas fa-plus me-2"></i>Add Configuration
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = settings.map(setting => `
+                <div class="settings-card">
+                    <div class="settings-header">
+                        <div>
+                            <h6 class="mb-1 fw-bold" style="color: var(--primary);">${setting.name}</h6>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="settings-badge ${setting.type === 'club' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}">
+                                <i class="fas fa-${setting.type === 'club' ? 'user-check' : 'user'}"></i>
+                                ${setting.type === 'club' ? 'Club' : 'Non-Club'}
+                            </span>
+                            <label class="toggle-switch mb-0">
+                                <input type="checkbox" ${setting.isActive ? 'checked' : ''} onchange="toggleStatus('${setting.id}')">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-details">
+                        <div class="detail-box">
+                            <div class="detail-label">Duration</div>
+                            <div class="detail-value">${setting.duration} months</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Penalty Rate</div>
+                            <div class="detail-value">${setting.penaltyPercentage}%</div>
+                        </div>
+
+                        <div class="detail-box">
+                            <div class="detail-label">Rollover Rate</div>
+                            <div class="detail-value">${setting.rolloverPercentage}%</div>
+                        </div>
+
+
+                       <div class="detail-box">
+                            <div class="detail-label">Eligibility</div>
+                            <div class="detail-value">${setting.eligibility}</div>
+                        </div>
+                    </div>
+
+                    <div class="action-button-group">
+                        <button class="btn btn-sm btn-info" onclick="editSetting('${setting.id}')">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </button>
+                        <button class="btn btn-sm ${setting.isActive ? 'btn-warning' : 'btn-success'}" onclick="toggleStatus('${setting.id}')">
+                            <i class="fas fa-${setting.isActive ? 'pause' : 'play'} me-1"></i>
+                            ${setting.isActive ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="showDeleteModal('${setting.id}')">
+                            <i class="fas fa-trash me-1"></i>Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+
+        // Show add setting modal
+        function showAddSettingModal() {
+            editingId = null;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle me-2"></i>Add Loan Configuration';
+            document.getElementById('loanSettingForm').reset();
+            document.getElementById('isActive').checked = true;
+            const modal = new bootstrap.Modal(document.getElementById('loanSettingModal'));
+            modal.show();
+        }
+
+// Edit setting
+function editSetting(id) {
+    editingId = id;
+
+    const setting = loanSettings.find(s => s.id === id);
+    if (!setting) return;
+
+    document.getElementById("modalTitle").innerHTML =
+        '<i class="fas fa-edit me-2"></i>Edit Loan Configuration';
+
+    // Hidden ID
+    document.getElementById("settingId").value = setting.id;
+
+    // Loan Name
+    document.getElementById("configName").value = setting.name;
+
+    // Duration (months)
+    document.getElementById("duration").value = setting.duration;
+
+    // Penalty %
+    document.getElementById("penaltyPercentage").value = setting.penaltyPercentage;
+
+    // Rollover %
+    document.getElementById("rolloverPercentage").value = setting.rolloverPercentage;
+
+    // Eligibility
+    const [value, unit] = setting.eligibility.split(" ");
+    document.getElementById("eligibilityUnit").value = unit;
+    document.getElementById("eligibilityValue").value = value;
+
+    // Status switch
+    document.getElementById("isActive").checked = setting.isActive;
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById("loanSettingModal"));
+    modal.show();
+}
+
+
+        // Save loan setting
+async function saveLoanSetting() {
+    const form = document.getElementById("loanSettingForm");
+
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const settingData = {
+        id: document.getElementById("settingId").value || null, // IMPORTANT
+        loanName: document.getElementById("configName").value,
+        duration: document.getElementById("duration").value,
+        penaltyPercentage: document.getElementById("penaltyPercentage").value || 0,
+        rolloverPercentage: document.getElementById("rolloverPercentage").value || 0,
+        eligibilityUnit: document.getElementById("eligibilityUnit").value,
+        eligibilityValue: document.getElementById("eligibilityValue").value,
+        status: document.getElementById("isActive").checked ? "active" : "inactive"
+    };
+
+    try {
+        const response = await fetch("/api/loan/settings/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(settingData)
+        });
+
+        const result = await response.json();
+
+        if (result.status) {
+            alert(settingData.id ? "Loan setting updated!" : "Loan setting added!");
+            bootstrap.Modal.getInstance(document.getElementById("loanSettingModal")).hide();
+            location.reload();
+        } else {
+            alert(result.message || "Failed to save loan setting.");
+        }
+
+    } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred while saving loan setting.");
+    }
+}
+
+
+async function toggleStatus(id) {
+    try {
+        const response = await fetch("/api/loan/settings/toggle", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+        });
+
+        const result = await response.json();
+
+        if (!result.status) {
+            showToast(result.message, "danger");
+            return;
+        }
+
+        showToast(result.message, "success");
+
+        // Delay 300ms so toast shows before reload
+        setTimeout(() => location.reload(), 300);
+
+    } catch (error) {
+        console.error("Error toggling status:", error);
+        showToast("Failed to toggle setting", "danger");
+    }
+}
+
+
+        // Show delete modal
+function showDeleteModal(id) {
+    const setting = loanSettings.find(s => s.id === id);
+    if (!setting) return;
+
+    document.getElementById('deleteConfigName').textContent = setting.name;
+    document.getElementById('deleteConfigDetails').textContent = 
+        `${setting.duration} months • ${setting.penaltyPercentage}% penalty • ${setting.rolloverPercentage}% rollover`;
+
+    // Set hidden input for form submission
+    document.getElementById('deleteSettingId').value = id;
+
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+
+
+        // Format number
+        function formatNumber(num) {
+            return new Intl.NumberFormat('en-NG').format(num);
+        }
+
+        // Show toast notification
+        function showToast(message, type) {
+            // Simple alert for now - you can implement a proper toast notification
+            const icon = type === 'success' ? '✓' : type === 'danger' ? '✗' : 'ℹ';
+            alert(`${icon} ${message}`);
+        }
+
+        // Initialize on page load
+        init();
+    </script>
+</body>
+</html>

@@ -10,6 +10,8 @@ const saltRounds = 10;
 const User = require("../models/User");
 const Payment = require("../models/Payment");
 const Account = require("../models/Account");
+const Settings = require("../models/Settings");
+const MemberType = require("../models/MemberType");
 
 const multer = require('multer');
 const fs = require('fs');
@@ -67,7 +69,7 @@ router.post(
         address,
         idType,
         idNumber,
-        referralCode, // referral code from signup form
+        referralCode,
         password,
       } = req.body;
 
@@ -87,12 +89,29 @@ router.post(
 
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      // Generate membershipID and referral code
-      const lastUser = await User.findOne({}).sort({ createdAt: -1 });
-      const nextNumber = lastUser
-        ? parseInt(lastUser.membershipID?.slice(-3)) + 1
-        : 1;
-      const membershipID = `NCD${String(nextNumber).padStart(3, "0")}`;
+      // Get default MemberType (NCDS) and Settings
+      const defaultMemberType = await MemberType.findOne({ shortCode: "NCDS" });
+      if (!defaultMemberType) {
+        return res
+          .status(500)
+          .json({ status: false, message: "Default member type not found" });
+      }
+
+      const settings = await Settings.getSettings();
+      const registrationFee = settings.registrationFees.adultRegistrationFee;
+
+      // Generate next membershipID for the type
+      const lastUserOfType = await User.findOne({
+        membershipID: { $regex: `^${defaultMemberType.shortCode}` },
+      }).sort({ createdAt: -1 });
+
+      let nextNumber = 1;
+      if (lastUserOfType && lastUserOfType.membershipID) {
+        const match = lastUserOfType.membershipID.match(/\d+$/);
+        if (match) nextNumber = parseInt(match[0]) + 1;
+      }
+
+      const membershipID = `${defaultMemberType.shortCode}${String(nextNumber).padStart(3, "0")}`;
       const newReferralCode = membershipID;
 
       // Create new user
@@ -134,16 +153,17 @@ router.post(
       // Create Account for the user
       const account = await Account.create({
         user: newUser._id,
-        accountType: "NCD", // default NCD
+        accountType: defaultMemberType._id, // proper reference
         balance: 0,
-        interestRate: 10,
+        monthlyROI: defaultMemberType.interestRate || 0,
+        accumulativeROI: 0,
       });
 
       // Link account to user
       newUser.account = account._id;
       await newUser.save();
 
-      // Initialize Paystack transaction
+      // Initialize Paystack transaction with dynamic registration fee
       const paystackRes = await fetch(
         "https://api.paystack.co/transaction/initialize",
         {
@@ -154,7 +174,7 @@ router.post(
           },
           body: JSON.stringify({
             email,
-            amount: 200000, // in kobo
+            amount: registrationFee * 100, // convert to kobo
             metadata: { firstName, lastName, userId: newUser._id },
             callback_url: `${process.env.BASE_URL}/payment/verify`,
           }),
@@ -168,7 +188,7 @@ router.post(
       const payment = await Payment.create({
         user: newUser._id,
         email,
-        amount: 200000,
+        amount: registrationFee,
         reference: data.data.reference,
         status: "pending",
       });
@@ -186,7 +206,108 @@ router.post(
   }
 );
 
+// MIGRATION 
+router.post(
+    "/add",
+    upload.fields([
+        { name: "addressProof", maxCount: 1 },
+        { name: "passportPhoto", maxCount: 1 },
+        { name: "idFile", maxCount: 1 },
+        { name: "signature", maxCount: 1 }
+    ]),
+    async (req, res) => {
+        try {
+            const {
+                firstName,
+                lastName,
+                email,
+                phone,
+                dob,
+                state,
+                lga,
+                address,
+                idType,
+                idNumber,
+                password,
+                openingBalance,
+                monthlyROI,
+                accumulativeROI,
+                memberTypeId
+            } = req.body;
 
+            // Check if email already exists
+            if (await User.findOne({ email })) {
+                return res.status(400).json({ status: false, message: "Email already registered." });
+            }
+
+            // File uploads
+            const addressProof = req.files["addressProof"]?.[0]?.path;
+            const passportPhoto = req.files["passportPhoto"]?.[0]?.path;
+            const idFile = req.files["idFile"]?.[0]?.path;
+            const signature = req.files["signature"]?.[0]?.path;
+
+            // Hash password
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+            // Get MemberType
+            const memberType = await MemberType.findById(memberTypeId);
+            if (!memberType) {
+                return res.status(400).json({ status: false, message: "Member type not found." });
+            }
+
+            // Generate membership ID
+            const lastUserOfType = await User.findOne({ membershipID: { $regex: `^${memberType.shortCode}` } }).sort({ createdAt: -1 });
+            let nextNumber = 1;
+            if (lastUserOfType && lastUserOfType.membershipID) {
+                const match = lastUserOfType.membershipID.match(/\d+$/);
+                if (match) nextNumber = parseInt(match[0]) + 1;
+            }
+            const membershipID = `${memberType.shortCode}${String(nextNumber).padStart(3, "0")}`;
+
+            // Create user
+            const newUser = await User.create({
+                firstName,
+                lastName,
+                email,
+                phone,
+                dob,
+                state,
+                lga,
+                address,
+                idType,
+                idNumber,
+                addressProof,
+                passportPhoto,
+                idFile,
+                signature,
+                membershipID,
+                referralCode: membershipID,
+                password: hashedPassword,
+                status: "active",
+                registrationStatus: "paid"
+            });
+
+            // Create user account
+            const account = await Account.create({
+                user: newUser._id,
+                accountType: memberType._id,
+                balance: parseFloat(openingBalance) || 0,
+                monthlyROI: parseFloat(monthlyROI) || 0,  // <-- now uses user input only
+                accumulativeROI: parseFloat(accumulativeROI) || 0
+            });
+
+
+            newUser.account = account._id;
+            await newUser.save();
+
+            res.json({ status: true, message: "Member added successfully.", user: newUser });
+        } catch (err) {
+            console.error("Error adding member:", err);
+            res.status(500).json({ status: false, message: "Error adding member." });
+        }
+    }
+);
+// ENDS 
 
 
 // ========== VERIFY PAYMENT ==========
@@ -218,13 +339,21 @@ router.get("/payment/verify", async (req, res) => {
     if (!payment) return res.redirect("/signup?error=payment-not-found");
 
     // Map Paystack 'success' to our schema 'paid'
-    payment.status = transaction.status === "success" ? "paid" : "failed";
+    const isPaid = transaction.status === "success";
+
+    payment.status = isPaid ? "success" : "failed"; // Keep Payment.status aligned
     payment.paystackResponse = transaction;
+    payment.verifiedAt = isPaid ? new Date() : null;
     await payment.save();
 
-    // Do NOT change user.status here — approval remains admin's responsibility
-    // You can optionally show a message to the user about successful payment
-    if (payment.status === "paid") {
+    // Update user registrationStatus
+    if (payment.user) {
+      payment.user.registrationStatus = isPaid ? "paid" : "failed";
+      await payment.user.save();
+    }
+
+    // Redirect user accordingly
+    if (isPaid) {
       return res.redirect("/club-de-star-cooperative/dashboard?payment=success");
     } else {
       return res.redirect("/signup?payment=failed");
@@ -234,6 +363,8 @@ router.get("/payment/verify", async (req, res) => {
     res.redirect("/signup?payment=failed");
   }
 });
+
+
 
 router.post("/paystack/webhook", express.json(), async (req, res) => {
   const secret = process.env.PAYSTACK_SECRET_KEY;
