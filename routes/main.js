@@ -574,7 +574,7 @@ router.get("/club-de-star-cooperative/guarantorRequest", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("Guarantor Request page error:", err);
+    console.error("Guarantor Request page error reads:", err);
     res.redirect("/club-de-star-cooperative/dashboard");
   }
 });
