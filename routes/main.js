@@ -45,6 +45,25 @@ router.get('/onboard/club-de-star-cooperative', async (req, res) => {
   }
 });
 
+router.get('/onboard/club-de-star-cooperative/bylaws', async (req, res) => {
+  try {
+    const referralCode = req.query.ref || "";
+
+    // Fetch settings (create default if not exists)
+    const settings = await Settings.getSettings();
+    const registrationFee = settings.registrationFees.adultRegistrationFee;
+
+    // Render the page and pass registration fee
+    res.render("auth/bylaws", { 
+      referralCode,
+      registrationFee 
+    });
+  } catch (err) {
+    console.error("Error fetching settings:", err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 
 
 // router.get('/club-de-star-cooperative/dashboard', (req,res)=>{
