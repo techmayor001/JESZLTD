@@ -560,7 +560,7 @@ router.get("/club-de-star-cooperative/guarantorRequest", async (req, res) => {
     const declinedRequests = user.guarantorRequests.filter(r => r.status === "declined");
 
     // Send all relevant info to frontend
-    res.render("dashboard/guarantorRequests", {
+    res.render("dashboard/guarantorRequest", {
       user,
       pendingRequests,
       acceptedRequests,
