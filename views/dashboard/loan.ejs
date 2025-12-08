@@ -1053,7 +1053,8 @@ function copyReferralLink() {
                     </div>
 
                     <input type="hidden" name="loanId" value="<%= loan ? loan._id : '' %>">
-                    <input type="hidden" name="dueDate" value="<%= loan ? loan.dueDate.toISOString() : '' %>">
+                    <input type="hidden" name="dueDate" value="<%= loan?.dueDate ? loan.dueDate.toISOString() : '' %>">
+
 
                     <div class="alert-warning-custom">
                         <small>
