@@ -790,6 +790,16 @@
                                 <label for="typeROIRate" class="form-label">Interest Rate (%)</label>
                                 <input type="number" class="form-control" id="interestRate" placeholder="5.5" min="0" max="100" step="0.1">
                             </div>
+
+                            <div class="col-md-6 d-flex align-items-center mt-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="isDefault">
+                                    <label class="form-check-label" for="isDefault">
+                                        Set as default membership type
+                                    </label>
+                                </div>
+                            </div>
+
                         </div>
                     </form>
                 </div>
@@ -816,41 +826,47 @@
     });
 
     // Load membership types dynamically
-    function loadMembershipTypes() {
-        const grid = document.getElementById('membershipGrid');
-        grid.innerHTML = '';
+function loadMembershipTypes() {
+    const grid = document.getElementById('membershipGrid');
+    grid.innerHTML = '';
 
-        membershipTypes.forEach(type => {
-            const card = `
-                <div class="col-lg-4 col-md-6">
-                    <div class="membership-card">
-                        <div class="membership-header">
-                            <div>
-                                <div class="membership-title">${type.name}</div>
-                            </div>
-                            <span class="badge bg-success">Interest Rate ${type.interestRate}%</span>
-                        </div>
+    membershipTypes.forEach(type => {
+        // Add default badge if this type is default
+        const defaultBadge = type.isDefault
+            ? `<span class="badge bg-warning text-dark ms-2">Default</span>`
+            : '';
 
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <small class="text-muted">
-                                <i class="fas fa-users me-1"></i> ${type.members || 0} members
-                            </small>
+        const card = `
+            <div class="col-lg-4 col-md-6">
+                <div class="membership-card">
+                    <div class="membership-header d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="membership-title">${type.name}${defaultBadge}</div>
                         </div>
+                        <span class="badge bg-success">Interest Rate ${type.interestRate}%</span>
+                    </div>
 
-                        <div class="membership-actions">
-                            <button class="btn btn-sm btn-outline-primary flex-fill" onclick="editMembershipType('${type._id}')">
-                                <i class="fas fa-edit me-1"></i> Edit
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteMembershipType('${type._id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-users me-1"></i> ${type.members || 0} members
+                        </small>
+                    </div>
+
+                    <div class="membership-actions">
+                        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="editMembershipType('${type._id}')">
+                            <i class="fas fa-edit me-1"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteMembershipType('${type._id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
-            `;
-            grid.innerHTML += card;
-        });
-    }
+            </div>
+        `;
+        grid.innerHTML += card;
+    });
+}
+
 // UPDATE STATS
 document.getElementById("totalTypes").innerText = membershipTypes.length;
 
@@ -889,39 +905,46 @@ document.getElementById("avgPrice").innerText =
         modal.show();
     }
 
-    // Save membership type (CREATE or UPDATE)
-    async function saveMembershipType() {
-        const id = document.getElementById('membershipId').value;
-        const name = document.getElementById('typeName').value.trim();
-        const shortCode = document.getElementById('shortName').value.trim();
-        const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
+async function saveMembershipType() {
+    const id = document.getElementById('membershipId').value;
+    const name = document.getElementById('typeName').value.trim();
+    const shortCode = document.getElementById('shortName').value.trim();
+    const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
+    const isDefault = document.getElementById('isDefault').checked;
 
-        if (!name || !shortCode) {
-            alert("Please fill in all required fields");
-            return;
-        }
-
-        try {
-            const response = await fetch("/admin/manage/memberType", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id, name, shortCode, interestRate })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                alert(id ? "Membership type updated!" : "Membership type added!");
-                location.reload();
-            } else {
-                alert(data.message || "Failed to save membership type");
-            }
-
-        } catch (err) {
-            console.error(err);
-            alert("Error saving membership type");
-        }
+    if (!name || !shortCode) {
+        alert("Please fill in all required fields");
+        return;
     }
+
+    try {
+        const response = await fetch("/admin/manage/memberType", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id,
+                name,
+                shortCode,
+                interestRate,
+                isDefault
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert(id ? "Membership type updated!" : "Membership type added!");
+            location.reload();
+        } else {
+            alert(data.message || "Failed to save membership type");
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("Error saving membership type");
+    }
+}
+
 
     // Delete membership type
     async function deleteMembershipType(id) {

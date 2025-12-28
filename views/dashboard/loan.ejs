@@ -1053,8 +1053,7 @@ function copyReferralLink() {
                     </div>
 
                     <input type="hidden" name="loanId" value="<%= loan ? loan._id : '' %>">
-                    <input type="hidden" name="dueDate" value="<%= loan?.dueDate ? loan.dueDate.toISOString() : '' %>">
-
+                    <input type="hidden" name="dueDate" value="<%= loan ? loan.dueDate.toISOString() : '' %>">
 
                     <div class="alert-warning-custom">
                         <small>
@@ -1128,71 +1127,70 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
     <!-- Rollover Modal -->
-<% if (loan) { %>
-<div class="modal fade" id="rolloverModal" tabindex="-1"> 
-    <div class="modal-dialog">
-        <div class="modal-content" style="border-radius: 20px;">
-            <div class="modal-header" style="border-radius: 20px 20px 0 0;">
-                <h5 class="modal-title fw-bold"><i class="fas fa-sync-alt me-2" style="color: var(--primary);"></i>Request Loan Rollover</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-
-                <div class="alert-info-custom mb-3">
-                    <h6 class="fw-bold mb-2">Rollover Requirements</h6>
-                    <ul class="small mb-0 ps-3">
-                        <li class="mb-2">Pay current month's interest before expiration</li>
-                        <li class="mb-2">Interest rate increases by <%= loan?.duration?.rolloverPercentage ?? 0 %> %</li>
-                        <li class="mb-0">Request must be approved before due date</li>
-                    </ul>
+     <% if (loan && loan.duration) { %>
+    <div class="modal fade" id="rolloverModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header" style="border-radius: 20px 20px 0 0;">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-sync-alt me-2" style="color: var(--primary);"></i>Request Loan Rollover</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
-                <form action="/club-de-star-cooperative/rollover-loan" method="POST">
-                    <div class="card mb-3" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted fw-semibold">Current Outstanding</span>
-                                <strong>₦<%= loan.totalRepay.toLocaleString() %></strong>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted fw-semibold">New Interest Rate</span>
-                                <strong class="text-warning">
-                                    <%= (loan?.duration?.rolloverPercentage ?? 0) + loan.interestRate %>% p.a.
-                                </strong>
+                <div class="modal-body">
+                    <div class="alert-info-custom mb-3">
+                        <h6 class="fw-bold mb-2">Rollover Requirements</h6>
+                        <ul class="small mb-0 ps-3">
+                            <li class="mb-2">Pay current month's interest before expiration</li>
+                            <li class="mb-2">Interest rate increases by <%= loan.duration.rolloverPercentage %> %</li>
+                            <li class="mb-0">Request must be approved before due date</li>
+                        </ul>
+                    </div>
+                    <form action="/club-de-star-cooperative/rollover-loan" method="POST">
+                        <div class="card mb-3" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted fw-semibold">Current Outstanding</span>
+                                    <strong>₦<%= loan.totalRepay.toLocaleString() %></strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted fw-semibold">New Interest Rate</span>
+                                    <strong class="text-warning">
+                                    <%= loan.duration.rolloverPercentage + loan.interestRate %>% p.a.
+                                    </strong>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Extended Duration (months)</label>
-                        <select class="form-select" name="duration" required>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Extended Duration (months)</label>
+                            <select class="form-select" name="duration" required>
                             <% loanSettings.forEach(setting => { %>
                                 <option value="<%= setting._id %>">
-                                    <%= setting.loanName %> — <%= setting.duration %> months
+                                <%= setting.loanName %> — <%= setting.duration %> months
                                 </option>
                             <% }) %>
-                        </select>
-                    </div>
+                            </select>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Loan Amount (₦)</label>
-                        <input type="number" class="form-control" name="amount"
-                               value="<%= loan.totalRepay %>" 
-                               readonly 
-                               required>
-                    </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-warning">Submit Rollover Request</button>
-                    </div>
-                </form>
-
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Loan Amount (₦)</label>
+                            <input type="number" class="form-control" name="amount"
+                                   value="<%= loan.totalRepay %>" 
+                                   readonly 
+                                   required
+                                   >
+                            <small class="text-muted">Max: ₦<%= (user.account.balance * 3).toLocaleString() %></small>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-warning">Submit Rollover Request</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<% } %>
+    <% } %>
 
  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>

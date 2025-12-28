@@ -6,7 +6,6 @@ const accountSchema = mongoose.Schema({
   accountType: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "MemberType", 
-    required: true 
   },
 
   balance: { type: Number, default: 0 },

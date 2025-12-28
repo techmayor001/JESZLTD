@@ -134,6 +134,56 @@ router.get("/deposit/verify", async (req, res) => {
   }
 });
 
+router.post("/deposit/cooperative", async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.redirect("/login");
+    }
+
+    const user = req.user;
+    const { coopAmount, source, payeeName } = req.body;
+
+    const amount = Number(coopAmount);
+
+    // 🚨 STRONG VALIDATION
+    if (!amount || isNaN(amount) || amount <= 0) {
+      return res.redirect("/club-de-star-cooperative/dashboard?deposit=invalid");
+    }
+
+    if (source === "no" && !payeeName?.trim()) {
+      return res.redirect("/club-de-star-cooperative/dashboard?deposit=missing-payee");
+    }
+
+    const reference = `COOP-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+
+    await Payment.create({
+      user: user._id,
+      email: user.email,
+      amount, // ✅ guaranteed number
+      reference,
+      payeeName: source === "no" ? payeeName.trim() : null,
+      status: "pending",
+    });
+
+    await Transaction.create({
+      user: user._id,
+      type: "deposit",
+      amount,
+      description: "Cooperative Deposit (Pending Approval)",
+      reference,
+      method: "Cooperative",
+      status: "pending",
+    });
+
+    console.log(`🕒 Cooperative deposit pending: ₦${amount} — ${user.email}`);
+
+    return res.redirect("/club-de-star-cooperative/dashboard?deposit=pending");
+
+  } catch (err) {
+    console.error("Cooperative deposit error:", err);
+    return res.redirect("/club-de-star-cooperative/dashboard?deposit=failed");
+  }
+});
 
 
 

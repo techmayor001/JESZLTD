@@ -81,17 +81,55 @@ router.post("/admin-signup", async (req, res) => {
       role
     });
 
-    res.status(201).json({
-      status: true,
-      message: `Admin account created successfully for role: ${role}`,
-      adminId: newAdmin._id
-    });
+  return res.redirect("/admin-login");
 
   } catch (err) {
     console.error("Admin signup error:", err);
     res.status(500).json({ status: false, message: "Internal Server Error" });
   }
 });
+
+
+
+router.post("/promote-to-superadmin", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ status: false, message: "Email is required." });
+    }
+
+    // Check if a super_admin already exists
+    const existingSuperAdmin = await User.findOne({ roles: "super_admin" });
+    if (existingSuperAdmin) {
+      // Redirect to admin login if super_admin exists
+      return res.redirect("/admin-login");
+    }
+
+    // Find the user to promote
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ status: false, message: "User not found." });
+    }
+
+    // Promote user to super_admin if not already
+    if (!user.roles.includes("super_admin")) {
+      user.roles.push("super_admin");
+      await user.save();
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: `${user.firstName} ${user.lastName} has been promoted to Super Admin.`,
+      userId: user._id,
+    });
+
+  } catch (err) {
+    console.error("Super Admin promotion error:", err);
+    return res.status(500).json({ status: false, message: "Server error." });
+  }
+});
+
 
 
 router.post("/admin-login", (req, res, next) => {
@@ -122,7 +160,75 @@ router.get("/logout", (req, res) => {
 });
 
 
+// ADMIN PAYMENT ROUTES 
+// PAYMENT MANAGEMENT
+router.get("/admin/manage-payment", ensureAdmin, async (req, res) => {
+  try {
+    const payments = await Payment.find()
+      .populate({
+        path: "user",
+        select: "firstName lastName membershipID email phone account",
+        populate: {
+          path: "account",
+          select: "accountType",
+          populate: {
+            path: "accountType",
+            model: "MemberType",
+            select: "name"
+          }
+        }
+      })
+      .populate({
+        path: "loanId",
+        populate: {
+          path: "duration",
+          model: "LoanSettings"
+        }
+      })
+      .sort({ createdAt: -1 });
 
+    res.render("dashboard/admin/payment", {
+      admin: req.user,
+      payments
+    });
+
+  } catch (error) {
+    console.error("Error fetching payments:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+router.get("/admin/search-member", ensureAdmin, async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) return res.json([]);
+
+    const users = await User.find({
+      $or: [
+        { membershipID: { $regex: q, $options: "i" } },
+        { email: { $regex: q, $options: "i" } },
+        { firstName: { $regex: q, $options: "i" } },
+        { lastName: { $regex: q, $options: "i" } }
+      ]
+    })
+      .populate("account")
+      .limit(5);
+
+    const results = users.map(u => ({
+      id: u._id,
+      name: `${u.firstName} ${u.lastName}`,
+      membershipID: u.membershipID,
+      email: u.email,
+      balance: u.account?.balance || 0
+    }));
+
+    res.json(results);
+
+  } catch (err) {
+    console.error("Search member error:", err);
+    res.status(500).json([]);
+  }
+});
 
 
 
@@ -154,39 +260,100 @@ router.get("/admin/manage/memberType", ensureAdmin, async (req, res) => {
 // CREATE or UPDATE Member Type
 router.post("/admin/manage/memberType", ensureAdmin, async (req, res) => {
   try {
-    const { id, name, shortCode, interestRate } = req.body;
+    const { id, name, shortCode, interestRate, isDefault } = req.body;
 
-    // If ID exists → UPDATE
+    if (!shortCode || shortCode.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Shortcode is required",
+      });
+    }
+
+    // If this member type is being set as default → unset previous default(s)
+    if (isDefault) {
+      await MemberType.updateMany(
+        { isDefault: true },
+        { isDefault: false }
+      );
+    }
+
+    // UPDATE existing MemberType
     if (id) {
+      const existingType = await MemberType.findById(id);
+      if (!existingType) {
+        return res.json({
+          success: false,
+          message: "Membership type not found",
+        });
+      }
+
+      const oldShortCode = existingType.shortCode?.trim() || "";
+      const newShortCode = shortCode.trim();
+
+      // Update the MemberType document
       const updated = await MemberType.findByIdAndUpdate(
         id,
-        { name, shortCode, interestRate },
+        { name, shortCode: newShortCode, interestRate, isDefault },
         { new: true }
       );
 
-      if (!updated) {
-        return res.json({ success: false, message: "Membership type not found" });
+      // 🔥 If shortcode first letter changed → update all users
+      if (oldShortCode.charAt(0) !== newShortCode.charAt(0)) {
+        const newChar = newShortCode.charAt(0);
+        const users = await User.find({});
+
+        let updatedCount = 0;
+
+        for (const user of users) {
+          if (!user.membershipID) continue;
+
+          // Replace only the first character
+          const newMembershipID = newChar + user.membershipID.substring(1);
+
+          if (user.membershipID !== newMembershipID) {
+            user.membershipID = newMembershipID;
+            user.referralCode = newMembershipID;
+            await user.save();
+            updatedCount++;
+          }
+        }
+
+        console.log(`Users updated: ${updatedCount}`);
       }
 
-      return res.json({ success: true, message: "Membership type updated", updated });
+      return res.json({
+        success: true,
+        message: "Membership type updated successfully",
+        updated,
+      });
     }
 
-    // If no ID → CREATE new
+    // CREATE new MemberType
     const newType = new MemberType({
       name,
-      shortCode,
-      interestRate
+      shortCode: shortCode.trim(),
+      interestRate,
+      isDefault,
     });
 
+    // If it is set as default, ensure others are unset (already done above)
     await newType.save();
 
-    return res.json({ success: true, message: "Membership type created", newType });
-
+    return res.json({
+      success: true,
+      message: "Membership type created successfully",
+      newType,
+    });
   } catch (error) {
     console.error("Error saving member type:", error);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 });
+
+
 
 // DELETE Member Type
 router.delete("/admin/manage/memberType/:id", ensureAdmin, async (req, res) => {

@@ -683,7 +683,7 @@
                 <div class="card-body">
                     <div class="alert-info-custom mb-4">
                         <h6 class="fw-bold mb-3">How ROI is Calculated</h6>
-                        <p class="mb-2">Monthly ROI = (Your Cumulative Savings from First Month to Current) / (Total Savings by All Members up to Current Month) × Interest for the Month - 10%(company charge)</p>
+                        <p class="mb-2">Monthly ROI = (Your Cumulative Savings from First Month to Current) / (Total Savings by All Members up to Current Month) × Interest for the Month - <%= companyCharge %> (company charge)</p>
                         <p class="mb-0 small"><strong>Note:</strong> 10% of the monthly interest pool is retained as operating charges</p>
                     </div>
 
@@ -696,7 +696,7 @@
                         </div>
                         <div class="col-md-3">
                             <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
-                                <small class="text-muted d-block mb-2">Total Member Savings</small>
+                                <small class="text-muted d-block mb-2">Total Payout</small>
                                 <h3 class="mb-0 fw-bold" style="color: var(--primary);">₦<%= allMembersTotalSavings.toLocaleString() %></h3>
                             </div>
                         </div>
@@ -927,95 +927,187 @@ function updateWithdrawalFee() {
 
 
     <!-- Deposit Modal -->
-    <div class="modal fade" id="depositModal" tabindex="-1">
-        <div class="modal-dialog">
-<div class="modal-content" style="border-radius: 20px;">
-  <div class="modal-header" style="border-radius: 20px 20px 0 0;">
-    <h5 class="modal-title fw-bold">
-      <i class="fas fa-plus-circle me-2 text-success"></i>Make Deposit
-    </h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-  </div>
+<div class="modal fade" id="depositModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius:20px">
 
-  <div class="modal-body">
-    <form id="depositForm">
-      <div class="mb-3">
-        <label class="form-label fw-semibold">Amount (₦)</label>
-        <input
-          type="number"
-          name="amount"
-          id="depositAmount"
-          class="form-control"
-          placeholder="Enter amount"
-          min="100"
-          required
-        >
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">
+          <i class="fas fa-plus-circle text-success me-2"></i>Make Deposit
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
-      <div class="alert-info-custom">
-        <small>
-          <i class="fas fa-info-circle me-2"></i>
-          Your current savings balance:
-          ₦<%= user.account?.balance?.toLocaleString() || 0 %>
-        </small>
+      <div class="modal-body">
+        <form id="depositForm" method="POST">
+
+          <!-- PAYMENT METHOD -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Payment Method</label>
+            <select class="form-select" id="paymentMethod" name="method" required>
+              <option value="">Select method</option>
+              <option value="paystack">Paystack (Automatic)</option>
+              <option value="cooperative">Cooperative Direct</option>
+            </select>
+          </div>
+
+          <!-- PAYSTACK SECTION -->
+          <div id="paystackSection" class="d-none">
+            <label class="form-label fw-semibold">Amount (₦)</label>
+            <input
+              type="number"
+              id="paystackAmount"
+              name="amount"
+              class="form-control"
+              min="100"
+            >
+          </div>
+
+          <!-- COOPERATIVE SECTION -->
+          <div id="cooperativeSection" class="d-none">
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">
+                Paying from your cooperative account?
+              </label>
+              <select class="form-select" id="coopSource" name="source">
+                <option value="">Select</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+
+            <!-- BANK DETAILS -->
+            <div id="coopBankDetails" class="alert alert-info small d-none">
+              <strong>Cooperative Bank Details</strong><br>
+              Bank: Coop Bank Ltd<br>
+              Account Name: JESZ Cooperative<br>
+              Account Number: <strong>0123456789</strong>
+            </div>
+
+            <!-- PAYEE NAME (ONLY IF NO) -->
+            <div id="coopNoExtra" class="d-none">
+              <label class="form-label fw-semibold">Payer Full Name</label>
+              <input
+                type="text"
+                id="payerName"
+                name="payeeName"
+                class="form-control"
+              >
+            </div>
+
+            <!-- AMOUNT -->
+            <label class="form-label fw-semibold mt-2">Amount (₦)</label>
+            <input
+              type="number"
+              id="coopAmount"
+              name="coopAmount"
+              class="form-control"
+              min="100"
+            >
+
+            <div class="alert alert-warning small mt-3">
+              Deposit will be credited after admin confirmation.
+            </div>
+
+          </div>
+
+          <div class="modal-footer px-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-success" id="submitDeposit">
+              Proceed
+            </button>
+          </div>
+
+        </form>
       </div>
 
-      <div class="modal-footer px-0 pb-0">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-success">Proceed to Deposit</button>
-      </div>
-    </form>
+    </div>
   </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const depositForm = document.getElementById("depositForm");
 
-  depositForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  const paymentMethod = document.getElementById("paymentMethod");
+  const paystackSection = document.getElementById("paystackSection");
+  const cooperativeSection = document.getElementById("cooperativeSection");
+  const coopSource = document.getElementById("coopSource");
+  const coopBankDetails = document.getElementById("coopBankDetails");
+  const coopNoExtra = document.getElementById("coopNoExtra");
+  const form = document.getElementById("depositForm");
+  const submitBtn = document.getElementById("submitDeposit");
 
-    const amount = parseFloat(document.getElementById("depositAmount").value);
-    if (!amount || amount <= 0) {
-      alert("Please enter a valid deposit amount.");
-      return;
+  paymentMethod.addEventListener("change", () => {
+    paystackSection.classList.add("d-none");
+    cooperativeSection.classList.add("d-none");
+
+    if (paymentMethod.value === "paystack") {
+      paystackSection.classList.remove("d-none");
     }
 
-    try {
-      // Disable the button to prevent multiple clicks
-      const button = depositForm.querySelector("button[type='submit']");
-      button.disabled = true;
-      button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    if (paymentMethod.value === "cooperative") {
+      cooperativeSection.classList.remove("d-none");
+    }
+  });
 
-      const response = await fetch("/deposit/init", {
+  coopSource.addEventListener("change", () => {
+    if (coopSource.value) {
+      coopBankDetails.classList.remove("d-none");
+    } else {
+      coopBankDetails.classList.add("d-none");
+    }
+
+    coopNoExtra.classList.toggle("d-none", coopSource.value !== "no");
+  });
+
+  /* SUBMIT HANDLER */
+  form.addEventListener("submit", async (e) => {
+    const method = paymentMethod.value;
+
+    if (method !== "paystack") {
+      // 👉 NORMAL FORM SUBMIT FOR COOPERATIVE
+      form.action = "/deposit/cooperative";
+      return; // allow default submit
+    }
+
+    // 👉 PAYSTACK (AJAX)
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "Processing...";
+
+    try {
+      const amount = document.getElementById("paystackAmount").value;
+
+      const res = await fetch("/deposit/init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount })
       });
 
-      const result = await response.json();
-
-      if (result.status && result.authorization_url) {
-        window.location.href = result.authorization_url; // Redirect to Paystack
-      } else {
-        alert(result.message || "Error initializing deposit.");
-        button.disabled = false;
-        button.innerHTML = "Proceed to Deposit";
+      const data = await res.json();
+      if (data.authorization_url) {
+        window.location.href = data.authorization_url;
+        return;
       }
+
+      alert(data.message || "Unable to initialize Paystack");
+
     } catch (err) {
-      console.error("Deposit initialization failed:", err);
-      alert("Unable to process deposit. Please try again.");
-      const button = depositForm.querySelector("button[type='submit']");
-      button.disabled = false;
-      button.innerHTML = "Proceed to Deposit";
+      console.error(err);
+      alert("Unable to process deposit.");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = "Proceed";
     }
   });
+
 });
 </script>
 
 
-        </div>
-    </div>
 
 
 

@@ -59,33 +59,27 @@ const userSchema = new mongoose.Schema({
 
   state: { 
     type: String, 
-    required: true 
   },
 
   lga: { 
     type: String, 
-    required: true 
   },
 
   address: { 
     type: String, 
-    required: true 
   },
 
   addressProof: { 
     type: String, 
-    required: true 
   },
 
   passportPhoto: { 
     type: String, 
-    required: true 
   },
 
   idType: { 
     type: String, 
     enum: ["nin", "passport", "drivers", "voters"], 
-    required: true 
   },
 
   idNumber: { 
@@ -94,12 +88,10 @@ const userSchema = new mongoose.Schema({
 
   idFile: { 
     type: String, 
-    required: true 
   },
 
   signature: { 
     type: String, 
-    required: true 
   },
 
   displayPicture: { 
@@ -144,7 +136,6 @@ const userSchema = new mongoose.Schema({
 
   referralCode: { 
     type: String, 
-    required: true 
   },
 
   membershipID: { 
@@ -163,11 +154,12 @@ const userSchema = new mongoose.Schema({
     }
   ],
 
-  role: { 
-    type: String, 
-    enum: ["member"], 
-    default: "member" 
+  roles: {
+    type: [String],
+    default: ["member"],
+    enum: ["member", "admin"]
   },
+
 
   bankDetails: {
     bankName: String,

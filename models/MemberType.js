@@ -19,9 +19,13 @@ const memberTypeSchema = new mongoose.Schema({
     min: 0,
     max: 100,
     default: 0
+  },
+
+  isDefault: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
 });
-
 module.exports = mongoose.model("MemberType", memberTypeSchema);

@@ -90,7 +90,7 @@ router.post(
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
       // Get default MemberType (NCDS) and Settings
-      const defaultMemberType = await MemberType.findOne({ shortCode: "NCDS" });
+      const defaultMemberType = await MemberType.findOne({ isDefault: true });
       if (!defaultMemberType) {
         return res
           .status(500)
@@ -111,7 +111,7 @@ router.post(
         if (match) nextNumber = parseInt(match[0]) + 1;
       }
 
-      const membershipID = `${defaultMemberType.shortCode}${String(nextNumber).padStart(3, "0")}`;
+      const membershipID = `${defaultMemberType.shortCode}${String(nextNumber).padStart(4, "0")}`;
       const newReferralCode = membershipID;
 
       // Create new user
