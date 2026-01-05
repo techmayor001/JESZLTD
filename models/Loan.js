@@ -4,7 +4,40 @@ const loanSchema = new mongoose.Schema({
   user: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "User", 
-    required: true 
+  },
+
+  // External borrower
+  external: {
+    borrowerType: {
+      type: String,
+      enum: ["company", "individual"]
+    },
+
+    borrowerName: {
+      type: String,
+      trim: true
+    },
+
+    email: {
+      type: String,
+      lowercase: true,
+      trim: true
+    },
+
+    phone: {
+      type: String,
+      trim: true
+    },
+
+    address: {
+      type: String,
+      trim: true
+    }
+  },
+
+  initiatedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Admin",
   },
 
   amount: { 
@@ -25,7 +58,10 @@ const loanSchema = new mongoose.Schema({
   duration: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "LoanSettings",
-    required: true
+  },
+
+  externalDuration: { 
+    type: Number 
   },
 
   dueDate: {

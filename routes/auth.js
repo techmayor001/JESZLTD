@@ -12,6 +12,7 @@ const Payment = require("../models/Payment");
 const Account = require("../models/Account");
 const Settings = require("../models/Settings");
 const MemberType = require("../models/MemberType");
+const ExtraCharge = require("../models/ExtraCharge");
 
 const multer = require('multer');
 const fs = require('fs');
@@ -341,7 +342,7 @@ router.get("/payment/verify", async (req, res) => {
     // Map Paystack 'success' to our schema 'paid'
     const isPaid = transaction.status === "success";
 
-    payment.status = isPaid ? "success" : "failed"; // Keep Payment.status aligned
+    payment.status = isPaid ? "success" : "failed";
     payment.paystackResponse = transaction;
     payment.verifiedAt = isPaid ? new Date() : null;
     await payment.save();
@@ -350,6 +351,29 @@ router.get("/payment/verify", async (req, res) => {
     if (payment.user) {
       payment.user.registrationStatus = isPaid ? "paid" : "failed";
       await payment.user.save();
+    }
+
+    // ✅ Record ExtraCharge if payment is verified
+    if (isPaid && payment.user) {
+      const existingCharge = await ExtraCharge.findOne({
+        member: payment.user._id,
+        chargeType: "registration",
+        amount: payment.amount,
+      });
+
+      // Avoid duplicates
+      if (!existingCharge) {
+        const extraCharge = new ExtraCharge({
+          member: payment.user._id,
+          chargeType: "registration",
+          amount: payment.amount,
+          reason: "Registration fee",
+          status: "paid",
+          appliedAt: new Date(),
+          paidAt: new Date(),
+        });
+        await extraCharge.save();
+      }
     }
 
     // Redirect user accordingly
@@ -363,7 +387,6 @@ router.get("/payment/verify", async (req, res) => {
     res.redirect("/signup?payment=failed");
   }
 });
-
 
 
 router.post("/paystack/webhook", express.json(), async (req, res) => {

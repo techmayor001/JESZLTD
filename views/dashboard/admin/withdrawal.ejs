@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Management - Club De Stars Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --sidebar-width: 280px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+            transform: translateX(0);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+        
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(239, 68, 68, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 70px;
+            padding: 1.5rem;
+            min-height: calc(100vh - 70px);
+            transition: all 0.3s;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 15px 40px rgba(239, 68, 68, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            height: 100%;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-label {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            background: white;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 1.25rem;
+            border-radius: 16px 16px 0 0 !important;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .status-approved {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .status-processing {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary-light);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .withdrawal-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .withdrawal-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.15);
+        }
+        
+        .withdrawal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        
+        .member-info {
+            flex: 1;
+        }
+        
+        .member-name {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .member-id {
+            color: var(--secondary);
+            font-size: 0.85rem;
+        }
+        
+        .withdrawal-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--danger);
+        }
+        
+        .withdrawal-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(30, 58, 138, 0.02);
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            color: var(--secondary);
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-approve {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+        
+        .btn-reject {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+            color: white;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            border-radius: 10px;
+            padding: 0.75rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .table-responsive {
+            border-radius: 0 0 16px 16px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin: 0;
+        }
+        
+        .table thead {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+        
+        .table thead th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(30, 58, 138, 0.02);
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        .filter-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .filter-tab.active {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .powered-by {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--secondary);
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            opacity: 0.25;
+            margin-bottom: 1rem;
+        }
+        
+        /* Receipt Styles */
+        .receipt-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .receipt-header {
+            text-align: center;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .receipt-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+        
+        .receipt-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .receipt-subtitle {
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        .receipt-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .receipt-section-title {
+            font-weight: bold;
+            color: var(--primary);
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+        
+        .receipt-row:last-child {
+            border-bottom: none;
+        }
+        
+        .receipt-label {
+            color: var(--secondary);
+            font-weight: 500;
+        }
+        
+        .receipt-value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .receipt-amount {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border: 2px solid var(--danger);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        
+        .receipt-amount-label {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .receipt-amount-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--danger);
+        }
+        
+        .receipt-footer {
+            text-align: center;
+            border-top: 3px solid var(--primary);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .receipt-stamp {
+            display: inline-block;
+            border: 3px solid var(--danger);
+            color: var(--danger);
+            padding: 0.5rem 1.5rem;
+            border-radius: 10px;
+            font-weight: bold;
+            transform: rotate(-5deg);
+            margin: 1rem 0;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .withdrawal-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .withdrawal-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .table thead {
+                display: none;
+            }
+            
+            .table tbody tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 2px solid rgba(30, 58, 138, 0.1);
+                border-radius: 12px;
+                overflow: hidden;
+                background: white;
+            }
+            
+            .table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid rgba(30, 58, 138, 0.05);
+            }
+            
+            .table tbody td:last-child {
+                border-bottom: none;
+            }
+            
+            .table tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--primary);
+                margin-right: 1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .top-navbar {
+                height: 60px;
+                padding: 0 1rem;
+            }
+            
+            .main-content {
+                margin-top: 60px;
+                padding: 0.75rem;
+            }
+            
+            .page-header {
+                padding: 1.25rem;
+                border-radius: 16px;
+            }
+            
+            .stats-value {
+                font-size: 1.5rem;
+            }
+            
+            .withdrawal-amount {
+                font-size: 1.2rem;
+            }
+            
+            .action-buttons {
+                width: 100%;
+            }
+            
+            .action-buttons button {
+                flex: 1;
+            }
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            #printReceipt, #printReceipt * {
+                visibility: visible;
+            }
+            
+            #printReceipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .sidebar, .top-navbar, .powered-by {
+                display: none !important;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">C</div>
+                <div>
+                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                </div>
+            </div>
+            <div class="admin-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>SUPER ADMIN</span>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="/admin-dashboard">
+                <i class="fas fa-users"></i> Members
+            </a>
+            <a href="/admin/manage/memberType">
+                <i class="fas fa-id-card"></i> Membership Types
+            </a>
+            <a href="/admin/manage-payment">
+                <i class="fas fa-credit-card"></i> Payments
+            </a>
+            <a href="/admin/manage-deposits">
+                <i class="fas fa-coins"></i> Deposit Management
+            </a>
+            <a href="/admin/manage-withdrawals" class="active">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="/admin/manage-extra-charges">
+                <i class="fas fa-hand-holding-usd"></i> Extra Charges
+            </a>
+            <a href="/admin/manage-loan">
+                <i class="fas fa-hand-holding-usd"></i> Loan Management
+            </a>
+            <a href="/admin/loan/settings">
+                <i class="fas fa-cogs"></i> Loan Settings
+            </a>
+            <a href="/admin/external-loans">
+                <i class="fas fa-building"></i> External Loans
+            </a>
+            <a href="#">
+                <i class="fas fa-chart-pie"></i> ROI Distribution
+            </a>
+            <a href="#">
+                <i class="fas fa-file-alt"></i> Reports
+            </a>
+            <a href="/admin/settings">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="#" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3"
+           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+           onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+        
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Withdrawal Management</h5>
+            <small class="text-muted">Process and manage member withdrawal requests</small>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header position-relative">
+            <div class="row align-items-center position-relative" style="z-index: 1;">
+                <div class="col-md-8">
+                    <h2 class="mb-2 fw-bold"><i class="fas fa-money-check-alt me-3"></i>Withdrawal Management</h2>
+                    <p class="mb-0 opacity-90">Review and process member withdrawal requests</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <div class="badge bg-light text-dark">
+                        <i class="fas fa-calendar me-1"></i>
+                        <span id="currentDate"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+      <div class="row mb-4">
+  <!-- Pending Requests -->
+  <div class="col-lg-3 col-md-6 mb-3">
+    <div class="stats-card">
+      <div class="stats-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="stats-label">Pending Requests</div>
+      <div class="stats-value">
+        <%= stats.pendingRequests %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approved Today -->
+  <div class="col-lg-3 col-md-6 mb-3">
+    <div class="stats-card">
+      <div class="stats-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stats-label">Approved Today</div>
+      <div class="stats-value">
+        <%= stats.approvedToday %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rejected Today -->
+  <div class="col-lg-3 col-md-6 mb-3">
+    <div class="stats-card">
+      <div class="stats-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+        <i class="fas fa-ban"></i>
+      </div>
+      <div class="stats-label">Rejected Today</div>
+      <div class="stats-value">
+        <%= stats.rejectedToday %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Amount -->
+  <div class="col-lg-3 col-md-6 mb-3">
+    <div class="stats-card">
+      <div class="stats-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+        <i class="fas fa-wallet"></i>
+      </div>
+      <div class="stats-label">Total Amount</div>
+      <div class="stats-value" style="font-size: 1.4rem;">
+        ₦<%= stats.totalAmount.toLocaleString() %>
+      </div>
+    </div>
+  </div>
+</div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <div class="filter-tab active" onclick="filterWithdrawals('all')">
+                <i class="fas fa-list me-2"></i>All Requests
+            </div>
+            <div class="filter-tab" onclick="filterWithdrawals('pending')">
+                <i class="fas fa-clock me-2"></i>Pending
+            </div>
+            <div class="filter-tab" onclick="filterWithdrawals('approved')">
+                <i class="fas fa-check-circle me-2"></i>Approved
+            </div>
+            <div class="filter-tab" onclick="filterWithdrawals('rejected')">
+                <i class="fas fa-times-circle me-2"></i>Rejected
+            </div>
+            <div class="filter-tab" onclick="filterWithdrawals('processing')">
+                <i class="fas fa-spinner me-2"></i>Processing
+            </div>
+        </div>
+
+        <!-- Withdrawal Requests -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-list me-2" style="color: var(--primary);"></i>
+                    Withdrawal Requests
+                </h5>
+                <button class="btn btn-sm btn-outline-primary" onclick="exportWithdrawals()">
+                    <i class="fas fa-download me-1"></i>Export
+                </button>
+            </div>
+          <div class="card-body" id="withdrawalContainer">
+  <% if (withdrawals.length === 0) { %>
+    <div class="empty-state">
+      <i class="fas fa-folder-open"></i>
+      <p>No withdrawal requests found</p>
+    </div>
+  <% } %>
+
+  <% withdrawals.forEach((w, index) => { %>
+    <div class="withdrawal-card fade-in" data-status="<%= w.status %>">
+      <div class="withdrawal-header">
+        <div class="member-info">
+          <div class="member-name"><%= w.memberName %></div>
+          <div class="member-id">
+            Member ID: <%= w.memberId %> | <%= w.email %>
+          </div>
+        </div>
+        <div class="text-end">
+          <div class="withdrawal-amount">₦<%= w.amount.toLocaleString() %></div>
+          <span class="status-badge status-<%= w.status %>">
+            <i class="fas fa-<%= 
+              w.status === 'pending' ? 'clock' :
+              w.status === 'approved' ? 'check-circle' :
+              w.status === 'rejected' ? 'times-circle' :
+              'spinner fa-spin'
+            %>"></i>
+            <%= w.status.charAt(0).toUpperCase() + w.status.slice(1) %>
+          </span>
+        </div>
+      </div>
+
+      <div class="withdrawal-details">
+        <div class="detail-item">
+          <div class="detail-label">Request Date</div>
+          <div class="detail-value"><%= w.date %> <%= w.time %></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Current Balance</div>
+          <div class="detail-value">₦<%= w.balance.toLocaleString() %></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Bank Name</div>
+          <div class="detail-value"><%= w.bankName %></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Account Number</div>
+          <div class="detail-value"><%= w.accountNumber %></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Account Name</div>
+          <div class="detail-value"><%= w.accountName %></div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <% if (w.status === 'pending' || w.status === 'processing') { %>
+          <button class="btn btn-approve" onclick="approveWithdrawal('<%= w.id %>')">
+            <i class="fas fa-check me-2"></i>Approve
+          </button>
+          <button class="btn btn-reject" onclick="rejectWithdrawal('<%= w.id %>')">
+            <i class="fas fa-times me-2"></i>Reject
+          </button>
+        <% } %>
+
+        <button class="btn btn-outline-primary" onclick="viewWithdrawalDetails('<%= w.id %>')">
+          <i class="fas fa-eye me-2"></i>View Details
+        </button>
+      </div>
+    </div>
+  <% }) %>
+        </div>
+
+        </div>
+    </div>
+
+    <!-- Powered By Footer -->
+    <div class="powered-by">
+        <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+    </div>
+
+    <!-- Approval Confirmation Modal -->
+    <div class="modal fade" id="approvalModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle me-2"></i>Approve Withdrawal
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-info-circle me-2"></i>
+                        You are about to approve this withdrawal request
+                    </div>
+                    <div id="approvalDetails"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Admin Notes (Optional)</label>
+                        <textarea class="form-control" id="approvalNotes" rows="3" placeholder="Add any notes about this approval..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="confirmApproval()">
+                        <i class="fas fa-check me-2"></i>Confirm Approval
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Modal -->
+    <div class="modal fade" id="rejectionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-times-circle me-2"></i>Reject Withdrawal
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        You are about to reject this withdrawal request
+                    </div>
+                    <div id="rejectionDetails"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Reason for Rejection <span class="text-danger">*</span></label>
+                        <select class="form-select mb-2" id="rejectionReason">
+                            <option value="">Select reason</option>
+                            <option value="insufficient-balance">Insufficient Balance</option>
+                            <option value="invalid-account">Invalid Account Details</option>
+                            <option value="pending-loan">Pending Loan Repayment</option>
+                            <option value="suspicious-activity">Suspicious Activity</option>
+                            <option value="other">Other (Specify below)</option>
+                        </select>
+                        <textarea class="form-control" id="rejectionNotes" rows="3" placeholder="Add additional notes..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmRejection()">
+                        <i class="fas fa-times me-2"></i>Confirm Rejection
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle me-2"></i>Success
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="fas fa-check-circle fa-5x text-success mb-3"></i>
+                    <h4 class="mb-3" id="successMessage">Withdrawal Approved Successfully!</h4>
+                    <p class="text-muted mb-0">Reference: <strong id="successReference">WTH20260102001</strong></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="printWithdrawalReceipt()">
+                        <i class="fas fa-print me-2"></i>Print Receipt
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdrawal Details Modal -->
+    <div class="modal fade" id="withdrawalDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-invoice me-2"></i>Withdrawal Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Member Info -->
+                     <div class="col-md-6 mb-4">
+                        <div class="card h-100" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(5, 150, 105, 0.03) 100%); border: 2px solid rgba(16, 185, 129, 0.1);">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3" style="color: var(--success);">
+                                    <i class="fas fa-user me-2"></i>Member Information
+                                </h6>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block mb-1">Member Name</small>
+                                    <strong id="detailMemberName">Sarah Johnson</strong>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block mb-1">Member ID</small>
+                                    <strong id="detailMemberId">CDS00234</strong>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted d-block mb-1">Email Address</small>
+                                    <strong id="detailMemberEmail">sarah.johnson@email.com</strong>
+                                </div>
+                                <div class="mb-0">
+                                    <small class="text-muted d-block mb-1">Phone Number</small>
+                                    <strong id="detailMemberPhone">+234 801 234 5678</strong>
+                                </div>
+                                <div class="mb-0">
+                                    <small class="text-muted d-block mb-1">Withdrawal Type</small>
+                                    <strong id="detailWithdrawalType">Normal</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                        <!-- Request Info -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.03) 0%, rgba(220, 38, 38, 0.03) 100%); border: 2px solid rgba(239, 68, 68, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--danger);">
+                                        <i class="fas fa-info-circle me-2"></i>Request Information
+                                    </h6>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Request ID</small>
+                                        <strong id="detailRequestId">WTH20260102001</strong>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Request Date</small>
+                                        <strong id="detailRequestDate">Jan 2, 2026 10:30 AM</strong>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Status</small>
+                                        <span id="detailStatus" class="status-badge status-pending">
+                                            <i class="fas fa-clock"></i>Pending
+                                        </span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <small class="text-muted d-block mb-1">Reason</small>
+                                        <strong id="detailReason">Personal Emergency</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Financial Details -->
+                        <div class="col-12 mb-4">
+                            <div class="card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.03) 0%, rgba(217, 119, 6, 0.03) 100%); border: 2px solid rgba(245, 158, 11, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--warning);">
+                                        <i class="fas fa-wallet me-2"></i>Financial Details
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <small class="text-muted d-block mb-1">Withdrawal Amount</small>
+                                            <h4 class="mb-0 fw-bold" style="color: var(--danger);" id="detailAmount">₦150,000</h4>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <small class="text-muted d-block mb-1">Current Balance</small>
+                                            <strong id="detailBalance">₦450,000</strong>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <small class="text-muted d-block mb-1">Balance After</small>
+                                            <strong id="detailBalanceAfter" style="color: var(--success);">₦300,000</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bank Details -->
+                        <div class="col-12 mb-4">
+                            <div class="card" style="border: 2px solid rgba(30, 58, 138, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--primary);">
+                                        <i class="fas fa-university me-2"></i>Bank Account Details
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <small class="text-muted d-block mb-1">Bank Name</small>
+                                            <strong id="detailBankName">First Bank Nigeria</strong>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <small class="text-muted d-block mb-1">Account Number</small>
+                                            <strong id="detailAccountNumber">0123456789</strong>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <small class="text-muted d-block mb-1">Account Name</small>
+                                            <strong id="detailAccountName">Sarah Johnson</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="col-12" id="additionalInfoSection" style="display: none;">
+                            <div class="card" style="border: 2px solid rgba(30, 58, 138, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--primary);">
+                                        <i class="fas fa-comment-alt me-2"></i>Additional Information
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <small class="text-muted d-block mb-1">Processed By</small>
+                                            <strong id="detailProcessedBy">Admin User</strong>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <small class="text-muted d-block mb-1">Processing Date</small>
+                                            <strong id="detailProcessingDate">Jan 2, 2026 11:45 AM</strong>
+                                        </div>
+                                    </div>
+                                    <div class="mb-0">
+                                        <small class="text-muted d-block mb-1">Notes</small>
+                                        <p class="mb-0" id="detailNotes">No additional notes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" onclick="printWithdrawalReceipt()">
+                        <i class="fas fa-print me-2"></i>Print Receipt
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Printable Receipt -->
+    <div id="printReceipt" style="display: none;">
+        <div class="receipt-container">
+            <!-- Receipt Header -->
+            <div class="receipt-header">
+                <div class="receipt-logo">C</div>
+                <div class="receipt-title">CLUB DE STARS</div>
+                <div class="receipt-subtitle">Official Withdrawal Receipt</div>
+                <div class="receipt-subtitle mt-2">
+                    <i class="fas fa-map-marker-alt me-1"></i>123 Business Avenue, Port Harcourt, Rivers State, Nigeria<br>
+                    <i class="fas fa-phone me-1"></i>+234 800 123 4567 | 
+                    <i class="fas fa-envelope me-1"></i>info@clubdestars.com
+                </div>
+            </div>
+
+            <!-- Receipt Body -->
+            <div class="receipt-section">
+                <div class="receipt-section-title">WITHDRAWAL INFORMATION</div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Reference Number:</span>
+                    <span class="receipt-value" id="printReference">WTH20260102001</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Request Date:</span>
+                    <span class="receipt-value" id="printRequestDate">Jan 2, 2026 10:30 AM</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Approval Date:</span>
+                    <span class="receipt-value" id="printApprovalDate">Jan 2, 2026 11:45 AM</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Status:</span>
+                    <span class="receipt-value" id="printStatus">Approved</span>
+                </div>
+            </div>
+
+            <div class="receipt-section">
+                <div class="receipt-section-title">MEMBER INFORMATION</div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Member Name:</span>
+                    <span class="receipt-value" id="printMemberName">Sarah Johnson</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Member ID:</span>
+                    <span class="receipt-value" id="printMemberId">CDS00234</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Email:</span>
+                    <span class="receipt-value" id="printEmail">sarah.johnson@email.com</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Phone:</span>
+                    <span class="receipt-value" id="printPhone">+234 801 234 5678</span>
+                </div>
+            </div>
+
+            <!-- Amount Section -->
+            <div class="receipt-amount">
+                <div class="receipt-amount-label">WITHDRAWAL AMOUNT</div>
+                <div class="receipt-amount-value" id="printAmount">₦150,000.00</div>
+            </div>
+
+            <div class="receipt-section">
+                <div class="receipt-section-title">BANK ACCOUNT DETAILS</div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Bank Name:</span>
+                    <span class="receipt-value" id="printBankName">First Bank Nigeria</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Account Number:</span>
+                    <span class="receipt-value" id="printAccountNumber">0123456789</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Account Name:</span>
+                    <span class="receipt-value" id="printAccountName">Sarah Johnson</span>
+                </div>
+            </div>
+
+            <div class="receipt-section">
+                <div class="receipt-section-title">BALANCE INFORMATION</div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Balance Before:</span>
+                    <span class="receipt-value" id="printBalanceBefore">₦450,000.00</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Withdrawal Amount:</span>
+                    <span class="receipt-value" id="printWithdrawalAmount">₦150,000.00</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Balance After:</span>
+                    <span class="receipt-value" id="printBalanceAfter">₦300,000.00</span>
+                </div>
+            </div>
+
+            <div class="receipt-section">
+                <div class="receipt-section-title">PROCESSING INFORMATION</div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Processed By:</span>
+                    <span class="receipt-value" id="printProcessedBy">Admin User</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Notes:</span>
+                    <span class="receipt-value" id="printNotes">Withdrawal approved and processed successfully</span>
+                </div>
+            </div>
+
+            <!-- Receipt Footer -->
+            <div class="receipt-footer">
+                <div class="receipt-stamp">APPROVED & PROCESSED</div>
+                
+                <div style="width: 120px; height: 120px; background: #f3f4f6; border: 2px solid #e5e7eb; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 1rem auto; font-size: 0.8rem; color: var(--secondary);">
+                    <div class="text-center">
+                        <i class="fas fa-qrcode fa-3x mb-2"></i>
+                        <div style="font-size: 0.7rem;">Scan for verification</div>
+                    </div>
+                </div>
+                
+                <p style="font-size: 0.8rem; color: var(--secondary); margin-top: 1rem;">
+                    This is a computer-generated receipt and does not require a signature.<br>
+                    For inquiries, please contact us at support@clubdestars.com
+                </p>
+                
+                <p style="font-size: 0.7rem; color: var(--secondary); margin-top: 1rem;">
+                    Generated on: <span id="printGeneratedDate"></span><br>
+                    Powered by <strong>JESZ LIMITED</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentWithdrawal = null;
+        function getWithdrawalById(id) {
+        return withdrawalsData.find(w => w.id === id || w._id === id);
+        }
+
+        
+        const withdrawalsData = <%- JSON.stringify(withdrawals) %>;
+
+        // Display current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+
+        // Filter withdrawals
+        function filterWithdrawals(status) {
+            const cards = document.querySelectorAll('.withdrawal-card');
+            const tabs = document.querySelectorAll('.filter-tab');
+            
+            // Update active tab
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            // Filter cards
+            cards.forEach(card => {
+                if (status === 'all' || card.dataset.status === status) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Check if any cards are visible
+            const visibleCards = Array.from(cards).filter(card => card.style.display !== 'none');
+            const container = document.getElementById('withdrawalContainer');
+            
+            if (visibleCards.length === 0) {
+                if (!document.querySelector('.empty-state')) {
+                    container.innerHTML += `
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <p>No withdrawal requests found for this filter</p>
+                        </div>
+                    `;
+                }
+            } else {
+                const emptyState = document.querySelector('.empty-state');
+                if (emptyState) {
+                    emptyState.remove();
+                }
+            }
+        }
+
+        // Approve withdrawal
+        function approveWithdrawal(id) {
+            currentWithdrawal = getWithdrawalById(id);
+            
+            const detailsHTML = `
+                <div class="withdrawal-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Member</div>
+                        <div class="detail-value">${currentWithdrawal.memberName} (${currentWithdrawal.memberId})</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Amount</div>
+                        <div class="detail-value">₦${currentWithdrawal.amount.toLocaleString()}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Bank</div>
+                        <div class="detail-value">${currentWithdrawal.bankName}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Account Number</div>
+                        <div class="detail-value">${currentWithdrawal.accountNumber}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('approvalDetails').innerHTML = detailsHTML;
+            new bootstrap.Modal(document.getElementById('approvalModal')).show();
+        }
+
+        // Reject withdrawal
+        function rejectWithdrawal(id) {
+            currentWithdrawal = getWithdrawalById(id);
+            
+            const detailsHTML = `
+                <div class="withdrawal-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Member</div>
+                        <div class="detail-value">${currentWithdrawal.memberName} (${currentWithdrawal.memberId})</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Amount</div>
+                        <div class="detail-value">₦${currentWithdrawal.amount.toLocaleString()}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Current Balance</div>
+                        <div class="detail-value">₦${currentWithdrawal.balance.toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('rejectionDetails').innerHTML = detailsHTML;
+            new bootstrap.Modal(document.getElementById('rejectionModal')).show();
+        }
+
+        // Confirm approval
+async function confirmApproval() {
+    const notes = document.getElementById('approvalNotes').value;
+    
+    if (!currentWithdrawal) return;
+
+    try {
+        // Send approval request to backend
+        const response = await fetch(`/admin/withdrawals/${currentWithdrawal.id}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ notes })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Hide approval modal
+            bootstrap.Modal.getInstance(document.getElementById('approvalModal')).hide();
+
+            // Show success modal
+            document.getElementById('successMessage').textContent = data.message;
+            document.getElementById('successReference').textContent = currentWithdrawal.id;
+
+            // Populate receipt data with updated withdrawal info
+            currentWithdrawal.balance = data.newBalance; // update balance in UI
+            populateReceiptData(currentWithdrawal, data.status, notes);
+
+            new bootstrap.Modal(document.getElementById('successModal')).show();
+
+            // Reload page after 2s
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        } else {
+            alert(data.message || 'Failed to approve withdrawal');
+        }
+
+    } catch (error) {
+        console.error('Approval error:', error);
+        alert('An error occurred while approving the withdrawal.');
+    }
+}
+
+
+        // Confirm rejection
+        function confirmRejection() {
+            const reason = document.getElementById('rejectionReason').value;
+            const notes = document.getElementById('rejectionNotes').value;
+            
+            if (!reason) {
+                alert('Please select a reason for rejection');
+                return;
+            }
+            
+            // In production, this would make an API call
+            console.log('Rejecting withdrawal:', currentWithdrawal.id, reason, notes);
+            
+            // Hide rejection modal
+            bootstrap.Modal.getInstance(document.getElementById('rejectionModal')).hide();
+            
+            // Show success modal
+            document.getElementById('successMessage').textContent = 'Withdrawal Rejected';
+            document.getElementById('successReference').textContent = currentWithdrawal.id;
+            
+            new bootstrap.Modal(document.getElementById('successModal')).show();
+            
+            // Update UI (in production, reload data from server)
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+
+function viewWithdrawalDetails(id) {
+    const withdrawal = getWithdrawalById(id);
+    currentWithdrawal = withdrawal;
+
+    // Populate modal
+    document.getElementById('detailMemberName').textContent = withdrawal.memberName;
+    document.getElementById('detailMemberId').textContent = withdrawal.memberId;
+    document.getElementById('detailMemberEmail').textContent = withdrawal.memberEmail || 'N/A';
+    document.getElementById('detailMemberPhone').textContent = withdrawal.memberPhone || 'N/A';
+    document.getElementById('detailWithdrawalType').textContent = capitalizeFirst(withdrawal.type || 'normal');
+
+    document.getElementById('detailRequestId').textContent = withdrawal.id;
+    document.getElementById('detailRequestDate').textContent = withdrawal.date + " " + withdrawal.time;
+    document.getElementById('detailReason').textContent = withdrawal.reason || '';
+
+    // Update status badge
+    const statusBadge = document.getElementById('detailStatus');
+    statusBadge.className = 'status-badge status-' + withdrawal.status;
+    statusBadge.innerHTML = `<i class="fas fa-${getStatusIcon(withdrawal.status)}"></i>${capitalizeFirst(withdrawal.status)}`;
+
+    document.getElementById('detailAmount').textContent = '₦' + withdrawal.amount.toLocaleString();
+    document.getElementById('detailBalance').textContent = '₦' + withdrawal.balance.toLocaleString();
+    document.getElementById('detailBalanceAfter').textContent = '₦' + (withdrawal.balance - withdrawal.amount).toLocaleString();
+
+    document.getElementById('detailBankName').textContent = withdrawal.bankName;
+    document.getElementById('detailAccountNumber').textContent = withdrawal.accountNumber;
+    document.getElementById('detailAccountName').textContent = withdrawal.accountName;
+
+    // Show additional info for processed withdrawals
+    const additionalSection = document.getElementById('additionalInfoSection');
+    if (withdrawal.status === 'approved' || withdrawal.status === 'rejected') {
+        additionalSection.style.display = 'block';
+        document.getElementById('detailProcessedBy').textContent = withdrawal.processedBy || withdrawal.rejectedBy || 'Admin User';
+        document.getElementById('detailProcessingDate').textContent = withdrawal.approvalDate || withdrawal.rejectionDate || 'N/A';
+        document.getElementById('detailNotes').textContent = withdrawal.notes || withdrawal.rejectionReason || 'No additional notes';
+    } else {
+        additionalSection.style.display = 'none';
+    }
+
+    // Populate receipt data
+    populateReceiptData(withdrawal, withdrawal.status);
+
+    // Show modal
+    new bootstrap.Modal(document.getElementById('withdrawalDetailsModal')).show();
+}
+
+
+        // Populate receipt data
+        function populateReceiptData(withdrawal, status, notes = '') {
+            document.getElementById('printReference').textContent = withdrawal.id;
+            document.getElementById('printRequestDate').textContent = withdrawal.requestDate;
+            document.getElementById('printApprovalDate').textContent = withdrawal.approvalDate || new Date().toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('printStatus').textContent = capitalizeFirst(status);
+            
+            document.getElementById('printMemberName').textContent = withdrawal.memberName;
+            document.getElementById('printMemberId').textContent = withdrawal.memberId;
+            document.getElementById('printEmail').textContent = withdrawal.memberEmail;
+            document.getElementById('printPhone').textContent = withdrawal.memberPhone;
+            
+            document.getElementById('printAmount').textContent = '₦' + withdrawal.amount.toLocaleString() + '.00';
+            
+            document.getElementById('printBankName').textContent = withdrawal.bankName;
+            document.getElementById('printAccountNumber').textContent = withdrawal.accountNumber;
+            document.getElementById('printAccountName').textContent = withdrawal.accountName;
+            
+            document.getElementById('printBalanceBefore').textContent = '₦' + withdrawal.balance.toLocaleString() + '.00';
+            document.getElementById('printWithdrawalAmount').textContent = '₦' + withdrawal.amount.toLocaleString() + '.00';
+            document.getElementById('printBalanceAfter').textContent = '₦' + (withdrawal.balance - withdrawal.amount).toLocaleString() + '.00';
+            
+            document.getElementById('printProcessedBy').textContent = 'Admin User';
+            document.getElementById('printNotes').textContent = notes || 'Withdrawal approved and processed successfully';
+            
+            // Set generated date
+            const now = new Date();
+            document.getElementById('printGeneratedDate').textContent = now.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // Print withdrawal receipt
+        function printWithdrawalReceipt(id) {
+            if (id && getWithdrawalById(id)) {
+                populateReceiptData(getWithdrawalById(id), getWithdrawalById(id).status);
+            }
+            
+            // Show the receipt div temporarily
+            const receiptDiv = document.getElementById('printReceipt');
+            receiptDiv.style.display = 'block';
+            
+            // Wait a moment for rendering, then print
+            setTimeout(() => {
+                window.print();
+                // Hide it again after printing
+                receiptDiv.style.display = 'none';
+            }, 100);
+        }
+
+        // Update status (for processing withdrawals)
+        function updateStatus(id) {
+            const withdrawal = getWithdrawalById(id);
+            const newStatus = prompt('Update status to (completed/failed):', 'completed');
+            
+            if (newStatus) {
+                console.log('Updating status for:', withdrawal.id, 'to', newStatus);
+                alert('Status updated successfully!');
+                // In production, reload data from server
+                location.reload();
+            }
+        }
+
+        // Export withdrawals
+        function exportWithdrawals() {
+            alert('Export functionality: In production, this would generate a CSV/Excel file with all withdrawal data');
+        }
+
+        // Helper functions
+        function getStatusIcon(status) {
+            const icons = {
+                'pending': 'clock',
+                'approved': 'check-circle',
+                'rejected': 'times-circle',
+                'processing': 'spinner fa-spin'
+            };
+            return icons[status] || 'circle';
+        }
+
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // Close sidebar on outside click (mobile)
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = event.target.closest('.fa-bars');
+            
+            if (window.innerWidth <= 992 && 
+                !sidebar.contains(event.target) && 
+                !hamburger && 
+                sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

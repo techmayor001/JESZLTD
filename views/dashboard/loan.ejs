@@ -836,10 +836,6 @@ function copyReferralLink() {
     <!-- Modals -->
     
     <!-- Loan Request Modal -->
-<!-- Special Loan Button -->
-<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#loanRequestModal">
-    <i class="fas fa-piggy-bank me-2"></i>Request Special Loan
-</button>
 
 <!-- Loan Request Modal -->
 <div class="modal fade" id="loanRequestModal" tabindex="-1">
@@ -906,7 +902,7 @@ function copyReferralLink() {
                     </div>
                 <% } %>
 
-                <form id="loanForm" action="/club-de-star-cooperative/apply-loan" method="POST">
+                <form id="loanForm">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Loan Amount (₦)</label>
@@ -985,30 +981,201 @@ function copyReferralLink() {
     </div>
 </div>
 
+<!-- Loan Success Modal -->
+<div class="modal fade" id="loanSuccessModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-success">
+                    <i class="fas fa-check-circle me-2"></i> Loan Submitted
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <i class="fas fa-file-invoice-dollar fa-3x text-success mb-3"></i>
+                <h5 class="fw-bold">Application Successful 🎉</h5>
+                <p class="text-muted">
+                    Your loan request is awaiting <strong>guarantor approval</strong>.
+                </p>
+
+                <div class="alert-info-custom">
+                    <small>
+                        <i class="fas fa-info-circle me-1"></i>
+                        You will be notified once they respond.
+                    </small>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    Okay, Got it
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Message Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 18px;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="messageModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <div id="messageModalIcon" class="mb-3"></div>
+                <p id="messageModalText" class="mb-0"></p>
+            </div>
+
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    Okay
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
 <script>
-    // Prevent selecting the same guarantor twice
-    document.querySelectorAll('.guarantorSelect').forEach(select => {
-        select.addEventListener('change', function() {
-            const g1 = document.getElementById('guarantor1').value;
-            const g2 = document.getElementById('guarantor2').value;
+/* ===============================
+   REUSABLE MESSAGE MODAL
+================================ */
+function showMessageModal({ title, message, type = "info" }) {
+    const titleEl = document.getElementById("messageModalTitle");
+    const textEl = document.getElementById("messageModalText");
+    const iconEl = document.getElementById("messageModalIcon");
 
-            if (g1 && g2 && g1 === g2) {
-                alert("You cannot select the same guarantor twice.");
-                this.value = "";
-            }
-        });
-    });
+    const icons = {
+        success: `<i class="fas fa-check-circle fa-3x text-success"></i>`,
+        error: `<i class="fas fa-times-circle fa-3x text-danger"></i>`,
+        warning: `<i class="fas fa-exclamation-triangle fa-3x text-warning"></i>`,
+        info: `<i class="fas fa-info-circle fa-3x text-primary"></i>`
+    };
 
-    document.getElementById('loanForm').addEventListener('submit', function(e) {
+    titleEl.innerText = title;
+    textEl.innerText = message;
+    iconEl.innerHTML = icons[type] || icons.info;
+
+    const modal = new bootstrap.Modal(
+        document.getElementById("messageModal")
+    );
+    modal.show();
+}
+
+/* ===============================
+   PREVENT SAME GUARANTOR SELECTION
+================================ */
+document.querySelectorAll('.guarantorSelect').forEach(select => {
+    select.addEventListener('change', function () {
         const g1 = document.getElementById('guarantor1').value;
         const g2 = document.getElementById('guarantor2').value;
 
         if (g1 && g2 && g1 === g2) {
-            alert("You cannot select the same guarantor twice.");
-            e.preventDefault();
+            this.value = "";
+
+            showMessageModal({
+                title: "Invalid Guarantor Selection",
+                message: "You cannot select the same guarantor twice.",
+                type: "warning"
+            });
         }
     });
+});
+
+/* ===============================
+   LOAN FORM SUBMISSION
+================================ */
+document.getElementById("loanForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const submitBtn = this.querySelector("button[type='submit']");
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Submitting...";
+
+    const amount = this.amount.value;
+    const duration = this.duration.value;
+    const guarantor1 = document.getElementById("guarantor1").value;
+    const guarantor2 = document.getElementById("guarantor2").value;
+    const agreeTerms = document.getElementById("agreeTerms").checked;
+
+    /* ===== Client-side validation ===== */
+    if (guarantor1 === guarantor2) {
+        showMessageModal({
+            title: "Invalid Guarantors",
+            message: "You cannot select the same guarantor twice.",
+            type: "warning"
+        });
+        resetButton();
+        return;
+    }
+
+    if (!agreeTerms) {
+        showMessageModal({
+            title: "Agreement Required",
+            message: "You must agree to the loan terms before submitting.",
+            type: "warning"
+        });
+        resetButton();
+        return;
+    }
+
+    try {
+        const response = await fetch("/club-de-star-cooperative/apply-loan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                amount,
+                duration,
+                guarantor1,
+                guarantor2,
+                agreeTerms
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "Failed to submit loan request.");
+        }
+
+        /* ===== Close request modal ===== */
+        const requestModalEl = document.getElementById("loanRequestModal");
+        const requestModalInstance = bootstrap.Modal.getInstance(requestModalEl);
+        if (requestModalInstance) requestModalInstance.hide();
+
+        /* ===== Show success modal ===== */
+        const successModal = new bootstrap.Modal(
+            document.getElementById("loanSuccessModal")
+        );
+        successModal.show();
+
+        /* ===== Reset form ===== */
+        this.reset();
+
+    } catch (err) {
+        showMessageModal({
+            title: "Submission Failed",
+            message: err.message,
+            type: "error"
+        });
+    } finally {
+        resetButton();
+    }
+
+    function resetButton() {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit Application";
+    }
+});
 </script>
+
+
 
 
 
@@ -1053,14 +1220,17 @@ function copyReferralLink() {
                     </div>
 
                     <input type="hidden" name="loanId" value="<%= loan ? loan._id : '' %>">
-                    <input type="hidden" name="dueDate" value="<%= loan ? loan.dueDate.toISOString() : '' %>">
+                    <input type="hidden" name="dueDate" value="<%= dueDate ? dueDate.toISOString() : '' %>">
 
                     <div class="alert-warning-custom">
                         <small>
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             <strong>
                                 Due 
-                                <%= loan ? new Date(loan.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A' %>!
+                                <%= dueDate 
+                                ? dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+                                : 'N/A' 
+                                %>
                             </strong> 
                             Avoid 0.5% daily penalty
                         </small>

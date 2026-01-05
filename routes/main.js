@@ -8,6 +8,7 @@ const Settings = require("../models/Settings");
 const Loan = require("../models/Loan");
 const LoanSettings = require("../models/LoanSettings");
 const CompanyROI = require("../models/companyRoiSchema");
+const Withdrawal = require("../models/Withdrawal");
 
 
 
@@ -66,9 +67,7 @@ router.get('/onboard/club-de-star-cooperative/bylaws', async (req, res) => {
 
 
 
-// router.get('/club-de-star-cooperative/dashboard', (req,res)=>{
-//     res.render("dashboard/user-dashboard")
-// })
+
 
 router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
   if (!req.isAuthenticated()) return res.redirect("/login");
@@ -106,7 +105,6 @@ const totalSavingsAllMembers = accounts.reduce((sum, acc) => {
 }, 0);
 
 
-    console.log(totalSavingsAllMembers)
 
     // 5) Get latest CompanyROI and read totalInterestCollected
     const latestROI = await CompanyROI.findOne().sort({ createdAt: -1 });
@@ -114,8 +112,6 @@ const totalSavingsAllMembers = accounts.reduce((sum, acc) => {
     
     const companyCharge = Number(latestROI?.companyCharge || 0);
     const netInterestForRoi = Number(latestROI?.netInterestForRoi || 0);
-    console.log(totalInterestCollected);
-
     
 
     // 6) Apply your exact formula:
@@ -153,6 +149,9 @@ const totalSavingsAllMembers = accounts.reduce((sum, acc) => {
     // 9) Interest rate for display (from member type)
     const interestRate = user.account?.accountType?.interestRate || 0;
 
+    const settings = await Settings.getSettings(); // getSettings ensures a settings document exists
+    const forceWithdrawalCharge = settings.otherFees.forceWithdrawalCharge || 2.5;
+
     // 10) Render dashboard
     res.render("dashboard/user-dashboard", {
       user,
@@ -161,6 +160,7 @@ const totalSavingsAllMembers = accounts.reduce((sum, acc) => {
       monthlyROI,
       accumulativeROI,
       allMembersTotalSavings: totalSavingsAllMembers,
+      forceWithdrawalCharge,
 
       // Company-level values used
       totalInterestCollected,
@@ -183,6 +183,140 @@ const totalSavingsAllMembers = accounts.reduce((sum, acc) => {
   }
 });
 
+
+router.post("/withdraw", async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { type, amount } = req.body;
+
+    /* ❌ BASIC VALIDATION */
+    if (!type || !amount || Number(amount) <= 0) {
+      return res.status(400).json({
+        message: "Invalid withdrawal data"
+      });
+    }
+
+    /* 🔍 FETCH USER + ACCOUNT + LOANS */
+    const user = await User.findById(userId)
+      .populate("account")
+      .populate({
+        path: "loans",
+        match: { status: { $in: ["pending", "approved"] } } // ✅ FIXED
+      });
+
+    if (!user || !user.account) {
+      return res.status(404).json({
+        message: "User account not found"
+      });
+    }
+
+    /* ❌ ACTIVE LOAN CHECK */
+    if (user.loans && user.loans.length > 0) {
+      return res.status(403).json({
+        message: "You cannot withdraw while you have an active loan"
+      });
+    }
+
+    /* ❌ GUARANTOR ACTIVE LOAN CHECK */
+    const activeGuaranteedLoan = await Loan.findOne({
+      guarantors: {
+        $elemMatch: {
+          guarantor: userId,
+          status: "accepted"
+        }
+      },
+      status: { $in: ["pending", "approved"] }
+    });
+
+    if (activeGuaranteedLoan && Number(amount) >= user.account.balance) {
+      return res.status(403).json({
+        message:
+          "You cannot withdraw your full balance while you are a guarantor on an active loan"
+      });
+    }
+
+    /* ❌ BANK DETAILS CHECK */
+    if (
+      !user.bankDetails ||
+      !user.bankDetails.bankName ||
+      !user.bankDetails.accountNumber ||
+      !user.bankDetails.accountName
+    ) {
+      return res.status(400).json({
+        message: "Please update your bank details before requesting withdrawal"
+      });
+    }
+
+    /* ❌ REGULAR WITHDRAWAL WINDOW */
+    if (type === "regular") {
+      const today = new Date();
+      const day = today.getDate();
+      const month = today.getMonth(); // December = 11
+
+      if (month !== 11 || day < 1 || day > 10) {
+        return res.status(403).json({
+          message:
+            "Regular withdrawals are only allowed between December 1st and 10th"
+        });
+      }
+    }
+
+    /* ❌ BALANCE CHECK */
+    if (Number(amount) > user.account.balance) {
+      return res.status(400).json({
+        message: "Insufficient balance"
+      });
+    }
+
+    /* 🏷 MAP FRONTEND TYPE → DB TYPE */
+    const withdrawalType = type === "force" ? "forceful" : "normal";
+
+    const description =
+      withdrawalType === "forceful"
+        ? "Forceful withdrawal request"
+        : "Regular withdrawal request";
+
+    /* 🔐 GENERATE REFERENCE */
+    const reference = `WD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+    /* 🧾 CREATE WITHDRAWAL */
+    const withdrawal = await Withdrawal.create({
+      user: userId,
+      amount: Number(amount),
+      reference,
+      bankName: user.bankDetails.bankName,
+      accountName: user.bankDetails.accountName,
+      accountNumber: user.bankDetails.accountNumber,
+      type: withdrawalType,
+      status: "pending"
+    });
+
+    /* 🧾 RECORD TRANSACTION */
+    const transaction = await Transaction.create({
+      user: userId,
+      type: "withdrawal",
+      amount: Number(amount),
+      status: "pending",
+      method: "manual",
+      reference,
+      description
+    });
+
+    return res.status(201).json({
+      message: "Withdrawal request submitted successfully",
+      withdrawalId: withdrawal._id,
+      transactionId: transaction._id
+    });
+
+  } catch (err) {
+    /* 🔥 FULL DEBUG */
+    console.error("Withdrawal Error:", err);
+
+    return res.status(500).json({
+      message: err.message || "Unable to process withdrawal"
+    });
+  }
+});
 
 
 
@@ -411,77 +545,84 @@ router.post('/club-de-star-cooperative/guarantorRequest/decline', async (req, re
 });
 
 router.post("/club-de-star-cooperative/apply-loan", async (req, res) => {
-  if (!req.isAuthenticated()) return res.redirect("/login");
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
   try {
     const { amount, duration, guarantor1, guarantor2, agreeTerms } = req.body;
 
-    // Basic sanity check for guarantors
-    if (guarantor1 === guarantor2) {
-      return res.status(400).send("You cannot select the same guarantor twice.");
+    if (!agreeTerms) {
+      return res.status(400).json({ message: "You must agree to the loan terms." });
     }
 
-    // Fetch user with populated account and accountType
+    if (guarantor1 === guarantor2) {
+      return res.status(400).json({ message: "You cannot select the same guarantor twice." });
+    }
+
     const user = await User.findById(req.user._id)
-      .populate({
-        path: "account",
-        populate: { path: "accountType" } // populate MemberType for interest rate
-      });
+      .populate({ path: "account", populate: { path: "accountType" } });
 
-    if (!user) return res.status(404).send("User not found.");
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
 
-    // Fetch LoanSettings for selected duration
-    const loanSetting = await LoanSettings.findById(duration);
-    if (!loanSetting) return res.status(400).send("Invalid loan type selected.");
-
-    // Get interest rate from account type
-    const interestRate = user.account.accountType.interestRate;
-
-    // Calculate total repayment
-    const totalRepay = parseFloat(amount) + (parseFloat(amount) * interestRate / 100);
-
-    // Create Loan document
-    const loan = new Loan({
+    const existingLoan = await Loan.findOne({
       user: user._id,
-      amount: parseFloat(amount),
+      status: { $in: ["pending", "approved"] }
+    });
+
+    if (existingLoan) {
+      return res.status(400).json({
+        message: "You already have an active or pending loan."
+      });
+    }
+
+    const loanSetting = await LoanSettings.findById(duration);
+    if (!loanSetting) {
+      return res.status(400).json({ message: "Invalid loan duration selected." });
+    }
+
+    const interestRate = user.account.accountType.interestRate;
+    const totalRepay = amount + (amount * interestRate) / 100;
+
+    const loan = await Loan.create({
+      user: user._id,
+      amount,
       totalRepay,
       interestRate,
-      duration: loanSetting._id,
-      status: "pending", // waiting for guarantor approval
+      duration,
+      status: "pending",
       guarantors: [
         { guarantor: guarantor1 },
         { guarantor: guarantor2 }
       ]
     });
 
-    await loan.save();
+    // Create guarantor requests
+    await Promise.all([guarantor1, guarantor2].map(async gid => {
+      const gUser = await User.findById(gid);
+      if (!gUser) return;
 
-    // Create guarantor requests for each guarantor
-    const createGuarantorRequest = async (guarantorId) => {
-      const guarantorUser = await User.findById(guarantorId);
-      if (!guarantorUser) return;
-
-      guarantorUser.guarantorRequests.push({
+      gUser.guarantorRequests.push({
         borrower: user._id,
         loan: loan._id,
-        amount: parseFloat(amount)
+        amount
       });
 
-      // Update stats
-      guarantorUser.guarantorRequestStats.totalReceived += 1;
-      await guarantorUser.save();
-    };
+      gUser.guarantorRequestStats.totalReceived += 1;
+      await gUser.save();
+    }));
 
-    await Promise.all([
-      createGuarantorRequest(guarantor1),
-      createGuarantorRequest(guarantor2)
-    ]);
+    return res.status(200).json({
+      message: "Loan application submitted successfully."
+    });
 
-    res.status(200).send({ message: "Loan application submitted successfully.", loanId: loan._id });
-
-  } catch (err) {
-    console.error("Loan application error:", err);
-    res.status(500).send("An error occurred while applying for the loan.");
+  } catch (error) {
+    console.error("Loan application error:", error);
+    return res.status(500).json({
+      message: "An error occurred while submitting the loan application."
+    });
   }
 });
 
@@ -822,7 +963,7 @@ function ensureAdmin(req, res, next) {
 }
 
 // Admin dashboard route
-router.get("/admin-dashboard", ensureAdmin, async (req, res) => {
+router.get("/admin-dashboards", ensureAdmin, async (req, res) => {
   try {
     // Fetch all users with populated fields
     const users = await User.find()

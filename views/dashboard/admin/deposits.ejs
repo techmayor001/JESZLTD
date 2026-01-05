@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit Management - Club De Stars Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --sidebar-width: 280px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+            transform: translateX(0);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+        
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(239, 68, 68, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 70px;
+            padding: 1.5rem;
+            min-height: calc(100vh - 70px);
+            transition: all 0.3s;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(30, 58, 138, 0.03);
+            border-radius: 0 16px 0 100%;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+            border-color: var(--primary);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-label {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .stats-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .stats-change.positive {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .stats-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            background: white;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 1.25rem;
+            border-radius: 16px 16px 0 0 !important;
+        }
+        
+        /* Deposit Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .status-approved {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        /* Action Buttons */
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-approve {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-reject {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-view {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+        
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.06);
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            background: white;
+            color: var(--primary);
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Table Styles */
+        .table-responsive {
+            border-radius: 0 0 16px 16px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin: 0;
+        }
+        
+        .table thead {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+        
+        .table thead th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(30, 58, 138, 0.02);
+        }
+        
+        /* Receipt Styles */
+        .receipt-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .receipt-header {
+            text-align: center;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .receipt-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+        
+        .receipt-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .receipt-subtitle {
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        .receipt-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .receipt-section-title {
+            font-weight: bold;
+            color: var(--primary);
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+        
+        .receipt-row:last-child {
+            border-bottom: none;
+        }
+        
+        .receipt-amount {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 2px solid var(--success);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        
+        .receipt-amount-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--success);
+        }
+        
+        .receipt-footer {
+            text-align: center;
+            border-top: 3px solid var(--primary);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .receipt-stamp {
+            display: inline-block;
+            border: 3px solid var(--success);
+            color: var(--success);
+            padding: 0.5rem 1.5rem;
+            border-radius: 10px;
+            font-weight: bold;
+            transform: rotate(-5deg);
+            margin: 1rem 0;
+        }
+        
+        .powered-by {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .table thead {
+                display: none;
+            }
+            
+            .table tbody tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 2px solid rgba(30, 58, 138, 0.1);
+                border-radius: 12px;
+                overflow: hidden;
+                background: white;
+            }
+            
+            .table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid rgba(30, 58, 138, 0.05);
+            }
+            
+            .table tbody td:last-child {
+                border-bottom: none;
+            }
+            
+            .table tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--primary);
+                margin-right: 1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .stats-value {
+                font-size: 1.5rem;
+            }
+            
+            .stats-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            #printReceipt, #printReceipt * {
+                visibility: visible;
+            }
+            
+            #printReceipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            
+            .sidebar, .top-navbar, .powered-by, .no-print {
+                display: none !important;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">C</div>
+                <div>
+                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                </div>
+            </div>
+            <div class="admin-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>SUPER ADMIN</span>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="/admin-dashboard">
+                <i class="fas fa-users"></i> Members
+            </a>
+            <a href="/admin/manage/memberType">
+                <i class="fas fa-id-card"></i> Membership Types
+            </a>
+            <a href="/admin/manage-payment">
+                <i class="fas fa-credit-card"></i> Payments
+            </a>
+            <a href="/admin/manage-deposits" class="active">
+                <i class="fas fa-coins"></i> Deposit Management
+            </a>
+            <a href="/admin/manage-withdrawals">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="/admin/manage-extra-charges">
+                <i class="fas fa-hand-holding-usd"></i> Extra Charges
+            </a>
+            <a href="/admin/manage-loan">
+                <i class="fas fa-hand-holding-usd"></i> Loan Management
+            </a>
+            <a href="/admin/loan/settings">
+                <i class="fas fa-cogs"></i> Loan Settings
+            </a>
+            <a href="/admin/external-loans">
+                <i class="fas fa-building"></i> External Loans
+            </a>
+            <a href="#">
+                <i class="fas fa-chart-pie"></i> ROI Distribution
+            </a>
+            <a href="#">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="#">
+                <i class="fas fa-file-alt"></i> Reports
+            </a>
+            <a href="/admin/settings">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="#" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3"
+           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+           onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+        
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Deposit Management</h5>
+            <small class="text-muted">Review and approve member deposits</small>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="badge bg-light text-dark">
+                <i class="fas fa-calendar me-1"></i>
+                <span id="currentDate"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header position-relative">
+            <div class="row align-items-center position-relative" style="z-index: 1;">
+                <div class="col-md-8">
+                    <h2 class="mb-2 fw-bold"><i class="fas fa-coins me-3"></i>Deposit Management</h2>
+                    <p class="mb-0 opacity-90">Monitor, review and approve member deposits</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-light" onclick="refreshData()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-3 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card">
+            <div class="stats-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div class="stats-value" style="color: var(--success);">
+                ₦<%= stats.totalIncome.toLocaleString() %>
+            </div>
+            <div class="stats-label">Total Income</div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card">
+            <div class="stats-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stats-value" style="color: var(--warning);">
+                <%= stats.pendingCount %>
+            </div>
+            <div class="stats-label">Pending Deposits</div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card">
+            <div class="stats-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stats-value" style="color: var(--primary);">
+                <%= stats.approvedToday %>
+            </div>
+            <div class="stats-label">Approved Today</div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card">
+            <div class="stats-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stats-value" style="color: #8b5cf6;">
+                <%= stats.activeMembers %>
+            </div>
+            <div class="stats-label">Active Members</div>
+        </div>
+    </div>
+</div>
+
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="filter-btn active" onclick="filterDeposits('all')">
+                            <i class="fas fa-list me-1"></i> All Deposits
+                        </button>
+                        <button class="filter-btn" onclick="filterDeposits('pending')">
+                            <i class="fas fa-clock me-1"></i> Pending
+                        </button>
+                        <button class="filter-btn" onclick="filterDeposits('approved')">
+                            <i class="fas fa-check me-1"></i> Approved
+                        </button>
+                        <button class="filter-btn" onclick="filterDeposits('rejected')">
+                            <i class="fas fa-times me-1"></i> Rejected
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-4 mt-3 mt-lg-0">
+                    <input type="text" class="form-control" id="searchDeposit" placeholder="Search by member name, ID or reference..." onkeyup="searchDeposits()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Deposits Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-list me-2" style="color: var(--primary);"></i>
+                    Deposit Requests
+                </h5>
+                <button class="btn btn-sm btn-outline-primary" onclick="exportDeposits()">
+                    <i class="fas fa-download me-1"></i>Export
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th>Member</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Reference</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="depositsTableBody">
+                            <% if (deposits && deposits.length > 0) { %>
+                                <% deposits.forEach(deposit => { %>
+                                    <tr data-status="<%= deposit.status %>">
+                                        <td data-label="Date/Time">
+                                            <small class="fw-semibold"><%= deposit.date %></small><br>
+                                            <small class="text-muted"><%= deposit.time %></small>
+                                        </td>
+
+                                        <td data-label="Member">
+                                            <div class="fw-semibold">
+                                                <%= deposit.memberName %>
+                                                <% if (deposit.payeeName) { %>
+                                                    (<%= deposit.payeeName %>)
+                                                <% } %>
+                                            </div>
+                                            <small class="text-muted"><%= deposit.memberId %></small>
+                                        </td>
+
+
+                                        <td data-label="Amount" class="fw-bold" style="color: var(--success);">
+                                            ₦<%= deposit.amount.toLocaleString() %>
+                                        </td>
+
+                                        <td data-label="Method">
+                                            <small><%= deposit.method %></small>
+                                        </td>
+
+                                        <td data-label="Reference">
+                                            <small class="text-muted"><%= deposit.reference %></small>
+                                        </td>
+
+                                        <td data-label="Status">
+                                            <span class="status-badge status-<%= deposit.status %>">
+                                                <%= deposit.status.charAt(0).toUpperCase() + deposit.status.slice(1) %>
+                                            </span>
+                                        </td>
+
+                                        <td data-label="Actions">
+                                            <div class="d-flex gap-2">
+                                                <% if (deposit.status === 'pending') { %>
+                                                    <button class="action-btn btn-approve" onclick="approveDeposit('<%= deposit.id %>')">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button class="action-btn btn-reject" onclick="rejectDeposit('<%= deposit.id %>')">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                <% } %>
+
+                                                <button class="action-btn btn-view" onclick="viewDepositDetails('<%= deposit.id %>')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+
+                                                <% if (deposit.status === 'approved') { %>
+                                                    <button class="action-btn btn-view" onclick="printReceipt('<%= deposit.id %>')">
+                                                        <i class="fas fa-print"></i>
+                                                    </button>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">
+                                        No deposit requests found
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Powered By Footer -->
+    <div class="powered-by">
+        <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+    </div>
+
+    <!-- Deposit Details Modal -->
+    <div class="modal fade" id="depositDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-invoice me-2"></i>Deposit Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Deposit Information -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%); border: 2px solid rgba(30, 58, 138, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--primary);">
+                                        <i class="fas fa-info-circle me-2"></i>Deposit Information
+                                    </h6>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Reference Number</small>
+                                        <strong id="detailReference">REF-2026-0001</strong>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Date & Time</small>
+                                        <strong id="detailDateTime">Jan 2, 2026 at 09:30 AM</strong>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Payment Method</small>
+                                        <strong id="detailMethod">Bank Transfer</strong>
+                                    </div>
+                                    <div class="mb-0">
+                                        <small class="text-muted d-block mb-1">Status</small>
+                                        <span id="detailStatus" class="status-badge status-pending">Pending</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Member Information -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(5, 150, 105, 0.03) 100%); border: 2px solid rgba(16, 185, 129, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--success);">
+                                        <i class="fas fa-user me-2"></i>Member Information
+                                    </h6>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Member Name</small>
+                                        <strong id="detailMemberName">John Doe</strong>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Member ID</small>
+                                        <strong id="detailMemberId">CDS001</strong>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Email</small>
+                                        <strong id="detailEmail">john.doe@example.com</strong>
+                                    </div>
+                                    <div class="mb-0">
+                                        <small class="text-muted d-block mb-1">Current Balance</small>
+                                        <strong id="detailBalance" style="color: var(--success);">₦250,000</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Amount Details -->
+                        <div class="col-12 mb-4">
+                            <div class="card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.03) 0%, rgba(217, 119, 6, 0.03) 100%); border: 2px solid rgba(245, 158, 11, 0.1);">
+                                <div class="card-body text-center">
+                                    <h6 class="fw-bold mb-3" style="color: var(--warning);">
+                                        <i class="fas fa-money-bill-wave me-2"></i>Deposit Amount
+                                    </h6>
+                                    <h2 class="mb-3 fw-bold" style="color: var(--success);" id="detailAmount">₦50,000.00</h2>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block mb-1">New Balance</small>
+                                            <strong id="detailNewBalance" style="color: var(--success);">₦300,000</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block mb-1">Transaction Fee</small>
+                                            <strong id="detailFee">₦0</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Notes -->
+                        <div class="col-12">
+                            <div class="card" style="border: 2px solid rgba(30, 58, 138, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--primary);">
+                                        <i class="fas fa-comment-alt me-2"></i>Additional Notes
+                                    </h6>
+                                    <p class="mb-0" id="detailNotes">Monthly savings contribution for January 2026</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="approveBtn" onclick="approveFromModal()">
+                        <i class="fas fa-check me-2"></i>Approve Deposit
+                    </button>
+                    <button type="button" class="btn btn-danger" id="rejectBtn" onclick="rejectFromModal()">
+                        <i class="fas fa-times me-2"></i>Reject Deposit
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approval Confirmation Modal -->
+    <div class="modal fade" id="approvalModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle me-2"></i>Approve Deposit
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-info-circle me-2"></i>
+                        You are about to approve this deposit. The amount will be credited to the member's account.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Admin Notes (Optional)</label>
+                        <textarea class="form-control" id="approvalNotes" rows="3" placeholder="Add any notes about this approval..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="confirmApproval()">
+                        <i class="fas fa-check me-2"></i>Confirm Approval
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Modal -->
+    <div class="modal fade" id="rejectionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-times-circle me-2"></i>Reject Deposit
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        You are about to reject this deposit. Please provide a reason.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Reason for Rejection <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="rejectionReason" rows="3" placeholder="Enter reason for rejection..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmRejection()">
+                        <i class="fas fa-times me-2"></i>Confirm Rejection
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle me-2"></i>Success
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="fas fa-check-circle fa-5x text-success mb-3"></i>
+                    <h4 class="mb-3" id="successMessage">Deposit Approved Successfully!</h4>
+                    <p class="text-muted mb-0">The member's account has been updated.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="generateReceipt()">
+                        <i class="fas fa-receipt me-2"></i>Generate Receipt
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Printable Receipt -->
+    <div id="printReceipt" style="display: none;">
+        <div class="receipt-container">
+            <!-- Receipt Header -->
+            <div class="receipt-header">
+                <div class="receipt-logo">C</div>
+                <div class="receipt-title">CLUB DE STARS</div>
+                <div class="receipt-subtitle">Official Deposit Receipt</div>
+                <div class="receipt-subtitle mt-2">
+                    <i class="fas fa-map-marker-alt me-1"></i>123 Business Avenue, Port Harcourt, Rivers State, Nigeria<br>
+                    <i class="fas fa-phone me-1"></i>+234 800 123 4567 | 
+                    <i class="fas fa-envelope me-1"></i>info@clubdestars.com
+                </div>
+            </div>
+
+            <!-- Receipt Body -->
+            <div class="receipt-section">
+                <div class="receipt-section-title">DEPOSIT INFORMATION</div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Reference Number:</span>
+                    <span class="receipt-value" id="printReference">REF-2026-0001</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Date & Time:</span>
+                    <span class="receipt-value" id="printDateTime">Jan 2, 2026 at 09:30 AM</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Payment Method:</span>
+                    <span class="receipt-value" id="printMethod">Bank Transfer</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Status:</span>
+                    <span class="receipt-value" id="printStatus">Approved</span>
+                </div>
+            </div>
+
+            <div class="receipt-section">
+                <div class="receipt-section-title">MEMBER INFORMATION</div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Member Name:</span>
+                    <span class="receipt-value" id="printMemberName">John Doe</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Member ID:</span>
+                    <span class="receipt-value" id="printMemberId">CDS001</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Email:</span>
+                    <span class="receipt-value" id="printEmail">john.doe@example.com</span>
+                </div>
+            </div>
+
+            <!-- Amount Section -->
+            <div class="receipt-amount">
+                <div class="receipt-amount-label">DEPOSIT AMOUNT</div>
+                <div class="receipt-amount-value" id="printAmount">₦50,000.00</div>
+            </div>
+
+            <div class="receipt-section">
+                <div class="receipt-section-title">ACCOUNT SUMMARY</div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Previous Balance:</span>
+                    <span class="receipt-value" id="printPrevBalance">₦250,000.00</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Deposit Amount:</span>
+                    <span class="receipt-value" id="printDepositAmount">₦50,000.00</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">New Balance:</span>
+                    <span class="receipt-value" style="color: var(--success); font-size: 1.1rem;" id="printNewBalance">₦300,000.00</span>
+                </div>
+            </div>
+
+            <!-- Receipt Footer -->
+            <div class="receipt-footer">
+                <div class="receipt-stamp">VERIFIED & APPROVED</div>
+                
+                <p style="font-size: 0.8rem; color: var(--secondary); margin-top: 1rem;">
+                    This is a computer-generated receipt and does not require a signature.<br>
+                    For inquiries, please contact us at support@clubdestars.com
+                </p>
+                
+                <p style="font-size: 0.7rem; color: var(--secondary); margin-top: 1rem;">
+                    Generated on: <span id="printGeneratedDate"></span><br>
+                    Powered by <strong>JESZ LIMITED</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentDepositId = null;
+        let currentFilter = 'all';
+
+        // Sample deposit data
+        const deposits = <%- JSON.stringify(deposits) %>;
+
+        // Display current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+
+        function filterDeposits(status) {
+            currentFilter = status;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Filter table rows
+            const rows = document.querySelectorAll('#depositsTableBody tr');
+            rows.forEach(row => {
+                if (status === 'all') {
+                    row.style.display = '';
+                } else {
+                    const rowStatus = row.getAttribute('data-status');
+                    row.style.display = rowStatus === status ? '' : 'none';
+                }
+            });
+        }
+
+        function searchDeposits() {
+            const searchTerm = document.getElementById('searchDeposit').value.toLowerCase();
+            const rows = document.querySelectorAll('#depositsTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function viewDepositDetails(depositId) {
+            const deposit = deposits.find(d => d.id === depositId);
+            if (!deposit) return;
+            
+            currentDepositId = depositId;
+            
+            // Populate modal
+            document.getElementById('detailReference').textContent = deposit.reference;
+            document.getElementById('detailDateTime').textContent = `${deposit.date} at ${deposit.time}`;
+            document.getElementById('detailMethod').textContent = deposit.method;
+            document.getElementById('detailMemberName').textContent = deposit.memberName;
+            document.getElementById('detailMemberId').textContent = deposit.memberId;
+            document.getElementById('detailEmail').textContent = deposit.email;
+            document.getElementById('detailBalance').textContent = `₦${deposit.balance.toLocaleString()}`;
+            document.getElementById('detailAmount').textContent = `₦${deposit.amount.toLocaleString()}.00`;
+            const newBalance =
+            deposit.status === "approved"
+                ? deposit.balance
+                : deposit.balance; // unchanged for rejected/pending
+
+            document.getElementById('detailNewBalance').textContent =
+            `₦${newBalance.toLocaleString()}`;
+
+            document.getElementById('detailFee').textContent = '₦0';
+            document.getElementById('detailNotes').textContent = deposit.notes;
+            
+            // Update status badge
+            const statusBadge = document.getElementById('detailStatus');
+            statusBadge.className = `status-badge status-${deposit.status}`;
+            statusBadge.textContent = deposit.status.charAt(0).toUpperCase() + deposit.status.slice(1);
+            
+            // Show/hide action buttons based on status
+            if (deposit.status === 'approved' || deposit.status === 'rejected') {
+                document.getElementById('approveBtn').style.display = 'none';
+                document.getElementById('rejectBtn').style.display = 'none';
+            } else {
+                document.getElementById('approveBtn').style.display = 'inline-block';
+                document.getElementById('rejectBtn').style.display = 'inline-block';
+            }
+            
+            // Show modal
+            new bootstrap.Modal(document.getElementById('depositDetailsModal')).show();
+        }
+
+        function approveDeposit(depositId) {
+            currentDepositId = depositId;
+            new bootstrap.Modal(document.getElementById('approvalModal')).show();
+        }
+
+        function approveFromModal() {
+            bootstrap.Modal.getInstance(document.getElementById('depositDetailsModal')).hide();
+            new bootstrap.Modal(document.getElementById('approvalModal')).show();
+        }
+
+async function confirmApproval() {
+    const notes = document.getElementById('approvalNotes').value;
+
+    try {
+        const response = await fetch(`/admin/deposits/${currentDepositId}/approve`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ notes })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.message || "Approval failed");
+            return;
+        }
+
+        // ✅ Update local data
+        const deposit = deposits.find(d => d.id === currentDepositId);
+        if (deposit) {
+            deposit.status = "approved";
+            deposit.balance = result.newBalance;
+        }
+
+        // ✅ Update UI
+        updateTableRow(currentDepositId, "approved");
+
+        bootstrap.Modal.getInstance(
+            document.getElementById('approvalModal')
+        ).hide();
+
+        document.getElementById('successMessage').textContent =
+            "Deposit Approved Successfully!";
+        new bootstrap.Modal(
+            document.getElementById('successModal')
+        ).show();
+
+        document.getElementById('approvalNotes').value = "";
+
+    } catch (err) {
+        console.error(err);
+        alert("Network error while approving deposit");
+    }
+}
+
+
+        function rejectDeposit(depositId) {
+            currentDepositId = depositId;
+            new bootstrap.Modal(document.getElementById('rejectionModal')).show();
+        }
+
+        function rejectFromModal() {
+            bootstrap.Modal.getInstance(document.getElementById('depositDetailsModal')).hide();
+            new bootstrap.Modal(document.getElementById('rejectionModal')).show();
+        }
+
+async function confirmRejection() {
+    const reason = document.getElementById('rejectionReason').value;
+
+    if (!reason.trim()) {
+        alert('Please provide a reason for rejection');
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `/admin/deposits/${currentDepositId}/reject`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ reason })
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.message || "Rejection failed");
+            return;
+        }
+
+        // ✅ Update local data
+        const deposit = deposits.find(d => d.id === currentDepositId);
+        if (deposit) {
+            deposit.status = "rejected";
+        }
+
+        // ✅ Update UI
+        updateTableRow(currentDepositId, "rejected");
+
+        // Close modal
+        const rejectionModal = bootstrap.Modal.getInstance(
+            document.getElementById('rejectionModal')
+        );
+        if (rejectionModal) rejectionModal.hide();
+
+        // Show success modal
+        document.getElementById('successMessage').textContent =
+            "Deposit Rejected Successfully";
+        new bootstrap.Modal(
+            document.getElementById('successModal')
+        ).show();
+
+        // Reset form
+        document.getElementById('rejectionReason').value = "";
+
+    } catch (err) {
+        console.error(err);
+        alert("Network error while rejecting deposit");
+    }
+}
+
+        function updateTableRow(depositId, status) {
+            const rows = document.querySelectorAll('#depositsTableBody tr');
+            rows.forEach(row => {
+                // Find the row by checking the onclick attribute or data
+                const viewBtn = row.querySelector(`button[onclick*="viewDepositDetails(${depositId})"]`);
+                if (viewBtn) {
+                    row.setAttribute('data-status', status);
+                    const statusCell = row.querySelector('[data-label="Status"]');
+                    if (statusCell) {
+                        statusCell.innerHTML = `<span class="status-badge status-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+                    }
+                    
+                    // Update action buttons
+                    const actionsCell = row.querySelector('[data-label="Actions"]');
+                    if (actionsCell && status === 'approved') {
+                        actionsCell.innerHTML = `
+                            <div class="d-flex gap-2">
+                                <button class="action-btn btn-view" onclick="viewDepositDetails(${depositId})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn btn-view" onclick="printReceipt(${depositId})">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+            });
+        }
+
+        function generateReceipt() {
+            const deposit = deposits.find(d => d.id === currentDepositId);
+            if (!deposit) return;
+            
+            // Populate receipt
+            document.getElementById('printReference').textContent = deposit.reference;
+            document.getElementById('printDateTime').textContent = `${deposit.date} at ${deposit.time}`;
+            document.getElementById('printMethod').textContent = deposit.method;
+            document.getElementById('printStatus').textContent = 'Approved';
+            document.getElementById('printMemberName').textContent = deposit.memberName;
+            document.getElementById('printMemberId').textContent = deposit.memberId;
+            document.getElementById('printEmail').textContent = deposit.email;
+            document.getElementById('printAmount').textContent = `₦${deposit.amount.toLocaleString()}.00`;
+
+            const previousBalance = deposit.balance - deposit.amount;
+            const newBalance = deposit.balance;
+
+            document.getElementById('printPrevBalance').textContent =
+            `₦${previousBalance.toLocaleString()}.00`;
+
+            document.getElementById('printDepositAmount').textContent =
+            `₦${deposit.amount.toLocaleString()}.00`;
+
+            document.getElementById('printNewBalance').textContent =
+            `₦${newBalance.toLocaleString()}.00`;
+            
+            const now = new Date();
+            document.getElementById('printGeneratedDate').textContent = now.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            // Close success modal
+                       // Close success modal
+            const successModalEl = document.getElementById('successModal');
+            const successModalInstance = bootstrap.Modal.getInstance(successModalEl);
+
+            if (successModalInstance) {
+                successModalInstance.hide();
+            }
+
+
+            // Show printable receipt
+            const receipt = document.getElementById('printReceipt');
+            receipt.style.display = 'block';
+
+            // Print
+            window.print();
+
+            // Hide receipt again after print
+            setTimeout(() => {
+                receipt.style.display = 'none';
+            }, 500);
+        }
+
+        function printReceipt(depositId) {
+            currentDepositId = depositId;
+            generateReceipt();
+        }
+    </script>
+</body>
+</html>

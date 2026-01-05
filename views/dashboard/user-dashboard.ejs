@@ -765,7 +765,7 @@
 
     <!-- Powered By Footer -->
     <div class="powered-by">
-        Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+        <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
     </div>
 
     <!-- Modals -->
@@ -801,7 +801,7 @@
                     </div>
                     <small>
                         <strong>Force Withdrawal:</strong> Available anytime with 
-                        <span class="text-danger">2.5% charge</span> 
+                        <span class="text-danger"><%= forceWithdrawalCharge %>% charge</span> 
                         (50% now, 50% after 30 days)
                     </small>
                 </div>
@@ -813,7 +813,7 @@
                         <select class="form-select" id="withdrawalType" required onchange="updateWithdrawalFee()">
                             <option value="">Choose withdrawal type...</option>
                             <option value="regular">Regular Withdrawal (Dec 1-10 only)</option>
-                            <option value="force">Force Withdrawal (2.5% charge)</option>
+                            <option value="force">Force Withdrawal (<%= forceWithdrawalCharge %>%)</option>
                         </select>
                     </div>
 
@@ -882,17 +882,59 @@
     </div>
 </div>
 
+<!-- WITHDRAWAL SUCCESS MODAL -->
+<div class="modal fade" id="withdrawSuccessModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4" style="border-radius:20px">
+      <div class="modal-body">
+        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+        <h5 class="fw-bold">Withdrawal Processing</h5>
+        <p class="text-muted">
+          Your withdrawal request is being processed and is expected to be
+          credited within <strong>5 minutes</strong>.
+        </p>
+        <button class="btn btn-success w-100" data-bs-dismiss="modal">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WITHDRAWAL FAILED MODAL -->
+<div class="modal fade" id="withdrawFailedModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4" style="border-radius:20px">
+      <div class="modal-body">
+        <i class="fas fa-times-circle text-danger fa-3x mb-3"></i>
+        <h5 class="fw-bold">Withdrawal Failed</h5>
+        <p class="text-muted" id="withdrawErrorMsg">
+          Unable to process withdrawal.
+        </p>
+        <button class="btn btn-danger w-100" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 <script>
+/* ================= SERVER FLAGS ================= */
+const USER_HAS_LOAN = <%= user.loans && user.loans.length > 0 ? "true" : "false" %>;
+const USER_IS_GUARANTOR = <%= user.guarantorRequests?.some(g => g.status === "accepted") ? "true" : "false" %>;
+const USER_BALANCE = <%= user.account?.balance || 0 %>;
+
+/* ================= UPDATE FEE ================= */
 function updateWithdrawalFee() {
     const type = document.getElementById('withdrawalType').value;
     const amountInput = document.getElementById('withdrawAmount');
     const feeInfo = document.getElementById('withdrawalFeeInfo');
 
-    const realBalance = <%= user.account?.balance || 0 %>;
-
-    // FORCE WITHDRAWAL → auto-fill full balance + readonly
     if (type === 'force') {
-        amountInput.value = realBalance;
+        amountInput.value = USER_BALANCE;
         amountInput.readOnly = true;
     } else {
         amountInput.readOnly = false;
@@ -910,18 +952,95 @@ function updateWithdrawalFee() {
     if (type === 'force') {
         initialFee = amount * 0.025;
         secondFee = amount * 0.025;
-        netAmount = (amount - (initialFee + secondFee)) / 2; // 50% now
+        netAmount = (amount - (initialFee + secondFee)) / 2;
     } else {
         netAmount = amount;
     }
 
     feeInfo.style.display = 'block';
     document.getElementById('withdrawAmountDisplay').innerText = `₦${amount.toLocaleString()}`;
-    document.getElementById('initialFee').innerText = `₦${initialFee.toLocaleString(undefined, {minimumFractionDigits:2})}`;
-    document.getElementById('secondFee').innerText = `₦${secondFee.toLocaleString(undefined, {minimumFractionDigits:2})}`;
-    document.getElementById('netAmount').innerText = `₦${netAmount.toLocaleString(undefined, {minimumFractionDigits:2})}`;
+    document.getElementById('initialFee').innerText = `₦${initialFee.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+    document.getElementById('secondFee').innerText = `₦${secondFee.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+    document.getElementById('netAmount').innerText = `₦${netAmount.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+}
+
+/* ================= SUBMIT WITHDRAWAL ================= */
+async function submitWithdrawal() {
+
+    const withdrawModal = document.getElementById("withdrawModal");
+    const successModal = new bootstrap.Modal(
+        document.getElementById("withdrawSuccessModal")
+    );
+    const failedModal = new bootstrap.Modal(
+        document.getElementById("withdrawFailedModal")
+    );
+
+    const errorMsg = document.getElementById("withdrawErrorMsg");
+
+    const type = document.getElementById("withdrawalType").value;
+    const amount = Number(document.getElementById("withdrawAmount").value);
+
+    try {
+        /* ❌ BASIC VALIDATION */
+        if (!type) throw new Error("Please select a withdrawal type.");
+        if (!amount || amount <= 0) throw new Error("Invalid withdrawal amount.");
+        if (amount > USER_BALANCE) throw new Error("Insufficient account balance.");
+
+        /* ❌ ACTIVE LOAN CHECK */
+        if (USER_HAS_LOAN === "true") {
+            throw new Error("You cannot withdraw while you have an active loan.");
+        }
+
+        /* ❌ GUARANTOR FULL BALANCE BLOCK */
+        if (USER_IS_GUARANTOR === "true" && amount >= USER_BALANCE) {
+            throw new Error(
+                "As a guarantor, you cannot withdraw your full balance while guaranteeing a loan."
+            );
+        }
+
+        /* ❌ REGULAR WITHDRAWAL DATE CHECK */
+        if (type === "regular") {
+            const today = new Date();
+            const day = today.getDate();
+            const month = today.getMonth(); // December = 11
+
+            if (month !== 11 || day < 1 || day > 10) {
+                throw new Error(
+                    "Regular withdrawals are only allowed between December 1st and 10th."
+                );
+            }
+        }
+
+        /* ✅ SEND TO BACKEND */
+        const res = await fetch("/withdraw", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type, amount })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || "Withdrawal request failed.");
+        }
+
+        /* ✅ SUCCESS */
+        bootstrap.Modal.getInstance(withdrawModal).hide();
+        successModal.show();
+
+        document.querySelector("#withdrawModal form").reset();
+        document.getElementById("withdrawalFeeInfo").style.display = "none";
+
+    } catch (err) {
+        /* 🔥 EXACT ERROR HANDLING */
+        console.error("Withdrawal Error:", err); // Console debug
+        errorMsg.innerText = err.message;        // Exact message to user
+        failedModal.show();
+    }
 }
 </script>
+
+
 
 
 
@@ -1028,6 +1147,48 @@ function updateWithdrawalFee() {
   </div>
 </div>
 
+<!-- SUCCESS MODAL -->
+<div class="modal fade" id="depositSuccessModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4" style="border-radius:20px">
+      <div class="modal-body">
+        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+        <h5 class="fw-bold">Deposit Submitted</h5>
+        <p class="text-muted mb-3">
+          Your deposit has been submitted successfully and will be processed
+          within <strong>5 minutes</strong>.
+        </p>
+        <button class="btn btn-success w-100" data-bs-dismiss="modal">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FAILED MODAL -->
+<div class="modal fade" id="depositFailedModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4" style="border-radius:20px">
+      <div class="modal-body">
+        <i class="fas fa-times-circle text-danger fa-3x mb-3"></i>
+        <h5 class="fw-bold">Submission Failed</h5>
+        <p class="text-muted mb-3">
+          We were unable to submit your deposit. Please try again.
+        </p>
+        <button class="btn btn-danger w-100" data-bs-dismiss="modal">
+          Try Again
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -1040,6 +1201,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("depositForm");
   const submitBtn = document.getElementById("submitDeposit");
 
+  /* BOOTSTRAP MODALS */
+  const depositModalEl = document.getElementById("depositModal");
+  const successModal = new bootstrap.Modal(
+    document.getElementById("depositSuccessModal")
+  );
+  const failedModal = new bootstrap.Modal(
+    document.getElementById("depositFailedModal")
+  );
+
+  /* PAYMENT METHOD SWITCH */
   paymentMethod.addEventListener("change", () => {
     paystackSection.classList.add("d-none");
     cooperativeSection.classList.add("d-none");
@@ -1053,51 +1224,77 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  /* COOPERATIVE SOURCE */
   coopSource.addEventListener("change", () => {
-    if (coopSource.value) {
-      coopBankDetails.classList.remove("d-none");
-    } else {
-      coopBankDetails.classList.add("d-none");
-    }
-
+    coopBankDetails.classList.toggle("d-none", !coopSource.value);
     coopNoExtra.classList.toggle("d-none", coopSource.value !== "no");
   });
 
   /* SUBMIT HANDLER */
   form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
     const method = paymentMethod.value;
 
-    if (method !== "paystack") {
-      // 👉 NORMAL FORM SUBMIT FOR COOPERATIVE
-      form.action = "/deposit/cooperative";
-      return; // allow default submit
-    }
-
-    // 👉 PAYSTACK (AJAX)
-    e.preventDefault();
     submitBtn.disabled = true;
     submitBtn.innerHTML = "Processing...";
 
     try {
-      const amount = document.getElementById("paystackAmount").value;
 
-      const res = await fetch("/deposit/init", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount })
-      });
+      /* ================= PAYSTACK ================= */
+      if (method === "paystack") {
+        const amount = document.getElementById("paystackAmount").value;
 
-      const data = await res.json();
-      if (data.authorization_url) {
-        window.location.href = data.authorization_url;
-        return;
+        const res = await fetch("/deposit/init", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount })
+        });
+
+        const data = await res.json();
+
+        if (data.authorization_url) {
+          window.location.href = data.authorization_url;
+          return;
+        }
+
+        throw new Error(data.message || "Paystack init failed");
       }
 
-      alert(data.message || "Unable to initialize Paystack");
+      /* ================= COOPERATIVE ================= */
+      if (method === "cooperative") {
+        const payload = {
+          coopAmount: document.getElementById("coopAmount").value,
+          source: document.getElementById("coopSource").value,
+          payeeName: document.getElementById("payerName")?.value || ""
+        };
+
+        const res = await fetch("/deposit/cooperative", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          throw new Error("Cooperative deposit failed");
+        }
+
+        /* CLOSE DEPOSIT MODAL */
+        bootstrap.Modal.getInstance(depositModalEl).hide();
+
+        /* SHOW SUCCESS MODAL */
+        successModal.show();
+        form.reset();
+
+        paystackSection.classList.add("d-none");
+        cooperativeSection.classList.add("d-none");
+      }
 
     } catch (err) {
       console.error(err);
-      alert("Unable to process deposit.");
+      failedModal.show();
     } finally {
       submitBtn.disabled = false;
       submitBtn.innerHTML = "Proceed";
@@ -1106,6 +1303,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 </script>
+
+
 
 
 
@@ -1360,23 +1559,23 @@ function calculateLoan() {
 
 
         // Form Submissions
-        function submitDeposit() {
-            alert('✅ Deposit request submitted successfully! You will receive a confirmation shortly.');
-            bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
-        }
+        // function submitDeposit() {
+        //     alert('✅ Deposit request submitted successfully! You will receive a confirmation shortly.');
+        //     bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
+        // }
 
-        function submitWithdrawal() {
-            const type = document.getElementById('withdrawalType').value;
-            if (type === 'force') {
-                if (confirm('Force withdrawal includes a 2.5% charge. You will receive 50% now and 50% after 30 days. Continue?')) {
-                    alert('✅ Force withdrawal request submitted! Processing time: 24-48 hours.');
-                    bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
-                }
-            } else {
-                alert('✅ Withdrawal request submitted successfully! Processing time: 24-48 hours.');
-                bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
-            }
-        }
+        // function submitWithdrawal() {
+        //     const type = document.getElementById('withdrawalType').value;
+        //     if (type === 'force') {
+        //         if (confirm('Force withdrawal includes a 2.5% charge. You will receive 50% now and 50% after 30 days. Continue?')) {
+        //             alert('✅ Force withdrawal request submitted! Processing time: 24-48 hours.');
+        //             bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
+        //         }
+        //     } else {
+        //         alert('✅ Withdrawal request submitted successfully! Processing time: 24-48 hours.');
+        //         bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
+        //     }
+        // }
 
         function submitPayment() {
             alert('✅ Payment processed successfully! Your loan balance has been updated.');

@@ -648,11 +648,14 @@
                             <div class="card mb-3" style="border: 2px solid #3350b0; border-radius: 15px;">
                                 <div class="card-body d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="fw-semibold mb-1"><%= request.borrower.firstName + ' ' + request.borrower.lastName %></h6>
+                                        <h6 class="fw-semibold mb-1">
+                                        <%= request.borrower ? (request.borrower.firstName + ' ' + request.borrower.lastName) : 'Company Loan' %>
+                                        </h6>
                                         <small class="text-muted">
-                                            Amount Requested: ₦<%= request.amount.toLocaleString() %> |
-                                            Status: <%= request.status.charAt(0).toUpperCase() + request.status.slice(1) %>
+                                        Amount Requested: ₦<%= request.amount.toLocaleString() %> |
+                                        Status: <%= request.status.charAt(0).toUpperCase() + request.status.slice(1) %>
                                         </small>
+
                                     </div>
                                     <div class="d-flex gap-2">
                                         <form method="POST" action="/club-de-star-cooperative/guarantorRequest/approve">
@@ -712,16 +715,22 @@
             <div class="card">
                 <div class="card-body">
                     <h6 class="fw-bold mb-3 text-primary"><i class="fas fa-users me-2"></i>Loans You Approved</h6>
-                    <% if (acceptedRequests.length > 0) { %>
-                        <% acceptedRequests.forEach(request => { %>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span><%= request.borrower.firstName + ' ' + request.borrower.lastName %></span>
-                                <span>₦<%= request.amount.toLocaleString() %></span>
-                            </div>
-                        <% }) %>
-                    <% } else { %>
-                        <div class="text-center text-muted">No loans approved yet</div>
-                    <% } %>
+            <% if (acceptedRequests.length > 0) { %>
+    <% acceptedRequests.forEach(request => { %>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span>
+                <%= request.borrower
+                    ? request.borrower.firstName + ' ' + request.borrower.lastName
+                    : 'Company Loan'
+                %>
+            </span>
+            <span>₦<%= request.amount.toLocaleString() %></span>
+        </div>
+    <% }) %>
+<% } else { %>
+    <div class="text-center text-muted">No loans approved yet</div>
+<% } %>
+
                 </div>
             </div>
         </div>

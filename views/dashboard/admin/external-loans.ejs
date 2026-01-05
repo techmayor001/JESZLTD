@@ -271,28 +271,30 @@
             color: #1e40af;
         }
         
-        .alert-warning-custom {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border: 2px solid #f59e0b;
-            border-radius: 12px;
-            padding: 1rem;
-            color: #92400e;
-        }
-        
-        .alert-success-custom {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-            border: 2px solid #10b981;
-            border-radius: 12px;
-            padding: 1rem;
-            color: #065f46;
-        }
-        
         .modal-content {
             border-radius: 16px;
         }
         
         .modal-header {
             border-radius: 16px 16px 0 0;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            border-radius: 10px;
+            padding: 0.75rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.1);
         }
         
         @media (max-width: 992px) {
@@ -312,47 +314,16 @@
                 margin-left: 0;
                 padding: 1rem;
             }
-            
-            .welcome-card {
-                padding: 1.5rem;
-            }
-            
-            .stat-card {
-                padding: 1.25rem;
-            }
-            
-            .powered-by {
-                bottom: 10px;
-                right: 10px;
-                font-size: 0.7rem;
-                padding: 8px 12px;
-            }
         }
         
         @media (max-width: 576px) {
             .top-navbar {
                 height: 60px;
-                padding: 0 1rem;
             }
             
             .main-content {
                 margin-top: 60px;
                 padding: 0.75rem;
-            }
-            
-            .welcome-card {
-                padding: 1.25rem;
-                border-radius: 16px;
-            }
-            
-            .stat-card {
-                padding: 1rem;
-            }
-            
-            .stat-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.4rem;
             }
         }
     </style>
@@ -444,7 +415,7 @@
                     </div>
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <button class="btn btn-light fw-semibold" onclick="openModal('issueLoanModal')">
+                    <button class="btn btn-light fw-semibold" data-bs-toggle="modal" data-bs-target="#issueLoanModal">
                         <i class="fas fa-plus me-2"></i>Issue New Loan
                     </button>
                 </div>
@@ -544,7 +515,7 @@
                                 <td><span class="badge bg-success">Active</span></td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-primary" onclick="openRecordPaymentModal('EXT-001', 'ABC Company Ltd', '₦1,150,000', '₦650,000')">
+                                        <button class="btn btn-primary" onclick="openRecordPaymentModal('EXT-001', 'ABC Company Ltd', 1150000, 650000)">
                                             <i class="fas fa-money-bill"></i>
                                         </button>
                                         <button class="btn btn-info" onclick="openLoanDetailsModal('EXT-001')">
@@ -568,7 +539,7 @@
                                 <td><span class="badge bg-success">Active</span></td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-primary" onclick="openRecordPaymentModal('EXT-002', 'John Okeke', '₦560,000', '₦360,000')">
+                                        <button class="btn btn-primary" onclick="openRecordPaymentModal('EXT-002', 'John Okeke', 560000, 360000)">
                                             <i class="fas fa-money-bill"></i>
                                         </button>
                                         <button class="btn btn-info" onclick="openLoanDetailsModal('EXT-002')">
@@ -592,7 +563,7 @@
                                 <td><span class="badge bg-danger">Overdue</span></td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-primary" onclick="openRecordPaymentModal('EXT-003', 'XYZ Ventures', '₦2,360,000', '₦2,360,000')">
+                                        <button class="btn btn-primary" onclick="openRecordPaymentModal('EXT-003', 'XYZ Ventures', 2360000, 2360000)">
                                             <i class="fas fa-money-bill"></i>
                                         </button>
                                         <button class="btn btn-info" onclick="openLoanDetailsModal('EXT-003')">
@@ -659,9 +630,10 @@
     </div>
 
     <div class="powered-by">
-        Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+        <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
     </div>
 
+    <!-- Issue Loan Modal -->
     <div class="modal fade" id="issueLoanModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -701,4 +673,434 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">
+                            <label class="form-label fw-semibold">Address</label>
+                            <textarea class="form-control" name="borrowerAddress" rows="2"></textarea>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Loan Amount (₦) *</label>
+                                <input type="number" class="form-control" name="loanAmount" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Interest Rate (% p.a.) *</label>
+                                <input type="number" class="form-control" name="interestRate" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Loan Duration (Months) *</label>
+                                <input type="number" class="form-control" name="loanDuration" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Due Date *</label>
+                                <input type="date" class="form-control" name="dueDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Loan Purpose</label>
+                            <textarea class="form-control" name="loanPurpose" rows="2" placeholder="E.g., Business expansion, Equipment purchase"></textarea>
+                        </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold">Guarantors</label>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <select class="form-select" name="guarantor1" id="guarantor1" required>
+                                <option value="">Select first guarantor...</option>
+                                <% users.forEach(user => { %>
+                                    <option value="<%= user._id %>">
+                                        <%= user.firstName %> <%= user.lastName %> (ID: <%= user.membershipID %>)
+                                    </option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-select" name="guarantor2" id="guarantor2" required>
+                                <option value="">Select second guarantor...</option>
+                                <% users.forEach(user => { %>
+                                    <option value="<%= user._id %>">
+                                        <%= user.firstName %> <%= user.lastName %> (ID: <%= user.membershipID %>)
+                                    </option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
+                    <small class="form-text text-muted">Two guarantors are required. You cannot select the same person twice.</small>
+                </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitLoanForm()">
+                        <i class="fas fa-check me-2"></i>Issue Loan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+const guarantor1 = document.getElementById('guarantor1');
+const guarantor2 = document.getElementById('guarantor2');
+
+function preventDuplicateGuarantors() {
+    const g1Value = guarantor1.value;
+    const g2Value = guarantor2.value;
+
+    Array.from(guarantor2.options).forEach(option => {
+        option.disabled = option.value === g1Value;
+    });
+    Array.from(guarantor1.options).forEach(option => {
+        option.disabled = option.value === g2Value;
+    });
+}
+
+guarantor1.addEventListener('change', preventDuplicateGuarantors);
+guarantor2.addEventListener('change', preventDuplicateGuarantors);
+</script>
+
+
+    <!-- Record Payment Modal -->
+    <div class="modal fade" id="recordPaymentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-money-bill me-2"></i>Record Payment
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="fw-semibold">Loan ID:</label>
+                        <span id="paymentLoanId" class="ms-2">EXT-001</span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-semibold">Borrower:</label>
+                        <span id="paymentBorrower" class="ms-2">ABC Company Ltd</span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-semibold">Total Due:</label>
+                        <span id="paymentTotalDue" class="ms-2 text-primary fw-bold">₦1,150,000</span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-semibold">Outstanding Balance:</label>
+                        <span id="paymentBalance" class="ms-2 text-warning fw-bold">₦650,000</span>
+                    </div>
+                    <hr>
+                    <form id="recordPaymentForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Payment Amount (₦) *</label>
+                            <input type="number" class="form-control" name="paymentAmount" id="paymentAmountInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Payment Type *</label>
+                            <select class="form-select" name="paymentType" required>
+                                <option value="principal">Principal Payment</option>
+                                <option value="interest">Interest Payment</option>
+                                <option value="both">Principal + Interest</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Payment Method *</label>
+                            <select class="form-select" name="paymentMethod" required>
+                                <option value="cash">Cash</option>
+                                <option value="bank-transfer">Bank Transfer</option>
+                                <option value="cheque">Cheque</option>
+                                <option value="pos">POS</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Payment Date *</label>
+                            <input type="date" class="form-control" name="paymentDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Reference/Transaction ID</label>
+                            <input type="text" class="form-control" name="referenceId">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Notes</label>
+                            <textarea class="form-control" name="paymentNotes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="submitPaymentRecord()">
+                        <i class="fas fa-check me-2"></i>Record Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loan Details Modal -->
+    <div class="modal fade" id="loanDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-file-invoice me-2"></i>Loan Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%); border: 2px solid rgba(30, 58, 138, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--primary);">Borrower Information</h6>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Name:</small>
+                                        <div class="fw-bold">ABC Company Ltd</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Phone:</small>
+                                        <div class="fw-bold">+234 803 123 4567</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Email:</small>
+                                        <div class="fw-bold">abc@company.com</div>
+                                    </div>
+                                    <div class="mb-0">
+                                        <small class="text-muted">Type:</small>
+                                        <div class="fw-bold">Company</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(5, 150, 105, 0.03) 100%); border: 2px solid rgba(16, 185, 129, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--success);">Loan Information</h6>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Loan ID:</small>
+                                        <div class="fw-bold">EXT-001</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Issue Date:</small>
+                                        <div class="fw-bold">Jan 1, 2025</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Due Date:</small>
+                                        <div class="fw-bold">Dec 31, 2025</div>
+                                    </div>
+                                    <div class="mb-0">
+                                        <small class="text-muted">Duration:</small>
+                                        <div class="fw-bold">12 Months</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-4">
+                            <div class="card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.03) 0%, rgba(217, 119, 6, 0.03) 100%); border: 2px solid rgba(245, 158, 11, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--warning);">Financial Details</h6>
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3">
+                                            <small class="text-muted d-block">Principal</small>
+                                            <h5 class="mb-0 fw-bold">₦1,000,000</h5>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <small class="text-muted d-block">Interest Rate</small>
+                                            <h5 class="mb-0 fw-bold">15% p.a.</h5>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <small class="text-muted d-block">Total Due</small>
+                                            <h5 class="mb-0 fw-bold text-primary">₦1,150,000</h5>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <small class="text-muted d-block">Outstanding</small>
+                                            <h5 class="mb-0 fw-bold text-warning">₦650,000</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0 fw-bold">Payment History</h6>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Amount</th>
+                                                    <th>Type</th>
+                                                    <th>Method</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Dec 20, 2025</td>
+                                                    <td class="fw-bold text-success">₦250,000</td>
+                                                    <td><span class="badge bg-info">Interest</span></td>
+                                                    <td>Bank Transfer</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Dec 15, 2025</td>
+                                                    <td class="fw-bold text-success">₦250,000</td>
+                                                    <td><span class="badge bg-success">Principal</span></td>
+                                                    <td>Cash</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" onclick="printLoanStatement()">
+                        <i class="fas fa-print me-2"></i>Print Statement
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Display current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+
+        // Set today's date as default for payment date
+        const today = new Date().toISOString().split('T')[0];
+        document.querySelector('input[name="paymentDate"]').value = today;
+
+        function openRecordPaymentModal(loanId, borrower, totalDue, balance) {
+            document.getElementById('paymentLoanId').textContent = loanId;
+            document.getElementById('paymentBorrower').textContent = borrower;
+            document.getElementById('paymentTotalDue').textContent = '₦' + totalDue.toLocaleString();
+            document.getElementById('paymentBalance').textContent = '₦' + balance.toLocaleString();
+            
+            const modal = new bootstrap.Modal(document.getElementById('recordPaymentModal'));
+            modal.show();
+        }
+
+        function openLoanDetailsModal(loanId) {
+            // In production, fetch loan details from API
+            const modal = new bootstrap.Modal(document.getElementById('loanDetailsModal'));
+            modal.show();
+        }
+
+
+async function submitLoanForm() {
+    const form = document.getElementById('issueLoanForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const formData = new FormData(form);
+    const loanData = {};
+
+    formData.forEach((value, key) => {
+        if (loanData[key]) {
+            // handle multi-select guarantors
+            if (Array.isArray(loanData[key])) {
+                loanData[key].push(value);
+            } else {
+                loanData[key] = [loanData[key], value];
+            }
+        } else {
+            loanData[key] = value;
+        }
+    });
+
+    try {
+        const res = await fetch("/admin/external-loans", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(loanData)
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+            alert(result.message);
+            bootstrap.Modal.getInstance(document.getElementById('issueLoanModal')).hide();
+            form.reset();
+            location.reload(); // refresh to show new loan
+        } else {
+            alert(result.error || "Failed to issue loan");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error submitting loan");
+    }
+}
+
+
+        function submitPaymentRecord() {
+            const form = document.getElementById('recordPaymentForm');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const formData = new FormData(form);
+            const paymentData = {
+                loanId: document.getElementById('paymentLoanId').textContent
+            };
+            formData.forEach((value, key) => {
+                paymentData[key] = value;
+            });
+            
+            console.log('Payment Data:', paymentData);
+            
+            // In production, send to API
+            // fetch('/api/external-loans/payment', { method: 'POST', body: JSON.stringify(paymentData) })
+            
+            alert('Payment recorded successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('recordPaymentModal')).hide();
+            form.reset();
+            
+            // Reload page or update table
+            location.reload();
+        }
+
+        function filterLoans(status) {
+            console.log('Filtering by:', status);
+            // Implement filtering logic
+            // In production, fetch filtered data from API
+        }
+
+        function exportToCSV() {
+            alert('Exporting loans to CSV...');
+            // Implement CSV export logic
+        }
+
+        function printLoanStatement() {
+            alert('Printing loan statement...');
+            // Implement print logic
+            window.print();
+        }
+
+        // Close sidebar on mobile when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburger = event.target.closest('.fa-bars');
+            
+            if (window.innerWidth <= 992 && 
+                !sidebar.contains(event.target) && 
+                !hamburger && 
+                sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

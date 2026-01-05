@@ -464,25 +464,32 @@
             </div>
         </div>
            <div class="sidebar-menu">
-            <a href="/admin-dashboard">
-                <i class="fas fa-home"></i> Dashboard
-            </a>
-
-            <a href="/admin/manage/members">
+             <a href="/admin-dashboard">
                 <i class="fas fa-users"></i> Members
             </a>
             <a href="/admin/manage/memberType">
                 <i class="fas fa-id-card"></i> Membership Types
             </a>
-            <a href="#" >
-                <i class="fas fa-exchange-alt"></i> Transactions
+            <a href="/admin/manage-payment">
+                <i class="fas fa-credit-card"></i> Payments
             </a>
-            <a href="/admin/manage-loan" class="active">
+            <a href="/admin/manage-deposits">
+                <i class="fas fa-coins"></i> Deposit Management
+            </a>
+            <a href="/admin/manage-withdrawals">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="/admin/manage-extra-charges">
+                <i class="fas fa-hand-holding-usd"></i> Extra Charges
+            </a>
+                <a href="/admin/manage-loan" class="active">
                 <i class="fas fa-hand-holding-usd"></i> Loan Management
             </a>
-
             <a href="/admin/loan/settings">
                 <i class="fas fa-cogs"></i> Loan Settings
+            </a>
+            <a href="/admin/external-loans">
+                <i class="fas fa-building"></i> External Loans
             </a>
 
             <a href="#" onclick="showSection('roi', event)">
@@ -508,21 +515,23 @@
 
     <!-- Top Navbar -->
     <div class="top-navbar">
-        <i class="fas fa-bars d-lg-none me-3"
-           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-           onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+<i class="fas fa-bars d-lg-none me-3"
+   style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+   onclick="toggleSidebar(event)">
+</i>
+
         
         <div class="flex-grow-1 d-none d-lg-block">
             <h5 class="mb-0 fw-bold" style="color: var(--primary)">Loan Management</h5>
             <small class="text-muted">Manage loan applications and active loans</small>
         </div>
         
-        <div class="d-flex align-items-center gap-3">
+        <!-- <div class="d-flex align-items-center gap-3">
             <div class="position-relative">
                 <i class="fas fa-bell" style="color: var(--primary); font-size: 1.25rem; cursor: pointer;"></i>
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">15</span>
             </div>
-        </div>
+        </div> -->
     </div>
 
     <!-- Main Content -->
@@ -549,70 +558,96 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="row g-3 mb-4">
-            <div class="col-lg-3 col-md-6 col-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
-                        <i class="fas fa-file-invoice"></i>
-                    </div>
-                    <p class="text-muted mb-1 fw-semibold small">Pending Applications</p>
-                    <h3 class="mb-1 fw-bold">15</h3>
-                    <small class="text-warning fw-semibold"><i class="fas fa-clock me-1"></i>Needs Review</small>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <p class="text-muted mb-1 fw-semibold small">Active Loans</p>
-                    <h3 class="mb-1 fw-bold">342</h3>
-                    <small class="text-success fw-semibold"><i class="fas fa-arrow-up me-1"></i>₦28.7M</small>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <p class="text-muted mb-1 fw-semibold small">Overdue Payments</p>
-                    <h3 class="mb-1 fw-bold">8</h3>
-                    <small class="text-danger fw-semibold"><i class="fas fa-exclamation me-1"></i>₦1.2M</small>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
-                        <i class="fas fa-sync-alt"></i>
-                    </div>
-                    <p class="text-muted mb-1 fw-semibold small">Rollover Requests</p>
-                    <h3 class="mb-1 fw-bold">5</h3>
-                    <small class="text-info fw-semibold"><i class="fas fa-clock me-1"></i>Pending</small>
-                </div>
-            </div>
-        </div>
+<div class="row g-3 mb-4">
 
-        <!-- Filter Tabs -->
-        <div class="filter-tabs">
-            <button class="filter-tab active" onclick="filterLoans('all')">
-                <i class="fas fa-th-large me-1"></i> All Loans
-            </button>
-            <button class="filter-tab" onclick="filterLoans('pending')">
-                <i class="fas fa-clock me-1"></i> Pending (15)
-            </button>
-            <button class="filter-tab" onclick="filterLoans('approved')">
-                <i class="fas fa-check me-1"></i> Approved (342)
-            </button>
-            <button class="filter-tab" onclick="filterLoans('rejected')">
-                <i class="fas fa-times me-1"></i> Rejected (23)
-            </button>
-            <button class="filter-tab" onclick="filterLoans('overdue')">
-                <i class="fas fa-exclamation-triangle me-1"></i> Overdue (8)
-            </button>
-            <button class="filter-tab" onclick="filterLoans('rollover')">
-                <i class="fas fa-sync-alt me-1"></i> Rollover (5)
-            </button>
+    <div class="col-lg-3 col-md-6 col-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <p class="text-muted mb-1 fw-semibold small">Pending Applications</p>
+            <h3 class="mb-1 fw-bold" id="stat-pending">0</h3>
+            <small class="text-warning fw-semibold">
+                <i class="fas fa-clock me-1"></i>Needs Review
+            </small>
         </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <p class="text-muted mb-1 fw-semibold small">Active Loans</p>
+            <h3 class="mb-1 fw-bold" id="stat-approved">0</h3>
+            <small class="text-success fw-semibold">
+                <i class="fas fa-arrow-up me-1"></i>
+                ₦<span id="stat-approved-amount">0</span>
+            </small>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <p class="text-muted mb-1 fw-semibold small">Overdue Payments</p>
+            <h3 class="mb-1 fw-bold" id="stat-overdue">0</h3>
+            <small class="text-danger fw-semibold">
+                <i class="fas fa-exclamation me-1"></i>
+                ₦<span id="stat-overdue-amount">0</span>
+            </small>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+            <p class="text-muted mb-1 fw-semibold small">Rollover Requests</p>
+            <h3 class="mb-1 fw-bold" id="stat-rollover">0</h3>
+            <small class="text-info fw-semibold">
+                <i class="fas fa-clock me-1"></i>Pending
+            </small>
+        </div>
+    </div>
+
+</div>
+
+
+      <div class="filter-tabs">
+    <button class="filter-tab active" onclick="filterLoans('all', event)">
+        <i class="fas fa-th-large me-1"></i>
+        All Loans (<span id="count-all">0</span>)
+    </button>
+
+    <button class="filter-tab" onclick="filterLoans('pending', event)">
+        <i class="fas fa-clock me-1"></i>
+        Pending (<span id="count-pending">0</span>)
+    </button>
+
+    <button class="filter-tab" onclick="filterLoans('approved', event)">
+        <i class="fas fa-check me-1"></i>
+        Approved (<span id="count-approved">0</span>)
+    </button>
+
+    <button class="filter-tab" onclick="filterLoans('rejected', event)">
+        <i class="fas fa-times me-1"></i>
+        Rejected (<span id="count-rejected">0</span>)
+    </button>
+
+    <button class="filter-tab" onclick="filterLoans('overdue', event)">
+        <i class="fas fa-exclamation-triangle me-1"></i>
+        Overdue (<span id="count-overdue">0</span>)
+    </button>
+
+    <button class="filter-tab" onclick="filterLoans('rollover', event)">
+        <i class="fas fa-sync-alt me-1"></i>
+        Rollover (<span id="count-rollover">0</span>)
+    </button>
+</div>
 
         <!-- Loan Applications Table -->
         <div class="card">
@@ -643,101 +678,117 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-<tbody>
-<% loans.forEach(loan => { %>
+                        <tbody>
+                        <% loans.forEach(loan => { %>
 
-    <% 
-        // Dynamic Account Type
-        const accType = loan?.user?.account?.accountType?.name || "Unknown";
+                            <% 
+                                // Dynamic Account Type
+                                const accType = loan?.user?.account?.accountType?.name || "Unknown";
 
-        // Badge text mapping
-        const isClub = accType.toLowerCase().includes("club"); 
-    %>
+                                // Badge text mapping
+                                const isClub = accType.toLowerCase().includes("club"); 
+                            %>
 
-    <tr>
+                        <tr class="loan-row" data-status="<%= loan.status.toLowerCase() %>">
 
-        <!-- DATE -->
-        <td>
-            <small class="fw-semibold">
-                <%= loan.createdAt.toDateString() %>
-            </small>
-        </td>
+                            <!-- DATE -->
+                            <td>
+                                <small class="fw-semibold">
+                                    <%= loan.createdAt.toDateString() %>
+                                </small>
+                            </td>
 
-        <!-- MEMBER -->
-        <td>
-            <div class="fw-semibold">
-                <%= loan.user.firstName %> <%= loan.user.lastName %>
-            </div>
-            <small class="text-muted"><%= loan.user.membershipID %></small>
-        </td>
+                            <!-- BORROWER -->
+                            <td>
+                                <div class="fw-semibold">
+                                    <%= loan.user
+                                        ? (loan.user.firstName + ' ' + loan.user.lastName)
+                                        : (loan.external?.borrowerName || 'External Loan')
+                                    %>
+                                </div>
+                                <small class="text-muted">
+                                    <%= loan.user
+                                        ? loan.user.membershipID
+                                        : (loan.external?.borrowerType
+                                            ? loan.external.borrowerType.toUpperCase()
+                                            : '')
+                                    %>
+                                </small>
+                            </td>
 
-        <!-- ACCOUNT TYPE (FULLY DYNAMIC) -->
-        <td>
-            <span class="badge <%= isClub ? 'bg-success' : 'bg-warning' %>">
-                <%= accType %>
-            </span>
-        </td>
+                            <!-- ACCOUNT TYPE -->
+                            <td>
+                                <span class="badge <%= loan.user ? 'bg-success' : 'bg-warning' %>">
+                                    <%= loan.user
+                                        ? accType
+                                        : loan.external?.borrowerType?.toUpperCase()
+                                    %>
+                                </span>
+                            </td>
 
-        <!-- AMOUNT -->
-        <td class="fw-bold">
-            ₦<%= loan.amount.toLocaleString() %>
-        </td>
+                            <!-- AMOUNT -->
+                            <td class="fw-bold">
+                                ₦<%= loan.amount.toLocaleString() %>
+                            </td>
 
-       
+                            <!-- INTEREST RATE -->
+                            <td>
+                                <span class="badge 
+                                    <%= loan.user ? 'bg-info-subtle text-info' : 'bg-warning-subtle text-warning' %>">
+                                    <%= loan.interestRate %>%
+                                </span>
+                            </td>
 
-        <!-- INTEREST RATE (DYNAMIC FROM loan.interestRate) -->
-        <td>
-            <span class="badge 
-                <%= isClub ? 'bg-info-subtle text-info' : 'bg-warning-subtle text-warning' %>">
-                <%= loan.interestRate %>%
-            </span>
-        </td>
+                            <!-- DURATION -->
+                            <td>
+                                <%= loan.duration
+                                    ? loan.duration.duration
+                                    : (loan.externalDuration || 'N/A')
+                                %> months
+                            </td>
 
-        <!-- DURATION (DYNAMIC LoanSettings) -->
-        <td>
-            <%= loan.duration ? loan.duration.duration : 'N/A' %> months
-        </td>
+                            <!-- STATUS -->
+                            <td>
+                                <% 
+                                    const statusColors = {
+                                        pending: "bg-warning",
+                                        approved: "bg-success",
+                                        rejected: "bg-danger",
+                                        paid: "bg-primary",
+                                    };
+                                %>
 
-        <!-- STATUS (DYNAMIC BADGE COLORS) -->
-        <td>
-            <% 
-                const statusColors = {
-                    pending: "bg-warning",
-                    approved: "bg-success",
-                    rejected: "bg-danger",
-                    paid: "bg-primary",
-                };
-            %>
+                                <span class="badge <%= statusColors[loan.status] %>">
+                                    <%= loan.status.toUpperCase() %>
+                                </span>
+                            </td>
 
-            <span class="badge <%= statusColors[loan.status] %>">
-                <%= loan.status.toUpperCase() %>
-            </span>
-        </td>
+                            <!-- ACTIONS -->
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button
+                                        class="btn btn-info viewLoanBtn"
+                                        data-loan='<%- JSON.stringify(loan) %>'
+                                        title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
 
-        <!-- ACTIONS -->
-        <td>
-            <div class="btn-group btn-group-sm">
-           <button class="btn btn-info viewLoanBtn"
-        data-loan='<%- JSON.stringify(loan) %>'
-        title="View Details">
-    <i class="fas fa-eye"></i>
-</button>
+                                    <% if (loan.status === "approved") { %>
+                                        <button
+                                            class="btn btn-danger"
+                                            onclick="sendReminder('<%= loan._id %>')"
+                                            title="Send Reminder">
+                                            <i class="fas fa-bell"></i>
+                                        </button>
+                                    <% } %>
+                                </div>
+                            </td>
+
+                        </tr>
 
 
-                <% if (loan.status === "approved") { %>
-                <button class="btn btn-danger"
-                        onclick="sendReminder('<%= loan._id %>')"
-                        title="Send Reminder">
-                    <i class="fas fa-bell"></i>
-                </button>
-                <% } %>
-            </div>
-        </td>
-
-    </tr>
-
-<% }) %>
-</tbody>
+                        <% }) %>
+                        </tbody>
 
 
                     </table>
@@ -811,7 +862,20 @@
                         <div class="detail-label">Repayment Date</div>
                         <div class="detail-value" id="loanRepayDate" style="font-size: 0.9rem;"></div>
                     </div>
+                </div>,
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        Additional Details <span class="text-danger">*</span>
+                    </label>
+                    <textarea
+                        class="form-control"
+                        id="rejectionDetails"
+                        rows="3"
+                        placeholder="Provide more details for the rejection..."
+                        required>
+                    </textarea>
                 </div>
+
 
                 <!-- Guarantor Information -->
                 <div class="mt-3">
@@ -1035,17 +1099,22 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 </div>
 
-                <div class="mb-3">
+              <div class="mb-3">
                     <label class="form-label fw-semibold">Rejection Reason <span class="text-danger">*</span></label>
                     <select class="form-select mb-2" id="rejectionReason" required>
                         <option value="">Select reason...</option>
-                        <option value="insufficient_savings">Insufficient Savings Balance</option>
-                        <option value="existing_loan">Outstanding Loan Balance</option>
-                        <option value="poor_history">Poor Repayment History</option>
-                        <option value="incomplete_docs">Incomplete Documentation</option>
-                        <option value="invalid_guarantor">Invalid/Unverified Guarantor</option>
-                        <option value="other">Other (Specify below)</option>
+                        <option value="Insufficient Savings Balance">Insufficient Savings Balance</option>
+                        <option value="Outstanding Loan Balance">Outstanding Loan Balance</option>
+                        <option value="Poor Repayment History">Poor Repayment History</option>
+                        <option value="Incomplete Documentation">Incomplete Documentation</option>
+                        <option value="Invalid/Unverified Guarantor">Invalid/Unverified Guarantor</option>
+                        <option value="Other">Other (Specify below)</option>
                     </select>
+                </div>
+
+                <div class="mb-3" id="otherReasonDiv" style="display:none;">
+                    <label class="form-label fw-semibold">Additional Details</label>
+                    <textarea class="form-control" id="rejectionDetails" rows="3" placeholder="Specify other reason..."></textarea>
                 </div>
 
                 <div class="alert-info-custom">
@@ -1286,27 +1355,37 @@ document.addEventListener("DOMContentLoaded", () => {
 function approveLoan(loanId) {
     if (!selectedLoan || selectedLoan._id !== loanId) return;
 
-    // Populate Approve Loan modal fields dynamically
-    document.getElementById("approveMemberName").innerText =
-        `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}`;
+    const isInternal = !!selectedLoan.user;
+
+    const borrowerName = isInternal
+        ? `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}`
+        : (selectedLoan.external?.borrowerName || "Company Loan");
+
+    const durationText = isInternal
+        ? `${selectedLoan.duration.duration} Months`
+        : `${selectedLoan.externalDuration} Months`;
+
+    document.getElementById("approveMemberName").innerText = borrowerName;
     document.getElementById("approveLoanAmount").innerText =
         "₦" + selectedLoan.amount.toLocaleString();
     document.getElementById("approveLoanInterest").innerText =
         selectedLoan.interestRate + "%";
     document.getElementById("approveLoanDuration").innerText =
-        selectedLoan.duration.duration + " Months";
+        durationText;
 
-    // Reset disbursement fields
     document.getElementById("disbursementMethod").value = "";
     document.getElementById("disbursementDate").value = "";
 
-    // Hide view modal and show approve modal
-    const viewModal = bootstrap.Modal.getInstance(document.getElementById("viewLoanModal"));
+    const viewModal = bootstrap.Modal.getInstance(
+        document.getElementById("viewLoanModal")
+    );
     viewModal.hide();
 
-    const approveModal = new bootstrap.Modal(document.getElementById("approveLoanModal"));
-    approveModal.show();
+    new bootstrap.Modal(
+        document.getElementById("approveLoanModal")
+    ).show();
 }
+
 
 // Confirm Approval
 async function confirmApproval() {
@@ -1349,10 +1428,17 @@ async function confirmApproval() {
         const result = await response.json();
         console.log("Loan approved successfully:", result);
 
-        alert(`Loan for ${selectedLoan.user.firstName} approved successfully! Member has been notified.`);
+        // Determine borrower name safely
+        const borrowerName = selectedLoan.user
+            ? `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}`
+            : selectedLoan.external?.borrowerName || "Company Loan";
+
+        alert(`Loan for ${borrowerName} approved successfully!`);
 
         // Hide modal
-        const approveModal = bootstrap.Modal.getInstance(document.getElementById("approveLoanModal"));
+        const approveModal = bootstrap.Modal.getInstance(
+            document.getElementById("approveLoanModal")
+        );
         approveModal.hide();
 
         // Optionally, refresh loan list or update UI
@@ -1369,47 +1455,87 @@ async function confirmApproval() {
 function viewLoan(loan) {
     selectedLoan = loan;
 
-    // populate the View Loan modal fields (same as your code)
-    document.getElementById("loanMemberName").innerText =
-        `${loan.user.firstName} ${loan.user.lastName}`;
-    document.getElementById("loanMemberID").innerText = `Member ID: ${loan.user.membershipID}`;
-    document.getElementById("loanMemberEmail").innerText = `Email: ${loan.user.email || 'N/A'}`;
-    document.getElementById("loanMemberPhone").innerText = `Phone: ${loan.user.phone || 'N/A'}`;
+    const isInternal = !!loan.user;
+    const borrowerName = isInternal
+        ? `${loan.user.firstName} ${loan.user.lastName}`
+        : (loan.external?.borrowerName || "Company Loan");
 
-    const accType = loan?.user?.account?.accountType?.name || "Unknown";
+    const borrowerId = isInternal
+        ? `Member ID: ${loan.user.membershipID}`
+        : `Type: ${loan.external?.borrowerType?.toUpperCase() || 'EXTERNAL'}`;
+
+    const borrowerEmail = isInternal
+        ? loan.user.email || "N/A"
+        : loan.external?.email || "N/A";
+
+    const borrowerPhone = isInternal
+        ? loan.user.phone || "N/A"
+        : loan.external?.phone || "N/A";
+
+    // Header
+    document.getElementById("loanMemberName").innerText = borrowerName;
+    document.getElementById("loanMemberID").innerText = borrowerId;
+    document.getElementById("loanMemberEmail").innerText = `Email: ${borrowerEmail}`;
+    document.getElementById("loanMemberPhone").innerText = `Phone: ${borrowerPhone}`;
+
+    // Account badge
+    const accType = isInternal
+        ? loan?.user?.account?.accountType?.name || "Unknown"
+        : loan.external?.borrowerType?.toUpperCase() || "EXTERNAL";
+
     const badge = document.getElementById("loanAccountBadge");
     badge.innerText = accType;
-    badge.className = "badge " + (accType.toLowerCase().includes("club") ? "bg-success" : "bg-warning");
+    badge.className = "badge " + (isInternal ? "bg-success" : "bg-warning");
 
-    document.getElementById("loanAmount").innerText = "₦" + loan.amount.toLocaleString();
-    document.getElementById("loanInterest").innerText = loan.interestRate + "%";
-    document.getElementById("loanDuration").innerText = loan.duration.duration + " Months";
-    document.getElementById("loanTotalRepay").innerText = "₦" + loan.totalRepay.toLocaleString();
+    // Loan details
+    document.getElementById("loanAmount").innerText =
+        "₦" + loan.amount.toLocaleString();
+    document.getElementById("loanInterest").innerText =
+        loan.interestRate + "%";
 
+    document.getElementById("loanDuration").innerText =
+        loan.duration
+            ? loan.duration.duration + " Months"
+            : (loan.externalDuration + " Months");
+
+    document.getElementById("loanTotalRepay").innerText =
+        "₦" + loan.totalRepay.toLocaleString();
+
+    // Dates
     const createdDate = new Date(loan.createdAt);
-    document.getElementById("loanCreatedAt").innerText = createdDate.toDateString();
-    const repayDate = new Date(createdDate);
-    repayDate.setMonth(repayDate.getMonth() + loan.duration.duration);
-    document.getElementById("loanRepayDate").innerText = repayDate.toDateString();
+    document.getElementById("loanCreatedAt").innerText =
+        createdDate.toDateString();
 
+    const repayDate = new Date(createdDate);
+    repayDate.setMonth(
+        repayDate.getMonth() +
+        (loan.duration?.duration || loan.externalDuration || 0)
+    );
+    document.getElementById("loanRepayDate").innerText =
+        repayDate.toDateString();
+
+    // Guarantors
     const gList = document.getElementById("guarantorList");
     gList.innerHTML = "";
+
     if (!loan.guarantors || loan.guarantors.length === 0) {
         gList.innerHTML = `<p class="text-muted">No guarantors attached.</p>`;
     } else {
         loan.guarantors.forEach(g => {
-            const bal = g.guarantor?.account?.balance || 0;
+            const gua = g.guarantor;
+            const bal = gua?.account?.balance || 0;
+
             gList.innerHTML += `
                 <div class="card mb-2">
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <strong>Name:</strong> ${g.guarantor.firstName} ${g.guarantor.lastName}<br>
-                                <strong>Member ID:</strong> ${g.guarantor.membershipID}<br>
-                                <strong>Phone:</strong> ${g.guarantor.phone || 'N/A'}
+                                <strong>Name:</strong> ${gua?.firstName || ''} ${gua?.lastName || ''}<br>
+                                <strong>Member ID:</strong> ${gua?.membershipID || 'N/A'}<br>
+                                <strong>Phone:</strong> ${gua?.phone || 'N/A'}
                             </div>
                             <div class="col-md-6">
-                                <strong>Email:</strong> ${g.guarantor.email || 'N/A'}<br>
+                                <strong>Email:</strong> ${gua?.email || 'N/A'}<br>
                                 <strong>Account Balance:</strong> ₦${bal.toLocaleString()}<br>
                                 <strong>Status:</strong> ${g.status}
                             </div>
@@ -1419,17 +1545,25 @@ function viewLoan(loan) {
         });
     }
 
-    // Show the View Loan modal
-    const modal = new bootstrap.Modal(document.getElementById("viewLoanModal"));
-    modal.show();
+    // Show modal
+    new bootstrap.Modal(document.getElementById("viewLoanModal")).show();
 }
 
         // Reject loan from modal
-// Reject loan from modal
+        document.getElementById("rejectionReason").addEventListener("change", function() {
+    const otherDiv = document.getElementById("otherReasonDiv");
+    if (this.value === "other") {
+        otherDiv.style.display = "block";
+    } else {
+        otherDiv.style.display = "none";
+        document.getElementById("rejectionDetails").value = "";
+    }
+});
+
+// Open reject modal and populate fields
 function rejectLoanFromModal() {
     if (!selectedLoan) return;
 
-    // Populate Reject Loan modal dynamically
     document.getElementById("rejectMemberName").innerText =
         `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}`;
     document.getElementById("rejectLoanAmount").innerText =
@@ -1438,8 +1572,9 @@ function rejectLoanFromModal() {
     // Reset form fields
     document.getElementById("rejectionReason").value = "";
     document.getElementById("rejectionDetails").value = "";
+    document.getElementById("otherReasonDiv").style.display = "none";
 
-    // Hide View Loan modal and show Reject Loan modal
+    // Hide view modal, show reject modal
     const viewModal = bootstrap.Modal.getInstance(document.getElementById("viewLoanModal"));
     viewModal.hide();
 
@@ -1447,25 +1582,191 @@ function rejectLoanFromModal() {
     rejectModal.show();
 }
 
-// Confirm Rejection
-function confirmRejection() {
-    const reason = document.getElementById("rejectionReason").value;
-    const details = document.getElementById("rejectionDetails").value.trim();
+    // Confirm rejection and send to backend
+    async function confirmRejection() {
+        if (!selectedLoan) return;
 
-    if (!reason || !details) {
-        alert("Please provide a rejection reason and additional details.");
+    let reason = document.getElementById("rejectionReason").value.trim();
+    let details = document.getElementById("rejectionDetails").value.trim();
+
+    // If "Other", require details
+    if (reason === "Other" && !details) {
+        alert("Please specify the rejection details for 'Other'.");
         return;
     }
 
-    console.log("Loan rejected:", selectedLoan._id, reason, details);
+    // Use details if "Other", otherwise just the reason message
+    const messageToSend = (reason === "Other") ? details : reason;
 
-    alert(`Loan for ${selectedLoan.user.firstName} has been rejected.`);
 
-    const rejectModal = bootstrap.Modal.getInstance(document.getElementById("rejectLoanModal"));
-    rejectModal.hide();
+    try {
+        const response = await fetch("/api/loans/reject", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                loanId: selectedLoan._id,
+                reason,
+                details: details || reason // if not 'other', use reason as details
+            })
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.message || "Failed to reject loan.");
+        }
+
+        const result = await response.json();
+        alert(result.message);
+
+        const rejectModal = bootstrap.Modal.getInstance(document.getElementById("rejectLoanModal"));
+        rejectModal.hide();
+
+        // Refresh UI dynamically
+        updateLoanCounts();
+        updateLoanStats();
+
+    } catch (error) {
+        console.error("Error rejecting loan:", error);
+        alert(`Error: ${error.message}`);
+    }
 }
 
+
+
 </script>
+
+
+<script>
+  function toggleSidebar(e) {
+    e.stopPropagation(); // stop document click
+    document.getElementById("sidebar").classList.toggle("active");
+  }
+
+  // Close sidebar when clicking outside
+  document.addEventListener("click", function () {
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar.classList.contains("active")) {
+      sidebar.classList.remove("active");
+    }
+  });
+
+  // Prevent clicks inside sidebar from closing it
+  document.getElementById("sidebar").addEventListener("click", function (e) {
+    e.stopPropagation();
+  });
+</script>
+
+
+<script>
+/* ============================
+   FILTER + COUNTS (MERGED)
+============================ */
+
+function updateLoanCounts() {
+    const rows = document.querySelectorAll("#loansTable tbody tr");
+
+    const counts = {
+        all: rows.length,
+        pending: 0,
+        approved: 0,
+        rejected: 0,
+        overdue: 0,
+        rollover: 0
+    };
+
+    rows.forEach(row => {
+        const status = row.dataset.status;
+        if (counts.hasOwnProperty(status)) {
+            counts[status]++;
+        }
+    });
+
+    Object.keys(counts).forEach(status => {
+        const el = document.getElementById(`count-${status}`);
+        if (el) el.textContent = counts[status];
+    });
+}
+
+function filterLoans(status, event) {
+    // Active tab state
+    document.querySelectorAll(".filter-tab").forEach(tab =>
+        tab.classList.remove("active")
+    );
+    event.currentTarget.classList.add("active");
+
+    const rows = document.querySelectorAll("#loansTable tbody tr");
+
+    rows.forEach(row => {
+        const rowStatus = row.dataset.status;
+        row.style.display =
+            status === "all" || rowStatus === status ? "" : "none";
+    });
+}
+
+// Init on load
+document.addEventListener("DOMContentLoaded", () => {
+    updateLoanCounts();
+});
+</script>
+
+<script>
+function updateLoanStats() {
+    const rows = document.querySelectorAll("#loansTable tbody tr");
+
+    let pending = 0;
+    let approved = 0;
+    let overdue = 0;
+    let rollover = 0;
+
+    let approvedAmount = 0;
+    let overdueAmount = 0;
+
+    rows.forEach(row => {
+        const status = row.dataset.status;
+        const amount = Number(row.dataset.amount) || 0;
+
+        switch (status) {
+            case "pending":
+                pending++;
+                break;
+
+            case "approved":
+                approved++;
+                approvedAmount += amount;
+                break;
+
+            case "overdue":
+                overdue++;
+                overdueAmount += amount;
+                break;
+
+            case "rollover":
+                rollover++;
+                break;
+        }
+    });
+
+    // Update counts
+    document.getElementById("stat-pending").textContent = pending;
+    document.getElementById("stat-approved").textContent = approved;
+    document.getElementById("stat-overdue").textContent = overdue;
+    document.getElementById("stat-rollover").textContent = rollover;
+
+    // Update amounts
+    document.getElementById("stat-approved-amount").textContent =
+        approvedAmount.toLocaleString();
+
+    document.getElementById("stat-overdue-amount").textContent =
+        overdueAmount.toLocaleString();
+}
+
+// Init
+document.addEventListener("DOMContentLoaded", () => {
+    updateLoanCounts();   // your filter counts
+    updateLoanStats();    // stat cards
+});
+</script>
+
 
 </body>
 </html>

@@ -259,12 +259,66 @@
             box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
         }
         
-        .amount-display {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        /* Autocomplete Dropdown */
+        .autocomplete-wrapper {
+            position: relative;
+        }
+        
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
             border: 2px solid var(--primary);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.15);
+            display: none;
+        }
+        
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+        
+        .autocomplete-item {
+            padding: 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+            transition: all 0.2s;
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .autocomplete-item:hover {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+        
+        .autocomplete-item-name {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .autocomplete-item-details {
+            font-size: 0.85rem;
+            color: var(--secondary);
+        }
+        
+        .autocomplete-item-balance {
+            display: inline-block;
+            margin-top: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
         }
         
         .member-search-result {
@@ -272,6 +326,42 @@
             border: 2px solid rgba(30, 58, 138, 0.1);
             border-radius: 10px;
             margin-bottom: 1rem;
+            background: rgba(30, 58, 138, 0.02);
+        }
+        
+        /* Responsive Table */
+        .table-responsive {
+            border-radius: 0 0 16px 16px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin: 0;
+        }
+        
+        .table thead {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+        
+        .table thead th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .table tbody tr:hover {
             background: rgba(30, 58, 138, 0.02);
         }
         
@@ -287,18 +377,6 @@
             font-weight: 600;
             color: var(--primary);
             z-index: 1000;
-        }
-        
-        .alert-custom {
-            border-radius: 12px;
-            padding: 1rem;
-            border: 2px solid;
-        }
-        
-        .alert-info-custom {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border-color: #3b82f6;
-            color: #1e40af;
         }
         
         .payment-summary {
@@ -323,7 +401,7 @@
             padding-top: 1rem;
         }
         
-        /* Mobile Responsive */
+        /* Mobile Card View for Table */
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -342,19 +420,50 @@
                 padding: 1rem;
             }
             
-            .page-header {
-                padding: 1.5rem;
+            .table-responsive {
+                border-radius: 16px;
+            }
+            
+            .table thead {
+                display: none;
+            }
+            
+            .table tbody tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 2px solid rgba(30, 58, 138, 0.1);
+                border-radius: 12px;
+                overflow: hidden;
+                background: white;
+            }
+            
+            .table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid rgba(30, 58, 138, 0.05);
+            }
+            
+            .table tbody td:last-child {
+                border-bottom: none;
+            }
+            
+            .table tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--primary);
+                margin-right: 1rem;
             }
             
             .payment-type-card {
-                padding: 1.25rem;
+                padding: 1rem;
             }
             
-            .powered-by {
-                bottom: 10px;
-                right: 10px;
-                font-size: 0.7rem;
-                padding: 8px 12px;
+            .payment-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
             }
         }
         
@@ -374,37 +483,12 @@
                 border-radius: 16px;
             }
             
-            .payment-type-card {
-                padding: 1rem;
+            .powered-by {
+                bottom: 10px;
+                right: 10px;
+                font-size: 0.7rem;
+                padding: 8px 12px;
             }
-            
-            .payment-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.5rem;
-            }
-            
-            .sidebar-header {
-                padding: 1.25rem;
-            }
-            
-            .logo-box {
-                width: 40px;
-                height: 40px;
-                font-size: 1.25rem;
-            }
-            
-            .sidebar-title {
-                font-size: 1rem;
-            }
-        }
-        
-        .modal-content {
-            border-radius: 16px;
-        }
-        
-        .modal-header {
-            border-radius: 16px 16px 0 0;
         }
         
         @keyframes fadeIn {
@@ -420,6 +504,173 @@
         
         .fade-in {
             animation: fadeIn 0.5s ease;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(30, 58, 138, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Print Styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            #printReceipt, #printReceipt * {
+                visibility: visible;
+            }
+            
+            #printReceipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .sidebar, .top-navbar, .powered-by {
+                display: none !important;
+            }
+        }
+        
+        .receipt-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .receipt-header {
+            text-align: center;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .receipt-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+        
+        .receipt-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .receipt-subtitle {
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        .receipt-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .receipt-section-title {
+            font-weight: bold;
+            color: var(--primary);
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+        
+        .receipt-row:last-child {
+            border-bottom: none;
+        }
+        
+        .receipt-label {
+            color: var(--secondary);
+            font-weight: 500;
+        }
+        
+        .receipt-value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .receipt-amount {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 2px solid var(--success);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        
+        .receipt-amount-label {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .receipt-amount-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--success);
+        }
+        
+        .receipt-footer {
+            text-align: center;
+            border-top: 3px solid var(--primary);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .receipt-stamp {
+            display: inline-block;
+            border: 3px solid var(--success);
+            color: var(--success);
+            padding: 0.5rem 1.5rem;
+            border-radius: 10px;
+            font-weight: bold;
+            transform: rotate(-5deg);
+            margin: 1rem 0;
+        }
+        
+        .receipt-qr {
+            width: 120px;
+            height: 120px;
+            background: #f3f4f6;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1rem auto;
+            font-size: 0.8rem;
+            color: var(--secondary);
         }
     </style>
 </head>
@@ -441,9 +692,6 @@
         </div>
         <div class="sidebar-menu">
             <a href="/admin-dashboard">
-                <i class="fas fa-home"></i> Dashboard
-            </a>
-            <a href="/admin/manage/members">
                 <i class="fas fa-users"></i> Members
             </a>
             <a href="/admin/manage/memberType">
@@ -452,14 +700,23 @@
             <a href="/admin/manage-payment" class="active">
                 <i class="fas fa-credit-card"></i> Payments
             </a>
-            <a href="#">
-                <i class="fas fa-exchange-alt"></i> Transactions
+            <a href="/admin/manage-deposits">
+                <i class="fas fa-coins"></i> Deposit Management
+            </a>
+            <a href="/admin/manage-withdrawals">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="/admin/manage-extra-charges">
+                <i class="fas fa-hand-holding-usd"></i> Extra Charges
             </a>
             <a href="/admin/manage-loan">
                 <i class="fas fa-hand-holding-usd"></i> Loan Management
             </a>
             <a href="/admin/loan/settings">
                 <i class="fas fa-cogs"></i> Loan Settings
+            </a>
+             <a href="/admin/external-loans">
+                <i class="fas fa-building"></i> External Loans
             </a>
             <a href="#">
                 <i class="fas fa-chart-pie"></i> ROI Distribution
@@ -567,16 +824,21 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-lg-8">
-                        <!-- Member Search -->
+                        <!-- Member Search with Autocomplete -->
                         <div class="mb-4">
                             <label class="form-label">
                                 <i class="fas fa-search me-2"></i>Search Member
                             </label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="memberSearch" placeholder="Enter Member ID, Name, or Email">
-                                <button class="btn btn-primary" onclick="searchMember()">
-                                    <i class="fas fa-search"></i> Search
-                                </button>
+                            <div class="autocomplete-wrapper">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="memberSearch" 
+                                    placeholder="Type member name, ID, or email..."
+                                    autocomplete="off"
+                                    oninput="handleMemberSearch()"
+                                    onfocus="handleMemberSearch()">
+                                <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
                             </div>
                         </div>
 
@@ -620,11 +882,10 @@
                                 <label class="form-label">
                                     <i class="fas fa-file-contract me-2"></i>Select Loan
                                 </label>
-                                <select class="form-select" id="loanSelect" onchange="updateLoanDetails()">
-                                    <option value="">Choose a loan</option>
-                                    <option value="loan1">Loan #L001 - ₦100,000 (₦50,000 remaining)</option>
-                                    <option value="loan2">Loan #L002 - ₦75,000 (₦30,000 remaining)</option>
+                                <select id="loanSelect" class="form-select" onchange="updateLoanDetails()">
+                                    <option value="">Select Loan</option>
                                 </select>
+
                             </div>
 
                             <!-- Charge Type (for direct debit) -->
@@ -669,12 +930,6 @@
                                     <i class="fas fa-comment me-2"></i>Notes/Description
                                 </label>
                                 <textarea class="form-control" id="paymentNotes" rows="3" placeholder="Add any additional notes or description"></textarea>
-                            </div>
-
-                            <!-- Alert for withdrawal -->
-                            <div id="withdrawalAlert" class="alert-custom alert-info-custom mb-3" style="display: none;">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Withdrawal Notice:</strong> Ensure member has sufficient balance and has met withdrawal conditions.
                             </div>
                         </div>
                     </div>
@@ -745,111 +1000,103 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                <table class="table table-hover mb-0">
-  <thead>
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th>Member</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+<tbody id="transactionTableBody">
+  <% if (adminPayments.length === 0) { %>
     <tr>
-      <th>Date/Time</th>
-      <th>Member</th>
-      <th>Type</th>
-      <th>Amount</th>
-      <th>Payee</th>
-      <th>Status</th>
-      <th>Actions</th>
+      <td colspan="7" class="text-center text-muted py-4">No transactions yet</td>
     </tr>
-  </thead>
+  <% } else { 
+      const typesMap = {
+        deposit: { label: "Deposit", class: "success", sign: "+" },
+        withdrawal: { label: "Withdrawal", class: "danger", sign: "-" },
+        "loan-repayment": { label: "Loan Repayment", class: "warning", sign: "" },
+        "direct-debit": { label: "Direct Debit", class: "info", sign: "-" }
+      };
 
-  <tbody id="transactionTableBody">
+      adminPayments.forEach(txn => {
+        const date = new Date(txn.createdAt);
+        const type = typesMap[txn.paymentType];
+  %>
+    <tr>
+      <!-- Date / Time -->
+      <td data-label="Date/Time">
+        <small class="fw-semibold"><%= date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) %></small><br>
+        <small class="text-muted"><%= date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) %></small>
+      </td>
 
-    <% if (payments && payments.length > 0) { %>
-      <% payments.forEach(payment => { %>
+      <!-- Member -->
+      <td data-label="Member">
+        <div class="fw-semibold"><%= txn.member ? txn.member.firstName + " " + txn.member.lastName : "Deleted Member" %></div>
+        <small class="text-muted"><%= txn.member?.membershipID || "N/A" %></small>
+      </td>
 
-        <tr>
-          <!-- DATE / TIME -->
-          <td>
-            <small class="fw-semibold">
-              <%= new Date(payment.createdAt).toLocaleDateString("en-NG", {
-                year: "numeric",
-                month: "short",
-                day: "numeric"
-              }) %>
-            </small><br>
-            <small class="text-muted">
-              <%= new Date(payment.createdAt).toLocaleTimeString("en-NG", {
-                hour: "2-digit",
-                minute: "2-digit"
-              }) %>
-            </small>
-          </td>
+      <!-- Type -->
+      <td data-label="Type">
+        <span class="badge bg-<%= type.class %>"><%= type.label %></span>
+      </td>
 
-          <!-- MEMBER -->
-          <td>
-            <div class="fw-semibold">
-              <%= payment.user?.firstName %> <%= payment.user?.lastName %>
-            </div>
-            <small class="text-muted">
-              <%= payment.user?.membershipID || "N/A" %>
-            </small>
-          </td>
+      <!-- Amount -->
+      <td data-label="Amount" class="fw-bold text-<%= type.class %>">
+        <%= type.sign %>₦<%= txn.amount.toLocaleString() %>
+      </td>
 
-          <!-- TYPE -->
-          <td>
-            <% if (payment.loanId) { %>
-              <span class="badge bg-warning-subtle text-warning">
-                Loan Payment
-              </span>
-            <% } else { %>
-              <span class="badge bg-success-subtle text-success">
-                Deposit
-              </span>
-            <% } %>
-          </td>
+      <!-- Method -->
+      <td data-label="Method"><small><%= txn.paymentMethod.replace("-", " ").toUpperCase() %></small></td>
 
-          <!-- AMOUNT -->
-          <td class="fw-bold
-            <%= payment.status === 'paid' ? 'text-success' : 'text-warning' %>">
-            ₦<%= payment.amount.toLocaleString() %>
-          </td>
+      <!-- Status -->
+      <td data-label="Status">
+        <span class="badge bg-success"><%= txn.status || "successful" %></span>
+      </td>
 
-          <!-- PAYEE -->
-          <td>
-            <small>
-              <%= payment.payeeName || `${payment.user?.firstName} ${payment.user?.lastName}` %>
-            </small>
-          </td>
+      <!-- Actions -->
+      <td data-label="Actions">
+<button
+  class="btn btn-sm btn-outline-primary"
+  onclick='viewTransactionDetails(<%- JSON.stringify({
+    id: txn.reference || "N/A",
+    date: date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    time: date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+    type: type.label,
+    typeClass: type.class,
+    status: txn.status || "Completed",
+    statusClass: "success",
+    reference: txn.reference || "N/A",
+    memberName: txn.member ? txn.member.firstName + " " + txn.member.lastName : "Deleted Member",
+    memberId: txn.member?.membershipID || "N/A",
+    memberEmail: txn.member?.email || "N/A",
+    memberPhone: txn.member?.phone || "N/A",
+    amount: txn.amount,
+    method: txn.paymentMethod.replace("-", " ").toUpperCase(),
+    fee: txn.chargeAmount || 0,
+    balanceBefore: txn.balanceBefore,
+    balanceAfter: txn.balanceAfter,
+    processedBy: txn.admin ? txn.admin.fullName : "System Admin",
+    notes: txn.notes || "No additional notes"
+  }) %>)'
+>
+  <i class="fas fa-eye"></i>
+</button>
 
-          <!-- STATUS -->
-          <td>
-            <% if (payment.status === "paid") { %>
-              <span class="badge bg-success">Completed</span>
-            <% } else if (payment.status === "pending") { %>
-              <span class="badge bg-warning">Pending</span>
-            <% } else { %>
-              <span class="badge bg-danger">Failed</span>
-            <% } %>
-          </td>
 
-          <!-- ACTIONS -->
-          <td>
-            <button
-              class="btn btn-sm btn-outline-primary"
-              onclick="viewPaymentDetails('<%= payment._id %>')">
-              <i class="fas fa-eye"></i>
-            </button>
-          </td>
-        </tr>
+      </td>
+    </tr>
+  <% }) } %>
+</tbody>
 
-      <% }) %>
-    <% } else { %>
-      <tr>
-        <td colspan="7" class="text-center text-muted py-4">
-          No payment records found.
-        </td>
-      </tr>
-    <% } %>
 
-  </tbody>
-</table>
-
+                    </table>
                 </div>
             </div>
         </div>
@@ -857,7 +1104,7 @@
 
     <!-- Powered By Footer -->
     <div class="powered-by">
-        Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+        <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
     </div>
 
     <!-- Confirmation Modal -->
@@ -871,7 +1118,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="alert-custom alert-info-custom mb-3">
+                    <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
                         Please review the payment details before confirming
                     </div>
@@ -912,10 +1159,277 @@
         </div>
     </div>
 
+    <!-- Transaction Details Modal -->
+    <div class="modal fade" id="transactionDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-invoice me-2"></i>Transaction Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Transaction Info -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%); border: 2px solid rgba(30, 58, 138, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--primary);">
+                                        <i class="fas fa-info-circle me-2"></i>Transaction Information
+                                    </h6>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Transaction ID</small>
+                                        <strong id="detailTxnId">TXN1704283800000</strong>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Date & Time</small>
+                                        <strong id="detailDateTime">Jan 2, 2026 at 02:30 PM</strong>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Transaction Type</small>
+                                        <span id="detailType" class="badge bg-success">Deposit</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Status</small>
+                                        <span id="detailStatus" class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Completed
+                                        </span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <small class="text-muted d-block mb-1">Reference Number</small>
+                                        <strong id="detailReference">REF-12345-ABCD</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Member Info -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(5, 150, 105, 0.03) 100%); border: 2px solid rgba(16, 185, 129, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--success);">
+                                        <i class="fas fa-user me-2"></i>Member Information
+                                    </h6>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Member Name</small>
+                                        <strong id="detailMemberName">John Doe</strong>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Member ID</small>
+                                        <strong id="detailMemberId">CDS001</strong>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Email Address</small>
+                                        <strong id="detailMemberEmail">john.doe@example.com</strong>
+                                    </div>
+                                    <div class="mb-0">
+                                        <small class="text-muted d-block mb-1">Phone Number</small>
+                                        <strong id="detailMemberPhone">+234 801 234 5678</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Details -->
+                        <div class="col-12 mb-4">
+                            <div class="card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.03) 0%, rgba(217, 119, 6, 0.03) 100%); border: 2px solid rgba(245, 158, 11, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--warning);">
+                                        <i class="fas fa-money-bill-wave me-2"></i>Payment Details
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <small class="text-muted d-block mb-1">Amount</small>
+                                            <h4 class="mb-0 fw-bold" style="color: var(--success);" id="detailAmount">₦50,000</h4>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <small class="text-muted d-block mb-1">Payment Method</small>
+                                            <strong id="detailMethod">Bank Transfer</strong>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <small class="text-muted d-block mb-1">Processing Fee</small>
+                                            <strong id="detailFee">₦0</strong>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <small class="text-muted d-block mb-1">Balance Before</small>
+                                            <strong id="detailBalanceBefore">₦100,000</strong>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <small class="text-muted d-block mb-1">Balance After</small>
+                                            <strong id="detailBalanceAfter" style="color: var(--success);">₦150,000</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="col-12">
+                            <div class="card" style="border: 2px solid rgba(30, 58, 138, 0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color: var(--primary);">
+                                        <i class="fas fa-comment-alt me-2"></i>Additional Information
+                                    </h6>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block mb-1">Processed By</small>
+                                        <strong id="detailProcessedBy">Admin User (ADMIN001)</strong>
+                                    </div>
+                                    <div class="mb-0">
+                                        <small class="text-muted d-block mb-1">Notes/Description</small>
+                                        <p class="mb-0" id="detailNotes">Monthly savings deposit for January 2026</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" onclick="printTransactionReceipt()">
+                        <i class="fas fa-print me-2"></i>Print Receipt
+                    </button>
+                    <button type="button" class="btn btn-outline-success" onclick="downloadTransactionPDF()">
+                        <i class="fas fa-download me-2"></i>Download PDF
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Printable Receipt -->
+    <div id="printReceipt" style="display: none;">
+        <div class="receipt-container">
+            <!-- Receipt Header -->
+            <div class="receipt-header">
+                <div class="receipt-logo">C</div>
+                <div class="receipt-title">CLUB DE STARS</div>
+                <div class="receipt-subtitle">Official Payment Receipt</div>
+                <div class="receipt-subtitle mt-2">
+                    <i class="fas fa-map-marker-alt me-1"></i>123 Business Avenue, Port Harcourt, Rivers State, Nigeria<br>
+                    <i class="fas fa-phone me-1"></i>+234 800 123 4567 | 
+                    <i class="fas fa-envelope me-1"></i>info@clubdestars.com
+                </div>
+            </div>
+
+            <!-- Receipt Body -->
+            <div class="receipt-section">
+                <div class="receipt-section-title">TRANSACTION INFORMATION</div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Transaction ID:</span>
+                    <span class="receipt-value" id="printTxnId">TXN1704283800000</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Date & Time:</span>
+                    <span class="receipt-value" id="printDateTime">Jan 2, 2026 at 02:30 PM</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Transaction Type:</span>
+                    <span class="receipt-value" id="printType">Deposit</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Status:</span>
+                    <span class="receipt-value" id="printStatus">Completed</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Reference Number:</span>
+                    <span class="receipt-value" id="printReference">REF-12345-ABCD</span>
+                </div>
+            </div>
+
+            <div class="receipt-section">
+                <div class="receipt-section-title">MEMBER INFORMATION</div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Member Name:</span>
+                    <span class="receipt-value" id="printMemberName">John Doe</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Member ID:</span>
+                    <span class="receipt-value" id="printMemberId">CDS001</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Email:</span>
+                    <span class="receipt-value" id="printMemberEmail">john.doe@example.com</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Phone:</span>
+                    <span class="receipt-value" id="printMemberPhone">+234 801 234 5678</span>
+                </div>
+            </div>
+
+            <!-- Amount Section -->
+            <div class="receipt-amount">
+                <div class="receipt-amount-label">TRANSACTION AMOUNT</div>
+                <div class="receipt-amount-value" id="printAmount">₦50,000.00</div>
+            </div>
+
+            <div class="receipt-section">
+                <div class="receipt-section-title">PAYMENT DETAILS</div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Payment Method:</span>
+                    <span class="receipt-value" id="printMethod">Bank Transfer</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Processing Fee:</span>
+                    <span class="receipt-value" id="printFee">₦0.00</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Balance Before:</span>
+                    <span class="receipt-value" id="printBalanceBefore">₦100,000.00</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Balance After:</span>
+                    <span class="receipt-value" id="printBalanceAfter">₦150,000.00</span>
+                </div>
+            </div>
+
+            <div class="receipt-section">
+                <div class="receipt-section-title">ADDITIONAL INFORMATION</div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Processed By:</span>
+                    <span class="receipt-value" id="printProcessedBy">Admin User (ADMIN001)</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Notes:</span>
+                    <span class="receipt-value" id="printNotes">Monthly savings deposit for January 2026</span>
+                </div>
+            </div>
+
+            <!-- Receipt Footer -->
+            <div class="receipt-footer">
+                <div class="receipt-stamp">VERIFIED & COMPLETED</div>
+                
+                <div class="receipt-qr">
+                    <div class="text-center">
+                        <i class="fas fa-qrcode fa-3x mb-2"></i>
+                        <div style="font-size: 0.7rem;">Scan for verification</div>
+                    </div>
+                </div>
+                
+                <p style="font-size: 0.8rem; color: var(--secondary); margin-top: 1rem;">
+                    This is a computer-generated receipt and does not require a signature.<br>
+                    For inquiries, please contact us at support@clubdestars.com
+                </p>
+                
+                <p style="font-size: 0.7rem; color: var(--secondary); margin-top: 1rem;">
+                    Generated on: <span id="printGeneratedDate"></span><br>
+                    Powered by <strong>JESZ LIMITED</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
         let currentPaymentType = '';
         let selectedMember = null;
+        let searchTimeout = null;
+ 
 
         // Display current date
         document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { 
@@ -950,45 +1464,115 @@
             // Show/hide relevant fields
             document.getElementById('loanSelection').style.display = type === 'loan-repayment' ? 'block' : 'none';
             document.getElementById('chargeType').style.display = type === 'direct-debit' ? 'block' : 'none';
-            document.getElementById('withdrawalAlert').style.display = type === 'withdrawal' ? 'block' : 'none';
             document.getElementById('loanBadge').style.display = type === 'loan-repayment' ? 'inline-block' : 'none';
             
             // Show form
             document.getElementById('paymentForm').style.display = 'block';
             
+            // Scroll to form
+            document.getElementById('paymentForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
             // Clear previous data
             clearMember();
         }
 
-        function searchMember() {
-            const searchTerm = document.getElementById('memberSearch').value;
-            
-            if (!searchTerm) {
-                alert('Please enter a search term');
-                return;
-            }
-            
-            // Simulate API call - replace with actual API
-            setTimeout(() => {
-                selectedMember = {
-                    id: 'CDS001',
-                    name: 'John Doe',
-                    email: 'john.doe@example.com',
-                    balance: 150000,
-                    loanBalance: 50000
-                };
-                
-                // Display member details
-                document.getElementById('memberName').textContent = selectedMember.name;
-                document.getElementById('memberID').textContent = selectedMember.id;
-                document.getElementById('memberEmail').textContent = selectedMember.email;
-                document.getElementById('memberBalance').textContent = selectedMember.balance.toLocaleString();
-                document.getElementById('memberLoan').textContent = selectedMember.loanBalance.toLocaleString();
-                
-                document.getElementById('memberDetails').style.display = 'block';
-                document.getElementById('summaryCurrentBalance').textContent = selectedMember.balance.toLocaleString();
-            }, 500);
-        }
+
+function handleMemberSearch() {
+  const searchTerm = document
+    .getElementById('memberSearch')
+    .value
+    .trim()
+    .toLowerCase();
+
+  const dropdown = document.getElementById('autocompleteDropdown');
+
+  if (searchTimeout) {
+    clearTimeout(searchTimeout);
+  }
+
+  if (!searchTerm) {
+    dropdown.classList.remove('show');
+    dropdown.innerHTML = '';
+    return;
+  }
+
+  searchTimeout = setTimeout(async () => {
+    try {
+      const res = await fetch(
+        `/admin/search-member?q=${encodeURIComponent(searchTerm)}`
+      );
+      const members = await res.json();
+
+      if (!members.length) {
+        dropdown.innerHTML = `
+          <div class="autocomplete-item text-center text-muted py-3">
+            <i class="fas fa-search mb-2"></i>
+            <div>No members found</div>
+          </div>
+        `;
+        dropdown.classList.add('show');
+        return;
+      }
+
+      dropdown.innerHTML = members.map(member => `
+        <div class="autocomplete-item" onclick='selectMember(${JSON.stringify(member)})'>
+          <div class="autocomplete-item-name">${member.name}</div>
+          <div class="autocomplete-item-details">
+            ${member.membershipID} | ${member.email}
+          </div>
+          <div class="autocomplete-item-balance">
+            Balance: ₦${Number(member.balance).toLocaleString()}
+          </div>
+        </div>
+      `).join('');
+
+      dropdown.classList.add('show');
+
+    } catch (err) {
+      console.error('Live member search failed:', err);
+    }
+  }, 300);
+}
+
+
+
+function selectMember(member) {
+  selectedMember = member;
+
+  document.getElementById('memberSearch').value = member.name;
+  document.getElementById('autocompleteDropdown').classList.remove('show');
+
+  document.getElementById('memberName').textContent = member.name;
+  document.getElementById('memberID').textContent = member.membershipID;
+  document.getElementById('memberEmail').textContent = member.email;
+  document.getElementById('memberBalance').textContent =
+    Number(member.balance).toLocaleString();
+
+  document.getElementById('summaryCurrentBalance').textContent =
+    Number(member.balance).toLocaleString();
+
+  document.getElementById('memberDetails').style.display = 'block';
+
+  /** 🔹 POPULATE LOANS */
+  const loanSelect = document.getElementById('loanSelect');
+  loanSelect.innerHTML = `<option value="">Select Loan</option>`;
+
+  if (member.loans && member.loans.length > 0) {
+    member.loans.forEach(loan => {
+      loanSelect.insertAdjacentHTML(
+        'beforeend',
+        `<option value="${loan.id}"
+          data-total="${loan.totalRepay}"
+          data-balance="${loan.balanceRemaining}">
+          ₦${loan.originalAmount.toLocaleString()} — ${loan.duration}
+        </option>`
+      );
+    });
+  } else {
+    loanSelect.innerHTML += `<option disabled>No active loans</option>`;
+  }
+}
+
 
         function clearMember() {
             selectedMember = null;
@@ -997,6 +1581,7 @@
             document.getElementById('paymentAmount').value = '';
             document.getElementById('summaryDetails').style.display = 'none';
             document.getElementById('summaryContent').style.display = 'block';
+            document.getElementById('autocompleteDropdown').classList.remove('show');
         }
 
         function calculateTotal() {
@@ -1018,14 +1603,21 @@
                 case 'withdrawal':
                     if (amount > selectedMember.balance) {
                         alert('Insufficient balance!');
+                        document.getElementById('paymentAmount').value = '';
                         return;
                     }
                     newBalance = selectedMember.balance - amount;
                     break;
                 case 'loan-repayment':
                     // Loan repayment doesn't affect main balance directly
+                    newBalance = selectedMember.balance;
                     break;
                 case 'direct-debit':
+                    if (amount > selectedMember.balance) {
+                        alert('Insufficient balance for debit!');
+                        document.getElementById('paymentAmount').value = '';
+                        return;
+                    }
                     newBalance = selectedMember.balance - amount;
                     break;
             }
@@ -1044,13 +1636,23 @@
             document.getElementById('chargeRow').style.display = charge > 0 ? 'flex' : 'none';
         }
 
-        function updateLoanDetails() {
-            const loanSelect = document.getElementById('loanSelect').value;
-            if (loanSelect) {
-                // Pre-fill amount based on selected loan
-                // This is a placeholder - implement actual logic
-            }
-        }
+function updateLoanDetails() {
+  const loanSelect = document.getElementById('loanSelect');
+  const selectedOption = loanSelect.options[loanSelect.selectedIndex];
+
+  if (!selectedOption || !selectedOption.value) {
+    document.getElementById('paymentAmount').value = '';
+    return;
+  }
+
+  const balanceRemaining = Number(selectedOption.dataset.balance || 0);
+
+  // Default repayment amount = remaining balance
+  document.getElementById('paymentAmount').value = balanceRemaining;
+
+  calculateTotal();
+}
+
 
         function processPayment() {
             const amount = parseFloat(document.getElementById('paymentAmount').value);
@@ -1090,7 +1692,7 @@
                     </div>
                     <div class="summary-row">
                         <span>Method:</span>
-                        <span class="fw-bold text-capitalize">${method}</span>
+                        <span class="fw-bold text-capitalize">${method.replace('-', ' ')}</span>
                     </div>
                     ${notes ? `
                     <div class="summary-row">
@@ -1105,23 +1707,86 @@
             new bootstrap.Modal(document.getElementById('confirmationModal')).show();
         }
 
-        function confirmPayment() {
-            // Close confirmation modal
-            bootstrap.Modal.getInstance(document.getElementById('confirmationModal')).hide();
-            
-            // Simulate API call
-            setTimeout(() => {
-                // Generate transaction reference
-                const txnRef = 'TXN' + Date.now();
-                document.getElementById('txnReference').textContent = txnRef;
-                
-                // Add to transaction table
-                addTransactionToTable();
-                
-                // Show success modal
-                new bootstrap.Modal(document.getElementById('successModal')).show();
-            }, 1000);
-        }
+async function confirmPayment() {
+  bootstrap.Modal
+    .getInstance(document.getElementById("confirmationModal"))
+    .hide();
+
+  const amount = parseFloat(document.getElementById("paymentAmount").value);
+  const method = document.getElementById("paymentMethod").value;
+  const notes = document.getElementById("paymentNotes").value;
+  const referenceInput = document.getElementById("referenceNumber").value;
+
+  try {
+    const res = await fetch("/admin/confirm-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        memberId: selectedMember.id,
+        paymentType: currentPaymentType,
+        amount,
+        paymentMethod: method,
+        reference: referenceInput,
+        notes,
+      }),
+    });
+
+    const data = await res.json();
+    if (!data.success) {
+      alert(data.message || "Payment failed");
+      return;
+    }
+
+    const txn = data.transaction;
+    const now = new Date(txn.date);
+
+    const types = {
+      "deposit": { label: "Deposit", class: "success" },
+      "withdrawal": { label: "Withdrawal", class: "danger" },
+      "loan-repayment": { label: "Loan Repayment", class: "warning" },
+      "direct-debit": { label: "Direct Debit", class: "info" },
+    };
+
+    const type = types[txn.type];
+
+    window.currentTransaction = {
+      id: txn.reference,
+      date: now.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      time: now.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      type: type.label,
+      typeClass: type.class,
+      status: "Completed",
+      statusClass: "success",
+      reference: txn.reference,
+      memberName: txn.member.name,
+      memberId: txn.member.membershipID,
+      memberEmail: txn.member.email,
+      memberPhone: txn.member.phone || "N/A",
+      amount: txn.amount,
+      method: txn.paymentMethod.replace("-", " ").toUpperCase(),
+      fee: txn.chargeAmount || 0,
+      balanceBefore: txn.balanceBefore,
+      balanceAfter: txn.balanceAfter,
+      processedBy: txn.processedBy,
+      notes: txn.notes || "No additional notes",
+    };
+
+    populatePrintReceipt(window.currentTransaction);
+    addTransactionToTable();
+    new bootstrap.Modal(document.getElementById("successModal")).show();
+
+  } catch (err) {
+    console.error("Payment error:", err);
+    alert("Something went wrong while processing payment");
+  }
+}
 
         function addTransactionToTable() {
             const tbody = document.getElementById('transactionTableBody');
@@ -1133,26 +1798,26 @@
                 'deposit': { label: 'Deposit', class: 'success', sign: '+' },
                 'withdrawal': { label: 'Withdrawal', class: 'danger', sign: '-' },
                 'loan-repayment': { label: 'Loan Repayment', class: 'warning', sign: '' },
-                'direct-debit': { label: 'Direct Debit', class: 'purple', sign: '-' }
+                'direct-debit': { label: 'Direct Debit', class: 'info', sign: '-' }
             };
             
             const type = types[currentPaymentType];
             
             const row = `
                 <tr>
-                    <td>
+                    <td data-label="Date/Time">
                         <small class="fw-semibold">${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</small><br>
                         <small class="text-muted">${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</small>
                     </td>
-                    <td>
+                    <td data-label="Member">
                         <div class="fw-semibold">${selectedMember.name}</div>
                         <small class="text-muted">${selectedMember.id}</small>
                     </td>
-                    <td><span class="badge bg-${type.class}-subtle text-${type.class}">${type.label}</span></td>
-                    <td class="fw-bold text-${type.class}">${type.sign}₦${amount.toLocaleString()}</td>
-                    <td><small>${method}</small></td>
-                    <td><span class="badge bg-success">Completed</span></td>
-                    <td>
+                    <td data-label="Type"><span class="badge bg-${type.class}">${type.label}</span></td>
+                    <td data-label="Amount" class="fw-bold text-${type.class}">${type.sign}₦${amount.toLocaleString()}</td>
+                    <td data-label="Method"><small>${method.replace('-', ' ')}</small></td>
+                    <td data-label="Status"><span class="badge bg-success">Completed</span></td>
+                    <td data-label="Actions">
                         <button class="btn btn-sm btn-outline-primary" onclick="viewTransactionDetails()">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -1165,26 +1830,149 @@
 
         function resetForm() {
             clearMember();
-            document.getElementById('paymentForm').style.display = 'none';
-            document.querySelectorAll('.payment-type-card').forEach(card => {
-                card.classList.remove('active');
-            });
-            currentPaymentType = '';
+            document.getElementById('paymentNotes').value = '';
+            document.getElementById('referenceNumber').value = '';
+            document.getElementById('paymentAmount').value = '';
+            document.getElementById('loanSelect').value = '';
+            document.getElementById('chargeSelect').value = '';
         }
 
         function printReceipt() {
-            // Implement print functionality
-            alert('Receipt printing functionality would be implemented here');
+            // Use the current transaction data
+            if (window.currentTransaction) {
+                // Show the receipt div temporarily
+                const receiptDiv = document.getElementById('printReceipt');
+                receiptDiv.style.display = 'block';
+                
+                // Wait a moment for rendering, then print
+                setTimeout(() => {
+                    window.print();
+                    // Hide it again after printing
+                    receiptDiv.style.display = 'none';
+                }, 100);
+            } else {
+                alert('No transaction data available for printing');
+            }
         }
 
-        function viewTransactionDetails() {
-            alert('Transaction details would be displayed here');
+        function viewTransactionDetails(transactionData) {
+            // Sample transaction data - replace with actual data from API
+            const transaction = transactionData || {
+                id: 'TXN1704283800000',
+                date: 'Jan 2, 2026',
+                time: '02:30 PM',
+                type: 'Deposit',
+                typeClass: 'success',
+                status: 'Completed',
+                statusClass: 'success',
+                reference: 'REF-12345-ABCD',
+                memberName: 'John Doe',
+                memberId: 'CDS001',
+                memberEmail: 'john.doe@example.com',
+                memberPhone: '+234 801 234 5678',
+                amount: 50000,
+                method: 'Bank Transfer',
+                fee: 0,
+                balanceBefore: 100000,
+                balanceAfter: 150000,
+                processedBy: 'Admin User (ADMIN001)',
+                notes: 'Monthly savings deposit for January 2026'
+            };
+            
+            // Populate modal with transaction data
+            document.getElementById('detailTxnId').textContent = transaction.id;
+            document.getElementById('detailDateTime').textContent = `${transaction.date} at ${transaction.time}`;
+            document.getElementById('detailType').textContent = transaction.type;
+            document.getElementById('detailType').className = `badge bg-${transaction.typeClass}`;
+            document.getElementById('detailStatus').innerHTML = `<i class="fas fa-check-circle me-1"></i>${transaction.status}`;
+            document.getElementById('detailStatus').className = `badge bg-${transaction.statusClass}`;
+            document.getElementById('detailReference').textContent = transaction.reference;
+            
+            document.getElementById('detailMemberName').textContent = transaction.memberName;
+            document.getElementById('detailMemberId').textContent = transaction.memberId;
+            document.getElementById('detailMemberEmail').textContent = transaction.memberEmail;
+            document.getElementById('detailMemberPhone').textContent = transaction.memberPhone;
+            
+            document.getElementById('detailAmount').textContent = `₦${transaction.amount.toLocaleString()}`;
+            document.getElementById('detailAmount').style.color = transaction.typeClass === 'danger' ? 'var(--danger)' : 'var(--success)';
+            document.getElementById('detailMethod').textContent = transaction.method;
+            document.getElementById('detailFee').textContent = `₦${transaction.fee.toLocaleString()}`;
+            document.getElementById('detailBalanceBefore').textContent = `₦${transaction.balanceBefore.toLocaleString()}`;
+            document.getElementById('detailBalanceAfter').textContent = `₦${transaction.balanceAfter.toLocaleString()}`;
+            
+            document.getElementById('detailProcessedBy').textContent = transaction.processedBy;
+            document.getElementById('detailNotes').textContent = transaction.notes || 'No additional notes';
+            
+            // Also populate the print receipt
+            populatePrintReceipt(transaction);
+            
+            // Show modal
+            new bootstrap.Modal(document.getElementById('transactionDetailsModal')).show();
+        }
+        
+        function populatePrintReceipt(transaction) {
+            document.getElementById('printTxnId').textContent = transaction.id;
+            document.getElementById('printDateTime').textContent = `${transaction.date} at ${transaction.time}`;
+            document.getElementById('printType').textContent = transaction.type;
+            document.getElementById('printStatus').textContent = transaction.status;
+            document.getElementById('printReference').textContent = transaction.reference;
+            
+            document.getElementById('printMemberName').textContent = transaction.memberName;
+            document.getElementById('printMemberId').textContent = transaction.memberId;
+            document.getElementById('printMemberEmail').textContent = transaction.memberEmail;
+            document.getElementById('printMemberPhone').textContent = transaction.memberPhone;
+            
+            document.getElementById('printAmount').textContent = `₦${transaction.amount.toLocaleString()}.00`;
+            document.getElementById('printMethod').textContent = transaction.method;
+            document.getElementById('printFee').textContent = `₦${transaction.fee.toLocaleString()}.00`;
+            document.getElementById('printBalanceBefore').textContent = `₦${transaction.balanceBefore.toLocaleString()}.00`;
+            document.getElementById('printBalanceAfter').textContent = `₦${transaction.balanceAfter.toLocaleString()}.00`;
+            
+            document.getElementById('printProcessedBy').textContent = transaction.processedBy;
+            document.getElementById('printNotes').textContent = transaction.notes || 'No additional notes';
+            
+            // Set generated date
+            const now = new Date();
+            document.getElementById('printGeneratedDate').textContent = now.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        function printTransactionReceipt() {
+            // Show the receipt div temporarily
+            const receiptDiv = document.getElementById('printReceipt');
+            receiptDiv.style.display = 'block';
+            
+            // Wait a moment for rendering, then print
+            setTimeout(() => {
+                window.print();
+                // Hide it again after printing
+                receiptDiv.style.display = 'none';
+            }, 100);
+        }
+        
+        function downloadTransactionPDF() {
+            alert('PDF download functionality: In a production environment, this would generate a PDF using a library like jsPDF or html2pdf.js');
+            // Example implementation:
+            // const element = document.getElementById('printReceipt');
+            // html2pdf().from(element).save('receipt-' + Date.now() + '.pdf');
         }
 
-        // Close sidebar on mobile when clicking outside
+        // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
+            const searchWrapper = document.querySelector('.autocomplete-wrapper');
+            const dropdown = document.getElementById('autocompleteDropdown');
             const sidebar = document.getElementById('sidebar');
             const hamburger = event.target.closest('.fa-bars');
+            
+            if (searchWrapper && !searchWrapper.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
             
             if (window.innerWidth <= 992 && 
                 !sidebar.contains(event.target) && 
@@ -1194,33 +1982,5 @@
             }
         });
     </script>
-
-    <script>
-async function searchMember() {
-  const q = document.getElementById("memberSearch").value.trim();
-  if (!q) return alert("Enter search value");
-
-  const res = await fetch(`/admin/search-member?q=${q}`);
-  const members = await res.json();
-
-  if (!members.length) {
-    alert("No member found");
-    return;
-  }
-
-  // pick first result (or show dropdown later)
-  const m = members[0];
-  selectedMember = m;
-
-  document.getElementById("memberName").textContent = m.name;
-  document.getElementById("memberID").textContent = m.membershipID;
-  document.getElementById("memberEmail").textContent = m.email;
-  document.getElementById("memberBalance").textContent = m.balance.toLocaleString();
-  document.getElementById("summaryCurrentBalance").textContent = m.balance.toLocaleString();
-
-  document.getElementById("memberDetails").style.display = "block";
-}
-</script>
-
 </body>
-</html>
+</html
