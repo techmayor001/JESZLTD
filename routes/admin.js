@@ -1287,7 +1287,8 @@ router.get("/admin/manage-loan", ensureAdmin, async (req, res) => {
 
 router.get("/admin/external-loans", ensureAdmin, async (req, res) => {
   try {
-    const loans = await Loan.find()
+    // Fetch only external loans
+    const loans = await Loan.find({ external: { $exists: true } })
       .populate({
         path: "user",
         select: "firstName lastName membershipID email phone account",
@@ -1317,10 +1318,21 @@ router.get("/admin/external-loans", ensureAdmin, async (req, res) => {
       "firstName lastName membershipID email phone"
     );
 
+    // Fetch last 10 payments for these loans
+    const payments = await Payment.find({ loan: { $in: loans.map(l => l._id) } })
+      .populate("loan") // get the loan document
+      .populate("loan.user")
+      .populate("loan.external")
+      .populate("paidBy") // admin/user who recorded payment
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    // Render template and pass payments
     res.render("dashboard/admin/external-loans", {
       admin: req.user,
       loans,
-      users
+      users,
+      payments // <-- pass payments here
     });
 
   } catch (error) {
@@ -1328,6 +1340,7 @@ router.get("/admin/external-loans", ensureAdmin, async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 
 router.post("/api/loans/approve", ensureAdmin, async (req, res) => {

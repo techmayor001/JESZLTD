@@ -344,26 +344,32 @@
             </div>
         </div>
         <div class="sidebar-menu">
-            <a href="/admin-dashboard">
-                <i class="fas fa-home"></i> Dashboard
-            </a>
-            <a href="/admin/manage/members">
-                <i class="fas fa-users"></i> Members
+     <a href="/admin-dashboard">
+                <i class="fas fa-users"></i>  Members
             </a>
             <a href="/admin/manage/memberType">
                 <i class="fas fa-id-card"></i> Membership Types
             </a>
-            <a href="#">
-                <i class="fas fa-exchange-alt"></i> Transactions
+            <a href="/admin/manage-payment">
+                <i class="fas fa-credit-card"></i> Payments
+            </a>
+            <a href="/admin/manage-deposits">
+                <i class="fas fa-coins"></i> Deposit Management
+            </a>
+            <a href="/admin/manage-withdrawals">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="/admin/manage-extra-charges">
+                <i class="fas fa-hand-holding-usd"></i> Extra Charges
             </a>
             <a href="/admin/manage-loan">
-                <i class="fas fa-hand-holding-usd"></i> Member Loans
-            </a>
-            <a href="/admin/external-loans" class="active">
-                <i class="fas fa-building"></i> External Loans
+                <i class="fas fa-hand-holding-usd"></i> Loan Management
             </a>
             <a href="/admin/loan/settings">
                 <i class="fas fa-cogs"></i> Loan Settings
+            </a>
+             <a href="/admin/external-loans" class="active">
+                <i class="fas fa-building"></i> External Loans
             </a>
             <a href="#">
                 <i class="fas fa-chart-pie"></i> ROI Distribution
@@ -392,13 +398,6 @@
             <h5 class="mb-0 fw-bold" style="color: var(--primary)">External Loan Management</h5>
             <small class="text-muted">Issue loans and track interest payments</small>
         </div>
-        
-        <div class="d-flex align-items-center gap-3">
-            <div class="position-relative">
-                <i class="fas fa-bell" style="color: var(--primary); font-size: 1.25rem; cursor: pointer;"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">3</span>
-            </div>
-        </div>
     </div>
 
     <div class="main-content">
@@ -422,48 +421,87 @@
             </div>
         </div>
 
-        <div class="row g-3 mb-4">
-            <div class="col-lg-3 col-md-6 col-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
-                        <i class="fas fa-hand-holding-usd"></i>
-                    </div>
-                    <p class="text-muted mb-1 fw-semibold small">Total Loans Issued</p>
-                    <h3 class="mb-1 fw-bold">₦8,500,000</h3>
-                    <small class="text-success fw-semibold"><i class="fas fa-arrow-up me-1"></i>12 active loans</small>
-                </div>
+      <%
+    // Filter external loans
+    const externalLoans = loans.filter(l => l.external);
+
+    // Total loans issued
+    const totalLoansIssued = externalLoans.reduce((sum, l) => sum + l.amount, 0);
+
+    // Expected interest
+    const expectedInterest = externalLoans.reduce((sum, l) => sum + (l.amount * (l.interestRate/100)), 0);
+
+    // Interest collected (assuming l.paidInterest exists, else 0)
+    const interestCollected = externalLoans.reduce((sum, l) => sum + (l.paidInterest || 0), 0);
+
+    // Overdue payments (balance > 0 && dueDate < today)
+    const today = new Date();
+    const overduePayments = externalLoans.reduce((sum, l) => {
+        const balance = (l.totalRepay - (l.paidAmount || 0));
+        if (balance > 0 && new Date(l.dueDate) < today) return sum + balance;
+        return sum;
+    }, 0);
+
+    // Active loans count
+    const activeLoansCount = externalLoans.filter(l => l.status === "approved").length;
+
+    // Average interest rate
+    const avgRate = externalLoans.length ? 
+        (externalLoans.reduce((sum, l) => sum + l.interestRate, 0) / externalLoans.length).toFixed(2) : 0;
+
+    // Percent collected
+    const percentCollected = expectedInterest ? ((interestCollected / expectedInterest) * 100).toFixed(0) : 0;
+
+    // Overdue loans count
+    const overdueCount = externalLoans.filter(l => {
+        const balance = l.totalRepay - (l.paidAmount || 0);
+        return balance > 0 && new Date(l.dueDate) < today;
+    }).length;
+%>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-3 col-md-6 col-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                <i class="fas fa-hand-holding-usd"></i>
             </div>
-            <div class="col-lg-3 col-md-6 col-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
-                    <p class="text-muted mb-1 fw-semibold small">Expected Interest</p>
-                    <h3 class="mb-1 fw-bold">₦1,275,000</h3>
-                    <small class="text-success fw-semibold"><i class="fas fa-percentage me-1"></i>15% avg rate</small>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                    <p class="text-muted mb-1 fw-semibold small">Interest Collected</p>
-                    <h3 class="mb-1 fw-bold">₦850,000</h3>
-                    <small class="text-warning fw-semibold"><i class="fas fa-clock me-1"></i>67% collected</small>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <p class="text-muted mb-1 fw-semibold small">Overdue Payments</p>
-                    <h3 class="mb-1 fw-bold">₦125,000</h3>
-                    <small class="text-danger fw-semibold"><i class="fas fa-alert me-1"></i>3 overdue</small>
-                </div>
-            </div>
+            <p class="text-muted mb-1 fw-semibold small">Total Loans Issued</p>
+            <h3 class="mb-1 fw-bold">₦<%= totalLoansIssued.toLocaleString() %></h3>
+            <small class="text-success fw-semibold"><i class="fas fa-arrow-up me-1"></i><%= activeLoansCount %> active loans</small>
         </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <p class="text-muted mb-1 fw-semibold small">Expected Interest</p>
+            <h3 class="mb-1 fw-bold">₦<%= expectedInterest.toLocaleString() %></h3>
+            <small class="text-success fw-semibold"><i class="fas fa-percentage me-1"></i><%= avgRate %>% avg rate</small>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                <i class="fas fa-coins"></i>
+            </div>
+            <p class="text-muted mb-1 fw-semibold small">Interest Collected</p>
+            <h3 class="mb-1 fw-bold">₦<%= interestCollected.toLocaleString() %></h3>
+            <small class="text-warning fw-semibold"><i class="fas fa-clock me-1"></i><%= percentCollected %>% collected</small>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-6">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <p class="text-muted mb-1 fw-semibold small">Overdue Payments</p>
+            <h3 class="mb-1 fw-bold">₦<%= overduePayments.toLocaleString() %></h3>
+            <small class="text-danger fw-semibold"><i class="fas fa-alert me-1"></i><%= overdueCount %> overdue</small>
+        </div>
+    </div>
+</div>
+
 
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -482,151 +520,127 @@
                     </button>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Loan ID</th>
-                                <th>Borrower</th>
-                                <th>Principal</th>
-                                <th>Interest Rate</th>
-                                <th>Total Due</th>
-                                <th>Paid</th>
-                                <th>Balance</th>
-                                <th>Due Date</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="loansTableBody">
-                            <tr>
-                                <td class="fw-semibold">EXT-001</td>
-                                <td>
-                                    <div class="fw-semibold">ABC Company Ltd</div>
-                                    <small class="text-muted">+234 803 123 4567</small>
-                                </td>
-                                <td class="fw-bold">₦1,000,000</td>
-                                <td>15% p.a.</td>
-                                <td class="fw-bold text-primary">₦1,150,000</td>
-                                <td class="text-success">₦500,000</td>
-                                <td class="text-warning fw-bold">₦650,000</td>
-                                <td>Dec 31, 2025</td>
-                                <td><span class="badge bg-success">Active</span></td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-primary" onclick="openRecordPaymentModal('EXT-001', 'ABC Company Ltd', 1150000, 650000)">
-                                            <i class="fas fa-money-bill"></i>
-                                        </button>
-                                        <button class="btn btn-info" onclick="openLoanDetailsModal('EXT-001')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="fw-semibold">EXT-002</td>
-                                <td>
-                                    <div class="fw-semibold">John Okeke</div>
-                                    <small class="text-muted">+234 805 987 6543</small>
-                                </td>
-                                <td class="fw-bold">₦500,000</td>
-                                <td>12% p.a.</td>
-                                <td class="fw-bold text-primary">₦560,000</td>
-                                <td class="text-success">₦200,000</td>
-                                <td class="text-warning fw-bold">₦360,000</td>
-                                <td>Jan 15, 2026</td>
-                                <td><span class="badge bg-success">Active</span></td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-primary" onclick="openRecordPaymentModal('EXT-002', 'John Okeke', 560000, 360000)">
-                                            <i class="fas fa-money-bill"></i>
-                                        </button>
-                                        <button class="btn btn-info" onclick="openLoanDetailsModal('EXT-002')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="fw-semibold">EXT-003</td>
-                                <td>
-                                    <div class="fw-semibold">XYZ Ventures</div>
-                                    <small class="text-muted">+234 807 456 1234</small>
-                                </td>
-                                <td class="fw-bold">₦2,000,000</td>
-                                <td>18% p.a.</td>
-                                <td class="fw-bold text-primary">₦2,360,000</td>
-                                <td class="text-success">₦0</td>
-                                <td class="text-danger fw-bold">₦2,360,000</td>
-                                <td>Nov 30, 2025</td>
-                                <td><span class="badge bg-danger">Overdue</span></td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-primary" onclick="openRecordPaymentModal('EXT-003', 'XYZ Ventures', 2360000, 2360000)">
-                                            <i class="fas fa-money-bill"></i>
-                                        </button>
-                                        <button class="btn btn-info" onclick="openLoanDetailsModal('EXT-003')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+           <div class="card-body p-0">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Loan ID</th>
+                    <th>Borrower</th>
+                    <th>Principal</th>
+                    <th>Interest Rate</th>
+                    <th>Total Due</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="loansTableBody">
+                <% loans.forEach((loan, index) => { %>
+                    <% if (loan.external) { %>
+                        <% 
+                            const borrower = loan.external;
+                            const paidAmount = loan.paidAmount || 0; // assuming you track payments
+                            const balance = loan.totalRepay - paidAmount;
+                            const loanIdDisplay = "EXT-" + (index + 1).toString().padStart(3, '0');
+                            const statusBadge = loan.status === "approved" ? "bg-success" :
+                                                loan.status === "pending" ? "bg-warning" :
+                                                loan.status === "rejected" ? "bg-danger" :
+                                                "bg-secondary";
+                        %>
+                        <tr>
+                            <td class="fw-semibold"><%= loanIdDisplay %></td>
+                            <td>
+                                <div class="fw-semibold"><%= borrower.borrowerName %></div>
+                                <small class="text-muted"><%= borrower.phone || 'N/A' %></small>
+                            </td>
+                            <td class="fw-bold">₦<%= loan.amount.toLocaleString() %></td>
+                            <td><%= loan.interestRate %>% p.a.</td>
+                            <td class="fw-bold text-primary">₦<%= loan.totalRepay.toLocaleString() %></td>
+                            <td class="text-success">₦<%= paidAmount.toLocaleString() %></td>
+                            <td class="<%= balance <= 0 ? 'text-success fw-bold' : 'text-warning fw-bold' %>">
+                                ₦<%= balance.toLocaleString() %>
+                            </td>
+                            <td><%= new Date(loan.dueDate).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) %></td>
+                            <td><span class="badge <%= statusBadge %>"><%= loan.status.charAt(0).toUpperCase() + loan.status.slice(1) %></span></td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-primary" 
+                                        onclick="openRecordPaymentModal('<%= loanIdDisplay %>', '<%= borrower.borrowerName %>', <%= loan.totalRepay %>, <%= balance %>)">
+                                        <i class="fas fa-money-bill"></i>
+                                    </button>
+                                    <button class="btn btn-info" onclick="openLoanDetailsModal('<%= loan._id %>')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } %>
+                <% }) %>
+                <% if (!loans.some(l => l.external)) { %>
+                    <tr>
+                        <td colspan="10" class="text-center text-muted">No external loans available</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0 fw-bold" style="color: var(--primary);">
-                    <i class="fas fa-history me-2"></i>Recent Interest Payments
-                </h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
+       <div class="card">
+    <div class="card-header">
+        <h5 class="mb-0 fw-bold" style="color: var(--primary);">
+            <i class="fas fa-history me-2"></i>Recent Interest Payments
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Loan ID</th>
+                        <th>Borrower</th>
+                        <th>Amount Paid</th>
+                        <th>Payment Type</th>
+                        <th>Recorded By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (payments && payments.length > 0) { %>
+                        <% payments.forEach(payment => { %>
                             <tr>
-                                <th>Date</th>
-                                <th>Loan ID</th>
-                                <th>Borrower</th>
-                                <th>Amount Paid</th>
-                                <th>Payment Type</th>
-                                <th>Recorded By</th>
+                                <td><%= new Date(payment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+                                <td class="fw-semibold"><%= payment.loan.external ? 'EXT-' + payment.loan._id.toString().slice(-3).toUpperCase() : payment.loan.user.membershipID %></td>
+                                <td>
+                                    <%= payment.loan.external 
+                                        ? payment.loan.external.borrowerName 
+                                        : payment.loan.user.firstName + ' ' + payment.loan.user.lastName %>
+                                </td>
+                                <td class="fw-bold text-success">₦<%= payment.amount.toLocaleString() %></td>
+                                <td>
+                                    <span class="badge <%= payment.type === 'interest' ? 'bg-info' : 'bg-success' %>">
+                                        <%= payment.type.charAt(0).toUpperCase() + payment.type.slice(1) %>
+                                    </span>
+                                </td>
+                                <td><%= payment.paidBy ? (payment.paidBy.firstName + ' ' + payment.paidBy.lastName) : 'Admin' %></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Dec 20, 2025</td>
-                                <td class="fw-semibold">EXT-001</td>
-                                <td>ABC Company Ltd</td>
-                                <td class="fw-bold text-success">₦250,000</td>
-                                <td><span class="badge bg-info">Interest</span></td>
-                                <td>Admin User</td>
-                            </tr>
-                            <tr>
-                                <td>Dec 18, 2025</td>
-                                <td class="fw-semibold">EXT-002</td>
-                                <td>John Okeke</td>
-                                <td class="fw-bold text-success">₦100,000</td>
-                                <td><span class="badge bg-success">Principal</span></td>
-                                <td>Admin User</td>
-                            </tr>
-                            <tr>
-                                <td>Dec 15, 2025</td>
-                                <td class="fw-semibold">EXT-001</td>
-                                <td>ABC Company Ltd</td>
-                                <td class="fw-bold text-success">₦250,000</td>
-                                <td><span class="badge bg-success">Principal</span></td>
-                                <td>Admin User</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No recent payments</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
         </div>
+    </div>
+</div>
+
     </div>
 
     <div class="powered-by">
