@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extra Charges Management | Club De Stars Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+        }
+        
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+
+        /* Top Navbar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            transition: all 0.3s;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 70px;
+            padding: 1.5rem;
+            min-height: calc(100vh - 70px);
+            transition: all 0.3s;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+        }
+
+        /* Stat Cards */
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-card p {
+            color: #64748b;
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+        }
+
+        /* Table Card */
+        .table-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+        
+        .table thead th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .badge {
+            padding: 0.5rem 0.875rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.3);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 10px;
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 0.65rem 1rem;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.1);
+        }
+
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+        }
+
+        .modal-header {
+            border-radius: 20px 20px 0 0;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        /* Withdrawal History Card */
+        .withdrawal-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            border-left: 4px solid var(--primary);
+        }
+
+        .withdrawal-card:hover {
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.15);
+        }
+
+        /* Alert Boxes */
+        .alert-info-custom {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stat-card h3 {
+                font-size: 1.5rem;
+            }
+
+            .table {
+                font-size: 0.85rem;
+            }
+
+            .action-btn {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 0.75rem;
+            }
+
+            .page-header {
+                padding: 1.25rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4rem;
+            }
+
+            .table thead th,
+            .table tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0,0,0,0.4);
+            z-index: 1035;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar-overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">C</div>
+                <div>
+                    <h5 class="mb-0 fw-bold" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="/admin-dashboard">
+                <i class="fas fa-users"></i> Members
+            </a>
+            <a href="/admin/manage/memberType">
+                <i class="fas fa-id-card"></i> Membership Types
+            </a>
+            <a href="/admin/manage-payment">
+                <i class="fas fa-credit-card"></i> Payments
+            </a>
+            <a href="/admin/manage-deposits">
+                <i class="fas fa-coins"></i> Deposit Management
+            </a>
+            <a href="/admin/manage-withdrawals">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="/admin/manage-extra-charges" class="active">
+                <i class="fas fa-hand-holding-usd"></i> Extra Charges
+            </a>
+                <a href="/admin/manage-loan">
+                <i class="fas fa-hand-holding-usd"></i> Loan Management
+            </a>
+            <a href="/admin/loan/settings">
+                <i class="fas fa-cogs"></i> Loan Settings
+            </a>
+            <a href="/admin/external-loans">
+                <i class="fas fa-building"></i> External Loans
+            </a>
+            <a href="#">
+                <i class="fas fa-chart-pie"></i> ROI Distribution
+            </a>
+            <a href="#">
+                <i class="fas fa-file-alt"></i> Reports
+            </a>
+            <a href="/admin/settings">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="#" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3"
+           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+           onclick="toggleSidebar()"></i>
+        
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Extra Charges Management</h5>
+            <small class="text-muted">Track and manage all extra charges and admin withdrawals</small>
+        </div>
+    </div>
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h3 class="mb-1 fw-bold" style="color: var(--primary);">
+                        <i class="fas fa-hand-holding-usd me-2"></i>Extra Charges Management
+                    </h3>
+                    <p class="text-muted mb-0">Monitor all extra charges and manage admin withdrawals</p>
+                </div>
+            </div>
+        </div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+
+    <!-- Total Collected -->
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon"
+                style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                <i class="fas fa-coins"></i>
+            </div>
+            <p class="text-muted mb-1 fw-semibold">Total Collected</p>
+            <h3 class="mb-0 fw-bold text-success" id="totalCollected">₦0</h3>
+        </div>
+    </div>
+
+    <!-- Pending Charges -->
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon"
+                style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            <p class="text-muted mb-1 fw-semibold">Pending Charges</p>
+            <h3 class="mb-0 fw-bold text-warning" id="pendingAmount">₦0</h3>
+        </div>
+    </div>
+
+    <!-- Total Charges Count -->
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon"
+                style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                <i class="fas fa-list-ol"></i>
+            </div>
+            <p class="text-muted mb-1 fw-semibold">Total Charges</p>
+            <h3 class="mb-0 fw-bold text-primary" id="totalChargeCount">0</h3>
+        </div>
+    </div>
+
+    <!-- Last Charge Date -->
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+            <div class="stat-icon"
+                style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white;">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <p class="text-muted mb-1 fw-semibold">Last Charge</p>
+            <h3 class="mb-0 fw-bold text-dark" id="lastChargeDate">—</h3>
+        </div>
+    </div>
+
+</div>
+
+
+        <!-- Filters -->
+        <div class="filter-section">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Search</label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by member or reason...">
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="paid">Paid</option>
+                        <option value="waived">Waived</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label">Charge Type</label>
+                    <select class="form-select" id="typeFilter">
+                        <option value="">All Types</option>
+                        <option value="registration">Registration</option>
+                        <option value="loan-penalty">Loan Penalty</option>
+                        <option value="forceful-withdrawal">Forceful Withdrawal</option>
+                        <option value="late-payment">Late Payment</option>
+                        <option value="service">Service</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label">Date Range</label>
+                    <select class="form-select" id="dateFilter">
+                        <option value="">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <button class="btn btn-outline-primary w-100" onclick="resetFilters()">
+                        <i class="fas fa-redo me-2"></i>Reset Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charges Table -->
+    <div class="table-card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Charge Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="chargesTableBody">
+                <!-- Table rows are dynamically rendered by JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <!-- Pagination info -->
+        <div class="text-muted" id="paginationInfo">
+            <!-- e.g., "Showing 1-10 of 25 charges" (populated by JS) -->
+        </div>
+
+        <!-- Pagination controls -->
+        <nav>
+            <ul class="pagination mb-0" id="paginationControls">
+                <!-- Pagination buttons dynamically rendered by JS -->
+            </ul>
+        </nav>
+    </div>
+</div>
+
+    </div>
+
+    <!-- View Charge Details Modal -->
+    <div class="modal fade" id="viewChargeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-eye me-2"></i>Charge Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="text-muted small">Member</label>
+                            <div class="fw-bold" id="viewMember">-</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-muted small">Charge Type</label>
+                            <div class="fw-bold" id="viewChargeType">-</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-muted small">Amount</label>
+                            <div class="fw-bold" id="viewAmount">-</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-muted small">Status</label>
+                            <div id="viewStatus">-</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-muted small">Applied Date</label>
+                            <div class="fw-bold" id="viewDate">-</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="text-muted small">Reason</label>
+                            <div class="fw-bold" id="viewReason">-</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ============================
+   DATA FROM BACKEND
+============================ */
+let charges = <%- JSON.stringify(charges || []) %>;
+let currentChargeId = null;
+
+/* ============================
+   PAGINATION STATE
+============================ */
+let currentPage = 1;
+const pageSize = 10;
+let currentData = [...charges];
+
+/* ============================
+   INIT
+============================ */
+document.addEventListener('DOMContentLoaded', () => {
+    updateStats();
+    renderCharges(currentData, currentPage);
+});
+
+/* ============================
+   STATS (EXTRA CHARGES ONLY)
+============================ */
+function updateStats() {
+    const totalCollected = charges
+        .filter(c => c.status === 'paid')
+        .reduce((sum, c) => sum + c.amount, 0);
+
+    const pendingAmount = charges
+        .filter(c => c.status === 'pending')
+        .reduce((sum, c) => sum + c.amount, 0);
+
+    const totalChargeCount = charges.length;
+
+    const lastCharge = charges
+        .slice()
+        .sort((a, b) => new Date(b.appliedAt) - new Date(a.appliedAt))[0];
+
+    document.getElementById('totalCollected').textContent =
+        `₦${totalCollected.toLocaleString()}`;
+
+    document.getElementById('pendingAmount').textContent =
+        `₦${pendingAmount.toLocaleString()}`;
+
+    document.getElementById('totalChargeCount').textContent =
+        totalChargeCount;
+
+    document.getElementById('lastChargeDate').textContent =
+        lastCharge
+            ? new Date(lastCharge.appliedAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+              })
+            : '—';
+}
+
+/* ============================
+   RENDER TABLE + PAGINATION
+============================ */
+function renderCharges(data = currentData, page = 1) {
+    currentData = data;
+    currentPage = page;
+
+    const tbody = document.getElementById('chargesTableBody');
+    tbody.innerHTML = '';
+
+    const totalItems = data.length;
+    const totalPages = Math.ceil(totalItems / pageSize);
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const pageData = data.slice(start, end);
+
+    if (pageData.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-5 text-muted">
+                    No charges found
+                </td>
+            </tr>`;
+        updatePagination(0, 0, 0);
+        return;
+    }
+
+    pageData.forEach(charge => {
+        // Status badge
+        const statusBadge = {
+            paid: '<span class="badge bg-success">Paid</span>',
+            pending: '<span class="badge bg-warning">Pending</span>',
+        }[charge.status] || '<span class="badge bg-secondary">Unknown</span>';
+
+        // Charge type badge
+        const chargeTypeBadge = {
+            registration: '<span class="badge bg-primary">Registration</span>',
+            'loan-penalty': '<span class="badge bg-danger">Loan Penalty</span>',
+            'forceful-withdrawal': '<span class="badge bg-warning">Forceful Withdrawal</span>',
+            'late-payment': '<span class="badge bg-orange">Late Payment</span>',
+            service: '<span class="badge bg-purple">Service</span>',
+            other: '<span class="badge bg-secondary">Other</span>',
+        }[charge.chargeType?.trim()] || '<span class="badge bg-secondary">Unknown</span>';
+
+        tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+                <td>
+                    <strong>${charge.memberName}</strong><br>
+                    <small class="text-muted">${charge.memberId}</small>
+                </td>
+                <td>${chargeTypeBadge}</td>
+                <td><strong>₦${charge.amount.toLocaleString()}</strong></td>
+                <td>${statusBadge}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick="viewCharge('${charge.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </td>
+            </tr>
+        `);
+    });
+
+    updatePagination(
+        start + 1,
+        Math.min(end, totalItems),
+        totalItems,
+        totalPages
+    );
+}
+
+/* ============================
+   PAGINATION UI
+============================ */
+function updatePagination(from, to, total, totalPages = 1) {
+    const info = document.getElementById('paginationInfo');
+    const controls = document.getElementById('paginationControls');
+
+    info.textContent = total
+        ? `Showing ${from}-${to} of ${total} charges`
+        : 'Showing 0 charges';
+
+    controls.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    // Previous
+    controls.insertAdjacentHTML('beforeend', `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="goToPage(${currentPage - 1})">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+    `);
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        controls.insertAdjacentHTML('beforeend', `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="goToPage(${i})">${i}</a>
+            </li>
+        `);
+    }
+
+    // Next
+    controls.insertAdjacentHTML('beforeend', `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="goToPage(${currentPage + 1})">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+    `);
+}
+
+function goToPage(page) {
+    const totalPages = Math.ceil(currentData.length / pageSize);
+    if (page < 1 || page > totalPages) return;
+    renderCharges(currentData, page);
+}
+
+/* ============================
+   VIEW MODAL
+============================ */
+function viewCharge(id) {
+    const charge = charges.find(c => c.id === id);
+    if (!charge) return;
+
+    document.getElementById('viewMember').textContent =
+        `${charge.memberName} (${charge.memberId})`;
+
+    document.getElementById('viewChargeType').textContent =
+        charge.chargeType?.replace('-', ' ').toUpperCase() || 'UNKNOWN';
+
+    document.getElementById('viewAmount').textContent =
+        `₦${charge.amount.toLocaleString()}`;
+
+    document.getElementById('viewStatus').innerHTML = {
+        paid: '<span class="badge bg-success">Paid</span>',
+        pending: '<span class="badge bg-warning">Pending</span>',
+    }[charge.status] || '<span class="badge bg-secondary">Unknown</span>';
+
+    document.getElementById('viewDate').textContent = charge.appliedAt;
+    document.getElementById('viewReason').textContent = charge.reason || '—';
+
+    openModal('viewChargeModal');
+}
+
+/* ============================
+   FILTERS
+============================ */
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('statusFilter').addEventListener('change', applyFilters);
+document.getElementById('typeFilter').addEventListener('change', applyFilters);
+document.getElementById('dateFilter').addEventListener('change', applyFilters);
+
+function applyFilters() {
+    let filtered = [...charges];
+
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const type = document.getElementById('typeFilter').value;
+    const dateRange = document.getElementById('dateFilter').value;
+
+    if (search) {
+        filtered = filtered.filter(c =>
+            c.memberName.toLowerCase().includes(search) ||
+            c.memberId.toLowerCase().includes(search) ||
+            (c.reason || '').toLowerCase().includes(search)
+        );
+    }
+
+    if (status) filtered = filtered.filter(c => c.status === status);
+    if (type) filtered = filtered.filter(c => c.chargeType === type);
+
+    if (dateRange) {
+        const now = new Date();
+        filtered = filtered.filter(c => {
+            const d = new Date(c.appliedAt);
+            if (dateRange === 'today') return d.toDateString() === now.toDateString();
+            if (dateRange === 'week') return d >= new Date(now - 7 * 86400000);
+            if (dateRange === 'month') return d.getMonth() === now.getMonth();
+            if (dateRange === 'year') return d.getFullYear() === now.getFullYear();
+            return true;
+        });
+    }
+
+    currentPage = 1;
+    renderCharges(filtered, 1);
+}
+
+/* ============================
+   MODAL HELPER
+============================ */
+function openModal(id) {
+    new bootstrap.Modal(document.getElementById(id)).show();
+}
+</script>
+
+
+
+</body>
+</html>

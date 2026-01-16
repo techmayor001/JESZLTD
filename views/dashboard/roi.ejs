@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club De Stars - Member Dashboard | Powered by JESZ LIMITED</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+        }
+        
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 75px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 75px;
+            padding: 2rem;
+            min-height: calc(100vh - 75px);
+            transition: all 0.3s;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .welcome-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        }
+        
+        .stat-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            background: white;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 1.5rem;
+            border-radius: 20px 20px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            padding: 0.7rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 12px;
+            padding: 0.7rem 1.75rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .member-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .club-member-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .non-club-badge {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .quick-action {
+            text-align: center;
+            padding: 1.75rem;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .quick-action:hover {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(30, 58, 138, 0.25);
+            border-color: transparent;
+        }
+        
+        .quick-action i {
+            font-size: 2.2rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        
+        .loan-info-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 1.75rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        .savings-goal-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 1.75rem;
+        }
+        
+        .alert-warning-custom {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            padding: 1.25rem;
+            color: #92400e;
+        }
+        
+        .alert-info-custom {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 16px;
+            padding: 1.25rem;
+            color: #1e40af;
+        }
+        
+        .powered-by {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+        
+        .loan-rules-list {
+            background: rgba(30, 58, 138, 0.02);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 2px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .loan-rules-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .loan-rules-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .print-button {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .print-button:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                left: calc(-1 * var(--sidebar-width));
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .powered-by {
+                bottom: 10px;
+                right: 10px;
+                font-size: 0.75rem;
+                padding: 8px 12px;
+            }
+        }
+
+        @media print {
+            .sidebar, .top-navbar, .btn, .quick-action, .powered-by {
+                display: none !important;
+            }
+            
+            .main-content {
+                margin: 0;
+                padding: 0;
+            }
+            
+            .card {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">
+
+                    <img src="/media/assets/logo/log.png" alt="" width="100%" height="100%">
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75">COOPERATIVE SOCIETY LIMITED</small>
+                </div>
+            </div>
+            <div class="member-badge mt-2 <%= user.membershipID.startsWith('CD') ? 'club-member-badge' : 'non-club-member-badge' %>">
+                <i class="fas <%= user.membershipID.startsWith('CD') ? 'fa-star' : 'fa-user' %>"></i>
+                <span><%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Non-Club Member' %></span>
+            </div>
+
+        </div>
+        <div class="sidebar-menu">
+            <a href="/club-de-star-cooperative/dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="/club-de-star-cooperative/transaction">
+                <i class="fas fa-exchange-alt"></i> Transactions
+            </a>
+            <!-- <a href="#" onclick="showSection('savings', event)">
+                <i class="fas fa-piggy-bank"></i> My Savings
+            </a> -->
+            <a href="/club-de-star-cooperative/loan">
+                <i class="fas fa-hand-holding-usd"></i> My Loans
+            </a>
+            <a href="/club-de-star-cooperative/guarantorRequest">
+                <i class="fas fa-user-friends"></i> Guarantor Requests
+                <% 
+                const pendingCount = user.guarantorRequests
+                    ? user.guarantorRequests.filter(r => r.status === "pending").length
+                    : 0; 
+                %>
+                <% if (pendingCount > 0) { %>
+                    <span class="badge bg-danger ms-2"><%= pendingCount %></span>
+                <% } %>
+            </a>
+
+            <a href="/club-de-star-cooperative/roiCalculator" class="active">
+                <i class="fas fa-chart-line"></i> ROI Calculator
+            </a>
+            <a href="/club-de-star-cooperative/profile">
+                <i class="fas fa-user-circle"></i> My Profile
+            </a>
+            <a href="/club-de-star-cooperative/referral">
+                <i class="fas fa-users"></i> Referral Program
+            </a>
+            <a href="/club-de-star-cooperative/memberContract">
+                <i class="fas fa-file-contract"></i> Terms & Conditions
+            </a>
+            <a href="/logout" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+<!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3"
+        style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+        onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+
+        <!-- This will only show on lg and above -->
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Welcome back, <%= user.firstName %>! 👋</h5>
+            <small class="text-muted">
+                Member ID: <%= user.membershipID %> | <%= new Date(user.createdAt).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
+            </small>
+        </div>
+    </div>
+
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section">
+            <!-- Welcome Card -->
+            <div class="welcome-card position-relative">
+                <div class="row align-items-center position-relative" style="z-index: 1;">
+                    <div class="col-md-8">
+                        <h2 class="mb-3 fw-bold">Great to see you again <%= user.firstName %>!</h2>
+                        <!-- <p class="mb-3 opacity-90 fs-5">Track your savings, manage loans, and grow your wealth with <b>Club De Stars Multipurpose Cooperative Society Limited</b></p> -->
+                        <div class="d-flex gap-3 flex-wrap">
+                            <div class="member-badge">
+                                <i class="fas fa-id-card"></i>
+                                <span><%= user.membershipID %></span>
+                            </div>
+                            <div class="member-badge">
+                                <i class="fas fa-calendar"></i>
+                                <span>Member Since: 
+                                    <%= new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) %>
+                                </span>
+                            </div>
+                            <div class="member-badge club-member-badge">
+                                <i class="fas fa-star"></i>
+                                <span>
+                                    <%= user.membershipID && user.membershipID.startsWith('CD') ? '5%' : '10%' %> Loan Interest Rate
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <h5 class="opacity-90">Account Status</h5>
+                        <% let badgeClass = "bg-light text-secondary"; %>
+                        <% let statusText = "Pending"; %>
+
+                        <% if (user.status === "active") { %>
+                            <% badgeClass = "bg-light text-success"; %>
+                            <% statusText = "Active"; %>
+                        <% } else if (user.status === "rejected") { %>
+                            <% badgeClass = "bg-light text-danger"; %>
+                            <% statusText = "Rejected"; %>
+                        <% } %>
+
+                        <h3>
+                            <span class="badge <%= badgeClass %> fs-5 px-4 py-2"><%= statusText %></span>
+                        </h3>
+                        <p class="mb-0 mt-2 opacity-75">
+                            <% if (user.Payment && user.Payment.status === "paid") { %>
+                                KYC Verified ✓
+                            <% } else { %>
+                                KYC Pending ✗
+                            <% } %>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+   
+
+        <!-- ROI Section -->
+        <div id="roi" class="content-section">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-chart-line me-2"></i>ROI Calculator & Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert-info-custom mb-4">
+                        <h6 class="fw-bold mb-3">How ROI is Calculated</h6>
+                        <p class="mb-2">Monthly ROI = (Your Cumulative Savings from First Month to Current) / (Total Savings by All Members up to Current Month) × Interest for the Month - 10%(company charge)</p>
+                        <p class="mb-0 small"><strong>Note:</strong> 10% of the monthly interest pool is retained as operating charges</p>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
+                                <small class="text-muted d-block mb-2">Your Cumulative Savings</small>
+                                <h3 class="mb-0 fw-bold" style="color: var(--primary);">₦<%= accountBalance.toLocaleString() %></h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+                                <small class="text-muted d-block mb-2">Total Member Savings</small>
+                                <h3 class="mb-0 fw-bold" style="color: var(--primary);">₦<%= allMembersTotalSavings.toLocaleString() %></h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                                <small class="text-muted d-block mb-2">Your Share</small>
+                                <% let sharePercentage = allMembersTotalSavings > 0 ? ((accountBalance / allMembersTotalSavings) * 100).toFixed(2) : 0; %>
+                                <h3 class="mb-0 fw-bold text-warning"><%= sharePercentage %>%</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
+                                <small class="text-muted d-block mb-2">This Month's ROI</small>
+                                <h3 class="mb-0 fw-bold text-success">₦<%= ROI.toLocaleString(undefined, {maximumFractionDigits: 2}) %></h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                      <div class="col-lg-6">
+                            <h6 class="fw-bold mb-3" style="color: var(--primary);">Monthly Breakdown</h6>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="d-none d-lg-table-header-group" 
+                                        style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);">
+                                        <tr>
+                                            <th>Month</th>
+                                            <th>Interest Pool</th>
+                                            <th>Your ROI (90%)</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <!-- Row -->
+                                        <tr>
+                                            <td data-label="Month" class="d-block d-lg-table-cell">Oct 2025</td>
+                                            <td data-label="Interest Pool" class="d-block d-lg-table-cell">₦30,000</td>
+                                            <td data-label="Your ROI (90%)" class="d-block d-lg-table-cell text-success fw-bold">₦3,750</td>
+                                            <td data-label="Status" class="d-block d-lg-table-cell">
+                                                <span class="badge bg-success-subtle text-success">Credited</span>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td data-label="Month" class="d-block d-lg-table-cell">Sep 2025</td>
+                                            <td data-label="Interest Pool" class="d-block d-lg-table-cell">₦28,500</td>
+                                            <td data-label="Your ROI (90%)" class="d-block d-lg-table-cell text-success fw-bold">₦3,563</td>
+                                            <td data-label="Status" class="d-block d-lg-table-cell">
+                                                <span class="badge bg-success-subtle text-success">Credited</span>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td data-label="Month" class="d-block d-lg-table-cell">Aug 2025</td>
+                                            <td data-label="Interest Pool" class="d-block d-lg-table-cell">₦27,000</td>
+                                            <td data-label="Your ROI (90%)" class="d-block d-lg-table-cell text-success fw-bold">₦3,375</td>
+                                            <td data-label="Status" class="d-block d-lg-table-cell">
+                                                <span class="badge bg-success-subtle text-success">Credited</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6">
+                            <h6 class="fw-bold mb-3" style="color: var(--primary);">Interest Sources</h6>
+                            <div class="loan-rules-list">
+                                <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                    <div>
+                                        <small class="text-muted d-block">Total Loan Interest</small>
+                                        <h5 class="mb-0 fw-bold" style="color: var(--primary);">₦30,000</h5>
+                                    </div>
+                                    <div class="text-end">
+                                        <small class="text-muted d-block">From All Members</small>
+                                        <small class="fw-semibold">Current Month</small>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <small>Distributed to Members (90%)</small>
+                                        <strong>₦27,000</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <small>Operating Charges (10%)</small>
+                                        <strong>₦3,000</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert-warning-custom mt-3">
+                                <small><i class="fas fa-info-circle me-2"></i><strong>Note:</strong> ROI is calculated and credited on the 1st of each month</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <!-- Powered By Footer -->
+    <div class="powered-by">
+        Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+    </div>
+
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Navigation
+        function showSection(sectionId, event) {
+            if (event) {
+                event.preventDefault();
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+            
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
+            if (window.innerWidth <= 992) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            const modal = new bootstrap.Modal(document.getElementById(modalId));
+            modal.show();
+        }
+
+        // Loan Calculator
+function calculateLoan() {
+    const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
+    const duration = parseInt(document.getElementById('calcDuration').value) || 1;
+    const rate = parseFloat(document.getElementById('calcRate').value) || 5;
+
+    if (amount > 0) {
+        const maxLoan = parseFloat("<%= user.account.balance %>") * 3;
+
+        if (amount > maxLoan) {
+            alert(`Loan amount exceeds your max eligible amount of ₦${maxLoan.toLocaleString()}`);
+            document.getElementById('calcAmount').value = maxLoan;
+            return;
+        }
+
+        // Interest for ONE MONTH ONLY
+        const interest = (amount * rate) / 100;
+
+        // Total repayment
+        const total = amount + interest;
+
+        // Monthly payment
+        const monthly = total / duration;
+
+        document.getElementById('calcResult').style.display = 'block';
+        document.getElementById('monthlyPay').textContent = '₦' + monthly.toLocaleString('en-NG', { maximumFractionDigits: 2 });
+        document.getElementById('totalInt').textContent = '₦' + interest.toLocaleString('en-NG', { maximumFractionDigits: 2 });
+        document.getElementById('totalRep').textContent = '₦' + total.toLocaleString('en-NG', { maximumFractionDigits: 2 });
+    }
+}
+
+        // Withdrawal Fee Calculator
+
+
+        // Form Submissions
+        function submitDeposit() {
+            alert('✅ Deposit request submitted successfully! You will receive a confirmation shortly.');
+            bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
+        }
+
+        function submitWithdrawal() {
+            const type = document.getElementById('withdrawalType').value;
+            if (type === 'force') {
+                if (confirm('Force withdrawal includes a 2.5% charge. You will receive 50% now and 50% after 30 days. Continue?')) {
+                    alert('✅ Force withdrawal request submitted! Processing time: 24-48 hours.');
+                    bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
+                }
+            } else {
+                alert('✅ Withdrawal request submitted successfully! Processing time: 24-48 hours.');
+                bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
+            }
+        }
+
+        function submitPayment() {
+            alert('✅ Payment processed successfully! Your loan balance has been updated.');
+            bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+        }
+
+        function submitLoanRequest() {
+            const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
+            
+            if (amount <= 0) {
+                alert('❌ Please enter a valid loan amount');
+                return;
+            }
+            
+            if (amount > 1350000) {
+                alert('❌ Loan amount exceeds maximum eligible amount of ₦1,350,000 (3x your savings)');
+                return;
+            }
+            
+            if (!document.getElementById('agreeTerms').checked) {
+                alert('❌ Please agree to the loan terms and conditions');
+                return;
+            }
+            
+            alert('✅ Loan application submitted successfully!\n\nYour application will be reviewed within 3-5 business days.\n\nClub Member Rate: 5% p.a.\nMaximum Amount: 3x savings\nReminder: 3 days before due date');
+            bootstrap.Modal.getInstance(document.getElementById('loanRequestModal')).hide();
+        }
+
+        function submitRollover() {
+            if (confirm('This will pay ₦8,750 interest and extend your loan with 6% interest rate. Continue?')) {
+                alert('✅ Rollover request submitted!\n\nInterest payment of ₦8,750 will be processed.\nNew interest rate: 6% p.a.\nYou will be notified once approved.');
+                bootstrap.Modal.getInstance(document.getElementById('rolloverModal')).hide();
+            }
+        }
+
+        // Animation on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.stat-card, .card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+
+
+    <script>
+    // Close sidebar when clicking outside (for mobile view)
+    document.addEventListener('click', function (event) {
+        const sidebar = document.getElementById('sidebar');
+        const toggleButton = document.querySelector('.fa-bars');
+
+        // Only apply this behavior on small screens
+        if (window.innerWidth <= 992) {
+            // If sidebar is active and click is outside sidebar and toggle button → close it
+            if (sidebar.classList.contains('active') &&
+                !sidebar.contains(event.target) &&
+                !toggleButton.contains(event.target)) {
+                sidebar.classList.remove('active');
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
