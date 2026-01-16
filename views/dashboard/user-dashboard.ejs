@@ -540,6 +540,7 @@
 
             <!-- Stats Cards -->
             <div class="row g-4 mb-4">
+              
                 <div class="col-lg-3 col-md-6">
                     <div class="stat-card">
                         <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
@@ -549,7 +550,7 @@
                         <p class="text-muted mb-1 fw-semibold">Total Savings</p>
 
                         <!-- Total account balance -->
-                        <h3 class="mb-2 fw-bold">
+                        <h3 class="mb-2 fw-bold" style="font-size: 14px;">
                             ₦<%= user.account?.balance ? user.account.balance.toLocaleString() : "0" %>
                         </h3>
 
@@ -575,7 +576,7 @@
                         <p class="text-muted mb-1 fw-semibold">Active Loan</p>
 
                         <!-- Display active loan amount -->
-                        <h3 class="mb-2 fw-bold">
+                        <h3 class="mb-2 fw-bold" style="font-size: 14px;">
                             ₦<%= loan ? loan.amount.toLocaleString() : '0' %>
                         </h3>
 
@@ -601,7 +602,7 @@
                         <p class="text-muted mb-1 fw-semibold">Monthly ROI</p>
 
                         <!-- Display ROI computed from backend -->
-                        <h3 class="mb-2 fw-bold">
+                        <h3 class="mb-2 fw-bold" style="font-size: 14px;">
                             ₦<%= ROI ? ROI.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00' %>
                         </h3>
 
@@ -620,7 +621,7 @@
 
                         <p class="text-muted mb-1 fw-semibold">Total Loan Payment</p>
 
-                        <h3 class="mb-2 fw-bold">
+                        <h3 class="mb-2 fw-bold" style="font-size: 14px;">
                             ₦<%= loan ? loan.totalRepay.toLocaleString() : '0' %>
                         </h3>
 
