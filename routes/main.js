@@ -151,6 +151,7 @@ const totalSavingsAllMembers = accounts.reduce((sum, acc) => {
 
     const settings = await Settings.getSettings(); // getSettings ensures a settings document exists
     const forceWithdrawalCharge = settings.otherFees.forceWithdrawalCharge || 2.5;
+    const roiOperatingCharge = settings.otherFees.roiOperatingCharge || 10;
 
 
     const currentYear = new Date().getFullYear();
@@ -174,6 +175,7 @@ const totalSavingsAllMembers = accounts.reduce((sum, acc) => {
       allMembersTotalSavings: totalSavingsAllMembers,
       forceWithdrawalCharge,
       forcefulWithdrawalCount,
+      roiOperatingCharge,
 
       // Company-level values used
       totalInterestCollected,
