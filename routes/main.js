@@ -27,7 +27,7 @@ router.get('/about-us', (req,res)=>{
 
 
 
-router.get('/onboard/club-de-star-cooperative', async (req, res) => {
+router.get('/cds-cooperative', async (req, res) => {
   try {
     const referralCode = req.query.ref || "";
 
@@ -90,7 +90,10 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
       .populate("referredUsers")
       .exec();
 
-    if (!user) return res.redirect("/login");
+    if (!user) {
+      console.error("User not found");
+      return res.redirect("/login");
+    }
 
     const users = await User.find({}).populate("account");
 
@@ -98,15 +101,19 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
     const accumulativeROI = Number(user.account?.accumulativeROI || 0);
     const totalBalance = safeAddMoney(memberSavings, accumulativeROI);
 
-    // ✅ FIXED: Sum all ROI entries for current month
+    console.log("Member Savings:", memberSavings);
+    console.log("Accumulative ROI:", accumulativeROI);
+    console.log("Total Balance:", totalBalance);
+
+    // Monthly ROI
     const currentMonthKey = getCurrentMonthKey();
     let monthlyROI = 0;
-
     if (user.account?.monthlyRoiHistory?.length) {
       monthlyROI = user.account.monthlyRoiHistory
         .filter(m => m.month === currentMonthKey)
         .reduce((sum, m) => safeAddMoney(sum, Number(m.roi || 0)), 0);
     }
+    console.log("Monthly ROI:", monthlyROI);
 
     const accounts = users
       .map(u => u.account)
@@ -114,45 +121,33 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
       .map(acc => ({ userId: acc.user.toString(), balance: Number(acc.balance || 0) }));
 
     const totalSavingsAllMembers = accounts.reduce((sum, acc) => sum + acc.balance, 0);
-
-    // ===== Share calculation (unchanged) =====
-    let sharePercentageDisplay = 0;
-    if (totalSavingsAllMembers > 0) {
-      let userShares = accounts.map(acc => ({
-        userId: acc.userId,
-        rawShare: (acc.balance / totalSavingsAllMembers) * 100
-      }));
-
-      userShares = userShares.map(u => ({
-        userId: u.userId,
-        shareHundredths: Math.floor(u.rawShare * 100)
-      }));
-
-      let totalHundredths = userShares.reduce((sum, u) => sum + u.shareHundredths, 0);
-      let remainder = 10000 - totalHundredths;
-
-      userShares.sort((a, b) => {
-        const accA = accounts.find(acc => acc.userId === a.userId);
-        const accB = accounts.find(acc => acc.userId === b.userId);
-        return accB.balance - accA.balance;
-      });
-
-      for (let i = 0; i < userShares.length && remainder > 0; i++, remainder--) {
-        userShares[i].shareHundredths += 1;
-      }
-
-      const currentUserShare = userShares.find(s => s.userId === user._id.toString());
-      sharePercentageDisplay = currentUserShare ? currentUserShare.shareHundredths / 100 : 0;
-    }
+    console.log("Total Savings of All Members:", totalSavingsAllMembers);
 
     const latestROI = await CompanyROI.findOne().sort({ createdAt: -1 });
     const totalInterestCollected = Number(latestROI?.totalInterestCollected || 0);
     const companyCharge = Number(latestROI?.companyCharge || 0);
     const netInterestForRoi = Number(latestROI?.netInterestForRoi || 0);
 
-    const settings = await Settings.getSettings();
-    const roiOperatingCharge = Number(settings.otherFees.roiOperatingCharge || 10);
+    console.log("Total Interest Collected:", totalInterestCollected);
+    console.log("Company Charge (ROI):", companyCharge);
+    console.log("Net Interest for ROI:", netInterestForRoi);
 
+    // Load settings dynamically
+    const settings = await Settings.getSettings();
+    const roiOperatingCharge = Number(settings.otherFees.roiOperatingCharge || 0);
+    console.log("ROI Operating Charge from Settings:", roiOperatingCharge);
+
+    // ===== User Share Calculation =====
+    // Share % = (memberSavings / totalSavingsAllMembers) * 100 - roiOperatingCharge
+    let sharePercentageDisplay = 0;
+    if (totalSavingsAllMembers > 0 && memberSavings > 0) {
+      const rawShare = (memberSavings / totalSavingsAllMembers) * 100;
+      const shareAfterCharge = rawShare - roiOperatingCharge;
+      sharePercentageDisplay = Math.max(0, Number(shareAfterCharge.toFixed(2)));
+    }
+    console.log("User Share % after company charge:", sharePercentageDisplay);
+
+    // ROI calculation (unchanged)
     let ROI = 0, userShare = 0, companyChargeOnUser = 0;
     if (totalSavingsAllMembers > 0 && totalInterestCollected > 0 && memberSavings > 0) {
       userShare = (memberSavings / totalSavingsAllMembers) * totalInterestCollected;
@@ -180,6 +175,8 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
       }
     });
 
+    console.log("Forceful Withdrawal Count:", forcefulWithdrawalCount);
+
     res.render("dashboard/user/user-dashboard", {
       user,
       users,
@@ -188,7 +185,7 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
       accumulativeROI,
       totalBalance,
 
-      monthlyROI, // ✅ correct sum
+      monthlyROI,
       sharePercentage: sharePercentageDisplay,
 
       allMembersTotalSavings: totalSavingsAllMembers,
