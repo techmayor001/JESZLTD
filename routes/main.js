@@ -14,7 +14,7 @@ const Withdrawal = require("../models/Withdrawal");
 
 
 router.get('/', (req,res)=>{
-    res.render("index")
+    res.render("static/index")
 })
 
 router.get('/gallery', (req,res)=>{
@@ -68,12 +68,20 @@ router.get('/onboard/club-de-star-cooperative/bylaws', async (req, res) => {
 
 
 
-
 router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
+
+  function getCurrentMonthKey() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  function safeAddMoney(a, b) {
+    return (Math.round(a * 100) + Math.round(b * 100)) / 100;
+  }
+
   if (!req.isAuthenticated()) return res.redirect("/login");
 
   try {
-    // 1) Fetch user with account (and accountType for interest display)
     const user = await User.findById(req.user._id)
       .populate({
         path: "account",
@@ -84,105 +92,115 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
 
     if (!user) return res.redirect("/login");
 
-    // 2) Fetch all users (for dropdowns etc)
-    const users = await User.find({});
+    const users = await User.find({}).populate("account");
 
-    // 3) Member's savings and account info
     const memberSavings = Number(user.account?.balance || 0);
-    const monthlyROI = Number(user.account?.monthlyROI || 0);
     const accumulativeROI = Number(user.account?.accumulativeROI || 0);
+    const totalBalance = safeAddMoney(memberSavings, accumulativeROI);
 
-    // 4) Total savings by all members
-// Fetch all users with accounts
-const accounts = await Account.find({}).populate("user");
+    // ✅ FIXED: Sum all ROI entries for current month
+    const currentMonthKey = getCurrentMonthKey();
+    let monthlyROI = 0;
 
-// Sum all account balances ONLY if the user exists (prevents null/invalid refs)
-const totalSavingsAllMembers = accounts.reduce((sum, acc) => {
-  if (acc.user) {
-    return sum + (Number(acc.balance) || 0);
-  }
-  return sum;
-}, 0);
+    if (user.account?.monthlyRoiHistory?.length) {
+      monthlyROI = user.account.monthlyRoiHistory
+        .filter(m => m.month === currentMonthKey)
+        .reduce((sum, m) => safeAddMoney(sum, Number(m.roi || 0)), 0);
+    }
 
+    const accounts = users
+      .map(u => u.account)
+      .filter(acc => acc)
+      .map(acc => ({ userId: acc.user.toString(), balance: Number(acc.balance || 0) }));
 
+    const totalSavingsAllMembers = accounts.reduce((sum, acc) => sum + acc.balance, 0);
 
-    // 5) Get latest CompanyROI and read totalInterestCollected
+    // ===== Share calculation (unchanged) =====
+    let sharePercentageDisplay = 0;
+    if (totalSavingsAllMembers > 0) {
+      let userShares = accounts.map(acc => ({
+        userId: acc.userId,
+        rawShare: (acc.balance / totalSavingsAllMembers) * 100
+      }));
+
+      userShares = userShares.map(u => ({
+        userId: u.userId,
+        shareHundredths: Math.floor(u.rawShare * 100)
+      }));
+
+      let totalHundredths = userShares.reduce((sum, u) => sum + u.shareHundredths, 0);
+      let remainder = 10000 - totalHundredths;
+
+      userShares.sort((a, b) => {
+        const accA = accounts.find(acc => acc.userId === a.userId);
+        const accB = accounts.find(acc => acc.userId === b.userId);
+        return accB.balance - accA.balance;
+      });
+
+      for (let i = 0; i < userShares.length && remainder > 0; i++, remainder--) {
+        userShares[i].shareHundredths += 1;
+      }
+
+      const currentUserShare = userShares.find(s => s.userId === user._id.toString());
+      sharePercentageDisplay = currentUserShare ? currentUserShare.shareHundredths / 100 : 0;
+    }
+
     const latestROI = await CompanyROI.findOne().sort({ createdAt: -1 });
     const totalInterestCollected = Number(latestROI?.totalInterestCollected || 0);
-    
     const companyCharge = Number(latestROI?.companyCharge || 0);
     const netInterestForRoi = Number(latestROI?.netInterestForRoi || 0);
-    
 
-    // 6) Apply your exact formula:
-    // ROI = (memberSavings / totalSavingsAllMembers) * totalInterestCollected - 10%(company charge on user's share)
-    // which simplifies to: ROI = (memberSavings / totalSavingsAllMembers) * totalInterestCollected * 0.9
-    let ROI = 0;
-    let userShare = 0;
-    let companyChargeOnUser = 0;
+    const settings = await Settings.getSettings();
+    const roiOperatingCharge = Number(settings.otherFees.roiOperatingCharge || 10);
 
+    let ROI = 0, userShare = 0, companyChargeOnUser = 0;
     if (totalSavingsAllMembers > 0 && totalInterestCollected > 0 && memberSavings > 0) {
       userShare = (memberSavings / totalSavingsAllMembers) * totalInterestCollected;
-      companyChargeOnUser = userShare * 0.10; // 10%
+      companyChargeOnUser = userShare * (roiOperatingCharge / 100);
       ROI = userShare - companyChargeOnUser;
     }
 
-    // Round values to 2 decimal places for display (avoid floating point oddities)
     const ROI_display = Number(ROI.toFixed(2));
     const userShare_display = Number(userShare.toFixed(2));
     const companyCharge_display = Number(companyChargeOnUser.toFixed(2));
 
-    // 7) Months since registration
-    const today = new Date();
-    const monthsSinceJoin = Math.floor(
-      (today - user.createdAt) / (1000 * 60 * 60 * 24 * 30)
-    );
+    const monthsSinceJoin = Math.floor((new Date() - user.createdAt) / (1000 * 60 * 60 * 24 * 30));
 
-    // 8) Fetch user's active loan (if any) — user can only have one active loan
-    const activeLoan = await Loan.findOne({
-      user: user._id,
-      status: "approved"
-    })
-      .populate("duration")
-      .exec();
+    const activeLoan = await Loan.findOne({ user: user._id, status: "approved" }).populate("duration");
 
-    // 9) Interest rate for display (from member type)
     const interestRate = user.account?.accountType?.interestRate || 0;
 
-    const settings = await Settings.getSettings(); // getSettings ensures a settings document exists
-    const forceWithdrawalCharge = settings.otherFees.forceWithdrawalCharge || 2.5;
-    const roiOperatingCharge = settings.otherFees.roiOperatingCharge || 10;
-
-
     const currentYear = new Date().getFullYear();
+    const forcefulWithdrawalCount = await Withdrawal.countDocuments({
+      user: req.user._id,
+      type: "forceful",
+      createdAt: {
+        $gte: new Date(`${currentYear}-01-01`),
+        $lte: new Date(`${currentYear}-12-31`)
+      }
+    });
 
-  const forcefulWithdrawalCount = await Withdrawal.countDocuments({
-    user: req.user._id,
-    type: "forceful",
-    createdAt: {
-      $gte: new Date(`${currentYear}-01-01`),
-      $lte: new Date(`${currentYear}-12-31`)
-    }
-  });
-
-    // 10) Render dashboard
-    res.render("dashboard/user-dashboard", {
+    res.render("dashboard/user/user-dashboard", {
       user,
       users,
+
       accountBalance: memberSavings,
-      monthlyROI,
       accumulativeROI,
+      totalBalance,
+
+      monthlyROI, // ✅ correct sum
+      sharePercentage: sharePercentageDisplay,
+
       allMembersTotalSavings: totalSavingsAllMembers,
-      forceWithdrawalCharge,
+
+      forceWithdrawalCharge: settings.otherFees.forceWithdrawalCharge || 2.5,
       forcefulWithdrawalCount,
       roiOperatingCharge,
 
-      // Company-level values used
       totalInterestCollected,
       companyCharge,
       netInterestForRoi,
 
-      // Per-user ROI breakdown
       userShare: userShare_display,
       companyChargeOnUser: companyCharge_display,
       ROI: ROI_display,
@@ -199,6 +217,10 @@ const totalSavingsAllMembers = accounts.reduce((sum, acc) => {
 });
 
 
+
+
+
+// HANDLING WITHDRAWAL REQUESTS 
 router.post("/withdraw", async (req, res) => {
   try {
     const userId = req.user._id;
@@ -332,7 +354,7 @@ router.post("/withdraw", async (req, res) => {
     });
   }
 });
-
+// ENDS -------------- EDISON OVICIAL 
 
 
 
@@ -367,7 +389,7 @@ router.get("/club-de-star-cooperative/transaction", async (req, res) => {
     const roiEarned = account?.accumulativeROI || 0;
 
     // Render template with statistics
-    res.render("dashboard/transaction", {
+    res.render("dashboard/user/transaction", {
       user,
       account,
       transactions,
@@ -382,6 +404,7 @@ router.get("/club-de-star-cooperative/transaction", async (req, res) => {
     res.status(500).send("Error fetching transactions.");
   }
 });
+
 
 // LOAN ROUTE 
 router.get("/club-de-star-cooperative/loan", async (req, res) => {
@@ -449,7 +472,7 @@ router.get("/club-de-star-cooperative/loan", async (req, res) => {
       (today - user.createdAt) / (1000 * 60 * 60 * 24 * 30)
     );
 
-    res.render("dashboard/loan", {
+    res.render("dashboard/user/loan", {
       user,
       users,
       loan: activeLoan,
@@ -466,6 +489,59 @@ router.get("/club-de-star-cooperative/loan", async (req, res) => {
   }
 });
 
+
+router.get("/api/user/loans/active", async (req, res) => {
+  if (!req.isAuthenticated()) return res.redirect("/login");
+  const loans = await Loan.find({
+    user: req.user._id,
+    status: "approved"
+  }).select("_id totalRepay dueDate");
+
+  res.json(loans);
+});
+
+
+// GUARANTOR REQUEST ROUTE 
+router.get("/club-de-star-cooperative/guarantorRequest", async (req, res) => {
+  if (!req.isAuthenticated()) return res.redirect("/login");
+
+  try {
+    // Fetch user and populate guarantorRequests → include borrower info
+    const user = await User.findById(req.user._id)
+      .populate({
+        path: "guarantorRequests.borrower",
+        select: "firstName lastName email phone membershipID",
+      })
+      .exec();
+
+    if (!user) return res.redirect("/login");
+
+    // Separate requests by status if needed (optional)
+    const pendingRequests = user.guarantorRequests.filter(r => r.status === "pending");
+    const acceptedRequests = user.guarantorRequests.filter(r => r.status === "accepted");
+    const declinedRequests = user.guarantorRequests.filter(r => r.status === "declined");
+
+    // Send all relevant info to frontend
+    res.render("dashboard/user/guarantorRequest", {
+      user,
+      pendingRequests,
+      acceptedRequests,
+      declinedRequests,
+      stats: user.guarantorRequestStats || {
+        totalReceived: 0,
+        totalAccepted: 0,
+        totalDeclined: 0,
+        totalAmountApproved: 0,
+      },
+    });
+
+  } catch (err) {
+    console.error("Guarantor Request page error reads:", err);
+    res.redirect("/club-de-star-cooperative/dashboard");
+  }
+});
+
+// POST: Approve guarantor request
 router.post('/club-de-star-cooperative/guarantorRequest/approve', async (req, res) => {
     if (!req.isAuthenticated()) return res.redirect("/login");
 
@@ -508,7 +584,7 @@ router.post('/club-de-star-cooperative/guarantorRequest/approve', async (req, re
             );
         }
 
-        return res.redirect("/club-de-star-cooperative/loan");
+        return res.redirect("/club-de-star-cooperative/guarantorRequest");
     } catch (err) {
         console.error(err);
         res.status(500).send("Server error.");
@@ -559,13 +635,17 @@ router.post('/club-de-star-cooperative/guarantorRequest/decline', async (req, re
     }
 });
 
+// LOAN APPLICATION ROUTE
 router.post("/club-de-star-cooperative/apply-loan", async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   try {
-    const { amount, duration, guarantor1, guarantor2, agreeTerms } = req.body;
+    let { amount, duration, guarantor1, guarantor2, agreeTerms } = req.body;
+
+    // 🔒 Force numeric conversion
+    amount = Number(amount);
 
     if (!agreeTerms) {
       return res.status(400).json({ message: "You must agree to the loan terms." });
@@ -575,13 +655,21 @@ router.post("/club-de-star-cooperative/apply-loan", async (req, res) => {
       return res.status(400).json({ message: "You cannot select the same guarantor twice." });
     }
 
-    const user = await User.findById(req.user._id)
-      .populate({ path: "account", populate: { path: "accountType" } });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
+    if (isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ message: "Invalid loan amount." });
     }
 
+    const user = await User.findById(req.user._id)
+      .populate({
+        path: "account",
+        populate: { path: "accountType" } // MemberType
+      });
+
+    if (!user || !user.account || !user.account.accountType) {
+      return res.status(400).json({ message: "User account type not set." });
+    }
+
+    // Prevent multiple active loans
     const existingLoan = await Loan.findOne({
       user: user._id,
       status: { $in: ["pending", "approved"] }
@@ -593,20 +681,40 @@ router.post("/club-de-star-cooperative/apply-loan", async (req, res) => {
       });
     }
 
+    // Get loan duration (MONTHS ONLY)
     const loanSetting = await LoanSettings.findById(duration);
     if (!loanSetting) {
       return res.status(400).json({ message: "Invalid loan duration selected." });
     }
 
-    const interestRate = user.account.accountType.interestRate;
-    const totalRepay = amount + (amount * interestRate) / 100;
+    const months = Number(loanSetting.duration);
+    if (isNaN(months) || months <= 0) {
+      return res.status(400).json({ message: "Invalid loan duration value." });
+    }
+
+    /* ------------ CORRECT INTEREST CALCULATION ------------ */
+
+    // Monthly interest rate from MemberType
+    const interestRate = Number(user.account.accountType.interestRate); // %
+
+    const interestAmount =
+      amount * (interestRate / 100) * months;
+
+    const totalRepay = Math.round(amount + interestAmount);
+
+    /* ------------------------------------------------------ */
+
+    // Due date = now + months
+    const dueDate = new Date();
+    dueDate.setMonth(dueDate.getMonth() + months);
 
     const loan = await Loan.create({
       user: user._id,
       amount,
       totalRepay,
       interestRate,
-      duration,
+      duration, // LoanSettings ID
+      dueDate,
       status: "pending",
       guarantors: [
         { guarantor: guarantor1 },
@@ -630,7 +738,11 @@ router.post("/club-de-star-cooperative/apply-loan", async (req, res) => {
     }));
 
     return res.status(200).json({
-      message: "Loan application submitted successfully."
+      message: "Loan application submitted successfully.",
+      amount,
+      interestRate,
+      durationInMonths: months,
+      totalRepay
     });
 
   } catch (error) {
@@ -641,6 +753,7 @@ router.post("/club-de-star-cooperative/apply-loan", async (req, res) => {
   }
 });
 
+// LOAN ROLLOVER ROUTE
 router.post("/club-de-star-cooperative/rollover-loan", async (req, res) => {
   if (!req.isAuthenticated()) return res.redirect("/login");
 
@@ -711,49 +824,9 @@ router.post("/club-de-star-cooperative/rollover-loan", async (req, res) => {
 });
 
 
-
 // ENDS 
 
-// GUARANTOR REQUEST ROUTE 
-router.get("/club-de-star-cooperative/guarantorRequest", async (req, res) => {
-  if (!req.isAuthenticated()) return res.redirect("/login");
 
-  try {
-    // Fetch user and populate guarantorRequests → include borrower info
-    const user = await User.findById(req.user._id)
-      .populate({
-        path: "guarantorRequests.borrower",
-        select: "firstName lastName email phone membershipID",
-      })
-      .exec();
-
-    if (!user) return res.redirect("/login");
-
-    // Separate requests by status if needed (optional)
-    const pendingRequests = user.guarantorRequests.filter(r => r.status === "pending");
-    const acceptedRequests = user.guarantorRequests.filter(r => r.status === "accepted");
-    const declinedRequests = user.guarantorRequests.filter(r => r.status === "declined");
-
-    // Send all relevant info to frontend
-    res.render("dashboard/guarantorRequest", {
-      user,
-      pendingRequests,
-      acceptedRequests,
-      declinedRequests,
-      stats: user.guarantorRequestStats || {
-        totalReceived: 0,
-        totalAccepted: 0,
-        totalDeclined: 0,
-        totalAmountApproved: 0,
-      },
-    });
-
-  } catch (err) {
-    console.error("Guarantor Request page error reads:", err);
-    res.redirect("/club-de-star-cooperative/dashboard");
-  }
-});
-// ENDS 
 
 // ROI ROUTE 
 router.get("/club-de-star-cooperative/roiCalculator", async (req, res) => {
@@ -846,7 +919,7 @@ router.get("/club-de-star-cooperative/profile", async (req, res) => {
       "Carbon", "V Bank", "Aella Credit", "PalmPay", "Paycom", "Chipper Cash", "Flutterwave"
     ];
 
-    res.render("dashboard/profile", {
+    res.render("dashboard/user/profile", {
       user,
       accountBalance,
       loan: activeLoan,
@@ -863,6 +936,45 @@ router.get("/club-de-star-cooperative/profile", async (req, res) => {
     res.status(500).send("Error fetching profile details.");
   }
 });
+
+router.get("/club-de-star-cooperative/kyc", async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) return res.redirect("/login");
+
+    const user = await User.findById(req.user._id)
+      .populate("account")
+      .exec();
+
+    if (!user) return res.redirect("/login");
+
+    const accountBalance = user.account?.balance || 0;
+
+    // ✅ Document-based KYC check
+    const hasAllKycDocs = Boolean(
+      user.addressProof &&
+      user.passportPhoto &&
+      user.idType &&
+      user.idNumber &&
+      user.idFile &&
+      user.signature
+    );
+
+    const kycStatus = hasAllKycDocs ? "submitted" : "not_submitted";
+
+    res.render("dashboard/user/kyc", {
+      user,
+      accountBalance,
+      kycStatus,
+      success: req.query.success || null,
+      error: req.query.error || null
+    });
+
+  } catch (err) {
+    console.error("KYC page error:", err);
+    res.status(500).send("Error loading KYC page");
+  }
+});
+
 // ENDS 
 
 // REFERRAL ROUTE
@@ -1161,6 +1273,10 @@ router.post('/member/approve/:id', ensureAdmin, async (req, res) => {
 });
 
 
+// REPORT PAGE STARTS HERE 
+router.get('/user/report', (req,res)=>{
+  res.render("dashboard/report")
+})
 
 
 

@@ -394,8 +394,56 @@
             }
         }
     </style>
+        <style>
+        .hidden {
+  display: none;
+}
+
+.loader-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0a1a2f, #102a44);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.logo span {
+  font-size: 52px;
+  font-weight: 600;
+  color: #5cc8ff;
+  display: inline-block;
+  animation: float 1.5s infinite ease-in-out;
+  letter-spacing: 1px;
+}
+
+.logo span:nth-child(n) {
+  animation-delay: calc(var(--i) * 0.1s);
+}
+
+.logo span:nth-child(1) { --i: 0; }
+.logo span:nth-child(2) { --i: 1; }
+.logo span:nth-child(3) { --i: 2; }
+.logo span:nth-child(4) { --i: 3; }
+.logo span:nth-child(5) { --i: 4; }
+.logo span:nth-child(6) { --i: 5; }
+.logo span:nth-child(7) { --i: 6; }
+.logo span:nth-child(8) { --i: 7; }
+.logo span:nth-child(9) { --i: 8; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-14px); opacity: 1; }
+}
+    </style>
 </head>
 <body>
+            <div id="loader-screen" class="loader-screen">
+        <div class="logo">
+            <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
+        </div>
+    </div>
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -445,6 +493,10 @@
             </a>
             <a href="/club-de-star-cooperative/profile">
                 <i class="fas fa-user-circle"></i> My Profile
+            </a>
+
+            <a href="/club-de-star-cooperative/kyc">
+                <i class="fas fa-shield-alt"></i> KYC Verification
             </a>
             <a href="/club-de-star-cooperative/referral">
                 <i class="fas fa-users"></i> Referral Program
@@ -958,5 +1010,22 @@ function calculateLoan() {
     });
 </script>
 
+<script>
+window.addEventListener("load", () => {
+  const loader = document.getElementById("loader-screen");
+  const main = document.getElementById("main-content");
+
+  setTimeout(() => {
+    loader.style.opacity = "0";
+    loader.style.transition = "opacity 0.6s ease";
+
+    setTimeout(() => {
+      loader.style.display = "none";
+      main.classList.remove("hidden");
+    }, 200);
+
+  }, 400); // adjust duration
+});
+</script>
 </body>
 </html>

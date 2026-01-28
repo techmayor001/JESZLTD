@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete KYC Verification | Club De Stars</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 280px;
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+        }
+        
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: 280px;
+            right: 0;
+            height: 75px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content-wrapper {
+            margin-left: 280px;
+            margin-top: 75px;
+            padding: 2rem;
+            min-height: calc(100vh - 75px);
+            transition: all 0.3s;
+        }
+        
+        .member-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .club-member-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .non-club-badge {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+        }
+        
+        .kyc-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                left: -280px;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content-wrapper {
+                margin-left: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .kyc-container {
+                padding: 0;
+            }
+            
+            .kyc-header {
+                padding: 1.5rem 1rem;
+                border-radius: 16px 16px 0 0;
+            }
+            
+            .kyc-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .kyc-card {
+                border-radius: 0 0 16px 16px;
+            }
+            
+            .progress-container {
+                padding: 1.25rem 1rem;
+            }
+            
+            .document-section {
+                padding: 1.25rem 1rem;
+            }
+            
+            .document-section h5 {
+                font-size: 1.125rem;
+                margin-bottom: 1rem;
+            }
+            
+            .document-item {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+            
+            .document-item .d-flex {
+                flex-direction: column;
+            }
+            
+            .document-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+                margin-right: 0;
+                margin-bottom: 0.75rem;
+            }
+            
+            .document-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .status-badge {
+                align-self: flex-start;
+                margin-top: 0.5rem;
+            }
+            
+            .alert-custom {
+                padding: 1rem;
+                font-size: 0.875rem;
+            }
+            
+            .alert-custom h6 {
+                font-size: 1rem;
+            }
+            
+            .requirements-list {
+                padding: 1rem;
+                font-size: 0.875rem;
+            }
+            
+            .upload-area {
+                padding: 1.5rem 1rem;
+            }
+            
+            .upload-area i {
+                font-size: 1.5rem;
+            }
+            
+            .upload-area p {
+                font-size: 0.875rem;
+            }
+            
+            .upload-area small {
+                font-size: 0.75rem;
+            }
+            
+            .main-content-wrapper {
+                padding: 1rem;
+                margin-top: 75px;
+            }
+            
+            .btn-primary, .btn-outline-primary {
+                width: 100%;
+                padding: 0.75rem 1.5rem;
+            }
+            
+            .d-flex.gap-3.flex-wrap {
+                flex-direction: column;
+                gap: 0.75rem !important;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .top-navbar {
+                padding: 0 1rem;
+                height: 70px;
+            }
+            
+            .kyc-header {
+                padding: 1.25rem 0.875rem;
+            }
+            
+            .kyc-header h2 {
+                font-size: 1.25rem;
+                line-height: 1.3;
+            }
+            
+            .kyc-header p {
+                font-size: 0.875rem;
+            }
+            
+            .kyc-header i {
+                font-size: 2rem;
+            }
+            
+            .progress-container h6 {
+                font-size: 0.875rem;
+            }
+            
+            .document-section {
+                padding: 1rem 0.875rem;
+            }
+            
+            .document-item {
+                padding: 0.875rem;
+            }
+            
+            .document-title h6 {
+                font-size: 0.9375rem;
+            }
+            
+            .document-title small {
+                font-size: 0.75rem;
+            }
+            
+            .alert-custom {
+                padding: 0.875rem;
+                font-size: 0.8125rem;
+            }
+            
+            .alert-custom ul {
+                padding-left: 1rem;
+            }
+            
+            .requirements-list {
+                padding: 0.875rem;
+            }
+            
+            .requirements-list small {
+                font-size: 0.75rem;
+            }
+            
+            .requirements-list li {
+                font-size: 0.8125rem;
+                padding: 0.375rem 0;
+            }
+            
+            .form-label {
+                font-size: 0.875rem;
+            }
+            
+            .form-control, .form-select {
+                font-size: 0.875rem;
+                padding: 0.625rem 0.875rem;
+            }
+            
+            .file-preview {
+                padding: 0.75rem;
+                font-size: 0.8125rem;
+            }
+            
+            .status-badge {
+                font-size: 0.75rem;
+                padding: 0.375rem 0.75rem;
+            }
+            
+            .main-content-wrapper {
+                padding: 0.75rem;
+            }
+            
+            .modal-content {
+                margin: 1rem;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .kyc-header {
+                padding: 1rem 0.75rem;
+            }
+            
+            .kyc-header h2 {
+                font-size: 1.125rem;
+            }
+            
+            .document-section {
+                padding: 0.875rem 0.75rem;
+            }
+            
+            .document-item {
+                padding: 0.75rem;
+            }
+            
+            .alert-custom {
+                padding: 0.75rem;
+            }
+        }
+        
+        .kyc-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 24px 24px 0 0;
+            padding: 2.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .kyc-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        .kyc-card {
+            background: white;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.15);
+            overflow: hidden;
+        }
+        
+        .progress-container {
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .progress {
+            height: 12px;
+            border-radius: 10px;
+            background: #e0e7ff;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .document-section {
+            padding: 2rem;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .document-section:last-child {
+            border-bottom: none;
+        }
+        
+        .document-item {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.02) 0%, rgba(59, 130, 246, 0.02) 100%);
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .document-item:hover {
+            border-color: var(--primary-light);
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.1);
+        }
+        
+        .document-item.completed {
+            border-color: var(--success);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+        }
+        
+        .document-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .document-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .document-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+        
+        .document-title {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .document-title h6 {
+            margin-bottom: 0.25rem;
+            word-wrap: break-word;
+        }
+        
+        .document-title small {
+            display: block;
+            word-wrap: break-word;
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--primary-light);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(59, 130, 246, 0.02);
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .upload-area.dragover {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        .file-preview {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .file-preview.show {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 12px;
+            padding: 0.875rem 2rem;
+            font-weight: 600;
+        }
+        
+        .alert-custom {
+            border-radius: 16px;
+            border: 2px solid;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            word-wrap: break-word;
+        }
+        
+        .alert-custom ul {
+            margin-bottom: 0;
+            padding-left: 1.25rem;
+        }
+        
+        .alert-custom li {
+            word-wrap: break-word;
+            margin-bottom: 0.5rem;
+        }
+        
+        .alert-custom li:last-child {
+            margin-bottom: 0;
+        }
+        
+        .alert-warning-custom {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        
+        .alert-info-custom {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+        
+        .alert-success-custom {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-color: #10b981;
+            color: #065f46;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-pending {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+        }
+        
+        .status-completed {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+        }
+        
+        .status-rejected {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.15);
+        }
+        
+        .requirements-list {
+            background: rgba(30, 58, 138, 0.02);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 1rem;
+            word-wrap: break-word;
+        }
+        
+        .requirements-list li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            word-wrap: break-word;
+        }
+        
+        .requirements-list li i {
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+        
+        .loading-spinner {
+            display: none;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .loader-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0a1a2f, #102a44);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .logo span {
+            font-size: 52px;
+            font-weight: 600;
+            color: #5cc8ff;
+            display: inline-block;
+            animation: float 1.5s infinite ease-in-out;
+            letter-spacing: 1px;
+        }
+        
+        .logo span:nth-child(1) { animation-delay: 0s; }
+        .logo span:nth-child(2) { animation-delay: 0.1s; }
+        .logo span:nth-child(3) { animation-delay: 0.2s; }
+        .logo span:nth-child(4) { animation-delay: 0.3s; }
+        .logo span:nth-child(5) { animation-delay: 0.4s; }
+        .logo span:nth-child(6) { animation-delay: 0.5s; }
+        .logo span:nth-child(7) { animation-delay: 0.6s; }
+        .logo span:nth-child(8) { animation-delay: 0.7s; }
+        .logo span:nth-child(9) { animation-delay: 0.8s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); opacity: 0.4; }
+            50% { transform: translateY(-14px); opacity: 1; }
+        }
+        
+        .powered-by {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+        
+        @media (max-width: 992px) {
+            .powered-by {
+                bottom: 10px;
+                right: 10px;
+                font-size: 0.75rem;
+                padding: 8px 12px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .kyc-container {
+                padding: 0 1rem;
+            }
+            
+            .kyc-header {
+                padding: 2rem 1.5rem;
+            }
+            
+            .document-section {
+                padding: 1.5rem 1rem;
+            }
+            
+            .document-item {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div id="loader-screen" class="loader-screen">
+        <div class="logo">
+            <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden">
+        
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-box">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold" style="text-transform: uppercase;">Club De Stars</h5>
+                        <small class="opacity-75">COOPERATIVE SOCIETY LIMITED</small>
+                    </div>
+                </div>
+                <div class="member-badge mt-2 club-member-badge">
+                    <i class="fas fa-star"></i>
+                    <span>Club Member</span>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <a href="/club-de-star-cooperative/dashboard">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="/club-de-star-cooperative/transaction">
+                    <i class="fas fa-exchange-alt"></i> Transactions
+                </a>
+                <a href="/club-de-star-cooperative/loan">
+                    <i class="fas fa-hand-holding-usd"></i> My Loans
+                </a>
+                <a href="/club-de-star-cooperative/guarantorRequest">
+                    <i class="fas fa-user-friends"></i> Guarantor Requests
+                </a>
+                <a href="/manage/kiddies-account">
+                    <i class="fas fa-users"></i> Kiddies Account
+                </a>
+                <a href="/club-de-star-cooperative/profile">
+                    <i class="fas fa-user-circle"></i> My Profile
+                </a>
+                <a href="/club-de-star-cooperative/kyc" class="active">
+                    <i class="fas fa-shield-alt"></i> KYC Verification
+                </a>
+                <a href="/club-de-star-cooperative/referral">
+                    <i class="fas fa-user"></i> Referral Program
+                </a>
+                <a href="/club-de-star-cooperative/memberContract">
+                    <i class="fas fa-file-contract"></i> Terms & Conditions
+                </a>
+                <a href="/club-de-star-cooperative/report">
+                    <i class="fas fa-chart-line"></i> Reports
+                </a>
+                <a href="/logout" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Top Navbar -->
+        <div class="top-navbar">
+            <i class="fas fa-bars d-lg-none me-3"
+               style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+               onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+
+            <div class="flex-grow-1">
+                <h5 class="mb-0 fw-bold d-none d-md-block" style="color: var(--primary)">Complete Your KYC Verification</h5>
+                <h6 class="mb-0 fw-bold d-md-none" style="color: var(--primary)">KYC Verification</h6>
+                <small class="text-muted">Upload your documents to activate your account</small>
+            </div>
+        </div>
+
+        <!-- Main Content Wrapper -->
+        <div class="main-content-wrapper">
+        <div class="kyc-container">
+            <!-- Header -->
+            <div class="kyc-header">
+                <div class="position-relative" style="z-index: 1;">
+                    <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                    <h2 class="fw-bold mb-2">Complete Your KYC Verification</h2>
+                    <p class="mb-0 opacity-90">Upload your documents to activate your account</p>
+                </div>
+            </div>
+
+            <div class="kyc-card">
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0 fw-bold" style="color: var(--primary);">
+                            <i class="fas fa-tasks me-2"></i>Verification Progress
+                        </h6>
+                        <span class="fw-bold" style="color: var(--primary);" id="progressText">0% Complete</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Complete all sections to activate your account</small>
+                </div>
+
+                <!-- Important Notice -->
+                <div class="document-section">
+                    <div class="alert-warning-custom">
+                        <h6 class="fw-bold mb-2">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Important Information
+                        </h6>
+                        <ul class="mb-0 ps-3">
+                            <li>All documents must be clear and legible</li>
+                            <li>File size should not exceed 5MB per document</li>
+                            <li>Accepted formats: JPG, PNG, PDF</li>
+                            <li>Documents will be reviewed within 24-48 hours</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <form id="kycForm" enctype="multipart/form-data">
+                    
+                    <!-- Proof of Address -->
+                    <div class="document-section">
+                        <h5 class="fw-bold mb-4" style="color: var(--primary);">
+                            <i class="fas fa-home me-2"></i>Proof of Address
+                        </h5>
+                        
+                        <div class="document-item" id="addressProofItem">
+                            <div class="d-flex align-items-start">
+                                <div class="document-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                                    <i class="fas fa-file-invoice"></i>
+                                </div>
+                                <div class="document-content">
+                                    <div class="document-header">
+                                        <div class="document-title">
+                                            <h6 class="mb-1 fw-bold">Address Verification Document</h6>
+                                            <small class="text-muted">Utility bill, bank statement, or official letter</small>
+                                        </div>
+                                        <span class="status-badge status-pending" id="addressStatus">
+                                            <i class="fas fa-clock"></i> Pending
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="upload-area" id="addressUploadArea" onclick="document.getElementById('addressProof').click()">
+                                        <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color: var(--primary-light);"></i>
+                                        <p class="mb-1 fw-semibold">Click to upload or drag and drop</p>
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                    </div>
+                                    <input type="file" id="addressProof" name="addressProof" accept="image/*,.pdf" class="d-none" onchange="handleFileSelect(this, 'address')">
+                                    
+                                    <div class="file-preview" id="addressPreview">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fas fa-file-alt text-primary"></i>
+                                            <span id="addressFileName"></span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile('address')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="requirements-list">
+                                        <small class="text-muted fw-semibold d-block mb-2">Requirements:</small>
+                                        <ul class="small mb-0 ps-0" style="list-style: none;">
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Must show your full name</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Must show your current address</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Should be dated within last 3 months</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Passport Photograph -->
+                    <div class="document-section">
+                        <h5 class="fw-bold mb-4" style="color: var(--primary);">
+                            <i class="fas fa-user me-2"></i>Passport Photograph
+                        </h5>
+                        
+                        <div class="document-item" id="passportItem">
+                            <div class="d-flex align-items-start">
+                                <div class="document-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                                <div class="document-content">
+                                    <div class="document-header">
+                                        <div class="document-title">
+                                            <h6 class="mb-1 fw-bold">Recent Passport Photo</h6>
+                                            <small class="text-muted">Clear photo with white background</small>
+                                        </div>
+                                        <span class="status-badge status-pending" id="passportStatus">
+                                            <i class="fas fa-clock"></i> Pending
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="upload-area" id="passportUploadArea" onclick="document.getElementById('passportPhoto').click()">
+                                        <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color: var(--primary-light);"></i>
+                                        <p class="mb-1 fw-semibold">Click to upload or drag and drop</p>
+                                        <small class="text-muted">JPG, PNG (Max 5MB)</small>
+                                    </div>
+                                    <input type="file" id="passportPhoto" name="passportPhoto" accept="image/*" class="d-none" onchange="handleFileSelect(this, 'passport')">
+                                    
+                                    <div class="file-preview" id="passportPreview">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fas fa-file-image text-primary"></i>
+                                            <span id="passportFileName"></span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile('passport')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="requirements-list">
+                                        <small class="text-muted fw-semibold d-block mb-2">Requirements:</small>
+                                        <ul class="small mb-0 ps-0" style="list-style: none;">
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Recent photo (within 6 months)</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Clear face, no sunglasses</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>White or light background</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Means of Identification -->
+                    <div class="document-section">
+                        <h5 class="fw-bold mb-4" style="color: var(--primary);">
+                            <i class="fas fa-id-card me-2"></i>Means of Identification
+                        </h5>
+                        
+                        <div class="document-item" id="idItem">
+                            <div class="d-flex align-items-start">
+                                <div class="document-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                                    <i class="fas fa-id-badge"></i>
+                                </div>
+                                <div class="document-content">
+                                    <div class="document-header">
+                                        <div class="document-title">
+                                            <h6 class="mb-1 fw-bold">Government-Issued ID</h6>
+                                            <small class="text-muted">National ID, Passport, Driver's License, or Voter's Card</small>
+                                        </div>
+                                        <span class="status-badge status-pending" id="idStatus">
+                                            <i class="fas fa-clock"></i> Pending
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">ID Type *</label>
+                                            <select class="form-select" id="idType" name="idType" required>
+                                                <option value="">Select ID Type</option>
+                                                <option value="nin">National ID (NIN)</option>
+                                                <option value="passport">International Passport</option>
+                                                <option value="drivers">Driver's License</option>
+                                                <option value="voters">Voter's Card</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">ID Number *</label>
+                                            <input type="text" class="form-control" id="idNumber" name="idNumber" placeholder="Enter ID number" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="upload-area" id="idUploadArea" onclick="document.getElementById('idFile').click()">
+                                        <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color: var(--primary-light);"></i>
+                                        <p class="mb-1 fw-semibold">Click to upload or drag and drop</p>
+                                        <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
+                                    </div>
+                                    <input type="file" id="idFile" name="idFile" accept="image/*,.pdf" class="d-none" onchange="handleFileSelect(this, 'id')">
+                                    
+                                    <div class="file-preview" id="idPreview">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fas fa-file-alt text-primary"></i>
+                                            <span id="idFileName"></span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile('id')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="requirements-list">
+                                        <small class="text-muted fw-semibold d-block mb-2">Requirements:</small>
+                                        <ul class="small mb-0 ps-0" style="list-style: none;">
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Must be valid and not expired</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>All text must be clearly readable</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Upload both front and back if applicable</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Signature -->
+                    <div class="document-section">
+                        <h5 class="fw-bold mb-4" style="color: var(--primary);">
+                            <i class="fas fa-signature me-2"></i>Signature
+                        </h5>
+                        
+                        <div class="document-item" id="signatureItem">
+                            <div class="d-flex align-items-start">
+                                <div class="document-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white;">
+                                    <i class="fas fa-pen-fancy"></i>
+                                </div>
+                                <div class="document-content">
+                                    <div class="document-header">
+                                        <div class="document-title">
+                                            <h6 class="mb-1 fw-bold">Digital Signature</h6>
+                                            <small class="text-muted">Your signature on white paper or digital signature</small>
+                                        </div>
+                                        <span class="status-badge status-pending" id="signatureStatus">
+                                            <i class="fas fa-clock"></i> Pending
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="upload-area" id="signatureUploadArea" onclick="document.getElementById('signature').click()">
+                                        <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color: var(--primary-light);"></i>
+                                        <p class="mb-1 fw-semibold">Click to upload or drag and drop</p>
+                                        <small class="text-muted">JPG, PNG (Max 2MB)</small>
+                                    </div>
+                                    <input type="file" id="signature" name="signature" accept="image/*" class="d-none" onchange="handleFileSelect(this, 'signature')">
+                                    
+                                    <div class="file-preview" id="signaturePreview">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fas fa-file-image text-primary"></i>
+                                            <span id="signatureFileName"></span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile('signature')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="requirements-list">
+                                        <small class="text-muted fw-semibold d-block mb-2">Requirements:</small>
+                                        <ul class="small mb-0 ps-0" style="list-style: none;">
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Clear and legible signature</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>On white or light background</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>No watermarks or logos</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Section -->
+                    <div class="document-section">
+                        <div class="alert-info-custom mb-4">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-info-circle me-2"></i>Before You Submit
+                            </h6>
+                            <ul class="mb-0 ps-3">
+                                <li>Ensure all documents are clear and readable</li>
+                                <li>Verify that your information matches across all documents</li>
+                                <li>Your documents will be kept confidential and secure</li>
+                                <li>You'll receive a notification once verification is complete</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex gap-3 flex-wrap justify-content-between align-items-center">
+                            <a href="/club-de-star-cooperative/dashboard" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <span id="submitText">Submit Documents</span>
+                                <div class="loading-spinner ms-2" id="submitSpinner"></div>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        </div>
+        </div>
+
+        <!-- Powered By Footer -->
+        <div class="powered-by">
+            <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4" style="border-radius: 20px;">
+                <div class="modal-body">
+                    <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
+                    <h5 class="fw-bold mb-3">Documents Submitted Successfully!</h5>
+                    <p class="text-muted mb-4">
+                        Your documents have been submitted for verification. Our team will review them within 24-48 hours.
+                        You'll receive a notification once your account is verified.
+                    </p>
+                    <button class="btn btn-success w-100" onclick="window.location.href='/club-de-star-cooperative/dashboard'">
+                        Go to Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4" style="border-radius: 20px;">
+                <div class="modal-body">
+                    <i class="fas fa-times-circle text-danger fa-4x mb-3"></i>
+                    <h5 class="fw-bold mb-3">Submission Failed</h5>
+                    <p class="text-muted mb-4" id="errorMessage">
+                        Unable to submit documents. Please try again.
+                    </p>
+                    <button class="btn btn-danger w-100" data-bs-dismiss="modal">
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Track uploaded files
+        const uploadedFiles = {
+            address: false,
+            passport: false,
+            id: false,
+            signature: false
+        };
+
+        // Handle file selection
+        function handleFileSelect(input, type) {
+            const file = input.files[0];
+            
+            if (!file) return;
+
+            // Validate file size
+            const maxSize = type === 'signature' ? 2 : 5; // MB
+            if (file.size > maxSize * 1024 * 1024) {
+                alert(`File size exceeds ${maxSize}MB. Please choose a smaller file.`);
+                input.value = '';
+                return;
+            }
+
+            // Validate file type
+            const validTypes = type === 'signature' || type === 'passport' 
+                ? ['image/jpeg', 'image/png'] 
+                : ['image/jpeg', 'image/png', 'application/pdf'];
+            
+            if (!validTypes.includes(file.type)) {
+                alert('Invalid file type. Please upload JPG, PNG' + (type !== 'signature' && type !== 'passport' ? ', or PDF' : ''));
+                input.value = '';
+                return;
+            }
+
+            // Update UI
+            uploadedFiles[type] = true;
+            updateProgress();
+            showFilePreview(type, file.name);
+            updateStatus(type, 'completed');
+        }
+
+        // Show file preview
+        function showFilePreview(type, fileName) {
+            const preview = document.getElementById(`${type}Preview`);
+            const fileNameSpan = document.getElementById(`${type}FileName`);
+            
+            fileNameSpan.textContent = fileName;
+            preview.classList.add('show');
+            
+            // Mark item as completed
+            document.getElementById(`${type}Item`).classList.add('completed');
+        }
+
+        // Remove file
+        function removeFile(type) {
+            const input = document.getElementById(`${type === 'passport' ? 'passportPhoto' : type === 'address' ? 'addressProof' : type === 'id' ? 'idFile' : 'signature'}`);
+            input.value = '';
+            
+            uploadedFiles[type] = false;
+            updateProgress();
+            
+            const preview = document.getElementById(`${type}Preview`);
+            preview.classList.remove('show');
+            
+            // Remove completed status
+            document.getElementById(`${type}Item`).classList.remove('completed');
+            updateStatus(type, 'pending');
+        }
+
+        // Update status badge
+        function updateStatus(type, status) {
+            const statusBadge = document.getElementById(`${type}Status`);
+            
+            if (status === 'completed') {
+                statusBadge.className = 'status-badge status-completed';
+                statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Uploaded';
+            } else {
+                statusBadge.className = 'status-badge status-pending';
+                statusBadge.innerHTML = '<i class="fas fa-clock"></i> Pending';
+            }
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const total = Object.keys(uploadedFiles).length;
+            const completed = Object.values(uploadedFiles).filter(v => v === true).length;
+            const percentage = Math.round((completed / total) * 100);
+            
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            progressBar.style.width = percentage + '%';
+            progressText.textContent = percentage + '% Complete';
+        }
+
+        // Drag and drop functionality
+        document.querySelectorAll('.upload-area').forEach(area => {
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragover');
+            });
+
+            area.addEventListener('dragleave', () => {
+                area.classList.remove('dragover');
+            });
+
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+                
+                const type = area.id.replace('UploadArea', '').replace('address', 'addressProof').replace('passport', 'passportPhoto').replace('id', 'idFile');
+                const input = document.getElementById(type);
+                
+                if (e.dataTransfer.files.length) {
+                    input.files = e.dataTransfer.files;
+                    handleFileSelect(input, area.id.replace('UploadArea', ''));
+                }
+            });
+        });
+
+        // Form submission
+        document.getElementById('kycForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validate all fields
+            if (!uploadedFiles.address || !uploadedFiles.passport || !uploadedFiles.id || !uploadedFiles.signature) {
+                alert('Please upload all required documents before submitting.');
+                return;
+            }
+
+            const idType = document.getElementById('idType').value;
+            const idNumber = document.getElementById('idNumber').value;
+
+            if (!idType || !idNumber) {
+                alert('Please select ID type and enter ID number.');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitSpinner = document.getElementById('submitSpinner');
+
+            // Disable button and show spinner
+            submitBtn.disabled = true;
+            submitText.textContent = 'Uploading...';
+            submitSpinner.style.display = 'inline-block';
+
+            try {
+                const formData = new FormData(document.getElementById('kycForm'));
+
+                const response = await fetch('/kyc/submit', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status) {
+                    // Show success modal
+                    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                    successModal.show();
+                } else {
+                    // Show error modal
+                    document.getElementById('errorMessage').textContent = result.message || 'Unable to submit documents. Please try again.';
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    errorModal.show();
+                }
+            } catch (error) {
+                console.error('KYC submission error:', error);
+                document.getElementById('errorMessage').textContent = 'Network error. Please check your connection and try again.';
+                const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+            } finally {
+                submitBtn.disabled = false;
+                submitText.textContent = 'Submit Documents';
+                submitSpinner.style.display = 'none';
+            }
+        });
+
+        // Loader
+        window.addEventListener("load", () => {
+            const loader = document.getElementById("loader-screen");
+            const main = document.getElementById("main-content");
+
+            setTimeout(() => {
+                loader.style.opacity = "0";
+                loader.style.transition = "opacity 0.6s ease";
+
+                setTimeout(() => {
+                    loader.style.display = "none";
+                    main.classList.remove("hidden");
+                }, 600);
+            }, 200);
+        });
+
+        // Close sidebar when clicking outside (for mobile view)
+        document.addEventListener('click', function (event) {
+            const sidebar = document.getElementById('sidebar');
+            const toggleButton = document.querySelector('.fa-bars');
+
+            if (window.innerWidth <= 992) {
+                if (sidebar.classList.contains('active') &&
+                    !sidebar.contains(event.target) &&
+                    !toggleButton.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Animation on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const items = document.querySelectorAll('.document-item');
+            items.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+        });
+    </script>
+</body>
+</html>

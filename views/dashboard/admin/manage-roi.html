@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROI Distribution | Club De Stars Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+            transform: translateX(0);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+        
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(239, 68, 68, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 70px;
+            padding: 1.5rem;
+            min-height: calc(100vh - 70px);
+            transition: all 0.3s;
+        }
+        
+        .page-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            background: white;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .table-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+        
+        .table thead th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+        
+        .badge {
+            padding: 0.5rem 0.875rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.3);
+        }
+        
+        .action-btn {
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+        }
+        
+        .modal-header {
+            border-radius: 20px 20px 0 0;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+        }
+        
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 0.65rem 1rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.1);
+        }
+        
+        .filter-section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+        }
+        
+        .roi-details-card {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+        
+        .sidebar-overlay {
+            display: none;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background: rgba(0,0,0,0.4);
+                z-index: 1035;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+            
+            .stat-card {
+                padding: 1.25rem;
+            }
+            
+            .page-header {
+                padding: 1.5rem;
+            }
+            
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .table {
+                min-width: 800px;
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .top-navbar {
+                height: 60px;
+                padding: 0 1rem;
+            }
+            
+            .main-content {
+                margin-top: 60px;
+                padding: 0.75rem;
+            }
+            
+            .page-header {
+                padding: 1rem;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">C</div>
+                <div>
+                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                </div>
+            </div>
+            <div class="admin-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>Super Admin</span>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="/admin-dashboard">
+                <i class="fas fa-users"></i> Members
+            </a>
+            <a href="/admin/manage/memberType">
+                <i class="fas fa-id-card"></i> Membership Types
+            </a>
+            <a href="/admin/manage-payment">
+                <i class="fas fa-credit-card"></i> Payments
+            </a>
+            <a href="/admin/manage-deposits">
+                <i class="fas fa-coins"></i> Deposit Management
+            </a>
+            <a href="/admin/manage-withdrawals">
+                <i class="fas fa-money-check-alt"></i> Withdrawals
+            </a>
+            <a href="/admin/manage-extra-charges">
+                <i class="fas fa-hand-holding-usd"></i> Extra Charges
+            </a>
+            <a href="/admin/manage-loan">
+                <i class="fas fa-hand-holding-usd"></i> Loan Management
+            </a>
+            <a href="/admin/loan/settings">
+                <i class="fas fa-cogs"></i> Loan Settings
+            </a>
+            <a href="/admin/external-loans">
+                <i class="fas fa-building"></i> External Loans
+            </a>
+            <a href="#" class="active">
+                <i class="fas fa-chart-pie"></i> ROI Distribution
+            </a>
+            <a href="#">
+                <i class="fas fa-file-alt"></i> Reports
+            </a>
+            <a href="/admin/settings">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="#" class="mt-3" style="color: rgba(255,255,255,0.6);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3" style="cursor: pointer; color: var(--primary); font-size: 1.5rem;" onclick="toggleSidebar()"></i>
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color: var(--primary)">ROI Distribution Management</h5>
+            <small class="text-muted">Preview and approve monthly return on investment distribution</small>
+        </div>
+    </div>
+    
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h3 class="mb-1 fw-bold" style="color: var(--primary);">
+                        <i class="fas fa-chart-pie me-2"></i>ROI Distribution
+                    </h3>
+                    <p class="text-muted mb-0">Manage monthly return on investment distribution to members</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('generateRoiModal')">
+                    <i class="fas fa-calculator me-2"></i><span class="d-none d-sm-inline">Generate</span> ROI
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold">Total Payout</p>
+                    <h3 class="mb-0 fw-bold text-success" id="totalPayout">₦0</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold">User Shares</p>
+                    <h3 class="mb-0 fw-bold text-primary" id="userShares">₦0</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold">Total Users</p>
+                    <h3 class="mb-0 fw-bold" style="color: #8b5cf6;" id="totalUsers">0</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <p class="text-muted mb-1 fw-semibold">Approved Payouts</p>
+                    <h3 class="mb-0 fw-bold text-warning" id="approvedPayouts">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-section">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Filter by Month</label>
+                    <select class="form-select" id="monthFilter" onchange="filterRoi()">
+                        <option value="">All Months</option>
+                        <option value="2026-01">January 2026</option>
+                        <option value="2025-12">December 2025</option>
+                        <option value="2025-11">November 2025</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="statusFilter" onchange="filterRoi()">
+                        <option value="">All Status</option>
+                        <option value="open">Open</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Sort By</label>
+                    <select class="form-select" id="sortFilter" onchange="filterRoi()">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="amount">Amount (High to Low)</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <button class="btn btn-outline-primary w-100" onclick="resetFilters()">
+                        <i class="fas fa-redo me-2"></i>Reset Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROI Table -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Interest Collected</th>
+                            <th>Company Charge</th>
+                            <th>Net ROI Pool</th>
+                            <th>Distributed</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roiTableBody">
+                        <!-- Sample Data -->
+                        <tr>
+                            <td><strong>January 2026</strong></td>
+                            <td><span class="badge bg-primary">₦25,500</span></td>
+                            <td><span class="badge bg-danger">₦2,550</span></td>
+                            <td><strong class="text-success">₦22,950</strong></td>
+                            <td><span class="badge bg-secondary">₦0</span></td>
+                            <td><span class="badge bg-success">Open</span></td>
+                            <td>Jan 19, 2026</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="action-btn btn btn-sm btn-primary" onclick="viewRoiDetails('696df9ea514a980e65785e9d')" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn btn btn-sm btn-success" onclick="approveRoi('696df9ea514a980e65785e9d')" title="Approve & Distribute">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- View ROI Details Modal -->
+    <div class="modal fade" id="viewRoiModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>ROI Distribution Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="roi-details-card">
+                        <h6 class="fw-bold mb-3" style="color: var(--primary);">
+                            <i class="fas fa-calendar-alt me-2"></i>Month: <span id="detail_month">January 2026</span>
+                        </h6>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Total Interest Collected</span>
+                            <span class="detail-value text-primary" id="detail_interest">₦25,500</span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Company Charge (10%)</span>
+                            <span class="detail-value text-danger" id="detail_charge">₦2,550</span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Net ROI for Distribution</span>
+                            <span class="detail-value text-success" id="detail_net">₦22,950</span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Total Distributed</span>
+                            <span class="detail-value" id="detail_distributed">₦0</span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Status</span>
+                            <span id="detail_status_badge"></span>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="detail-label">Created Date</span>
+                            <span class="detail-value" id="detail_created">Jan 19, 2026</span>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> ROI will be distributed proportionally to all active members based on their account balances.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" onclick="approveRoiFromModal()">
+                        <i class="fas fa-check-circle me-2"></i>Approve & Distribute
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate ROI Modal -->
+    <div class="modal fade" id="generateRoiModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-calculator me-2"></i>Generate Monthly ROI</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="generateRoiForm">
+                        <div class="mb-3">
+                            <label class="form-label">Select Month</label>
+                            <input type="month" class="form-control" id="roi_month" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Total Interest Collected</label>
+                            <input type="number" class="form-control" id="roi_interest" placeholder="Enter total interest collected" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Company Charge (%)</label>
+                            <input type="number" class="form-control" id="roi_charge_percent" value="10" readonly>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <small>
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                ROI will be calculated automatically based on the company charge percentage.
+                            </small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="generateRoi()">
+                        <i class="fas fa-plus me-2"></i>Generate ROI
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approve Confirmation Modal -->
+    <div class="modal fade" id="approveRoiModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Confirm ROI Distribution</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success">
+                        <h6 class="fw-bold mb-2">Distribution Summary</h6>
+                        <div class="row g-2 small">
+                            <div class="col-6"><strong>Month:</strong></div>
+                            <div class="col-6 text-end" id="approve_month">January 2026</div>
+                            <div class="col-6"><strong>Net ROI Pool:</strong></div>
+                            <div class="col-6 text-end" id="approve_amount">₦22,950</div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> This action will distribute ROI to all eligible members and cannot be undone.
+                    </div>
+                    
+                    <p class="mb-0">Are you sure you want to approve and distribute this ROI?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="confirmApproveRoi()">
+                        <i class="fas fa-check-double me-2"></i>Confirm Distribution
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sample data - Replace with server-side rendered data
+        let companyRois = [
+            {
+                _id: "696df9ea514a980e65785e9d",
+                month: "2026-01",
+                totalInterestCollected: 25500,
+                companyCharge: 2550,
+                netInterestForRoi: 22950,
+                totalRoiDistributed: 0,
+                status: "open",
+                createdAt: new Date("2026-01-19T09:31:22.969Z")
+            }
+        ];
+
+        let currentRoiId = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            renderRoiTable();
+        });
+
+        // Update statistics
+        function updateStats() {
+            const totalPayout = companyRois.reduce((sum, roi) => sum + roi.totalRoiDistributed, 0);
+            const userShares = companyRois.reduce((sum, roi) => sum + roi.netInterestForRoi, 0);
+            const approvedPayouts = companyRois.filter(roi => roi.status === 'closed').length;
+
+            document.getElementById('totalPayout').textContent = '₦' + totalPayout.toLocaleString();
+            document.getElementById('userShares').textContent = '₦' + userShares.toLocaleString();
+            document.getElementById('totalUsers').textContent = '150'; // Replace with actual count
+            document.getElementById('approvedPayouts').textContent = approvedPayouts;
+        }
+
+        // Render ROI table
+        function renderRoiTable(filteredRois = companyRois) {
+            const tbody = document.getElementById('roiTableBody');
+            tbody.innerHTML = '';
+
+            if (filteredRois.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No ROI records found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filteredRois.forEach(roi => {
+                const row = document.createElement('tr');
+                
+                const monthName = new Date(roi.month + '-01').toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+
+                const statusBadge = roi.status === 'open' 
+                    ? '<span class="badge bg-success">Open</span>'
+                    : '<span class="badge bg-secondary">Closed</span>';
+
+                const createdDate = new Date(roi.createdAt).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                });
+
+                const actionButtons = roi.status === 'open'
+                    ? `
+                        <button class="action-btn btn btn-sm btn-primary" onclick="viewRoiDetails('${roi._id}')" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn btn btn-sm btn-success" onclick="approveRoi('${roi._id}')" title="Approve & Distribute">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    `
+                    : `
+                        <button class="action-btn btn btn-sm btn-primary" onclick="viewRoiDetails('${roi._id}')" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn btn btn-sm btn-secondary" disabled>
+                            <i class="fas fa-check-circle"></i> Distributed
+                        </button>
+                    `;
+
+                row.innerHTML = `
+                    <td><strong>${monthName}</strong></td>
+                    <td><span class="badge bg-primary">₦${roi.totalInterestCollected.toLocaleString()}</span></td>
+                    <td><span class="badge bg-danger">₦${roi.companyCharge.toLocaleString()}</span></td>
+                    <td><strong class="text-success">₦${roi.netInterestForRoi.toLocaleString()}</strong></td>
+                    <td><span class="badge bg-secondary">₦${roi.totalRoiDistributed.toLocaleString()}</span></td>
+                    <td>${statusBadge}</td>
+                    <td>${createdDate}</td>
+                    <td>
+                        <div class="btn-group">
+                            ${actionButtons}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Filter functionality
+        function filterRoi() {
+            let filtered = [...companyRois];
+
+            // Month filter
+            const month = document.getElementById('monthFilter').value;
+            if (month) {
+                filtered = filtered.filter(roi => roi.month === month);
+            }
+
+            // Status filter
+            const status = document.getElementById('statusFilter').value;
+            if (status) {
+                filtered = filtered.filter(roi => roi.status === status);
+            }
+
+            // Sort
+            const sort = document.getElementById('sortFilter').value;
+            if (sort === 'newest') {
+                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            } else if (sort === 'oldest') {
+                filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            } else if (sort === 'amount') {
+                filtered.sort((a, b) => b.netInterestForRoi - a.netInterestForRoi);
+            }
+
+            renderRoiTable(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('monthFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('sortFilter').value = 'newest';
+            renderRoiTable();
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            const modal = new bootstrap.Modal(document.getElementById(modalId));
+            modal.show();
+        }
+
+        function viewRoiDetails(id) {
+            currentRoiId = id;
+            const roi = companyRois.find(r => r._id === id);
+            if (!roi) return;
+
+            const monthName = new Date(roi.month + '-01').toLocaleDateString('en-US', { 
+                month: 'long', 
+                year: 'numeric' 
+            });
+
+            document.getElementById('detail_month').textContent = monthName;
+            document.getElementById('detail_interest').textContent = '₦' + roi.totalInterestCollected.toLocaleString();
+            document.getElementById('detail_charge').textContent = '₦' + roi.companyCharge.toLocaleString();
+            document.getElementById('detail_net').textContent = '₦' + roi.netInterestForRoi.toLocaleString();
+            document.getElementById('detail_distributed').textContent = '₦' + roi.totalRoiDistributed.toLocaleString();
+            
+            const statusBadge = roi.status === 'open' 
+                ? '<span class="badge bg-success">Open</span>'
+                : '<span class="badge bg-secondary">Closed</span>';
+            document.getElementById('detail_status_badge').innerHTML = statusBadge;
+
+            const createdDate = new Date(roi.createdAt).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+            document.getElementById('detail_created').textContent = createdDate;
+
+            openModal('viewRoiModal');
+        }
+
+        function approveRoi(id) {
+            currentRoiId = id;
+            const roi = companyRois.find(r => r._id === id);
+            if (!roi) return;
+
+            const monthName = new Date(roi.month + '-01').toLocaleDateString('en-US', { 
+                month: 'long', 
+                year: 'numeric' 
+            });
+
+            document.getElementById('approve_month').textContent = monthName;
+            document.getElementById('approve_amount').textContent = '₦' + roi.netInterestForRoi.toLocaleString();
+
+            openModal('approveRoiModal');
+        }
+
+        function approveRoiFromModal() {
+            bootstrap.Modal.getInstance(document.getElementById('viewRoiModal')).hide();
+            approveRoi(currentRoiId);
+        }
+
+        async function confirmApproveRoi() {
+            if (!currentRoiId) return;
+
+            try {
+                const response = await fetch(`/admin/roi/approve/${currentRoiId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.status) {
+                    // Update local data
+                    const roiIndex = companyRois.findIndex(r => r._id === currentRoiId);
+                    if (roiIndex !== -1) {
+                        companyRois[roiIndex].status = 'closed';
+                        companyRois[roiIndex].totalRoiDistributed = companyRois[roiIndex].netInterestForRoi;
+                    }
+
+                    bootstrap.Modal.getInstance(document.getElementById('approveRoiModal')).hide();
+                    
+                    updateStats();
+                    renderRoiTable();
+
+                    alert('✅ ROI distributed successfully to all eligible members!');
+                } else {
+                    alert('❌ Failed to distribute ROI: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error approving ROI:', error);
+                alert('❌ An error occurred while distributing ROI');
+            }
+        }
+
+        async function generateRoi() {
+            const month = document.getElementById('roi_month').value;
+            const totalInterest = parseFloat(document.getElementById('roi_interest').value);
+
+            if (!month || !totalInterest) {
+                alert('❌ Please fill in all required fields');
+                return;
+            }
+
+            const companyCharge = totalInterest * 0.1;
+            const netRoi = totalInterest - companyCharge;
+
+            try {
+                const response = await fetch('/admin/roi/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        month: month,
+                        totalInterestCollected: totalInterest,
+                        companyCharge: companyCharge,
+                        netInterestForRoi: netRoi
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status) {
+                    // Add to local data
+                    companyRois.unshift(result.roi);
+
+                    bootstrap.Modal.getInstance(document.getElementById('generateRoiModal')).hide();
+                    document.getElementById('generateRoiForm').reset();
+
+                    updateStats();
+                    renderRoiTable();
+
+                    alert('✅ ROI generated successfully!');
+                } else {
+                    alert('❌ Failed to generate ROI: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error generating ROI:', error);
+                alert('❌ An error occurred while generating ROI');
+            }
+        }
+
+        // Sidebar toggle
+        function toggleSidebar() {
+            if (window.innerWidth <= 992) {
+                document.getElementById("sidebar").classList.toggle("active");
+                document.getElementById("sidebarOverlay").classList.toggle("active");
+            }
+        }
+
+        function closeSidebar() {
+            document.getElementById("sidebar").classList.remove("active");
+            document.getElementById("sidebarOverlay").classList.remove("active");
+        }
+
+        // Auto-calculate company charge
+        document.getElementById('roi_interest').addEventListener('input', function() {
+            const interest = parseFloat(this.value) || 0;
+            const charge = interest * 0.1;
+            console.log('Company charge:', charge);
+        });
+    </script>
+</body>
+</html>

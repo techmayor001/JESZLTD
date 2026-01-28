@@ -16,8 +16,10 @@
     "express-session": "^1.18.2",
     "mongoose": "^8.19.3",
     "multer": "^2.0.2",
+    "node-cron": "^4.2.1",
     "node-fetch": "^2.7.0",
     "passport": "^0.7.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "postmark": "^4.0.5"
   }
 }

@@ -445,82 +445,87 @@ router.get("/admin/manage-deposits", ensureAdmin, async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    // 🔄 Transform to frontend format
-const deposits = payments.map((payment) => {
-  const dateObj = new Date(payment.createdAt);
+    const deposits = payments.map((payment) => {
+      const dateObj = new Date(payment.createdAt);
+      const memberFullName = payment.user
+        ? `${payment.user.firstName} ${payment.user.lastName}`
+        : "N/A";
 
-  // Full member name
-  const memberFullName = payment.user
-    ? `${payment.user.firstName} ${payment.user.lastName}`
-    : "N/A";
+      // ✅ Detect ALL manual payments (deposit + loan)
+      const isManual =
+        payment.reference.startsWith("COOP-") ||
+        payment.reference.startsWith("LOAN-MANUAL-");
 
-return {
-  id: payment._id,
-  reference: payment.reference,
+      const isPaystack = !isManual;
 
-  date: dateObj.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }),
+      // ✅ Correct amount handling
+      const amount = isManual
+        ? payment.amount
+        : payment.amount / 100;
 
-  time: dateObj.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }),
+      // ✅ Account balance is always naira
+      const balance = payment.user?.account?.balance || 0;
 
-  memberName: memberFullName,
-  payeeName: payment.payeeName,
+      return {
+        id: payment._id,
+        reference: payment.reference,
 
-  memberId: payment.user?.membershipID || "N/A",
-  email: payment.email,
+        date: dateObj.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
 
-  // ✅ FIX HERE
-  amount: payment.amount / 100,
+        time: dateObj.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
 
-  method: payment.paystackResponse?.channel || "Bank Transfer",
+        memberName: memberFullName,
+        payeeName: payment.payeeName,
+        memberId: payment.user?.membershipID || "N/A",
+        email: payment.email,
 
-  status:
-    payment.status === "paid" || payment.status === "success"
-      ? "approved"
-      : payment.status === "failed"
-      ? "rejected"
-      : "pending",
+        // ✅ Fixed values
+        amount,
+        balance,
 
-  // ⚠️ Make sure balance is also in naira
-  balance: (payment.user?.account?.balance || 0) / 100,
+        method: isManual
+          ? "Manual Transfer"
+          : "Paystack",
 
-  notes: payment.paystackResponse?.message || "Deposit payment",
-};
+        status:
+          payment.status === "paid" || payment.status === "success"
+            ? "approved"
+            : payment.status === "failed"
+            ? "rejected"
+            : "pending",
 
-});
+        notes: payment.paystackResponse?.message || "Deposit / Loan payment",
+      };
+    });
 
-// 📊 Stats calculations
-const totalIncome = payments
-  .filter(p => p.status === "paid" || p.status === "success")
-  .reduce((sum, p) => sum + p.amount, 0);
+    // ❌ Stats unchanged (as requested)
+    const totalIncome = payments
+      .filter(p => p.status === "paid" || p.status === "success")
+      .reduce((sum, p) => sum + p.amount, 0);
 
-const pendingCount = payments.filter(p => p.status === "pending").length;
+    const pendingCount = payments.filter(p => p.status === "pending").length;
 
-// Approved today
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-const approvedToday = payments.filter(p => {
-  const created = new Date(p.createdAt);
-  return (
-    (p.status === "paid" || p.status === "success") &&
-    created >= today
-  );
-}).length;
+    const approvedToday = payments.filter(p => {
+      const created = new Date(p.createdAt);
+      return (
+        (p.status === "paid" || p.status === "success") &&
+        created >= today
+      );
+    }).length;
 
-// Active members (unique users with at least one deposit)
-const activeMembers = new Set(
-  payments
-    .filter(p => p.user)
-    .map(p => p.user._id.toString())
-).size;
-
+    const activeMembers = new Set(
+      payments.filter(p => p.user).map(p => p.user._id.toString())
+    ).size;
 
     res.render("dashboard/admin/deposits", {
       admin: req.user,
@@ -529,8 +534,8 @@ const activeMembers = new Set(
         totalIncome,
         pendingCount,
         approvedToday,
-        activeMembers
-      }
+        activeMembers,
+      },
     });
 
   } catch (error) {
@@ -539,75 +544,131 @@ const activeMembers = new Set(
   }
 });
 
-router.post(
-  "/admin/deposits/:id/approve",
-  ensureAdmin,
-  async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { notes } = req.body;
 
-      const payment = await Payment.findById(id).populate({
-        path: "user",
-        populate: { path: "account" },
+
+
+router.post("/admin/deposits/:id/approve", ensureAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { notes } = req.body;
+
+    const payment = await Payment.findById(id).populate({
+      path: "user",
+      populate: { path: "account" },
+    });
+
+    if (!payment) {
+      return res.status(404).json({ message: "Payment not found" });
+    }
+
+    // Prevent double approval
+    if (payment.status === "success" || payment.status === "paid") {
+      return res.status(400).json({ message: "Payment already approved" });
+    }
+
+    const isLoanPayment = !!payment.loanId;
+    const amount = Number(payment.amount); // manual = naira
+
+    // =========================
+    // UPDATE PAYMENT RECORD
+    // =========================
+    payment.status = "success";
+    payment.paystackResponse = {
+      ...(payment.paystackResponse || {}),
+      adminNote: notes || "Approved by admin",
+      approvedAt: new Date(),
+    };
+
+    // =========================
+    // HANDLE LOAN PAYMENT
+    // =========================
+    if (isLoanPayment) {
+      const loan = await Loan.findOne({
+        _id: payment.loanId,
+        user: payment.user._id,
+        status: "approved",
       });
 
-      if (!payment) {
-        return res.status(404).json({ message: "Deposit not found" });
+      if (!loan) {
+        return res.status(404).json({ message: "Loan not found or inactive" });
       }
 
-      // ❌ Prevent double approval
-      if (payment.status === "success" || payment.status === "paid") {
-        return res.status(400).json({ message: "Deposit already approved" });
+      // subtract payment
+      loan.totalRepay = Math.max(loan.totalRepay - amount, 0);
+
+      // record transaction
+      await Transaction.create({
+        user: payment.user._id,
+        type: "loan_payment",
+        amount,
+        description: `Manual loan repayment approved (${payment.reference})`,
+        reference: payment.reference,
+        method: "Cooperative",
+        status: "successful",
+      });
+
+      // if fully paid → close loan
+      if (loan.totalRepay === 0) {
+        loan.status = "paid";
+        await loan.save();
+
+        await Transaction.create({
+          user: payment.user._id,
+          type: "loan_repayment",
+          amount: 0,
+          description: "Loan fully settled (manual payment)",
+          method: "system",
+          status: "successful",
+        });
+
+        await Loan.deleteOne({ _id: loan._id });
+
+        console.log(`🎉 Loan cleared for ${payment.user.email}`);
+      } else {
+        await loan.save();
       }
+    }
 
-      // ✅ Update payment
-      payment.status = "success";
-      payment.paystackResponse = {
-        ...(payment.paystackResponse || {}),
-        adminNote: notes || "Approved by admin",
-        approvedAt: new Date(),
-      };
+    // =========================
+    // HANDLE NORMAL DEPOSIT
+    // =========================
+    if (!isLoanPayment && payment.user?.account) {
+      payment.user.account.balance += amount;
+      await payment.user.account.save();
 
-      // ✅ Credit user account
-      if (payment.user && payment.user.account) {
-        payment.user.account.balance += payment.amount;
-        await payment.user.account.save();
-      }
-
-      // ✅ Update linked transaction
       const transaction = await Transaction.findOne({
-        user: payment.user?._id,
+        user: payment.user._id,
         reference: payment.reference,
         type: "deposit",
       });
 
       if (transaction) {
         transaction.status = "successful";
-        transaction.method =
-          payment.paystackResponse?.channel || "Bank Transfer";
-
+        transaction.method = "Bank Transfer";
         transaction.description =
           transaction.description ||
           `Deposit approved by admin (${payment.reference})`;
 
         await transaction.save();
       }
-
-      await payment.save();
-
-      res.json({
-        success: true,
-        message: "Deposit approved and transaction recorded",
-        newBalance: payment.user?.account?.balance || 0,
-      });
-
-    } catch (error) {
-      console.error("Approve deposit error:", error);
-      res.status(500).json({ message: "Internal server error" });
     }
+
+    await payment.save();
+
+    return res.json({
+      success: true,
+      message: isLoanPayment
+        ? "Loan payment approved and applied"
+        : "Deposit approved successfully",
+      newBalance: payment.user?.account?.balance || 0,
+    });
+
+  } catch (error) {
+    console.error("Approve payment error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
-);
+});
+
 
 
 router.post(
@@ -779,118 +840,184 @@ router.get("/admin/manage-withdrawals", ensureAdmin, async (req, res) => {
 
 
 
-router.post("/admin/withdrawals/:id/approve", ensureAdmin, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { notes } = req.body;
+router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
+  try {
+    const { loanId, disbursementMethod, disbursementDate } = req.body;
+    if (!loanId || !disbursementMethod || !disbursementDate)
+      return res.status(400).json({ message: "Missing required fields." });
 
-        const withdrawal = await Withdrawal.findById(id)
-            .populate({ path: "user", populate: { path: "account" } });
+    const approvedBy = req.user?._id;
+    if (!approvedBy) return res.status(401).json({ message: "Unauthorized." });
 
-        if (!withdrawal) return res.status(404).json({ message: "Withdrawal not found" });
-        if (withdrawal.status === "success") return res.status(400).json({ message: "Withdrawal already approved" });
+    const loan = await Loan.findById(loanId)
+      .populate("duration")
+      .populate("user")
+      .populate("guarantors.guarantor");
 
-        const settings = await Settings.getSettings();
-        const forceChargeRate = settings.otherFees.forceWithdrawalCharge || 2.5; // %
+    if (!loan) return res.status(404).json({ message: "Loan not found." });
 
-        const userAccount = withdrawal.user.account;
-        const userBalance = userAccount.balance;
-        const halfBalance = userBalance / 2;
-
-        let payoutAmount = 0;   // Cash the user will actually get now
-        let chargeAmount = 0;   // Deducted from withdrawal
-
-        if (withdrawal.type === "forceful") {
-            // Calculate charge from withdrawal amount
-            if (withdrawal.amount <= halfBalance) {
-                // <= half → full payout immediately
-                payoutAmount = withdrawal.amount;
-                chargeAmount = payoutAmount * (forceChargeRate / 100);
-                payoutAmount -= chargeAmount;
-
-                withdrawal.amountPaid = (withdrawal.amountPaid || 0) + payoutAmount;
-                withdrawal.amount = 0;
-                withdrawal.status = "success";
-
-            } else {
-                // > half → pay first half now
-                payoutAmount = halfBalance;
-                chargeAmount = withdrawal.amount * (forceChargeRate / 100);
-                payoutAmount -= chargeAmount;
-
-                withdrawal.amountPaid = (withdrawal.amountPaid || 0) + payoutAmount;
-                withdrawal.amount -= payoutAmount + chargeAmount; // remaining for 2nd payout
-                withdrawal.status = "pending";
-            }
-
-            // Deduct total from user balance
-            userAccount.balance -= (payoutAmount + chargeAmount);
-            await userAccount.save();
-
-            // Record withdrawal transaction (net payout)
-            await Transaction.create({
-                user: withdrawal.user._id,
-                type: "withdrawal",
-                reference: withdrawal.reference,
-                amount: payoutAmount,
-                status: "successful",
-                method: withdrawal.method || "Bank Transfer",
-                description: `Forceful withdrawal payout`
-            });
-
-            // Record charge as separate withdrawal transaction
-            await Transaction.create({
-                user: withdrawal.user._id,
-                type: "withdrawal",
-                reference: withdrawal.reference,
-                amount: chargeAmount,
-                status: "successful",
-                method: "Automatic Deduction",
-                description: `Forceful withdrawal charge ${forceChargeRate}%`
-            });
-
-        } else {
-            // Normal withdrawal → approve fully
-            payoutAmount = withdrawal.amount;
-
-            userAccount.balance -= payoutAmount;
-            await userAccount.save();
-
-            await Transaction.create({
-                user: withdrawal.user._id,
-                type: "withdrawal",
-                reference: withdrawal.reference,
-                amount: payoutAmount,
-                status: "successful",
-                method: withdrawal.method || "Bank Transfer",
-                description: `Normal withdrawal approved by admin`
-            });
-
-            withdrawal.amountPaid = (withdrawal.amountPaid || 0) + payoutAmount;
-            withdrawal.amount = 0;
-            withdrawal.status = "success";
-        }
-
-        withdrawal.notes = notes || "Approved by admin";
-        await withdrawal.save();
-
-        res.json({
-            success: true,
-            message: withdrawal.type === "forceful"
-                ? (withdrawal.status === "success"
-                    ? "Forceful withdrawal fully processed"
-                    : "Forceful withdrawal partially processed; pending remaining payout")
-                : "Withdrawal approved successfully",
-            newBalance: userAccount.balance,
-            status: withdrawal.status,
-            remainingAmount: withdrawal.amount
-        });
-
-    } catch (error) {
-        console.error("Approve withdrawal error:", error);
-        res.status(500).json({ message: "Internal server error" });
+    if (!loan.guarantors.every(g => g.status === "accepted")) {
+      return res.status(400).json({ message: "All guarantors must accept." });
     }
+
+    const durationMonths = loan.user ? loan.duration?.duration : loan.externalDuration;
+    if (!durationMonths) return res.status(400).json({ message: "Loan duration missing." });
+
+    if (loan.user) {
+      const existingLoan = await Loan.findOne({
+        user: loan.user._id,
+        _id: { $ne: loan._id },
+        status: { $in: ["pending", "approved"] }
+      });
+      if (existingLoan) await Loan.deleteOne({ _id: existingLoan._id });
+    }
+
+    // Approve loan
+    const disburseDate = new Date(disbursementDate);
+    const dueDate = new Date(disburseDate);
+    dueDate.setMonth(dueDate.getMonth() + durationMonths);
+
+    loan.status = "approved";
+    loan.disbursementMethod = disbursementMethod;
+    loan.disbursementDate = disburseDate;
+    loan.dueDate = dueDate;
+    loan.approvedAt = new Date();
+    await loan.save();
+
+    // Ledger
+    const ledgerEntry = await LoanLedger.create({
+      loan: loan._id,
+      approvedBy,
+      amount: loan.amount,
+      interestRate: loan.interestRate,
+      durationMonths,
+      disbursementMethod,
+      disbursementDate: disburseDate,
+      dueDate,
+      approvedAt: new Date(),
+      status: "approved",
+      member: loan.user?._id,
+      externalBorrower: loan.user ? undefined : loan.external
+    });
+
+    // Loan approval transaction (borrower)
+    if (loan.user) {
+      await Transaction.create({
+        user: loan.user._id,
+        type: "loan_payment",
+        amount: loan.amount,
+        status: "successful",
+        method: disbursementMethod,
+        description: `Loan approved and disbursed`
+      });
+    }
+
+    // Settings
+    const settings = await Settings.getSettings();
+    const roiOperatingCharge = Number(settings.otherFees.roiOperatingCharge || 10);
+
+    // Month key
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+    // Interest from THIS loan only
+    const interestForLoan = loan.amount * (loan.interestRate / 100) * durationMonths;
+    const companyChargeForThisLoan = interestForLoan * (roiOperatingCharge / 100);
+    const netInterestForThisLoan = interestForLoan - companyChargeForThisLoan;
+
+    // Company ROI aggregation
+    let companyRoi = await CompanyROI.findOne({ month: currentMonth });
+    if (!companyRoi) {
+      companyRoi = await CompanyROI.create({
+        month: currentMonth,
+        totalSavings: 0,
+        totalInterestCollected: interestForLoan,
+        companyCharge: companyChargeForThisLoan,
+        netInterestForRoi: netInterestForThisLoan,
+        totalRoiDistributed: 0,
+        status: "open",
+        loanRoiHistory: [
+          {
+            loan: loan._id,
+            interestForLoan,
+            companyChargeForLoan: companyChargeForThisLoan,
+            netInterestForLoan: netInterestForThisLoan
+          }
+        ]
+      });
+    } else {
+      companyRoi.totalInterestCollected += interestForLoan;
+      companyRoi.companyCharge += companyChargeForThisLoan;
+      companyRoi.netInterestForRoi += netInterestForThisLoan;
+
+      companyRoi.loanRoiHistory.push({
+        loan: loan._id,
+        interestForLoan,
+        companyChargeForLoan: companyChargeForThisLoan,
+        netInterestForLoan: netInterestForThisLoan
+      });
+    }
+
+    // Accounts
+    const allAccounts = await Account.find({}).populate("user");
+    const totalSavingsAllMembers = allAccounts.reduce((sum, acc) => sum + Number(acc.balance || 0), 0);
+    const safeMoney = n => Math.round(n * 100) / 100;
+
+    let totalDistributed = 0;
+
+    for (const acc of allAccounts) {
+      const memberSavings = Number(acc.balance || 0);
+      if (memberSavings <= 0 || totalSavingsAllMembers <= 0) continue;
+
+      const userROI = (memberSavings / totalSavingsAllMembers) * netInterestForThisLoan;
+      const roundedROI = safeMoney(userROI);
+
+      // Monthly record (per loan)
+      acc.monthlyRoiHistory.push({
+        month: currentMonth,
+        roi: roundedROI
+      });
+
+      // Update accumulative ROI
+      acc.accumulativeROI = safeMoney(acc.monthlyRoiHistory.reduce((sum, m) => sum + m.roi, 0));
+      acc.lastRoiPayout = new Date();
+      await acc.save();
+
+      totalDistributed += roundedROI;
+
+      // ROI transaction (per loan)
+      await Transaction.create({
+        user: acc.user._id,
+        type: "roi",
+        amount: roundedROI,
+        status: "successful",
+        method: "System Distribution",
+        description: `ROI from loan ${loan._id} (${currentMonth})`
+      });
+    }
+
+    companyRoi.totalRoiDistributed += safeMoney(totalDistributed);
+    await companyRoi.save();
+
+    const borrowerName = loan.user
+      ? `${loan.user.firstName} ${loan.user.lastName}`
+      : loan.external?.borrowerName || "Company";
+
+    return res.status(200).json({
+      message: `Loan for ${borrowerName} approved successfully.`,
+      loan,
+      ledger: ledgerEntry,
+      roiDistributed: totalDistributed,
+      companyRoi
+    });
+
+  } catch (error) {
+    console.error("Error approving loan:", error);
+    return res.status(500).json({ message: "Server error while approving loan." });
+  }
 });
+
+
 
 
 // EXTRA CHARGES SECTION
@@ -1385,10 +1512,8 @@ router.get("/admin/external-loans", ensureAdmin, async (req, res) => {
 router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
   try {
     const { loanId, disbursementMethod, disbursementDate } = req.body;
-
-    if (!loanId || !disbursementMethod || !disbursementDate) {
+    if (!loanId || !disbursementMethod || !disbursementDate)
       return res.status(400).json({ message: "Missing required fields." });
-    }
 
     const approvedBy = req.user?._id;
     if (!approvedBy) return res.status(401).json({ message: "Unauthorized." });
@@ -1400,27 +1525,16 @@ router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
 
     if (!loan) return res.status(404).json({ message: "Loan not found." });
 
-    // --------------------------
-    // Check if all guarantors accepted
-    // --------------------------
-    const allGuarantorsAccepted = loan.guarantors.every(
-      g => g.status === "accepted"
-    );
-
-    if (!allGuarantorsAccepted) {
+    // Check guarantors
+    if (!loan.guarantors.every(g => g.status === "accepted")) {
       return res.status(400).json({ message: "All guarantors must accept." });
     }
 
-    // --------------------------
-    // Determine duration
-    // --------------------------
+    // Loan duration
     const durationMonths = loan.user ? loan.duration?.duration : loan.externalDuration;
-
     if (!durationMonths) return res.status(400).json({ message: "Loan duration missing." });
 
-    // --------------------------
-    // Remove existing loans for internal users
-    // --------------------------
+    // Remove old conflicting loans
     if (loan.user) {
       const existingLoan = await Loan.findOne({
         user: loan.user._id,
@@ -1430,9 +1544,7 @@ router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
       if (existingLoan) await Loan.deleteOne({ _id: existingLoan._id });
     }
 
-    // --------------------------
     // Approve loan
-    // --------------------------
     const disburseDate = new Date(disbursementDate);
     const dueDate = new Date(disburseDate);
     dueDate.setMonth(dueDate.getMonth() + durationMonths);
@@ -1444,9 +1556,7 @@ router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
     loan.approvedAt = new Date();
     await loan.save();
 
-    // --------------------------
     // Ledger entry
-    // --------------------------
     const ledgerData = {
       loan: loan._id,
       approvedBy,
@@ -1459,60 +1569,84 @@ router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
       approvedAt: new Date(),
       status: "approved"
     };
-
-    // Only set member if internal
     if (loan.user) ledgerData.member = loan.user._id;
-    // Only set externalBorrower if external
-    if (!loan.user) ledgerData.externalBorrower = loan.external;
-
+    else ledgerData.externalBorrower = loan.external;
     const ledgerEntry = await LoanLedger.create(ledgerData);
 
-    // --------------------------
-    // Update guarantor stats
-    // --------------------------
+    // Guarantor stats
     for (const g of loan.guarantors) {
       const guarantor = await User.findById(g.guarantor._id);
       if (!guarantor) continue;
 
       guarantor.guarantorRequestStats.totalReceived += 1;
-
       if (g.status === "accepted") {
         guarantor.guarantorRequestStats.totalAccepted += 1;
         guarantor.guarantorRequestStats.totalAmountApproved += loan.amount;
       } else {
         guarantor.guarantorRequestStats.totalDeclined += 1;
       }
-
       await guarantor.save();
     }
 
-    // --------------------------
-    // Company ROI
-    // --------------------------
-    const currentMonth = new Date().toISOString().slice(0, 7);
+    // Settings
+    const settings = await Settings.getSettings();
+    const roiOperatingCharge = Number(settings.otherFees.roiOperatingCharge || 10);
+
+    // ------------------------------
+    // Company ROI & net interest
+    // ------------------------------
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     const interestForLoan = loan.amount * (loan.interestRate / 100) * durationMonths;
 
     let companyRoi = await CompanyROI.findOne({ month: currentMonth });
-
     if (!companyRoi) {
+      const companyCharge = interestForLoan * (roiOperatingCharge / 100);
       companyRoi = await CompanyROI.create({
         month: currentMonth,
         totalInterestCollected: interestForLoan,
-        companyCharge: interestForLoan * 0.1,
-        netInterestForRoi: interestForLoan * 0.9,
+        companyCharge,
+        netInterestForRoi: interestForLoan - companyCharge,
         totalRoiDistributed: 0,
         status: "open"
       });
     } else if (companyRoi.status === "open") {
       companyRoi.totalInterestCollected += interestForLoan;
-      companyRoi.companyCharge = companyRoi.totalInterestCollected * 0.1;
+      companyRoi.companyCharge = companyRoi.totalInterestCollected * (roiOperatingCharge / 100);
       companyRoi.netInterestForRoi = companyRoi.totalInterestCollected - companyRoi.companyCharge;
       await companyRoi.save();
     }
 
-    // --------------------------
-    // Response
-    // --------------------------
+    // ------------------------------
+    // Credit ROI to all members
+    // ------------------------------
+    const allAccounts = await Account.find({}).populate("user");
+    const totalSavingsAllMembers = allAccounts.reduce((sum, acc) => sum + (Number(acc.balance) || 0), 0);
+
+    // Helper: money-safe addition
+    function safeAdd(a, b) {
+      return Math.round((a + b) * 100) / 100;
+    }
+
+    for (const acc of allAccounts) {
+      const memberSavings = Number(acc.balance || 0);
+      if (totalSavingsAllMembers > 0 && memberSavings > 0) {
+        // Calculate user's ROI for this loan
+        const userShare = (memberSavings / totalSavingsAllMembers) * companyRoi.totalInterestCollected;
+        const companyChargeOnUser = userShare * (roiOperatingCharge / 100);
+        const userROI = safeAdd(userShare - companyChargeOnUser, 0);
+
+        // Push to monthly ROI array
+        acc.monthlyRoiHistory.push({ month: currentMonth, roi: userROI });
+
+        // Recalculate accumulative ROI from monthly array
+        acc.accumulativeROI = acc.monthlyRoiHistory.reduce((sum, m) => safeAdd(sum, m.roi), 0);
+
+        acc.lastRoiPayout = new Date();
+        await acc.save();
+      }
+    }
+
     const borrowerName = loan.user
       ? `${loan.user.firstName} ${loan.user.lastName}`
       : loan.external?.borrowerName || "Company";
@@ -1523,12 +1657,14 @@ router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
       ledger: ledgerEntry,
       companyRoi
     });
-
   } catch (error) {
     console.error("Error approving loan:", error);
     return res.status(500).json({ message: "Server error while approving loan." });
   }
 });
+
+
+
 
 
 

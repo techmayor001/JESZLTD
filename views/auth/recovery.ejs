@@ -80,174 +80,227 @@
             to { opacity: 0; transform: translateY(-10px); } 
         }
     </style>
+    
+    <style>
+        .hidden {
+  display: none;
+}
+
+.loader-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0a1a2f, #102a44);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.logo span {
+  font-size: 52px;
+  font-weight: 600;
+  color: #5cc8ff;
+  display: inline-block;
+  animation: float 1.5s infinite ease-in-out;
+  letter-spacing: 1px;
+}
+
+.logo span:nth-child(n) {
+  animation-delay: calc(var(--i) * 0.1s);
+}
+
+.logo span:nth-child(1) { --i: 0; }
+.logo span:nth-child(2) { --i: 1; }
+.logo span:nth-child(3) { --i: 2; }
+.logo span:nth-child(4) { --i: 3; }
+.logo span:nth-child(5) { --i: 4; }
+.logo span:nth-child(6) { --i: 5; }
+.logo span:nth-child(7) { --i: 6; }
+.logo span:nth-child(8) { --i: 7; }
+.logo span:nth-child(9) { --i: 8; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-14px); opacity: 1; }
+}
+    </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex justify-between items-center">
-                <div>
-                    <img src="log.png" alt="" width="10%" height="10%">
-                    <h1 class="text-1xl font-bold text-gray-900">CLUB DE STARS</h1>
-                    <p class="text-sm text-gray-600">Multipurpose Cooperative Society Ltd</p>
-                </div>
-            </div>
+        <div id="loader-screen" class="loader-screen">
+        <div class="logo">
+            <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
         </div>
-    </header>
+    </div>
 
-    <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <!-- Left Side - Info -->
-            <div class="fade-in order-2 lg:order-1">
-                <div class="gradient-bg rounded-3xl p-6 md:p-8 text-white mb-6 md:mb-8">
-                    <div class="flex justify-center mb-6">
-                        <div class="bg-white bg-opacity-20 rounded-full p-4">
-                            <svg class="w-12 h-12 md:w-16 md:h-16" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
+    <div id="main-content" class="hidden">
+        
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <img src="log.png" alt="" width="10%" height="10%">
+                        <h1 class="text-1xl font-bold text-gray-900">CLUB DE STARS</h1>
+                        <p class="text-sm text-gray-600">Multipurpose Cooperative Society Ltd</p>
                     </div>
-                    <h2 class="text-2xl md:text-3xl font-bold mb-4 text-center">Password Recovery</h2>
-                    <p class="text-blue-50 mb-6 text-center">
-                        Don't worry! It happens to the best of us. Enter your email and we'll send you instructions to reset your password.
-                    </p>
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            <div>
-                                <h4 class="font-semibold mb-1">Quick Process</h4>
-                                <p class="text-blue-50 text-sm">Reset your password in just a few minutes</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            <div>
-                                <h4 class="font-semibold mb-1">Secure Link</h4>
-                                <p class="text-blue-50 text-sm">Password reset link expires in 1 hour for your security</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            <div>
-                                <h4 class="font-semibold mb-1">Email Verification</h4>
-                                <p class="text-blue-50 text-sm">Check your inbox and spam folder for the reset email</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-blue-50 rounded-2xl p-4 md:p-6 border border-blue-100">
-                    <h3 class="font-bold text-gray-900 text-lg mb-3">Still Need Help?</h3>
-                    <ul class="space-y-2 text-sm md:text-base text-gray-700">
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-blue-900 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-                            </svg>
-                            <a href="mailto:support@clubdestars.com" class="hover:text-blue-900 transition">support@clubdestars.com</a>
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-blue-900 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                            </svg>
-                            <a href="tel:+2341234567890" class="hover:text-blue-900 transition">+234 123 456 7890</a>
-                        </li>
-                    </ul>
                 </div>
             </div>
-
-            <!-- Right Side - Forgot Password Form -->
-            <div class="fade-in order-1 lg:order-2">
-                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Reset Your Password</h2>
-                    <p class="text-gray-600 mb-6">Enter your email address and we'll send you a link to reset your password</p>
-
-                    <!-- Alert Messages -->
-                    <div id="alertContainer"></div>
-
-                    <form id="forgotPasswordForm" method="POST" action="/forgot-password" class="space-y-5">
-                        <div>
-                            <label for="email" class="block text-gray-700 font-medium mb-2">
-                                Email Address <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-                                    </svg>
+        </header>
+    
+        <!-- Main Content -->
+        <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+            <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                <!-- Left Side - Info -->
+                <div class="fade-in order-2 lg:order-1">
+                    <div class="gradient-bg rounded-3xl p-6 md:p-8 text-white mb-6 md:mb-8">
+                        <div class="flex justify-center mb-6">
+                            <div class="bg-white bg-opacity-20 rounded-full p-4">
+                                <svg class="w-12 h-12 md:w-16 md:h-16" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-center">Password Recovery</h2>
+                        <p class="text-blue-50 mb-6 text-center">
+                            Don't worry! It happens to the best of us. Enter your email and we'll send you instructions to reset your password.
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div>
+                                    <h4 class="font-semibold mb-1">Quick Process</h4>
+                                    <p class="text-blue-50 text-sm">Reset your password in just a few minutes</p>
                                 </div>
-                                <input 
-                                    type="email" 
-                                    id="email"
-                                    name="email" 
-                                    required 
-                                    autocomplete="email"
-                                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition" 
-                                    placeholder="your@email.com">
                             </div>
-                            <p class="text-red-600 text-sm mt-1 hidden" id="emailError"></p>
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div>
+                                    <h4 class="font-semibold mb-1">Secure Link</h4>
+                                    <p class="text-blue-50 text-sm">Password reset link expires in 1 hour for your security</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div>
+                                    <h4 class="font-semibold mb-1">Email Verification</h4>
+                                    <p class="text-blue-50 text-sm">Check your inbox and spam folder for the reset email</p>
+                                </div>
+                            </div>
                         </div>
-
-                        <button 
-                            type="submit" 
-                            id="resetButton"
-                            class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg hover:shadow-xl transition transform hover:scale-105 active:scale-95">
-                            Send Reset Link
-                        </button>
-
-                        <div class="text-center pt-4 border-t border-gray-200">
-                            <p class="text-gray-600 mb-3">
-                                Remember your password? 
-                                <a href="/login" class="text-blue-900 hover:underline font-semibold">Login Here</a>
-                            </p>
-                            <p class="text-gray-600">
-                                Don't have an account? 
-                                <a href="/onboard/club-de-star-cooperative" class="text-blue-900 hover:underline font-semibold">Register Here</a>
-                            </p>
+                    </div>
+    
+                    <div class="bg-blue-50 rounded-2xl p-4 md:p-6 border border-blue-100">
+                        <h3 class="font-bold text-gray-900 text-lg mb-3">Still Need Help?</h3>
+                        <ul class="space-y-2 text-sm md:text-base text-gray-700">
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 text-blue-900 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                                </svg>
+                                <a href="mailto:support@clubdestars.com" class="hover:text-blue-900 transition">support@clubdestars.com</a>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 text-blue-900 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                                </svg>
+                                <a href="tel:+2341234567890" class="hover:text-blue-900 transition">+234 123 456 7890</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+    
+                <!-- Right Side - Forgot Password Form -->
+                <div class="fade-in order-1 lg:order-2">
+                    <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Reset Your Password</h2>
+                        <p class="text-gray-600 mb-6">Enter your email address and we'll send you a link to reset your password</p>
+    
+                        <!-- Alert Messages -->
+                        <div id="alertContainer"></div>
+    
+                        <form id="forgotPasswordForm" method="POST" action="/forgot-password" class="space-y-5">
+                            <div>
+                                <label for="email" class="block text-gray-700 font-medium mb-2">
+                                    Email Address <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                                        </svg>
+                                    </div>
+                                    <input 
+                                        type="email" 
+                                        id="email"
+                                        name="email" 
+                                        required 
+                                        autocomplete="email"
+                                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition" 
+                                        placeholder="your@email.com">
+                                </div>
+                                <p class="text-red-600 text-sm mt-1 hidden" id="emailError"></p>
+                            </div>
+    
+                            <button 
+                                type="submit" 
+                                id="resetButton"
+                                class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg hover:shadow-xl transition transform hover:scale-105 active:scale-95">
+                                Send Reset Link
+                            </button>
+    
+                            <div class="text-center pt-4 border-t border-gray-200">
+                                <p class="text-gray-600 mb-3">
+                                    Remember your password? 
+                                    <a href="/login" class="text-blue-900 hover:underline font-semibold">Login Here</a>
+                                </p>
+                                <p class="text-gray-600">
+                                    Don't have an account? 
+                                    <a href="/onboard/club-de-star-cooperative" class="text-blue-900 hover:underline font-semibold">Register Here</a>
+                                </p>
+                            </div>
+                        </form>
+    
+                        <!-- Help Text -->
+                        <div class="mt-6 bg-gray-50 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-900 mb-2 text-sm">What happens next?</h4>
+                            <ol class="text-sm text-gray-600 space-y-1 list-decimal list-inside">
+                                <li>You'll receive an email with a password reset link</li>
+                                <li>Click the link in the email (valid for 1 hour)</li>
+                                <li>Create a new secure password</li>
+                                <li>Login with your new password</li>
+                            </ol>
                         </div>
-                    </form>
-
-                    <!-- Help Text -->
-                    <div class="mt-6 bg-gray-50 rounded-lg p-4">
-                        <h4 class="font-semibold text-gray-900 mb-2 text-sm">What happens next?</h4>
-                        <ol class="text-sm text-gray-600 space-y-1 list-decimal list-inside">
-                            <li>You'll receive an email with a password reset link</li>
-                            <li>Click the link in the email (valid for 1 hour)</li>
-                            <li>Create a new secure password</li>
-                            <li>Login with your new password</li>
-                        </ol>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="text-center mt-8">
-            <a href="/" class="text-blue-900 hover:text-blue-700 font-medium inline-flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i> Back to Home
-            </a>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8 px-4 sm:px-6 lg:px-8 mt-16">
-        <div class="max-w-7xl mx-auto text-center">
-            <p class="text-gray-400 mb-2">CLUB DE STARS MULTIPURPOSE COOPERATIVE SOCIETY LTD</p>
-            <p class="text-sm text-gray-500">Powered by <a href="/" class="text-blue-400 hover:text-blue-300">JESZ LTD</a></p>
-            <div class="mt-4 flex flex-wrap justify-center gap-4 md:gap-6 text-sm text-gray-400">
-                <a href="/privacy" class="hover:text-white transition">Privacy Policy</a>
-                <a href="/terms" class="hover:text-white transition">Terms of Service</a>
-                <a href="/contact" class="hover:text-white transition">Contact Support</a>
+    
+            <div class="text-center mt-8">
+                <a href="/" class="text-blue-900 hover:text-blue-700 font-medium inline-flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Home
+                </a>
             </div>
-        </div>
-    </footer>
+        </main>
+    
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white py-8 px-4 sm:px-6 lg:px-8 mt-16">
+            <div class="max-w-7xl mx-auto text-center">
+                <p class="text-gray-400 mb-2">CLUB DE STARS MULTIPURPOSE COOPERATIVE SOCIETY LTD</p>
+                <p class="text-sm text-gray-500">Powered by <a href="/" class="text-blue-400 hover:text-blue-300">JESZ LTD</a></p>
+                <div class="mt-4 flex flex-wrap justify-center gap-4 md:gap-6 text-sm text-gray-400">
+                    <a href="/privacy" class="hover:text-white transition">Privacy Policy</a>
+                    <a href="/terms" class="hover:text-white transition">Terms of Service</a>
+                    <a href="/contact" class="hover:text-white transition">Contact Support</a>
+                </div>
+            </div>
+        </footer>
+    </div>
 
     <script>
         function showAlert(message, type = 'info') {
@@ -322,5 +375,23 @@
             }
         });
     </script>
+
+    <script>
+window.addEventListener("load", () => {
+  const loader = document.getElementById("loader-screen");
+  const main = document.getElementById("main-content");
+
+  setTimeout(() => {
+    loader.style.opacity = "0";
+    loader.style.transition = "opacity 0.6s ease";
+
+    setTimeout(() => {
+      loader.style.display = "none";
+      main.classList.remove("hidden");
+    }, 600);
+
+  }, 2500); // adjust duration
+});
+</script>
 </body>
 </html>

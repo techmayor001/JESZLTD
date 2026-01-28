@@ -91,201 +91,254 @@
             to { transform: rotate(360deg); }
         }
     </style>
+
+    <style>
+        .hidden {
+  display: none;
+}
+
+.loader-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0a1a2f, #102a44);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.logo span {
+  font-size: 52px;
+  font-weight: 600;
+  color: #5cc8ff;
+  display: inline-block;
+  animation: float 1.5s infinite ease-in-out;
+  letter-spacing: 1px;
+}
+
+.logo span:nth-child(n) {
+  animation-delay: calc(var(--i) * 0.1s);
+}
+
+.logo span:nth-child(1) { --i: 0; }
+.logo span:nth-child(2) { --i: 1; }
+.logo span:nth-child(3) { --i: 2; }
+.logo span:nth-child(4) { --i: 3; }
+.logo span:nth-child(5) { --i: 4; }
+.logo span:nth-child(6) { --i: 5; }
+.logo span:nth-child(7) { --i: 6; }
+.logo span:nth-child(8) { --i: 7; }
+.logo span:nth-child(9) { --i: 8; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-14px); opacity: 1; }
+}
+    </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex justify-between items-center">
-                 
-                <div>
-                    <img src="log.png" alt="" width="10%" height="10%">
-                    <h1 class="text-1xl font-bold text-gray-900">CLUB DE STARS</h1>
-                    <p class="text-sm text-gray-600">Multipurpose Cooperative Society Ltd</p>
-                </div>
-                
-            </div>
-        </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <!-- Left Side - Welcome Info -->
-            <div class="fade-in order-2 lg:order-1">
-                <div class="gradient-bg rounded-3xl p-6 md:p-8 text-white mb-6 md:mb-8">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-4">Welcome Back!</h2>
-                    <p class="text-blue-50 mb-6">
-                        Access your Club De Stars account to manage your savings, loans, and cooperative benefits.
-                    </p>
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            <div>
-                                <h4 class="font-semibold mb-1">Secure Access</h4>
-                                <p class="text-blue-50 text-sm">Your data is protected with advanced security</p>
+    <div id="loader-screen" class="loader-screen">
+        <div class="logo">
+            <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
+        </div>
+    </div>
+    <div id="main-content" class="hidden">
+
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex justify-between items-center">
+                     
+                    <div>
+                        <img src="log.png" alt="" width="10%" height="10%">
+                        <h1 class="text-1xl font-bold text-gray-900">CLUB DE STARS</h1>
+                        <p class="text-sm text-gray-600">Multipurpose Cooperative Society Ltd</p>
+                    </div>
+                    
+                </div>
+            </div>
+        </header>
+    
+        <!-- Main Content -->
+        <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+            <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                <!-- Left Side - Welcome Info -->
+                <div class="fade-in order-2 lg:order-1">
+                    <div class="gradient-bg rounded-3xl p-6 md:p-8 text-white mb-6 md:mb-8">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-4">Welcome Back!</h2>
+                        <p class="text-blue-50 mb-6">
+                            Access your Club De Stars account to manage your savings, loans, and cooperative benefits.
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div>
+                                    <h4 class="font-semibold mb-1">Secure Access</h4>
+                                    <p class="text-blue-50 text-sm">Your data is protected with advanced security</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex items-start">
-                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            <div>
-                                <h4 class="font-semibold mb-1">Real-time Updates</h4>
-                                <p class="text-blue-50 text-sm">Track your financial activities instantly</p>
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div>
+                                    <h4 class="font-semibold mb-1">Real-time Updates</h4>
+                                    <p class="text-blue-50 text-sm">Track your financial activities instantly</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex items-start">
-                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            <div>
-                                <h4 class="font-semibold mb-1">24/7 Support</h4>
-                                <p class="text-blue-50 text-sm">We're here to help whenever you need</p>
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div>
+                                    <h4 class="font-semibold mb-1">24/7 Support</h4>
+                                    <p class="text-blue-50 text-sm">We're here to help whenever you need</p>
+                                </div>
                             </div>
                         </div>
                     </div>
+    
+                    <div class="bg-blue-50 rounded-2xl p-4 md:p-6 border border-blue-100">
+                        <h3 class="font-bold text-gray-900 text-lg mb-3">Need Help?</h3>
+                        <ul class="space-y-2 text-sm md:text-base text-gray-700">
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 text-blue-900 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                                </svg>
+                                <a href="mailto:support@clubdestars.com" class="hover:text-blue-900 transition">support@clubdestars.com</a>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 text-blue-900 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                                </svg>
+                                <a href="tel:+2341234567890" class="hover:text-blue-900 transition">+234 123 456 7890</a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-
-                <div class="bg-blue-50 rounded-2xl p-4 md:p-6 border border-blue-100">
-                    <h3 class="font-bold text-gray-900 text-lg mb-3">Need Help?</h3>
-                    <ul class="space-y-2 text-sm md:text-base text-gray-700">
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-blue-900 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-                            </svg>
-                            <a href="mailto:support@clubdestars.com" class="hover:text-blue-900 transition">support@clubdestars.com</a>
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-blue-900 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                            </svg>
-                            <a href="tel:+2341234567890" class="hover:text-blue-900 transition">+234 123 456 7890</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Right Side - Login Form -->
-            <div class="fade-in order-1 lg:order-2">
-                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Login to Your Account</h2>
-                    <p class="text-gray-600 mb-6">Enter your credentials to access your dashboard</p>
-
-                    <!-- Alert Messages (populated by backend) -->
-                    <% if (typeof error !== 'undefined' && error) { %>
-                        <div class="alert alert-error" id="alertBox">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span><%= error %></span>
-                        </div>
-                    <% } %>
-
-                    <% if (typeof success !== 'undefined' && success) { %>
-                        <div class="alert alert-success" id="alertBox">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span><%= success %></span>
-                        </div>
-                    <% } %>
-
-                    <% if (typeof info !== 'undefined' && info) { %>
-                        <div class="alert alert-info" id="alertBox">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span><%= info %></span>
-                        </div>
-                    <% } %>
-
-                    <form id="loginForm" method="POST" action="/login" class="space-y-5">
-                        <div>
-                            <label for="email" class="block text-gray-700 font-medium mb-2">
-                                Email Address <span class="text-red-500">*</span>
-                            </label>
-                            <input 
-                                type="email" 
-                                id="email"
-                                name="email" 
-                                required 
-                                autocomplete="email"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition" 
-                                placeholder="your@email.com">
-                            <p class="text-red-600 text-sm mt-1 hidden" id="emailError"></p>
-                        </div>
-
-                        <div>
-                            <label for="password" class="block text-gray-700 font-medium mb-2">
-                                Password <span class="text-red-500">*</span>
-                            </label>
-                            <div class="input-wrapper">
+    
+                <!-- Right Side - Login Form -->
+                <div class="fade-in order-1 lg:order-2">
+                    <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Login to Your Account</h2>
+                        <p class="text-gray-600 mb-6">Enter your credentials to access your dashboard</p>
+    
+                        <!-- Alert Messages (populated by backend) -->
+                        <% if (typeof error !== 'undefined' && error) { %>
+                            <div class="alert alert-error" id="alertBox">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span><%= error %></span>
+                            </div>
+                        <% } %>
+    
+                        <% if (typeof success !== 'undefined' && success) { %>
+                            <div class="alert alert-success" id="alertBox">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span><%= success %></span>
+                            </div>
+                        <% } %>
+    
+                        <% if (typeof info !== 'undefined' && info) { %>
+                            <div class="alert alert-info" id="alertBox">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span><%= info %></span>
+                            </div>
+                        <% } %>
+    
+                        <form id="loginForm" method="POST" action="/login" class="space-y-5">
+                            <div>
+                                <label for="email" class="block text-gray-700 font-medium mb-2">
+                                    Email Address <span class="text-red-500">*</span>
+                                </label>
                                 <input 
-                                    type="password" 
-                                    id="password"
-                                    name="password" 
+                                    type="email" 
+                                    id="email"
+                                    name="email" 
                                     required 
-                                    autocomplete="current-password"
-                                    class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition" 
-                                    placeholder="Enter your password">
-                                <i class="fas fa-eye password-toggle" id="togglePassword" onclick="togglePasswordVisibility()"></i>
+                                    autocomplete="email"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition" 
+                                    placeholder="your@email.com">
+                                <p class="text-red-600 text-sm mt-1 hidden" id="emailError"></p>
                             </div>
-                            <p class="text-red-600 text-sm mt-1 hidden" id="passwordError"></p>
-                        </div>
-
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <div class="flex items-center">
-                                <input 
-                                    type="checkbox" 
-                                    id="remember" 
-                                    name="remember"
-                                    class="w-4 h-4 text-blue-900 border-gray-300 rounded focus:ring-blue-900 cursor-pointer">
-                                <label for="remember" class="ml-2 text-sm text-gray-700 cursor-pointer">Remember me</label>
+    
+                            <div>
+                                <label for="password" class="block text-gray-700 font-medium mb-2">
+                                    Password <span class="text-red-500">*</span>
+                                </label>
+                                <div class="input-wrapper">
+                                    <input 
+                                        type="password" 
+                                        id="password"
+                                        name="password" 
+                                        required 
+                                        autocomplete="current-password"
+                                        class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition" 
+                                        placeholder="Enter your password">
+                                    <i class="fas fa-eye password-toggle" id="togglePassword" onclick="togglePasswordVisibility()"></i>
+                                </div>
+                                <p class="text-red-600 text-sm mt-1 hidden" id="passwordError"></p>
                             </div>
-                            <a href="/forgot-password" class="text-sm text-blue-900 hover:underline font-medium">Forgot Password?</a>
-                        </div>
-
-                        <button 
-                            type="submit" 
-                            id="loginButton"
-                            class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg hover:shadow-xl transition transform hover:scale-105 active:scale-95">
-                            Login to Account
-                        </button>
-
-                        <div class="text-center pt-4 border-t border-gray-200">
-                            <p class="text-gray-600">
-                                Don't have an account? 
-                                <a href="/onboard/club-de-star-cooperative" class="text-blue-900 hover:underline font-semibold">Register Here</a>
-                            </p>
-                        </div>
-                    </form>
+    
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div class="flex items-center">
+                                    <input 
+                                        type="checkbox" 
+                                        id="remember" 
+                                        name="remember"
+                                        class="w-4 h-4 text-blue-900 border-gray-300 rounded focus:ring-blue-900 cursor-pointer">
+                                    <label for="remember" class="ml-2 text-sm text-gray-700 cursor-pointer">Remember me</label>
+                                </div>
+                                <a href="/forgot-password" class="text-sm text-blue-900 hover:underline font-medium">Forgot Password?</a>
+                            </div>
+    
+                            <button 
+                                type="submit" 
+                                id="loginButton"
+                                class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg hover:shadow-xl transition transform hover:scale-105 active:scale-95">
+                                Login to Account
+                            </button>
+    
+                            <div class="text-center pt-4 border-t border-gray-200">
+                                <p class="text-gray-600">
+                                    Don't have an account? 
+                                    <a href="/onboard/club-de-star-cooperative" class="text-blue-900 hover:underline font-semibold">Register Here</a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="text-center mt-8">
-            <a href="/" class="text-blue-900 hover:text-blue-700 font-medium inline-flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i> Back to Home
-            </a>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8 px-4 sm:px-6 lg:px-8 mt-16">
-        <div class="max-w-7xl mx-auto text-center">
-            <p class="text-gray-400 mb-2">CLUB DE STARS MULTIPURPOSE COOPERATIVE SOCIETY LTD</p>
-            <p class="text-sm text-gray-500">Powered by <a href="/" class="text-blue-400 hover:text-blue-300">JESZ LTD</a></p>
-            <div class="mt-4 flex flex-wrap justify-center gap-4 md:gap-6 text-sm text-gray-400">
-                <a href="/privacy" class="hover:text-white transition">Privacy Policy</a>
-                <a href="/terms" class="hover:text-white transition">Terms of Service</a>
-                <a href="/contact" class="hover:text-white transition">Contact Support</a>
+    
+            <div class="text-center mt-8">
+                <a href="/" class="text-blue-900 hover:text-blue-700 font-medium inline-flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Home
+                </a>
             </div>
-        </div>
-    </footer>
+        </main>
+    
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white py-8 px-4 sm:px-6 lg:px-8 mt-16">
+            <div class="max-w-7xl mx-auto text-center">
+                <p class="text-gray-400 mb-2">CLUB DE STARS MULTIPURPOSE COOPERATIVE SOCIETY LTD</p>
+                <p class="text-sm text-gray-500">Powered by <a href="/" class="text-blue-400 hover:text-blue-300">JESZ LTD</a></p>
+                <div class="mt-4 flex flex-wrap justify-center gap-4 md:gap-6 text-sm text-gray-400">
+                    <a href="/privacy" class="hover:text-white transition">Privacy Policy</a>
+                    <a href="/terms" class="hover:text-white transition">Terms of Service</a>
+                    <a href="/contact" class="hover:text-white transition">Contact Support</a>
+                </div>
+            </div>
+        </footer>
+    </div>
 
     <script>
         // Password visibility toggle
@@ -372,5 +425,25 @@
         style.textContent = '@keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }';
         document.head.appendChild(style);
     </script>
+
+
+
+<script>
+window.addEventListener("load", () => {
+  const loader = document.getElementById("loader-screen");
+  const main = document.getElementById("main-content");
+
+  setTimeout(() => {
+    loader.style.opacity = "0";
+    loader.style.transition = "opacity 0.6s ease";
+
+    setTimeout(() => {
+      loader.style.display = "none";
+      main.classList.remove("hidden");
+    }, 600);
+
+  }, 2500); // adjust duration
+});
+</script>
 </body>
 </html>

@@ -135,6 +135,8 @@ router.get("/deposit/verify", async (req, res) => {
 });
 
 router.post("/deposit/cooperative", async (req, res) => {
+  console.log("Raw coopAmount:", req.body.coopAmount);
+
   try {
     if (!req.isAuthenticated()) {
       return res.redirect("/login");
@@ -353,5 +355,79 @@ router.get("/loan/verify", async (req, res) => {
   }
 });
 
+router.post("/loan/payment/manual", async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = req.user;
+    const { loanId, amount, payerName } = req.body;
+
+    // ✅ Force NAIRA value (not kobo)
+    const paymentAmount = Math.round(Number(amount));
+
+    // ---------- VALIDATION ----------
+    if (!loanId) {
+      return res.status(400).json({ message: "Loan is required" });
+    }
+
+    if (!paymentAmount || isNaN(paymentAmount) || paymentAmount <= 0) {
+      return res.status(400).json({ message: "Invalid amount" });
+    }
+
+    const loan = await Loan.findOne({
+      _id: loanId,
+      user: user._id,
+      status: "approved"
+    });
+
+    if (!loan) {
+      return res.status(404).json({ message: "Loan not found or inactive" });
+    }
+
+    if (payerName && !payerName.trim()) {
+      return res.status(400).json({ message: "Invalid payer name" });
+    }
+
+    // ---------- REFERENCE ----------
+    const reference = `LOAN-MANUAL-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+
+    // ---------- PAYMENT RECORD ----------
+    await Payment.create({
+      user: user._id,
+      email: user.email,
+      loanId: loan._id,
+      amount: paymentAmount, // ✅ FULL NAIRA VALUE
+      reference,
+      payeeName: payerName?.trim() || null,
+      status: "pending"
+    });
+
+    // ---------- TRANSACTION RECORD ----------
+    await Transaction.create({
+      user: user._id,
+      type: "loan_payment",
+      amount: paymentAmount, // ✅ FULL NAIRA VALUE
+      description: "Manual loan repayment (Pending approval)",
+      reference,
+      method: "Manual", // ✅ NOT Paystack
+      status: "pending"
+    });
+
+    console.log(
+      `🕒 Manual loan repayment pending → ₦${paymentAmount} | Loan ${loan._id} | ${user.email}`
+    );
+
+    return res.status(200).json({
+      status: true,
+      message: "Loan repayment submitted for admin approval"
+    });
+
+  } catch (err) {
+    console.error("Manual loan repayment error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
 module.exports = router;
