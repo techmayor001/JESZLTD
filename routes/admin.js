@@ -863,6 +863,7 @@ router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
     const durationMonths = loan.user ? loan.duration?.duration : loan.externalDuration;
     if (!durationMonths) return res.status(400).json({ message: "Loan duration missing." });
 
+    // Remove previous pending loan
     if (loan.user) {
       const existingLoan = await Loan.findOne({
         user: loan.user._id,
@@ -900,7 +901,7 @@ router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
       externalBorrower: loan.user ? undefined : loan.external
     });
 
-    // Loan approval transaction (borrower)
+    // Borrower transaction
     if (loan.user) {
       await Transaction.create({
         user: loan.user._id,
@@ -908,42 +909,45 @@ router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
         amount: loan.amount,
         status: "successful",
         method: disbursementMethod,
-        description: `Loan approved and disbursed`
+        description: "Loan approved and disbursed"
       });
     }
 
     // Settings
     const settings = await Settings.getSettings();
-    const roiOperatingCharge = Number(settings.otherFees.roiOperatingCharge || 10);
+    const roiOperatingCharge = Number(settings.otherFees?.roiOperatingCharge || 10);
 
     // Month key
     const now = new Date();
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-    // Interest from THIS loan only
-    const interestForLoan = loan.amount * (loan.interestRate / 100) * durationMonths;
-    const companyChargeForThisLoan = interestForLoan * (roiOperatingCharge / 100);
-    const netInterestForThisLoan = interestForLoan - companyChargeForThisLoan;
+    // Interest calculations (per loan)
+    const interestForLoan =
+      loan.amount * (loan.interestRate / 100) * durationMonths;
+
+    const companyChargeForThisLoan =
+      interestForLoan * (roiOperatingCharge / 100);
+
+    const netInterestForThisLoan =
+      interestForLoan - companyChargeForThisLoan;
 
     // Company ROI aggregation
     let companyRoi = await CompanyROI.findOne({ month: currentMonth });
+
     if (!companyRoi) {
       companyRoi = await CompanyROI.create({
         month: currentMonth,
-        totalSavings: 0,
         totalInterestCollected: interestForLoan,
         companyCharge: companyChargeForThisLoan,
         netInterestForRoi: netInterestForThisLoan,
         totalRoiDistributed: 0,
         status: "open",
-        loanRoiHistory: [
-          {
-            loan: loan._id,
-            interestForLoan,
-            companyChargeForLoan: companyChargeForThisLoan,
-            netInterestForLoan: netInterestForThisLoan
-          }
-        ]
+        loanRoiHistory: [{
+          loan: loan._id,
+          interestForLoan,
+          companyChargeForLoan: companyChargeForThisLoan,
+          netInterestForLoan: netInterestForThisLoan
+        }]
       });
     } else {
       companyRoi.totalInterestCollected += interestForLoan;
@@ -958,34 +962,44 @@ router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
       });
     }
 
-    // Accounts
+    // ROI Distribution (NEW FORMULA)
     const allAccounts = await Account.find({}).populate("user");
-    const totalSavingsAllMembers = allAccounts.reduce((sum, acc) => sum + Number(acc.balance || 0), 0);
+
+    const totalCumulativeSavings = allAccounts.reduce(
+      (sum, acc) => sum + Number(acc.balance || 0),
+      0
+    );
+
     const safeMoney = n => Math.round(n * 100) / 100;
 
     let totalDistributed = 0;
 
     for (const acc of allAccounts) {
-      const memberSavings = Number(acc.balance || 0);
-      if (memberSavings <= 0 || totalSavingsAllMembers <= 0) continue;
+      const userSavings = Number(acc.balance || 0);
+      if (userSavings <= 0 || totalCumulativeSavings <= 0) continue;
 
-      const userROI = (memberSavings / totalSavingsAllMembers) * netInterestForThisLoan;
+      const userROI =
+        (userSavings / totalCumulativeSavings) * netInterestForThisLoan;
+
       const roundedROI = safeMoney(userROI);
 
-      // Monthly record (per loan)
+      // Monthly history (per loan)
       acc.monthlyRoiHistory.push({
         month: currentMonth,
         roi: roundedROI
       });
 
-      // Update accumulative ROI
-      acc.accumulativeROI = safeMoney(acc.monthlyRoiHistory.reduce((sum, m) => sum + m.roi, 0));
+      // Accumulative ROI
+      acc.accumulativeROI = safeMoney(
+        acc.accumulativeROI + roundedROI
+      );
+
       acc.lastRoiPayout = new Date();
       await acc.save();
 
       totalDistributed += roundedROI;
 
-      // ROI transaction (per loan)
+      // ROI transaction
       await Transaction.create({
         user: acc.user._id,
         type: "roi",
@@ -1005,9 +1019,9 @@ router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
 
     return res.status(200).json({
       message: `Loan for ${borrowerName} approved successfully.`,
+      roiDistributed: totalDistributed,
       loan,
       ledger: ledgerEntry,
-      roiDistributed: totalDistributed,
       companyRoi
     });
 
@@ -1016,6 +1030,7 @@ router.post("/api/loans/approve", ensureAdmin, async (req, res) => {
     return res.status(500).json({ message: "Server error while approving loan." });
   }
 });
+
 
 
 
