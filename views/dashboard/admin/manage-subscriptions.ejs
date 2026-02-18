@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club De Stars - Payments Management | Powered by JESZ LIMITED</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Righteous&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --sidebar-width: 280px;
+            --exchange-rate: <%= exchangeRate %>;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+            transform: translateX(0);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .logo-box {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            line-height: 1.2;
+            font-weight: 800;
+        }
+        
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(239, 68, 68, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 0.875rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .sidebar-menu a:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left-color: white;
+        }
+        
+        .sidebar-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 70px;
+            padding: 1.5rem;
+            min-height: calc(100vh - 70px);
+            transition: all 0.3s;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        
+        .countdown-timer {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+            border: 2px solid #ef4444;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .countdown-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #ef4444;
+            line-height: 1;
+            font-family: 'Righteous', cursive;
+        }
+        
+        .penalty-banner {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .payment-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+            position: relative;
+        }
+        
+        .payment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        }
+        
+        .payment-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+        
+        .status-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .service-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.9rem;
+        }
+        
+        .service-detail:last-child {
+            border-bottom: none;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            background: white;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            padding: 1.25rem;
+            border-radius: 16px 16px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            border-radius: 20px 20px 0 0;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
+        }
+        
+        .modal-footer {
+            border-top: 2px solid rgba(30, 58, 138, 0.1);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid rgba(30, 58, 138, 0.2);
+            padding: 0.6rem 1rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.15);
+        }
+        
+        .calculator-box {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            border: 1px solid rgba(30, 58, 138, 0.05);
+            margin-bottom: 1.5rem;
+        }
+        
+        .currency-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .currency-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 10px;
+            border: 2px solid rgba(30, 58, 138, 0.2);
+            background: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .currency-btn.active {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .price-display {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            font-family: 'Righteous', cursive;
+        }
+        
+        .powered-by {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            z-index: 1000;
+        }
+        
+        .progress-custom {
+            height: 8px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.05);
+        }
+        
+        .progress-custom .progress-bar {
+            border-radius: 10px;
+        }
+        
+        .payment-info-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .service-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .service-link:hover {
+            color: var(--primary-light);
+            transform: translateX(3px);
+        }
+        
+        .table {
+            font-size: 0.9rem;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
+            white-space: nowrap;
+        }
+        
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        /* Mobile Table Card View */
+        @media (max-width: 768px) {
+            .table-responsive {
+                border: none;
+            }
+            
+            .payment-table-mobile {
+                display: block;
+            }
+            
+            .payment-table-mobile .table {
+                display: none;
+            }
+            
+            .mobile-payment-card {
+                background: white;
+                border-radius: 12px;
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border: 1px solid rgba(30, 58, 138, 0.1);
+                box-shadow: 0 4px 10px rgba(30, 58, 138, 0.05);
+            }
+            
+            .mobile-payment-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: start;
+                margin-bottom: 0.75rem;
+                padding-bottom: 0.75rem;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            }
+            
+            .mobile-payment-service {
+                font-weight: 600;
+                color: var(--primary);
+                font-size: 0.95rem;
+            }
+            
+            .mobile-payment-detail {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.4rem 0;
+                font-size: 0.85rem;
+            }
+            
+            .mobile-payment-detail .label {
+                color: #64748b;
+                font-weight: 500;
+            }
+            
+            .mobile-payment-detail .value {
+                font-weight: 600;
+                text-align: right;
+            }
+            
+            .mobile-payment-actions {
+                margin-top: 0.75rem;
+                padding-top: 0.75rem;
+                border-top: 1px solid rgba(0, 0, 0, 0.05);
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .mobile-payment-card {
+                display: none;
+            }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .top-navbar {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .page-header {
+                padding: 1.5rem;
+            }
+            
+            .payment-card {
+                padding: 1.25rem;
+            }
+            
+            .countdown-number {
+                font-size: 2.5rem;
+            }
+            
+            .powered-by {
+                bottom: 10px;
+                right: 10px;
+                font-size: 0.7rem;
+                padding: 8px 12px;
+            }
+            
+            .price-display {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .top-navbar {
+                height: 60px;
+                padding: 0 1rem;
+            }
+            
+            .main-content {
+                margin-top: 60px;
+                padding: 0.75rem;
+            }
+            
+            .page-header {
+                padding: 1.25rem;
+                border-radius: 16px;
+            }
+            
+            .page-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .page-header p {
+                font-size: 0.9rem;
+            }
+            
+            .payment-card {
+                padding: 1rem;
+            }
+            
+            .payment-card h6 {
+                font-size: 0.95rem;
+            }
+            
+            .payment-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4rem;
+            }
+            
+            .countdown-number {
+                font-size: 2rem;
+            }
+            
+            .card-header {
+                padding: 1rem;
+            }
+            
+            .card-header h5 {
+                font-size: 1rem;
+            }
+            
+            .sidebar-header {
+                padding: 1.25rem;
+            }
+            
+            .logo-box {
+                width: 40px;
+                height: 40px;
+                font-size: 1.25rem;
+            }
+            
+            .sidebar-title {
+                font-size: 1rem;
+            }
+            
+            .service-detail {
+                font-size: 0.85rem;
+            }
+            
+            .service-detail span {
+                word-break: break-word;
+            }
+            
+            .calculator-box {
+                padding: 1rem;
+            }
+            
+            .price-display {
+                font-size: 1.25rem;
+            }
+            
+            .btn {
+                font-size: 0.9rem;
+                padding: 0.5rem 1rem;
+            }
+            
+            .penalty-banner h6 {
+                font-size: 0.95rem;
+            }
+            
+            .penalty-banner .small {
+                font-size: 0.8rem;
+            }
+            
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+            
+            .table {
+                font-size: 0.8rem;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .content-section {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1035;
+        }
+        
+        .overlay.active {
+            display: block;
+        }
+
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.15em;
+        }
+
+        .payment-details-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .detail-row {
+            padding: 0.75rem;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.02) 0%, rgba(59, 130, 246, 0.02) 100%);
+            border-radius: 10px;
+            border: 1px solid rgba(30, 58, 138, 0.05);
+        }
+        
+        .detail-label {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            color: #1e3a8a;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">C</div>
+                <div>
+                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                </div>
+            </div>
+            <div class="admin-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>Super Admin</span>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
+            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
+            <a href="/admin/transaction-approvals">
+                <i class="fas fa-tasks"></i> Approvals
+                <span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span>
+            </a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
+            <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
+            <a href="/manage-subscriptions" class="active"><i class="fas fa-cube"></i> Manage Subscription</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
+             <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
+            <a href="/club-de-star-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);">
+                <i class="fas fa-sign-in-alt"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3"
+           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+           onclick="toggleSidebar()"></i>
+        
+        <div class="flex-grow-1">
+            <h5 class="mb-0 fw-bold d-none d-md-block" style="color: var(--primary)">Payments Management</h5>
+            <h6 class="mb-0 fw-bold d-md-none" style="color: var(--primary)">Payments</h6>
+            <small class="text-muted d-none d-sm-block">Track all service subscriptions & renewals</small>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="position-relative">
+                <i class="fas fa-bell" style="color: var(--primary); font-size: 1.25rem; cursor: pointer;"></i>
+                <% if (summary.expiringServices > 0) { %>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;"><%= summary.expiringServices %></span>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header position-relative">
+            <div class="row align-items-center position-relative" style="z-index: 1;">
+                <div class="col-md-8">
+                    <h2 class="mb-2 fw-bold"><i class="fas fa-credit-card me-2"></i>Payments & Subscriptions</h2>
+                    <p class="mb-3 opacity-90">Manage all hosting, domain, and maintenance payments</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <div class="badge bg-light text-dark">
+                            <i class="fas fa-calendar me-1"></i>
+                            <span id="currentDate"></span>
+                        </div>
+                        <div class="badge bg-light text-dark">
+                            <i class="fas fa-building me-1"></i>
+                            Techmayorco Team
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-light fw-semibold" onclick="openCalculator()">
+                        <i class="fas fa-calculator me-2"></i>Calculator
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="text-primary mb-2">
+                            <i class="fas fa-check-circle" style="font-size: 2rem;"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1"><%= summary.activeServices %></h3>
+                        <p class="text-muted mb-0 small">Active Services</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="text-warning mb-2">
+                            <i class="fas fa-clock" style="font-size: 2rem;"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1"><%= summary.expiringServices %></h3>
+                        <p class="text-muted mb-0 small">Expiring Soon</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="text-danger mb-2">
+                            <i class="fas fa-times-circle" style="font-size: 2rem;"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1"><%= summary.expiredServices %></h3>
+                        <p class="text-muted mb-0 small">Expired</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="text-success mb-2">
+                            <i class="fas fa-money-bill-wave" style="font-size: 2rem;"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1">₦<%= summary.totalSpend.toLocaleString() %></h3>
+                        <p class="text-muted mb-0 small">Total Spend</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Countdown Timer -->
+        <% if (summary.nextRenewal && summary.daysUntilRenewal >= 0) { 
+            // Find the service that has the next renewal
+            const nextRenewalService = services.find(s => 
+                s.nextRenewalDate && 
+                new Date(s.nextRenewalDate).getTime() === new Date(summary.nextRenewal.nextRenewalDate).getTime()
+            );
+            const serviceName = nextRenewalService ? nextRenewalService.name : 'Service';
+        %>
+        <div class="countdown-timer">
+            <div class="row align-items-center">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h6 class="fw-bold mb-2" style="color: #991b1b;">
+                        <i class="fas fa-clock me-2"></i>TIME UNTIL RENEWAL
+                    </h6>
+                    <div class="countdown-number" id="daysLeft"><%= summary.daysUntilRenewal %></div>
+                    <small class="fw-semibold" style="color: #991b1b;">Days Remaining</small>
+                </div>
+                <div class="col-md-8">
+                    <h6 class="fw-bold mb-2" style="color: #991b1b;">
+                        Next Renewal: <%= serviceName %> - <%= new Date(summary.nextRenewal.nextRenewalDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                    </h6>
+                    <div class="progress-custom mb-2">
+                        <% 
+                            // Calculate progress based on when the service started vs when it expires
+                            const now = new Date();
+                            const renewalDate = new Date(summary.nextRenewal.nextRenewalDate);
+                            const startDate = new Date(summary.nextRenewal.currentPeriodStart);
+                            const totalPeriod = renewalDate - startDate;
+                            const elapsed = now - startDate;
+                            const progressPercent = Math.min(100, Math.max(0, (elapsed / totalPeriod) * 100));
+                        %>
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: <%= progressPercent.toFixed(2) %>%" id="timeProgress"></div>
+                    </div>
+                    <small class="fw-semibold" style="color: #991b1b;">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Renew on time to avoid automatic site shutdown after 1 week
+                    </small>
+                </div>
+            </div>
+        </div>
+        <% } else if (summary.nextRenewal) { %>
+        <div class="countdown-timer" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);">
+            <div class="text-center">
+                <h5 class="fw-bold mb-2" style="color: #991b1b;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>SERVICE EXPIRED
+                </h5>
+                <p class="mb-0 fw-semibold" style="color: #991b1b;">
+                    Renewal was due on <%= new Date(summary.nextRenewal.nextRenewalDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>. 
+                    Please renew immediately to avoid service disruption.
+                </p>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Critical Alerts -->
+        <div class="penalty-banner">
+            <h6 class="fw-bold mb-3" style="color: #92400e;">
+                <i class="fas fa-shield-alt me-2"></i>IMPORTANT: Renewal & Penalty Policy
+            </h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fas fa-exclamation-circle" style="color: #f59e0b; font-size: 1.5rem; flex-shrink: 0;"></i>
+                        <div style="flex: 1;">
+                            <strong>1 Week Grace Period</strong>
+                            <p class="mb-0 small">Sites automatically stop after 1 week of non-payment. Penalty fees apply for reactivation.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fas fa-ban" style="color: #ef4444; font-size: 1.5rem; flex-shrink: 0;"></i>
+                        <div style="flex: 1;">
+                            <strong>2 Week Deletion</strong>
+                            <p class="mb-0 small">After 2 weeks of expiration, all data will be permanently deleted.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fas fa-tools" style="color: #06b6d4; font-size: 1.5rem; flex-shrink: 0;"></i>
+                        <div style="flex: 1;">
+                            <strong>Maintenance Charges</strong>
+                            <p class="mb-0 small">Custom maintenance: ₦100,000+ per page. Contact Techmayorco Team.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Payment Cards -->
+        <div class="row g-3 mb-4">
+            <% services.forEach(function(service, index) { 
+                const statusColors = {
+                    'Active': 'success',
+                    'Expiring Soon': 'warning',
+                    'Expired': 'danger',
+                    'Grace Period': 'warning',
+                    'Suspended': 'secondary'
+                };
+                const statusColor = statusColors[service.status] || 'secondary';
+                
+                const iconColors = [
+                    'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                    'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                    'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)'
+                ];
+                
+                const icons = ['fa-globe', 'fa-envelope', 'fa-paper-plane', 'fa-database', 'fa-server'];
+                
+                let priceDisplay = '';
+                if (service.currency === 'NGN') {
+                    priceDisplay = `₦${service.price.toLocaleString('en-NG', {minimumFractionDigits: 2})}/${service.billingPeriod}`;
+                } else {
+                    if (service.billingPeriod === 'month') {
+                        const yearlyUSD = service.price * 12;
+                        const yearlyNGN = yearlyUSD * exchangeRate;
+                        priceDisplay = `$${service.price}/month (₦${yearlyNGN.toLocaleString('en-NG')}/year)`;
+                    } else {
+                        const nairaPrice = service.price * exchangeRate;
+                        priceDisplay = `$${service.price}/${service.billingPeriod} (₦${nairaPrice.toLocaleString('en-NG')})`;
+                    }
+                }
+            %>
+            <div class="col-lg-4 col-md-6">
+                <div class="payment-card">
+                    <span class="status-badge bg-<%= statusColor %> text-white">
+                        <i class="fas fa-<%= service.status === 'Active' ? 'check-circle' : 'clock' %> me-1"></i><%= service.status %>
+                    </span>
+                    <div class="payment-icon" style="background: <%= iconColors[index % iconColors.length] %>; color: white;">
+                        <i class="fas <%= icons[index % icons.length] %>"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2"><%= service.name %></h6>
+                    <p class="text-muted small mb-3"><%= service.description %></p>
+                    <div class="service-detail">
+                        <span class="text-muted small">Provider:</span>
+                        <span class="fw-semibold"><%= service.provider %></span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="text-muted small">Price:</span>
+                        <span class="fw-bold text-primary"><%= priceDisplay %></span>
+                    </div>
+                    <% if (service.nextRenewalDate) { %>
+                    <div class="service-detail">
+                        <span class="text-muted small">Due Date:</span>
+                        <span class="fw-bold text-danger"><%= new Date(service.nextRenewalDate).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'}) %></span>
+                    </div>
+                    <% } %>
+                    <% if (service.lastPaymentDate) { %>
+                    <div class="service-detail">
+                        <span class="text-muted small">Last Paid:</span>
+                        <span class="text-success"><%= new Date(service.lastPaymentDate).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'}) %></span>
+                    </div>
+                    <% } %>
+                    <% if (service.providerLink) { %>
+                    <a href="<%= service.providerLink %>" target="_blank" class="service-link">
+                        <i class="fas fa-external-link-alt"></i> View <%= service.provider %>
+                    </a>
+                    <% } %>
+                    <button class="btn btn-primary btn-sm w-100 mt-3" onclick="openRenewalModal('<%= service.serviceKey %>')">
+                        <i class="fas fa-sync-alt me-1"></i>Renew Now
+                    </button>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+
+        <!-- Payment History Table -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-history me-2"></i>Payment History</h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <select class="form-select form-select-sm" style="max-width: 150px;" id="serviceFilter" onchange="filterPayments()">
+                        <option value="all">All Services</option>
+                        <% services.forEach(function(service) { %>
+                        <option value="<%= service.serviceKey %>"><%= service.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Desktop Table View -->
+                <div class="table-responsive d-none d-md-block">
+                    <table class="table table-hover" id="paymentTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Service</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Reference</th>
+                                <th>Recorded By</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentHistoryBody">
+                            <% paymentHistory.forEach(function(payment) { 
+                                let amountDisplay = '';
+                                if (payment.currency === 'NGN') {
+                                    amountDisplay = `₦${payment.amount.toLocaleString('en-NG', {minimumFractionDigits: 2})}`;
+                                } else {
+                                    amountDisplay = `$${payment.amount} (₦${payment.amountInNaira.toLocaleString('en-NG')})`;
+                                }
+                                
+                                const statusColors = {
+                                    'Paid': 'success',
+                                    'Pending': 'warning',
+                                    'Failed': 'danger',
+                                    'Refunded': 'secondary'
+                                };
+                                const statusColor = statusColors[payment.status] || 'secondary';
+                            %>
+                            <tr data-service="<%= payment.service.serviceKey %>">
+                                <td><%= new Date(payment.paymentDate).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'}) %></td>
+                                <td><%= payment.serviceName %></td>
+                                <td><%= amountDisplay %></td>
+                                <td><span class="badge bg-<%= statusColor %>"><%= payment.status %></span></td>
+                                <td class="small"><%= payment.transactionReference %></td>
+                                <td class="small"><%= payment.recordedBy ? payment.recordedBy.firstName + ' ' + payment.recordedBy.lastName : 'System' %></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick='viewPaymentDetails(<%= JSON.stringify(payment) %>)'>
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div id="mobilePaymentsList" class="d-md-none">
+                    <% paymentHistory.forEach(function(payment) { 
+                        let amountDisplay = '';
+                        if (payment.currency === 'NGN') {
+                            amountDisplay = `₦${payment.amount.toLocaleString('en-NG', {minimumFractionDigits: 2})}`;
+                        } else {
+                            amountDisplay = `$${payment.amount} (₦${payment.amountInNaira.toLocaleString('en-NG')})`;
+                        }
+                        
+                        const statusColors = {
+                            'Paid': 'success',
+                            'Pending': 'warning',
+                            'Failed': 'danger',
+                            'Refunded': 'secondary'
+                        };
+                        const statusColor = statusColors[payment.status] || 'secondary';
+                    %>
+                    <div class="mobile-payment-card" data-service="<%= payment.service.serviceKey %>">
+                        <div class="mobile-payment-header">
+                            <div>
+                                <div class="mobile-payment-service"><%= payment.serviceName %></div>
+                                <small class="text-muted"><%= new Date(payment.paymentDate).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'}) %></small>
+                            </div>
+                            <span class="badge bg-<%= statusColor %>"><%= payment.status %></span>
+                        </div>
+                        <div class="mobile-payment-detail">
+                            <span class="label">Amount:</span>
+                            <span class="value text-primary"><%= amountDisplay %></span>
+                        </div>
+                        <div class="mobile-payment-detail">
+                            <span class="label">Reference:</span>
+                            <span class="value"><%= payment.transactionReference %></span>
+                        </div>
+                        <div class="mobile-payment-detail">
+                            <span class="label">Recorded By:</span>
+                            <span class="value"><%= payment.recordedBy ? payment.recordedBy.firstName + ' ' + payment.recordedBy.lastName : 'System' %></span>
+                        </div>
+                        <div class="mobile-payment-actions">
+                            <button class="btn btn-outline-primary btn-sm w-100" onclick='viewPaymentDetails(<%= JSON.stringify(payment) %>)'>
+                                <i class="fas fa-eye me-2"></i>View Details
+                            </button>
+                        </div>
+                    </div>
+                    <% }); %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculator Modal -->
+    <div class="modal fade" id="calculatorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" style="color: var(--primary);">
+                        <i class="fas fa-calculator me-2"></i>Payment Calculator
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Currency Toggle -->
+                    <div class="currency-toggle">
+                        <button class="currency-btn active" id="nairaBtn" onclick="setCurrency('NGN')">
+                            <i class="fas fa-naira-sign me-1"></i> Naira (₦)
+                        </button>
+                        <button class="currency-btn" id="dollarBtn" onclick="setCurrency('USD')">
+                            <i class="fas fa-dollar-sign me-1"></i> Dollar ($)
+                        </button>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Exchange Rate:</strong> $1 = ₦<%= exchangeRate.toLocaleString() %>
+                    </div>
+
+                    <!-- Services Checklist -->
+                    <div class="row g-3 mb-3">
+                        <% services.forEach(function(service) { 
+                            let priceDisplay = '';
+                            if (service.currency === 'NGN') {
+                                priceDisplay = `₦${service.price.toLocaleString('en-NG', {minimumFractionDigits: 2})}/${service.billingPeriod}`;
+                            } else {
+                                if (service.billingPeriod === 'month') {
+                                    const yearlyUSD = service.price * 12;
+                                    priceDisplay = `$${service.price}/month × 12 = $${yearlyUSD}`;
+                                } else {
+                                    priceDisplay = `$${service.price}/${service.billingPeriod}`;
+                                }
+                            }
+                        %>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       id="calc<%= service.serviceKey %>" 
+                                       data-service="<%= service.serviceKey %>"
+                                       data-price="<%= service.price %>"
+                                       data-currency="<%= service.currency %>"
+                                       data-period="<%= service.billingPeriod %>"
+                                       onchange="calculateTotal()">
+                                <label class="form-check-label fw-semibold" for="calc<%= service.serviceKey %>">
+                                    <%= service.name %>
+                                    <span class="text-muted small d-block"><%= priceDisplay %></span>
+                                </label>
+                            </div>
+                        </div>
+                        <% }); %>
+                    </div>
+
+                    <!-- Total Display -->
+                    <div class="calculator-box text-center">
+                        <h6 class="text-muted mb-2">TOTAL AMOUNT</h6>
+                        <div class="price-display" id="totalAmount">₦0</div>
+                        <div class="text-muted small mt-2" id="conversionNote"></div>
+                    </div>
+
+                    <!-- Payment Info -->
+                    <div class="payment-info-box">
+                        <h6 class="fw-bold mb-2" style="color: var(--primary);">
+                            <i class="fas fa-university me-2"></i>Payment Information
+                        </h6>
+                        <div class="row g-2 small">
+                            <div class="col-6"><strong>Bank Name:</strong></div>
+                            <div class="col-6">OPAY</div>
+                            <div class="col-6"><strong>Account Number:</strong></div>
+                            <div class="col-6">6409765034</div>
+                            <div class="col-6"><strong>Account Name:</strong></div>
+                            <div class="col-6">Techmayor Company Limited</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Renewal Modal -->
+    <div class="modal fade" id="renewalModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" style="color: var(--primary);">
+                        <i class="fas fa-sync-alt me-2"></i>Record Payment
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="paymentForm">
+                    <div class="modal-body">
+                        <div id="renewalContent"></div>
+                        
+                        <!-- Payment Info -->
+                        <div class="payment-info-box mt-3">
+                            <h6 class="fw-bold mb-2" style="color: var(--primary);">
+                                <i class="fas fa-university me-2"></i>Payment Details
+                            </h6>
+                            <div class="row g-2 small">
+                                <div class="col-6"><strong>Bank Name:</strong></div>
+                                <div class="col-6">OPAY</div>
+                                <div class="col-6"><strong>Account Number:</strong></div>
+                                <div class="col-6">6409765034</div>
+                                <div class="col-6"><strong>Account Name:</strong></div>
+                                <div class="col-6">Techmayor Company Limited</div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Confirmation Form -->
+                        <div class="mt-3">
+                            <h6 class="fw-bold mb-3">Payment Information</h6>
+                            
+                            <input type="hidden" id="serviceId" name="serviceId">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Transaction Reference <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="transactionReference" name="transactionReference" 
+                                       placeholder="Enter payment reference" required>
+                                <small class="text-muted">Enter the bank transaction reference number</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Payment Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="paymentDate" name="paymentDate" required>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Amount <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" class="form-control" id="amount" name="amount" 
+                                           placeholder="0.00" required readonly>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Currency <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="currency" name="currency" required disabled>
+                                        <option value="NGN">NGN (₦)</option>
+                                        <option value="USD">USD ($)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Notes (Optional)</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="2" 
+                                          placeholder="Add any additional notes about this payment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success" id="recordPaymentBtn">
+                            <i class="fas fa-check me-2"></i>Record Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="mb-3">
+                        <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--success);"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2" id="successTitle">Success!</h5>
+                    <p class="text-muted" id="successMessage"></p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-success w-100" data-bs-dismiss="modal" onclick="location.reload()">
+                        <i class="fas fa-check me-2"></i>Got it
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="mb-3">
+                        <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: var(--danger);"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2" id="errorTitle">Oops!</h5>
+                    <p class="text-muted" id="errorMessage"></p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Details Modal -->
+    <div class="modal fade" id="paymentDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" style="color: var(--primary);">
+                        <i class="fas fa-receipt me-2"></i>Payment Details
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="paymentDetailsContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Powered By Badge -->
+    <div class="powered-by">
+        Powered by <strong>JESZ LIMITED</strong>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global Variables
+        let currentCurrency = 'NGN';
+        let currentService = null;
+        const EXCHANGE_RATE = <%= exchangeRate %>;
+        
+        // Services data from backend
+        const servicesData = <%- JSON.stringify(services) %>;
+        
+        // Summary data for timer
+        const summaryData = <%- JSON.stringify(summary) %>;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentDate();
+            setTodayDate();
+            updateCountdownTimer();
+            // Update timer every hour
+            setInterval(updateCountdownTimer, 3600000);
+        });
+
+        function updateCurrentDate() {
+            const today = new Date();
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            document.getElementById('currentDate').textContent = today.toLocaleDateString('en-US', options);
+        }
+
+        function updateCountdownTimer() {
+            if (!summaryData.nextRenewal || !summaryData.nextRenewal.nextRenewalDate) {
+                return;
+            }
+            
+            const now = new Date();
+            const renewalDate = new Date(summaryData.nextRenewal.nextRenewalDate);
+            const diffTime = renewalDate - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            const daysLeftElement = document.getElementById('daysLeft');
+            if (daysLeftElement) {
+                daysLeftElement.textContent = diffDays >= 0 ? diffDays : 0;
+            }
+            
+            const progressElement = document.getElementById('timeProgress');
+            if (progressElement && summaryData.nextRenewal.currentPeriodStart) {
+                const startDate = new Date(summaryData.nextRenewal.currentPeriodStart);
+                const totalPeriod = renewalDate - startDate;
+                const elapsed = now - startDate;
+                const progress = (elapsed / totalPeriod) * 100;
+                progressElement.style.width = Math.min(100, Math.max(0, progress)) + '%';
+            }
+        }
+
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            const paymentDateInput = document.getElementById('paymentDate');
+            if (paymentDateInput) {
+                paymentDateInput.value = today;
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        function openCalculator() {
+            const modal = new bootstrap.Modal(document.getElementById('calculatorModal'));
+            modal.show();
+            calculateTotal();
+        }
+
+        function setCurrency(currency) {
+            currentCurrency = currency;
+            
+            const nairaBtn = document.getElementById('nairaBtn');
+            const dollarBtn = document.getElementById('dollarBtn');
+            
+            if (currency === 'NGN') {
+                nairaBtn.classList.add('active');
+                dollarBtn.classList.remove('active');
+            } else {
+                dollarBtn.classList.add('active');
+                nairaBtn.classList.remove('active');
+            }
+            
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let totalNGN = 0;
+            
+            servicesData.forEach(function(service) {
+                const checkbox = document.getElementById('calc' + service.serviceKey);
+                if (checkbox && checkbox.checked) {
+                    let servicePrice = service.price;
+                    
+                    // Convert to NGN if needed
+                    if (service.currency === 'USD') {
+                        if (service.billingPeriod === 'month') {
+                            servicePrice = service.price * 12 * EXCHANGE_RATE;
+                        } else {
+                            servicePrice = service.price * EXCHANGE_RATE;
+                        }
+                    } else {
+                        if (service.billingPeriod === 'month') {
+                            servicePrice = service.price * 12;
+                        }
+                    }
+                    
+                    totalNGN += servicePrice;
+                }
+            });
+            
+            const totalElement = document.getElementById('totalAmount');
+            const conversionNote = document.getElementById('conversionNote');
+            
+            if (currentCurrency === 'NGN') {
+                totalElement.textContent = '₦' + totalNGN.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                conversionNote.textContent = '';
+            } else {
+                const usdTotal = totalNGN / EXCHANGE_RATE;
+                totalElement.textContent = '$' + usdTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                conversionNote.textContent = '≈ ₦' + totalNGN.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
+        }
+
+        function openRenewalModal(serviceKey) {
+            const service = servicesData.find(s => s.serviceKey === serviceKey);
+            
+            if (!service) {
+                showErrorModal('Error', 'Service not found');
+                return;
+            }
+            
+            currentService = service;
+            
+            let priceDisplay = '';
+            let amountForPayment = service.price;
+            let currencyForPayment = service.currency;
+            
+            if (service.currency === 'NGN') {
+                if (service.billingPeriod === 'month') {
+                    amountForPayment = service.price * 12;
+                    priceDisplay = `₦${service.price.toLocaleString('en-NG', {minimumFractionDigits: 2})}/month (₦${amountForPayment.toLocaleString('en-NG')}/year)`;
+                } else {
+                    priceDisplay = `₦${service.price.toLocaleString('en-NG', {minimumFractionDigits: 2})}/${service.billingPeriod}`;
+                }
+            } else {
+                const nairaPrice = service.price * EXCHANGE_RATE;
+                if (service.billingPeriod === 'month') {
+                    const yearlyUSD = service.price * 12;
+                    amountForPayment = yearlyUSD;
+                    const yearlyNGN = yearlyUSD * EXCHANGE_RATE;
+                    priceDisplay = `$${service.price}/month ($${yearlyUSD}/year or ₦${yearlyNGN.toLocaleString('en-NG')}/year)`;
+                } else {
+                    priceDisplay = `$${service.price}/${service.billingPeriod} (₦${nairaPrice.toLocaleString('en-NG')})`;
+                }
+            }
+            
+            const content = `
+                <div class="text-center mb-3">
+                    <h5 class="fw-bold">${service.name}</h5>
+                    <p class="text-muted">${service.provider}</p>
+                </div>
+                <div class="service-detail">
+                    <span class="text-muted">Price:</span>
+                    <span class="fw-bold text-primary">${priceDisplay}</span>
+                </div>
+                ${service.nextRenewalDate ? `
+                <div class="service-detail">
+                    <span class="text-muted">Due Date:</span>
+                    <span class="fw-bold text-danger">${new Date(service.nextRenewalDate).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}</span>
+                </div>
+                ` : ''}
+                ${service.providerLink ? `
+                <div class="service-detail">
+                    <span class="text-muted">Provider Link:</span>
+                    <a href="${service.providerLink}" target="_blank" class="fw-semibold">${service.provider} <i class="fas fa-external-link-alt"></i></a>
+                </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('renewalContent').innerHTML = content;
+            document.getElementById('serviceId').value = service._id;
+            document.getElementById('amount').value = amountForPayment;
+            document.getElementById('currency').value = currencyForPayment;
+            
+            setTodayDate();
+            
+            const modal = new bootstrap.Modal(document.getElementById('renewalModal'));
+            modal.show();
+        }
+
+        function viewPaymentDetails(payment) {
+            let amountDisplay = '';
+            if (payment.currency === 'NGN') {
+                amountDisplay = `₦${payment.amount.toLocaleString('en-NG', {minimumFractionDigits: 2})}`;
+            } else {
+                amountDisplay = `$${payment.amount} (₦${payment.amountInNaira.toLocaleString('en-NG')})`;
+            }
+            
+            const statusColors = {
+                'Paid': 'success',
+                'Pending': 'warning',
+                'Failed': 'danger',
+                'Refunded': 'secondary'
+            };
+            const statusColor = statusColors[payment.status] || 'secondary';
+            
+            const recordedByName = payment.recordedBy 
+                ? `${payment.recordedBy.firstName} ${payment.recordedBy.lastName}` 
+                : 'System';
+            
+            const recordedByEmail = payment.recordedBy 
+                ? payment.recordedBy.email 
+                : 'N/A';
+            
+            const content = `
+                <div class="payment-details-grid">
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-calendar me-2"></i>Payment Date</div>
+                        <div class="detail-value fw-bold">${new Date(payment.paymentDate).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-cog me-2"></i>Service</div>
+                        <div class="detail-value fw-bold">${payment.serviceName}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-building me-2"></i>Provider</div>
+                        <div class="detail-value">${payment.provider}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-money-bill-wave me-2"></i>Amount</div>
+                        <div class="detail-value text-primary fw-bold fs-5">${amountDisplay}</div>
+                    </div>
+                    ${payment.exchangeRate > 1 ? `
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-exchange-alt me-2"></i>Exchange Rate</div>
+                        <div class="detail-value">$1 = ₦${payment.exchangeRate.toLocaleString('en-NG')}</div>
+                    </div>
+                    ` : ''}
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-check-circle me-2"></i>Status</div>
+                        <div class="detail-value"><span class="badge bg-${statusColor}">${payment.status}</span></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-hashtag me-2"></i>Transaction Reference</div>
+                        <div class="detail-value fw-bold">${payment.transactionReference}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-credit-card me-2"></i>Payment Method</div>
+                        <div class="detail-value">${payment.paymentMethod}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-university me-2"></i>Bank Details</div>
+                        <div class="detail-value">
+                            ${payment.bankDetails.bankName} - ${payment.bankDetails.accountNumber}<br>
+                            <small class="text-muted">${payment.bankDetails.accountName}</small>
+                        </div>
+                    </div>
+                    ${payment.renewalPeriod ? `
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-calendar-alt me-2"></i>Renewal Period</div>
+                        <div class="detail-value">
+                            ${new Date(payment.renewalPeriod.startDate).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})} 
+                            - 
+                            ${new Date(payment.renewalPeriod.endDate).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
+                        </div>
+                    </div>
+                    ` : ''}
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-user me-2"></i>Recorded By</div>
+                        <div class="detail-value">
+                            ${recordedByName}<br>
+                            <small class="text-muted">${recordedByEmail}</small>
+                        </div>
+                    </div>
+                    ${payment.notes ? `
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-sticky-note me-2"></i>Notes</div>
+                        <div class="detail-value">${payment.notes}</div>
+                    </div>
+                    ` : ''}
+                    <div class="detail-row">
+                        <div class="detail-label"><i class="fas fa-clock me-2"></i>Recorded On</div>
+                        <div class="detail-value text-muted small">${new Date(payment.createdAt).toLocaleString('en-US', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('paymentDetailsContent').innerHTML = content;
+            
+            const modal = new bootstrap.Modal(document.getElementById('paymentDetailsModal'));
+            modal.show();
+        }
+
+        // Handle payment form submission
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('recordPaymentBtn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+            
+            const formData = {
+                serviceId: document.getElementById('serviceId').value,
+                transactionReference: document.getElementById('transactionReference').value,
+                paymentDate: document.getElementById('paymentDate').value,
+                amount: document.getElementById('amount').value,
+                currency: document.getElementById('currency').value,
+                notes: document.getElementById('notes').value
+            };
+            
+            try {
+                const response = await fetch('/admin/record-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Close renewal modal
+                    const renewalModal = bootstrap.Modal.getInstance(document.getElementById('renewalModal'));
+                    renewalModal.hide();
+                    
+                    // Show success modal
+                    showSuccessModal('Payment Recorded Successfully!', `Payment for ${currentService.name} has been recorded with reference: ${formData.transactionReference}`);
+                } else {
+                    showErrorModal('Payment Recording Failed', data.message || 'An error occurred while recording the payment');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorModal('Network Error', 'Failed to connect to the server. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        });
+
+        function showSuccessModal(title, message) {
+            document.getElementById('successTitle').textContent = title;
+            document.getElementById('successMessage').textContent = message;
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
+        }
+
+        function showErrorModal(title, message) {
+            document.getElementById('errorTitle').textContent = title;
+            document.getElementById('errorMessage').textContent = message;
+            const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+            modal.show();
+        }
+
+        function filterPayments() {
+            const filter = document.getElementById('serviceFilter').value;
+            const desktopRows = document.querySelectorAll('#paymentHistoryBody tr');
+            const mobileCards = document.querySelectorAll('#mobilePaymentsList .mobile-payment-card');
+            
+            // Filter desktop table
+            desktopRows.forEach(row => {
+                const serviceKey = row.getAttribute('data-service');
+                if (filter === 'all' || serviceKey === filter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Filter mobile cards
+            mobileCards.forEach(card => {
+                const serviceKey = card.getAttribute('data-service');
+                if (filter === 'all' || serviceKey === filter) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+
+<script>
+async function loadSidebarPendingCount() {
+  try {
+    console.log("Loading sidebar approval count...");
+
+    const res = await fetch('/admin/pending-approvals-count');
+    const data = await res.json();
+
+    console.log("Pending approvals count:", data);
+
+    const badge = document.getElementById('sidebarPendingBadge');
+
+    if (!badge) {
+      console.log("Sidebar badge not found on page");
+      return;
+    }
+
+    if (data.count > 0) {
+      badge.style.display = 'inline-block';
+      badge.textContent = data.count;
+    } else {
+      badge.style.display = 'none';
+    }
+
+  } catch (err) {
+    console.error("Sidebar count error:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadSidebarPendingCount);
+</script>
+</body>
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Approvals - Club De Stars Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a; --primary-dark: #1e40af; --primary-light: #3b82f6;
+            --secondary: #64748b; --success: #10b981; --danger: #ef4444;
+            --warning: #f59e0b; --info: #06b6d4; --sidebar-width: 280px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%); min-height: 100vh; overflow-x: hidden; }
+        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-width); background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%); color: white; z-index: 1040; transition: all 0.3s; overflow-y: auto; box-shadow: 4px 0 20px rgba(30,58,138,0.15); transform: translateX(0); }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.1); }
+        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .logo-box { width: 45px; height: 45px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--primary); font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; }
+        .admin-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(239,68,68,0.2); border-radius: 20px; border: 1px solid rgba(239,68,68,0.3); font-weight: 600; font-size: 0.8rem; margin-top: 8px; }
+        .sidebar-menu { padding: 1rem 0; }
+        .sidebar-menu a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 0.875rem 1.5rem; display: flex; align-items: center; transition: all 0.3s; border-left: 3px solid transparent; font-weight: 500; font-size: 0.95rem; }
+        .sidebar-menu a:hover { background: rgba(255,255,255,0.1); color: white; border-left-color: white; }
+        .sidebar-menu a.active { background: rgba(255,255,255,0.15); color: white; border-left-color: white; }
+        .sidebar-menu a i { width: 24px; margin-right: 12px; font-size: 1.1rem; flex-shrink: 0; }
+        .top-navbar { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 70px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(30,58,138,0.08); z-index: 1030; display: flex; align-items: center; padding: 0 1.5rem; border-bottom: 1px solid rgba(30,58,138,0.1); }
+        .main-content { margin-left: var(--sidebar-width); margin-top: 70px; padding: 1.5rem; min-height: calc(100vh - 70px); }
+        .page-header { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%); color: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 15px 40px rgba(30,58,138,0.25); position: relative; overflow: hidden; }
+        .page-header::before { content: ''; position: absolute; top: -50%; right: -20%; width: 400px; height: 400px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+        .card { border: none; border-radius: 16px; box-shadow: 0 8px 20px rgba(30,58,138,0.08); background: white; border: 1px solid rgba(30,58,138,0.05); }
+        .card-header { background: linear-gradient(135deg, rgba(30,58,138,0.03) 0%, rgba(59,130,246,0.03) 100%); border-bottom: 2px solid rgba(30,58,138,0.1); padding: 1.25rem; border-radius: 16px 16px 0 0 !important; }
+        .powered-by { position: fixed; bottom: 15px; right: 15px; background: white; padding: 10px 16px; border-radius: 25px; box-shadow: 0 4px 15px rgba(30,58,138,0.15); font-size: 0.8rem; font-weight: 600; color: var(--primary); z-index: 1000; }
+
+        /* ── Approval Card ── */
+        .approval-card {
+            border-radius: 16px;
+            border: 2px solid rgba(30,58,138,0.1);
+            background: white;
+            box-shadow: 0 6px 20px rgba(30,58,138,0.07);
+            transition: all 0.3s;
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+        }
+        .approval-card:hover { box-shadow: 0 12px 30px rgba(30,58,138,0.13); transform: translateY(-2px); }
+        .approval-card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(30,58,138,0.08); display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+        .approval-card-body { padding: 1.25rem 1.5rem; }
+        .approval-card-footer { padding: 1rem 1.5rem; background: rgba(30,58,138,0.02); border-top: 1px solid rgba(30,58,138,0.08); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+
+        .txn-type-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.8rem; }
+        .txn-type-deposit { background: rgba(16,185,129,0.12); color: #059669; }
+        .txn-type-withdrawal { background: rgba(239,68,68,0.12); color: #dc2626; }
+        .txn-type-loan-repayment { background: rgba(245,158,11,0.12); color: #d97706; }
+        .txn-type-direct-debit { background: rgba(99,102,241,0.12); color: #6366f1; }
+
+        .amount-display { font-size: 1.5rem; font-weight: 800; color: #1f2937; }
+        .amount-display.deposit { color: var(--success); }
+        .amount-display.withdrawal, .amount-display.direct-debit { color: var(--danger); }
+        .amount-display.loan-repayment { color: var(--warning); }
+
+        .member-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(30,58,138,0.05); border-radius: 20px; font-size: 0.85rem; }
+        .member-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; flex-shrink: 0; }
+
+        .approval-progress { display: flex; align-items: center; gap: 10px; }
+        .progress-dots { display: flex; gap: 6px; }
+        .progress-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #e5e7eb; background: #f9fafb; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; transition: all 0.3s; position: relative; }
+        .progress-dot.approved { background: var(--success); border-color: var(--success); color: white; }
+        .progress-dot.declined { background: var(--danger); border-color: var(--danger); color: white; }
+        .progress-dot.pending { background: #fef3c7; border-color: var(--warning); color: var(--warning); }
+        .progress-dot.empty { background: #f1f5f9; border-color: #cbd5e1; color: #94a3b8; }
+
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+        .detail-item { }
+        .detail-label { font-size: 0.75rem; color: var(--secondary); font-weight: 500; margin-bottom: 3px; }
+        .detail-value { font-weight: 600; font-size: 0.9rem; color: #1f2937; }
+
+        .btn-approve { background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; padding: 0.6rem 1.5rem; border-radius: 10px; font-weight: 600; transition: all 0.3s; }
+        .btn-approve:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.4); color: white; }
+        .btn-decline { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: none; color: white; padding: 0.6rem 1.5rem; border-radius: 10px; font-weight: 600; transition: all 0.3s; }
+        .btn-decline:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239,68,68,0.4); color: white; }
+
+        .acted-badge { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+        .acted-badge.approved { background: rgba(16,185,129,0.12); color: #059669; }
+        .acted-badge.declined { background: rgba(239,68,68,0.12); color: #dc2626; }
+        .acted-badge.processed { background: rgba(99,102,241,0.12); color: #6366f1; }
+
+        .initiator-line { font-size: 0.8rem; color: var(--secondary); }
+        .initiator-line strong { color: var(--primary); }
+
+        .empty-state { text-align: center; padding: 4rem 2rem; color: var(--secondary); }
+        .empty-state i { font-size: 3.5rem; opacity: 0.2; margin-bottom: 1rem; display: block; }
+
+        .tab-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tab-pill { padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; text-decoration: none; }
+        .tab-pill.active { background: var(--primary); color: white; }
+        .tab-pill.inactive { background: white; color: var(--secondary); border-color: rgba(30,58,138,0.15); }
+        .tab-pill.inactive:hover { border-color: var(--primary); color: var(--primary); }
+
+        .comment-box { border: 2px solid rgba(30,58,138,0.1); border-radius: 10px; padding: 0.75rem; width: 100%; font-size: 0.9rem; resize: vertical; min-height: 80px; transition: border-color 0.2s; }
+        .comment-box:focus { outline: none; border-color: var(--primary); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease; }
+
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .top-navbar { left: 0; }
+            .main-content { margin-left: 0; padding: 1rem; }
+        }
+        @media (max-width: 576px) {
+            .top-navbar { height: 60px; padding: 0 1rem; }
+            .main-content { margin-top: 60px; padding: 0.75rem; }
+            .approval-card-header { flex-direction: column; }
+            .approval-card-footer { flex-direction: column; align-items: stretch; }
+            .btn-approve, .btn-decline { width: 100%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">C</div>
+                <div>
+                    <h5 class="mb-0 fw-bold" style="text-transform:uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size:0.75rem;">ADMIN PANEL</small>
+                </div>
+            </div>
+            <div class="admin-badge"><i class="fas fa-shield-alt"></i><span>SUPER ADMIN</span></div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
+            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
+            <a href="/admin/transaction-approvals" class="active"><i class="fas fa-tasks"></i> Approvals
+                <% if (pendingApprovals.length > 0) { %>
+                <span class="badge bg-danger ms-1"><%= pendingApprovals.length %></span>
+                <% } %>
+            </a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
+            <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles & Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
+             <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
+            <a href="/club-de-star-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.5rem;" onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color:var(--primary)">Transaction Approvals</h5>
+            <small class="text-muted">Review and approve pending payment transactions</small>
+        </div>
+        <% if (pendingApprovals.length > 0) { %>
+        <span class="badge bg-danger ms-auto" style="font-size:0.9rem;padding:8px 14px;">
+            <i class="fas fa-bell me-1"></i><%= pendingApprovals.length %> Pending
+        </span>
+        <% } %>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header position-relative">
+            <div class="row align-items-center position-relative" style="z-index:1;">
+                <div class="col-md-8">
+                    <h2 class="mb-2 fw-bold"><i class="fas fa-tasks me-3"></i>Transaction Approvals</h2>
+                    <p class="mb-0 opacity-90">Each transaction requires 3 approvals. A single decline rejects the transaction immediately.</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <div class="d-flex gap-2 justify-content-md-end">
+                        <div class="badge bg-light text-dark p-2"><i class="fas fa-clock me-1 text-warning"></i><%= pendingApprovals.length %> Pending</div>
+                        <div class="badge bg-light text-dark p-2"><i class="fas fa-history me-1 text-primary"></i><%= actedApprovals.length %> Acted On</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Pills -->
+        <div class="tab-pills mb-4" id="tabPills">
+            <span class="tab-pill active" onclick="switchTab('pending', this)"><i class="fas fa-hourglass-half me-2"></i>Pending Approvals <% if (pendingApprovals.length > 0) { %><span class="badge bg-danger ms-1"><%= pendingApprovals.length %></span><% } %></span>
+            <span class="tab-pill inactive" onclick="switchTab('acted', this)"><i class="fas fa-check-double me-2"></i>My Actions (<%= actedApprovals.length %>)</span>
+        </div>
+
+        <!-- PENDING TAB -->
+        <div id="pendingTab" class="fade-in">
+            <% if (pendingApprovals.length === 0) { %>
+            <div class="card">
+                <div class="card-body">
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <h5 class="mb-2">All caught up!</h5>
+                        <p class="mb-0">You have no pending transactions to approve right now.</p>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+
+            <% pendingApprovals.forEach(approval => {
+                const typeLabels = { deposit: 'Deposit', withdrawal: 'Withdrawal', 'loan-repayment': 'Loan Repayment', 'direct-debit': 'Direct Debit' };
+                const typeIcons = { deposit: 'plus-circle', withdrawal: 'minus-circle', 'loan-repayment': 'hand-holding-usd', 'direct-debit': 'university' };
+                const label = typeLabels[approval.paymentType] || approval.paymentType;
+                const icon = typeIcons[approval.paymentType] || 'money-bill';
+                const approvedCount = approval.approvals.filter(a => a.action === 'approved').length;
+                const totalRequired = approval.approvalsRequired || 3;
+                const timeAgo = new Date(approval.createdAt);
+                const memberName = approval.member ? `${approval.member.firstName} ${approval.member.lastName}` : 'Unknown Member';
+                const initials = memberName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            %>
+            <div class="approval-card fade-in" id="card-<%= approval._id %>">
+                <div class="approval-card-header">
+                    <div class="d-flex align-items-start gap-3 flex-wrap">
+                        <div>
+                            <span class="txn-type-badge txn-type-<%= approval.paymentType %>">
+                                <i class="fas fa-<%= icon %>"></i><%= label %>
+                            </span>
+                           <div class="mt-2 initiator-line">
+                                Initiated by <strong>
+                                    <%= approval.initiatedBy ? approval.initiatedBy.firstName + ' ' + approval.initiatedBy.lastName : 'Admin' %>
+                                </strong> · 
+                                <span class="time" data-time="<%= approval.createdAt %>"></span>
+                            </div>
+
+                        </div>
+                        <div class="ms-auto text-end">
+                            <div class="amount-display <%= approval.paymentType %>">₦<%= approval.totalAmount.toLocaleString() %></div>
+                            <small class="text-muted">Total Amount</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="approval-card-body">
+                    <div class="row g-3">
+                        <!-- Left: details -->
+                        <div class="col-md-7">
+                            <div class="member-chip mb-3">
+                                <div class="member-avatar"><%= initials %></div>
+                                <div>
+                                    <div class="fw-semibold" style="font-size:0.9rem;"><%= memberName %></div>
+                                    <div style="font-size:0.78rem;color:var(--secondary);"><%= approval.member?.membershipID || 'N/A' %></div>
+                                </div>
+                            </div>
+
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <div class="detail-label">Current Balance</div>
+                                    <div class="detail-value">₦<%= (approval.member?.account?.balance || 0).toLocaleString() %></div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Amount</div>
+                                    <div class="detail-value">₦<%= approval.amount.toLocaleString() %></div>
+                                </div>
+                                <% if (approval.chargeAmount > 0) { %>
+                                <div class="detail-item">
+                                    <div class="detail-label">Charge</div>
+                                    <div class="detail-value text-danger">₦<%= approval.chargeAmount.toLocaleString() %></div>
+                                </div>
+                                <% } %>
+                                <div class="detail-item">
+                                    <div class="detail-label">Method</div>
+                                    <div class="detail-value text-capitalize"><%= approval.paymentMethod.replace('-', ' ') %></div>
+                                </div>
+                                <% if (approval.reference) { %>
+                                <div class="detail-item">
+                                    <div class="detail-label">Reference</div>
+                                    <div class="detail-value" style="font-family:monospace;font-size:0.8rem;"><%= approval.reference %></div>
+                                </div>
+                                <% } %>
+                            </div>
+
+                            <% if (approval.notes) { %>
+                            <div class="mt-3 p-3" style="background:#f8fafc;border-radius:8px;border-left:3px solid rgba(30,58,138,0.3);">
+                                <div class="detail-label mb-1"><i class="fas fa-sticky-note me-1"></i>Notes</div>
+                                <div style="font-size:0.88rem;color:#374151;"><%= approval.notes %></div>
+                            </div>
+                            <% } %>
+                        </div>
+
+                        <!-- Right: approval progress -->
+                        <div class="col-md-5">
+                            <div class="p-3 rounded-3" style="background:rgba(30,58,138,0.03);border:1px solid rgba(30,58,138,0.1);">
+                                <div class="detail-label mb-3"><i class="fas fa-user-check me-1"></i>Approval Progress</div>
+
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <div class="progress flex-grow-1" style="height:8px;border-radius:4px;">
+                                        <div class="progress-bar bg-success" style="width:<%= (approvedCount / totalRequired * 100) %>%;border-radius:4px;"></div>
+                                    </div>
+                                    <span class="fw-bold" style="font-size:0.9rem;color:var(--primary);white-space:nowrap;"><%= approvedCount %> / <%= totalRequired %></span>
+                                </div>
+
+                                <!-- Individual approver statuses -->
+                                <div>
+                                    <% approval.selectedApprovers.forEach((approverId, idx) => {
+                                        const vote = approval.approvals.find(a => a.user?.toString() === approverId?.toString());
+                                    %>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <% if (vote) { %>
+                                            <% if (vote.action === 'approved') { %>
+                                            <span class="progress-dot approved"><i class="fas fa-check" style="font-size:0.6rem;"></i></span>
+                                            <% } else { %>
+                                            <span class="progress-dot declined"><i class="fas fa-times" style="font-size:0.6rem;"></i></span>
+                                            <% } %>
+                                        <% } else { %>
+                                            <span class="progress-dot pending"><i class="fas fa-clock" style="font-size:0.6rem;"></i></span>
+                                        <% } %>
+                                        <small style="font-size:0.8rem;color:var(--secondary);">
+                                            <% if (vote) { %>
+                                                <span class="<%= vote.action === 'approved' ? 'text-success' : 'text-danger' %> fw-semibold"><%= vote.action === 'approved' ? 'Approved' : 'Declined' %></span>
+                                            <% } else { %>
+                                                <span>Awaiting response...</span>
+                                            <% } %>
+                                        </small>
+                                    </div>
+                                    <% }) %>
+                                </div>
+
+                                <% const remaining = totalRequired - approvedCount; %>
+                                <% if (remaining > 0) { %>
+                                <div class="mt-2 text-muted" style="font-size:0.78rem;"><i class="fas fa-info-circle me-1"></i><%= remaining %> more approval<%= remaining > 1 ? 's' : '' %> needed</div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comment Box -->
+                    <div class="mt-3">
+                        <label class="detail-label"><i class="fas fa-comment me-1"></i>Comment (optional)</label>
+                        <textarea class="comment-box mt-1" id="comment-<%= approval._id %>" placeholder="Add a comment with your decision..."></textarea>
+                    </div>
+                </div>
+
+                <div class="approval-card-footer">
+                    <div style="font-size:0.8rem;color:var(--secondary);">
+                        <i class="fas fa-fingerprint me-1"></i>ID: <span style="font-family:monospace;"><%= approval._id.toString().substring(0,16) %>...</span>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn-decline" onclick="handleDecline('<%= approval._id %>')">
+                            <i class="fas fa-times-circle me-2"></i>Decline
+                        </button>
+                        <button class="btn-approve" onclick="handleApprove('<%= approval._id %>')">
+                            <i class="fas fa-check-circle me-2"></i>Approve
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+        </div>
+
+        <!-- ACTED TAB -->
+        <div id="actedTab" style="display:none;" class="fade-in">
+            <% if (actedApprovals.length === 0) { %>
+            <div class="card">
+                <div class="card-body">
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <h5 class="mb-2">No history yet</h5>
+                        <p class="mb-0">Transactions you've approved or declined will appear here.</p>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+
+                    <% actedApprovals.forEach(approval => {
+                const typeLabels = { deposit:'Deposit', withdrawal:'Withdrawal', 'loan-repayment':'Loan Repayment', 'direct-debit':'Direct Debit' };
+                const label = typeLabels[approval.paymentType] || approval.paymentType;
+                const memberName = approval.member ? `${approval.member.firstName} ${approval.member.lastName}` : 'Unknown';
+                const initials = memberName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+                const adminId = admin._id.toString();
+                const myVote = approval.approvals.find(a => a.user?.toString() === adminId);
+            %>
+
+            <div class="approval-card">
+                <div class="approval-card-header">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <div class="member-chip">
+                            <div class="member-avatar"><%= initials %></div>
+                            <span class="fw-semibold"><%= memberName %></span>
+                            <small class="text-muted">· <%= label %></small>
+                        </div>
+                        <span class="fw-bold" style="font-size:1.1rem;">₦<%= approval.totalAmount.toLocaleString() %></span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 ms-auto flex-wrap">
+                        <% if (approval.status === 'processed') { %>
+                        <span class="acted-badge processed"><i class="fas fa-check-double"></i>Processed</span>
+                        <% } else if (approval.status === 'declined') { %>
+                        <span class="acted-badge declined"><i class="fas fa-times-circle"></i>Declined</span>
+                        <% } else if (approval.status === 'approved') { %>
+                        <span class="acted-badge approved"><i class="fas fa-check-circle"></i>Approved</span>
+                        <% } else { %>
+                        <span class="acted-badge" style="background:rgba(245,158,11,0.12);color:#d97706;"><i class="fas fa-hourglass-half"></i>Pending</span>
+                        <% } %>
+                        <% if (myVote) { %>
+                        <span class="acted-badge <%= myVote.action %>">
+                            <i class="fas fa-<%= myVote.action === 'approved' ? 'thumbs-up' : 'thumbs-down' %>"></i>
+                            You <%= myVote.action %>
+                        </span>
+                        <% } %>
+                       <small class="text-muted">
+                            <span class="time" data-time="<%= approval.updatedAt %>"></span>
+                        </small>
+
+                    </div>
+                </div>
+                <% if (myVote && myVote.comment) { %>
+                <div class="approval-card-body py-3">
+                    <div class="detail-label"><i class="fas fa-comment me-1"></i>Your comment</div>
+                    <div style="font-size:0.88rem;color:#374151;margin-top:4px;font-style:italic;">"<%= myVote.comment %>"</div>
+                </div>
+                <% } %>
+            </div>
+            <% }) %>
+        </div>
+    </div>
+
+    <div class="powered-by"><strong style="color:var(--primary);">Cloudbaam</strong> Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong></div>
+
+    <!-- Result Modal -->
+    <div class="modal fade" id="resultModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" id="resultModalHeader">
+                    <h5 class="modal-title" id="resultModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div id="resultModalIcon" style="font-size:4rem;margin-bottom:1rem;"></div>
+                    <h5 id="resultModalMessage" class="mb-2"></h5>
+                    <p id="resultModalSub" class="text-muted mb-0"></p>
+                    <div id="progressInfo" class="mt-3 p-3 rounded" style="background:#f8fafc;border:1px solid #e5e7eb;display:none;">
+                        <div style="font-size:0.9rem;" id="progressText"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        /* ── Time helpers ── */
+        function timeSince(date) {
+            const secs = Math.floor((new Date() - date) / 1000);
+            if (secs < 60) return 'just now';
+            const mins = Math.floor(secs / 60);
+            if (mins < 60) return `${mins}m ago`;
+            const hrs = Math.floor(mins / 60);
+            if (hrs < 24) return `${hrs}h ago`;
+            return `${Math.floor(hrs / 24)}d ago`;
+        }
+        function timeSinceStr(date) { return timeSince(date); }
+
+        /* ── Tab switching ── */
+        function switchTab(tab, el) {
+            document.querySelectorAll('.tab-pill').forEach(p => { p.classList.remove('active'); p.classList.add('inactive'); });
+            el.classList.add('active'); el.classList.remove('inactive');
+            document.getElementById('pendingTab').style.display = tab === 'pending' ? 'block' : 'none';
+            document.getElementById('actedTab').style.display = tab === 'acted' ? 'block' : 'none';
+        }
+
+        /* ── Approve ── */
+        async function handleApprove(approvalId) {
+            const comment = document.getElementById(`comment-${approvalId}`).value;
+            const btn = event.currentTarget;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+
+            try {
+                const res = await fetch(`/admin/approve-transaction/${approvalId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment })
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    showResult('error', 'Error', data.message, '');
+                    btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Approve';
+                    return;
+                }
+
+                if (data.finalized) {
+                    showResult('processed', 'Transaction Processed!', 'All required approvals received. The transaction has been executed successfully.', '');
+                    document.getElementById(`card-${approvalId}`)?.remove();
+                } else {
+                    showResult('approved', 'Approval Recorded', `Your approval has been noted.`, `${data.approvalCount} of ${data.approvalsRequired} approvals received. ${data.approvalsRequired - data.approvalCount} more needed.`);
+                    document.getElementById(`card-${approvalId}`)?.remove();
+                }
+
+                updatePendingCountBadge(-1);
+
+            } catch (err) {
+                console.error(err);
+                showResult('error', 'Error', 'Something went wrong', '');
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Approve';
+            }
+        }
+
+        /* ── Decline ── */
+        async function handleDecline(approvalId) {
+            const comment = document.getElementById(`comment-${approvalId}`).value;
+            if (!comment.trim()) {
+                if (!confirm('Are you sure you want to decline this transaction? This will immediately reject it for all approvers.\n\nYou have not added a comment — proceed anyway?')) return;
+            } else {
+                if (!confirm('Are you sure you want to decline this transaction? This action immediately rejects it.')) return;
+            }
+
+            const btn = event.currentTarget;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+
+            try {
+                const res = await fetch(`/admin/decline-transaction/${approvalId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment })
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    showResult('error', 'Error', data.message, '');
+                    btn.disabled = false; btn.innerHTML = '<i class="fas fa-times-circle me-2"></i>Decline';
+                    return;
+                }
+
+                showResult('declined', 'Transaction Declined', 'The transaction has been declined and will not be processed.', comment ? `Reason: "${comment}"` : '');
+                document.getElementById(`card-${approvalId}`)?.remove();
+                updatePendingCountBadge(-1);
+
+            } catch (err) {
+                console.error(err);
+                showResult('error', 'Error', 'Something went wrong', '');
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-times-circle me-2"></i>Decline';
+            }
+        }
+
+        /* ── Show result modal ── */
+        function showResult(type, title, message, sub) {
+            const configs = {
+                processed: { bg: 'bg-success text-white', icon: '✅', btnClass: 'btn-success' },
+                approved:  { bg: 'bg-primary text-white', icon: '👍', btnClass: 'btn-primary' },
+                declined:  { bg: 'bg-danger text-white', icon: '❌', btnClass: 'btn-danger' },
+                error:     { bg: 'bg-warning text-dark', icon: '⚠️', btnClass: 'btn-warning' },
+            };
+            const cfg = configs[type] || configs.error;
+
+            document.getElementById('resultModalHeader').className = `modal-header ${cfg.bg}`;
+            document.getElementById('resultModalTitle').textContent = title;
+            document.getElementById('resultModalIcon').textContent = cfg.icon;
+            document.getElementById('resultModalMessage').textContent = message;
+            document.getElementById('resultModalSub').textContent = sub || '';
+
+            const progDiv = document.getElementById('progressInfo');
+            if (sub && type === 'approved') { progDiv.style.display = 'block'; document.getElementById('progressText').textContent = sub; }
+            else { progDiv.style.display = 'none'; }
+
+            new bootstrap.Modal(document.getElementById('resultModal')).show();
+        }
+
+        /* ── Update pending badge in navbar/sidebar ── */
+        function updatePendingCountBadge(delta) {
+            const badges = document.querySelectorAll('[data-pending-badge]');
+            badges.forEach(b => {
+                let n = parseInt(b.textContent) + delta;
+                if (n <= 0) { b.style.display = 'none'; } else { b.textContent = n; }
+            });
+        }
+
+        /* ── Sidebar toggle ── */
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth <= 992 && !sidebar.contains(e.target) && !e.target.closest('.fa-bars') && sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+
+
+        document.querySelectorAll('.time').forEach(el => {
+    const date = new Date(el.dataset.time);
+    el.textContent = timeSince(date);
+});
+
+    </script>
+</body>
+</html>

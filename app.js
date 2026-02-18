@@ -9,6 +9,7 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
+const initSystem = require("./seed");
 
 
 
@@ -27,18 +28,29 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
+
+
+
+
+
 mongoose
   .connect(process.env.DB)
-  .then((done) => {
-    let port = process.env.PORT || 3001;
-    if(port == null || port == ""){
-      port = 3001
-    }
-    app.listen(port, () => console.log(`Server running on Port ${port}`));
+  .then(async () => {
+    console.log("✅ DB connected");
 
-    console.log("Db connected");
+    await initSystem();
+
+    const port = process.env.PORT || 3001;
+
+    app.listen(port, () =>
+      console.log(`🚀 Server running on Port ${port}`)
+    );
   })
-.catch((err) => console.log(err));
+  .catch((err) => {
+    console.error("❌ Startup failed:", err);
+    process.exit(1);
+  });
+
 
 
 app.use(require("./routes/main"));
@@ -46,3 +58,5 @@ app.use(require("./routes/auth"));
 app.use(require("./routes/admin"));
 app.use(require("./routes/transaction"));
 app.use(require("./routes/kiddies"));
+app.use(require("./routes/report"));
+app.use(require("./routes/adminLogs"));

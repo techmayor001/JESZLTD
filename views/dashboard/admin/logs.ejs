@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Logs | Club De Stars Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --sidebar-width: 280px;
+            --navbar-h: 70px;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white; z-index: 1040; transition: transform .3s ease;
+            overflow-y: auto; box-shadow: 4px 0 20px rgba(30,58,138,.15);
+        }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.1); }
+        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .logo-box { width: 45px; height: 45px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--primary); font-size: 1.5rem; flex-shrink: 0; }
+        .admin-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(239,68,68,.2); border-radius: 20px; border: 1px solid rgba(239,68,68,.3); font-weight: 600; font-size: .78rem; margin-top: 6px; }
+        .sidebar-menu { padding: 1rem 0; }
+        .sidebar-menu a { color: rgba(255,255,255,.85); text-decoration: none; padding: .75rem 1.5rem; display: flex; align-items: center; transition: all .2s; border-left: 3px solid transparent; font-weight: 500; font-size: .9rem; }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background: rgba(255,255,255,.12); color: white; border-left-color: white; }
+        .sidebar-menu a i { width: 22px; margin-right: 10px; font-size: 1rem; flex-shrink: 0; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1035; }
+        .sidebar-overlay.active { display: block; }
+
+        /* ── NAVBAR ── */
+        .top-navbar {
+            position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: var(--navbar-h);
+            background: rgba(255,255,255,.97); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30,58,138,.08); z-index: 1030;
+            display: flex; align-items: center; padding: 0 1.25rem; gap: .75rem;
+            transition: left .3s; border-bottom: 1px solid rgba(30,58,138,.1);
+        }
+        .navbar-title { flex-grow: 1; min-width: 0; }
+        .navbar-title h5 { margin: 0; font-size: 1rem; color: var(--primary); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .navbar-title small { font-size: .75rem; color: #64748b; }
+        .navbar-actions { display: flex; gap: .5rem; flex-shrink: 0; }
+
+        /* ── MAIN ── */
+        .main-content { margin-left: var(--sidebar-width); margin-top: var(--navbar-h); padding: 1.25rem; min-height: calc(100vh - var(--navbar-h)); transition: margin-left .3s; }
+
+        /* ── BUTTONS ── */
+        .btn { border-radius: 9px; font-weight: 600; transition: all .2s; white-space: nowrap; }
+        .btn-primary { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border: none; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(30,58,138,.3); }
+        .btn-outline-primary { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
+        .btn-outline-primary:hover { background: var(--primary); color: white; }
+        .btn-sm { padding: .35rem .8rem; font-size: .8rem; }
+        .btn-xs { padding: .25rem .6rem; font-size: .75rem; border-radius: 7px; font-weight: 600; border: 1.5px solid var(--primary); color: var(--primary); background: transparent; }
+        .btn-xs:hover { background: var(--primary); color: white; }
+
+        /* ── CARDS ── */
+        .card-white { background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(30,58,138,.08); border: 1px solid rgba(30,58,138,.05); }
+        .page-header { background: white; border-radius: 16px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 4px 16px rgba(30,58,138,.08); }
+        .filter-card { background: white; border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 4px 16px rgba(30,58,138,.08); border: 2px solid rgba(30,58,138,.06); }
+
+        /* ── FORM ── */
+        .form-label { font-weight: 600; color: var(--primary); font-size: .8rem; margin-bottom: .3rem; }
+        .form-control, .form-select { border-radius: 9px; border: 2px solid rgba(30,58,138,.12); padding: .5rem .8rem; font-size: .88rem; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,58,138,.1); }
+
+        /* ── STAT CARDS ── */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+        .stat-card { background: white; border-radius: 12px; padding: 1rem; box-shadow: 0 3px 10px rgba(30,58,138,.07); border: 1px solid rgba(30,58,138,.05); display: flex; align-items: center; gap: .75rem; }
+        .stat-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+        .stat-content { flex: 1; min-width: 0; }
+        .stat-label { font-size: .7rem; color: #94a3b8; font-weight: 600; margin-bottom: 2px; text-transform: uppercase; letter-spacing: .3px; }
+        .stat-value { font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+
+        /* ── TABLE ── */
+        .logs-table-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid rgba(30,58,138,.07); }
+        .table-header { padding: 1rem 1.25rem; border-bottom: 2px solid rgba(30,58,138,.07); background: rgba(30,58,138,.02); display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
+        .table-title { font-weight: 700; color: var(--primary); font-size: .95rem; display: flex; align-items: center; gap: 8px; }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .logs-table { margin: 0; width: 100%; font-size: .82rem; min-width: 900px; }
+        .logs-table thead tr { background: rgba(30,58,138,.04); }
+        .logs-table thead th { padding: .7rem .8rem; font-weight: 700; color: var(--primary); white-space: nowrap; font-size: .72rem; text-transform: uppercase; letter-spacing: .3px; border: none; }
+        .logs-table tbody td { padding: .7rem .8rem; vertical-align: middle; border-color: rgba(30,58,138,.05); font-size: .8rem; }
+        .logs-table tbody tr:hover { background: rgba(59,130,246,.03); }
+
+        /* ── LOG ENTRY STYLES ── */
+        .log-time { font-size: .78rem; font-weight: 600; white-space: nowrap; color: #1e293b; }
+        .log-date { font-size: .7rem; color: #94a3b8; }
+        .admin-info { display: flex; flex-direction: column; gap: 2px; }
+        .admin-name { font-size: .8rem; font-weight: 600; color: #1e293b; }
+        .admin-id { font-size: .7rem; color: #64748b; }
+        .action-badge { padding: .3rem .65rem; border-radius: 7px; font-weight: 600; font-size: .7rem; white-space: nowrap; display: inline-block; }
+        .log-description { font-size: .78rem; max-width: 300px; overflow: hidden; text-overflow: ellipsis; word-break: break-word; line-height: 1.3; }
+        .ip-address { font-family: 'Courier New', monospace; font-size: .72rem; color: #64748b; white-space: nowrap; }
+
+        /* ── ACTION TYPE COLORS ── */
+        .action-member { background: #dbeafe; color: #1e3a8a; }
+        .action-financial { background: #d1fae5; color: #065f46; }
+        .action-system { background: #e0e7ff; color: #3730a3; }
+        .action-auth { background: #fef3c7; color: #92400e; }
+        .action-danger { background: #fee2e2; color: #7f1d1d; }
+
+        /* ── STATUS BADGES ── */
+        .status-success { background: #d1fae5; color: #065f46; }
+        .status-failed { background: #fee2e2; color: #7f1d1d; }
+        .status-partial { background: #fef3c7; color: #92400e; }
+
+        /* ── ROLE PILL ── */
+        .role-pill { display: inline-flex; align-items: center; gap: 4px; background: rgba(30,58,138,.07); border-radius: 20px; padding: 2px 8px; font-size: .7rem; font-weight: 600; color: var(--primary); white-space: nowrap; }
+
+        /* ── PAGINATION ── */
+        .pagination-wrapper { padding: 1rem 1.25rem; border-top: 1px solid rgba(30,58,138,.07); display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .pagination-info { font-size: .8rem; color: #64748b; }
+        .pagination { margin: 0; display: flex; gap: .25rem; }
+        .page-link { padding: .4rem .7rem; font-size: .8rem; border-radius: 6px; border: 1px solid rgba(30,58,138,.12); color: var(--primary); background: white; font-weight: 600; text-decoration: none; }
+        .page-link:hover { background: rgba(30,58,138,.05); }
+        .page-link.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .page-link.disabled { opacity: .5; pointer-events: none; }
+
+        /* ── EMPTY STATE ── */
+        .empty-state { padding: 3rem 1rem; text-align: center; color: #94a3b8; }
+        .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: .35; }
+        .empty-state p { margin: 0; font-size: .9rem; }
+
+        /* ── PRESET BUTTONS ── */
+        .preset-row { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+        .preset-label { font-size: .75rem; color: #94a3b8; font-weight: 600; margin-right: .25rem; }
+
+        /* ── MOBILE SWIPE HINT ── */
+        .swipe-hint { display: none; align-items: center; gap: 5px; padding: .6rem 1rem; background: rgba(30,58,138,.04); font-size: .72rem; color: var(--primary); font-weight: 600; border-bottom: 1px solid rgba(30,58,138,.05); }
+
+        /* ── TABLET (<=992px) — sidebar off-canvas ── */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .top-navbar { left: 0 !important; }
+            .main-content { margin-left: 0 !important; }
+            .swipe-hint { display: flex; }
+            .stats-row { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+        }
+
+        /* ── TABLET PORTRAIT (<=768px) ── */
+        @media (max-width: 768px) {
+            :root { --navbar-h: 58px; }
+            .top-navbar { height: 58px; padding: 0 .9rem; gap: .5rem; }
+            .main-content { padding: .9rem; }
+            .page-header { padding: .9rem 1rem; margin-bottom: 1rem; }
+            .filter-card { padding: 1rem; margin-bottom: 1rem; }
+            .stat-card { padding: .75rem; }
+            .stat-icon { width: 36px; height: 36px; font-size: 1rem; }
+            .stat-value { font-size: 1rem; }
+            .logs-table thead th { padding: .5rem .6rem; font-size: .68rem; }
+            .logs-table tbody td { padding: .5rem .6rem; font-size: .76rem; }
+            .log-description { max-width: 200px; }
+        }
+
+        /* ── MOBILE (<=576px) ── */
+        @media (max-width: 576px) {
+            :root { --navbar-h: 54px; }
+            .top-navbar { height: 54px; padding: 0 .75rem; gap: .4rem; }
+            .main-content { padding: .75rem; }
+            .page-header { padding: .75rem; border-radius: 12px; margin-bottom: .75rem; }
+            .page-header h5 { font-size: .9rem !important; }
+            .page-header p { font-size: .72rem !important; }
+            .filter-card { padding: .75rem; border-radius: 12px; margin-bottom: .75rem; }
+            .form-label { font-size: .75rem; margin-bottom: .2rem; }
+            .form-control, .form-select { padding: .45rem .7rem; font-size: .82rem; border-radius: 8px; }
+            .btn-sm { padding: .38rem .7rem; font-size: .78rem; }
+            .btn-xs { padding: .22rem .55rem; font-size: .7rem; }
+            .stats-row { grid-template-columns: 1fr; gap: .75rem; margin-bottom: .75rem; }
+            .stat-card { padding: .65rem .75rem; }
+            .stat-icon { width: 32px; height: 32px; font-size: .9rem; }
+            .stat-label { font-size: .65rem; }
+            .stat-value { font-size: .9rem; }
+            .table-header { padding: .75rem; }
+            .table-title { font-size: .85rem; }
+            .logs-table { min-width: 800px; }
+            .logs-table thead th { padding: .45rem .5rem; font-size: .64rem; }
+            .logs-table tbody td { padding: .45rem .5rem; font-size: .72rem; }
+            .log-time { font-size: .72rem; }
+            .log-date { font-size: .65rem; }
+            .admin-name { font-size: .75rem; }
+            .admin-id { font-size: .65rem; }
+            .action-badge { padding: .25rem .5rem; font-size: .65rem; }
+            .role-pill { font-size: .65rem; padding: 2px 6px; }
+            .log-description { font-size: .72rem; max-width: 160px; }
+            .ip-address { font-size: .68rem; }
+            .pagination-wrapper { padding: .75rem; }
+            .pagination-info { font-size: .75rem; }
+            .page-link { padding: .35rem .6rem; font-size: .75rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-container">
+            <div class="logo-box">C</div>
+            <div>
+                <div class="fw-bold" style="text-transform:uppercase;font-size:1rem;line-height:1.2;">Club De Stars</div>
+                <small class="opacity-75" style="font-size:.72rem;">ADMIN PANEL</small>
+            </div>
+        </div>
+        <div class="admin-badge"><i class="fas fa-shield-alt"></i> <%= admin.role?.name || 'Admin' %></div>
+    </div>
+    <div class="sidebar-menu">
+        <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
+        <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
+        <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
+        <a href="/admin/transaction-approvals">
+            <i class="fas fa-tasks"></i> Approvals
+            <span id="sidebarPendingBadge" class="badge bg-danger ms-auto" style="display:none;">0</span>
+        </a>
+        <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposits</a>
+        <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
+        <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
+        <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loans</a>
+        <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
+        <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
+        <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
+        <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Subscriptions</a>
+        <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
+        <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
+        <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
+        <a href="/admin/logs" class="active"><i class="fas fa-history"></i> Admin Logs</a>
+        <a href="/club-de-star-cooperative/dashboard" class="mt-2" style="color:rgba(255,255,255,.55);">
+            <i class="fas fa-sign-in-alt"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- ── TOP NAVBAR ── -->
+<div class="top-navbar">
+    <i class="fas fa-bars d-lg-none" style="cursor:pointer;color:var(--primary);font-size:1.3rem;" onclick="toggleSidebar()"></i>
+    <div class="navbar-title d-none d-md-block">
+        <h5>Admin Activity Logs</h5>
+        <small>System-wide audit trail of all administrative actions</small>
+    </div>
+    <div class="d-md-none fw-bold" style="color:var(--primary);font-size:.9rem;flex-grow:1;margin-left:.5rem;">Admin Logs</div>
+    <div class="navbar-actions">
+        <a href="/admin/logs/export?<%= new URLSearchParams(filters).toString() %>" class="btn btn-outline-primary btn-sm" title="Export Logs">
+            <i class="fas fa-download"></i><span class="d-none d-sm-inline ms-1">Export</span>
+        </a>
+        <a href="/admin/logs" class="btn btn-primary btn-sm" title="Refresh">
+            <i class="fas fa-sync-alt"></i><span class="d-none d-sm-inline ms-1">Refresh</span>
+        </a>
+    </div>
+</div>
+
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="d-flex align-items-center gap-3">
+            <div style="width:44px;height:44px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="fas fa-history" style="color:white;font-size:1.15rem;"></i>
+            </div>
+            <div>
+                <h5 class="mb-0 fw-bold" style="color:var(--primary);font-size:1rem;">Admin Activity Logs</h5>
+                <p class="text-muted mb-0" style="font-size:.78rem;">Complete audit trail of all administrative actions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#dbeafe;color:#1e3a8a;">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Total Events</div>
+                <div class="stat-value"><%= stats.total.toLocaleString() %></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#d1fae5;color:#065f46;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Successful</div>
+                <div class="stat-value"><%= stats.success.toLocaleString() %></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fee2e2;color:#dc2626;">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Failed</div>
+                <div class="stat-value"><%= stats.failed.toLocaleString() %></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#e0e7ff;color:#3730a3;">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Active Admins</div>
+                <div class="stat-value"><%= stats.uniqueAdmins.toLocaleString() %></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="filter-card">
+        <form method="GET" action="/admin/logs">
+            <div class="row g-2 align-items-end gy-2">
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label">From Date</label>
+                    <input type="date" name="dateFrom" class="form-control" value="<%= filters.dateFrom || '' %>">
+                </div>
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label">To Date</label>
+                    <input type="date" name="dateTo" class="form-control" value="<%= filters.dateTo || '' %>">
+                </div>
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label">Action Type</label>
+                    <select name="actionType" class="form-select">
+                        <option value="">All Actions</option>
+                        <optgroup label="Member Management">
+                            <option value="member_approve" <%= filters.actionType === 'member_approve' ? 'selected' : '' %>>Member Approve</option>
+                            <option value="member_reject" <%= filters.actionType === 'member_reject' ? 'selected' : '' %>>Member Reject</option>
+                            <option value="member_delete" <%= filters.actionType === 'member_delete' ? 'selected' : '' %>>Member Delete</option>
+                            <option value="member_edit" <%= filters.actionType === 'member_edit' ? 'selected' : '' %>>Member Edit</option>
+                            <option value="member_create" <%= filters.actionType === 'member_create' ? 'selected' : '' %>>Member Create</option>
+                            <option value="member_status_change" <%= filters.actionType === 'member_status_change' ? 'selected' : '' %>>Status Change</option>
+                        </optgroup>
+                        <optgroup label="Financial">
+                            <option value="deposit_approve" <%= filters.actionType === 'deposit_approve' ? 'selected' : '' %>>Deposit Approve</option>
+                            <option value="deposit_reject" <%= filters.actionType === 'deposit_reject' ? 'selected' : '' %>>Deposit Reject</option>
+                            <option value="deposit_reverse" <%= filters.actionType === 'deposit_reverse' ? 'selected' : '' %>>Deposit Reverse</option>
+                            <option value="withdrawal_approve" <%= filters.actionType === 'withdrawal_approve' ? 'selected' : '' %>>Withdrawal Approve</option>
+                            <option value="withdrawal_reject" <%= filters.actionType === 'withdrawal_reject' ? 'selected' : '' %>>Withdrawal Reject</option>
+                            <option value="loan_approve" <%= filters.actionType === 'loan_approve' ? 'selected' : '' %>>Loan Approve</option>
+                            <option value="loan_reject" <%= filters.actionType === 'loan_reject' ? 'selected' : '' %>>Loan Reject</option>
+                            <option value="loan_disburse" <%= filters.actionType === 'loan_disburse' ? 'selected' : '' %>>Loan Disburse</option>
+                            <option value="roi_distribute" <%= filters.actionType === 'roi_distribute' ? 'selected' : '' %>>ROI Distribute</option>
+                            <option value="extra_charge_add" <%= filters.actionType === 'extra_charge_add' ? 'selected' : '' %>>Extra Charge Add</option>
+                            <option value="extra_charge_waive" <%= filters.actionType === 'extra_charge_waive' ? 'selected' : '' %>>Extra Charge Waive</option>
+                        </optgroup>
+                        <optgroup label="System">
+                            <option value="role_create" <%= filters.actionType === 'role_create' ? 'selected' : '' %>>Role Create</option>
+                            <option value="role_edit" <%= filters.actionType === 'role_edit' ? 'selected' : '' %>>Role Edit</option>
+                            <option value="role_delete" <%= filters.actionType === 'role_delete' ? 'selected' : '' %>>Role Delete</option>
+                            <option value="permission_update" <%= filters.actionType === 'permission_update' ? 'selected' : '' %>>Permission Update</option>
+                            <option value="settings_update" <%= filters.actionType === 'settings_update' ? 'selected' : '' %>>Settings Update</option>
+                            <option value="subscription_update" <%= filters.actionType === 'subscription_update' ? 'selected' : '' %>>Subscription Update</option>
+                        </optgroup>
+                        <optgroup label="Authentication">
+                            <option value="admin_login" <%= filters.actionType === 'admin_login' ? 'selected' : '' %>>Admin Login</option>
+                            <option value="admin_logout" <%= filters.actionType === 'admin_logout' ? 'selected' : '' %>>Admin Logout</option>
+                            <option value="password_reset" <%= filters.actionType === 'password_reset' ? 'selected' : '' %>>Password Reset</option>
+                        </optgroup>
+                        <option value="other" <%= filters.actionType === 'other' ? 'selected' : '' %>>Other</option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label">Admin</label>
+                    <select name="adminId" class="form-select">
+                        <option value="">All Admins</option>
+                        <% admins.forEach(adm => { %>
+                        <option value="<%= adm._id %>" <%= filters.adminId === String(adm._id) ? 'selected' : '' %>>
+                            <%= adm.firstName %> <%= adm.lastName %> (<%= adm.membershipID %>)<% if(adm.role) { %> - <%= adm.role.name %><% } %>
+                        </option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+            <div class="preset-row mt-3">
+                <span class="preset-label">Quick Filters:</span>
+                <button type="button" class="btn-xs" onclick="setPreset('today')">Today</button>
+                <button type="button" class="btn-xs" onclick="setPreset('yesterday')">Yesterday</button>
+                <button type="button" class="btn-xs" onclick="setPreset('week')">This Week</button>
+                <button type="button" class="btn-xs" onclick="setPreset('month')">This Month</button>
+                <button type="button" class="btn-xs" onclick="setPreset('all')">All Time</button>
+                <a href="/admin/logs" class="btn btn-outline-primary btn-sm ms-auto">
+                    <i class="fas fa-redo me-1"></i>Clear
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fas fa-search me-1"></i>Apply
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="logs-table-card">
+        <div class="table-header">
+            <div class="table-title">
+                <i class="fas fa-list"></i>
+                <span>Activity Log</span>
+                <span class="badge" style="background:rgba(30,58,138,.1);color:var(--primary);font-size:.7rem;"><%= pagination.total.toLocaleString() %> results</span>
+            </div>
+        </div>
+        
+        <div class="swipe-hint">
+            <i class="fas fa-arrows-left-right"></i> Swipe to view all columns
+        </div>
+        
+        <div class="table-scroll">
+            <table class="logs-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date & Time</th>
+                        <th>Admin</th>
+                        <th>Role</th>
+                        <th>Action Type</th>
+                        <th>Description</th>
+                        <th>Target User</th>
+                        <th>Status</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (logs.length === 0) { %>
+                    <tr>
+                        <td colspan="9">
+                            <div class="empty-state">
+                                <i class="fas fa-history"></i>
+                                <p>No log entries found for the selected filters</p>
+                            </div>
+                        </td>
+                    </tr>
+                    <% } else { %>
+                        <% 
+                        const startIdx = (pagination.page - 1) * pagination.limit;
+                        logs.forEach((log, idx) => { 
+                            const date = new Date(log.createdAt);
+                            let actionClass = 'action-member';
+                            if (log.actionType.startsWith('member_')) actionClass = 'action-member';
+                            else if (log.actionType.includes('deposit') || log.actionType.includes('withdrawal') || 
+                                     log.actionType.includes('loan') || log.actionType.includes('roi') || 
+                                     log.actionType.includes('charge')) actionClass = 'action-financial';
+                            else if (log.actionType.startsWith('role_') || log.actionType.includes('permission') || 
+                                     log.actionType.includes('settings') || log.actionType.includes('subscription')) actionClass = 'action-system';
+                            else if (log.actionType.includes('login') || log.actionType.includes('logout') || 
+                                     log.actionType.includes('password')) actionClass = 'action-auth';
+                            else if (log.actionType.includes('delete') || log.actionType.includes('reject')) actionClass = 'action-danger';
+                        %>
+                        <tr>
+                            <td><small class="text-muted"><%= startIdx + idx + 1 %></small></td>
+                            <td>
+                                <div class="log-time"><%= date.toLocaleDateString('en-NG', {day: '2-digit', month: 'short', year: 'numeric'}) %></div>
+                                <div class="log-date"><%= date.toLocaleTimeString('en-NG', {hour: '2-digit', minute: '2-digit'}) %></div>
+                            </td>
+                            <td>
+                                <div class="admin-info">
+                                    <div class="admin-name"><%= log.admin ? `${log.admin.firstName} ${log.admin.lastName}` : 'System' %></div>
+                                    <% if (log.admin) { %>
+                                    <div class="admin-id"><%= log.admin.membershipID %></div>
+                                    <% } %>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="role-pill">
+                                    <i class="fas fa-shield-alt"></i><%= log.adminRole || '—' %>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="action-badge <%= actionClass %>">
+                                    <%= log.actionType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="log-description" title="<%= log.description %>">
+                                    <%= log.description %>
+                                </div>
+                            </td>
+                            <td>
+                                <% if (log.targetUser) { %>
+                                <div style="font-size:.75rem;font-weight:600;"><%= log.targetUser.firstName %> <%= log.targetUser.lastName %></div>
+                                <div style="font-size:.7rem;color:#64748b;"><%= log.targetUser.membershipID %></div>
+                                <% } else { %>
+                                <small class="text-muted">—</small>
+                                <% } %>
+                            </td>
+                            <td>
+                                <span class="action-badge status-<%= log.status %>">
+                                    <%= log.status.toUpperCase() %>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="ip-address"><%= log.ipAddress || '—' %></div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination.pages > 0) { %>
+        <div class="pagination-wrapper">
+            <div class="pagination-info">
+                <% 
+                const start = (pagination.page - 1) * pagination.limit + 1;
+                const end = Math.min(pagination.page * pagination.limit, pagination.total);
+                %>
+                Showing <%= start %>-<%= end %> of <%= pagination.total.toLocaleString() %> results
+            </div>
+            <ul class="pagination">
+                <% 
+                const currentPage = pagination.page;
+                const totalPages = pagination.pages;
+                const maxVisible = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+                let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                if (endPage - startPage < maxVisible - 1) {
+                    startPage = Math.max(1, endPage - maxVisible + 1);
+                }
+                
+                // Build query string for pagination
+                const queryParams = { ...filters, page: '' };
+                delete queryParams.page;
+                const baseQuery = new URLSearchParams(queryParams).toString();
+                const makeUrl = (p) => `/admin/logs?${baseQuery ? baseQuery + '&' : ''}page=${p}`;
+                %>
+                
+                <!-- Previous -->
+                <li class="page-item">
+                    <a class="page-link <%= currentPage === 1 ? 'disabled' : '' %>" href="<%= currentPage > 1 ? makeUrl(currentPage - 1) : '#' %>">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+
+                <!-- First page -->
+                <% if (startPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="<%= makeUrl(1) %>">1</a>
+                    </li>
+                    <% if (startPage > 2) { %>
+                        <li class="page-item disabled"><a class="page-link">...</a></li>
+                    <% } %>
+                <% } %>
+
+                <!-- Page numbers -->
+                <% for (let i = startPage; i <= endPage; i++) { %>
+                    <li class="page-item">
+                        <a class="page-link <%= i === currentPage ? 'active' : '' %>" href="<%= makeUrl(i) %>"><%= i %></a>
+                    </li>
+                <% } %>
+
+                <!-- Last page -->
+                <% if (endPage < totalPages) { %>
+                    <% if (endPage < totalPages - 1) { %>
+                        <li class="page-item disabled"><a class="page-link">...</a></li>
+                    <% } %>
+                    <li class="page-item">
+                        <a class="page-link" href="<%= makeUrl(totalPages) %>"><%= totalPages %></a>
+                    </li>
+                <% } %>
+
+                <!-- Next -->
+                <li class="page-item">
+                    <a class="page-link <%= currentPage === totalPages ? 'disabled' : '' %>" href="<%= currentPage < totalPages ? makeUrl(currentPage + 1) : '#' %>">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <% } %>
+    </div>
+
+</div><!-- /main-content -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════
+// SIDEBAR TOGGLE
+// ══════════════════════════════════════════════════════════
+function toggleSidebar() {
+    if (window.innerWidth <= 992) {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('active');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+}
+
+// ══════════════════════════════════════════════════════════
+// DATE PRESETS
+// ══════════════════════════════════════════════════════════
+function setPreset(preset) {
+    const today = new Date();
+    const fmt = d => d.toISOString().slice(0,10);
+    let from, to = fmt(today);
+
+    switch(preset) {
+        case 'today':
+            from = to;
+            break;
+        case 'yesterday':
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            from = to = fmt(yesterday);
+            break;
+        case 'week':
+            const weekStart = new Date(today);
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            from = fmt(weekStart);
+            break;
+        case 'month':
+            from = fmt(new Date(today.getFullYear(), today.getMonth(), 1));
+            break;
+        case 'all':
+            from = '';
+            to = '';
+            break;
+    }
+
+    document.querySelector('[name="dateFrom"]').value = from;
+    document.querySelector('[name="dateTo"]').value = to;
+}
+
+// ══════════════════════════════════════════════════════════
+// LOAD PENDING BADGE COUNT
+// ══════════════════════════════════════════════════════════
+async function loadSidebarPendingCount() {
+    try {
+        const data = await fetch('/admin/pending-approvals-count').then(r=>r.json());
+        const badge = document.getElementById('sidebarPendingBadge');
+        if (!badge) return;
+        badge.style.display = data.count > 0 ? 'inline-block' : 'none';
+        badge.textContent = data.count;
+    } catch(e) {}
+}
+
+document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
+</script>
+
+</body>
+</html>

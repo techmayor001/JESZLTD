@@ -9,6 +9,8 @@ const Loan = require("../models/Loan");
 const LoanSettings = require("../models/LoanSettings");
 const CompanyROI = require("../models/companyRoiSchema");
 const Withdrawal = require("../models/Withdrawal");
+const Role = require("../models/Role");
+const Permission = require("../models/Permission");
 
 
 
@@ -82,6 +84,8 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
   if (!req.isAuthenticated()) return res.redirect("/login");
 
   try {
+    // Passport already populates role & permissions via deserializeUser
+    // We just need to populate account and referredUsers
     const user = await User.findById(req.user._id)
       .populate({
         path: "account",
@@ -94,6 +98,9 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
       console.error("User not found");
       return res.redirect("/login");
     }
+
+    // Merge role from req.user (already populated by Passport)
+    user.role = req.user.role;
 
     const users = await User.find({}).populate("account");
 
@@ -176,6 +183,8 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
     });
 
     console.log("Forceful Withdrawal Count:", forcefulWithdrawalCount);
+    console.log("User Role:", user.role?.name);
+    console.log("User Permissions Count:", user.role?.permissions?.length || 0);
 
     res.render("dashboard/user/user-dashboard", {
       user,
@@ -212,7 +221,6 @@ router.get("/club-de-star-cooperative/dashboard", async (req, res) => {
     res.redirect("/login");
   }
 });
-
 
 
 

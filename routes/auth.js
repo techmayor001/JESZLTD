@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+require("dotenv").config();
+const mongoose = require("mongoose");
 
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
@@ -13,6 +15,8 @@ const Account = require("../models/Account");
 const Settings = require("../models/Settings");
 const MemberType = require("../models/MemberType");
 const ExtraCharge = require("../models/ExtraCharge");
+const Role = require("../models/Role");
+const Permission = require("../models/Permission");
 
 const multer = require('multer');
 const fs = require('fs');
@@ -48,7 +52,6 @@ const upload = multer({
  });
 
 
-
 router.post(
   "/signup",
   upload.fields([
@@ -74,8 +77,10 @@ router.post(
         password,
       } = req.body;
 
+      const normalizedEmail = email.toLowerCase();
+
       // ✅ Check for existing email
-      const existingUser = await User.findOne({ email });
+      const existingUser = await User.findOne({ email: normalizedEmail });
       if (existingUser) {
         return res
           .status(400)
@@ -90,18 +95,19 @@ router.post(
 
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      // Get default MemberType (NCDS) and Settings
+      // Get default MemberType
       const defaultMemberType = await MemberType.findOne({ isDefault: true });
       if (!defaultMemberType) {
-        return res
-          .status(500)
-          .json({ status: false, message: "Default member type not found" });
+        return res.status(500).json({
+          status: false,
+          message: "Default member type not found",
+        });
       }
 
       const settings = await Settings.getSettings();
       const registrationFee = settings.registrationFees.adultRegistrationFee;
 
-      // Generate next membershipID for the type
+      // Generate membershipID
       const lastUserOfType = await User.findOne({
         membershipID: { $regex: `^${defaultMemberType.shortCode}` },
       }).sort({ createdAt: -1 });
@@ -115,11 +121,36 @@ router.post(
       const membershipID = `${defaultMemberType.shortCode}${String(nextNumber).padStart(4, "0")}`;
       const newReferralCode = membershipID;
 
-      // Create new user
+      // 🔥 SUPERADMIN CHECK
+      const isSuperAdmin = normalizedEmail === process.env.SUPERADMIN_EMAIL?.toLowerCase();
+
+      // Get roles
+      const superAdminRole = isSuperAdmin
+        ? await Role.findOne({ name: "superadmin" })
+        : null;
+      const memberRole = !isSuperAdmin
+        ? await Role.findOne({ name: "member" })
+        : null;
+
+      if (isSuperAdmin && !superAdminRole) {
+        return res.status(500).json({
+          status: false,
+          message: "Superadmin role not configured.",
+        });
+      }
+
+      if (!isSuperAdmin && !memberRole) {
+        return res.status(500).json({
+          status: false,
+          message: "Member role not configured.",
+        });
+      }
+
+      // ✅ Create user
       const newUser = await User.create({
         firstName,
         lastName,
-        email,
+        email: normalizedEmail,
         phone,
         dob,
         state,
@@ -134,11 +165,13 @@ router.post(
         referralCode: newReferralCode,
         membershipID,
         password: hashedPassword,
-        status: "pending",
+        status: isSuperAdmin ? "active" : "pending",
+        registrationStatus: isSuperAdmin ? "paid" : "pending",
+        role: isSuperAdmin ? superAdminRole._id : memberRole._id, // <-- Assign member role for normal users
       });
 
-      // Handle referral if provided
-      if (referralCode) {
+      // Handle referral
+      if (referralCode && !isSuperAdmin) {
         const referringUser = await User.findOne({ referralCode });
         if (referringUser) {
           referringUser.referredUsers.push(newUser._id);
@@ -151,44 +184,70 @@ router.post(
         if (err) console.error("Auto-login error:", err);
       });
 
-      // Create Account for the user
+      // Create Account
       const account = await Account.create({
         user: newUser._id,
-        accountType: defaultMemberType._id, // proper reference
+        accountType: defaultMemberType._id,
         balance: 0,
         monthlyROI: defaultMemberType.interestRate || 0,
         accumulativeROI: 0,
       });
 
-      // Link account to user
       newUser.account = account._id;
       await newUser.save();
 
-      // Initialize Paystack transaction with dynamic registration fee
-      const paystackRes = await fetch(
-        "https://api.paystack.co/transaction/initialize",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            amount: registrationFee * 100, // convert to kobo
-            metadata: { firstName, lastName, userId: newUser._id },
-            callback_url: `${process.env.BASE_URL}/payment/verify`,
-          }),
-        }
-      );
+      // 🚀 SUPERADMIN: Skip Paystack
+      if (isSuperAdmin) {
+        const payment = await Payment.create({
+          user: newUser._id,
+          email: normalizedEmail,
+          amount: 0,
+          reference: `SUPERADMIN-${Date.now()}`,
+          status: "success",
+          verifiedAt: new Date(),
+        });
+
+        newUser.Payment = payment._id;
+        await newUser.save();
+
+        await ExtraCharge.create({
+          member: newUser._id,
+          chargeType: "registration",
+          amount: 0,
+          reason: "Superadmin registration (system bypass)",
+          status: "paid",
+          appliedAt: new Date(),
+          paidAt: new Date(),
+        });
+
+        return res.json({
+          status: true,
+          message: "Superadmin registered successfully",
+          redirect: "/club-de-star-cooperative/dashboard",
+        });
+      }
+
+      // ✅ Normal users → Initialize Paystack
+      const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: normalizedEmail,
+          amount: registrationFee * 100,
+          metadata: { firstName, lastName, userId: newUser._id },
+          callback_url: `${process.env.BASE_URL}/payment/verify`,
+        }),
+      });
 
       const data = await paystackRes.json();
-      if (!data.status || !data.data)
-        throw new Error("Payment initialization failed");
+      if (!data.status || !data.data) throw new Error("Payment initialization failed");
 
       const payment = await Payment.create({
         user: newUser._id,
-        email,
+        email: normalizedEmail,
         amount: registrationFee,
         reference: data.data.reference,
         status: "pending",
@@ -198,14 +257,15 @@ router.post(
       await newUser.save();
 
       res.json({ status: true, authorization_url: data.data.authorization_url });
+
     } catch (err) {
       console.error("Signup error:", err);
-      res
-        .status(500)
-        .json({ status: false, message: "Error during registration." });
+      res.status(500).json({ status: false, message: "Error during registration." });
     }
   }
 );
+
+
 
 // MIGRATION 
 router.post(
@@ -436,48 +496,57 @@ router.post("/login", (req, res, next) => {
   passport.authenticate("user-local", (err, user, info) => {
 
     if (err) {
-      return res.status(500).render("auth/login", { 
-        error: "An error occurred. Please try again." 
+      return res.status(500).render("auth/login", {
+        error: "An error occurred. Please try again."
       });
     }
 
     if (!user) {
+      // Keep your custom error messages
       if (info?.message === "No user found") {
-        return res.status(401).render("auth/login", { 
+        return res.status(401).render("auth/login", {
           error: "Email not found. Please register first.",
           info: "Need an account? Click Register Here below."
         });
-      } 
-      else if (info?.message === "Incorrect password") {
-        return res.status(401).render("auth/login", { 
-          error: "Incorrect password. Please try again." 
+      } else if (info?.message === "Incorrect password") {
+        return res.status(401).render("auth/login", {
+          error: "Incorrect password. Please try again."
         });
-      } 
-      else if (info?.message === "Invalid email") {
-        return res.status(401).render("auth/login", { 
-          error: "Please enter a valid email address." 
+      } else if (info?.message === "Invalid email") {
+        return res.status(401).render("auth/login", {
+          error: "Please enter a valid email address."
+        });
+      } else if (info?.message === "No role assigned") {
+        return res.status(403).render("auth/login", {
+          error: "No role assigned to this account. Contact support."
+        });
+      } else if (info?.message === "User role is inactive") {
+        return res.status(403).render("auth/login", {
+          error: "Your account role is inactive. Contact support."
         });
       }
-      return res.status(401).render("auth/login", { 
-        error: info?.message || "Invalid credentials" 
+
+      // Default fallback
+      return res.status(401).render("auth/login", {
+        error: info?.message || "Invalid email or password"
       });
     }
 
     req.logIn(user, (err) => {
       if (err) {
-        return res.status(500).render("auth/login", { 
-          error: "Login failed. Please try again." 
+        return res.status(500).render("auth/login", {
+          error: "Login failed. Please try again."
         });
       }
 
-      if (user.role === "admin") {
-        return res.redirect("/admin-dashboard");
-      } else {
-        return res.redirect("/club-de-star-cooperative/dashboard");
-      }
+      // ✅ All users go to the same dashboard
+      return res.redirect("/club-de-star-cooperative/dashboard");
     });
+
   })(req, res, next);
 });
+
+
 
 
 // LOGOUT ROUTE 

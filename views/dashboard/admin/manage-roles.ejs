@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Role & Permission Management - Club De Stars</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <style>
+    :root{--primary:#1e3a8a;--primary-dark:#1e40af;--primary-light:#3b82f6;--sidebar-width:280px}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#f8fafc 0%,#e0e7ff 100%);min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-width);background:linear-gradient(180deg,#1e3a8a 0%,#1e40af 50%,#3b82f6 100%);color:#fff;z-index:1040;overflow-y:auto;box-shadow:4px 0 20px rgba(30,58,138,.15);transform:translateX(0);transition:all .3s}
+    .sidebar-header{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.1)}
+    .logo-box{width:45px;height:45px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:var(--primary);font-size:1.5rem;box-shadow:0 4px 10px rgba(0,0,0,.2)}
+    .admin-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(239,68,68,.2);border-radius:20px;border:1px solid rgba(239,68,68,.3);font-weight:600;font-size:.8rem;margin-top:8px}
+    .sidebar-menu a{color:rgba(255,255,255,.85);text-decoration:none;padding:.875rem 1.5rem;display:flex;align-items:center;transition:all .3s;border-left:3px solid transparent;font-weight:500;font-size:.95rem}
+    .sidebar-menu a:hover,.sidebar-menu a.active{background:rgba(255,255,255,.15);color:#fff;border-left-color:#fff}
+    .sidebar-menu a i{width:24px;margin-right:12px;font-size:1.1rem}
+
+    /* NAVBAR */
+    .top-navbar{position:fixed;top:0;left:var(--sidebar-width);right:0;height:70px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);box-shadow:0 4px 15px rgba(30,58,138,.08);z-index:1030;display:flex;align-items:center;padding:0 1.5rem;border-bottom:1px solid rgba(30,58,138,.1)}
+
+    /* MAIN */
+    .main-content{margin-left:var(--sidebar-width);margin-top:70px;padding:1.5rem;min-height:calc(100vh - 70px)}
+    .page-header{background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 50%,#3b82f6 100%);color:#fff;border-radius:20px;padding:2rem;margin-bottom:1.5rem;box-shadow:0 15px 40px rgba(30,58,138,.25);position:relative;overflow:hidden}
+    .page-header::before{content:'';position:absolute;top:-50%;right:-20%;width:400px;height:400px;background:rgba(255,255,255,.05);border-radius:50%}
+
+    /* CARDS */
+    .card{border:none;border-radius:16px;box-shadow:0 8px 20px rgba(30,58,138,.08);background:#fff;border:1px solid rgba(30,58,138,.05);margin-bottom:1.5rem}
+    .card-header{background:linear-gradient(135deg,rgba(30,58,138,.03),rgba(59,130,246,.03));border-bottom:2px solid rgba(30,58,138,.1);padding:1.25rem;border-radius:16px 16px 0 0!important}
+    .role-card{border:2px solid rgba(30,58,138,.1);border-radius:16px;padding:1.5rem;transition:all .3s;background:#fff;height:100%}
+    .role-card:hover{transform:translateY(-4px);box-shadow:0 15px 35px rgba(30,58,138,.15);border-color:var(--primary)}
+    .role-icon{width:58px;height:58px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
+    .user-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:.8rem;flex-shrink:0}
+
+    /* PERMISSIONS */
+    .permission-item{padding:.6rem .9rem;border-radius:10px;background:linear-gradient(135deg,rgba(30,58,138,.03),rgba(59,130,246,.03));border:1px solid rgba(30,58,138,.1);margin-bottom:.4rem;transition:all .3s}
+    .permission-item:hover{border-color:var(--primary)}
+    .perm-cat-hdr{background:linear-gradient(135deg,rgba(30,58,138,.07),rgba(59,130,246,.07));border-left:4px solid var(--primary);padding:.6rem 1rem;margin-bottom:.5rem;border-radius:8px;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between}
+    .perm-cat-hdr .chevron{transition:transform .25s}
+    .perm-cat-hdr.collapsed .chevron{transform:rotate(-90deg)}
+
+    /* MISC */
+    .form-check-input:checked{background-color:var(--primary);border-color:var(--primary)}
+    .btn-primary{background:linear-gradient(135deg,#1e3a8a,#3b82f6);border:none;padding:.55rem 1.4rem;border-radius:10px;font-weight:600;transition:all .3s}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(30,58,138,.3)}
+    .badge{padding:.35rem .75rem;border-radius:8px;font-weight:600;font-size:.72rem}
+    .table th{font-weight:600;color:var(--primary);border-bottom:2px solid rgba(30,58,138,.1);white-space:nowrap}
+    .modal-content{border-radius:16px;overflow:hidden}
+    .modal-header{border-radius:0!important}
+    .powered-by{position:fixed;bottom:15px;right:15px;background:#fff;padding:10px 16px;border-radius:25px;box-shadow:0 4px 15px rgba(30,58,138,.15);font-size:.8rem;font-weight:600;color:var(--primary);z-index:1000}
+
+    /* TOAST */
+    #toastWrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:.5rem;align-items:center;pointer-events:none}
+    .ctoast{display:flex;align-items:center;gap:10px;padding:.7rem 1.4rem;border-radius:50px;box-shadow:0 8px 30px rgba(0,0,0,.2);font-weight:600;font-size:.88rem;pointer-events:auto;animation:toastIn .3s ease;max-width:90vw}
+    .ctoast.success{background:#10b981;color:#fff}
+    .ctoast.error{background:#ef4444;color:#fff}
+    .ctoast.info{background:#3b82f6;color:#fff}
+    @keyframes toastIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+    @media(max-width:992px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.active{transform:translateX(0)}
+      .top-navbar{left:0}
+      .main-content{margin-left:0}
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="d-flex align-items-center gap-3 mb-2">
+      <div class="logo-box">C</div>
+      <div>
+        <h5 class="mb-0 fw-bold text-uppercase" style="font-size:.95rem">Club De Stars</h5>
+        <small class="opacity-75" style="font-size:.7rem">ADMIN PANEL</small>
+      </div>
+    </div>
+    <div class="admin-badge"><i class="fas fa-shield-alt"></i> SUPER ADMIN</div>
+  </div>
+        <div class="sidebar-menu">
+            <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
+            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
+            <a href="/admin/transaction-approvals">
+                <i class="fas fa-tasks"></i> Approvals
+                <span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span>
+            </a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
+            <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
+            <a href="/manage-roles" class="active"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
+             <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
+            <a href="/club-de-star-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);">
+                <i class="fas fa-sign-in-alt"></i> Back to Dashboard
+            </a>
+        </div>
+</div>
+
+<!-- TOP NAV -->
+<div class="top-navbar">
+  <i class="fas fa-bars d-lg-none me-3" id="menuToggle" style="cursor:pointer;color:var(--primary);font-size:1.4rem"></i>
+  <div class="flex-grow-1 d-none d-lg-block">
+    <h5 class="mb-0 fw-bold" style="color:var(--primary)">Role &amp; Permission Management</h5>
+    <small class="text-muted">Create roles, assign permissions, and manage user access</small>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <div class="user-avatar">
+      <%= admin.firstName ? admin.firstName[0].toUpperCase() : 'A' %><%= admin.lastName ? admin.lastName[0].toUpperCase() : '' %>
+    </div>
+    <div class="d-none d-md-block">
+      <div class="fw-semibold" style="font-size:.85rem;color:var(--primary)"><%= admin.firstName %> <%= admin.lastName %></div>
+      <small class="text-muted" style="font-size:.72rem">Administrator</small>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-content">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="row align-items-center position-relative" style="z-index:1">
+      <div class="col-md-8">
+        <h2 class="mb-1 fw-bold"><i class="fas fa-user-shield me-2"></i>Role &amp; Permission Management</h2>
+        <p class="mb-0 opacity-90">Create roles, assign permissions, and manage user access control</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <button class="btn btn-light fw-semibold" id="openCreateBtn">
+          <i class="fas fa-plus me-2"></i>Create New Role
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-3 col-md-6 col-6">
+      <div class="role-card text-center">
+        <div class="role-icon mx-auto" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff"><i class="fas fa-user-tag"></i></div>
+        <p class="text-muted mb-1 fw-semibold small">Total Roles</p>
+        <h3 class="mb-0 fw-bold"><%= stats.totalRoles %></h3>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-6">
+      <div class="role-card text-center">
+        <div class="role-icon mx-auto" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff"><i class="fas fa-key"></i></div>
+        <p class="text-muted mb-1 fw-semibold small">Permissions</p>
+        <h3 class="mb-0 fw-bold"><%= stats.totalPermissions %></h3>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-6">
+      <div class="role-card text-center">
+        <div class="role-icon mx-auto" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff"><i class="fas fa-users-cog"></i></div>
+        <p class="text-muted mb-1 fw-semibold small">Assigned Users</p>
+        <h3 class="mb-0 fw-bold"><%= stats.assignedUsers %></h3>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-6">
+      <div class="role-card text-center">
+        <div class="role-icon mx-auto" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff"><i class="fas fa-shield-alt"></i></div>
+        <p class="text-muted mb-1 fw-semibold small">Active Roles</p>
+        <h3 class="mb-0 fw-bold"><%= stats.activeRoles %></h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Roles Grid -->
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0 fw-bold" style="color:var(--primary)"><i class="fas fa-user-tag me-2"></i>Existing Roles</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3" id="rolesGrid">
+        <%
+          var roleIconMap = {
+            superadmin: { icon: 'fas fa-crown',       bg: 'linear-gradient(135deg,#ef4444,#dc2626)' },
+            admin:      { icon: 'fas fa-user-shield', bg: 'linear-gradient(135deg,#3b82f6,#2563eb)' },
+            accountant: { icon: 'fas fa-calculator',  bg: 'linear-gradient(135deg,#10b981,#059669)' },
+            member:     { icon: 'fas fa-user',        bg: 'linear-gradient(135deg,#64748b,#475569)' }
+          };
+        %>
+        <% roles.forEach(function(r) { %>
+          <%
+            var ri = roleIconMap[r.name.toLowerCase()] || { icon: 'fas fa-user-tag', bg: 'linear-gradient(135deg,#8b5cf6,#7c3aed)' };
+            var createdByName = r.createdBy ? (r.createdBy.firstName + ' ' + r.createdBy.lastName) : 'System';
+            var roleDesc = r.description || '';
+            var permIdList = r.permissions.map(function(p){ return p._id.toString(); });
+          %>
+          <div class="col-lg-4 col-md-6" id="rcard-<%= r._id %>">
+            <div class="role-card">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="role-icon" style="background:<%= ri.bg %>;color:#fff">
+                  <i class="<%= ri.icon %>"></i>
+                </div>
+                <% if (r.isSystemRole) { %>
+                  <span class="badge bg-danger">System Role</span>
+                <% } else if (r.isActive) { %>
+                  <span class="badge bg-success">Active</span>
+                <% } else { %>
+                  <span class="badge bg-secondary">Inactive</span>
+                <% } %>
+              </div>
+              <h5 class="fw-bold mb-1 text-capitalize"><%= r.name %></h5>
+              <p class="text-muted small mb-3" style="min-height:2.2rem"><%= roleDesc || 'No description provided' %></p>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <small class="text-muted">Permissions:</small>
+                <span class="badge bg-primary"><%= r.permissions.length %> / <%= stats.totalPermissions %></span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <small class="text-muted">Created by:</small>
+                <small class="text-muted"><%= createdByName %></small>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary flex-fill js-view-role"
+                  data-id="<%= r._id %>">
+                  <i class="fas fa-eye me-1"></i>View
+                </button>
+                <% if (!r.isSystemRole) { %>
+                  <button class="btn btn-sm btn-outline-warning js-edit-role"
+                    data-id="<%= r._id %>"
+                    data-name="<%= r.name %>"
+                    data-desc="<%= roleDesc %>"
+                    data-active="<%= r.isActive %>"
+                    data-perms="<%= permIdList.join(',') %>">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger js-delete-role"
+                    data-id="<%= r._id %>"
+                    data-name="<%= r.name %>">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Role Assignments -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <h5 class="mb-0 fw-bold" style="color:var(--primary)"><i class="fas fa-users-cog me-2"></i>User Role Assignments</h5>
+      <button class="btn btn-sm btn-primary" id="openAssignBtn">
+        <i class="fas fa-user-plus me-1"></i>Assign User to Role
+      </button>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th class="d-none d-md-table-cell">Email</th>
+              <th>Role</th>
+              <th class="d-none d-sm-table-cell">Last Updated</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="userRoleBody">
+            <% if (assignedUsers && assignedUsers.length) { %>
+              <% assignedUsers.forEach(function(u) { %>
+                <%
+                  var uInitials = (u.firstName ? u.firstName[0].toUpperCase() : '?') + (u.lastName ? u.lastName[0].toUpperCase() : '');
+                  var uRoleId   = (u.role && u.role._id) ? u.role._id.toString() : '';
+                  var uRoleName = (u.role && u.role.name) ? u.role.name : '';
+                  var uFullName = u.firstName + ' ' + u.lastName;
+                  var uUpdated  = u.updatedAt ? new Date(u.updatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '-';
+                  var uStatus   = u.status ? (u.status.charAt(0).toUpperCase() + u.status.slice(1)) : 'Pending';
+                  var uStatusBadge = u.status === 'active' ? 'bg-success' : 'bg-warning text-dark';
+                %>
+                <tr id="urow-<%= u._id %>">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="user-avatar" style="font-size:.75rem"><%= uInitials %></div>
+                      <div>
+                        <div class="fw-semibold" style="font-size:.9rem"><%= uFullName %></div>
+                        <small class="text-muted d-md-none"><%= u.email %></small>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="d-none d-md-table-cell text-muted small"><%= u.email %></td>
+                  <td>
+                    <% if (uRoleName) { %>
+                      <span class="badge bg-primary text-capitalize"><%= uRoleName %></span>
+                    <% } else { %>
+                      <span class="badge bg-secondary">No Role</span>
+                    <% } %>
+                  </td>
+                  <td class="d-none d-sm-table-cell text-muted small"><%= uUpdated %></td>
+                  <td><span class="badge <%= uStatusBadge %>"><%= uStatus %></span></td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-warning js-change-role"
+                        title="Change Role"
+                        data-uid="<%= u._id %>"
+                        data-name="<%= uFullName %>"
+                        data-roleid="<%= uRoleId %>">
+                        <i class="fas fa-exchange-alt"></i>
+                      </button>
+                      <button class="btn btn-outline-danger js-remove-role"
+                        title="Remove Role"
+                        data-uid="<%= u._id %>"
+                        data-name="<%= uFullName %>">
+                        <i class="fas fa-user-minus"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            <% } else { %>
+              <tr id="emptyRow">
+                <td colspan="6" class="text-center text-muted py-5">
+                  <i class="fas fa-users-slash fa-2x mb-2 d-block opacity-25"></i>
+                  No users have been assigned roles yet.
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-content -->
+
+<div class="powered-by">Powered by <strong style="color:var(--primary)">JESZ LIMITED</strong></div>
+<div id="toastWrap"></div>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- CREATE ROLE -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff">
+        <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle me-2"></i>Create New Role</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Role Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="cName" placeholder="e.g. Manager">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Description</label>
+            <input type="text" class="form-control" id="cDesc" placeholder="Brief description">
+          </div>
+        </div>
+        <h6 class="fw-bold mb-3">Assign Permissions</h6>
+        <% groupedPermissions.forEach(function(grp) { %>
+          <div class="perm-cat-hdr">
+            <span><i class="<%= grp.icon %> me-2"></i><strong><%= grp.label %></strong></span>
+            <div class="d-flex align-items-center gap-2">
+              <button type="button" class="btn btn-sm btn-outline-light js-select-all" data-target="create-perm"
+                style="font-size:.7rem;padding:.15rem .55rem">Select All</button>
+              <i class="fas fa-chevron-down chevron"></i>
+            </div>
+          </div>
+          <div class="perm-group mb-3">
+            <% grp.permissions.forEach(function(p) { %>
+              <div class="permission-item">
+                <div class="form-check">
+                  <input class="form-check-input create-perm" type="checkbox"
+                    id="c_<%= p._id %>" value="<%= p._id %>">
+                  <label class="form-check-label" for="c_<%= p._id %>">
+                    <strong class="text-capitalize"><%= p.name.replace(/_/g, ' ') %></strong>
+                    <small class="d-block text-muted"><%= p.description %></small>
+                  </label>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% }); %>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" id="createBtn">
+          <i class="fas fa-save me-2"></i>Create Role
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT ROLE -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff">
+        <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Role</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="eId">
+        <div class="row g-3 mb-4">
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Role Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="eName">
+          </div>
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Description</label>
+            <input type="text" class="form-control" id="eDesc">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label fw-semibold">Status</label>
+            <select class="form-select" id="eActive">
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <h6 class="fw-bold mb-3">Permissions</h6>
+        <% groupedPermissions.forEach(function(grp) { %>
+          <div class="perm-cat-hdr">
+            <span><i class="<%= grp.icon %> me-2"></i><strong><%= grp.label %></strong></span>
+            <div class="d-flex align-items-center gap-2">
+              <button type="button" class="btn btn-sm btn-outline-light js-select-all" data-target="edit-perm"
+                style="font-size:.7rem;padding:.15rem .55rem">Select All</button>
+              <i class="fas fa-chevron-down chevron"></i>
+            </div>
+          </div>
+          <div class="perm-group mb-3">
+            <% grp.permissions.forEach(function(p) { %>
+              <div class="permission-item">
+                <div class="form-check">
+                  <input class="form-check-input edit-perm" type="checkbox"
+                    id="e_<%= p._id %>" value="<%= p._id %>">
+                  <label class="form-check-label" for="e_<%= p._id %>">
+                    <strong class="text-capitalize"><%= p.name.replace(/_/g, ' ') %></strong>
+                    <small class="d-block text-muted"><%= p.description %></small>
+                  </label>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% }); %>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" id="editBtn">
+          <i class="fas fa-save me-2"></i>Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW ROLE -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header" style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff">
+        <h5 class="modal-title fw-bold"><i class="fas fa-info-circle me-2"></i>Role Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="viewBody">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" style="width:2.5rem;height:2.5rem"></div>
+          <p class="mt-3 text-muted">Loading&hellip;</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ASSIGN USER -->
+<div class="modal fade" id="assignModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff">
+        <h5 class="modal-title fw-bold"><i class="fas fa-user-plus me-2"></i>Assign User to Role</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Select User <span class="text-danger">*</span></label>
+          <select class="form-select" id="assignUserId">
+            <option value="">Choose a user&hellip;</option>
+            <% allUsers.forEach(function(u) { %>
+              <option value="<%= u._id %>"><%= u.firstName %> <%= u.lastName %> &mdash; <%= u.email %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Select Role <span class="text-danger">*</span></label>
+          <select class="form-select" id="assignRoleId">
+            <option value="">Choose a role&hellip;</option>
+            <% roles.forEach(function(r) { %>
+              <% if (r.isActive && r.name !== 'member') { %>
+                <option value="<%= r._id %>"><%= r.name.charAt(0).toUpperCase() + r.name.slice(1) %></option>
+              <% } %>
+            <% }); %>
+          </select>
+        </div>
+        <div class="alert mb-0" style="background:#dbeafe;border:2px solid #3b82f6;color:#1e40af;border-radius:10px">
+          <i class="fas fa-info-circle me-2"></i>
+          <small>The user will immediately inherit all permissions of the selected role.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" id="assignBtn">
+          <i class="fas fa-check me-2"></i>Assign Role
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE ROLE -->
+<div class="modal fade" id="changeRoleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff">
+        <h5 class="modal-title fw-bold"><i class="fas fa-exchange-alt me-2"></i>Change User Role</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="chUserId">
+        <p class="mb-3 text-muted">Updating role for: <strong id="chUserName" class="text-dark"></strong></p>
+        <div class="mb-0">
+          <label class="form-label fw-semibold">New Role <span class="text-danger">*</span></label>
+          <select class="form-select" id="chRoleId">
+            <option value="">Choose a role&hellip;</option>
+            <% roles.forEach(function(r) { %>
+              <% if (r.isActive && r.name !== 'member') { %>
+                <option value="<%= r._id %>"><%= r.name.charAt(0).toUpperCase() + r.name.slice(1) %></option>
+              <% } %>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" id="changeRoleBtn">
+          <i class="fas fa-check me-2"></i>Update Role
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff">
+        <h5 class="modal-title fw-bold" id="confirmTitle">Confirm Action</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p id="confirmMsg" class="mb-0 text-muted"></p>
+      </div>
+      <div class="modal-footer justify-content-center gap-2">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" id="confirmOkBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ─── TOAST ─── */
+  function toast(msg, type) {
+    type = type || 'success';
+    var icons = { success: 'check-circle', error: 'exclamation-circle', info: 'info-circle' };
+    var el = document.createElement('div');
+    el.className = 'ctoast ' + type;
+    el.innerHTML = '<i class="fas fa-' + (icons[type] || 'info-circle') + '"></i> ' + msg;
+    document.getElementById('toastWrap').appendChild(el);
+    setTimeout(function () {
+      el.style.transition = 'opacity .4s';
+      el.style.opacity = '0';
+      setTimeout(function () { el.remove(); }, 400);
+    }, 3500);
+  }
+
+  /* ─── CONFIRM MODAL ─── */
+  var _confirmCb = null;
+  function showConfirm(title, msg, cb) {
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMsg').textContent = msg;
+    _confirmCb = cb;
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmModal')).show();
+  }
+  document.getElementById('confirmOkBtn').addEventListener('click', function () {
+    bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+    if (typeof _confirmCb === 'function') { _confirmCb(); _confirmCb = null; }
+  });
+
+  /* ─── BUTTON LOADING ─── */
+  function setBusy(id, on) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    if (on) {
+      btn.disabled = true;
+      btn._orig = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Saving&hellip;';
+    } else {
+      btn.disabled = false;
+      if (btn._orig) btn.innerHTML = btn._orig;
+    }
+  }
+
+  /* ─── PERMISSION CATEGORY TOGGLE ─── */
+  document.addEventListener('click', function (e) {
+    var hdr = e.target.closest('.perm-cat-hdr');
+    if (!hdr) return;
+    // Don't collapse when clicking the Select All button
+    if (e.target.closest('.js-select-all')) return;
+    var grp = hdr.nextElementSibling;
+    if (!grp || !grp.classList.contains('perm-group')) return;
+    var hidden = grp.style.display === 'none';
+    grp.style.display = hidden ? '' : 'none';
+    hdr.classList.toggle('collapsed', !hidden);
+  });
+
+  /* ─── SELECT ALL IN CATEGORY ─── */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.js-select-all');
+    if (!btn) return;
+    e.stopPropagation();
+    var target = btn.getAttribute('data-target');
+    var grp = btn.closest('.perm-cat-hdr').nextElementSibling;
+    if (!grp) return;
+    var cbs = grp.querySelectorAll('input.' + target);
+    var allOn = Array.prototype.every.call(cbs, function (c) { return c.checked; });
+    cbs.forEach(function (c) { c.checked = !allOn; });
+    btn.textContent = allOn ? 'Select All' : 'Deselect All';
+  });
+
+  /* ─── SIDEBAR TOGGLE ─── */
+  document.getElementById('menuToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('active');
+  });
+  document.addEventListener('click', function (e) {
+    var sb = document.getElementById('sidebar');
+    if (!sb.classList.contains('active')) return;
+    if (window.innerWidth > 992) return;
+    if (e.target.closest('#menuToggle') || e.target.closest('#sidebar')) return;
+    sb.classList.remove('active');
+  });
+
+  /* ======================================================
+     CREATE ROLE
+  ====================================================== */
+  document.getElementById('openCreateBtn').addEventListener('click', function () {
+    document.getElementById('cName').value = '';
+    document.getElementById('cDesc').value = '';
+    document.querySelectorAll('.create-perm').forEach(function (c) { c.checked = false; });
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('createModal')).show();
+  });
+
+  document.getElementById('createBtn').addEventListener('click', function () {
+    var name = document.getElementById('cName').value.trim();
+    if (!name) { toast('Role name is required', 'error'); return; }
+    var description = document.getElementById('cDesc').value.trim();
+    var permissions = Array.prototype.map.call(
+      document.querySelectorAll('.create-perm:checked'),
+      function (c) { return c.value; }
+    );
+    setBusy('createBtn', true);
+    fetch('/admin/manage-roles/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, description: description, permissions: permissions })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.success) {
+          toast(d.message);
+          bootstrap.Modal.getInstance(document.getElementById('createModal')).hide();
+          setTimeout(function () { location.reload(); }, 900);
+        } else {
+          toast(d.message, 'error');
+          setBusy('createBtn', false);
+        }
+      })
+      .catch(function () { toast('Network error. Please try again.', 'error'); setBusy('createBtn', false); });
+  });
+
+  /* ======================================================
+     VIEW ROLE
+  ====================================================== */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.js-view-role');
+    if (!btn) return;
+    var id = btn.getAttribute('data-id');
+    var viewBody = document.getElementById('viewBody');
+    viewBody.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" style="width:2.5rem;height:2.5rem"></div><p class="mt-3 text-muted">Loading&hellip;</p></div>';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('viewModal')).show();
+    fetch('/admin/manage-roles/' + id)
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d.success) {
+          viewBody.innerHTML = '<div class="alert alert-danger">' + d.message + '</div>';
+          return;
+        }
+        var role = d.role;
+        var users = d.assignedUsers;
+        var permsHtml = role.permissions.length
+          ? role.permissions.map(function (p) {
+              return '<div class="col-md-6"><div class="permission-item d-flex align-items-start gap-2">' +
+                '<i class="fas fa-check-circle text-success mt-1 flex-shrink-0"></i>' +
+                '<div><strong class="text-capitalize d-block">' + p.name.replace(/_/g, ' ') + '</strong>' +
+                '<small class="text-muted">' + (p.description || '') + '</small></div></div></div>';
+            }).join('')
+          : '<div class="col-12 text-muted small">No permissions assigned.</div>';
+
+        var usersHtml = users.length
+          ? '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Name</th><th>Email</th><th>Status</th></tr></thead><tbody>' +
+            users.map(function (u) {
+              var badge = u.status === 'active' ? 'bg-success' : 'bg-warning text-dark';
+              return '<tr><td><div class="d-flex align-items-center gap-2">' +
+                '<div class="user-avatar" style="width:28px;height:28px;font-size:.7rem">' +
+                (u.firstName ? u.firstName[0].toUpperCase() : '') + (u.lastName ? u.lastName[0].toUpperCase() : '') +
+                '</div>' + u.firstName + ' ' + u.lastName + '</div></td>' +
+                '<td class="text-muted small">' + u.email + '</td>' +
+                '<td><span class="badge ' + badge + '">' + (u.status || 'Pending') + '</span></td></tr>';
+            }).join('') + '</tbody></table></div>'
+          : '<p class="text-muted mt-2 small">No users assigned to this role.</p>';
+
+        viewBody.innerHTML =
+          '<div class="d-flex align-items-center gap-3 mb-4">' +
+            '<div class="role-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff"><i class="fas fa-user-shield"></i></div>' +
+            '<div>' +
+              '<h4 class="mb-1 fw-bold text-capitalize">' + role.name + '</h4>' +
+              '<p class="text-muted mb-0">' + (role.description || 'No description') + '</p>' +
+            '</div>' +
+            '<span class="ms-auto badge ' + (role.isActive ? 'bg-success' : 'bg-secondary') + '">' + (role.isActive ? 'Active' : 'Inactive') + '</span>' +
+          '</div>' +
+          '<div class="row g-3 mb-4">' +
+            '<div class="col-4 text-center"><div class="card border-0 shadow-sm"><div class="card-body py-3"><h4 class="fw-bold text-primary mb-0">' + role.permissions.length + '</h4><small class="text-muted">Permissions</small></div></div></div>' +
+            '<div class="col-4 text-center"><div class="card border-0 shadow-sm"><div class="card-body py-3"><h4 class="fw-bold text-success mb-0">' + users.length + '</h4><small class="text-muted">Users</small></div></div></div>' +
+            '<div class="col-4 text-center"><div class="card border-0 shadow-sm"><div class="card-body py-3"><h4 class="fw-bold text-warning mb-0">' + (role.isSystemRole ? 'System' : 'Custom') + '</h4><small class="text-muted">Type</small></div></div></div>' +
+          '</div>' +
+          '<h6 class="fw-bold">Permissions <span class="badge bg-primary">' + role.permissions.length + '</span></h6>' +
+          '<div class="row g-2 mt-1">' + permsHtml + '</div>' +
+          '<h6 class="fw-bold mt-4">Assigned Users <span class="badge bg-success">' + users.length + '</span></h6>' +
+          usersHtml;
+      })
+      .catch(function () {
+        viewBody.innerHTML = '<div class="alert alert-danger">Failed to load role details. Please try again.</div>';
+      });
+  });
+
+  /* ======================================================
+     EDIT ROLE
+  ====================================================== */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.js-edit-role');
+    if (!btn) return;
+    var id     = btn.getAttribute('data-id');
+    var name   = btn.getAttribute('data-name');
+    var desc   = btn.getAttribute('data-desc');
+    var active = btn.getAttribute('data-active');
+    var permsRaw = btn.getAttribute('data-perms');
+    var permIds = permsRaw ? permsRaw.split(',').filter(function (x) { return x; }) : [];
+
+    document.getElementById('eId').value     = id;
+    document.getElementById('eName').value   = name;
+    document.getElementById('eDesc').value   = desc;
+    document.getElementById('eActive').value = active === 'true' ? 'true' : 'false';
+
+    document.querySelectorAll('.edit-perm').forEach(function (c) {
+      c.checked = permIds.indexOf(c.value) !== -1;
+    });
+
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).show();
+  });
+
+  document.getElementById('editBtn').addEventListener('click', function () {
+    var id          = document.getElementById('eId').value;
+    var name        = document.getElementById('eName').value.trim();
+    var description = document.getElementById('eDesc').value.trim();
+    var isActive    = document.getElementById('eActive').value;
+    var permissions = Array.prototype.map.call(
+      document.querySelectorAll('.edit-perm:checked'),
+      function (c) { return c.value; }
+    );
+    if (!name) { toast('Role name is required', 'error'); return; }
+    setBusy('editBtn', true);
+    fetch('/admin/manage-roles/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, description: description, isActive: isActive, permissions: permissions })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.success) {
+          toast(d.message);
+          bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+          setTimeout(function () { location.reload(); }, 900);
+        } else {
+          toast(d.message, 'error');
+          setBusy('editBtn', false);
+        }
+      })
+      .catch(function () { toast('Network error. Please try again.', 'error'); setBusy('editBtn', false); });
+  });
+
+  /* ======================================================
+     DELETE ROLE
+  ====================================================== */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.js-delete-role');
+    if (!btn) return;
+    var id   = btn.getAttribute('data-id');
+    var name = btn.getAttribute('data-name');
+    showConfirm(
+      'Delete Role',
+      'Delete "' + name + '"? All users assigned to this role will have their role removed.',
+      function () {
+        fetch('/admin/manage-roles/' + id, { method: 'DELETE' })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.success) {
+              toast(d.message);
+              var card = document.getElementById('rcard-' + id);
+              if (card) card.remove();
+            } else {
+              toast(d.message, 'error');
+            }
+          })
+          .catch(function () { toast('Network error. Please try again.', 'error'); });
+      }
+    );
+  });
+
+  /* ======================================================
+     ASSIGN USER
+  ====================================================== */
+  document.getElementById('openAssignBtn').addEventListener('click', function () {
+    document.getElementById('assignUserId').value = '';
+    document.getElementById('assignRoleId').value = '';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('assignModal')).show();
+  });
+
+  document.getElementById('assignBtn').addEventListener('click', function () {
+    var userId = document.getElementById('assignUserId').value;
+    var roleId = document.getElementById('assignRoleId').value;
+    if (!userId || !roleId) { toast('Please select both a user and a role', 'error'); return; }
+    setBusy('assignBtn', true);
+    fetch('/admin/manage-roles/assign-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: userId, roleId: roleId })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.success) {
+          toast(d.message);
+          bootstrap.Modal.getInstance(document.getElementById('assignModal')).hide();
+          setTimeout(function () { location.reload(); }, 900);
+        } else {
+          toast(d.message, 'error');
+          setBusy('assignBtn', false);
+        }
+      })
+      .catch(function () { toast('Network error. Please try again.', 'error'); setBusy('assignBtn', false); });
+  });
+
+  /* ======================================================
+     CHANGE ROLE
+  ====================================================== */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.js-change-role');
+    if (!btn) return;
+    var uid       = btn.getAttribute('data-uid');
+    var name      = btn.getAttribute('data-name');
+    var currentId = btn.getAttribute('data-roleid');
+    document.getElementById('chUserId').value   = uid;
+    document.getElementById('chUserName').textContent = name;
+    document.getElementById('chRoleId').value   = currentId || '';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('changeRoleModal')).show();
+  });
+
+  document.getElementById('changeRoleBtn').addEventListener('click', function () {
+    var userId = document.getElementById('chUserId').value;
+    var roleId = document.getElementById('chRoleId').value;
+    if (!roleId) { toast('Please select a role', 'error'); return; }
+    setBusy('changeRoleBtn', true);
+    fetch('/admin/manage-roles/assign-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: userId, roleId: roleId })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.success) {
+          toast(d.message);
+          bootstrap.Modal.getInstance(document.getElementById('changeRoleModal')).hide();
+          setTimeout(function () { location.reload(); }, 900);
+        } else {
+          toast(d.message, 'error');
+          setBusy('changeRoleBtn', false);
+        }
+      })
+      .catch(function () { toast('Network error. Please try again.', 'error'); setBusy('changeRoleBtn', false); });
+  });
+
+  /* ======================================================
+     REMOVE ROLE FROM USER
+  ====================================================== */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.js-remove-role');
+    if (!btn) return;
+    var uid  = btn.getAttribute('data-uid');
+    var name = btn.getAttribute('data-name');
+    showConfirm('Remove Role', 'Remove role from ' + name + '?', function () {
+      fetch('/admin/manage-roles/remove-user/' + uid, { method: 'DELETE' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.success) {
+            toast(d.message);
+            var row = document.getElementById('urow-' + uid);
+            if (row) row.remove();
+            var tbody = document.getElementById('userRoleBody');
+            if (tbody && tbody.querySelectorAll('tr[id^="urow-"]').length === 0) {
+              tbody.innerHTML =
+                '<tr id="emptyRow"><td colspan="6" class="text-center text-muted py-5">' +
+                '<i class="fas fa-users-slash fa-2x mb-2 d-block opacity-25"></i>' +
+                'No users have been assigned roles yet.</td></tr>';
+            }
+          } else {
+            toast(d.message, 'error');
+          }
+        })
+        .catch(function () { toast('Network error. Please try again.', 'error'); });
+    });
+  });
+
+})();
+</script>
+
+
+
+
+<script>
+async function loadSidebarPendingCount() {
+  try {
+    console.log("Loading sidebar approval count...");
+
+    const res = await fetch('/admin/pending-approvals-count');
+    const data = await res.json();
+
+    console.log("Pending approvals count:", data);
+
+    const badge = document.getElementById('sidebarPendingBadge');
+
+    if (!badge) {
+      console.log("Sidebar badge not found on page");
+      return;
+    }
+
+    if (data.count > 0) {
+      badge.style.display = 'inline-block';
+      badge.textContent = data.count;
+    } else {
+      badge.style.display = 'none';
+    }
+
+  } catch (err) {
+    console.error("Sidebar count error:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadSidebarPendingCount);
+</script>
+</body>
+</html>

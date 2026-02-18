@@ -998,14 +998,23 @@
             submitBtn.disabled = false;
             submitSpinner.style.display = 'none';
 
-            if (response.ok && result.status) {
-                if (result.authorization_url) {
-                    // Redirect to payment page
-                    window.location.href = result.authorization_url;
-                } else {
-                    showError('Payment initialization failed. Please try again.');
-                }
-            } else {
+       if (response.ok && result.status) {
+
+    // 🔹 Normal users → Go to Paystack
+    if (result.authorization_url) {
+        window.location.href = result.authorization_url;
+        return;
+    }
+
+    // 🔹 Superadmin → Redirect internally
+    if (result.redirect) {
+        window.location.href = result.redirect;
+        return;
+    }
+
+    // Fallback
+    showError(result.message || "Registration completed.");
+} else {
                 // Show error message from server
                 const errorMessage = result.message || 'Registration failed. Please try again.';
                 

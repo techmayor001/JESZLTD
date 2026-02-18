@@ -564,6 +564,37 @@
             font-size: 0.75rem;
         }
 
+        /* Settings sections */
+        .settings-section {
+            background: #f8f9fa;
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .settings-section h6 {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-group-text {
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+
+        .form-text {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
 /* ---------- DESKTOP DEFAULTS ---------- */
 #sidebar {
     transform: translateX(0); /* Always visible on desktop */
@@ -643,50 +674,27 @@
             </div>
         </div>
         <div class="sidebar-menu">
-            <a href="/admin-dashboard">
-                <i class="fas fa-users"></i> Members
+            <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
+            <a href="/admin/manage/memberType" class="active"><i class="fas fa-id-card"></i> Membership Types</a>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
+                <a href="/admin/transaction-approvals">
+                <i class="fas fa-tasks"></i> Approvals
+                <span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span>
             </a>
-            <a href="/admin/manage/memberType" class="active">
-                <i class="fas fa-id-card"></i> Membership Types
-            </a>
-            <a href="/admin/manage-payment">
-                <i class="fas fa-credit-card"></i> Payments
-            </a>
-            <a href="/admin/manage-deposits">
-                <i class="fas fa-coins"></i> Deposit Management
-            </a>
-            <a href="/admin/manage-withdrawals">
-                <i class="fas fa-money-check-alt"></i> Withdrawals
-            </a>
-            <a href="/admin/manage-extra-charges">
-                <i class="fas fa-hand-holding-usd"></i> Extra Charges
-            </a>
-            <a href="/admin/manage-loan">
-                <i class="fas fa-hand-holding-usd"></i> Loan Management
-            </a>
-            <a href="/admin/loan/settings">
-                <i class="fas fa-cogs"></i> Loan Settings
-            </a>
-             <a href="/admin/external-loans">
-                <i class="fas fa-building"></i> External Loans
-            </a>
-            <a href="#">
-                <i class="fas fa-chart-pie"></i> ROI Distribution
-            </a>
-            <a href="#">
-                <i class="fas fa-money-check-alt"></i> Withdrawals
-            </a>
-            <a href="#">
-                <i class="fas fa-file-alt"></i> Reports
-            </a>
-            <a href="#">
-                <i class="fas fa-cog"></i> Payments
-            </a>
-            <a href="#">
-                <i class="fas fa-cog"></i> Settings
-            </a>
-            <a href="#" class="mt-3" style="color: rgba(255,255,255,0.6);">
-                <i class="fas fa-sign-out-alt"></i> Logout
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
+            <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles & Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
+             <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
+            <a href="/club-de-star-cooperative/dashboard" class="mt-3" style="color: rgba(255,255,255,.6);">
+                <i class="fas fa-sign-in-alt"></i> Back to Dashboard
             </a>
         </div>
     </div>
@@ -713,7 +721,7 @@
             <div class="row align-items-center position-relative" style="z-index: 1;">
                 <div class="col-md-8">
                     <h2 class="mb-2 fw-bold">Membership Type Management</h2>
-                    <p class="mb-0 opacity-90">Define membership tiers, pricing, and benefits for your cooperative</p>
+                    <p class="mb-0 opacity-90">Define membership tiers, pricing, and financial rules for your cooperative</p>
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
                     <button class="btn btn-light fw-semibold" onclick="openAddModal()">
@@ -755,10 +763,10 @@
             <div class="col-lg-3 col-md-6 col-6">
                 <div class="stat-card">
                     <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
-                        <i class="fas fa-dollar-sign"></i>
+                        <i class="fas fa-percent"></i>
                     </div>
-                    <p class="text-muted mb-1 fw-semibold small">Avg. Price</p>
-                    <h3 class="mb-0 fw-bold" id="avgPrice">₦0</h3>
+                    <p class="text-muted mb-1 fw-semibold small">Avg. Interest</p>
+                    <h3 class="mb-0 fw-bold" id="avgInterest">0%</h3>
                 </div>
             </div>
         </div>
@@ -776,7 +784,7 @@
 
     <!-- Add/Edit Membership Type Modal -->
     <div class="modal fade" id="membershipModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitle"><i class="fas fa-plus-circle me-2"></i>Add Membership Type</h5>
@@ -786,33 +794,152 @@
                     <form id="membershipForm">
                         <input type="hidden" id="membershipId">
                         
-                        <div class="row g-3">
-                            <div class="col-md-8">
-                                <label for="typeName" class="form-label">Membership Type Name *</label>
-                                <input type="text" class="form-control" id="typeName" required placeholder="e.g., Club Member">
-                            </div>
+                        <!-- Basic Information -->
+                        <div class="settings-section">
+                            <h6><i class="fas fa-info-circle me-2"></i>Basic Information</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="typeName" class="form-label">Membership Type Name *</label>
+                                    <input type="text" class="form-control" id="typeName" required placeholder="e.g., Club Member">
+                                </div>
 
-                            <div class="col-md-4">
-                                <label for="shortName" class="form-label">Short Name *</label>
-                                <input type="text" class="form-control" id="shortName" required placeholder="e.g., CDS">
-                            </div>
-                            
-                            
-                            <div class="col-md-6">
-                                <label for="typeROIRate" class="form-label">Interest Rate (%)</label>
-                                <input type="number" class="form-control" id="interestRate" placeholder="5.5" min="0" max="100" step="0.1">
-                            </div>
+                                <div class="col-md-3">
+                                    <label for="shortName" class="form-label">Short Code *</label>
+                                    <input type="text" class="form-control" id="shortName" required placeholder="e.g., CDS">
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <label for="interestRate" class="form-label">Interest Rate (%) *</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="interestRate" placeholder="5.5" min="0" max="100" step="0.1" required>
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
 
-                            <div class="col-md-6 d-flex align-items-center mt-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="isDefault">
-                                    <label class="form-check-label" for="isDefault">
-                                        Set as default membership type
-                                    </label>
+                                <div class="col-md-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="isDefault">
+                                        <label class="form-check-label" for="isDefault">
+                                            Set as default membership type
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
-
                         </div>
+
+                        <!-- Withdrawal Settings -->
+                        <div class="settings-section">
+                            <h6><i class="fas fa-money-bill-wave me-2"></i>Withdrawal Settings</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="forceWithdrawalPenalty" class="form-label">Force Withdrawal Penalty (%)</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="forceWithdrawalPenalty" placeholder="2" min="0" max="100" step="0.1" value="2">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                    <small class="form-text">Penalty charged when member makes forced withdrawal</small>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="earlyWithdrawalPeriodMonths" class="form-label">Early Withdrawal Period (Months)</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="earlyWithdrawalPeriodMonths" placeholder="6" min="0" step="1" value="6">
+                                        <span class="input-group-text">months</span>
+                                    </div>
+                                    <small class="form-text">Period before withdrawal is considered early</small>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="allowForcedWithdrawal" checked>
+                                        <label class="form-check-label" for="allowForcedWithdrawal">
+                                            Allow forced withdrawals for this membership type
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loan Settings -->
+                        <div class="settings-section">
+                            <h6><i class="fas fa-hand-holding-usd me-2"></i>Loan Settings</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="loanRolloverRate" class="form-label">Loan Rollover Rate (%)</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="loanRolloverRate" placeholder="0" min="0" max="100" step="0.1" value="0">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                    <small class="form-text">Interest charged when rolling over a loan</small>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="loanPenaltyRate" class="form-label">Loan Penalty Rate</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="loanPenaltyRate" placeholder="0" min="0" max="100" step="0.1" value="0">
+                                        <select class="form-select" id="loanPenaltyType" style="max-width: 120px;">
+                                            <option value="percentage">%</option>
+                                            <option value="fixed">₦</option>
+                                        </select>
+                                    </div>
+                                    <small class="form-text">Penalty for late loan payments</small>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="gracePeriodDays" class="form-label">Grace Period (Days)</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="gracePeriodDays" placeholder="0" min="0" step="1" value="0">
+                                        <span class="input-group-text">days</span>
+                                    </div>
+                                    <small class="form-text">Days before penalties apply</small>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="maxLoanAmount" class="form-label">Max Loan Amount (₦)</label>
+                                    <input type="number" class="form-control" id="maxLoanAmount" placeholder="0" min="0" step="1000" value="0">
+                                    <small class="form-text">0 = unlimited</small>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="minDepositBeforeLoan" class="form-label">Min Deposit Before Loan (₦)</label>
+                                    <input type="number" class="form-control" id="minDepositBeforeLoan" placeholder="0" min="0" step="1000" value="0">
+                                    <small class="form-text">Minimum deposit required for loan eligibility</small>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="loanToDepositRatio" class="form-label">Loan to Deposit Ratio (%)</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="loanToDepositRatio" placeholder="80" min="0" max="100" step="1" value="80">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                    <small class="form-text">Max loan as % of total deposits</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ROI/Dividend Settings -->
+                        <div class="settings-section">
+                            <h6><i class="fas fa-chart-line me-2"></i>ROI & Dividend Settings</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="roiDistributionFrequency" class="form-label">Distribution Frequency</label>
+                                    <select class="form-select" id="roiDistributionFrequency">
+                                        <option value="monthly">Monthly</option>
+                                        <option value="quarterly">Quarterly</option>
+                                        <option value="biannually">Bi-annually</option>
+                                        <option value="annually">Annually</option>
+                                    </select>
+                                    <small class="form-text">How often ROI is distributed</small>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="minimumBalanceForROI" class="form-label">Min Balance for ROI (₦)</label>
+                                    <input type="number" class="form-control" id="minimumBalanceForROI" placeholder="0" min="0" step="1000" value="0">
+                                    <small class="form-text">Minimum balance required to earn ROI</small>
+                                </div>
+                            </div>
+                        </div>
+
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -835,69 +962,116 @@
     document.addEventListener('DOMContentLoaded', function() {
         modal = new bootstrap.Modal(document.getElementById('membershipModal'));
         loadMembershipTypes();
+        updateStats();
     });
 
     // Load membership types dynamically
-function loadMembershipTypes() {
-    const grid = document.getElementById('membershipGrid');
-    grid.innerHTML = '';
+    function loadMembershipTypes() {
+        const grid = document.getElementById('membershipGrid');
+        grid.innerHTML = '';
 
-    membershipTypes.forEach(type => {
-        // Add default badge if this type is default
-        const defaultBadge = type.isDefault
-            ? `<span class="badge bg-warning text-dark ms-2">Default</span>`
-            : '';
+        membershipTypes.forEach(type => {
+            const defaultBadge = type.isDefault
+                ? `<span class="badge bg-warning text-dark ms-2">Default</span>`
+                : '';
 
-        const card = `
-            <div class="col-lg-4 col-md-6">
-                <div class="membership-card">
-                    <div class="membership-header d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="membership-title">${type.name}${defaultBadge}</div>
+            const card = `
+                <div class="col-lg-4 col-md-6">
+                    <div class="membership-card">
+                        <div class="membership-header">
+                            <div>
+                                <div class="membership-title">${type.name}${defaultBadge}</div>
+                                <small class="text-muted">${type.shortCode}</small>
+                            </div>
+                            <span class="badge bg-success">${type.interestRate}%</span>
                         </div>
-                        <span class="badge bg-success">Interest Rate ${type.interestRate}%</span>
-                    </div>
 
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <small class="text-muted">
-                            <i class="fas fa-users me-1"></i> ${type.members || 0} members
-                        </small>
-                    </div>
+                        <ul class="membership-features">
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Withdrawal Penalty: <strong>${type.forceWithdrawalPenalty || 0}%</strong></span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Loan Rollover: <strong>${type.loanRolloverRate || 0}%</strong></span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Loan Penalty: <strong>${type.loanPenaltyRate || 0}${type.loanPenaltyType === 'fixed' ? '₦' : '%'}</strong></span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Grace Period: <strong>${type.gracePeriodDays || 0} days</strong></span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>Max Loan: <strong>${type.maxLoanAmount ? '₦' + type.maxLoanAmount.toLocaleString() : 'Unlimited'}</strong></span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle"></i>
+                                <span>ROI Distribution: <strong>${formatFrequency(type.roiDistributionFrequency)}</strong></span>
+                            </li>
+                        </ul>
 
-                    <div class="membership-actions">
-                        <button class="btn btn-sm btn-outline-primary flex-fill" onclick="editMembershipType('${type._id}')">
-                            <i class="fas fa-edit me-1"></i> Edit
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteMembershipType('${type._id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i> ${type.members || 0} members
+                            </small>
+                        </div>
+
+                        <div class="membership-actions">
+                            <button class="btn btn-sm btn-outline-primary flex-fill" onclick="editMembershipType('${type._id}')">
+                                <i class="fas fa-edit me-1"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteMembershipType('${type._id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
-        grid.innerHTML += card;
-    });
-}
+            `;
+            grid.innerHTML += card;
+        });
+    }
 
-// UPDATE STATS
-document.getElementById("totalTypes").innerText = membershipTypes.length;
+    function formatFrequency(freq) {
+        const map = {
+            'monthly': 'Monthly',
+            'quarterly': 'Quarterly',
+            'biannually': 'Bi-annually',
+            'annually': 'Annually'
+        };
+        return map[freq] || 'Monthly';
+    }
 
-document.getElementById("activeTypes").innerText = membershipTypes.filter(t => t.active !== false).length;
-
-document.getElementById("totalMembers").innerText =
-    membershipTypes.reduce((sum, t) => sum + (t.members || 0), 0);
-
-const avg =
-    membershipTypes.reduce((sum, t) => sum + (t.price || 0), 0) / membershipTypes.length;
-
-document.getElementById("avgPrice").innerText =
-    "₦" + (avg ? avg.toLocaleString() : 0);
+    // Update statistics
+    function updateStats() {
+        document.getElementById("totalTypes").innerText = membershipTypes.length;
+        document.getElementById("activeTypes").innerText = membershipTypes.filter(t => t.active !== false).length;
+        document.getElementById("totalMembers").innerText = membershipTypes.reduce((sum, t) => sum + (t.members || 0), 0);
+        
+        const avgInterest = membershipTypes.reduce((sum, t) => sum + (t.interestRate || 0), 0) / (membershipTypes.length || 1);
+        document.getElementById("avgInterest").innerText = avgInterest.toFixed(1) + "%";
+    }
 
     // Open modal to add
     function openAddModal() {
         editingId = null;
         document.getElementById('membershipForm').reset();
-        document.getElementById('modalTitle').innerHTML = "Add Membership Type";
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle me-2"></i>Add Membership Type';
+        
+        // Set default values
+        document.getElementById('forceWithdrawalPenalty').value = 2;
+        document.getElementById('loanRolloverRate').value = 0;
+        document.getElementById('loanPenaltyRate').value = 0;
+        document.getElementById('gracePeriodDays').value = 0;
+        document.getElementById('maxLoanAmount').value = 0;
+        document.getElementById('minDepositBeforeLoan').value = 0;
+        document.getElementById('loanToDepositRatio').value = 80;
+        document.getElementById('earlyWithdrawalPeriodMonths').value = 6;
+        document.getElementById('minimumBalanceForROI').value = 0;
+        document.getElementById('allowForcedWithdrawal').checked = true;
+        
         modal.show();
     }
 
@@ -908,59 +1082,107 @@ document.getElementById("avgPrice").innerText =
 
         editingId = id;
 
-        document.getElementById('modalTitle').innerHTML = "Edit Membership Type";
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Membership Type';
         document.getElementById('membershipId').value = type._id;
         document.getElementById('typeName').value = type.name;
         document.getElementById('shortName').value = type.shortCode;
         document.getElementById('interestRate').value = type.interestRate;
+        document.getElementById('isDefault').checked = type.isDefault || false;
+        
+        // Withdrawal settings
+        document.getElementById('forceWithdrawalPenalty').value = type.forceWithdrawalPenalty || 2;
+        document.getElementById('earlyWithdrawalPeriodMonths').value = type.earlyWithdrawalPeriodMonths || 6;
+        document.getElementById('allowForcedWithdrawal').checked = type.allowForcedWithdrawal !== false;
+        
+        // Loan settings
+        document.getElementById('loanRolloverRate').value = type.loanRolloverRate || 0;
+        document.getElementById('loanPenaltyRate').value = type.loanPenaltyRate || 0;
+        document.getElementById('loanPenaltyType').value = type.loanPenaltyType || 'percentage';
+        document.getElementById('gracePeriodDays').value = type.gracePeriodDays || 0;
+        document.getElementById('maxLoanAmount').value = type.maxLoanAmount || 0;
+        document.getElementById('minDepositBeforeLoan').value = type.minDepositBeforeLoan || 0;
+        document.getElementById('loanToDepositRatio').value = type.loanToDepositRatio || 80;
+        
+        // ROI settings
+        document.getElementById('roiDistributionFrequency').value = type.roiDistributionFrequency || 'monthly';
+        document.getElementById('minimumBalanceForROI').value = type.minimumBalanceForROI || 0;
 
         modal.show();
     }
 
-async function saveMembershipType() {
-    const id = document.getElementById('membershipId').value;
-    const name = document.getElementById('typeName').value.trim();
-    const shortCode = document.getElementById('shortName').value.trim();
-    const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
-    const isDefault = document.getElementById('isDefault').checked;
+    async function saveMembershipType() {
+        const id = document.getElementById('membershipId').value;
+        const name = document.getElementById('typeName').value.trim();
+        const shortCode = document.getElementById('shortName').value.trim();
+        const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
+        const isDefault = document.getElementById('isDefault').checked;
 
-    if (!name || !shortCode) {
-        alert("Please fill in all required fields");
-        return;
-    }
+        // Withdrawal settings
+        const forceWithdrawalPenalty = parseFloat(document.getElementById('forceWithdrawalPenalty').value) || 0;
+        const earlyWithdrawalPeriodMonths = parseInt(document.getElementById('earlyWithdrawalPeriodMonths').value) || 0;
+        const allowForcedWithdrawal = document.getElementById('allowForcedWithdrawal').checked;
 
-    try {
-        const response = await fetch("/admin/manage/memberType", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                id,
-                name,
-                shortCode,
-                interestRate,
-                isDefault
-            })
-        });
+        // Loan settings
+        const loanRolloverRate = parseFloat(document.getElementById('loanRolloverRate').value) || 0;
+        const loanPenaltyRate = parseFloat(document.getElementById('loanPenaltyRate').value) || 0;
+        const loanPenaltyType = document.getElementById('loanPenaltyType').value;
+        const gracePeriodDays = parseInt(document.getElementById('gracePeriodDays').value) || 0;
+        const maxLoanAmount = parseFloat(document.getElementById('maxLoanAmount').value) || 0;
+        const minDepositBeforeLoan = parseFloat(document.getElementById('minDepositBeforeLoan').value) || 0;
+        const loanToDepositRatio = parseFloat(document.getElementById('loanToDepositRatio').value) || 80;
 
-        const data = await response.json();
+        // ROI settings
+        const roiDistributionFrequency = document.getElementById('roiDistributionFrequency').value;
+        const minimumBalanceForROI = parseFloat(document.getElementById('minimumBalanceForROI').value) || 0;
 
-        if (data.success) {
-            alert(id ? "Membership type updated!" : "Membership type added!");
-            location.reload();
-        } else {
-            alert(data.message || "Failed to save membership type");
+        if (!name || !shortCode) {
+            alert("Please fill in all required fields");
+            return;
         }
 
-    } catch (err) {
-        console.error(err);
-        alert("Error saving membership type");
-    }
-}
+        try {
+            const response = await fetch("/admin/manage/memberType", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id,
+                    name,
+                    shortCode,
+                    interestRate,
+                    isDefault,
+                    forceWithdrawalPenalty,
+                    earlyWithdrawalPeriodMonths,
+                    allowForcedWithdrawal,
+                    loanRolloverRate,
+                    loanPenaltyRate,
+                    loanPenaltyType,
+                    gracePeriodDays,
+                    maxLoanAmount,
+                    minDepositBeforeLoan,
+                    loanToDepositRatio,
+                    roiDistributionFrequency,
+                    minimumBalanceForROI
+                })
+            });
 
+            const data = await response.json();
+
+            if (data.success) {
+                alert(id ? "Membership type updated!" : "Membership type added!");
+                location.reload();
+            } else {
+                alert(data.message || "Failed to save membership type");
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert("Error saving membership type");
+        }
+    }
 
     // Delete membership type
     async function deleteMembershipType(id) {
-        if (!confirm("Are you sure you want to delete this membership type?")) {
+        if (!confirm("Are you sure you want to delete this membership type? This action cannot be undone.")) {
             return;
         }
 
@@ -983,7 +1205,6 @@ async function saveMembershipType() {
     }
 </script>
 
-
 <script>
 function toggleSidebar() {
     if (window.innerWidth <= 992) {
@@ -996,6 +1217,38 @@ function closeSidebar() {
     document.getElementById("sidebar").classList.remove("active");
     document.getElementById("sidebarOverlay").classList.remove("active");
 }
+</script>
+
+<script>
+async function loadSidebarPendingCount() {
+  try {
+    console.log("Loading sidebar approval count...");
+
+    const res = await fetch('/admin/pending-approvals-count');
+    const data = await res.json();
+
+    console.log("Pending approvals count:", data);
+
+    const badge = document.getElementById('sidebarPendingBadge');
+
+    if (!badge) {
+      console.log("Sidebar badge not found on page");
+      return;
+    }
+
+    if (data.count > 0) {
+      badge.style.display = 'inline-block';
+      badge.textContent = data.count;
+    } else {
+      badge.style.display = 'none';
+    }
+
+  } catch (err) {
+    console.error("Sidebar count error:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadSidebarPendingCount);
 </script>
 
 

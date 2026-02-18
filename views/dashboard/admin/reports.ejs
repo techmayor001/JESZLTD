@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports | Club De Stars Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --sidebar-width: 280px;
+            --navbar-h: 70px;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white; z-index: 1040; transition: transform .3s ease;
+            overflow-y: auto; box-shadow: 4px 0 20px rgba(30,58,138,.15);
+        }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.1); }
+        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .logo-box { width: 45px; height: 45px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--primary); font-size: 1.5rem; flex-shrink: 0; }
+        .admin-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(239,68,68,.2); border-radius: 20px; border: 1px solid rgba(239,68,68,.3); font-weight: 600; font-size: .78rem; margin-top: 6px; }
+        .sidebar-menu { padding: 1rem 0; }
+        .sidebar-menu a { color: rgba(255,255,255,.85); text-decoration: none; padding: .75rem 1.5rem; display: flex; align-items: center; transition: all .2s; border-left: 3px solid transparent; font-weight: 500; font-size: .9rem; }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background: rgba(255,255,255,.12); color: white; border-left-color: white; }
+        .sidebar-menu a i { width: 22px; margin-right: 10px; font-size: 1rem; flex-shrink: 0; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1035; }
+        .sidebar-overlay.active { display: block; }
+
+        /* ── NAVBAR ── */
+        .top-navbar {
+            position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: var(--navbar-h);
+            background: rgba(255,255,255,.97); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30,58,138,.08); z-index: 1030;
+            display: flex; align-items: center; padding: 0 1.25rem; gap: .75rem;
+            transition: left .3s; border-bottom: 1px solid rgba(30,58,138,.1);
+        }
+        .navbar-title { flex-grow: 1; min-width: 0; }
+        .navbar-title h5 { margin: 0; font-size: 1rem; color: var(--primary); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .navbar-title small { font-size: .75rem; color: #64748b; }
+        .navbar-actions { display: flex; gap: .5rem; flex-shrink: 0; }
+
+        /* ── MAIN ── */
+        .main-content { margin-left: var(--sidebar-width); margin-top: var(--navbar-h); padding: 1.25rem; min-height: calc(100vh - var(--navbar-h)); transition: margin-left .3s; }
+
+        /* ── BUTTONS ── */
+        .btn { border-radius: 9px; font-weight: 600; transition: all .2s; white-space: nowrap; }
+        .btn-primary { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border: none; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(30,58,138,.3); }
+        .btn-outline-primary { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
+        .btn-outline-primary:hover { background: var(--primary); color: white; }
+        .btn-sm { padding: .35rem .8rem; font-size: .8rem; }
+        .btn-xs { padding: .25rem .6rem; font-size: .75rem; border-radius: 7px; font-weight: 600; border: 1.5px solid var(--primary); color: var(--primary); background: transparent; }
+        .btn-xs:hover { background: var(--primary); color: white; }
+
+        /* ── CARDS ── */
+        .card-white { background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(30,58,138,.08); border: 1px solid rgba(30,58,138,.05); }
+        .page-header { background: white; border-radius: 16px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 4px 16px rgba(30,58,138,.08); }
+        .search-card { background: white; border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 4px 16px rgba(30,58,138,.08); border: 2px solid rgba(30,58,138,.06); }
+
+        /* ── FORM ── */
+        .form-label { font-weight: 600; color: var(--primary); font-size: .8rem; margin-bottom: .3rem; }
+        .form-control, .form-select { border-radius: 9px; border: 2px solid rgba(30,58,138,.12); padding: .5rem .8rem; font-size: .88rem; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,58,138,.1); }
+        .search-wrap { position: relative; }
+        .search-wrap i { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: .9rem; }
+        .search-wrap input { padding-left: 2.5rem; }
+
+        /* ── PRESETS ── */
+        .preset-row { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .75rem; align-items: center; }
+        .preset-label { font-size: .75rem; color: #94a3b8; font-weight: 600; }
+
+        /* ── MEMBER CARD ── */
+        .member-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border-radius: 16px; padding: 1.25rem; color: white;
+            margin-bottom: 1.25rem; box-shadow: 0 8px 24px rgba(30,58,138,.25);
+            position: relative; overflow: hidden;
+        }
+        .member-card::after { content:''; position:absolute; right:-30px; top:-30px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,.06); pointer-events:none; }
+        .member-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2.5px solid rgba(255,255,255,.4); flex-shrink: 0; }
+        .member-name { font-size: 1.05rem; font-weight: 700; margin: 0 0 4px; line-height: 1.2; }
+        .mem-badge { display: inline-block; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.3); border-radius: 6px; padding: 2px 8px; font-size: .72rem; font-weight: 700; }
+        .member-meta { display: flex; flex-wrap: wrap; gap: .5rem .75rem; font-size: .78rem; opacity: .9; margin-top: .35rem; }
+        .member-meta span { display: flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+        .member-balance { text-align: right; flex-shrink: 0; }
+        .balance-label { font-size: .7rem; opacity: .75; text-transform: uppercase; letter-spacing: .5px; }
+        .balance-value { font-size: 1.5rem; font-weight: 800; line-height: 1.1; }
+
+        /* ── SUMMARY BAR ── */
+        .summary-bar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            border-radius: 14px; color: white; margin-bottom: 1.25rem;
+            box-shadow: 0 6px 20px rgba(30,58,138,.22); overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .sum-grid { display: flex; min-width: 480px; }
+        .sum-item { flex: 1; padding: .9rem .6rem; text-align: center; border-right: 1px solid rgba(255,255,255,.12); }
+        .sum-item:last-child { border-right: none; }
+        .sum-label { font-size: .68rem; opacity: .78; text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; }
+        .sum-value { font-size: 1rem; font-weight: 800; margin-top: 3px; white-space: nowrap; }
+        .sum-sub { font-size: .63rem; opacity: .6; margin-top: 2px; }
+        .positive { color: #6ee7b7; }
+        .negative { color: #fca5a5; }
+
+        /* ── STAT MINI CARDS ── */
+        .stat-mini { background: white; border-radius: 12px; padding: .9rem; box-shadow: 0 3px 10px rgba(30,58,138,.07); border: 1px solid rgba(30,58,138,.05); height: 100%; overflow: hidden; }
+        .stat-mini > .d-flex { min-width: 0; }
+        .stat-mini .s-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .stat-mini .s-label { font-size: .7rem; color: #94a3b8; font-weight: 600; margin-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .stat-mini .s-value { font-size: .95rem; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+        /* ── STAT MINI overflow guard ── */
+        .stat-mini > .d-flex > div { min-width: 0; }
+
+        /* ── TABS ── */
+        .report-tabs { background: white; border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem; box-shadow: 0 4px 14px rgba(30,58,138,.08); }
+        .tab-nav-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; background: rgba(30,58,138,.03); border-bottom: 2px solid rgba(30,58,138,.08); scrollbar-width: none; }
+        .tab-nav-wrap::-webkit-scrollbar { display: none; }
+        .tab-nav { display: flex; padding: .6rem .75rem .4rem; gap: .25rem; white-space: nowrap; border: none; flex-wrap: nowrap; min-width: max-content; }
+        .tab-nav .nav-link { border: none; border-radius: 8px; padding: .4rem .85rem; color: #64748b; font-weight: 600; font-size: .8rem; transition: all .2s; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+        .tab-nav .nav-link:hover { background: rgba(30,58,138,.08); color: var(--primary); }
+        .tab-nav .nav-link.active { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; box-shadow: 0 3px 10px rgba(30,58,138,.25); }
+        .tab-nav .nav-link .tab-count { font-size: .68rem; padding: 1px 5px; border-radius: 10px; font-weight: 700; }
+        .tab-nav .nav-link.active .tab-count { background: rgba(255,255,255,.25); color: white; }
+        .tab-nav .nav-link:not(.active) .tab-count { background: rgba(30,58,138,.1); color: var(--primary); }
+        .tab-content-wrap { padding: 1.1rem; }
+
+        /* ── TABLE ── */
+        .tbl-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid rgba(30,58,138,.07); margin-top: .75rem; }
+        .tbl-head { padding: .75rem 1rem; border-bottom: 2px solid rgba(30,58,138,.07); background: rgba(30,58,138,.02); display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
+        .tbl-head-title { font-weight: 700; color: var(--primary); font-size: .88rem; display: flex; align-items: center; gap: 6px; }
+        .swipe-hint { display: none; align-items: center; gap: 5px; padding: .25rem .75rem; background: rgba(30,58,138,.04); font-size: .72rem; color: var(--primary); font-weight: 600; }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: rgba(30,58,138,.2) transparent; }
+        .table-scroll::-webkit-scrollbar { height: 3px; }
+        .table-scroll::-webkit-scrollbar-thumb { background: rgba(30,58,138,.2); border-radius: 3px; }
+        .tbl { margin: 0; width: 100%; font-size: .82rem; }
+        .tbl thead tr { background: rgba(30,58,138,.04); }
+        .tbl thead th { padding: .65rem .8rem; font-weight: 700; color: var(--primary); white-space: nowrap; font-size: .73rem; text-transform: uppercase; letter-spacing: .3px; border: none; }
+        .tbl tbody td { padding: .65rem .8rem; vertical-align: middle; border-color: rgba(30,58,138,.05); }
+        .tbl tbody tr:hover { background: rgba(59,130,246,.03); }
+        .tbl tfoot td { padding: .65rem .8rem; font-weight: 700; border-top: 2px solid rgba(30,58,138,.1); background: rgba(30,58,138,.03); font-size: .82rem; }
+        .tbl-min { min-width: 520px; }
+        .tbl-min-md { min-width: 700px; }
+        .tbl-min-lg { min-width: 860px; }
+        .cell-date-main { font-size: .82rem; font-weight: 600; white-space: nowrap; }
+        .cell-date-sub { font-size: .7rem; color: #94a3b8; white-space: nowrap; }
+        .cell-amount-pos { font-weight: 700; color: #059669; white-space: nowrap; }
+        .cell-amount-neg { font-weight: 700; color: #dc2626; white-space: nowrap; }
+        .cell-amount-neu { font-size: .8rem; white-space: nowrap; }
+
+        /* ── BADGES ── */
+        .badge { padding: .3rem .65rem; border-radius: 7px; font-weight: 600; font-size: .7rem; white-space: nowrap; }
+        .bs-active, .bs-approved, .bs-paid, .bs-confirmed { background: #d1fae5; color: #065f46; }
+        .bs-pending { background: #fef3c7; color: #92400e; }
+        .bs-rejected, .bs-defaulted, .bs-overdue { background: #fee2e2; color: #7f1d1d; }
+        .bs-completed, .bs-active-loan { background: #dbeafe; color: #1e3a8a; }
+        .bs-reversed { background: #f3f4f6; color: #374151; }
+        .bs-waived { background: #e0e7ff; color: #3730a3; }
+        .bs-processing { background: #fdf4ff; color: #7e22ce; }
+        .bs-purple { background: #e0e7ff; color: #3730a3; }
+        .bs-teal { background: #ccfbf1; color: #0f766e; }
+
+        /* ── ACTOR PILL ── */
+        .actor-pill { display: inline-flex; align-items: center; gap: 4px; background: rgba(30,58,138,.07); border-radius: 20px; padding: 2px 8px; font-size: .72rem; font-weight: 600; color: var(--primary); white-space: nowrap; max-width: 130px; overflow: hidden; text-overflow: clip; vertical-align: middle; }
+
+        /* ── GUARANTOR LIST ── */
+        .g-list { list-style: none; padding: 0; margin: 0; }
+        .g-list li { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 5px 0; border-bottom: 1px solid rgba(30,58,138,.05); font-size: .8rem; }
+        .g-list li:last-child { border: none; }
+
+        /* ── LOAN CARD ── */
+        .loan-card { background: white; border-radius: 12px; border: 1px solid rgba(30,58,138,.08); margin-bottom: .75rem; overflow: hidden; }
+        .loan-card-hdr { padding: .75rem 1rem; background: rgba(30,58,138,.03); border-bottom: 1px solid rgba(30,58,138,.07); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .4rem; }
+        .loan-card-hdr-title { font-weight: 700; color: var(--primary); font-size: .88rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .loan-card-body { padding: .9rem 1rem; }
+        .loan-kv { font-size: .7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 2px; }
+        .loan-kv-val { font-weight: 700; font-size: .88rem; color: #1e293b; word-break: break-word; overflow-wrap: break-word; }
+        .approver-bar { display: flex; align-items: flex-start; gap: 8px; background: rgba(30,58,138,.04); border-radius: 8px; padding: .6rem .75rem; border-left: 3px solid var(--primary); margin-bottom: .75rem; font-size: .8rem; flex-wrap: wrap; }
+
+        /* ── ROI BANNER ── */
+        .roi-banner { border-radius: 10px; padding: .75rem 1rem; margin-bottom: .75rem; display: flex; align-items: flex-start; gap: .65rem; font-size: .82rem; }
+
+        /* ── EMPTY STATE ── */
+        .empty-state { padding: 2.5rem 1rem; text-align: center; color: #94a3b8; }
+        .empty-state i { font-size: 2.5rem; margin-bottom: .75rem; opacity: .35; display: block; }
+        .empty-state p { margin: 0; font-size: .88rem; }
+
+        /* ── WELCOME / 404 CARDS ── */
+        .center-card { background: white; border-radius: 16px; padding: 2.5rem 1.5rem; text-align: center; box-shadow: 0 6px 18px rgba(30,58,138,.08); }
+        .center-icon { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-size: 1.8rem; }
+
+        /* ── PRINT ── */
+        @media print {
+            .sidebar, .top-navbar, .search-card, .no-print { display: none !important; }
+            .main-content { margin: 0 !important; padding: 0 !important; }
+            .tab-nav-wrap { display: none; }
+            .tab-pane { display: block !important; opacity: 1 !important; margin-bottom: 1.5rem; }
+            .tbl { min-width: unset !important; font-size: .75rem; }
+        }
+
+        /* ── TABLET (<=992px) — sidebar off-canvas ── */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .top-navbar { left: 0 !important; }
+            .main-content { margin-left: 0 !important; }
+            .swipe-hint { display: flex; }
+        }
+
+        /* ── TABLET PORTRAIT (<=768px) ── */
+        @media (max-width: 768px) {
+            :root { --navbar-h: 58px; }
+            .top-navbar { height: 58px; padding: 0 .9rem; gap: .5rem; }
+            .main-content { padding: .9rem; }
+            .page-header { padding: .9rem 1rem; margin-bottom: 1rem; }
+            .search-card { padding: 1rem; margin-bottom: 1rem; }
+            .member-card { padding: 1rem; margin-bottom: 1rem; }
+            .member-name { font-size: .95rem; }
+            .balance-value { font-size: 1.2rem; }
+            .tab-content-wrap { padding: .9rem; }
+            .stat-mini .s-icon { width: 34px; height: 34px; font-size: .9rem; }
+            .stat-mini .s-value { font-size: .88rem; }
+            .stat-mini .s-label { font-size: .67rem; }
+            .loan-kv-val { font-size: .82rem; white-space: normal; word-break: break-word; }
+        }
+
+        /* ── MOBILE (<=576px) ── */
+        @media (max-width: 576px) {
+            :root { --navbar-h: 54px; }
+            .top-navbar { height: 54px; padding: 0 .75rem; gap: .4rem; }
+            .btn-sm { padding: .38rem .7rem; font-size: .78rem; }
+            .main-content { padding: .75rem; }
+            .page-header { padding: .75rem; border-radius: 12px; margin-bottom: .75rem; }
+            .page-header h5 { font-size: .9rem !important; }
+            .page-header p { font-size: .72rem !important; }
+            .search-card { padding: .75rem; border-radius: 12px; margin-bottom: .75rem; }
+            .form-label { font-size: .75rem; margin-bottom: .2rem; }
+            .form-control, .form-select { padding: .45rem .7rem; font-size: .82rem; border-radius: 8px; }
+            .preset-row { gap: .3rem; margin-top: .6rem; }
+            .btn-xs { padding: .22rem .55rem; font-size: .7rem; }
+            .member-card { padding: .85rem; border-radius: 12px; margin-bottom: .75rem; }
+            .member-avatar { width: 42px; height: 42px; }
+            .member-name { font-size: .88rem; }
+            .mem-badge { font-size: .67rem; padding: 2px 6px; }
+            .member-meta { font-size: .72rem; gap: .3rem .5rem; }
+            .member-meta span { max-width: 100%; }
+            .balance-value { font-size: 1rem; }
+            .summary-bar { border-radius: 12px; margin-bottom: .75rem; }
+            .sum-item { padding: .65rem .45rem; }
+            .sum-label { font-size: .6rem; letter-spacing: 0; }
+            .sum-value { font-size: .82rem; margin-top: 2px; }
+            .sum-sub { font-size: .58rem; }
+            .tab-nav { padding: .45rem .5rem .3rem; gap: .2rem; }
+            .tab-nav .nav-link { padding: .35rem .6rem; font-size: .73rem; gap: 3px; border-radius: 7px; }
+            .tab-nav .nav-link i { font-size: .72rem; }
+            .tab-nav .nav-link .tab-count { font-size: .62rem; padding: 0 4px; }
+            .tab-content-wrap { padding: .75rem; }
+            .stat-mini { padding: .65rem .6rem; }
+            .stat-mini .s-icon { width: 30px; height: 30px; font-size: .82rem; }
+            .stat-mini .s-value { font-size: .82rem; }
+            .stat-mini .s-label { font-size: .64rem; }
+            .tbl-head { padding: .55rem .75rem; }
+            .tbl-head-title { font-size: .82rem; }
+            .tbl thead th { padding: .45rem .55rem; font-size: .65rem; }
+            .tbl tbody td { padding: .45rem .55rem; font-size: .78rem; }
+            .tbl tfoot td { padding: .45rem .55rem; font-size: .78rem; }
+            .cell-date-main { font-size: .76rem; }
+            .cell-date-sub { font-size: .65rem; }
+            .cell-amount-pos, .cell-amount-neg { font-size: .8rem; }
+            .cell-amount-neu { font-size: .74rem; }
+            .badge { padding: .25rem .5rem; font-size: .64rem; border-radius: 5px; }
+            .actor-pill { font-size: .65rem; padding: 2px 6px; max-width: 110px; }
+            code { font-size: .68rem !important; }
+            .loan-card-hdr { padding: .6rem .75rem; }
+            .loan-card-hdr-title { font-size: .8rem; }
+            .loan-card-body { padding: .7rem .75rem; }
+            .loan-kv { font-size: .64rem; }
+            .loan-kv-val { font-size: .8rem; white-space: normal; word-break: break-word; }
+            .approver-bar { padding: .5rem .6rem; font-size: .75rem; }
+            .g-list li { font-size: .74rem; }
+            .roi-banner { padding: .65rem .75rem; font-size: .76rem; }
+            .center-card { padding: 1.75rem 1rem; }
+            .center-icon { width: 58px; height: 58px; font-size: 1.4rem; margin-bottom: 1rem; }
+        }
+
+        /* ── VERY SMALL (<=380px) ── */
+        @media (max-width: 380px) {
+            .main-content { padding: .6rem; }
+            .tab-nav .nav-link { padding: .3rem .5rem; font-size: .68rem; }
+            .tab-nav .nav-link i { display: none; }
+            .sum-label { font-size: .56rem; }
+            .sum-value { font-size: .76rem; }
+            .stat-mini .s-value { font-size: .76rem; }
+            .loan-kv-val { font-size: .76rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-container">
+            <div class="logo-box">C</div>
+            <div>
+                <div class="fw-bold" style="text-transform:uppercase;font-size:1rem;line-height:1.2;">Club De Stars</div>
+                <small class="opacity-75" style="font-size:.72rem;">ADMIN PANEL</small>
+            </div>
+        </div>
+        <div class="admin-badge"><i class="fas fa-shield-alt"></i> Super Admin</div>
+    </div>
+    <div class="sidebar-menu">
+        <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
+        <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
+        <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
+        <a href="/admin/transaction-approvals">
+            <i class="fas fa-tasks"></i> Approvals
+            <span id="sidebarPendingBadge" class="badge bg-danger ms-auto" style="display:none;">0</span>
+        </a>
+        <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposits</a>
+        <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
+        <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
+        <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loans</a>
+        <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
+        <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
+        <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
+        <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Subscriptions</a>
+        <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
+        <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
+        <a href="/admin/reports" class="active"><i class="fas fa-file-alt"></i> Reports</a>
+        <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
+        <a href="/club-de-star-cooperative/dashboard" class="mt-2" style="color:rgba(255,255,255,.55);">
+            <i class="fas fa-sign-in-alt"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- ── TOP NAVBAR ── -->
+<div class="top-navbar">
+    <i class="fas fa-bars d-lg-none" style="cursor:pointer;color:var(--primary);font-size:1.3rem;" onclick="toggleSidebar()"></i>
+    <div class="navbar-title d-none d-md-block">
+        <h5>Reports &amp; Statements</h5>
+        <small>Generate member financial reports</small>
+    </div>
+    <div class="d-md-none fw-bold" style="color:var(--primary);font-size:.9rem;flex-grow:1;margin-left:.5rem;">Reports</div>
+    <div class="navbar-actions no-print">
+        <button class="btn btn-outline-primary btn-sm" onclick="printReport()" title="Print">
+            <i class="fas fa-print"></i><span class="d-none d-sm-inline ms-1">Print</span>
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="exportCSV()" title="Export CSV">
+            <i class="fas fa-download"></i><span class="d-none d-sm-inline ms-1">CSV</span>
+        </button>
+    </div>
+</div>
+
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header no-print">
+        <div class="d-flex align-items-center gap-3">
+            <div style="width:44px;height:44px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="fas fa-file-alt" style="color:white;font-size:1.15rem;"></i>
+            </div>
+            <div>
+                <h5 class="mb-0 fw-bold" style="color:var(--primary);font-size:1rem;">Member Reports</h5>
+                <p class="text-muted mb-0" style="font-size:.78rem;">Search by Membership ID to generate a full financial statement</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="search-card no-print">
+        <form method="GET" action="/admin/reports" id="reportForm">
+            <div class="row g-2 align-items-end gy-2">
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label">Membership ID</label>
+                    <div class="search-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="text" name="membershipID" class="form-control"
+                               placeholder="e.g. CDS001234"
+                               value="<%= query?.membershipID || '' %>"
+                               autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-6 col-sm-3 col-lg-2">
+                    <label class="form-label">From</label>
+                    <input type="date" name="dateFrom" class="form-control" value="<%= query?.dateFrom || '' %>">
+                </div>
+                <div class="col-6 col-sm-3 col-lg-2">
+                    <label class="form-label">To</label>
+                    <input type="date" name="dateTo" class="form-control" value="<%= query?.dateTo || '' %>">
+                </div>
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label">Report Type</label>
+                    <select name="reportType" class="form-select">
+                        <option value="all"          <%=(query?.reportType==='all'||!query?.reportType)?'selected':''%>>All Transactions</option>
+                        <option value="deposits"     <%=query?.reportType==='deposits'?'selected':''%>>Deposits</option>
+                        <option value="withdrawals"  <%=query?.reportType==='withdrawals'?'selected':''%>>Withdrawals</option>
+                        <option value="loans"        <%=query?.reportType==='loans'?'selected':''%>>Loans</option>
+                        <option value="roi"          <%=query?.reportType==='roi'?'selected':''%>>ROI</option>
+                        <option value="extracharges" <%=query?.reportType==='extracharges'?'selected':''%>>Extra Charges</option>
+                        <option value="subscriptions"<%=query?.reportType==='subscriptions'?'selected':''%>>Subscriptions</option>
+                        <option value="admin_actions"<%=query?.reportType==='admin_actions'?'selected':''%>>Admin Log</option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-2">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1" style="padding:.5rem .8rem;font-size:.88rem;">
+                            <i class="fas fa-search me-1"></i>Generate
+                        </button>
+                        <a href="/admin/reports" class="btn btn-outline-primary d-flex align-items-center justify-content-center" style="padding:.5rem .8rem;min-width:44px;" title="Reset">
+                            <i class="fas fa-redo"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="preset-row">
+                <span class="preset-label">Quick:</span>
+                <button type="button" class="btn-xs" onclick="setPreset('today')">Today</button>
+                <button type="button" class="btn-xs" onclick="setPreset('week')">Week</button>
+                <button type="button" class="btn-xs" onclick="setPreset('month')">Month</button>
+                <button type="button" class="btn-xs" onclick="setPreset('quarter')">Quarter</button>
+                <button type="button" class="btn-xs" onclick="setPreset('year')">Year</button>
+                <button type="button" class="btn-xs" onclick="setPreset('all')">All Time</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ═══ RESULTS ═══ -->
+    <% if (member && reportData) { %>
+
+    <!-- Member Card -->
+    <div class="member-card">
+        <div class="d-flex align-items-start gap-3">
+            <img src="<%=member.displayPicture||member.passportPhoto||`https://ui-avatars.com/api/?name=${encodeURIComponent(member.firstName+'+'+member.lastName)}&background=ffffff&color=1e3a8a&size=80`%>"
+                 alt="Avatar" class="member-avatar mt-1">
+            <div style="flex:1;min-width:0;overflow:hidden;">
+                <div class="member-name"><%=member.firstName%> <%=member.lastName%></div>
+                <div class="d-flex flex-wrap gap-1 mb-1">
+                    <span class="mem-badge"><i class="fas fa-id-card me-1"></i><%=member.membershipID||'N/A'%></span>
+                    <%if(member.role){%>
+                    <span class="mem-badge"><i class="fas fa-shield-alt me-1"></i><%=member.role.name?.toUpperCase()%></span>
+                    <%}%>
+                    <span class="mem-badge" style="background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.35);"><%=member.status?.toUpperCase()%></span>
+                    <%if(member.account?.accountType){%>
+                    <span class="mem-badge"><%=member.account.accountType.shortCode%> · <%=member.account.accountType.interestRate%>%</span>
+                    <%}%>
+                </div>
+                <div class="member-meta">
+                    <span style="overflow:hidden;text-overflow:ellipsis;min-width:0;"><i class="fas fa-envelope me-1"></i><%=member.email%></span>
+                    <%if(member.phone){%><span><i class="fas fa-phone"></i><%=member.phone%></span><%}%>
+                </div>
+            </div>
+            <div class="member-balance d-none d-sm-block">
+                <div class="balance-label">Balance</div>
+                <div class="balance-value">₦<%=(member.account?.balance||0).toLocaleString()%></div>
+                <%if(query?.dateFrom||query?.dateTo){%>
+                <div style="font-size:.65rem;opacity:.65;margin-top:3px;"><%=query.dateFrom||'Start'%> → <%=query.dateTo||'Now'%></div>
+                <%}%>
+            </div>
+        </div>
+        <!-- mobile balance -->
+        <div class="d-sm-none mt-2 pt-2" style="border-top:1px solid rgba(255,255,255,.15);">
+            <span class="balance-label">Balance: </span>
+            <span class="fw-bold">₦<%=(member.account?.balance||0).toLocaleString()%></span>
+        </div>
+    </div>
+
+    <!-- Summary Bar -->
+    <%if(reportData.summary){%>
+    <div class="summary-bar">
+        <div class="sum-grid">
+            <div class="sum-item">
+                <div class="sum-label"><i class="fas fa-arrow-down"></i> Deposits</div>
+                <div class="sum-value positive">₦<%=(reportData.summary.totalDeposits||0).toLocaleString()%></div>
+            </div>
+            <div class="sum-item">
+                <div class="sum-label"><i class="fas fa-arrow-up"></i> Withdrawals</div>
+                <div class="sum-value negative">₦<%=(reportData.summary.totalWithdrawals||0).toLocaleString()%></div>
+            </div>
+            <div class="sum-item">
+                <div class="sum-label"><i class="fas fa-chart-line"></i> ROI</div>
+                <div class="sum-value positive">₦<%=(reportData.summary.totalROI||0).toLocaleString()%></div>
+            </div>
+            <div class="sum-item">
+                <div class="sum-label"><i class="fas fa-exclamation-circle"></i> Charges</div>
+                <div class="sum-value negative">₦<%=(reportData.summary.totalCharges||0).toLocaleString()%></div>
+            </div>
+            <div class="sum-item">
+                <div class="sum-label"><i class="fas fa-landmark"></i> Loans Out</div>
+                <div class="sum-value negative">₦<%=(reportData.summary.totalLoansOutstanding||0).toLocaleString()%></div>
+            </div>
+            <div class="sum-item">
+                <div class="sum-label"><i class="fas fa-wallet"></i> Net Flow</div>
+                <div class="sum-value <%=(reportData.summary.netFlow||0)>=0?'positive':'negative'%>">
+                    <%=(reportData.summary.netFlow||0)<0?'-':''%>₦<%=Math.abs(reportData.summary.netFlow||0).toLocaleString()%>
+                </div>
+                <div class="sum-sub">Live: ₦<%=(reportData.summary.currentBalance||0).toLocaleString()%></div>
+            </div>
+        </div>
+    </div>
+    <%}%>
+
+    <!-- Tabs -->
+    <div class="report-tabs">
+        <div class="tab-nav-wrap">
+            <ul class="tab-nav nav" id="rTabs">
+                <%if(reportData.deposits){%>
+                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-dep">
+                    <i class="fas fa-coins"></i> Deposits <span class="tab-count"><%=reportData.deposits.count%></span>
+                </a></li>
+                <%}%>
+                <%if(reportData.withdrawals){%>
+                <li class="nav-item"><a class="nav-link <%=!reportData.deposits?'active':''%>" data-bs-toggle="tab" href="#tab-wdr">
+                    <i class="fas fa-money-check-alt"></i> Withdrawals <span class="tab-count"><%=reportData.withdrawals.count%></span>
+                </a></li>
+                <%}%>
+                <%if(reportData.loans){%>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-loan">
+                    <i class="fas fa-hand-holding-usd"></i> Loans <span class="tab-count"><%=reportData.loans.count%></span>
+                </a></li>
+                <%}%>
+                <%if(reportData.roi){%>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-roi">
+                    <i class="fas fa-chart-pie"></i> ROI <span class="tab-count"><%=reportData.roi.count%></span>
+                </a></li>
+                <%}%>
+                <%if(reportData.extraCharges){%>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-chg">
+                    <i class="fas fa-exclamation-triangle"></i> Charges <span class="tab-count"><%=reportData.extraCharges.count%></span>
+                </a></li>
+                <%}%>
+                <%if(reportData.subscriptions){%>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-sub">
+                    <i class="fas fa-cube"></i> Subscriptions <span class="tab-count"><%=reportData.subscriptions.count%></span>
+                </a></li>
+                <%}%>
+                <%if(reportData.adminActions){%>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-act">
+                    <i class="fas fa-history"></i> Admin Log <span class="tab-count"><%=reportData.adminActions.count%></span>
+                </a></li>
+                <%}%>
+            </ul>
+        </div>
+
+        <div class="tab-content tab-content-wrap">
+
+            <!-- ═══ DEPOSITS ═══ -->
+            <%if(reportData.deposits){%>
+            <div class="tab-pane fade show active" id="tab-dep">
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#d1fae5;color:#059669;"><i class="fas fa-arrow-down"></i></div>
+                        <div style="min-width:0;flex:1;"><div class="s-label">Total</div><div class="s-value">₦<%=(reportData.deposits.totalAmount||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#d1fae5;color:#059669;"><i class="fas fa-check"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Approved</div><div class="s-value">₦<%=(reportData.deposits.totalApproved||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-clock"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Pending</div><div class="s-value">₦<%=(reportData.deposits.totalPending||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#dbeafe;color:#1e3a8a;"><i class="fas fa-receipt"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Count</div><div class="s-value"><%=reportData.deposits.count%></div></div>
+                    </div></div>
+                </div>
+                <div class="tbl-card">
+                    <div class="tbl-head">
+                        <div class="tbl-head-title"><i class="fas fa-coins"></i> Deposit Transactions</div>
+                    </div>
+                    <div class="swipe-hint"><i class="fas fa-arrows-left-right"></i> Swipe to view all columns</div>
+                    <div class="table-scroll">
+                        <table class="tbl tbl-min-md">
+                            <thead><tr><th>#</th><th>Date</th><th>Ref</th><th>Type</th><th>Amount</th><th>Bal Before</th><th>Bal After</th><th>Status</th><th>By</th></tr></thead>
+                            <tbody>
+                                <%if(reportData.deposits.records.length===0){%>
+                                <tr><td colspan="9"><div class="empty-state"><i class="fas fa-coins"></i><p>No deposit records</p></div></td></tr>
+                                <%}%>
+                                <%reportData.deposits.records.forEach((dep,i)=>{%>
+                                <tr>
+                                    <td><small class="text-muted"><%=i+1%></small></td>
+                                    <td><div class="cell-date-main"><%=new Date(dep.createdAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'})%></div><div class="cell-date-sub"><%=new Date(dep.createdAt).toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'})%></div></td>
+                                    <td><code style="font-size:.72rem;"><%=dep.reference||'—'%></code></td>
+                                    <td><span class="badge bs-purple" style="text-transform:capitalize;"><%=(dep.type||'').replace(/_/g,' ')%></span></td>
+                                    <td><span class="cell-amount-pos">+₦<%=dep.amount.toLocaleString()%></span></td>
+                                    <td><span class="cell-amount-neu">₦<%=(dep.balanceBefore||0).toLocaleString()%></span></td>
+                                    <td><span class="cell-amount-neu">₦<%=(dep.balanceAfter||0).toLocaleString()%></span></td>
+                                    <td><span class="badge bs-<%=dep.status%>"><%=(dep.status||'').toUpperCase()%></span></td>
+                                    <td><%if(dep.processedBy){%><span class="actor-pill"><i class="fas fa-shield-alt"></i><%=dep.processedBy.firstName%> <%=dep.processedBy.lastName?.charAt(0)%>.</span><%}else{%><small class="text-muted">—</small><%}%></td>
+                                </tr>
+                                <%})%>
+                            </tbody>
+                            <tfoot><tr><td colspan="4" class="text-end">APPROVED TOTAL</td><td colspan="5"><span class="cell-amount-pos">₦<%=(reportData.deposits.totalApproved||0).toLocaleString()%></span></td></tr></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <%}%>
+
+            <!-- ═══ WITHDRAWALS ═══ -->
+            <%if(reportData.withdrawals){%>
+            <div class="tab-pane fade <%=!reportData.deposits?'show active':''%>" id="tab-wdr">
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-arrow-up"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Total</div><div class="s-value">₦<%=(reportData.withdrawals.totalAmount||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#d1fae5;color:#059669;"><i class="fas fa-check"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Completed</div><div class="s-value">₦<%=(reportData.withdrawals.totalCompleted||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-tags"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Fees</div><div class="s-value">₦<%=(reportData.withdrawals.totalFees||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#dbeafe;color:#1e3a8a;"><i class="fas fa-receipt"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Count</div><div class="s-value"><%=reportData.withdrawals.count%></div></div>
+                    </div></div>
+                </div>
+                <div class="tbl-card">
+                    <div class="tbl-head"><div class="tbl-head-title"><i class="fas fa-money-check-alt"></i> Withdrawal Transactions</div></div>
+                    <div class="swipe-hint"><i class="fas fa-arrows-left-right"></i> Swipe to view all columns</div>
+                    <div class="table-scroll">
+                        <table class="tbl tbl-min-lg">
+                            <thead><tr><th>#</th><th>Date</th><th>Ref</th><th>Amount</th><th>Fee</th><th>Net</th><th>Bal Before</th><th>Bal After</th><th>Bank</th><th>Status</th><th>By</th></tr></thead>
+                            <tbody>
+                                <%if(reportData.withdrawals.records.length===0){%>
+                                <tr><td colspan="11"><div class="empty-state"><i class="fas fa-money-check-alt"></i><p>No withdrawal records</p></div></td></tr>
+                                <%}%>
+                                <%reportData.withdrawals.records.forEach((w,i)=>{%>
+                                <tr>
+                                    <td><small class="text-muted"><%=i+1%></small></td>
+                                    <td><div class="cell-date-main"><%=new Date(w.createdAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'})%></div><div class="cell-date-sub"><%=new Date(w.createdAt).toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'})%></div></td>
+                                    <td><code style="font-size:.72rem;"><%=w.reference||'—'%></code></td>
+                                    <td><span class="cell-amount-neg">-₦<%=w.amount.toLocaleString()%></span></td>
+                                    <td><span class="cell-amount-neu">₦<%=(w.fee||0).toLocaleString()%></span></td>
+                                    <td><span class="cell-amount-neu">₦<%=(w.netAmount||0).toLocaleString()%></span></td>
+                                    <td><span class="cell-amount-neu">₦<%=(w.balanceBefore||0).toLocaleString()%></span></td>
+                                    <td><span class="cell-amount-neu">₦<%=(w.balanceAfter||0).toLocaleString()%></span></td>
+                                    <td><%if(w.bankDetails?.bankName){%><div style="font-size:.75rem;font-weight:600;white-space:nowrap;"><%=w.bankDetails.bankName%></div><div style="font-size:.7rem;color:#64748b;"><%=w.bankDetails.accountNumber%></div><%}else{%><small class="text-muted">—</small><%}%></td>
+                                    <td><span class="badge bs-<%=w.status%>"><%=(w.status||'').toUpperCase()%></span></td>
+                                    <td><%if(w.approvedBy){%><span class="actor-pill"><i class="fas fa-shield-alt"></i><%=w.approvedBy.firstName%> <%=w.approvedBy.lastName?.charAt(0)%>.</span><%}else{%><small class="text-muted">—</small><%}%></td>
+                                </tr>
+                                <%})%>
+                            </tbody>
+                            <tfoot><tr><td colspan="3" class="text-end">COMPLETED TOTAL</td><td colspan="8"><span class="cell-amount-neg">₦<%=(reportData.withdrawals.totalCompleted||0).toLocaleString()%></span></td></tr></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <%}%>
+
+            <!-- ═══ LOANS ═══ -->
+            <%if(reportData.loans){%>
+            <div class="tab-pane fade" id="tab-loan">
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-landmark"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Borrowed</div><div class="s-value">₦<%=(reportData.loans.totalBorrowed||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#d1fae5;color:#059669;"><i class="fas fa-undo"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Repaid</div><div class="s-value">₦<%=(reportData.loans.totalRepaid||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-exclamation"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Outstanding</div><div class="s-value">₦<%=(reportData.loans.totalOutstanding||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#e0e7ff;color:#3730a3;"><i class="fas fa-percent"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Interest</div><div class="s-value">₦<%=(reportData.loans.totalInterest||0).toLocaleString()%></div></div>
+                    </div></div>
+                </div>
+
+                <%if(reportData.loans.records.length===0){%>
+                <div class="empty-state"><i class="fas fa-hand-holding-usd"></i><p>No loan records found</p></div>
+                <%}%>
+
+                <%reportData.loans.records.forEach((loan,li)=>{%>
+                <div class="loan-card">
+                    <div class="loan-card-hdr">
+                        <div class="loan-card-hdr-title">
+                            <i class="fas fa-hand-holding-usd" style="color:var(--primary);"></i>
+                            Loan #<%=li+1%> — <span style="font-family:monospace;font-size:.82rem;"><%=loan.loanRef||loan._id.toString().slice(-8).toUpperCase()%></span>
+                            <span class="badge bs-<%=loan.status%>"><%=(loan.status||'').toUpperCase()%></span>
+                        </div>
+                        <span style="font-size:.75rem;color:#64748b;"><%=new Date(loan.createdAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'})%></span>
+                    </div>
+                    <div class="loan-card-body">
+                        <!-- Loan KV Grid -->
+                        <div class="row g-2 mb-3">
+                            <div class="col-6 col-md-2"><div class="loan-kv">Principal</div><div class="loan-kv-val">₦<%=loan.principalAmount.toLocaleString()%></div></div>
+                            <div class="col-6 col-md-2"><div class="loan-kv">Rate</div><div class="loan-kv-val"><%=loan.interestRate%>% · ₦<%=(loan.interestAmount||0).toLocaleString()%></div></div>
+                            <div class="col-6 col-md-2"><div class="loan-kv">Total Due</div><div class="loan-kv-val">₦<%=(loan.totalRepayable||0).toLocaleString()%></div></div>
+                            <div class="col-6 col-md-2"><div class="loan-kv">Monthly</div><div class="loan-kv-val">₦<%=(loan.monthlyInstalment||0).toLocaleString()%></div></div>
+                            <div class="col-6 col-md-2"><div class="loan-kv">Repaid</div><div class="loan-kv-val" style="color:#059669;">₦<%=(loan.amountRepaid||0).toLocaleString()%></div></div>
+                            <div class="col-6 col-md-2"><div class="loan-kv">Outstanding</div><div class="loan-kv-val" style="color:#dc2626;">₦<%=(loan.outstandingBalance||0).toLocaleString()%></div></div>
+                        </div>
+
+                        <!-- Guarantors -->
+                        <%if(loan.guarantors&&loan.guarantors.length>0){%>
+                        <div style="font-size:.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:5px;"><i class="fas fa-users me-1"></i>Guarantors</div>
+                        <ul class="g-list mb-3">
+                            <%loan.guarantors.forEach(g=>{%>
+                            <li>
+                                <span class="badge bs-<%=g.status%>" style="min-width:60px;"><%=(g.status||'').toUpperCase()%></span>
+                                <%if(g.guarantor){%>
+                                <strong style="font-size:.8rem;"><%=g.guarantor.firstName%> <%=g.guarantor.lastName%></strong>
+                                <span class="text-muted" style="font-size:.75rem;">(<%=g.guarantor.membershipID%>)</span>
+                                <%}else{%><span class="text-muted" style="font-size:.78rem;">Unknown</span><%}%>
+                                <span class="ms-auto" style="color:var(--primary);font-weight:700;font-size:.8rem;white-space:nowrap;">₦<%=g.amount.toLocaleString()%></span>
+                            </li>
+                            <%})%>
+                        </ul>
+                        <%}%>
+
+                        <!-- Approver -->
+                        <%if(loan.reviewedBy){%>
+                        <div class="approver-bar">
+                            <i class="fas fa-user-shield" style="color:var(--primary);flex-shrink:0;margin-top:2px;"></i>
+                            <div>
+                                <strong style="font-size:.8rem;">Decision by:</strong>
+                                <span style="font-size:.8rem;"> <%=loan.reviewedBy.firstName%> <%=loan.reviewedBy.lastName%></span>
+                                <span class="actor-pill ms-1"><i class="fas fa-shield-alt"></i><%=loan.reviewedByRole||'Admin'%></span>
+                                <%if(loan.reviewedAt){%><span class="text-muted ms-1" style="font-size:.75rem;"><%=new Date(loan.reviewedAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'})%></span><%}%>
+                            </div>
+                        </div>
+                        <%}%>
+
+                        <!-- Repayments -->
+                        <%if(loan.repayments&&loan.repayments.length>0){%>
+                        <div style="font-size:.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:6px;"><i class="fas fa-undo me-1"></i>Repayments (<%=loan.repayments.length%>)</div>
+                        <div class="tbl-card">
+                            <div class="table-scroll">
+                                <table class="tbl tbl-min">
+                                    <thead><tr><th>#</th><th>Date</th><th>Amount</th><th>Principal</th><th>Interest</th><th>Bal After</th><th>Received By</th><th>Status</th></tr></thead>
+                                    <tbody>
+                                        <%loan.repayments.forEach((r,ri)=>{%>
+                                        <tr>
+                                            <td><%=ri+1%></td>
+                                            <td><span class="cell-date-main"><%=new Date(r.paidAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'})%></span></td>
+                                            <td><span class="cell-amount-pos">₦<%=r.amount.toLocaleString()%></span></td>
+                                            <td><span class="cell-amount-neu">₦<%=(r.principal||0).toLocaleString()%></span></td>
+                                            <td><span class="cell-amount-neu">₦<%=(r.interest||0).toLocaleString()%></span></td>
+                                            <td><span class="cell-amount-neu">₦<%=(r.balanceAfter||0).toLocaleString()%></span></td>
+                                            <td><%if(r.receivedBy){%><span class="actor-pill"><i class="fas fa-shield-alt"></i><%=r.receivedBy.firstName||''%></span><%}else{%><small class="text-muted">—</small><%}%></td>
+                                            <td><span class="badge bs-<%=r.status%>"><%=(r.status||'').toUpperCase()%></span></td>
+                                        </tr>
+                                        <%})%>
+                                    </tbody>
+                                    <tfoot><tr><td colspan="2" class="text-end">TOTAL</td><td colspan="6"><span class="cell-amount-pos">₦<%=(loan.amountRepaid||0).toLocaleString()%></span></td></tr></tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <%}else{%>
+                        <p style="font-size:.8rem;color:#94a3b8;margin:0;"><i class="fas fa-info-circle me-1"></i>No repayments yet.</p>
+                        <%}%>
+                    </div>
+                </div>
+                <%})%>
+            </div>
+            <%}%>
+
+            <!-- ═══ ROI ═══ -->
+            <%
+              const isAccumulative = (member && member.account && member.account.accumulativeROI > 0);
+            %>
+            <%if(reportData.roi){%>
+            <div class="tab-pane fade" id="tab-roi">
+                <div class="roi-banner" style="background:<%=isAccumulative?'#d1fae5':'#dbeafe'%>;border-left:4px solid <%=isAccumulative?'#059669':'#2563eb'%>;">
+                    <i class="fas <%=isAccumulative?'fa-piggy-bank':'fa-money-bill-wave'%>" style="font-size:1.2rem;color:<%=isAccumulative?'#059669':'#2563eb'%>;flex-shrink:0;margin-top:2px;"></i>
+                    <div>
+                        <div style="font-weight:700;color:<%=isAccumulative?'#065f46':'#1e3a8a'%>;font-size:.85rem;"><%=isAccumulative?'Accumulative ROI Mode':'Monthly Payout ROI Mode'%></div>
+                        <div style="font-size:.75rem;color:#475569;margin-top:2px;">
+                            <%if(isAccumulative){%>ROI is compounded into balance. Lifetime total: <strong>₦<%=(reportData.roi.accumulativeROI||0).toLocaleString()%></strong>
+                            <%}else{%>ROI paid out each cycle. Last payout: <strong><%=reportData.roi.lastRoiPayout?new Date(reportData.roi.lastRoiPayout).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'}):'Never'%></strong><%}%>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#d1fae5;color:#059669;"><i class="fas fa-chart-line"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Period ROI</div><div class="s-value">₦<%=(reportData.roi.totalROI||0).toLocaleString()%></div><div style="font-size:.67rem;color:#94a3b8;"><%=reportData.roi.count%>/<%=reportData.roi.totalHistoryCount%> mo</div></div>
+                    </div></div>
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#e0e7ff;color:#3730a3;"><i class="fas fa-piggy-bank"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Lifetime</div><div class="s-value">₦<%=(reportData.roi.accumulativeROI||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-calendar-check"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Last Payout</div><div class="s-value" style="font-size:.82rem;"><%=reportData.roi.lastRoiPayout?new Date(reportData.roi.lastRoiPayout).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'}):'—'%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-3"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#dbeafe;color:#1e3a8a;"><i class="fas fa-history"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Total Cycles</div><div class="s-value"><%=reportData.roi.totalHistoryCount%> mo</div></div>
+                    </div></div>
+                </div>
+
+                <div class="tbl-card">
+                    <div class="tbl-head">
+                        <div class="tbl-head-title"><i class="fas fa-chart-pie"></i> Monthly ROI History</div>
+                        <%if(query.dateFrom||query.dateTo){%><small class="text-muted"><%=query.dateFrom||'start'%> → <%=query.dateTo||'today'%></small><%}%>
+                    </div>
+                    <div class="swipe-hint"><i class="fas fa-arrows-left-right"></i> Swipe to view all columns</div>
+                    <div class="table-scroll">
+                        <%
+                          const roiAsc=[...reportData.roi.records].sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
+                          let rMap={},rRun=0;
+                          roiAsc.forEach(r=>{rRun+=(r.roi||0);rMap[String(r._id||r.month)]=rRun;});
+                        %>
+                        <table class="tbl tbl-min">
+                            <thead><tr><th>#</th><th>Month</th><th>Credited</th><th>ROI Amount</th><th>Running Total</th></tr></thead>
+                            <tbody>
+                                <%if(reportData.roi.records.length===0){%>
+                                <tr><td colspan="5"><div class="empty-state"><i class="fas fa-chart-pie"></i><p>No ROI records for this period</p></div></td></tr>
+                                <%}%>
+                                <%reportData.roi.records.forEach((r,i)=>{%>
+                                <tr>
+                                    <td><small class="text-muted"><%=i+1%></small></td>
+                                    <td><span class="badge bs-purple" style="font-size:.75rem;"><%=r.month%></span></td>
+                                    <td><div class="cell-date-main"><%=new Date(r.createdAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'})%></div><div class="cell-date-sub"><%=new Date(r.createdAt).toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'})%></div></td>
+                                    <td><span class="cell-amount-pos">+₦<%=(r.roi||0).toLocaleString()%></span></td>
+                                    <td><span style="font-size:.82rem;color:var(--primary);font-weight:600;">₦<%=(rMap[String(r._id||r.month)]||0).toLocaleString()%></span></td>
+                                </tr>
+                                <%})%>
+                            </tbody>
+                            <tfoot><tr><td colspan="3" class="text-end">PERIOD TOTAL</td><td colspan="2"><span class="cell-amount-pos">₦<%=(reportData.roi.totalROI||0).toLocaleString()%></span></td></tr></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <%}%>
+
+            <!-- ═══ EXTRA CHARGES ═══ -->
+            <%if(reportData.extraCharges){%>
+            <div class="tab-pane fade" id="tab-chg">
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-4"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Total Charged</div><div class="s-value">₦<%=(reportData.extraCharges.totalAmount||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-4"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#d1fae5;color:#059669;"><i class="fas fa-check"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Paid</div><div class="s-value">₦<%=(reportData.extraCharges.totalPaid||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-4"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#e0e7ff;color:#3730a3;"><i class="fas fa-hand-paper"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Waived</div><div class="s-value">₦<%=(reportData.extraCharges.totalWaived||0).toLocaleString()%></div></div>
+                    </div></div>
+                </div>
+                <div class="tbl-card">
+                    <div class="tbl-head"><div class="tbl-head-title"><i class="fas fa-exclamation-triangle"></i> Extra Charges</div></div>
+                    <div class="swipe-hint"><i class="fas fa-arrows-left-right"></i> Swipe to view all columns</div>
+                    <div class="table-scroll">
+                        <table class="tbl tbl-min-md">
+                            <thead><tr><th>#</th><th>Date</th><th>Type</th><th>Description</th><th>Amount</th><th>Status</th><th>Charged By</th><th>Approved By</th></tr></thead>
+                            <tbody>
+                                <%if(reportData.extraCharges.records.length===0){%>
+                                <tr><td colspan="8"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>No charge records</p></div></td></tr>
+                                <%}%>
+                                <%reportData.extraCharges.records.forEach((c,i)=>{%>
+                                <tr>
+                                    <td><small class="text-muted"><%=i+1%></small></td>
+                                    <td><div class="cell-date-main"><%=new Date(c.createdAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'})%></div></td>
+                                    <td><span class="badge bs-purple" style="text-transform:capitalize;font-size:.68rem;"><%=(c.chargeType||'').replace(/_/g,' ')%></span></td>
+                                    <td style="max-width:140px;font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%=c.description%></td>
+                                    <td><span class="cell-amount-neg">₦<%=c.amount.toLocaleString()%></span></td>
+                                    <td><span class="badge bs-<%=c.status%>"><%=(c.status||'').toUpperCase()%></span></td>
+                                    <td><%if(c.chargedBy){%><span class="actor-pill"><i class="fas fa-shield-alt"></i><%=c.chargedBy.firstName%> <%=c.chargedBy.lastName?.charAt(0)%>.</span><%}else{%><small class="text-muted">—</small><%}%></td>
+                                    <td><%if(c.approvedBy){%><span class="actor-pill"><i class="fas fa-shield-alt"></i><%=c.approvedBy.firstName%> <%=c.approvedBy.lastName?.charAt(0)%>.</span><%}else{%><small class="text-muted">—</small><%}%></td>
+                                </tr>
+                                <%})%>
+                            </tbody>
+                            <tfoot><tr><td colspan="4" class="text-end">PAID TOTAL</td><td colspan="4"><span class="cell-amount-neg">₦<%=(reportData.extraCharges.totalPaid||0).toLocaleString()%></span></td></tr></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <%}%>
+
+            <!-- ═══ SUBSCRIPTIONS ═══ -->
+            <%if(reportData.subscriptions){%>
+            <div class="tab-pane fade" id="tab-sub">
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-4"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#dbeafe;color:#1e3a8a;"><i class="fas fa-cube"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Total Billed</div><div class="s-value">₦<%=(reportData.subscriptions.totalAmount||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-4"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#d1fae5;color:#059669;"><i class="fas fa-check"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Paid</div><div class="s-value">₦<%=(reportData.subscriptions.totalPaid||0).toLocaleString()%></div></div>
+                    </div></div>
+                    <div class="col-6 col-md-4"><div class="stat-mini d-flex align-items-center gap-2">
+                        <div class="s-icon" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-clock"></i></div>
+                        <div style="min-width:0;flex:1;overflow:hidden;">Overdue</div><div class="s-value">₦<%=(reportData.subscriptions.totalOverdue||0).toLocaleString()%></div></div>
+                    </div></div>
+                </div>
+                <div class="tbl-card">
+                    <div class="tbl-head"><div class="tbl-head-title"><i class="fas fa-cube"></i> Subscription / Maintenance History</div></div>
+                    <div class="swipe-hint"><i class="fas fa-arrows-left-right"></i> Swipe to view all columns</div>
+                    <div class="table-scroll">
+                        <table class="tbl tbl-min-md">
+                            <thead><tr><th>#</th><th>Date</th><th>Plan</th><th>Period</th><th>Amount</th><th>Late Fee</th><th>Due</th><th>Paid</th><th>Status</th><th>By</th></tr></thead>
+                            <tbody>
+                                <%if(reportData.subscriptions.records.length===0){%>
+                                <tr><td colspan="10"><div class="empty-state"><i class="fas fa-cube"></i><p>No subscription records</p></div></td></tr>
+                                <%}%>
+                                <%reportData.subscriptions.records.forEach((s,i)=>{%>
+                                <tr>
+                                    <td><small class="text-muted"><%=i+1%></small></td>
+                                    <td><div class="cell-date-main"><%=new Date(s.createdAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'})%></div></td>
+                                    <td><strong style="font-size:.8rem;white-space:nowrap;"><%=s.subscriptionPlan%></strong></td>
+                                    <td><span class="badge bs-purple"><%=s.period||'—'%></span></td>
+                                    <td><span class="cell-amount-neu" style="font-weight:700;">₦<%=s.amount.toLocaleString()%></span></td>
+                                    <td><%if(s.isLateFee&&s.lateFeeAmount){%><span class="cell-amount-neg" style="font-size:.75rem;">+₦<%=s.lateFeeAmount.toLocaleString()%></span><%}else{%><small class="text-muted">—</small><%}%></td>
+                                    <td><small class="cell-date-main"><%=s.dueDate?new Date(s.dueDate).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'}):'—'%></small></td>
+                                    <td><small class="cell-date-main"><%=s.paidDate?new Date(s.paidDate).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'}):'—'%></small></td>
+                                    <td><span class="badge bs-<%=s.status%>"><%=(s.status||'').toUpperCase()%></span></td>
+                                    <td><%if(s.processedBy){%><span class="actor-pill"><i class="fas fa-shield-alt"></i><%=s.processedBy.firstName%> <%=s.processedBy.lastName?.charAt(0)%>.</span><%}else{%><small class="text-muted">—</small><%}%></td>
+                                </tr>
+                                <%})%>
+                            </tbody>
+                            <tfoot><tr><td colspan="4" class="text-end">PAID TOTAL</td><td colspan="6"><span class="cell-amount-pos">₦<%=(reportData.subscriptions.totalPaid||0).toLocaleString()%></span></td></tr></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <%}%>
+
+            <!-- ═══ ADMIN ACTIONS ═══ -->
+            <%if(reportData.adminActions){%>
+            <div class="tab-pane fade" id="tab-act">
+                <div class="tbl-card">
+                    <div class="tbl-head">
+                        <div class="tbl-head-title"><i class="fas fa-history"></i> Admin Actions Log</div>
+                        <span class="badge bs-purple"><%=reportData.adminActions.count%> events</span>
+                    </div>
+                    <div class="swipe-hint"><i class="fas fa-arrows-left-right"></i> Swipe to view all columns</div>
+                    <div class="table-scroll">
+                        <table class="tbl tbl-min-md">
+                            <thead><tr><th>#</th><th>Date &amp; Time</th><th>Admin</th><th>Role</th><th>Action</th><th>Description</th><th>Status</th><th>IP</th></tr></thead>
+                            <tbody>
+                                <%if(reportData.adminActions.records.length===0){%>
+                                <tr><td colspan="8"><div class="empty-state"><i class="fas fa-history"></i><p>No admin actions found</p></div></td></tr>
+                                <%}%>
+                                <%reportData.adminActions.records.forEach((act,i)=>{%>
+                                <tr>
+                                    <td><small class="text-muted"><%=i+1%></small></td>
+                                    <td><div class="cell-date-main"><%=new Date(act.createdAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'})%></div><div class="cell-date-sub"><%=new Date(act.createdAt).toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'})%></div></td>
+                                    <td>
+                                        <%if(act.admin){%>
+                                        <div style="font-size:.8rem;font-weight:600;white-space:nowrap;"><%=act.admin.firstName%> <%=act.admin.lastName%></div>
+                                        <div style="font-size:.7rem;color:#64748b;"><%=act.admin.membershipID%></div>
+                                        <%}else{%><small class="text-muted">System</small><%}%>
+                                    </td>
+                                    <td><span class="actor-pill"><i class="fas fa-shield-alt"></i><%=act.adminRole||'—'%></span></td>
+                                    <td><span class="badge bs-purple" style="font-size:.68rem;text-transform:uppercase;"><%=(act.actionType||'').replace(/_/g,' ')%></span></td>
+                                    <td style="max-width:160px;font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="<%=act.description%>"><%=act.description%></td>
+                                    <td><span class="badge <%=act.status==='success'?'bs-approved':act.status==='failed'?'bs-rejected':'bs-pending'%>"><%=(act.status||'').toUpperCase()%></span></td>
+                                    <td><code style="font-size:.7rem;white-space:nowrap;"><%=act.ipAddress||'—'%></code></td>
+                                </tr>
+                                <%})%>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <%}%>
+
+        </div><!-- /tab-content -->
+    </div><!-- /report-tabs -->
+
+    <%}else if(query&&query.membershipID&&!member){%>
+    <div class="center-card">
+        <div class="center-icon" style="background:#fee2e2;">
+            <i class="fas fa-user-slash" style="color:#dc2626;"></i>
+        </div>
+        <h5 class="fw-bold mb-2" style="color:#1e293b;">Member Not Found</h5>
+        <p class="text-muted mb-1">No member found with ID: <strong><%=query.membershipID%></strong></p>
+        <p class="text-muted mb-0" style="font-size:.85rem;">Check the membership ID and try again.</p>
+    </div>
+
+    <%}else{%>
+    <div class="center-card">
+        <div class="center-icon" style="background:linear-gradient(135deg,#e0e7ff,#dbeafe);">
+            <i class="fas fa-file-alt" style="color:var(--primary);"></i>
+        </div>
+        <h5 class="fw-bold mb-2" style="color:#1e293b;">Generate a Member Report</h5>
+        <p class="text-muted mb-1">Enter a Membership ID and click <strong>Generate</strong>.</p>
+        <p class="text-muted mb-0" style="font-size:.82rem;">Filter by date range and report type for targeted results.</p>
+    </div>
+    <%}%>
+
+</div><!-- /main-content -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleSidebar() {
+    if (window.innerWidth <= 992) {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('active');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+}
+
+function setPreset(p) {
+    const today = new Date(), fmt = d => d.toISOString().slice(0,10);
+    let from, to = fmt(today);
+    if (p==='today')   { from=to; }
+    else if (p==='week')    { const d=new Date(today); d.setDate(d.getDate()-d.getDay()); from=fmt(d); }
+    else if (p==='month')   { from=fmt(new Date(today.getFullYear(),today.getMonth(),1)); }
+    else if (p==='quarter') { const q=Math.floor(today.getMonth()/3); from=fmt(new Date(today.getFullYear(),q*3,1)); }
+    else if (p==='year')    { from=fmt(new Date(today.getFullYear(),0,1)); }
+    else                    { from=''; to=''; }
+    document.querySelector('[name="dateFrom"]').value = from;
+    document.querySelector('[name="dateTo"]').value   = to;
+}
+
+function printReport() {
+    document.querySelectorAll('.tab-pane').forEach(p=>{p.style.display='block';p.style.opacity='1';});
+    window.print();
+    setTimeout(()=>{ document.querySelectorAll('.tab-pane').forEach(p=>{p.style.display='';p.style.opacity='';});},1000);
+}
+
+function exportCSV() {
+    const active = document.querySelector('.tab-pane.show.active');
+    if (!active) return alert('No report data to export.');
+    const table = active.querySelector('table');
+    if (!table) return alert('No table in current tab.');
+    let csv='';
+    table.querySelectorAll('tr').forEach(row=>{
+        const cells=[...row.querySelectorAll('th,td')].map(c=>'"'+(c.innerText||c.textContent).replace(/"/g,'""').replace(/\n/g,' ').trim()+'"');
+        csv+=cells.join(',')+'\n';
+    });
+    const mid = document.querySelector('[name="membershipID"]')?.value||'member';
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+    a.download=`report_${mid}_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+}
+
+async function loadSidebarPendingCount() {
+    try {
+        const data = await fetch('/admin/pending-approvals-count').then(r=>r.json());
+        const badge = document.getElementById('sidebarPendingBadge');
+        if (!badge) return;
+        badge.style.display = data.count>0?'inline-block':'none';
+        badge.textContent = data.count;
+    } catch(e){}
+}
+document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
+</script>
+
+</body>
+</html>

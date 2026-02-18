@@ -507,6 +507,13 @@
             <a href="/club-de-star-cooperative/report">
                 <i class="fas fa-chart-line"></i> Reports
             </a>
+
+                  <!-- PROFESSIONAL DASHBOARD - Visible to non-members -->
+            <% if (user.role && user.role.name !== 'member') { %>
+                <a href="/admin-dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Professional Dashboard
+                </a>
+            <% } %>
             <a href="/logout" class="mt-3" style="color: rgba(255,255,255,0.6);">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>

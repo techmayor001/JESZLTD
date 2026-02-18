@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied | Club De Stars Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Righteous&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --warning: #f59e0b;
+            --sidebar-width: 280px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            z-index: 1040;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30,58,138,.15);
+            transform: translateX(0);
+            transition: transform .3s;
+        }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            background: rgba(0,0,0,.1);
+        }
+        .logo-container { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+        .logo-box {
+            width:45px; height:45px; background:white; border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:bold; color:var(--primary); font-size:1.5rem;
+            box-shadow:0 4px 10px rgba(0,0,0,.2); flex-shrink:0;
+        }
+        .sidebar-title { font-size:1.1rem; line-height:1.2; font-weight:800; }
+        .admin-badge {
+            display:inline-flex; align-items:center; gap:8px;
+            padding:6px 12px;
+            background:rgba(239,68,68,.2); backdrop-filter:blur(10px);
+            border-radius:20px; border:1px solid rgba(239,68,68,.3);
+            font-weight:600; font-size:.8rem; margin-top:8px;
+        }
+        .sidebar-menu { padding:1rem 0; }
+        .sidebar-menu a {
+            color:rgba(255,255,255,.85); text-decoration:none;
+            padding:.875rem 1.5rem; display:flex; align-items:center;
+            transition:all .3s; border-left:3px solid transparent;
+            font-weight:500; font-size:.95rem;
+        }
+        .sidebar-menu a:hover { background:rgba(255,255,255,.1); color:white; border-left-color:white; }
+        .sidebar-menu a i { width:24px; margin-right:12px; font-size:1.1rem; flex-shrink:0; }
+
+        /* ── Top Navbar ── */
+        .top-navbar {
+            position: fixed; top:0;
+            left: var(--sidebar-width); right: 0;
+            height: 70px;
+            background: rgba(255,255,255,.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30,58,138,.08);
+            z-index: 1030;
+            display: flex; align-items: center;
+            padding: 0 1.5rem;
+            border-bottom: 1px solid rgba(30,58,138,.1);
+            transition: left .3s;
+        }
+
+        /* ── Main Content ── */
+        .main-content {
+            margin-top: 70px;
+            min-height: calc(100vh - 70px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            transition: margin-left .3s;
+        }
+
+        /* ── 403 Card ── */
+        .error-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(30,58,138,.12);
+            border: 1px solid rgba(30,58,138,.06);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideUp .5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity:0; transform:translateY(30px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        /* banner strip at top of card */
+        .error-banner {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            padding: 2.5rem 2rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .error-banner::before {
+            content: '';
+            position: absolute;
+            top: -60%; right: -20%;
+            width: 350px; height: 350px;
+            background: rgba(255,255,255,.05);
+            border-radius: 50%;
+        }
+        .error-banner::after {
+            content: '';
+            position: absolute;
+            bottom: -40%; left: -10%;
+            width: 250px; height: 250px;
+            background: rgba(255,255,255,.04);
+            border-radius: 50%;
+        }
+
+        /* lock icon ring */
+        .lock-ring {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 110px; height: 110px;
+            margin: 0 auto 1.25rem;
+            z-index: 1;
+        }
+        .lock-ring-outer {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,.25);
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+        .lock-ring-inner {
+            position: absolute;
+            inset: 12px;
+            border-radius: 50%;
+            background: rgba(239,68,68,.25);
+            border: 2px solid rgba(239,68,68,.5);
+        }
+        .lock-icon {
+            font-size: 2.5rem;
+            color: white;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 4px 12px rgba(239,68,68,.4));
+        }
+        @keyframes pulse {
+            0%,100% { transform: scale(1); opacity:.6; }
+            50%      { transform: scale(1.12); opacity:1; }
+        }
+
+        .error-code {
+            font-family: 'Righteous', cursive;
+            font-size: 1rem;
+            letter-spacing: 4px;
+            color: rgba(255,255,255,.6);
+            text-transform: uppercase;
+            margin-bottom: .25rem;
+            position: relative; z-index:1;
+        }
+        .error-title {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: white;
+            position: relative; z-index:1;
+        }
+
+        /* body of card */
+        .error-body {
+            padding: 2rem;
+        }
+
+        /* reason chips */
+        .reason-section { margin-bottom: 1.75rem; }
+        .reason-section h6 {
+            font-size: .8rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 1rem;
+        }
+        .reason-list { display: flex; flex-direction: column; gap: .625rem; }
+        .reason-item {
+            display: flex;
+            align-items: center;
+            gap: .875rem;
+            padding: .875rem 1rem;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            font-size: .9rem;
+            font-weight: 500;
+            transition: background .2s;
+        }
+        /* highlighted = the matched reason, others dimmed */
+        .reason-item.active {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-color: rgba(239,68,68,.25);
+            color: #991b1b;
+        }
+        .reason-item.inactive {
+            background: #f8fafc;
+            color: #94a3b8;
+        }
+        .reason-icon {
+            width: 34px; height: 34px;
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .9rem;
+            flex-shrink: 0;
+        }
+        .reason-item.active .reason-icon  { background: rgba(239,68,68,.15); color:#ef4444; }
+        .reason-item.inactive .reason-icon { background: #e2e8f0; color: #94a3b8; }
+
+        /* what to do */
+        .action-section {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 14px;
+            padding: 1.25rem;
+            margin-bottom: 1.75rem;
+        }
+        .action-section h6 {
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: .75rem;
+        }
+        .action-list { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
+        .action-list li {
+            font-size: .875rem;
+            color: #1e3a8a;
+            display: flex;
+            align-items: flex-start;
+            gap: .625rem;
+        }
+        .action-list li i { color: var(--primary-light); margin-top: 2px; flex-shrink: 0; }
+
+        /* buttons */
+        .btn-row {
+            display: flex;
+            gap: .75rem;
+            flex-wrap: wrap;
+        }
+        .btn-primary-cds {
+            flex: 1;
+            min-width: 140px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: .75rem 1.25rem;
+            font-weight: 700;
+            font-size: .9rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            gap: .5rem;
+            text-decoration: none;
+            transition: transform .25s, box-shadow .25s;
+        }
+        .btn-primary-cds:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 28px rgba(30,58,138,.3);
+        }
+        .btn-ghost-cds {
+            flex: 1;
+            min-width: 140px;
+            background: white;
+            color: var(--primary);
+            border: 2px solid rgba(30,58,138,.2);
+            border-radius: 12px;
+            padding: .75rem 1.25rem;
+            font-weight: 700;
+            font-size: .9rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            gap: .5rem;
+            text-decoration: none;
+            transition: all .25s;
+        }
+        .btn-ghost-cds:hover {
+            border-color: var(--primary);
+            background: #f0f5ff;
+            transform: translateY(-3px);
+        }
+
+        /* powered by */
+        .powered-by {
+            position: fixed; bottom:15px; right:15px;
+            background: white; padding:10px 16px; border-radius:25px;
+            box-shadow: 0 4px 15px rgba(30,58,138,.15);
+            font-size:.8rem; font-weight:600; color:var(--primary); z-index:1000;
+        }
+
+        /* overlay for mobile */
+        .overlay {
+            display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,.5); z-index:1035;
+        }
+        .overlay.active { display:block; }
+
+        /* ── Mobile ── */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .top-navbar { left: 0; }
+            .main-content { margin-left: 0; }
+        }
+        @media (max-width: 576px) {
+            .top-navbar { height:60px; padding:0 1rem; }
+            .main-content { margin-top:60px; padding:.75rem; }
+            .error-banner { padding:2rem 1.25rem 1.75rem; }
+            .error-title { font-size:1.5rem; }
+            .error-body { padding:1.25rem; }
+            .btn-row { flex-direction: column; }
+            .btn-primary-cds, .btn-ghost-cds { min-width:unset; }
+        }
+    </style>
+</head>
+<body>
+
+
+
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="error-card">
+
+        <!-- Banner -->
+        <div class="error-banner">
+            <div class="lock-ring">
+                <div class="lock-ring-outer"></div>
+                <div class="lock-ring-inner"></div>
+                <i class="fas fa-lock lock-icon"></i>
+            </div>
+            <p class="error-code">Error 403</p>
+            <h1 class="error-title">Access Denied</h1>
+        </div>
+
+        <!-- Body -->
+        <div class="error-body">
+
+            <!-- Reasons -->
+            <div class="reason-section">
+                <h6>Why am I seeing this?</h6>
+                <div class="reason-list" id="reasonList">
+                    <div class="reason-item" id="reason-nologin">
+                        <div class="reason-icon"><i class="fas fa-sign-in-alt"></i></div>
+                        <div>
+                            <strong>Not Logged In</strong>
+                            <div style="font-size:.8rem; margin-top:2px;">Your session may have expired or you haven't signed in.</div>
+                        </div>
+                    </div>
+                    <div class="reason-item" id="reason-norole">
+                        <div class="reason-icon"><i class="fas fa-id-badge"></i></div>
+                        <div>
+                            <strong>No Role Assigned</strong>
+                            <div style="font-size:.8rem; margin-top:2px;">Your account does not have any role configured.</div>
+                        </div>
+                    </div>
+                    <div class="reason-item" id="reason-inactive">
+                        <div class="reason-icon"><i class="fas fa-pause-circle"></i></div>
+                        <div>
+                            <strong>Role Inactive</strong>
+                            <div style="font-size:.8rem; margin-top:2px;">Your assigned role has been deactivated by an administrator.</div>
+                        </div>
+                    </div>
+                    <div class="reason-item" id="reason-member">
+                        <div class="reason-icon"><i class="fas fa-user-slash"></i></div>
+                        <div>
+                            <strong>Member Account</strong>
+                            <div style="font-size:.8rem; margin-top:2px;">Member accounts cannot access the admin panel.</div>
+                        </div>
+                    </div>
+                    <div class="reason-item" id="reason-permission">
+                        <div class="reason-icon"><i class="fas fa-key"></i></div>
+                        <div>
+                            <strong>Insufficient Permissions</strong>
+                            <div style="font-size:.8rem; margin-top:2px;">Your role doesn't include the permission required for this action.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What to do -->
+            <div class="action-section">
+                <h6><i class="fas fa-lightbulb me-2"></i>What can you do?</h6>
+                <ul class="action-list">
+                    <li><i class="fas fa-arrow-right"></i> Contact a Super Admin to request access or have your role updated.</li>
+                    <li><i class="fas fa-arrow-right"></i> Go to <strong>Roles &amp; Permissions</strong> to verify your account's role configuration.</li>
+                    <li><i class="fas fa-arrow-right"></i> If you believe this is a mistake, note the page URL and report it.</li>
+                </ul>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="btn-row">
+                <a href="javascript:history.back()" class="btn-ghost-cds">
+                    <i class="fas fa-arrow-left"></i> Go Back
+                </a>
+                <a href="/club-de-star-cooperative/dashboard" class="btn-primary-cds">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Powered By -->
+<div class="powered-by">Powered by <strong>JESZ LIMITED</strong></div>
+
+<script>
+
+    function highlightReason(reason) {
+        const ids = ['nologin','norole','inactive','member','permission'];
+
+        ids.forEach(id => {
+            const el = document.getElementById('reason-' + id);
+            if (!el) return;
+
+            if (id === reason) {
+                el.classList.add('active');
+                el.classList.remove('inactive');
+            } else {
+                el.classList.add('inactive');
+                el.classList.remove('active');
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const reason = "<%= reason || 'permission' %>";
+        highlightReason(reason);
+    });
+</script>
+
+</body>
+</html>
