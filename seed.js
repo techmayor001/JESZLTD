@@ -72,6 +72,13 @@ const defaultPermissions = [
 async function initSystem() {
   console.log("🔧 Initializing system...");
 
+  await Promise.all([
+  Role.syncIndexes(),
+  Permission.syncIndexes(),
+  MemberType.syncIndexes(),
+]);
+
+
   /* =========================
      1️⃣ Seed Permissions
   ========================= */
