@@ -7,7 +7,7 @@ const MemberType = require("../models/MemberType");
 const Settings = require("../models/Settings");
 const KiddiesAccount = require("../models/Kiddies/kiddiesAccount");
 const KiddiesTransaction = require("../models/Kiddies/kiddiesTransaction");
-const KiddiesPayment = require("../models/Kiddies/kiddiesPayment");
+const KiddiesPayment = require("../models/Kiddies/KiddiesPayment");
 
 // ─── Auth middleware ───────────────────────────────────────────────────────────
 function requireAuth(req, res, next) {
