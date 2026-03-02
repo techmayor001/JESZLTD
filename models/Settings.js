@@ -3,20 +3,6 @@ const mongoose = require("mongoose");
 const SettingsSchema = new mongoose.Schema(
   {
     // ============================
-    // INTEREST RATE CONFIGURATION
-    // ============================
-    interestRates: {
-      clubMemberRate: {
-        type: Number,
-        default: 5.0,
-      },
-      nonClubMemberRate: {
-        type: Number,
-        default: 10.0,
-      },
-    },
-
-    // ============================
     // MEMBERSHIP REGISTRATION FEES
     // ============================
     registrationFees: {
@@ -76,7 +62,7 @@ const SettingsSchema = new mongoose.Schema(
       autoUpgradeNotificationDays: {
         type: Number,
         default: 60,
-        enum: [30, 60, 90], // match UI options
+        enum: [30, 60, 90],
       },
     },
 
@@ -84,18 +70,56 @@ const SettingsSchema = new mongoose.Schema(
     // OTHER FEES & CHARGES
     // ============================
     otherFees: {
-      forceWithdrawalCharge: {
-        type: Number,
-        default: 2.5, // %
-        min: 0,
-        max: 100,
-      },
-      
       roiOperatingCharge: {
         type: Number,
         default: 10,
         min: 0,
         max: 50,
+      },
+    },
+
+    // ============================
+    // COMPANY BANK ACCOUNT
+    // ============================
+    companyAccount: {
+      bankName: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      accountNumber: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      accountName: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+    },
+
+    // ============================
+    // MAINTENANCE MODE
+    // ============================
+    maintenanceMode: {
+      enabled: {
+        type: Boolean,
+        default: false,
+      },
+      message: {
+        type: String,
+        default: "The system is currently undergoing scheduled maintenance. Please check back shortly.",
+        trim: true,
+      },
+      enabledAt: {
+        type: Date,
+        default: null,
+      },
+      enabledBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null,
       },
     },
   },

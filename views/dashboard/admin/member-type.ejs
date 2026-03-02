@@ -32,7 +32,6 @@
             overflow-x: hidden;
         }
         
-        /* Sidebar Styles */
         .sidebar {
             position: fixed;
             left: 0;
@@ -130,7 +129,6 @@
             flex-shrink: 0;
         }
         
-        /* Top Navbar */
         .top-navbar {
             position: fixed;
             top: 0;
@@ -148,7 +146,6 @@
             border-bottom: 1px solid rgba(30, 58, 138, 0.1);
         }
         
-        /* Main Content */
         .main-content {
             margin-left: var(--sidebar-width);
             margin-top: 70px;
@@ -373,7 +370,6 @@
             transform: translateY(-2px);
         }
         
-        /* Mobile Responsive */
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -509,14 +505,8 @@
         }
         
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .form-label {
@@ -531,40 +521,6 @@
             box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.15);
         }
 
-        .feature-input-group {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-input-group input {
-            flex: 1;
-        }
-
-        #featuresList {
-            margin-top: 0.5rem;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-item span {
-            flex: 1;
-        }
-
-        .feature-item button {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-        }
-
-        /* Settings sections */
         .settings-section {
             background: #f8f9fa;
             padding: 1.25rem;
@@ -595,59 +551,57 @@
             color: #6c757d;
         }
 
-/* ---------- DESKTOP DEFAULTS ---------- */
-#sidebar {
-    transform: translateX(0); /* Always visible on desktop */
-}
+        /* ── Notification Modal ── */
+        #notifModal .modal-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+        #notifModal .modal-header.success-header { background: linear-gradient(135deg, #065f46 0%, #10b981 100%); }
+        #notifModal .modal-header.danger-header  { background: linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%); }
+        #notifModal .modal-header.warning-header { background: linear-gradient(135deg, #78350f 0%, #f59e0b 100%); }
 
-/* Overlay hidden on desktop */
-.sidebar-overlay {
-    display: none;
-}
+        .notif-icon-wrap {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1rem;
+        }
+        .notif-icon-wrap.success { background: rgba(16,185,129,.12); color: #10b981; }
+        .notif-icon-wrap.danger  { background: rgba(239,68,68,.12);  color: #ef4444; }
+        .notif-icon-wrap.warning { background: rgba(245,158,11,.12); color: #f59e0b; }
+        .notif-icon-wrap.info    { background: rgba(6,182,212,.12);  color: #06b6d4; }
 
-/* ---------- MOBILE BEHAVIOR ---------- */
-@media (max-width: 992px) {
+        /* ── Confirm Delete Modal ── */
+        #confirmDeleteModal .modal-header {
+            background: linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%);
+        }
 
-    /* Sidebar hidden by default on mobile */
-    #sidebar {
-        transform: translateX(-100%);
-        position: fixed;
-        z-index: 1040;
-        height: 100vh;
-    }
+        #sidebar { transform: translateX(0); }
+        .sidebar-overlay { display: none; }
 
-    /* Sidebar open state */
-    #sidebar.active {
-        transform: translateX(0);
-    }
-
-    /* Overlay only on mobile */
-    .sidebar-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        background: rgba(0,0,0,0.4);
-        z-index: 1035;
-    }
-
-    .sidebar-overlay.active {
-        display: block;
-    }
-
-    /* Navbar moves to full width on mobile */
-    .top-navbar {
-        left: 0 !important;
-    }
-
-    /* Main content shifts */
-    .main-content {
-        margin-left: 0 !important;
-    }
-}
-
+        @media (max-width: 992px) {
+            #sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 1040;
+                height: 100vh;
+            }
+            #sidebar.active { transform: translateX(0); }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100vh;
+                background: rgba(0,0,0,0.4);
+                z-index: 1035;
+            }
+            .sidebar-overlay.active { display: block; }
+            .top-navbar { left: 0 !important; }
+            .main-content { margin-left: 0 !important; }
+        }
     </style>
 </head>
 <body>
@@ -673,39 +627,34 @@
                 <span>Super Admin</span>
             </div>
         </div>
-        <div class="sidebar-menu">
+      <div class="sidebar-menu">
             <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
+            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
             <a href="/admin/manage/memberType" class="active"><i class="fas fa-id-card"></i> Membership Types</a>
             <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
-                <a href="/admin/transaction-approvals">
-                <i class="fas fa-tasks"></i> Approvals
-                <span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span>
-            </a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
             <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
             <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
             <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
             <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
             <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
             <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
             <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
             <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
-            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles & Permissions</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
             <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
             <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-             <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
-            <a href="/club-de-star-cooperative/dashboard" class="mt-3" style="color: rgba(255,255,255,.6);">
-                <i class="fas fa-sign-in-alt"></i> Back to Dashboard
-            </a>
+            <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
+            <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
         </div>
     </div>
 
     <!-- Top Navbar -->
     <div class="top-navbar">
-       <i class="fas fa-bars d-lg-none me-3"
-   style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-   onclick="toggleSidebar()"></i>
-
-        
+        <i class="fas fa-bars d-lg-none me-3"
+           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
+           onclick="toggleSidebar()"></i>
         <div class="flex-grow-1 d-none d-lg-block">
             <h5 class="mb-0 fw-bold" style="color: var(--primary)">Membership Type Management</h5>
             <small class="text-muted">Create and manage membership tiers and benefits</small>
@@ -713,10 +662,8 @@
     </div>
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
 
-
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Welcome Card -->
         <div class="welcome-card position-relative">
             <div class="row align-items-center position-relative" style="z-index: 1;">
                 <div class="col-md-8">
@@ -772,15 +719,95 @@
         </div>
 
         <!-- Membership Types Grid -->
-        <div class="row g-4" id="membershipGrid">
-            <!-- Dynamic content will be inserted here -->
-        </div>
+        <div class="row g-4" id="membershipGrid"></div>
     </div>
 
     <!-- Powered By Footer -->
     <div class="powered-by">
         Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
     </div>
+
+
+    <!-- ══════════════════════════════════════════════
+         NOTIFICATION MODAL (replaces all alert())
+    ══════════════════════════════════════════════ -->
+    <div class="modal fade" id="notifModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header" id="notifModalHeader">
+                    <h5 class="modal-title text-white" id="notifModalTitle">
+                        <i id="notifModalTitleIcon" class="fas fa-info-circle me-2"></i>
+                        <span id="notifModalTitleText">Notification</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="notif-icon-wrap" id="notifIconWrap">
+                        <i id="notifBodyIcon" class="fas fa-info-circle"></i>
+                    </div>
+                    <p id="notifMessage" class="mb-0 fs-6"></p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button class="btn btn-primary px-4" id="notifOkBtn" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════
+         CONFIRM DELETE MODAL
+    ══════════════════════════════════════════════ -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title text-white">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="notif-icon-wrap danger">
+                        <i class="fas fa-trash-alt"></i>
+                    </div>
+                    <p class="mb-1 fs-6 fw-semibold">Are you sure you want to delete this membership type?</p>
+                    <p class="text-muted small mb-0">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer justify-content-center gap-2">
+                    <button class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-danger px-4" id="confirmDeleteBtn">
+                        <i class="fas fa-trash me-1"></i>Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════
+         UNAUTHORIZED ACCESS MODAL
+    ══════════════════════════════════════════════ -->
+    <div class="modal fade" id="unauthorizedModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-shield-alt me-2"></i>Unauthorized Action
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="fas fa-lock fa-3x text-danger mb-3"></i>
+                    <p id="unauthorizedMessage" class="mb-0">You do not have permission to perform this action.</p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button class="btn btn-danger px-4" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Add/Edit Membership Type Modal -->
     <div class="modal fade" id="membershipModal" tabindex="-1">
@@ -793,7 +820,7 @@
                 <div class="modal-body">
                     <form id="membershipForm">
                         <input type="hidden" id="membershipId">
-                        
+
                         <!-- Basic Information -->
                         <div class="settings-section">
                             <h6><i class="fas fa-info-circle me-2"></i>Basic Information</h6>
@@ -802,12 +829,10 @@
                                     <label for="typeName" class="form-label">Membership Type Name *</label>
                                     <input type="text" class="form-control" id="typeName" required placeholder="e.g., Club Member">
                                 </div>
-
                                 <div class="col-md-3">
                                     <label for="shortName" class="form-label">Short Code *</label>
                                     <input type="text" class="form-control" id="shortName" required placeholder="e.g., CDS">
                                 </div>
-                                
                                 <div class="col-md-3">
                                     <label for="interestRate" class="form-label">Interest Rate (%) *</label>
                                     <div class="input-group">
@@ -815,13 +840,10 @@
                                         <span class="input-group-text">%</span>
                                     </div>
                                 </div>
-
                                 <div class="col-md-12">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="isDefault">
-                                        <label class="form-check-label" for="isDefault">
-                                            Set as default membership type
-                                        </label>
+                                        <label class="form-check-label" for="isDefault">Set as default membership type</label>
                                     </div>
                                 </div>
                             </div>
@@ -839,7 +861,6 @@
                                     </div>
                                     <small class="form-text">Penalty charged when member makes forced withdrawal</small>
                                 </div>
-
                                 <div class="col-md-6">
                                     <label for="earlyWithdrawalPeriodMonths" class="form-label">Early Withdrawal Period (Months)</label>
                                     <div class="input-group">
@@ -848,13 +869,10 @@
                                     </div>
                                     <small class="form-text">Period before withdrawal is considered early</small>
                                 </div>
-
                                 <div class="col-md-12">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="allowForcedWithdrawal" checked>
-                                        <label class="form-check-label" for="allowForcedWithdrawal">
-                                            Allow forced withdrawals for this membership type
-                                        </label>
+                                        <label class="form-check-label" for="allowForcedWithdrawal">Allow forced withdrawals for this membership type</label>
                                     </div>
                                 </div>
                             </div>
@@ -872,7 +890,6 @@
                                     </div>
                                     <small class="form-text">Interest charged when rolling over a loan</small>
                                 </div>
-
                                 <div class="col-md-4">
                                     <label for="loanPenaltyRate" class="form-label">Loan Penalty Rate</label>
                                     <div class="input-group">
@@ -884,7 +901,6 @@
                                     </div>
                                     <small class="form-text">Penalty for late loan payments</small>
                                 </div>
-
                                 <div class="col-md-4">
                                     <label for="gracePeriodDays" class="form-label">Grace Period (Days)</label>
                                     <div class="input-group">
@@ -893,19 +909,16 @@
                                     </div>
                                     <small class="form-text">Days before penalties apply</small>
                                 </div>
-
                                 <div class="col-md-4">
                                     <label for="maxLoanAmount" class="form-label">Max Loan Amount (₦)</label>
                                     <input type="number" class="form-control" id="maxLoanAmount" placeholder="0" min="0" step="1000" value="0">
                                     <small class="form-text">0 = unlimited</small>
                                 </div>
-
                                 <div class="col-md-4">
                                     <label for="minDepositBeforeLoan" class="form-label">Min Deposit Before Loan (₦)</label>
                                     <input type="number" class="form-control" id="minDepositBeforeLoan" placeholder="0" min="0" step="1000" value="0">
                                     <small class="form-text">Minimum deposit required for loan eligibility</small>
                                 </div>
-
                                 <div class="col-md-4">
                                     <label for="loanToDepositRatio" class="form-label">Loan to Deposit Ratio (%)</label>
                                     <div class="input-group">
@@ -931,7 +944,6 @@
                                     </select>
                                     <small class="form-text">How often ROI is distributed</small>
                                 </div>
-
                                 <div class="col-md-6">
                                     <label for="minimumBalanceForROI" class="form-label">Min Balance for ROI (₦)</label>
                                     <input type="number" class="form-control" id="minimumBalanceForROI" placeholder="0" min="0" step="1000" value="0">
@@ -939,7 +951,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -952,305 +963,379 @@
         </div>
     </div>
 
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-   <script>
-    // MemberTypes will come from backend EJS
-    let membershipTypes = <%- JSON.stringify(memberTypes) %>;
-    let editingId = null;
-    let modal;
+    <script>
+        // MemberTypes will come from backend EJS
+        let membershipTypes = <%- JSON.stringify(memberTypes) %>;
+        let editingId = null;
+        let membershipModal;
+        let notifModal;
+        let confirmDeleteModal;
+        let unauthorizedModal;
+        let pendingDeleteId = null;   // stores ID awaiting confirmation
 
-    document.addEventListener('DOMContentLoaded', function() {
-        modal = new bootstrap.Modal(document.getElementById('membershipModal'));
-        loadMembershipTypes();
-        updateStats();
-    });
+        document.addEventListener('DOMContentLoaded', function () {
+            membershipModal   = new bootstrap.Modal(document.getElementById('membershipModal'));
+            notifModal        = new bootstrap.Modal(document.getElementById('notifModal'));
+            confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            unauthorizedModal = new bootstrap.Modal(document.getElementById('unauthorizedModal'));
 
-    // Load membership types dynamically
-    function loadMembershipTypes() {
-        const grid = document.getElementById('membershipGrid');
-        grid.innerHTML = '';
+            // Wire up the confirm-delete button
+            document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+                confirmDeleteModal.hide();
+                if (pendingDeleteId) {
+                    executeDelete(pendingDeleteId);
+                    pendingDeleteId = null;
+                }
+            });
 
-        membershipTypes.forEach(type => {
-            const defaultBadge = type.isDefault
-                ? `<span class="badge bg-warning text-dark ms-2">Default</span>`
-                : '';
+            loadMembershipTypes();
+            updateStats();
+        });
 
-            const card = `
-                <div class="col-lg-4 col-md-6">
-                    <div class="membership-card">
-                        <div class="membership-header">
-                            <div>
-                                <div class="membership-title">${type.name}${defaultBadge}</div>
-                                <small class="text-muted">${type.shortCode}</small>
+
+        /* ═══════════════════════════════════════════════
+           NOTIFICATION HELPER  –  replaces all alert()
+           type: 'success' | 'danger' | 'warning' | 'info'
+           onClose (optional): callback after OK
+        ═══════════════════════════════════════════════ */
+        function showNotif(message, type = 'info', onClose = null) {
+            const config = {
+                success: { headerClass: 'success-header', iconClass: 'success', icon: 'fa-check-circle',  titleIcon: 'fa-check-circle',  title: 'Success'  },
+                danger:  { headerClass: 'danger-header',  iconClass: 'danger',  icon: 'fa-times-circle',  titleIcon: 'fa-times-circle',  title: 'Error'    },
+                warning: { headerClass: 'warning-header', iconClass: 'warning', icon: 'fa-exclamation-triangle', titleIcon: 'fa-exclamation-triangle', title: 'Warning' },
+                info:    { headerClass: '',               iconClass: 'info',    icon: 'fa-info-circle',   titleIcon: 'fa-info-circle',   title: 'Info'     },
+            };
+
+            const c = config[type] || config.info;
+            const header    = document.getElementById('notifModalHeader');
+            const titleIcon = document.getElementById('notifModalTitleIcon');
+            const titleText = document.getElementById('notifModalTitleText');
+            const iconWrap  = document.getElementById('notifIconWrap');
+            const bodyIcon  = document.getElementById('notifBodyIcon');
+            const msgEl     = document.getElementById('notifMessage');
+            const okBtn     = document.getElementById('notifOkBtn');
+
+            // Reset header classes
+            header.className = 'modal-header';
+            if (c.headerClass) header.classList.add(c.headerClass);
+
+            titleIcon.className = `fas ${c.titleIcon} me-2`;
+            titleText.textContent = c.title;
+
+            iconWrap.className = `notif-icon-wrap ${c.iconClass}`;
+            bodyIcon.className = `fas ${c.icon}`;
+
+            msgEl.textContent = message;
+
+            // Remove old listener, add new one
+            const newBtn = okBtn.cloneNode(true);
+            okBtn.parentNode.replaceChild(newBtn, okBtn);
+            if (onClose) {
+                newBtn.addEventListener('click', onClose, { once: true });
+            }
+
+            notifModal.show();
+        }
+
+
+        /* ═══════════════════════════════════════════
+           UNAUTHORIZED HELPER
+        ═══════════════════════════════════════════ */
+        function showUnauthorized(reason = 'permission') {
+            const messageMap = {
+                auth:       'Your session has expired. Please login again.',
+                permission: "You don't have permission to perform this action.",
+                inactive:   'Your admin role is currently inactive.',
+                norole:     'No role is assigned to your account.',
+                member:     'Members are not allowed to access admin actions.',
+            };
+            document.getElementById('unauthorizedMessage').innerText =
+                messageMap[reason] || 'Unauthorized action.';
+            unauthorizedModal.show();
+        }
+
+
+        /* ═══════════════════════════════════════════
+           CARD RENDERING
+        ═══════════════════════════════════════════ */
+        function loadMembershipTypes() {
+            const grid = document.getElementById('membershipGrid');
+            grid.innerHTML = '';
+
+            membershipTypes.forEach(type => {
+                const defaultBadge = type.isDefault
+                    ? `<span class="badge bg-warning text-dark ms-2">Default</span>`
+                    : '';
+
+                const card = `
+                    <div class="col-lg-4 col-md-6">
+                        <div class="membership-card">
+                            <div class="membership-header">
+                                <div>
+                                    <div class="membership-title">${type.name}${defaultBadge}</div>
+                                    <small class="text-muted">${type.shortCode}</small>
+                                </div>
+                                <span class="badge bg-success">${type.interestRate}%</span>
                             </div>
-                            <span class="badge bg-success">${type.interestRate}%</span>
-                        </div>
-
-                        <ul class="membership-features">
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Withdrawal Penalty: <strong>${type.forceWithdrawalPenalty || 0}%</strong></span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Loan Rollover: <strong>${type.loanRolloverRate || 0}%</strong></span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Loan Penalty: <strong>${type.loanPenaltyRate || 0}${type.loanPenaltyType === 'fixed' ? '₦' : '%'}</strong></span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Grace Period: <strong>${type.gracePeriodDays || 0} days</strong></span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Max Loan: <strong>${type.maxLoanAmount ? '₦' + type.maxLoanAmount.toLocaleString() : 'Unlimited'}</strong></span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>ROI Distribution: <strong>${formatFrequency(type.roiDistributionFrequency)}</strong></span>
-                            </li>
-                        </ul>
-
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <small class="text-muted">
-                                <i class="fas fa-users me-1"></i> ${type.members || 0} members
-                            </small>
-                        </div>
-
-                        <div class="membership-actions">
-                            <button class="btn btn-sm btn-outline-primary flex-fill" onclick="editMembershipType('${type._id}')">
-                                <i class="fas fa-edit me-1"></i> Edit
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteMembershipType('${type._id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <ul class="membership-features">
+                                <li><i class="fas fa-check-circle"></i><span>Withdrawal Penalty: <strong>${type.forceWithdrawalPenalty || 0}%</strong></span></li>
+                                <li><i class="fas fa-check-circle"></i><span>Loan Rollover: <strong>${type.loanRolloverRate || 0}%</strong></span></li>
+                                <li><i class="fas fa-check-circle"></i><span>Loan Penalty: <strong>${type.loanPenaltyRate || 0}${type.loanPenaltyType === 'fixed' ? '₦' : '%'}</strong></span></li>
+                                <li><i class="fas fa-check-circle"></i><span>Grace Period: <strong>${type.gracePeriodDays || 0} days</strong></span></li>
+                                <li><i class="fas fa-check-circle"></i><span>Max Loan: <strong>${type.maxLoanAmount ? '₦' + type.maxLoanAmount.toLocaleString() : 'Unlimited'}</strong></span></li>
+                                <li><i class="fas fa-check-circle"></i><span>ROI Distribution: <strong>${formatFrequency(type.roiDistributionFrequency)}</strong></span></li>
+                            </ul>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <small class="text-muted"><i class="fas fa-users me-1"></i> ${type.members || 0} members</small>
+                            </div>
+                            <div class="membership-actions">
+                                <button class="btn btn-sm btn-outline-primary flex-fill" onclick="editMembershipType('${type._id}')">
+                                    <i class="fas fa-edit me-1"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteMembershipType('${type._id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-            grid.innerHTML += card;
-        });
-    }
-
-    function formatFrequency(freq) {
-        const map = {
-            'monthly': 'Monthly',
-            'quarterly': 'Quarterly',
-            'biannually': 'Bi-annually',
-            'annually': 'Annually'
-        };
-        return map[freq] || 'Monthly';
-    }
-
-    // Update statistics
-    function updateStats() {
-        document.getElementById("totalTypes").innerText = membershipTypes.length;
-        document.getElementById("activeTypes").innerText = membershipTypes.filter(t => t.active !== false).length;
-        document.getElementById("totalMembers").innerText = membershipTypes.reduce((sum, t) => sum + (t.members || 0), 0);
-        
-        const avgInterest = membershipTypes.reduce((sum, t) => sum + (t.interestRate || 0), 0) / (membershipTypes.length || 1);
-        document.getElementById("avgInterest").innerText = avgInterest.toFixed(1) + "%";
-    }
-
-    // Open modal to add
-    function openAddModal() {
-        editingId = null;
-        document.getElementById('membershipForm').reset();
-        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle me-2"></i>Add Membership Type';
-        
-        // Set default values
-        document.getElementById('forceWithdrawalPenalty').value = 2;
-        document.getElementById('loanRolloverRate').value = 0;
-        document.getElementById('loanPenaltyRate').value = 0;
-        document.getElementById('gracePeriodDays').value = 0;
-        document.getElementById('maxLoanAmount').value = 0;
-        document.getElementById('minDepositBeforeLoan').value = 0;
-        document.getElementById('loanToDepositRatio').value = 80;
-        document.getElementById('earlyWithdrawalPeriodMonths').value = 6;
-        document.getElementById('minimumBalanceForROI').value = 0;
-        document.getElementById('allowForcedWithdrawal').checked = true;
-        
-        modal.show();
-    }
-
-    // Edit membership type
-    function editMembershipType(id) {
-        const type = membershipTypes.find(t => t._id === id);
-        if (!type) return;
-
-        editingId = id;
-
-        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Membership Type';
-        document.getElementById('membershipId').value = type._id;
-        document.getElementById('typeName').value = type.name;
-        document.getElementById('shortName').value = type.shortCode;
-        document.getElementById('interestRate').value = type.interestRate;
-        document.getElementById('isDefault').checked = type.isDefault || false;
-        
-        // Withdrawal settings
-        document.getElementById('forceWithdrawalPenalty').value = type.forceWithdrawalPenalty || 2;
-        document.getElementById('earlyWithdrawalPeriodMonths').value = type.earlyWithdrawalPeriodMonths || 6;
-        document.getElementById('allowForcedWithdrawal').checked = type.allowForcedWithdrawal !== false;
-        
-        // Loan settings
-        document.getElementById('loanRolloverRate').value = type.loanRolloverRate || 0;
-        document.getElementById('loanPenaltyRate').value = type.loanPenaltyRate || 0;
-        document.getElementById('loanPenaltyType').value = type.loanPenaltyType || 'percentage';
-        document.getElementById('gracePeriodDays').value = type.gracePeriodDays || 0;
-        document.getElementById('maxLoanAmount').value = type.maxLoanAmount || 0;
-        document.getElementById('minDepositBeforeLoan').value = type.minDepositBeforeLoan || 0;
-        document.getElementById('loanToDepositRatio').value = type.loanToDepositRatio || 80;
-        
-        // ROI settings
-        document.getElementById('roiDistributionFrequency').value = type.roiDistributionFrequency || 'monthly';
-        document.getElementById('minimumBalanceForROI').value = type.minimumBalanceForROI || 0;
-
-        modal.show();
-    }
-
-    async function saveMembershipType() {
-        const id = document.getElementById('membershipId').value;
-        const name = document.getElementById('typeName').value.trim();
-        const shortCode = document.getElementById('shortName').value.trim();
-        const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
-        const isDefault = document.getElementById('isDefault').checked;
-
-        // Withdrawal settings
-        const forceWithdrawalPenalty = parseFloat(document.getElementById('forceWithdrawalPenalty').value) || 0;
-        const earlyWithdrawalPeriodMonths = parseInt(document.getElementById('earlyWithdrawalPeriodMonths').value) || 0;
-        const allowForcedWithdrawal = document.getElementById('allowForcedWithdrawal').checked;
-
-        // Loan settings
-        const loanRolloverRate = parseFloat(document.getElementById('loanRolloverRate').value) || 0;
-        const loanPenaltyRate = parseFloat(document.getElementById('loanPenaltyRate').value) || 0;
-        const loanPenaltyType = document.getElementById('loanPenaltyType').value;
-        const gracePeriodDays = parseInt(document.getElementById('gracePeriodDays').value) || 0;
-        const maxLoanAmount = parseFloat(document.getElementById('maxLoanAmount').value) || 0;
-        const minDepositBeforeLoan = parseFloat(document.getElementById('minDepositBeforeLoan').value) || 0;
-        const loanToDepositRatio = parseFloat(document.getElementById('loanToDepositRatio').value) || 80;
-
-        // ROI settings
-        const roiDistributionFrequency = document.getElementById('roiDistributionFrequency').value;
-        const minimumBalanceForROI = parseFloat(document.getElementById('minimumBalanceForROI').value) || 0;
-
-        if (!name || !shortCode) {
-            alert("Please fill in all required fields");
-            return;
+                `;
+                grid.innerHTML += card;
+            });
         }
 
-        try {
-            const response = await fetch("/admin/manage/memberType", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id,
-                    name,
-                    shortCode,
-                    interestRate,
-                    isDefault,
-                    forceWithdrawalPenalty,
-                    earlyWithdrawalPeriodMonths,
-                    allowForcedWithdrawal,
-                    loanRolloverRate,
-                    loanPenaltyRate,
-                    loanPenaltyType,
-                    gracePeriodDays,
-                    maxLoanAmount,
-                    minDepositBeforeLoan,
-                    loanToDepositRatio,
-                    roiDistributionFrequency,
-                    minimumBalanceForROI
-                })
-            });
+        function formatFrequency(freq) {
+            const map = { monthly: 'Monthly', quarterly: 'Quarterly', biannually: 'Bi-annually', annually: 'Annually' };
+            return map[freq] || 'Monthly';
+        }
 
-            const data = await response.json();
+        function updateStats() {
+            document.getElementById('totalTypes').innerText  = membershipTypes.length;
+            document.getElementById('activeTypes').innerText = membershipTypes.filter(t => t.active !== false).length;
+            document.getElementById('totalMembers').innerText = membershipTypes.reduce((s, t) => s + (t.members || 0), 0);
+            const avg = membershipTypes.reduce((s, t) => s + (t.interestRate || 0), 0) / (membershipTypes.length || 1);
+            document.getElementById('avgInterest').innerText = avg.toFixed(1) + '%';
+        }
 
-            if (data.success) {
-                alert(id ? "Membership type updated!" : "Membership type added!");
-                location.reload();
-            } else {
-                alert(data.message || "Failed to save membership type");
+
+        /* ═══════════════════════════════════════════
+           ADD MODAL
+        ═══════════════════════════════════════════ */
+        function openAddModal() {
+            editingId = null;
+            document.getElementById('membershipForm').reset();
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle me-2"></i>Add Membership Type';
+            document.getElementById('forceWithdrawalPenalty').value  = 2;
+            document.getElementById('loanRolloverRate').value        = 0;
+            document.getElementById('loanPenaltyRate').value         = 0;
+            document.getElementById('gracePeriodDays').value         = 0;
+            document.getElementById('maxLoanAmount').value           = 0;
+            document.getElementById('minDepositBeforeLoan').value    = 0;
+            document.getElementById('loanToDepositRatio').value      = 80;
+            document.getElementById('earlyWithdrawalPeriodMonths').value = 6;
+            document.getElementById('minimumBalanceForROI').value    = 0;
+            document.getElementById('allowForcedWithdrawal').checked = true;
+            membershipModal.show();
+        }
+
+
+        /* ═══════════════════════════════════════════
+           EDIT MODAL
+        ═══════════════════════════════════════════ */
+        function editMembershipType(id) {
+            const type = membershipTypes.find(t => t._id === id);
+            if (!type) return;
+            editingId = id;
+
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Membership Type';
+            document.getElementById('membershipId').value            = type._id;
+            document.getElementById('typeName').value                = type.name;
+            document.getElementById('shortName').value               = type.shortCode;
+            document.getElementById('interestRate').value            = type.interestRate;
+            document.getElementById('isDefault').checked             = type.isDefault || false;
+            document.getElementById('forceWithdrawalPenalty').value  = type.forceWithdrawalPenalty || 2;
+            document.getElementById('earlyWithdrawalPeriodMonths').value = type.earlyWithdrawalPeriodMonths || 6;
+            document.getElementById('allowForcedWithdrawal').checked = type.allowForcedWithdrawal !== false;
+            document.getElementById('loanRolloverRate').value        = type.loanRolloverRate || 0;
+            document.getElementById('loanPenaltyRate').value         = type.loanPenaltyRate || 0;
+            document.getElementById('loanPenaltyType').value         = type.loanPenaltyType || 'percentage';
+            document.getElementById('gracePeriodDays').value         = type.gracePeriodDays || 0;
+            document.getElementById('maxLoanAmount').value           = type.maxLoanAmount || 0;
+            document.getElementById('minDepositBeforeLoan').value    = type.minDepositBeforeLoan || 0;
+            document.getElementById('loanToDepositRatio').value      = type.loanToDepositRatio || 80;
+            document.getElementById('roiDistributionFrequency').value = type.roiDistributionFrequency || 'monthly';
+            document.getElementById('minimumBalanceForROI').value    = type.minimumBalanceForROI || 0;
+
+            membershipModal.show();
+        }
+
+
+        /* ═══════════════════════════════════════════
+           SAVE (CREATE / UPDATE)
+        ═══════════════════════════════════════════ */
+        async function saveMembershipType() {
+            const id        = document.getElementById('membershipId').value;
+            const name      = document.getElementById('typeName').value.trim();
+            const shortCode = document.getElementById('shortName').value.trim();
+
+            if (!name || !shortCode) {
+                showNotif('Please fill in all required fields.', 'warning');
+                return;
             }
 
-        } catch (err) {
-            console.error(err);
-            alert("Error saving membership type");
-        }
-    }
+            const payload = {
+                id,
+                name,
+                shortCode,
+                interestRate:               parseFloat(document.getElementById('interestRate').value) || 0,
+                isDefault:                  document.getElementById('isDefault').checked,
+                forceWithdrawalPenalty:     parseFloat(document.getElementById('forceWithdrawalPenalty').value) || 0,
+                earlyWithdrawalPeriodMonths:parseInt(document.getElementById('earlyWithdrawalPeriodMonths').value) || 0,
+                allowForcedWithdrawal:      document.getElementById('allowForcedWithdrawal').checked,
+                loanRolloverRate:           parseFloat(document.getElementById('loanRolloverRate').value) || 0,
+                loanPenaltyRate:            parseFloat(document.getElementById('loanPenaltyRate').value) || 0,
+                loanPenaltyType:            document.getElementById('loanPenaltyType').value,
+                gracePeriodDays:            parseInt(document.getElementById('gracePeriodDays').value) || 0,
+                maxLoanAmount:              parseFloat(document.getElementById('maxLoanAmount').value) || 0,
+                minDepositBeforeLoan:       parseFloat(document.getElementById('minDepositBeforeLoan').value) || 0,
+                loanToDepositRatio:         parseFloat(document.getElementById('loanToDepositRatio').value) || 80,
+                roiDistributionFrequency:   document.getElementById('roiDistributionFrequency').value,
+                minimumBalanceForROI:       parseFloat(document.getElementById('minimumBalanceForROI').value) || 0,
+            };
 
-    // Delete membership type
-    async function deleteMembershipType(id) {
-        if (!confirm("Are you sure you want to delete this membership type? This action cannot be undone.")) {
-            return;
-        }
+            try {
+                const response = await fetch('/admin/manage/memberType', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify(payload),
+                });
 
-        try {
-            const response = await fetch(`/admin/manage/memberType/${id}`, {
-                method: "DELETE"
-            });
+                if (response.status === 401) {
+                    membershipModal.hide();
+                    // Wait for modal to fully close before showing next
+                    document.getElementById('membershipModal').addEventListener('hidden.bs.modal', function onHidden() {
+                        this.removeEventListener('hidden.bs.modal', onHidden);
+                        showUnauthorized('auth');
+                        setTimeout(() => { window.location.href = '/login'; }, 1500);
+                    });
+                    return;
+                }
 
-            const data = await response.json();
-            if (data.success) {
-                alert("Membership type deleted!");
-                location.reload();
-            } else {
-                alert(data.message);
+                if (response.status === 403) {
+                    let errorData = {};
+                    try { errorData = await response.json(); } catch (_) {}
+                    membershipModal.hide();
+                    // Wait for modal to fully close before showing next
+                    document.getElementById('membershipModal').addEventListener('hidden.bs.modal', function onHidden() {
+                        this.removeEventListener('hidden.bs.modal', onHidden);
+                        showUnauthorized(errorData.reason || 'permission');
+                    });
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    membershipModal.hide();
+                    showNotif(
+                        id ? 'Membership type updated successfully!' : 'Membership type added successfully!',
+                        'success',
+                        () => location.reload()
+                    );
+                } else {
+                    showNotif(data.message || 'Failed to save membership type.', 'danger');
+                }
+
+            } catch (err) {
+                console.error(err);
+                showNotif('An unexpected error occurred while saving. Please try again.', 'danger');
             }
-        } catch (err) {
-            console.error(err);
-            alert("Error deleting membership type");
         }
-    }
-</script>
-
-<script>
-function toggleSidebar() {
-    if (window.innerWidth <= 992) {
-        document.getElementById("sidebar").classList.toggle("active");
-        document.getElementById("sidebarOverlay").classList.toggle("active");
-    }
-}
-
-function closeSidebar() {
-    document.getElementById("sidebar").classList.remove("active");
-    document.getElementById("sidebarOverlay").classList.remove("active");
-}
-</script>
-
-<script>
-async function loadSidebarPendingCount() {
-  try {
-    console.log("Loading sidebar approval count...");
-
-    const res = await fetch('/admin/pending-approvals-count');
-    const data = await res.json();
-
-    console.log("Pending approvals count:", data);
-
-    const badge = document.getElementById('sidebarPendingBadge');
-
-    if (!badge) {
-      console.log("Sidebar badge not found on page");
-      return;
-    }
-
-    if (data.count > 0) {
-      badge.style.display = 'inline-block';
-      badge.textContent = data.count;
-    } else {
-      badge.style.display = 'none';
-    }
-
-  } catch (err) {
-    console.error("Sidebar count error:", err);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", loadSidebarPendingCount);
-</script>
 
 
+        /* ═══════════════════════════════════════════
+           DELETE  –  Step 1: show confirm dialog
+        ═══════════════════════════════════════════ */
+        function deleteMembershipType(id) {
+            pendingDeleteId = id;
+            confirmDeleteModal.show();
+        }
+
+        /* ═══════════════════════════════════════════
+           DELETE  –  Step 2: execute after confirmation
+        ═══════════════════════════════════════════ */
+        async function executeDelete(id) {
+            try {
+                const response = await fetch(`/admin/manage/memberType/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                if (response.status === 401) {
+                    showUnauthorized('auth');
+                    setTimeout(() => { window.location.href = '/login'; }, 1500);
+                    return;
+                }
+
+                if (response.status === 403) {
+                    let errorData = {};
+                    try { errorData = await response.json(); } catch (_) {}
+                    showUnauthorized(errorData.reason || 'permission');
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    showNotif('Membership type deleted successfully.', 'success', () => location.reload());
+                } else {
+                    showNotif(data.message || 'Failed to delete membership type.', 'danger');
+                }
+
+            } catch (err) {
+                console.error(err);
+                showNotif('An unexpected error occurred while deleting. Please try again.', 'danger');
+            }
+        }
+    </script>
+
+    <script>
+        function toggleSidebar() {
+            if (window.innerWidth <= 992) {
+                document.getElementById('sidebar').classList.toggle('active');
+                document.getElementById('sidebarOverlay').classList.toggle('active');
+            }
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+    </script>
+
+    <script>
+        async function loadSidebarPendingCount() {
+            try {
+                const res  = await fetch('/admin/pending-approvals-count');
+                const data = await res.json();
+                const badge = document.getElementById('sidebarPendingBadge');
+                if (!badge) return;
+                if (data.count > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = data.count;
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Sidebar count error:', err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
+    </script>
 </body>
 </html>

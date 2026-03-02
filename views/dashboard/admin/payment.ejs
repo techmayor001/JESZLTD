@@ -8,14 +8,14 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #1e3a8a;
-            --primary-dark: #1e40af;
+            --primary:       #1e3a8a;
+            --primary-dark:  #1e40af;
             --primary-light: #3b82f6;
-            --secondary: #64748b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #06b6d4;
+            --secondary:     #64748b;
+            --success:       #10b981;
+            --danger:        #ef4444;
+            --warning:       #f59e0b;
+            --info:          #06b6d4;
             --sidebar-width: 280px;
         }
 
@@ -28,17 +28,22 @@
             overflow-x: hidden;
         }
 
-        /* ── Sidebar ── */
+        /* ══════════════════════════════════════════
+           SIDEBAR
+        ══════════════════════════════════════════ */
         .sidebar {
             position: fixed; left: 0; top: 0; bottom: 0;
             width: var(--sidebar-width);
             background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white; z-index: 1040; transition: all 0.3s;
+            color: white; z-index: 1040; transition: transform 0.3s;
             overflow-y: auto;
             box-shadow: 4px 0 20px rgba(30,58,138,0.15);
-            transform: translateX(0);
         }
-        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.1); }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.1);
+        }
         .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
         .logo-box {
             width: 45px; height: 45px; background: white; border-radius: 10px;
@@ -51,7 +56,8 @@
             display: inline-flex; align-items: center; gap: 8px;
             padding: 6px 12px; background: rgba(239,68,68,0.2);
             backdrop-filter: blur(10px); border-radius: 20px;
-            border: 1px solid rgba(239,68,68,0.3); font-weight: 600; font-size: 0.8rem; margin-top: 8px;
+            border: 1px solid rgba(239,68,68,0.3);
+            font-weight: 600; font-size: 0.8rem; margin-top: 8px;
         }
         .sidebar-menu { padding: 1rem 0; }
         .sidebar-menu a {
@@ -60,26 +66,32 @@
             transition: all 0.3s; border-left: 3px solid transparent;
             font-weight: 500; font-size: 0.95rem;
         }
-        .sidebar-menu a:hover { background: rgba(255,255,255,0.1); color: white; border-left-color: white; }
+        .sidebar-menu a:hover  { background: rgba(255,255,255,0.1); color: white; border-left-color: white; }
         .sidebar-menu a.active { background: rgba(255,255,255,0.15); color: white; border-left-color: white; }
         .sidebar-menu a i { width: 24px; margin-right: 12px; font-size: 1.1rem; flex-shrink: 0; }
 
-        /* ── Top Navbar ── */
+        /* ══════════════════════════════════════════
+           TOP NAVBAR
+        ══════════════════════════════════════════ */
         .top-navbar {
             position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 70px;
             background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
             box-shadow: 0 4px 15px rgba(30,58,138,0.08); z-index: 1030;
             display: flex; align-items: center; padding: 0 1.5rem;
-            transition: all 0.3s; border-bottom: 1px solid rgba(30,58,138,0.1);
+            transition: left 0.3s; border-bottom: 1px solid rgba(30,58,138,0.1);
         }
 
-        /* ── Main Content ── */
+        /* ══════════════════════════════════════════
+           MAIN CONTENT
+        ══════════════════════════════════════════ */
         .main-content {
             margin-left: var(--sidebar-width); margin-top: 70px;
-            padding: 1.5rem; min-height: calc(100vh - 70px); transition: all 0.3s;
+            padding: 1.5rem; min-height: calc(100vh - 70px); transition: margin 0.3s;
         }
 
-        /* ── Page Header ── */
+        /* ══════════════════════════════════════════
+           PAGE HEADER
+        ══════════════════════════════════════════ */
         .page-header {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
             color: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem;
@@ -90,11 +102,12 @@
             width: 400px; height: 400px; background: rgba(255,255,255,0.05); border-radius: 50%;
         }
 
-        /* ── Cards ── */
+        /* ══════════════════════════════════════════
+           CARDS
+        ══════════════════════════════════════════ */
         .card {
-            border: none; border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(30,58,138,0.08);
-            background: white; border: 1px solid rgba(30,58,138,0.05);
+            border: 1px solid rgba(30,58,138,0.05); border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(30,58,138,0.08); background: white;
         }
         .card-header {
             background: linear-gradient(135deg, rgba(30,58,138,0.03) 0%, rgba(59,130,246,0.03) 100%);
@@ -102,86 +115,155 @@
             padding: 1.25rem; border-radius: 16px 16px 0 0 !important;
         }
 
-        /* ── Payment Type Cards ── */
+        /* ══════════════════════════════════════════
+           PAYMENT TYPE CARDS
+        ══════════════════════════════════════════ */
         .payment-type-card {
             background: white; border-radius: 16px; padding: 1.5rem;
             box-shadow: 0 8px 20px rgba(30,58,138,0.08); transition: all 0.3s;
             cursor: pointer; border: 2px solid transparent; height: 100%;
+            position: relative;
         }
-        .payment-type-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(30,58,138,0.15); border-color: var(--primary); }
-        .payment-type-card.active { border-color: var(--primary); background: linear-gradient(135deg, rgba(30,58,138,0.03) 0%, rgba(59,130,246,0.03) 100%); }
-        .payment-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1rem; }
+        .payment-type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30,58,138,0.15);
+            border-color: var(--primary);
+        }
+        .payment-type-card.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(30,58,138,0.03) 0%, rgba(59,130,246,0.03) 100%);
+        }
+        /* Locked state */
+        .payment-type-card.locked {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .payment-type-card.locked:hover {
+            transform: none;
+            box-shadow: 0 8px 20px rgba(30,58,138,0.08);
+            border-color: transparent;
+        }
+        .lock-overlay {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 6px; border-radius: 14px;
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(2px);
+        }
+        .lock-overlay i   { font-size: 1.8rem; color: var(--danger); }
+        .lock-overlay span { font-size: 0.7rem; font-weight: 700; color: var(--danger); letter-spacing: 0.03em; }
 
-        /* ── Form Controls ── */
+        .payment-icon {
+            width: 60px; height: 60px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; margin-bottom: 1rem;
+        }
+
+        /* ══════════════════════════════════════════
+           FORM CONTROLS
+        ══════════════════════════════════════════ */
         .form-label { font-weight: 600; color: var(--primary); margin-bottom: 0.5rem; }
         .form-control, .form-select {
             border: 2px solid rgba(30,58,138,0.1); border-radius: 10px;
             padding: 0.75rem; transition: all 0.3s;
         }
-        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(30,58,138,0.1); }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(30,58,138,0.1);
+        }
 
-        /* ── Buttons ── */
+        /* ══════════════════════════════════════════
+           BUTTONS
+        ══════════════════════════════════════════ */
         .btn-primary {
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none; padding: 0.75rem 1.5rem; border-radius: 10px; font-weight: 600; transition: all 0.3s;
+            border: none; padding: 0.75rem 1.5rem; border-radius: 10px;
+            font-weight: 600; transition: all 0.3s;
         }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(30,58,138,0.3); }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30,58,138,0.3);
+        }
 
-        /* ── Autocomplete ── */
+        /* ══════════════════════════════════════════
+           AUTOCOMPLETE
+        ══════════════════════════════════════════ */
         .autocomplete-wrapper { position: relative; }
         .autocomplete-dropdown {
-            position: absolute; top: 100%; left: 0; right: 0; background: white;
-            border: 2px solid var(--primary); border-top: none;
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: white; border: 2px solid var(--primary); border-top: none;
             border-radius: 0 0 10px 10px; max-height: 300px; overflow-y: auto;
-            z-index: 1000; box-shadow: 0 8px 20px rgba(30,58,138,0.15); display: none;
+            z-index: 1050; box-shadow: 0 8px 20px rgba(30,58,138,0.15); display: none;
         }
         .autocomplete-dropdown.show { display: block; }
-        .autocomplete-item { padding: 1rem; cursor: pointer; border-bottom: 1px solid rgba(30,58,138,0.1); transition: all 0.2s; }
+        .autocomplete-item {
+            padding: 1rem; cursor: pointer;
+            border-bottom: 1px solid rgba(30,58,138,0.1); transition: all 0.2s;
+        }
         .autocomplete-item:last-child { border-bottom: none; }
-        .autocomplete-item:hover { background: linear-gradient(135deg, rgba(30,58,138,0.05) 0%, rgba(59,130,246,0.05) 100%); }
-        .autocomplete-item-name { font-weight: 600; color: var(--primary); margin-bottom: 0.25rem; }
+        .autocomplete-item:hover {
+            background: linear-gradient(135deg, rgba(30,58,138,0.05) 0%, rgba(59,130,246,0.05) 100%);
+        }
+        .autocomplete-item-name    { font-weight: 600; color: var(--primary); margin-bottom: 0.25rem; }
         .autocomplete-item-details { font-size: 0.85rem; color: var(--secondary); }
         .autocomplete-item-balance {
-            display: inline-block; margin-top: 0.25rem; padding: 0.25rem 0.5rem;
+            display: inline-block; margin-top: 0.25rem; padding: 0.2rem 0.5rem;
             background: rgba(16,185,129,0.1); color: var(--success);
             border-radius: 6px; font-size: 0.8rem; font-weight: 600;
         }
 
-        /* ── Member Result ── */
+        /* ══════════════════════════════════════════
+           MEMBER SEARCH RESULT
+        ══════════════════════════════════════════ */
         .member-search-result {
             padding: 1rem; border: 2px solid rgba(30,58,138,0.1);
             border-radius: 10px; margin-bottom: 1rem; background: rgba(30,58,138,0.02);
         }
 
-        /* ── Table ── */
+        /* ══════════════════════════════════════════
+           TABLE
+        ══════════════════════════════════════════ */
         .table-responsive { border-radius: 0 0 16px 16px; overflow: hidden; }
         .table { margin: 0; }
-        .table thead { background: linear-gradient(135deg, rgba(30,58,138,0.05) 0%, rgba(59,130,246,0.05) 100%); }
-        .table thead th { border: none; padding: 1rem; font-weight: 600; color: var(--primary); white-space: nowrap; }
-        .table tbody td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid rgba(30,58,138,0.05); }
+        .table thead {
+            background: linear-gradient(135deg, rgba(30,58,138,0.05) 0%, rgba(59,130,246,0.05) 100%);
+        }
+        .table thead th {
+            border: none; padding: 1rem; font-weight: 600;
+            color: var(--primary); white-space: nowrap;
+        }
+        .table tbody td {
+            padding: 1rem; vertical-align: middle;
+            border-bottom: 1px solid rgba(30,58,138,0.05);
+        }
         .table tbody tr:last-child td { border-bottom: none; }
         .table tbody tr:hover { background: rgba(30,58,138,0.02); }
 
-        /* ── Powered By ── */
-        .powered-by {
-            position: fixed; bottom: 15px; right: 15px; background: white;
-            padding: 10px 16px; border-radius: 25px;
-            box-shadow: 0 4px 15px rgba(30,58,138,0.15);
-            font-size: 0.8rem; font-weight: 600; color: var(--primary); z-index: 1000;
-        }
-
-        /* ── Payment Summary ── */
+        /* ══════════════════════════════════════════
+           PAYMENT SUMMARY PANEL
+        ══════════════════════════════════════════ */
         .payment-summary {
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
             border: 2px solid #10b981; border-radius: 12px; padding: 1.5rem; margin-top: 1rem;
         }
-        .summary-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(16,185,129,0.2); }
-        .summary-row:last-child { border-bottom: none; font-weight: bold; font-size: 1.1rem; padding-top: 1rem; }
+        .summary-row {
+            display: flex; justify-content: space-between;
+            padding: 0.5rem 0; border-bottom: 1px solid rgba(16,185,129,0.2);
+        }
+        .summary-row:last-child {
+            border-bottom: none; font-weight: bold; font-size: 1.1rem; padding-top: 1rem;
+        }
 
-        /* ── Approver Selector ── */
+        /* ══════════════════════════════════════════
+           APPROVER SELECTOR
+        ══════════════════════════════════════════ */
         .approver-selector {
             border: 2px solid rgba(30,58,138,0.1); border-radius: 12px;
             padding: 1rem; background: #fafbff; max-height: 300px; overflow-y: auto;
+            transition: opacity 0.2s;
+        }
+        .approver-selector.locked {
+            pointer-events: none; opacity: 0.45;
         }
         .approver-item {
             display: flex; align-items: center; gap: 10px; padding: 0.75rem;
@@ -195,7 +277,10 @@
             border-color: var(--primary);
             background: linear-gradient(135deg, rgba(30,58,138,0.05) 0%, rgba(59,130,246,0.05) 100%);
         }
-        .approver-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); flex-shrink: 0; cursor: pointer; }
+        .approver-item input[type="checkbox"] {
+            width: 18px; height: 18px; accent-color: var(--primary);
+            flex-shrink: 0; cursor: pointer;
+        }
         .approver-avatar {
             width: 38px; height: 38px; border-radius: 50%;
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
@@ -203,44 +288,155 @@
             font-weight: bold; font-size: 0.9rem; flex-shrink: 0;
         }
         .approver-info { flex: 1; min-width: 0; }
-        .approver-name { font-weight: 600; font-size: 0.9rem; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .approver-name {
+            font-weight: 600; font-size: 0.9rem; color: #1f2937;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
         .approver-role { font-size: 0.75rem; color: var(--secondary); }
         .approver-check { color: var(--primary); display: none; flex-shrink: 0; }
         .approver-item.selected .approver-check { display: block; }
 
-        /* ── Approval Count Badge ── */
+        /* Approver count badge */
         .approval-count-badge {
             display: inline-flex; align-items: center; gap: 6px;
             padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 0.8rem;
         }
-        .approval-count-badge.insufficient { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
-        .approval-count-badge.sufficient { background: rgba(16,185,129,0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+        .approval-count-badge.insufficient {
+            background: rgba(239,68,68,0.1); color: var(--danger);
+            border: 1px solid rgba(239,68,68,0.3);
+        }
+        .approval-count-badge.sufficient {
+            background: rgba(16,185,129,0.1); color: var(--success);
+            border: 1px solid rgba(16,185,129,0.3);
+        }
 
-        /* ── Approval Notice Banner ── */
+        /* Approver locked notice */
+        .approver-locked-notice {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 0.875rem 1rem;
+            background: rgba(239,68,68,0.06); border: 2px solid rgba(239,68,68,0.2);
+            border-radius: 12px; margin-bottom: 0.75rem; font-size: 0.875rem;
+        }
+        .approver-locked-notice i { color: var(--danger); flex-shrink: 0; margin-top: 2px; }
+
+        /* ══════════════════════════════════════════
+           APPROVAL NOTICE BANNER
+        ══════════════════════════════════════════ */
         .approval-notice {
             background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(217,119,6,0.08) 100%);
             border: 2px solid rgba(245,158,11,0.3); border-radius: 12px;
             padding: 1rem 1.25rem; margin-bottom: 1.5rem;
         }
 
-        /* ── Animations ── */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-in { animation: fadeIn 0.5s ease; }
+        /* ══════════════════════════════════════════
+           NOTIFICATION MODAL
+        ══════════════════════════════════════════ */
+        #notifyModal .modal-content {
+            border-radius: 20px; border: none; overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.18);
+        }
+        #notifyModal .modal-body { padding: 2rem; text-align: center; }
 
-        /* ── Receipt (Print) ── */
-        .receipt-container { max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border: 2px solid #e5e7eb; }
-        .receipt-header { text-align: center; border-bottom: 3px solid var(--primary); padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+        .notify-icon-wrap {
+            width: 80px; height: 80px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.25rem; font-size: 2.2rem;
+            animation: notifyPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+        @keyframes notifyPop {
+            from { transform: scale(0.4); opacity: 0; }
+            to   { transform: scale(1);   opacity: 1; }
+        }
+        .notify-icon-wrap.success { background: linear-gradient(135deg,#d1fae5,#6ee7b7); color: #059669; }
+        .notify-icon-wrap.error   { background: linear-gradient(135deg,#fee2e2,#fca5a5); color: #dc2626; }
+        .notify-icon-wrap.warning { background: linear-gradient(135deg,#fef3c7,#fcd34d); color: #d97706; }
+        .notify-icon-wrap.info    { background: linear-gradient(135deg,#dbeafe,#93c5fd); color: #2563eb; }
+
+        .notify-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .notify-title.success { color: #065f46; }
+        .notify-title.error   { color: #7f1d1d; }
+        .notify-title.warning { color: #78350f; }
+        .notify-title.info    { color: #1e3a8a; }
+
+        .notify-message {
+            color: #475569; font-size: 0.95rem; line-height: 1.6;
+            margin-bottom: 1.5rem; white-space: pre-line;
+        }
+        .notify-footer { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+        .notify-btn-ok {
+            padding: 0.6rem 2rem; border-radius: 10px; border: none;
+            font-weight: 600; font-size: 0.95rem; cursor: pointer;
+            transition: all 0.25s; color: white;
+        }
+        .notify-btn-ok.success { background: linear-gradient(135deg,#10b981,#059669); }
+        .notify-btn-ok.error   { background: linear-gradient(135deg,#ef4444,#dc2626); }
+        .notify-btn-ok.warning { background: linear-gradient(135deg,#f59e0b,#d97706); }
+        .notify-btn-ok.info    { background: linear-gradient(135deg,#1e3a8a,#3b82f6); }
+        .notify-btn-ok:hover   { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.18); }
+
+        .notify-btn-cancel {
+            padding: 0.6rem 1.5rem; border-radius: 10px;
+            border: 2px solid #e2e8f0; background: white; color: #64748b;
+            font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.25s;
+        }
+        .notify-btn-cancel:hover { background: #f1f5f9; border-color: #cbd5e1; }
+
+        /* ══════════════════════════════════════════
+           UNAUTHORIZED MODAL
+        ══════════════════════════════════════════ */
+        #unauthorizedModal .modal-content { border: none; border-radius: 16px; overflow: hidden; }
+        #unauthorizedModal .modal-header {
+            background: linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%);
+        }
+
+        /* ══════════════════════════════════════════
+           POWERED BY
+        ══════════════════════════════════════════ */
+        .powered-by {
+            position: fixed; bottom: 15px; right: 15px; background: white;
+            padding: 10px 16px; border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(30,58,138,0.15);
+            font-size: 0.8rem; font-weight: 600; color: var(--primary); z-index: 1000;
+        }
+
+        /* ══════════════════════════════════════════
+           ANIMATIONS
+        ══════════════════════════════════════════ */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.4s ease; }
+
+        /* ══════════════════════════════════════════
+           RECEIPT (PRINT)
+        ══════════════════════════════════════════ */
+        .receipt-container {
+            max-width: 800px; margin: 0 auto; background: white;
+            padding: 2rem; border: 2px solid #e5e7eb;
+        }
+        .receipt-header {
+            text-align: center; border-bottom: 3px solid var(--primary);
+            padding-bottom: 1.5rem; margin-bottom: 1.5rem;
+        }
         .receipt-logo {
             width: 80px; height: 80px;
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
             color: white; border-radius: 50%; display: flex; align-items: center;
             justify-content: center; font-size: 2.5rem; font-weight: bold; margin: 0 auto 1rem;
         }
-        .receipt-title { font-size: 1.8rem; font-weight: bold; color: var(--primary); margin-bottom: 0.5rem; }
+        .receipt-title    { font-size: 1.8rem; font-weight: bold; color: var(--primary); margin-bottom: 0.5rem; }
         .receipt-subtitle { color: var(--secondary); font-size: 0.9rem; }
-        .receipt-section { margin-bottom: 1.5rem; }
-        .receipt-section-title { font-weight: bold; color: var(--primary); border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1rem; }
-        .receipt-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed #e5e7eb; }
+        .receipt-section  { margin-bottom: 1.5rem; }
+        .receipt-section-title {
+            font-weight: bold; color: var(--primary);
+            border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1rem;
+        }
+        .receipt-row {
+            display: flex; justify-content: space-between;
+            padding: 0.5rem 0; border-bottom: 1px dashed #e5e7eb;
+        }
         .receipt-row:last-child { border-bottom: none; }
         .receipt-label { color: var(--secondary); font-weight: 500; }
         .receipt-value { font-weight: 600; color: #1f2937; }
@@ -251,23 +447,38 @@
         }
         .receipt-amount-label { color: var(--secondary); font-size: 0.9rem; margin-bottom: 0.5rem; }
         .receipt-amount-value { font-size: 2.5rem; font-weight: bold; color: var(--success); }
-        .receipt-footer { text-align: center; border-top: 3px solid var(--primary); padding-top: 1.5rem; margin-top: 2rem; }
+        .receipt-footer {
+            text-align: center; border-top: 3px solid var(--primary);
+            padding-top: 1.5rem; margin-top: 2rem;
+        }
         .receipt-stamp {
             display: inline-block; border: 3px solid var(--success); color: var(--success);
             padding: 0.5rem 1.5rem; border-radius: 10px; font-weight: bold;
             transform: rotate(-5deg); margin: 1rem 0;
         }
 
-        /* ── Responsive ── */
+        /* ══════════════════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════════════════ */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.active { transform: translateX(0); }
             .top-navbar { left: 0; }
             .main-content { margin-left: 0; padding: 1rem; }
             .table thead { display: none; }
-            .table tbody tr { display: block; margin-bottom: 1rem; border: 2px solid rgba(30,58,138,0.1); border-radius: 12px; overflow: hidden; background: white; }
-            .table tbody td { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid rgba(30,58,138,0.05); }
-            .table tbody td::before { content: attr(data-label); font-weight: 600; color: var(--primary); margin-right: 1rem; }
+            .table tbody tr {
+                display: block; margin-bottom: 1rem;
+                border: 2px solid rgba(30,58,138,0.1); border-radius: 12px;
+                overflow: hidden; background: white;
+            }
+            .table tbody td {
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 0.75rem 1rem; border-bottom: 1px solid rgba(30,58,138,0.05);
+            }
+            .table tbody td::before {
+                content: attr(data-label); font-weight: 600;
+                color: var(--primary); margin-right: 1rem; flex-shrink: 0;
+            }
         }
         @media (max-width: 576px) {
             .top-navbar { height: 60px; padding: 0 1rem; }
@@ -285,1199 +496,1826 @@
 </head>
 <body>
 
-    <!-- ══════════════════ SIDEBAR ══════════════════ -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <div class="logo-box">C</div>
-                <div>
-                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform:uppercase;">Club De Stars</h5>
-                    <small class="opacity-75" style="font-size:0.75rem;">ADMIN PANEL</small>
-                </div>
-            </div>
-            <div class="admin-badge">
-                <i class="fas fa-shield-alt"></i>
-                <span><%= admin.role?.name?.toUpperCase() || 'ADMIN' %></span>
+<!-- ══════════════════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════════════════ -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-container">
+            <div class="logo-box">C</div>
+            <div>
+                <h5 class="mb-0 fw-bold sidebar-title" style="text-transform:uppercase;">Club De Stars</h5>
+                <small class="opacity-75" style="font-size:0.75rem;">ADMIN PANEL</small>
             </div>
         </div>
-        <div class="sidebar-menu">
+        <div class="admin-badge">
+            <i class="fas fa-shield-alt"></i>
+            <span><%= admin.role?.name?.toUpperCase() || 'ADMIN' %></span>
+        </div>
+    </div>
+  <div class="sidebar-menu">
             <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
+            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
             <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
             <a href="/admin/manage-payment" class="active"><i class="fas fa-credit-card"></i> Payments</a>
-            <a href="/admin/transaction-approvals">
-                <i class="fas fa-tasks"></i> Approvals
-                <span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span>
-            </a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
             <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
             <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
             <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
             <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
             <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
             <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
             <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
             <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
             <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
             <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
             <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-             <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
-            <a href="/club-de-star-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);">
-                <i class="fas fa-sign-in-alt"></i> Back to Dashboard
-            </a>
+            <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
+            <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
+        </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     TOP NAVBAR
+══════════════════════════════════════════════════════ -->
+<div class="top-navbar">
+    <i class="fas fa-bars d-lg-none me-3"
+       style="cursor:pointer;color:var(--primary);font-size:1.5rem;"
+       onclick="toggleSidebar()"></i>
+    <div class="flex-grow-1 d-none d-lg-block">
+        <h5 class="mb-0 fw-bold" style="color:var(--primary)">Payment Management</h5>
+        <small class="text-muted">Process member payments — requires 3 approvals</small>
+    </div>
+    <a href="/admin/transaction-approvals" class="btn btn-outline-primary btn-sm ms-auto position-relative">
+        <i class="fas fa-tasks me-1"></i>My Approvals
+        <span id="navbarPendingBadge"
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              style="display:none;">0</span>
+    </a>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════════════════ -->
+<div class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center position-relative" style="z-index:1;">
+            <div class="col-md-8">
+                <h2 class="mb-2 fw-bold"><i class="fas fa-credit-card me-3"></i>Payment Management</h2>
+                <p class="mb-0 opacity-90">All transactions require approval from 3 officers before processing</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <div class="badge bg-light text-dark p-2">
+                    <i class="fas fa-calendar me-1"></i><span id="currentDate"></span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- ══════════════════ TOP NAVBAR ══════════════════ -->
-    <div class="top-navbar">
-        <i class="fas fa-bars d-lg-none me-3"
-           style="cursor:pointer;color:var(--primary);font-size:1.5rem;"
-           onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
-        <div class="flex-grow-1 d-none d-lg-block">
-            <h5 class="mb-0 fw-bold" style="color:var(--primary)">Payment Management</h5>
-            <small class="text-muted">Process member payments — requires 3 approvals</small>
+    <!-- Approval Notice -->
+    <div class="approval-notice d-flex align-items-start gap-3">
+        <i class="fas fa-info-circle mt-1" style="color:var(--warning);font-size:1.2rem;flex-shrink:0;"></i>
+        <div>
+            <strong style="color:#92400e;">Transaction Approval Required</strong>
+            <p class="mb-0 mt-1 text-muted" style="font-size:0.9rem;">
+                Every transaction submitted here will be placed in a <strong>pending</strong> state.
+                You must select 3 non-member officers who will each review and approve the transaction
+                before it is processed. A single decline will reject the transaction immediately.
+            </p>
         </div>
-        <a href="/admin/transaction-approvals" class="btn btn-outline-primary btn-sm ms-auto position-relative">
-            <i class="fas fa-tasks me-1"></i>My Approvals
-            <span id="navbarPendingBadge"
-                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                  style="display:none;">0</span>
-        </a>
     </div>
 
-    <!-- ══════════════════ MAIN CONTENT ══════════════════ -->
-    <div class="main-content">
-
-        <!-- Page Header -->
-        <div class="page-header position-relative">
-            <div class="row align-items-center position-relative" style="z-index:1;">
-                <div class="col-md-8">
-                    <h2 class="mb-2 fw-bold"><i class="fas fa-credit-card me-3"></i>Payment Management</h2>
-                    <p class="mb-0 opacity-90">All transactions require approval from 3 officers before processing</p>
-                </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <div class="badge bg-light text-dark p-2">
-                        <i class="fas fa-calendar me-1"></i><span id="currentDate"></span>
-                    </div>
-                </div>
-            </div>
+    <!-- Payment Type Selection -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-list me-2" style="color:var(--primary);"></i>Select Payment Type
+            </h5>
         </div>
-
-        <!-- Approval Notice -->
-        <div class="approval-notice d-flex align-items-start gap-3">
-            <i class="fas fa-info-circle mt-1" style="color:var(--warning);font-size:1.2rem;flex-shrink:0;"></i>
-            <div>
-                <strong style="color:#92400e;">Transaction Approval Required</strong>
-                <p class="mb-0 mt-1 text-muted" style="font-size:0.9rem;">
-                    Every transaction submitted here will be placed in a <strong>pending</strong> state.
-                    You must select 3 non-member officers who will each review and approve the transaction
-                    before it is processed. A single decline will reject the transaction immediately.
-                </p>
-            </div>
-        </div>
-
-        <!-- Payment Type Selection -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0 fw-bold">
-                    <i class="fas fa-list me-2" style="color:var(--primary);"></i>Select Payment Type
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-lg-3 col-md-6 col-6">
-                        <div class="payment-type-card" onclick="selectPaymentType('deposit', this)">
-                            <div class="payment-icon" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;">
-                                <i class="fas fa-plus-circle"></i>
-                            </div>
-                            <h6 class="fw-bold mb-1">Member Deposit</h6>
-                            <small class="text-muted">Add funds to member account</small>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="payment-type-card" id="card-deposit"
+                         onclick="handlePaymentTypeClick('deposit', this)">
+                        <div class="payment-icon"
+                             style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;">
+                            <i class="fas fa-plus-circle"></i>
                         </div>
+                        <h6 class="fw-bold mb-1">Member Deposit</h6>
+                        <small class="text-muted">Add funds to member account</small>
                     </div>
-                    <div class="col-lg-3 col-md-6 col-6">
-                        <div class="payment-type-card" onclick="selectPaymentType('withdrawal', this)">
-                            <div class="payment-icon" style="background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:white;">
-                                <i class="fas fa-minus-circle"></i>
-                            </div>
-                            <h6 class="fw-bold mb-1">Process Withdrawal</h6>
-                            <small class="text-muted">Debit member account</small>
+                </div>
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="payment-type-card" id="card-withdrawal"
+                         onclick="handlePaymentTypeClick('withdrawal', this)">
+                        <div class="payment-icon"
+                             style="background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:white;">
+                            <i class="fas fa-minus-circle"></i>
                         </div>
+                        <h6 class="fw-bold mb-1">Process Withdrawal</h6>
+                        <small class="text-muted">Debit member account</small>
                     </div>
-                    <div class="col-lg-3 col-md-6 col-6">
-                        <div class="payment-type-card" onclick="selectPaymentType('loan-repayment', this)">
-                            <div class="payment-icon" style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:white;">
-                                <i class="fas fa-hand-holding-usd"></i>
-                            </div>
-                            <h6 class="fw-bold mb-1">Loan Repayment</h6>
-                            <small class="text-muted">Process loan payment</small>
+                </div>
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="payment-type-card" id="card-loan-repayment"
+                         onclick="handlePaymentTypeClick('loan-repayment', this)">
+                        <div class="payment-icon"
+                             style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:white;">
+                            <i class="fas fa-hand-holding-usd"></i>
                         </div>
+                        <h6 class="fw-bold mb-1">Loan Repayment</h6>
+                        <small class="text-muted">Process loan payment</small>
                     </div>
-                    <div class="col-lg-3 col-md-6 col-6">
-                        <div class="payment-type-card" onclick="selectPaymentType('direct-debit', this)">
-                            <div class="payment-icon" style="background:linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%);color:white;">
-                                <i class="fas fa-university"></i>
-                            </div>
-                            <h6 class="fw-bold mb-1">Direct Debit</h6>
-                            <small class="text-muted">Deduct charges/fees</small>
+                </div>
+                <div class="col-lg-3 col-md-6 col-6">
+                    <div class="payment-type-card" id="card-direct-debit"
+                         onclick="handlePaymentTypeClick('direct-debit', this)">
+                        <div class="payment-icon"
+                             style="background:linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%);color:white;">
+                            <i class="fas fa-university"></i>
                         </div>
+                        <h6 class="fw-bold mb-1">Direct Debit</h6>
+                        <small class="text-muted">Deduct charges/fees</small>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Payment Form -->
-        <div id="paymentForm" class="card fade-in" style="display:none;">
-            <div class="card-header">
-                <h5 class="mb-0 fw-bold" id="formTitle">
-                    <i class="fas fa-file-invoice-dollar me-2" style="color:var(--primary);"></i>Payment Details
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
+    <!-- Payment Form (hidden until type selected) -->
+    <div id="paymentForm" class="card fade-in" style="display:none;">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h5 class="mb-0 fw-bold" id="formTitle">
+                <i class="fas fa-file-invoice-dollar me-2" style="color:var(--primary);"></i>Payment Details
+            </h5>
+            <button class="btn btn-sm btn-outline-secondary" onclick="resetForm()">
+                <i class="fas fa-times me-1"></i>Cancel
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
 
-                    <!-- ── Left: Transaction Details ── -->
-                    <div class="col-lg-8">
+                <!-- ── Left Column: Transaction Details ── -->
+                <div class="col-lg-8">
 
-                        <!-- Member Search -->
-                        <div class="mb-4">
-                            <label class="form-label"><i class="fas fa-search me-2"></i>Search Member</label>
-                            <div class="autocomplete-wrapper">
-                                <input type="text" class="form-control" id="memberSearch"
-                                       placeholder="Type member name, ID, or email..."
-                                       autocomplete="off"
-                                       oninput="handleMemberSearch()"
-                                       onfocus="handleMemberSearch()">
-                                <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
-                            </div>
+                    <!-- Member Search -->
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="fas fa-search me-2"></i>Search Member
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="autocomplete-wrapper">
+                            <input type="text" class="form-control" id="memberSearch"
+                                   placeholder="Type member name, ID, or email…"
+                                   autocomplete="off"
+                                   oninput="handleMemberSearch()"
+                                   onfocus="handleMemberSearch()">
+                            <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
                         </div>
+                    </div>
 
-                        <!-- Member Details (shown after selection) -->
-                        <div id="memberDetails" style="display:none;">
-                            <div class="member-search-result">
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <h6 class="mb-1 fw-bold" id="memberName"></h6>
-                                        <small class="text-muted d-block">
-                                            <span id="memberID"></span> | <span id="memberEmail"></span>
-                                        </small>
-                                        <div class="mt-2">
-                                            <span class="badge bg-success me-2">
-                                                <i class="fas fa-wallet me-1"></i>Balance: ₦<span id="memberBalance">0</span>
-                                            </span>
-                                            <span class="badge bg-warning" id="loanBadge" style="display:none;">
-                                                <i class="fas fa-hand-holding-usd me-1"></i>Loan active
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                                        <button class="btn btn-sm btn-outline-danger" onclick="clearMember()">
-                                            <i class="fas fa-times me-1"></i>Clear
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Amount -->
-                            <div class="mb-3">
-                                <label class="form-label"><i class="fas fa-money-bill-wave me-2"></i>Amount (₦)</label>
-                                <input type="number" class="form-control" id="paymentAmount"
-                                       placeholder="Enter amount" min="1" oninput="calculateTotal()">
-                            </div>
-
-                            <!-- Loan Selection (loan-repayment only) -->
-                            <div id="loanSelection" style="display:none;" class="mb-3">
-                                <label class="form-label"><i class="fas fa-file-contract me-2"></i>Select Loan</label>
-                                <select id="loanSelect" class="form-select" onchange="updateLoanDetails()">
-                                    <option value="">Select Loan</option>
-                                </select>
-                            </div>
-
-                            <!-- Charge Type (direct-debit only) -->
-                            <div id="chargeTypeDiv" style="display:none;" class="mb-3">
-                                <label class="form-label"><i class="fas fa-tags me-2"></i>Charge Type</label>
-                                <select class="form-select" id="chargeSelect">
-                                    <option value="">Select charge type</option>
-                                    <option value="admin-fee">Administrative Fee</option>
-                                    <option value="penalty">Late Payment Penalty</option>
-                                    <option value="service">Service Charge</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-
-                            <!-- Payment Method -->
-                            <div class="mb-3">
-                                <label class="form-label"><i class="fas fa-credit-card me-2"></i>Payment Method</label>
-                                <select class="form-select" id="paymentMethod">
-                                    <option value="cash">Cash</option>
-                                    <option value="bank-transfer">Bank Transfer</option>
-                                    <option value="pos">POS</option>
-                                    <option value="online">Online Payment</option>
-                                    <option value="cheque">Cheque</option>
-                                </select>
-                            </div>
-
-                            <!-- Reference -->
-                            <div class="mb-3">
-                                <label class="form-label"><i class="fas fa-hashtag me-2"></i>Reference Number <span class="text-muted fw-normal">(Optional)</span></label>
-                                <input type="text" class="form-control" id="referenceNumber"
-                                       placeholder="Enter transaction reference">
-                            </div>
-
-                            <!-- Notes -->
-                            <div class="mb-4">
-                                <label class="form-label"><i class="fas fa-comment me-2"></i>Notes / Description</label>
-                                <textarea class="form-control" id="paymentNotes" rows="3"
-                                          placeholder="Add any additional notes or description"></textarea>
-                            </div>
-
-                            <!-- ── Approver Selection ── -->
-                            <div class="mb-3">
-                                <label class="form-label d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                    <span><i class="fas fa-user-check me-2"></i>Select Approvers</span>
-                                    <span id="approverCountBadge" class="approval-count-badge insufficient">
-                                        <i class="fas fa-exclamation-circle" id="approverCountIcon"></i>
-                                        <span id="approverCountText">0 / 3 selected</span>
-                                    </span>
-                                </label>
-                                <p class="text-muted mb-2" style="font-size:0.85rem;">
-                                    Choose exactly 3 officers with non-member roles to approve this transaction.
-                                </p>
-
-                                <div class="approver-selector" id="approverList">
-                                    <% if (!availableApprovers || availableApprovers.length === 0) { %>
-                                    <div class="text-center text-muted py-4">
-                                        <i class="fas fa-users-slash fa-2x mb-2 d-block opacity-50"></i>
-                                        No eligible approvers found. Ensure other users have non-member roles.
-                                    </div>
-                                    <% } else { %>
-                                    <% availableApprovers.forEach(function(approver) {
-                                        const initials = ((approver.firstName || '')[0] + (approver.lastName || '')[0]).toUpperCase();
-                                    %>
-                                    <label class="approver-item" data-id="<%= approver._id %>">
-                                        <input type="checkbox" value="<%= approver._id %>"
-                                               data-name="<%= approver.firstName %> <%= approver.lastName %>"
-                                               onchange="handleApproverToggle(this)">
-                                        <div class="approver-avatar"><%= initials %></div>
-                                        <div class="approver-info">
-                                            <div class="approver-name"><%= approver.firstName %> <%= approver.lastName %></div>
-                                            <div class="approver-role">
-                                                <%= approver.role ? approver.role.name : 'Officer' %> &middot; <%= approver.email %>
-                                            </div>
-                                        </div>
-                                        <i class="fas fa-check-circle approver-check"></i>
-                                    </label>
-                                    <% }) %>
-                                    <% } %>
-                                </div>
-                            </div>
-                        </div><!-- /memberDetails -->
-                    </div><!-- /col-lg-8 -->
-
-                    <!-- ── Right: Payment Summary Sidebar ── -->
-                    <div class="col-lg-4">
-                        <div class="card" style="position:sticky;top:90px;">
-                            <div class="card-header">
-                                <h6 class="mb-0 fw-bold"><i class="fas fa-receipt me-2"></i>Payment Summary</h6>
-                            </div>
-                            <div class="card-body">
-
-                                <!-- Placeholder -->
-                                <div id="summaryPlaceholder" class="text-center text-muted py-5">
-                                    <i class="fas fa-calculator fa-3x mb-3 d-block opacity-25"></i>
-                                    <p class="mb-0">Select a member and enter payment details to see summary</p>
-                                </div>
-
-                                <!-- Summary Details -->
-                                <div id="summaryDetails" style="display:none;">
-                                    <div class="payment-summary">
-                                        <div class="summary-row">
-                                            <span>Amount:</span>
-                                            <span class="fw-bold">₦<span id="summaryAmount">0</span></span>
-                                        </div>
-                                        <div class="summary-row" id="chargeRow" style="display:none;">
-                                            <span>Processing Fee:</span>
-                                            <span class="fw-bold text-danger">₦<span id="summaryCharge">0</span></span>
-                                        </div>
-                                        <div class="summary-row">
-                                            <span>Total:</span>
-                                            <span class="fw-bold text-success">₦<span id="summaryTotal">0</span></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-3">
-                                        <small class="text-muted d-block mb-1">Current Balance:</small>
-                                        <div class="fw-bold" style="font-size:1.1rem;">₦<span id="summaryCurrentBalance">0</span></div>
-                                    </div>
-
-                                    <div class="mt-2">
-                                        <small class="text-muted d-block mb-1">Balance After Approval:</small>
-                                        <div class="fw-bold text-primary" style="font-size:1.1rem;">₦<span id="summaryNewBalance">0</span></div>
-                                    </div>
-
-                                    <!-- Selected Approvers in Sidebar -->
-                                    <div class="mt-3 p-3 rounded-3"
-                                         style="background:rgba(30,58,138,0.04);border:1px solid rgba(30,58,138,0.1);">
-                                        <small class="text-muted d-block mb-2 fw-semibold">
-                                            <i class="fas fa-user-check me-1"></i>Selected Approvers
-                                        </small>
-                                        <div id="sidebarApproverList">
-                                            <small class="text-muted fst-italic">None selected yet</small>
-                                        </div>
-                                    </div>
-
-                                    <button class="btn btn-primary w-100 mt-4" id="submitBtn"
-                                            onclick="submitForApproval()" disabled>
-                                        <i class="fas fa-paper-plane me-2"></i>Submit for Approval
-                                    </button>
-                                    <small class="text-muted d-block text-center mt-2">
-                                        <i class="fas fa-lock me-1"></i>Requires 3 approvals before processing
+                    <!-- Member Details Card (shown after selection) -->
+                    <div id="memberDetails" style="display:none;">
+                        <div class="member-search-result mb-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h6 class="mb-1 fw-bold" id="memberName"></h6>
+                                    <small class="text-muted d-block">
+                                        <span id="memberID"></span> &bull; <span id="memberEmail"></span>
                                     </small>
+                                    <div class="mt-2">
+                                        <span class="badge bg-success me-2">
+                                            <i class="fas fa-wallet me-1"></i>Balance: ₦<span id="memberBalance">0</span>
+                                        </span>
+                                        <span class="badge bg-warning text-dark" id="loanBadge" style="display:none;">
+                                            <i class="fas fa-hand-holding-usd me-1"></i>Active loan
+                                        </span>
+                                    </div>
                                 </div>
-
+                                <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                                    <button class="btn btn-sm btn-outline-danger" onclick="clearMember()">
+                                        <i class="fas fa-times me-1"></i>Clear
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div><!-- /col-lg-4 -->
 
-                </div><!-- /row -->
-            </div><!-- /card-body -->
-        </div><!-- /paymentForm -->
+                        <!-- Amount -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-money-bill-wave me-2"></i>Amount (₦)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" class="form-control" id="paymentAmount"
+                                   placeholder="Enter amount" min="1" step="0.01"
+                                   oninput="calculateTotal()">
+                        </div>
 
-        <!-- Recent Transactions Table -->
-        <div class="card mt-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">
-                    <i class="fas fa-history me-2" style="color:var(--primary);"></i>Recent Transactions
-                </h5>
-                <button class="btn btn-sm btn-outline-primary">
+                        <!-- Loan Selection (loan-repayment only) -->
+                        <div id="loanSelection" style="display:none;" class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-file-contract me-2"></i>Select Loan
+                                <span class="text-danger">*</span>
+                            </label>
+                            <select id="loanSelect" class="form-select" onchange="updateLoanDetails()">
+                                <option value="">— Select a loan —</option>
+                            </select>
+                            <div id="loanDetailsBox" class="mt-2 p-3 rounded-3 d-none"
+                                 style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.3);">
+                                <div class="row g-2 text-sm">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Total Repayable</small>
+                                        <strong>₦<span id="loanTotalRepay">0</span></strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Balance Remaining</small>
+                                        <strong class="text-danger">₦<span id="loanBalanceRemaining">0</span></strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charge Type (direct-debit only) -->
+                        <div id="chargeTypeDiv" style="display:none;" class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-tags me-2"></i>Charge Type
+                                <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="chargeSelect">
+                                <option value="">— Select charge type —</option>
+                                <option value="admin-fee">Administrative Fee</option>
+                                <option value="penalty">Late Payment Penalty</option>
+                                <option value="service">Service Charge</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-credit-card me-2"></i>Payment Method
+                            </label>
+                            <select class="form-select" id="paymentMethod">
+                                <option value="cash">Cash</option>
+                                <option value="bank-transfer">Bank Transfer</option>
+                                <option value="pos">POS</option>
+                                <option value="online">Online Payment</option>
+                                <option value="cheque">Cheque</option>
+                            </select>
+                        </div>
+
+                        <!-- Reference -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-hashtag me-2"></i>Reference Number
+                                <span class="text-muted fw-normal">(Optional)</span>
+                            </label>
+                            <input type="text" class="form-control" id="referenceNumber"
+                                   placeholder="Enter transaction reference or receipt number">
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-comment me-2"></i>Notes / Description
+                            </label>
+                            <textarea class="form-control" id="paymentNotes" rows="3"
+                                      placeholder="Add any additional notes or context for this transaction"></textarea>
+                        </div>
+
+                        <!-- ── Approver Selection ── -->
+                        <div class="mb-3" id="approverSection">
+                            <label class="form-label d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <span>
+                                    <i class="fas fa-user-check me-2"></i>Select Approvers
+                                    <span class="text-danger">*</span>
+                                </span>
+                                <span id="approverCountBadge" class="approval-count-badge insufficient">
+                                    <i class="fas fa-exclamation-circle" id="approverCountIcon"></i>
+                                    <span id="approverCountText">0 / 3 selected</span>
+                                </span>
+                            </label>
+                            <p class="text-muted mb-2" style="font-size:0.85rem;">
+                                Choose exactly 3 officers with non-member roles to approve this transaction.
+                            </p>
+
+                            <!-- Shown when user lacks authorize_transactions -->
+                            <div class="approver-locked-notice" id="approverLockedNotice" style="display:none;">
+                                <i class="fas fa-lock fa-fw"></i>
+                                <span>
+                                    You don't have the permission to <strong>Authorize transactions</strong>
+                                    and cannot assign approvers or submit transactions.
+                                </span>
+                            </div>
+
+                            <div class="approver-selector" id="approverList">
+                                <% if (!availableApprovers || availableApprovers.length === 0) { %>
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-users-slash fa-2x mb-2 d-block opacity-50"></i>
+                                    No eligible approvers found. Ensure other users have non-member roles.
+                                </div>
+                                <% } else { %>
+                                <% availableApprovers.forEach(function(approver) {
+                                    const initials = (
+                                        ((approver.firstName || '')[0] || '') +
+                                        ((approver.lastName  || '')[0] || '')
+                                    ).toUpperCase();
+                                %>
+                                <label class="approver-item" data-id="<%= approver._id %>">
+                                    <input type="checkbox"
+                                           value="<%= approver._id %>"
+                                           data-name="<%= approver.firstName %> <%= approver.lastName %>"
+                                           onchange="handleApproverToggle(this)">
+                                    <div class="approver-avatar"><%= initials %></div>
+                                    <div class="approver-info">
+                                        <div class="approver-name">
+                                            <%= approver.firstName %> <%= approver.lastName %>
+                                        </div>
+                                        <div class="approver-role">
+                                            <%= approver.role ? approver.role.name : 'Officer' %>
+                                            &middot; <%= approver.email %>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-check-circle approver-check"></i>
+                                </label>
+                                <% }) %>
+                                <% } %>
+                            </div>
+                        </div><!-- /approverSection -->
+
+                    </div><!-- /memberDetails -->
+                </div><!-- /col-lg-8 -->
+
+                <!-- ── Right Column: Payment Summary ── -->
+                <div class="col-lg-4">
+                    <div class="card" style="position:sticky;top:90px;">
+                        <div class="card-header">
+                            <h6 class="mb-0 fw-bold">
+                                <i class="fas fa-receipt me-2"></i>Payment Summary
+                            </h6>
+                        </div>
+                        <div class="card-body">
+
+                            <!-- Placeholder before member + amount selected -->
+                            <div id="summaryPlaceholder" class="text-center text-muted py-5">
+                                <i class="fas fa-calculator fa-3x mb-3 d-block opacity-25"></i>
+                                <p class="mb-0 small">Select a member and enter an amount to see the summary</p>
+                            </div>
+
+                            <!-- Live summary -->
+                            <div id="summaryDetails" style="display:none;">
+                                <div class="payment-summary">
+                                    <div class="summary-row">
+                                        <span class="text-muted">Payment Type:</span>
+                                        <span class="fw-semibold" id="summaryType">—</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span class="text-muted">Amount:</span>
+                                        <span class="fw-bold">₦<span id="summaryAmount">0</span></span>
+                                    </div>
+                                    <div class="summary-row" id="chargeRow" style="display:none;">
+                                        <span class="text-muted">Processing Fee:</span>
+                                        <span class="fw-bold text-danger">₦<span id="summaryCharge">0</span></span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Total:</span>
+                                        <span class="fw-bold text-success">₦<span id="summaryTotal">0</span></span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 p-3 rounded-3"
+                                     style="background:rgba(30,58,138,0.03);border:1px solid rgba(30,58,138,0.1);">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <small class="text-muted">Current Balance</small>
+                                        <strong>₦<span id="summaryCurrentBalance">0</span></strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">Balance After</small>
+                                        <strong class="text-primary">₦<span id="summaryNewBalance">0</span></strong>
+                                    </div>
+                                </div>
+
+                                <!-- Selected Approvers mini list -->
+                                <div class="mt-3 p-3 rounded-3"
+                                     style="background:rgba(30,58,138,0.03);border:1px solid rgba(30,58,138,0.1);">
+                                    <small class="text-muted d-block mb-2 fw-semibold">
+                                        <i class="fas fa-user-check me-1"></i>Selected Approvers
+                                    </small>
+                                    <div id="sidebarApproverList">
+                                        <small class="text-muted fst-italic">None selected yet</small>
+                                    </div>
+                                </div>
+
+                                <button class="btn btn-primary w-100 mt-4" id="submitBtn"
+                                        onclick="submitForApproval()" disabled>
+                                    <i class="fas fa-paper-plane me-2"></i>Submit for Approval
+                                </button>
+                                <small class="text-muted d-block text-center mt-2">
+                                    <i class="fas fa-lock me-1"></i>Requires 3 approvals before processing
+                                </small>
+                            </div><!-- /summaryDetails -->
+
+                        </div>
+                    </div>
+                </div><!-- /col-lg-4 -->
+
+            </div><!-- /row -->
+        </div><!-- /card-body -->
+    </div><!-- /paymentForm -->
+
+    <!-- ══════════════════════════════════════════
+         RECENT TRANSACTIONS TABLE
+    ══════════════════════════════════════════ -->
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-history me-2" style="color:var(--primary);"></i>Recent Transactions
+            </h5>
+            <div class="d-flex gap-2 align-items-center">
+                <!-- Filter -->
+                <select class="form-select form-select-sm" id="filterStatus" onchange="filterTable()"
+                        style="width:auto;">
+                    <option value="">All Statuses</option>
+                    <option value="successful">Successful</option>
+                    <option value="pending">Pending</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+                <button class="btn btn-sm btn-outline-primary" onclick="exportTransactions()">
                     <i class="fas fa-download me-1"></i>Export
                 </button>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Date / Time</th>
-                                <th>Member</th>
-                                <th>Type</th>
-                                <th>Amount</th>
-                                <th>Method</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transactionTableBody">
-                            <% if (!adminPayments || adminPayments.length === 0) { %>
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-5">
-                                    <i class="fas fa-inbox fa-2x d-block mb-2 opacity-25"></i>
-                                    No transactions yet
-                                </td>
-                            </tr>
-                            <% } else {
-                                const typesMap = {
-                                    'deposit':        { label: 'Deposit',        cls: 'success', sign: '+' },
-                                    'withdrawal':     { label: 'Withdrawal',     cls: 'danger',  sign: '-' },
-                                    'loan-repayment': { label: 'Loan Repayment', cls: 'warning', sign: ''  },
-                                    'direct-debit':   { label: 'Direct Debit',   cls: 'info',    sign: '-' }
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="transactionsTable">
+                    <thead>
+                        <tr>
+                            <th>Date / Time</th>
+                            <th>Member</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody">
+                        <% if (!adminPayments || adminPayments.length === 0) { %>
+                        <tr id="emptyRow">
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="fas fa-inbox fa-2x d-block mb-2 opacity-25"></i>
+                                No transactions yet
+                            </td>
+                        </tr>
+                        <% } else {
+                            const typesMap = {
+                                'deposit':        { label: 'Deposit',        cls: 'success', sign: '+' },
+                                'withdrawal':     { label: 'Withdrawal',     cls: 'danger',  sign: '-' },
+                                'loan-repayment': { label: 'Loan Repayment', cls: 'warning', sign: ''  },
+                                'direct-debit':   { label: 'Direct Debit',   cls: 'info',    sign: '-' }
+                            };
+                            const statusMap = {
+                                successful: 'success',
+                                pending:    'warning',
+                                rejected:   'danger',
+                            };
+                            adminPayments.forEach(function(txn) {
+                                const d          = new Date(txn.createdAt);
+                                const type       = typesMap[txn.paymentType] || { label: txn.paymentType, cls: 'secondary', sign: '' };
+                                const memberName  = txn.member ? (txn.member.firstName + ' ' + txn.member.lastName) : 'Deleted Member';
+                                const membershipID = txn.member ? (txn.member.membershipID || 'N/A') : 'N/A';
+                                const processedBy  = txn.admin  ? (txn.admin.firstName + ' ' + txn.admin.lastName) : 'System';
+                                const txnStatus    = txn.status || 'successful';
+                                const txnStatusCls = statusMap[txnStatus] || 'secondary';
+                                const txnData = {
+                                    id:            txn.reference || txn._id,
+                                    date:          d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }),
+                                    time:          d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' }),
+                                    type:          type.label,
+                                    typeClass:     type.cls,
+                                    status:        txnStatus,
+                                    statusClass:   txnStatusCls,
+                                    reference:     txn.reference || 'N/A',
+                                    memberName:    memberName,
+                                    memberId:      membershipID,
+                                    memberEmail:   txn.member ? (txn.member.email || 'N/A') : 'N/A',
+                                    memberPhone:   txn.member ? (txn.member.phone || 'N/A') : 'N/A',
+                                    amount:        txn.amount,
+                                    method:        txn.paymentMethod.replace(/-/g,' ').toUpperCase(),
+                                    fee:           txn.chargeAmount || 0,
+                                    balanceBefore: txn.balanceBefore,
+                                    balanceAfter:  txn.balanceAfter,
+                                    processedBy:   processedBy,
+                                    notes:         txn.notes || 'No additional notes'
                                 };
-                                adminPayments.forEach(function(txn) {
-                                    const d    = new Date(txn.createdAt);
-                                    const type = typesMap[txn.paymentType] || { label: txn.paymentType, cls: 'secondary', sign: '' };
-                                    const memberName  = txn.member ? (txn.member.firstName + ' ' + txn.member.lastName) : 'Deleted Member';
-                                    const membershipID = txn.member ? (txn.member.membershipID || 'N/A') : 'N/A';
-                                    const processedBy  = txn.admin  ? (txn.admin.firstName  + ' ' + txn.admin.lastName)  : 'System';
-                                    const txnData = {
-                                        id:           txn.reference || txn._id,
-                                        date:         d.toLocaleDateString('en-US',  { month:'short', day:'numeric', year:'numeric' }),
-                                        time:         d.toLocaleTimeString('en-US',  { hour:'2-digit', minute:'2-digit' }),
-                                        type:         type.label,
-                                        typeClass:    type.cls,
-                                        status:       txn.status || 'successful',
-                                        statusClass:  'success',
-                                        reference:    txn.reference || 'N/A',
-                                        memberName:   memberName,
-                                        memberId:     membershipID,
-                                        memberEmail:  txn.member ? (txn.member.email  || 'N/A') : 'N/A',
-                                        memberPhone:  txn.member ? (txn.member.phone  || 'N/A') : 'N/A',
-                                        amount:       txn.amount,
-                                        method:       txn.paymentMethod.replace(/-/g,' ').toUpperCase(),
-                                        fee:          txn.chargeAmount || 0,
-                                        balanceBefore: txn.balanceBefore,
-                                        balanceAfter:  txn.balanceAfter,
-                                        processedBy:   processedBy,
-                                        notes:         txn.notes || 'No additional notes'
-                                    };
-                            %>
-                            <tr>
-                                <td data-label="Date/Time">
-                                    <small class="fw-semibold d-block">
-                                        <%= d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) %>
-                                    </small>
-                                    <small class="text-muted">
-                                        <%= d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' }) %>
-                                    </small>
-                                </td>
-                                <td data-label="Member">
-                                    <div class="fw-semibold"><%= memberName %></div>
-                                    <small class="text-muted"><%= membershipID %></small>
-                                </td>
-                                <td data-label="Type">
-                                    <span class="badge bg-<%= type.cls %>"><%= type.label %></span>
-                                </td>
-                                <td data-label="Amount" class="fw-bold text-<%= type.cls %>">
-                                    <%= type.sign %>₦<%= txn.amount.toLocaleString() %>
-                                </td>
-                                <td data-label="Method">
-                                    <small><%= txn.paymentMethod.replace(/-/g,' ').toUpperCase() %></small>
-                                </td>
-                                <td data-label="Status">
-                                    <span class="badge bg-success"><%= txn.status || 'successful' %></span>
-                                </td>
-                                <td data-label="Actions">
-                                    <button class="btn btn-sm btn-outline-primary"
-                                            onclick='viewTransactionDetails(<%- JSON.stringify(txnData) %>)'>
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <% }); } %>
-                        </tbody>
-                    </table>
+                        %>
+                        <tr data-status="<%= txnStatus %>">
+                            <td data-label="Date/Time">
+                                <small class="fw-semibold d-block">
+                                    <%= d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) %>
+                                </small>
+                                <small class="text-muted">
+                                    <%= d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' }) %>
+                                </small>
+                            </td>
+                            <td data-label="Member">
+                                <div class="fw-semibold"><%= memberName %></div>
+                                <small class="text-muted"><%= membershipID %></small>
+                            </td>
+                            <td data-label="Type">
+                                <span class="badge bg-<%= type.cls %>"><%= type.label %></span>
+                            </td>
+                            <td data-label="Amount" class="fw-bold text-<%= type.cls %>">
+                                <%= type.sign %>₦<%= txn.amount.toLocaleString() %>
+                            </td>
+                            <td data-label="Method">
+                                <small><%= txn.paymentMethod.replace(/-/g,' ').toUpperCase() %></small>
+                            </td>
+                            <td data-label="Status">
+                                <span class="badge bg-<%= txnStatusCls %>">
+                                    <%= txnStatus.charAt(0).toUpperCase() + txnStatus.slice(1) %>
+                                </span>
+                            </td>
+                            <td data-label="Actions">
+                                <button class="btn btn-sm btn-outline-primary"
+                                        title="View details"
+                                        onclick='viewTransactionDetails(<%- JSON.stringify(txnData) %>)'>
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <% }); } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /main-content -->
+
+<!-- Powered By -->
+<div class="powered-by">
+    <strong style="color:var(--primary);">Cloudbaam</strong>
+    Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     NOTIFICATION MODAL
+══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="notifyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+        <div class="modal-content border-0" style="border-radius:20px;overflow:hidden;">
+            <div class="modal-body p-4 text-center">
+                <div class="notify-icon-wrap" id="notifyIconWrap">
+                    <i id="notifyIconEl" class="fas fa-info-circle"></i>
+                </div>
+                <div class="notify-title" id="notifyTitle">Info</div>
+                <div class="notify-message" id="notifyMessage"></div>
+                <div class="notify-footer" id="notifyFooter">
+                    <button class="notify-btn-ok info" id="notifyOkBtn" onclick="notifyClose()">OK</button>
                 </div>
             </div>
         </div>
-
-    </div><!-- /main-content -->
-
-    <!-- Powered By -->
-    <div class="powered-by">
-        <strong style="color:var(--primary);">Cloudbaam</strong>
-        Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong>
     </div>
+</div>
 
-    <!-- ══════════════════ MODALS ══════════════════ -->
 
-    <!-- Submission Success Modal -->
-    <div class="modal fade" id="successModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title"><i class="fas fa-clock me-2"></i>Transaction Submitted</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- ══════════════════════════════════════════════════════
+     UNAUTHORIZED MODAL
+══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="unauthorizedModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"
+                 style="background:linear-gradient(135deg,#7f1d1d 0%,#ef4444 100%);">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-shield-alt me-2"></i>Access Denied
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-lock fa-3x text-danger mb-3 d-block"></i>
+                <p id="unauthorizedMessage" class="mb-0 text-secondary">
+                    You do not have permission to perform this action.
+                </p>
+            </div>
+            <div class="modal-footer justify-content-center border-0 pt-0">
+                <button class="btn btn-danger px-5" data-bs-dismiss="modal">Understood</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SUBMISSION SUCCESS MODAL
+══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-clock me-2"></i>Transaction Submitted
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-hourglass-half fa-5x text-warning mb-3 d-block"></i>
+                <h4 class="mb-2">Awaiting Approval</h4>
+                <p class="text-muted mb-3">
+                    Your transaction has been submitted and is now pending review.
+                    All selected approvers have been notified.
+                </p>
+                <div class="p-3 rounded-3" style="background:#fffbeb;border:1px solid #fde68a;">
+                    <small class="fw-semibold d-block mb-1" style="color:#92400e;">Approval Reference</small>
+                    <strong id="approvalIdDisplay"
+                            style="font-family:monospace;font-size:0.95rem;color:#92400e;word-break:break-all;"></strong>
                 </div>
-                <div class="modal-body text-center py-4">
-                    <i class="fas fa-hourglass-half fa-5x text-warning mb-3 d-block"></i>
-                    <h4 class="mb-3">Awaiting Approval</h4>
-                    <p class="text-muted">
-                        Your transaction has been submitted and is now pending review.
-                        The selected approvers have been notified.
-                    </p>
-                    <div class="mt-3 p-3 rounded" style="background:#fffbeb;border:1px solid #fde68a;">
-                        <small class="fw-semibold" style="color:#92400e;">Approval ID:</small><br>
-                        <strong id="approvalIdDisplay" style="font-family:monospace;font-size:0.9rem;color:#92400e;"></strong>
+            </div>
+            <div class="modal-footer">
+                <a href="/admin/transaction-approvals" class="btn btn-outline-primary">
+                    <i class="fas fa-tasks me-1"></i>View All Approvals
+                </a>
+                <button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal" onclick="resetForm()">
+                    Close &amp; New Transaction
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     TRANSACTION DETAILS MODAL
+══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="transactionDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"
+                 style="background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);color:white;">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-invoice me-2"></i>Transaction Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+
+                    <!-- Transaction Info -->
+                    <div class="col-md-6">
+                        <div class="card h-100"
+                             style="background:rgba(30,58,138,0.02);border:2px solid rgba(30,58,138,0.1);">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3" style="color:var(--primary);">
+                                    <i class="fas fa-info-circle me-2"></i>Transaction Information
+                                </h6>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">Transaction ID</small>
+                                    <strong id="detailTxnId" class="text-break">—</strong>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">Date &amp; Time</small>
+                                    <strong id="detailDateTime">—</strong>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">Type</small>
+                                    <span id="detailType" class="badge bg-secondary">—</span>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">Status</small>
+                                    <span id="detailStatus" class="badge bg-success">—</span>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block">Reference</small>
+                                    <strong id="detailReference">—</strong>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <a href="/admin/transaction-approvals" class="btn btn-outline-primary">
-                        <i class="fas fa-tasks me-1"></i>View All Approvals
-                    </a>
-                    <button type="button" class="btn btn-secondary"
-                            data-bs-dismiss="modal" onclick="resetForm()">Close</button>
-                </div>
+
+                    <!-- Member Info -->
+                    <div class="col-md-6">
+                        <div class="card h-100"
+                             style="background:rgba(16,185,129,0.02);border:2px solid rgba(16,185,129,0.1);">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3" style="color:var(--success);">
+                                    <i class="fas fa-user me-2"></i>Member Information
+                                </h6>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">Full Name</small>
+                                    <strong id="detailMemberName">—</strong>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">Member ID</small>
+                                    <strong id="detailMemberId">—</strong>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">Email</small>
+                                    <strong id="detailMemberEmail">—</strong>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block">Phone</small>
+                                    <strong id="detailMemberPhone">—</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Details -->
+                    <div class="col-12">
+                        <div class="card"
+                             style="background:rgba(245,158,11,0.02);border:2px solid rgba(245,158,11,0.1);">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3" style="color:var(--warning);">
+                                    <i class="fas fa-money-bill-wave me-2"></i>Payment Details
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block">Amount</small>
+                                        <h4 class="mb-0 fw-bold text-success" id="detailAmount">—</h4>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block">Method</small>
+                                        <strong id="detailMethod">—</strong>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block">Processing Fee</small>
+                                        <strong id="detailFee">—</strong>
+                                    </div>
+                                </div>
+                                <hr class="my-3">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <small class="text-muted d-block">Balance Before</small>
+                                        <strong id="detailBalanceBefore">—</strong>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted d-block">Balance After</small>
+                                        <strong id="detailBalanceAfter" style="color:var(--success);">—</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Info -->
+                    <div class="col-12">
+                        <div class="card" style="border:2px solid rgba(30,58,138,0.08);">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3" style="color:var(--primary);">
+                                    <i class="fas fa-comment-alt me-2"></i>Additional Information
+                                </h6>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">Processed By</small>
+                                    <strong id="detailProcessedBy">—</strong>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block">Notes</small>
+                                    <p class="mb-0 text-secondary" id="detailNotes">—</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /row -->
+            </div><!-- /modal-body -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" onclick="printReceipt()">
+                    <i class="fas fa-print me-2"></i>Print Receipt
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Close
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Transaction Details Modal -->
-    <div class="modal fade" id="transactionDetailsModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header"
-                     style="background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);color:white;">
-                    <h5 class="modal-title"><i class="fas fa-file-invoice me-2"></i>Transaction Details</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-3">
 
-                        <!-- Transaction Info -->
-                        <div class="col-md-6">
-                            <div class="card h-100"
-                                 style="background:linear-gradient(135deg,rgba(30,58,138,0.03) 0%,rgba(59,130,246,0.03) 100%);border:2px solid rgba(30,58,138,0.1);">
-                                <div class="card-body">
-                                    <h6 class="fw-bold mb-3" style="color:var(--primary);">
-                                        <i class="fas fa-info-circle me-2"></i>Transaction Information
-                                    </h6>
-                                    <div class="mb-3">
-                                        <small class="text-muted d-block mb-1">Transaction ID</small>
-                                        <strong id="detailTxnId">—</strong>
-                                    </div>
-                                    <div class="mb-3">
-                                        <small class="text-muted d-block mb-1">Date &amp; Time</small>
-                                        <strong id="detailDateTime">—</strong>
-                                    </div>
-                                    <div class="mb-3">
-                                        <small class="text-muted d-block mb-1">Transaction Type</small>
-                                        <span id="detailType" class="badge bg-success">—</span>
-                                    </div>
-                                    <div class="mb-3">
-                                        <small class="text-muted d-block mb-1">Status</small>
-                                        <span id="detailStatus" class="badge bg-success">—</span>
-                                    </div>
-                                    <div>
-                                        <small class="text-muted d-block mb-1">Reference</small>
-                                        <strong id="detailReference">—</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Member Info -->
-                        <div class="col-md-6">
-                            <div class="card h-100"
-                                 style="background:linear-gradient(135deg,rgba(16,185,129,0.03) 0%,rgba(5,150,105,0.03) 100%);border:2px solid rgba(16,185,129,0.1);">
-                                <div class="card-body">
-                                    <h6 class="fw-bold mb-3" style="color:var(--success);">
-                                        <i class="fas fa-user me-2"></i>Member Information
-                                    </h6>
-                                    <div class="mb-3">
-                                        <small class="text-muted d-block mb-1">Name</small>
-                                        <strong id="detailMemberName">—</strong>
-                                    </div>
-                                    <div class="mb-3">
-                                        <small class="text-muted d-block mb-1">Member ID</small>
-                                        <strong id="detailMemberId">—</strong>
-                                    </div>
-                                    <div class="mb-3">
-                                        <small class="text-muted d-block mb-1">Email</small>
-                                        <strong id="detailMemberEmail">—</strong>
-                                    </div>
-                                    <div>
-                                        <small class="text-muted d-block mb-1">Phone</small>
-                                        <strong id="detailMemberPhone">—</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Payment Details -->
-                        <div class="col-12">
-                            <div class="card"
-                                 style="background:linear-gradient(135deg,rgba(245,158,11,0.03) 0%,rgba(217,119,6,0.03) 100%);border:2px solid rgba(245,158,11,0.1);">
-                                <div class="card-body">
-                                    <h6 class="fw-bold mb-3" style="color:var(--warning);">
-                                        <i class="fas fa-money-bill-wave me-2"></i>Payment Details
-                                    </h6>
-                                    <div class="row g-3">
-                                        <div class="col-md-4">
-                                            <small class="text-muted d-block mb-1">Amount</small>
-                                            <h4 class="mb-0 fw-bold text-success" id="detailAmount">—</h4>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <small class="text-muted d-block mb-1">Payment Method</small>
-                                            <strong id="detailMethod">—</strong>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <small class="text-muted d-block mb-1">Processing Fee</small>
-                                            <strong id="detailFee">—</strong>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <small class="text-muted d-block mb-1">Balance Before</small>
-                                            <strong id="detailBalanceBefore">—</strong>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <small class="text-muted d-block mb-1">Balance After</small>
-                                            <strong id="detailBalanceAfter" style="color:var(--success);">—</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Additional Info -->
-                        <div class="col-12">
-                            <div class="card" style="border:2px solid rgba(30,58,138,0.1);">
-                                <div class="card-body">
-                                    <h6 class="fw-bold mb-3" style="color:var(--primary);">
-                                        <i class="fas fa-comment-alt me-2"></i>Additional Information
-                                    </h6>
-                                    <div class="mb-3">
-                                        <small class="text-muted d-block mb-1">Processed By</small>
-                                        <strong id="detailProcessedBy">—</strong>
-                                    </div>
-                                    <div>
-                                        <small class="text-muted d-block mb-1">Notes</small>
-                                        <p class="mb-0" id="detailNotes">—</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div><!-- /row -->
-                </div><!-- /modal-body -->
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-primary" onclick="printReceipt()">
-                        <i class="fas fa-print me-2"></i>Print Receipt
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Close
-                    </button>
-                </div>
+<!-- ══════════════════════════════════════════════════════
+     HIDDEN PRINTABLE RECEIPT
+══════════════════════════════════════════════════════ -->
+<div id="printReceipt" style="display:none;">
+    <div class="receipt-container">
+        <div class="receipt-header">
+            <div class="receipt-logo">C</div>
+            <div class="receipt-title">CLUB DE STARS</div>
+            <div class="receipt-subtitle">Official Payment Receipt</div>
+            <div class="receipt-subtitle mt-2">
+                123 Business Avenue, Port Harcourt, Rivers State, Nigeria<br>
+                +234 800 123 4567 &bull; info@clubdestars.com
             </div>
         </div>
-    </div>
 
-    <!-- Hidden Printable Receipt -->
-    <div id="printReceipt" style="display:none;">
-        <div class="receipt-container">
-            <div class="receipt-header">
-                <div class="receipt-logo">C</div>
-                <div class="receipt-title">CLUB DE STARS</div>
-                <div class="receipt-subtitle">Official Payment Receipt</div>
-                <div class="receipt-subtitle mt-2">
-                    123 Business Avenue, Port Harcourt, Rivers State, Nigeria<br>
-                    +234 800 123 4567 | info@clubdestars.com
-                </div>
+        <div class="receipt-section">
+            <div class="receipt-section-title">TRANSACTION INFORMATION</div>
+            <div class="receipt-row">
+                <span class="receipt-label">Transaction ID:</span>
+                <span class="receipt-value" id="printTxnId">—</span>
             </div>
-
-            <div class="receipt-section">
-                <div class="receipt-section-title">TRANSACTION INFORMATION</div>
-                <div class="receipt-row"><span class="receipt-label">Transaction ID:</span><span class="receipt-value" id="printTxnId">—</span></div>
-                <div class="receipt-row"><span class="receipt-label">Date &amp; Time:</span><span class="receipt-value" id="printDateTime">—</span></div>
-                <div class="receipt-row"><span class="receipt-label">Type:</span><span class="receipt-value" id="printType">—</span></div>
-                <div class="receipt-row"><span class="receipt-label">Status:</span><span class="receipt-value" id="printStatus">—</span></div>
-                <div class="receipt-row"><span class="receipt-label">Reference:</span><span class="receipt-value" id="printReference">—</span></div>
+            <div class="receipt-row">
+                <span class="receipt-label">Date &amp; Time:</span>
+                <span class="receipt-value" id="printDateTime">—</span>
             </div>
-
-            <div class="receipt-section">
-                <div class="receipt-section-title">MEMBER INFORMATION</div>
-                <div class="receipt-row"><span class="receipt-label">Name:</span><span class="receipt-value" id="printMemberName">—</span></div>
-                <div class="receipt-row"><span class="receipt-label">Member ID:</span><span class="receipt-value" id="printMemberId">—</span></div>
-                <div class="receipt-row"><span class="receipt-label">Email:</span><span class="receipt-value" id="printMemberEmail">—</span></div>
-                <div class="receipt-row"><span class="receipt-label">Phone:</span><span class="receipt-value" id="printMemberPhone">—</span></div>
+            <div class="receipt-row">
+                <span class="receipt-label">Type:</span>
+                <span class="receipt-value" id="printType">—</span>
             </div>
-
-            <div class="receipt-amount">
-                <div class="receipt-amount-label">TRANSACTION AMOUNT</div>
-                <div class="receipt-amount-value" id="printAmount">₦0.00</div>
+            <div class="receipt-row">
+                <span class="receipt-label">Status:</span>
+                <span class="receipt-value" id="printStatus">—</span>
             </div>
-
-            <div class="receipt-section">
-                <div class="receipt-section-title">PAYMENT DETAILS</div>
-                <div class="receipt-row"><span class="receipt-label">Method:</span><span class="receipt-value" id="printMethod">—</span></div>
-                <div class="receipt-row"><span class="receipt-label">Processing Fee:</span><span class="receipt-value" id="printFee">₦0.00</span></div>
-                <div class="receipt-row"><span class="receipt-label">Balance Before:</span><span class="receipt-value" id="printBalanceBefore">—</span></div>
-                <div class="receipt-row"><span class="receipt-label">Balance After:</span><span class="receipt-value" id="printBalanceAfter">—</span></div>
-            </div>
-
-            <div class="receipt-section">
-                <div class="receipt-section-title">ADDITIONAL INFORMATION</div>
-                <div class="receipt-row"><span class="receipt-label">Processed By:</span><span class="receipt-value" id="printProcessedBy">—</span></div>
-                <div class="receipt-row"><span class="receipt-label">Notes:</span><span class="receipt-value" id="printNotes">—</span></div>
-            </div>
-
-            <div class="receipt-footer">
-                <div class="receipt-stamp">VERIFIED &amp; COMPLETED</div>
-                <p style="font-size:0.8rem;color:var(--secondary);margin-top:1rem;">
-                    This is a computer-generated receipt and does not require a signature.<br>
-                    For inquiries contact: support@clubdestars.com
-                </p>
-                <p style="font-size:0.7rem;color:var(--secondary);margin-top:0.5rem;">
-                    Generated on: <span id="printGeneratedDate">—</span><br>
-                    Powered by <strong>JESZ LIMITED</strong>
-                </p>
+            <div class="receipt-row">
+                <span class="receipt-label">Reference:</span>
+                <span class="receipt-value" id="printReference">—</span>
             </div>
         </div>
+
+        <div class="receipt-section">
+            <div class="receipt-section-title">MEMBER INFORMATION</div>
+            <div class="receipt-row">
+                <span class="receipt-label">Name:</span>
+                <span class="receipt-value" id="printMemberName">—</span>
+            </div>
+            <div class="receipt-row">
+                <span class="receipt-label">Member ID:</span>
+                <span class="receipt-value" id="printMemberId">—</span>
+            </div>
+            <div class="receipt-row">
+                <span class="receipt-label">Email:</span>
+                <span class="receipt-value" id="printMemberEmail">—</span>
+            </div>
+            <div class="receipt-row">
+                <span class="receipt-label">Phone:</span>
+                <span class="receipt-value" id="printMemberPhone">—</span>
+            </div>
+        </div>
+
+        <div class="receipt-amount">
+            <div class="receipt-amount-label">TRANSACTION AMOUNT</div>
+            <div class="receipt-amount-value" id="printAmount">₦0.00</div>
+        </div>
+
+        <div class="receipt-section">
+            <div class="receipt-section-title">PAYMENT DETAILS</div>
+            <div class="receipt-row">
+                <span class="receipt-label">Payment Method:</span>
+                <span class="receipt-value" id="printMethod">—</span>
+            </div>
+            <div class="receipt-row">
+                <span class="receipt-label">Processing Fee:</span>
+                <span class="receipt-value" id="printFee">₦0.00</span>
+            </div>
+            <div class="receipt-row">
+                <span class="receipt-label">Balance Before:</span>
+                <span class="receipt-value" id="printBalanceBefore">—</span>
+            </div>
+            <div class="receipt-row">
+                <span class="receipt-label">Balance After:</span>
+                <span class="receipt-value" id="printBalanceAfter">—</span>
+            </div>
+        </div>
+
+        <div class="receipt-section">
+            <div class="receipt-section-title">ADDITIONAL INFORMATION</div>
+            <div class="receipt-row">
+                <span class="receipt-label">Processed By:</span>
+                <span class="receipt-value" id="printProcessedBy">—</span>
+            </div>
+            <div class="receipt-row">
+                <span class="receipt-label">Notes:</span>
+                <span class="receipt-value" id="printNotes">—</span>
+            </div>
+        </div>
+
+        <div class="receipt-footer">
+            <div class="receipt-stamp">VERIFIED &amp; COMPLETED</div>
+            <p style="font-size:0.8rem;color:#64748b;margin-top:1rem;">
+                This is a computer-generated receipt and does not require a signature.<br>
+                For inquiries contact: support@clubdestars.com
+            </p>
+            <p style="font-size:0.7rem;color:#94a3b8;margin-top:0.5rem;">
+                Generated on: <span id="printGeneratedDate">—</span><br>
+                Powered by <strong>JESZ LIMITED</strong>
+            </p>
+        </div>
     </div>
+</div>
 
-    <!-- ══════════════════ SCRIPTS ══════════════════ -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script>
-        /* ──────────────────────────────────────────
-           STATE
-        ────────────────────────────────────────── */
-        let currentPaymentType  = '';
-        let selectedMember      = null;
-        let searchTimeout       = null;
-        let selectedApproverIds   = [];   // array of id strings
-        let selectedApproverNames = {};   // { id: 'Full Name' }
-        let currentTransaction  = null;   // last processed / viewed txn
 
-        /* ──────────────────────────────────────────
-           INIT
-        ────────────────────────────────────────── */
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
-            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+<!-- ══════════════════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════════════════
+   PERMISSIONS
+   Injected at render time from server. permissions is an array
+   of objects { name, ... } — we use .some() not .includes().
+════════════════════════════════════════════════════════════ */
+const PERMISSIONS = {
+    processDeposits:       <%- JSON.stringify(!!admin.role?.permissions?.some(p => p.name === 'process_deposits'))      %>,
+    authorizeTransactions: <%- JSON.stringify(!!admin.role?.permissions?.some(p => p.name === 'authorize_transactions')) %>,
+};
+
+/* ════════════════════════════════════════════════════════════
+   NOTIFICATION MODAL
+   Promise-based — await showNotify({…}) before continuing.
+════════════════════════════════════════════════════════════ */
+let _notifyResolve = null;
+
+function showNotify({ type = 'info', title = '', message = '', confirmLabel = 'OK', cancelLabel = null } = {}) {
+    return new Promise(resolve => {
+        _notifyResolve = resolve;
+
+        const iconMap = {
+            success: { icon: 'fa-check-circle',        label: title || 'Success' },
+            error:   { icon: 'fa-times-circle',         label: title || 'Error'   },
+            warning: { icon: 'fa-exclamation-triangle', label: title || 'Warning' },
+            info:    { icon: 'fa-info-circle',           label: title || 'Info'   },
+        };
+        const cfg = iconMap[type] ?? iconMap.info;
+
+        document.getElementById('notifyIconWrap').className = `notify-icon-wrap ${type}`;
+        document.getElementById('notifyIconEl').className   = `fas ${cfg.icon}`;
+
+        const titleEl     = document.getElementById('notifyTitle');
+        titleEl.className = `notify-title ${type}`;
+        titleEl.textContent = cfg.label;
+
+        document.getElementById('notifyMessage').textContent = message;
+
+        const okBtn = document.getElementById('notifyOkBtn');
+        okBtn.className   = `notify-btn-ok ${type}`;
+        okBtn.textContent = confirmLabel;
+
+        // Remove any old cancel button
+        document.getElementById('notifyCancelBtn')?.remove();
+
+        if (cancelLabel) {
+            const cb = document.createElement('button');
+            cb.className   = 'notify-btn-cancel';
+            cb.id          = 'notifyCancelBtn';
+            cb.textContent = cancelLabel;
+            cb.onclick     = notifyCancel;
+            document.getElementById('notifyFooter').insertBefore(cb, okBtn);
+        }
+
+        new bootstrap.Modal(document.getElementById('notifyModal'), {
+            backdrop: 'static', keyboard: false,
+        }).show();
+    });
+}
+
+function notifyClose() {
+    bootstrap.Modal.getInstance(document.getElementById('notifyModal'))?.hide();
+    if (_notifyResolve) { _notifyResolve(true);  _notifyResolve = null; }
+}
+function notifyCancel() {
+    bootstrap.Modal.getInstance(document.getElementById('notifyModal'))?.hide();
+    if (_notifyResolve) { _notifyResolve(false); _notifyResolve = null; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   UNAUTHORIZED MODAL
+   Keys match exactly what ensureAdmin() sends as `reason`.
+════════════════════════════════════════════════════════════ */
+const UNAUTH_MESSAGES = {
+    // ── Server-sent reasons (ensureAdmin middleware) ──────────
+    auth:       'Your session has expired. Please log in again.',
+    permission: "You don't have permission to perform this action.",
+    inactive:   'Your admin role is currently inactive. Contact a super-admin.',
+    norole:     'No role is assigned to your account. Contact a super-admin.',
+    member:     'Member accounts are not permitted to perform admin actions.',
+    // ── Client-side only (never returned by server) ───────────
+    process_deposits:       'You don\'t have the permission to Authorize transaction \n and cannot assign approvers or submit transactions.',
+    authorize_transactions: 'You need the authorize_transactions permission to assign approvers.',
+};
+
+function showUnauthorized(reason = 'permission', onClose = null) {
+    document.getElementById('unauthorizedMessage').textContent =
+        UNAUTH_MESSAGES[reason] ?? UNAUTH_MESSAGES.permission;
+
+    const modalEl = document.getElementById('unauthorizedModal');
+
+    if (onClose) {
+        modalEl.addEventListener('hidden.bs.modal', function h() {
+            modalEl.removeEventListener('hidden.bs.modal', h);
+            onClose();
+        });
+    }
+
+    new bootstrap.Modal(modalEl).show();
+}
+
+/* ════════════════════════════════════════════════════════════
+   PERMISSION-AWARE FETCH WRAPPER
+   Handles 401 → redirect to login, 403 → unauthorized modal.
+   If a sourceModal element is passed, it is hidden first so
+   modals don't stack on top of each other.
+════════════════════════════════════════════════════════════ */
+async function permFetch(url, options = {}, sourceModalEl = null) {
+    // Merge headers so X-Requested-With is always present
+    const headers = {
+        'X-Requested-With': 'XMLHttpRequest',
+        ...(options.headers || {}),
+    };
+
+    let res;
+    try {
+        res = await fetch(url, { ...options, headers });
+    } catch (networkErr) {
+        await showNotify({
+            type: 'error',
+            title: 'Network Error',
+            message: 'Could not reach the server. Check your connection and try again.',
+        });
+        return { ok: false };
+    }
+
+    const hideSource = () => {
+        if (sourceModalEl) {
+            bootstrap.Modal.getInstance(sourceModalEl)?.hide();
+        }
+    };
+
+    if (res.status === 401) {
+        hideSource();
+        const doRedirect = () => {
+            showUnauthorized('auth', () => {
+                setTimeout(() => { window.location.href = '/login'; }, 800);
+            });
+        };
+        if (sourceModalEl) {
+            sourceModalEl.addEventListener('hidden.bs.modal', function h() {
+                sourceModalEl.removeEventListener('hidden.bs.modal', h);
+                doRedirect();
+            });
+        } else {
+            doRedirect();
+        }
+        return { ok: false };
+    }
+
+    if (res.status === 403) {
+        let errorData = {};
+        try { errorData = await res.json(); } catch (_) {}
+        hideSource();
+        const doShow = () => showUnauthorized(errorData.reason || 'permission');
+        if (sourceModalEl) {
+            sourceModalEl.addEventListener('hidden.bs.modal', function h() {
+                sourceModalEl.removeEventListener('hidden.bs.modal', h);
+                doShow();
+            });
+        } else {
+            doShow();
+        }
+        return { ok: false };
+    }
+
+    let data;
+    try {
+        data = await res.json();
+    } catch (_) {
+        data = {};
+    }
+    return { ok: res.ok, status: res.status, data };
+}
+
+/* ════════════════════════════════════════════════════════════
+   APPLICATION STATE
+════════════════════════════════════════════════════════════ */
+let currentPaymentType    = '';
+let selectedMember        = null;
+let searchTimeout         = null;
+let selectedApproverIds   = [];
+let selectedApproverNames = {};   // { id: 'Full Name' }
+let currentTransaction    = null;
+
+/* ════════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+    // Set current date in page header
+    document.getElementById('currentDate').textContent =
+        new Date().toLocaleDateString('en-US', {
+            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
         });
 
-        loadPendingCount();
+    loadPendingCount();
+    applyPermissionUI();
+});
 
-        /* ──────────────────────────────────────────
-           PENDING APPROVALS BADGE
-        ────────────────────────────────────────── */
-        async function loadPendingCount() {
-            try {
-                const res  = await fetch('/admin/pending-approvals-count');
-                const data = await res.json();
-                if (data.count > 0) {
-                    const nb = document.getElementById('navbarPendingBadge');
-                    const sb = document.getElementById('sidebarPendingBadge');
-                    nb.style.display = 'inline';
-                    nb.textContent   = data.count;
-                    sb.style.display = 'inline';
-                    sb.textContent   = data.count;
-                }
-            } catch (e) { /* silent */ }
+/* ════════════════════════════════════════════════════════════
+   APPLY PERMISSION UI
+   Runs on DOMContentLoaded — visually locks elements the user
+   cannot interact with based on their role permissions.
+════════════════════════════════════════════════════════════ */
+function applyPermissionUI() {
+    // Lock all payment type cards if user lacks process_deposits
+    if (!PERMISSIONS.processDeposits) {
+        document.querySelectorAll('.payment-type-card').forEach(card => {
+            card.classList.add('locked');
+            if (!card.querySelector('.lock-overlay')) {
+                const overlay = document.createElement('div');
+                overlay.className = 'lock-overlay';
+                overlay.innerHTML = '<i class="fas fa-lock"></i><span>NO PERMISSION</span>';
+                card.appendChild(overlay);
+            }
+        });
+    }
+
+    // Lock approver list and show notice if user lacks authorize_transactions
+    if (!PERMISSIONS.authorizeTransactions) {
+        document.getElementById('approverList')?.classList.add('locked');
+        const notice = document.getElementById('approverLockedNotice');
+        if (notice) notice.style.display = 'flex';
+    }
+}
+
+/* ════════════════════════════════════════════════════════════
+   SIDEBAR TOGGLE (mobile)
+════════════════════════════════════════════════════════════ */
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('active');
+}
+
+/* ════════════════════════════════════════════════════════════
+   PENDING APPROVALS BADGE
+════════════════════════════════════════════════════════════ */
+async function loadPendingCount() {
+    try {
+        const res  = await fetch('/admin/pending-approvals-count');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.count > 0) {
+            ['navbarPendingBadge', 'sidebarPendingBadge'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.style.display = 'inline'; el.textContent = data.count; }
+            });
         }
+    } catch (_) { /* silent — badge is non-critical */ }
+}
 
-        /* ──────────────────────────────────────────
-           PAYMENT TYPE SELECTION
-        ────────────────────────────────────────── */
-        function selectPaymentType(type, el) {
-            currentPaymentType = type;
+/* ════════════════════════════════════════════════════════════
+   PAYMENT TYPE CLICK HANDLER
+   Front-line permission check before opening the form.
+════════════════════════════════════════════════════════════ */
+function handlePaymentTypeClick(type, el) {
+    if (!PERMISSIONS.processDeposits) {
+        showUnauthorized('process_deposits');
+        return;
+    }
+    selectPaymentType(type, el);
+}
 
-            document.querySelectorAll('.payment-type-card').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
+/* ════════════════════════════════════════════════════════════
+   SELECT PAYMENT TYPE — opens and configures the form
+════════════════════════════════════════════════════════════ */
+function selectPaymentType(type, el) {
+    currentPaymentType = type;
 
-            const titles = {
-                'deposit':        'Member Deposit',
-                'withdrawal':     'Process Withdrawal',
-                'loan-repayment': 'Loan Repayment',
-                'direct-debit':   'Direct Debit'
-            };
-            document.getElementById('formTitle').innerHTML =
-                `<i class="fas fa-file-invoice-dollar me-2" style="color:var(--primary);"></i>${titles[type]}`;
+    // Mark active card
+    document.querySelectorAll('.payment-type-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
 
-            document.getElementById('loanSelection').style.display  = (type === 'loan-repayment') ? 'block' : 'none';
-            document.getElementById('chargeTypeDiv').style.display  = (type === 'direct-debit')   ? 'block' : 'none';
-            document.getElementById('loanBadge').style.display      = (type === 'loan-repayment') ? 'inline-flex' : 'none';
+    // Update form title
+    const titles = {
+        'deposit':        '<i class="fas fa-plus-circle me-2" style="color:var(--success);"></i>Member Deposit',
+        'withdrawal':     '<i class="fas fa-minus-circle me-2" style="color:var(--danger);"></i>Process Withdrawal',
+        'loan-repayment': '<i class="fas fa-hand-holding-usd me-2" style="color:var(--warning);"></i>Loan Repayment',
+        'direct-debit':   '<i class="fas fa-university me-2" style="color:#8b5cf6;"></i>Direct Debit',
+    };
+    document.getElementById('formTitle').innerHTML = titles[type] || 'Payment Details';
 
-            document.getElementById('paymentForm').style.display = 'block';
-            document.getElementById('paymentForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Show / hide conditional fields
+    document.getElementById('loanSelection').style.display  = type === 'loan-repayment' ? 'block' : 'none';
+    document.getElementById('chargeTypeDiv').style.display  = type === 'direct-debit'   ? 'block' : 'none';
+    document.getElementById('loanBadge').style.display      = type === 'loan-repayment' ? 'inline-flex' : 'none';
 
-            clearMember();
-        }
+    // Show form and scroll into view
+    const formEl = document.getElementById('paymentForm');
+    formEl.style.display = 'block';
+    setTimeout(() => formEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
 
-        /* ──────────────────────────────────────────
-           MEMBER SEARCH AUTOCOMPLETE
-        ────────────────────────────────────────── */
-        function handleMemberSearch() {
-            const q        = document.getElementById('memberSearch').value.trim();
-            const dropdown = document.getElementById('autocompleteDropdown');
+    clearMember();
+}
 
-            if (searchTimeout) clearTimeout(searchTimeout);
+/* ════════════════════════════════════════════════════════════
+   MEMBER SEARCH AUTOCOMPLETE
+════════════════════════════════════════════════════════════ */
+function handleMemberSearch() {
+    const q        = document.getElementById('memberSearch').value.trim();
+    const dropdown = document.getElementById('autocompleteDropdown');
 
-            if (!q) {
-                dropdown.classList.remove('show');
-                dropdown.innerHTML = '';
+    if (searchTimeout) clearTimeout(searchTimeout);
+
+    if (!q) {
+        dropdown.classList.remove('show');
+        dropdown.innerHTML = '';
+        return;
+    }
+
+    searchTimeout = setTimeout(async () => {
+        try {
+            const res = await fetch(`/admin/search-member?q=${encodeURIComponent(q)}`);
+            if (!res.ok) return;
+            const members = await res.json();
+
+            if (!Array.isArray(members) || members.length === 0) {
+                dropdown.innerHTML = `
+                    <div class="autocomplete-item text-center text-muted py-3">
+                        <i class="fas fa-search fa-lg d-block mb-2 opacity-50"></i>
+                        No members found for "<strong>${escHtml(q)}</strong>"
+                    </div>`;
+                dropdown.classList.add('show');
                 return;
             }
 
-            searchTimeout = setTimeout(async () => {
-                try {
-                    const res     = await fetch(`/admin/search-member?q=${encodeURIComponent(q)}`);
-                    const members = await res.json();
+            dropdown.innerHTML = members.map(m => `
+                <div class="autocomplete-item"
+                     onclick='selectMember(${JSON.stringify(m).replace(/'/g, "&#39;")})'>
+                    <div class="autocomplete-item-name">${escHtml(m.name)}</div>
+                    <div class="autocomplete-item-details">
+                        ${escHtml(m.membershipID)} &bull; ${escHtml(m.email)}
+                    </div>
+                    <span class="autocomplete-item-balance">
+                        Balance: ₦${Number(m.balance).toLocaleString()}
+                    </span>
+                </div>`).join('');
 
-                    if (!members.length) {
-                        dropdown.innerHTML = `
-                            <div class="autocomplete-item text-center text-muted py-3">
-                                <i class="fas fa-search d-block mb-2"></i>No members found
-                            </div>`;
-                        dropdown.classList.add('show');
-                        return;
-                    }
-
-                    dropdown.innerHTML = members.map(m => `
-                        <div class="autocomplete-item" onclick='selectMember(${JSON.stringify(m).replace(/'/g, "&#39;")})'>
-                            <div class="autocomplete-item-name">${escHtml(m.name)}</div>
-                            <div class="autocomplete-item-details">${escHtml(m.membershipID)} | ${escHtml(m.email)}</div>
-                            <span class="autocomplete-item-balance">Balance: ₦${Number(m.balance).toLocaleString()}</span>
-                        </div>`).join('');
-
-                    dropdown.classList.add('show');
-                } catch (e) { console.error('Member search error:', e); }
-            }, 300);
+            dropdown.classList.add('show');
+        } catch (e) {
+            console.error('Member search error:', e);
         }
+    }, 300);
+}
 
-        function selectMember(member) {
-            selectedMember = member;
+function selectMember(member) {
+    selectedMember = member;
 
-            document.getElementById('memberSearch').value    = member.name;
-            document.getElementById('autocompleteDropdown').classList.remove('show');
+    document.getElementById('memberSearch').value = member.name;
+    document.getElementById('autocompleteDropdown').classList.remove('show');
 
-            document.getElementById('memberName').textContent    = member.name;
-            document.getElementById('memberID').textContent      = member.membershipID;
-            document.getElementById('memberEmail').textContent   = member.email;
-            document.getElementById('memberBalance').textContent = Number(member.balance).toLocaleString();
+    document.getElementById('memberName').textContent    = member.name;
+    document.getElementById('memberID').textContent      = member.membershipID;
+    document.getElementById('memberEmail').textContent   = member.email;
+    document.getElementById('memberBalance').textContent = Number(member.balance).toLocaleString();
+    document.getElementById('summaryCurrentBalance').textContent = Number(member.balance).toLocaleString();
 
-            document.getElementById('summaryCurrentBalance').textContent = Number(member.balance).toLocaleString();
-            document.getElementById('memberDetails').style.display = 'block';
+    document.getElementById('memberDetails').style.display = 'block';
 
-            /* Populate loan dropdown */
-            const loanSelect = document.getElementById('loanSelect');
-            loanSelect.innerHTML = '<option value="">Select Loan</option>';
-            if (member.loans && member.loans.length > 0) {
-                member.loans.forEach(loan => {
-                    loanSelect.insertAdjacentHTML('beforeend', `
-                        <option value="${loan.id}"
-                                data-total="${loan.totalRepay}"
-                                data-balance="${loan.balanceRemaining}">
-                            ₦${Number(loan.originalAmount).toLocaleString()} — ${loan.duration}
-                        </option>`);
-                });
-            } else {
-                loanSelect.innerHTML += '<option disabled>No active loans</option>';
-            }
-
-            calculateTotal();
-        }
-
-        function clearMember() {
-            selectedMember = null;
-
-            document.getElementById('memberSearch').value = '';
-            document.getElementById('memberDetails').style.display = 'none';
-            document.getElementById('paymentAmount').value = '';
-            document.getElementById('loanSelect').value   = '';
-            document.getElementById('chargeSelect').value = '';
-
-            document.getElementById('summaryDetails').style.display    = 'none';
-            document.getElementById('summaryPlaceholder').style.display = 'block';
-            document.getElementById('autocompleteDropdown').classList.remove('show');
-
-            updateSubmitButton();
-        }
-
-        /* ──────────────────────────────────────────
-           AMOUNT & TOTAL CALCULATION
-        ────────────────────────────────────────── */
-        function calculateTotal() {
-            const amount = parseFloat(document.getElementById('paymentAmount').value) || 0;
-            if (!selectedMember || amount <= 0) return;
-
-            let newBalance = Number(selectedMember.balance);
-
-            switch (currentPaymentType) {
-                case 'deposit':
-                    newBalance += amount;
-                    break;
-                case 'withdrawal':
-                case 'direct-debit':
-                    if (amount > selectedMember.balance) {
-                        showAlert('danger', 'Insufficient balance for this transaction.');
-                        document.getElementById('paymentAmount').value = '';
-                        return;
-                    }
-                    newBalance -= amount;
-                    break;
-                case 'loan-repayment':
-                    /* balance unchanged at submission; loan ledger updated after approval */
-                    break;
-            }
-
-            document.getElementById('summaryAmount').textContent     = amount.toLocaleString();
-            document.getElementById('summaryCharge').textContent     = '0';
-            document.getElementById('summaryTotal').textContent      = amount.toLocaleString();
-            document.getElementById('summaryNewBalance').textContent = newBalance.toLocaleString();
-
-            document.getElementById('summaryPlaceholder').style.display = 'none';
-            document.getElementById('summaryDetails').style.display     = 'block';
-            document.getElementById('chargeRow').style.display          = 'none';
-
-            updateSubmitButton();
-        }
-
-        function updateLoanDetails() {
-            const sel = document.getElementById('loanSelect');
-            const opt = sel.options[sel.selectedIndex];
-            if (!opt || !opt.value) { document.getElementById('paymentAmount').value = ''; return; }
-            document.getElementById('paymentAmount').value = Number(opt.dataset.balance || 0);
-            calculateTotal();
-        }
-
-        /* ──────────────────────────────────────────
-           APPROVER SELECTION
-        ────────────────────────────────────────── */
-        function handleApproverToggle(checkbox) {
-            const item = checkbox.closest('.approver-item');
-            const id   = checkbox.value;
-            const name = checkbox.dataset.name;
-
-            if (checkbox.checked) {
-                if (selectedApproverIds.length >= 3) {
-                    checkbox.checked = false;
-                    showAlert('warning', 'You can only select up to 3 approvers.');
-                    return;
-                }
-                selectedApproverIds.push(id);
-                selectedApproverNames[id] = name;
-                item.classList.add('selected');
-            } else {
-                selectedApproverIds = selectedApproverIds.filter(a => a !== id);
-                delete selectedApproverNames[id];
-                item.classList.remove('selected');
-            }
-
-            updateApproverUI();
-        }
-
-        function updateApproverUI() {
-            const count  = selectedApproverIds.length;
-            const badge  = document.getElementById('approverCountBadge');
-            const text   = document.getElementById('approverCountText');
-            const icon   = document.getElementById('approverCountIcon');
-
-            text.textContent = `${count} / 3 selected`;
-
-            if (count >= 3) {
-                badge.classList.replace('insufficient', 'sufficient');
-                icon.className = 'fas fa-check-circle';
-            } else {
-                badge.classList.replace('sufficient', 'insufficient');
-                icon.className = 'fas fa-exclamation-circle';
-            }
-
-            /* Update sidebar approver list */
-            const listEl = document.getElementById('sidebarApproverList');
-            if (count === 0) {
-                listEl.innerHTML = '<small class="text-muted fst-italic">None selected yet</small>';
-            } else {
-                listEl.innerHTML = Object.entries(selectedApproverNames).map(([, name]) => `
-                    <div class="d-flex align-items-center gap-2 mb-1">
-                        <i class="fas fa-check-circle text-success" style="font-size:0.75rem;flex-shrink:0;"></i>
-                        <small class="fw-semibold">${escHtml(name)}</small>
-                    </div>`).join('');
-            }
-
-            updateSubmitButton();
-        }
-
-        function updateSubmitButton() {
-            const amount = parseFloat(document.getElementById('paymentAmount')?.value) || 0;
-            const ready  = selectedMember && amount > 0 && selectedApproverIds.length >= 3;
-            const btn    = document.getElementById('submitBtn');
-            if (btn) btn.disabled = !ready;
-        }
-
-        /* ──────────────────────────────────────────
-           SUBMIT FOR APPROVAL
-        ────────────────────────────────────────── */
-        async function submitForApproval() {
-            const amount    = parseFloat(document.getElementById('paymentAmount').value);
-            const method    = document.getElementById('paymentMethod').value;
-            const notes     = document.getElementById('paymentNotes').value;
-            const reference = document.getElementById('referenceNumber').value;
-            const loanId    = document.getElementById('loanSelect')?.value    || null;
-            const chargeType= document.getElementById('chargeSelect')?.value  || null;
-
-            /* Validation */
-            if (!selectedMember || !amount || amount <= 0) {
-                showAlert('danger', 'Please fill in all required fields.'); return;
-            }
-            if (selectedApproverIds.length < 3) {
-                showAlert('danger', 'Please select exactly 3 approvers.'); return;
-            }
-            if (currentPaymentType === 'loan-repayment' && !loanId) {
-                showAlert('danger', 'Please select a loan.'); return;
-            }
-            if (currentPaymentType === 'direct-debit' && !chargeType) {
-                showAlert('danger', 'Please select a charge type.'); return;
-            }
-
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
-
-            try {
-                const res  = await fetch('/admin/submit-payment-for-approval', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        memberId:          selectedMember.id,
-                        paymentType:       currentPaymentType,
-                        amount,
-                        chargeAmount:      0,
-                        paymentMethod:     method,
-                        reference,
-                        notes,
-                        loanId,
-                        chargeType,
-                        selectedApprovers: selectedApproverIds,
-                    })
-                });
-                const data = await res.json();
-
-                if (!data.success) {
-                    showAlert('danger', data.message || 'Submission failed.');
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit for Approval';
-                    return;
-                }
-
-                document.getElementById('approvalIdDisplay').textContent = data.approvalId;
-                new bootstrap.Modal(document.getElementById('successModal')).show();
-
-            } catch (err) {
-                console.error('Submit error:', err);
-                showAlert('danger', 'Something went wrong while submitting.');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit for Approval';
-            }
-        }
-
-        /* ──────────────────────────────────────────
-           RESET FORM
-        ────────────────────────────────────────── */
-        function resetForm() {
-            clearMember();
-            document.getElementById('paymentNotes').value    = '';
-            document.getElementById('referenceNumber').value = '';
-            document.getElementById('paymentAmount').value   = '';
-
-            selectedApproverIds   = [];
-            selectedApproverNames = {};
-
-            document.querySelectorAll('.approver-item').forEach(el => {
-                el.classList.remove('selected');
-                el.querySelector('input[type="checkbox"]').checked = false;
-            });
-
-            updateApproverUI();
-
-            const btn = document.getElementById('submitBtn');
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit for Approval';
-            }
-
-            /* Deactivate payment type cards */
-            document.querySelectorAll('.payment-type-card').forEach(c => c.classList.remove('active'));
-            document.getElementById('paymentForm').style.display = 'none';
-            currentPaymentType = '';
-        }
-
-        /* ──────────────────────────────────────────
-           VIEW TRANSACTION DETAILS MODAL
-        ────────────────────────────────────────── */
-        function viewTransactionDetails(transaction) {
-            currentTransaction = transaction;
-
-            document.getElementById('detailTxnId').textContent     = transaction.id       || '—';
-            document.getElementById('detailDateTime').textContent   = `${transaction.date} at ${transaction.time}`;
-            document.getElementById('detailReference').textContent  = transaction.reference || '—';
-            document.getElementById('detailMemberName').textContent = transaction.memberName;
-            document.getElementById('detailMemberId').textContent   = transaction.memberId;
-            document.getElementById('detailMemberEmail').textContent= transaction.memberEmail;
-            document.getElementById('detailMemberPhone').textContent= transaction.memberPhone;
-            document.getElementById('detailProcessedBy').textContent= transaction.processedBy;
-            document.getElementById('detailNotes').textContent      = transaction.notes || 'No additional notes';
-
-            document.getElementById('detailAmount').textContent       = `₦${Number(transaction.amount).toLocaleString()}`;
-            document.getElementById('detailFee').textContent          = `₦${Number(transaction.fee).toLocaleString()}`;
-            document.getElementById('detailBalanceBefore').textContent = `₦${Number(transaction.balanceBefore).toLocaleString()}`;
-            document.getElementById('detailBalanceAfter').textContent  = `₦${Number(transaction.balanceAfter).toLocaleString()}`;
-            document.getElementById('detailMethod').textContent       = transaction.method;
-
-            const typeEl   = document.getElementById('detailType');
-            typeEl.textContent = transaction.type;
-            typeEl.className   = `badge bg-${transaction.typeClass}`;
-
-            const statusEl = document.getElementById('detailStatus');
-            statusEl.innerHTML  = `<i class="fas fa-check-circle me-1"></i>${transaction.status}`;
-            statusEl.className  = `badge bg-${transaction.statusClass}`;
-
-            /* Populate receipt for printing */
-            populatePrintReceipt(transaction);
-
-            new bootstrap.Modal(document.getElementById('transactionDetailsModal')).show();
-        }
-
-        /* ──────────────────────────────────────────
-           RECEIPT HELPERS
-        ────────────────────────────────────────── */
-        function populatePrintReceipt(t) {
-            document.getElementById('printTxnId').textContent      = t.id       || '—';
-            document.getElementById('printDateTime').textContent   = `${t.date} at ${t.time}`;
-            document.getElementById('printType').textContent       = t.type;
-            document.getElementById('printStatus').textContent     = t.status;
-            document.getElementById('printReference').textContent  = t.reference || '—';
-            document.getElementById('printMemberName').textContent = t.memberName;
-            document.getElementById('printMemberId').textContent   = t.memberId;
-            document.getElementById('printMemberEmail').textContent= t.memberEmail;
-            document.getElementById('printMemberPhone').textContent= t.memberPhone;
-            document.getElementById('printAmount').textContent     = `₦${Number(t.amount).toLocaleString()}.00`;
-            document.getElementById('printMethod').textContent     = t.method;
-            document.getElementById('printFee').textContent        = `₦${Number(t.fee).toLocaleString()}.00`;
-            document.getElementById('printBalanceBefore').textContent = `₦${Number(t.balanceBefore).toLocaleString()}.00`;
-            document.getElementById('printBalanceAfter').textContent  = `₦${Number(t.balanceAfter).toLocaleString()}.00`;
-            document.getElementById('printProcessedBy').textContent   = t.processedBy;
-            document.getElementById('printNotes').textContent         = t.notes || 'No additional notes';
-            document.getElementById('printGeneratedDate').textContent = new Date().toLocaleString('en-US', {
-                year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit'
-            });
-        }
-
-        function printReceipt() {
-            if (!currentTransaction) { showAlert('warning', 'No transaction data available.'); return; }
-            populatePrintReceipt(currentTransaction);
-            const el = document.getElementById('printReceipt');
-            el.style.display = 'block';
-            setTimeout(() => { window.print(); el.style.display = 'none'; }, 150);
-        }
-
-        /* ──────────────────────────────────────────
-           UTILITY
-        ────────────────────────────────────────── */
-        function escHtml(str) {
-            return String(str)
-                .replace(/&/g,  '&amp;')
-                .replace(/</g,  '&lt;')
-                .replace(/>/g,  '&gt;')
-                .replace(/"/g,  '&quot;')
-                .replace(/'/g,  '&#39;');
-        }
-
-        function showAlert(type, message) {
-            /* Remove any existing alert */
-            const existing = document.getElementById('inlineAlert');
-            if (existing) existing.remove();
-
-            const div = document.createElement('div');
-            div.id = 'inlineAlert';
-            div.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-            div.style.cssText = 'top:80px;right:1.5rem;z-index:9999;min-width:300px;max-width:450px;box-shadow:0 8px 25px rgba(0,0,0,0.15);';
-            div.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-            document.body.appendChild(div);
-            setTimeout(() => div.remove(), 4000);
-        }
-
-        /* ──────────────────────────────────────────
-           GLOBAL CLICK HANDLER
-           - Close autocomplete when clicking outside
-           - Close sidebar on mobile when clicking outside
-        ────────────────────────────────────────── */
-        document.addEventListener('click', function(e) {
-            /* Autocomplete */
-            const wrapper  = document.querySelector('.autocomplete-wrapper');
-            const dropdown = document.getElementById('autocompleteDropdown');
-            if (wrapper && !wrapper.contains(e.target)) {
-                dropdown.classList.remove('show');
-            }
-
-            /* Mobile sidebar */
-            const sidebar   = document.getElementById('sidebar');
-            const hamburger = e.target.closest('.fa-bars');
-            if (window.innerWidth <= 992 &&
-                sidebar.classList.contains('active') &&
-                !sidebar.contains(e.target) &&
-                !hamburger) {
-                sidebar.classList.remove('active');
-            }
+    // Populate loan dropdown
+    const loanSelect = document.getElementById('loanSelect');
+    loanSelect.innerHTML = '<option value="">— Select a loan —</option>';
+    if (member.loans && member.loans.length > 0) {
+        member.loans.forEach(loan => {
+            const opt = document.createElement('option');
+            opt.value               = loan.id;
+            opt.dataset.total       = loan.totalRepay;
+            opt.dataset.balance     = loan.balanceRemaining;
+            opt.dataset.original    = loan.originalAmount;
+            opt.textContent = `₦${Number(loan.originalAmount).toLocaleString()} — ${loan.duration}`;
+            loanSelect.appendChild(opt);
         });
-    </script>
+    } else {
+        const opt = document.createElement('option');
+        opt.disabled   = true;
+        opt.textContent = 'No active loans found';
+        loanSelect.appendChild(opt);
+    }
+
+    // Show loan badge if loans exist
+    document.getElementById('loanBadge').style.display =
+        (currentPaymentType === 'loan-repayment' && member.loans?.length > 0) ? 'inline-flex' : 'none';
+
+    calculateTotal();
+}
+
+function clearMember() {
+    selectedMember = null;
+
+    document.getElementById('memberSearch').value    = '';
+    document.getElementById('memberDetails').style.display = 'none';
+    document.getElementById('paymentAmount').value   = '';
+    document.getElementById('loanSelect').value      = '';
+    document.getElementById('chargeSelect').value    = '';
+    document.getElementById('referenceNumber').value = '';
+    document.getElementById('paymentNotes').value    = '';
+    document.getElementById('loanDetailsBox').classList.add('d-none');
+    document.getElementById('autocompleteDropdown').classList.remove('show');
+
+    document.getElementById('summaryDetails').style.display    = 'none';
+    document.getElementById('summaryPlaceholder').style.display = 'block';
+
+    updateSubmitButton();
+}
+
+/* ════════════════════════════════════════════════════════════
+   AMOUNT & TOTAL CALCULATION
+════════════════════════════════════════════════════════════ */
+async function calculateTotal() {
+    const amount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+    if (!selectedMember || amount <= 0) {
+        document.getElementById('summaryDetails').style.display    = 'none';
+        document.getElementById('summaryPlaceholder').style.display = 'block';
+        updateSubmitButton();
+        return;
+    }
+
+    // Balance validation for debit types
+    if ((currentPaymentType === 'withdrawal' || currentPaymentType === 'direct-debit')
+        && amount > Number(selectedMember.balance)) {
+        await showNotify({
+            type:    'error',
+            title:   'Insufficient Balance',
+            message: `This amount (₦${amount.toLocaleString()}) exceeds the member's\ncurrent balance of ₦${Number(selectedMember.balance).toLocaleString()}.`,
+        });
+        document.getElementById('paymentAmount').value = '';
+        updateSubmitButton();
+        return;
+    }
+
+    let newBalance = Number(selectedMember.balance);
+    if      (currentPaymentType === 'deposit')                                    newBalance += amount;
+    else if (currentPaymentType === 'withdrawal' || currentPaymentType === 'direct-debit') newBalance -= amount;
+    // loan-repayment: member balance unchanged at submission; loan ledger updated post-approval
+
+    const typeLabels = {
+        'deposit':        'Deposit',
+        'withdrawal':     'Withdrawal',
+        'loan-repayment': 'Loan Repayment',
+        'direct-debit':   'Direct Debit',
+    };
+
+    document.getElementById('summaryType').textContent       = typeLabels[currentPaymentType] || '—';
+    document.getElementById('summaryAmount').textContent     = amount.toLocaleString();
+    document.getElementById('summaryCharge').textContent     = '0';
+    document.getElementById('summaryTotal').textContent      = amount.toLocaleString();
+    document.getElementById('summaryCurrentBalance').textContent = Number(selectedMember.balance).toLocaleString();
+    document.getElementById('summaryNewBalance').textContent  = newBalance.toLocaleString();
+
+    document.getElementById('chargeRow').style.display          = 'none';
+    document.getElementById('summaryPlaceholder').style.display = 'none';
+    document.getElementById('summaryDetails').style.display     = 'block';
+
+    updateSubmitButton();
+}
+
+function updateLoanDetails() {
+    const sel = document.getElementById('loanSelect');
+    const opt = sel.options[sel.selectedIndex];
+    const box = document.getElementById('loanDetailsBox');
+
+    if (!opt || !opt.value) {
+        document.getElementById('paymentAmount').value = '';
+        box.classList.add('d-none');
+        calculateTotal();
+        return;
+    }
+
+    const balRem = Number(opt.dataset.balance  || 0);
+    const total  = Number(opt.dataset.total    || 0);
+
+    document.getElementById('loanTotalRepay').textContent      = total.toLocaleString();
+    document.getElementById('loanBalanceRemaining').textContent = balRem.toLocaleString();
+    box.classList.remove('d-none');
+
+    document.getElementById('paymentAmount').value = balRem;
+    calculateTotal();
+}
+
+/* ════════════════════════════════════════════════════════════
+   APPROVER SELECTION
+   Checks authorize_transactions before allowing any checkbox.
+════════════════════════════════════════════════════════════ */
+function handleApproverToggle(checkbox) {
+    // Permission guard
+    if (!PERMISSIONS.authorizeTransactions) {
+        checkbox.checked = false;
+        showUnauthorized('authorize_transactions');
+        return;
+    }
+
+    const item = checkbox.closest('.approver-item');
+    const id   = checkbox.value;
+    const name = checkbox.dataset.name;
+
+    if (checkbox.checked) {
+        if (selectedApproverIds.length >= 3) {
+            checkbox.checked = false;
+            showNotify({
+                type:    'warning',
+                title:   'Selection Limit',
+                message: 'You can only select up to 3 approvers.\nDeselect one before choosing another.',
+            });
+            return;
+        }
+        selectedApproverIds.push(id);
+        selectedApproverNames[id] = name;
+        item.classList.add('selected');
+    } else {
+        selectedApproverIds = selectedApproverIds.filter(a => a !== id);
+        delete selectedApproverNames[id];
+        item.classList.remove('selected');
+    }
+
+    updateApproverUI();
+}
+
+function updateApproverUI() {
+    const count  = selectedApproverIds.length;
+    const badge  = document.getElementById('approverCountBadge');
+    const text   = document.getElementById('approverCountText');
+    const icon   = document.getElementById('approverCountIcon');
+
+    text.textContent = `${count} / 3 selected`;
+
+    if (count >= 3) {
+        badge.className = 'approval-count-badge sufficient';
+        icon.className  = 'fas fa-check-circle';
+    } else {
+        badge.className = 'approval-count-badge insufficient';
+        icon.className  = 'fas fa-exclamation-circle';
+    }
+
+    // Sidebar approver mini-list
+    const listEl = document.getElementById('sidebarApproverList');
+    if (count === 0) {
+        listEl.innerHTML = '<small class="text-muted fst-italic">None selected yet</small>';
+    } else {
+        listEl.innerHTML = Object.entries(selectedApproverNames).map(([, name]) => `
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="fas fa-check-circle text-success" style="font-size:0.75rem;flex-shrink:0;"></i>
+                <small class="fw-semibold">${escHtml(name)}</small>
+            </div>`).join('');
+    }
+
+    updateSubmitButton();
+}
+
+/* ════════════════════════════════════════════════════════════
+   SUBMIT BUTTON STATE
+════════════════════════════════════════════════════════════ */
+function updateSubmitButton() {
+    const amount  = parseFloat(document.getElementById('paymentAmount')?.value) || 0;
+    const canSubmit = selectedMember
+                   && amount > 0
+                   && selectedApproverIds.length >= 3
+                   && PERMISSIONS.processDeposits
+                   && PERMISSIONS.authorizeTransactions;
+
+    const btn = document.getElementById('submitBtn');
+    if (btn) btn.disabled = !canSubmit;
+}
+
+/* ════════════════════════════════════════════════════════════
+   SUBMIT FOR APPROVAL
+════════════════════════════════════════════════════════════ */
+async function submitForApproval() {
+    // Hard permission checks — defence-in-depth even though UI already blocks
+    if (!PERMISSIONS.processDeposits) {
+        showUnauthorized('process_deposits');
+        return;
+    }
+    if (!PERMISSIONS.authorizeTransactions) {
+        showUnauthorized('authorize_transactions');
+        return;
+    }
+
+    // Collect form values
+    const amount     = parseFloat(document.getElementById('paymentAmount').value);
+    const method     = document.getElementById('paymentMethod').value;
+    const notes      = document.getElementById('paymentNotes').value.trim();
+    const reference  = document.getElementById('referenceNumber').value.trim();
+    const loanId     = document.getElementById('loanSelect')?.value  || null;
+    const chargeType = document.getElementById('chargeSelect')?.value || null;
+
+    // Client-side validation
+    if (!selectedMember) {
+        await showNotify({ type: 'warning', title: 'No Member Selected', message: 'Please search and select a member first.' });
+        return;
+    }
+    if (!amount || amount <= 0) {
+        await showNotify({ type: 'warning', title: 'Invalid Amount', message: 'Please enter a valid amount greater than zero.' });
+        return;
+    }
+    if (selectedApproverIds.length < 3) {
+        await showNotify({ type: 'warning', title: 'Approvers Required', message: `You have selected ${selectedApproverIds.length} approver(s).\nPlease select exactly 3 approvers.` });
+        return;
+    }
+    if (currentPaymentType === 'loan-repayment' && !loanId) {
+        await showNotify({ type: 'warning', title: 'Loan Not Selected', message: 'Please select the loan you are repaying.' });
+        return;
+    }
+    if (currentPaymentType === 'direct-debit' && !chargeType) {
+        await showNotify({ type: 'warning', title: 'Charge Type Required', message: 'Please select a charge type for the direct debit.' });
+        return;
+    }
+
+    // Confirm submission
+    const confirmed = await showNotify({
+        type:         'info',
+        title:        'Confirm Submission',
+        message:      `Submit a ₦${amount.toLocaleString()} ${currentPaymentType.replace(/-/g, ' ')} for ${selectedMember.name}?\n\nThis will notify all 3 selected approvers.`,
+        confirmLabel: 'Yes, Submit',
+        cancelLabel:  'Cancel',
+    });
+    if (!confirmed) return;
+
+    // Disable button & show spinner
+    const btn = document.getElementById('submitBtn');
+    const originalBtnHTML = btn.innerHTML;
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Submitting…';
+
+    const result = await permFetch('/admin/submit-payment-for-approval', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+            memberId:          selectedMember.id,
+            paymentType:       currentPaymentType,
+            amount,
+            chargeAmount:      0,
+            paymentMethod:     method,
+            reference:         reference || undefined,
+            notes:             notes     || undefined,
+            loanId:            loanId    || undefined,
+            chargeType:        chargeType || undefined,
+            selectedApprovers: selectedApproverIds,
+        }),
+    });
+
+    // 401 / 403 are handled inside permFetch — just restore button
+    if (!result.ok) {
+        btn.disabled  = false;
+        btn.innerHTML = originalBtnHTML;
+        return;
+    }
+
+    if (!result.data?.success) {
+        await showNotify({
+            type:    'error',
+            title:   'Submission Failed',
+            message: result.data?.message || 'The server rejected the submission. Please try again.',
+        });
+        btn.disabled  = false;
+        btn.innerHTML = originalBtnHTML;
+        return;
+    }
+
+    // Success
+    document.getElementById('approvalIdDisplay').textContent = result.data.approvalId || '—';
+    new bootstrap.Modal(document.getElementById('successModal')).show();
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESET FORM — clears everything and hides the form
+════════════════════════════════════════════════════════════ */
+function resetForm() {
+    clearMember();
+
+    selectedApproverIds   = [];
+    selectedApproverNames = {};
+
+    document.querySelectorAll('.approver-item').forEach(el => {
+        el.classList.remove('selected');
+        const cb = el.querySelector('input[type="checkbox"]');
+        if (cb) cb.checked = false;
+    });
+
+    updateApproverUI();
+
+    const btn = document.getElementById('submitBtn');
+    if (btn) {
+        btn.disabled  = true;
+        btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit for Approval';
+    }
+
+    document.querySelectorAll('.payment-type-card').forEach(c => c.classList.remove('active'));
+    document.getElementById('paymentForm').style.display = 'none';
+    currentPaymentType = '';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ════════════════════════════════════════════════════════════
+   TABLE FILTER
+════════════════════════════════════════════════════════════ */
+function filterTable() {
+    const filter = document.getElementById('filterStatus').value.toLowerCase();
+    const rows   = document.querySelectorAll('#transactionTableBody tr[data-status]');
+    let   visible = 0;
+
+    rows.forEach(row => {
+        const match = !filter || (row.dataset.status || '').toLowerCase() === filter;
+        row.style.display = match ? '' : 'none';
+        if (match) visible++;
+    });
+
+    // Show/hide empty state
+    let emptyRow = document.getElementById('filterEmptyRow');
+    if (visible === 0) {
+        if (!emptyRow) {
+            emptyRow = document.createElement('tr');
+            emptyRow.id = 'filterEmptyRow';
+            emptyRow.innerHTML = `
+                <td colspan="7" class="text-center text-muted py-4">
+                    <i class="fas fa-filter fa-2x d-block mb-2 opacity-25"></i>
+                    No transactions match the selected filter
+                </td>`;
+            document.getElementById('transactionTableBody').appendChild(emptyRow);
+        }
+        emptyRow.style.display = '';
+    } else if (emptyRow) {
+        emptyRow.style.display = 'none';
+    }
+}
+
+/* ════════════════════════════════════════════════════════════
+   EXPORT TRANSACTIONS
+════════════════════════════════════════════════════════════ */
+function exportTransactions() {
+    const rows   = document.querySelectorAll('#transactionTableBody tr[data-status]');
+    const filter = document.getElementById('filterStatus').value;
+
+    const headers = ['Date', 'Time', 'Member', 'Member ID', 'Type', 'Amount', 'Method', 'Status'];
+    const lines   = [headers.join(',')];
+
+    rows.forEach(row => {
+        if (row.style.display === 'none') return;
+        const cells = row.querySelectorAll('td');
+        if (cells.length < 7) return;
+
+        // Extract clean text from each cell
+        const dateCell   = cells[0];
+        const dateStr    = dateCell.querySelector('small.fw-semibold')?.textContent?.trim() || '';
+        const timeStr    = dateCell.querySelector('small.text-muted')?.textContent?.trim()  || '';
+        const memberName = cells[1].querySelector('.fw-semibold')?.textContent?.trim()      || '';
+        const memberId   = cells[1].querySelector('small')?.textContent?.trim()             || '';
+        const type       = cells[2].querySelector('.badge')?.textContent?.trim()            || '';
+        const amount     = cells[3]?.textContent?.trim()                                    || '';
+        const method     = cells[4]?.textContent?.trim()                                    || '';
+        const status     = cells[5].querySelector('.badge')?.textContent?.trim()            || '';
+
+        const row_data = [dateStr, timeStr, memberName, memberId, type, amount, method, status]
+            .map(v => `"${v.replace(/"/g, '""')}"`);
+        lines.push(row_data.join(','));
+    });
+
+    if (lines.length <= 1) {
+        showNotify({ type: 'info', title: 'Nothing to Export', message: 'No visible transactions to export.' });
+        return;
+    }
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const date = new Date().toISOString().slice(0, 10);
+    a.href     = url;
+    a.download = `transactions${filter ? '-' + filter : ''}-${date}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+/* ════════════════════════════════════════════════════════════
+   VIEW TRANSACTION DETAILS MODAL
+════════════════════════════════════════════════════════════ */
+function viewTransactionDetails(transaction) {
+    currentTransaction = transaction;
+
+    const fmt = n => `₦${Number(n || 0).toLocaleString()}`;
+
+    // Transaction info
+    document.getElementById('detailTxnId').textContent       = transaction.id        || '—';
+    document.getElementById('detailDateTime').textContent    = `${transaction.date} at ${transaction.time}`;
+    document.getElementById('detailReference').textContent   = transaction.reference  || '—';
+
+    const typeEl = document.getElementById('detailType');
+    typeEl.textContent = transaction.type;
+    typeEl.className   = `badge bg-${transaction.typeClass || 'secondary'}`;
+
+    const statusEl = document.getElementById('detailStatus');
+    statusEl.innerHTML = `<i class="fas fa-circle me-1" style="font-size:0.6em;"></i>${transaction.status}`;
+    statusEl.className = `badge bg-${transaction.statusClass || 'secondary'}`;
+
+    // Member info
+    document.getElementById('detailMemberName').textContent  = transaction.memberName  || '—';
+    document.getElementById('detailMemberId').textContent    = transaction.memberId    || '—';
+    document.getElementById('detailMemberEmail').textContent = transaction.memberEmail || '—';
+    document.getElementById('detailMemberPhone').textContent = transaction.memberPhone || '—';
+
+    // Payment details
+    document.getElementById('detailAmount').textContent        = fmt(transaction.amount);
+    document.getElementById('detailMethod').textContent        = transaction.method     || '—';
+    document.getElementById('detailFee').textContent           = fmt(transaction.fee);
+    document.getElementById('detailBalanceBefore').textContent = fmt(transaction.balanceBefore);
+    document.getElementById('detailBalanceAfter').textContent  = fmt(transaction.balanceAfter);
+
+    // Additional
+    document.getElementById('detailProcessedBy').textContent = transaction.processedBy || '—';
+    document.getElementById('detailNotes').textContent       = transaction.notes        || 'No additional notes.';
+
+    // Pre-populate print receipt
+    populatePrintReceipt(transaction);
+
+    new bootstrap.Modal(document.getElementById('transactionDetailsModal')).show();
+}
+
+/* ════════════════════════════════════════════════════════════
+   RECEIPT — populate & print
+════════════════════════════════════════════════════════════ */
+function populatePrintReceipt(t) {
+    const fmt = n => `₦${Number(n || 0).toLocaleString()}.00`;
+
+    document.getElementById('printTxnId').textContent        = t.id          || '—';
+    document.getElementById('printDateTime').textContent     = `${t.date} at ${t.time}`;
+    document.getElementById('printType').textContent         = t.type        || '—';
+    document.getElementById('printStatus').textContent       = t.status      || '—';
+    document.getElementById('printReference').textContent    = t.reference   || '—';
+    document.getElementById('printMemberName').textContent   = t.memberName  || '—';
+    document.getElementById('printMemberId').textContent     = t.memberId    || '—';
+    document.getElementById('printMemberEmail').textContent  = t.memberEmail || '—';
+    document.getElementById('printMemberPhone').textContent  = t.memberPhone || '—';
+    document.getElementById('printAmount').textContent       = fmt(t.amount);
+    document.getElementById('printMethod').textContent       = t.method      || '—';
+    document.getElementById('printFee').textContent          = fmt(t.fee);
+    document.getElementById('printBalanceBefore').textContent = fmt(t.balanceBefore);
+    document.getElementById('printBalanceAfter').textContent  = fmt(t.balanceAfter);
+    document.getElementById('printProcessedBy').textContent  = t.processedBy || '—';
+    document.getElementById('printNotes').textContent        = t.notes       || 'No additional notes.';
+    document.getElementById('printGeneratedDate').textContent = new Date().toLocaleString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+    });
+}
+
+async function printReceipt() {
+    if (!currentTransaction) {
+        await showNotify({
+            type:    'warning',
+            title:   'No Data',
+            message: 'No transaction is currently loaded. Please open a transaction first.',
+        });
+        return;
+    }
+    populatePrintReceipt(currentTransaction);
+    const el = document.getElementById('printReceipt');
+    el.style.display = 'block';
+    setTimeout(() => {
+        window.print();
+        el.style.display = 'none';
+    }, 150);
+}
+
+/* ════════════════════════════════════════════════════════════
+   UTILITY — HTML escape
+════════════════════════════════════════════════════════════ */
+function escHtml(str) {
+    return String(str ?? '')
+        .replace(/&/g,  '&amp;')
+        .replace(/</g,  '&lt;')
+        .replace(/>/g,  '&gt;')
+        .replace(/"/g,  '&quot;')
+        .replace(/'/g,  '&#39;');
+}
+
+/* ════════════════════════════════════════════════════════════
+   GLOBAL CLICK HANDLER
+   - Close autocomplete when clicking outside its wrapper
+   - Close mobile sidebar when clicking outside it
+════════════════════════════════════════════════════════════ */
+document.addEventListener('click', function (e) {
+    // Autocomplete
+    const wrapper  = document.querySelector('.autocomplete-wrapper');
+    const dropdown = document.getElementById('autocompleteDropdown');
+    if (wrapper && dropdown && !wrapper.contains(e.target)) {
+        dropdown.classList.remove('show');
+    }
+
+    // Mobile sidebar
+    const sidebar = document.getElementById('sidebar');
+    if (window.innerWidth <= 992
+        && sidebar.classList.contains('active')
+        && !sidebar.contains(e.target)
+        && !e.target.closest('.fa-bars')) {
+        sidebar.classList.remove('active');
+    }
+});
+
+/* Prevent negative amounts */
+document.addEventListener('input', function (e) {
+    if (e.target.id === 'paymentAmount' && parseFloat(e.target.value) < 0) {
+        e.target.value = '';
+    }
+});
+</script>
 </body>
 </html>

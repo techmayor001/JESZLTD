@@ -1,0 +1,40 @@
+ <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">
+
+                    <img src="/media/assets/logo/log.png" alt="" width="100%" height="100%">
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold" style="text-transform: uppercase;">Club De Stars</h5>
+                    <small class="opacity-75">COOPERATIVE SOCIETY LIMITED</small>
+                </div>
+            </div>
+            <div class="member-badge mt-2 <%= user.membershipID.startsWith('CD') ? 'club-member-badge' : 'non-club-member-badge' %>">
+                <i class="fas <%= user.membershipID.startsWith('CD') ? 'fa-star' : 'fa-user' %>"></i>
+                <span><%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Non-Club Member' %></span>
+            </div>
+
+        </div>
+        <div class="sidebar-menu">
+            <a href="/cds-cooperative/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/cds-cooperative/transaction" class="active"><i class="fas fa-exchange-alt"></i> Transactions</a>
+            <a href="/cds-cooperative/loan"><i class="fas fa-hand-holding-usd"></i> My Loans</a>
+            <a href="/cds-cooperative/guarantorRequest">
+                <i class="fas fa-user-friends"></i> Guarantor Requests
+                <% if (pendingGuarantorCount > 0) { %>
+                    <span class="badge bg-danger ms-auto" style="font-size:0.68rem;"><%= pendingGuarantorCount %></span>
+                <% } %>
+            </a>
+            <a href="/manage/kiddies-account"><i class="fas fa-users"></i> Kiddies Account</a>
+            <a href="/cds-cooperative/profile"><i class="fas fa-user-circle"></i> My Profile</a>
+            <a href="/cds-cooperative/kyc"><i class="fas fa-shield-alt"></i> KYC Verification</a>
+            <a href="/cds-cooperative/referral"><i class="fas fa-user-plus"></i> Referral Program</a>
+            <a href="/cds-cooperative/memberContract"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
+            <a href="/cds-cooperative/report"><i class="fas fa-chart-line"></i> Reports</a>
+            <% if (user.role && user.role.name !== 'member') { %>
+            <a href="/admin-dashboard"><i class="fas fa-tachometer-alt"></i> Administration</a>
+            <% } %>
+            <a href="/logout" style="color:rgba(255,255,255,0.52);margin-top:4px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>

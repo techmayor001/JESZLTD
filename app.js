@@ -9,28 +9,28 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
+const globalData = require("./globalData");
 const initSystem = require("./seed");
-
-
 
 
 // CONNECTING PASSPORT 
 const session = require("express-session");
 const passport = require("passport");
 require("./config/passport");
+require("./jobs/LoanPenaltyCron");
 
 app.use(session({
     secret: process.env.SESSION_SECRET || "defaultsecret",
     resave: false,
     saveUninitialized: false,
-}));
-app.use(passport.initialize());
-app.use(passport.session());
-
-
-
-
-
+  }));
+  app.use(passport.initialize());
+  app.use(passport.session());
+  
+  
+  
+  
+  
 
 
 mongoose
@@ -39,9 +39,9 @@ mongoose
     console.log("✅ DB connected");
 
     await initSystem();
-
+    
     const port = process.env.PORT || 3001;
-
+    
     app.listen(port, () =>
       console.log(`🚀 Server running on Port ${port}`)
     );
@@ -52,8 +52,9 @@ mongoose
   });
 
 
+  app.use(globalData);
 
-app.use(require("./routes/main"));
+  app.use(require("./routes/main"));
 app.use(require("./routes/auth"));
 app.use(require("./routes/admin"));
 app.use(require("./routes/transaction"));

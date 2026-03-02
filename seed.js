@@ -30,10 +30,14 @@ const defaultPermissions = [
   { name: "view_withdrawals", description: "View withdrawal requests", isSystemPermission: true },
   { name: "approve_withdrawals", description: "Approve withdrawal requests", isSystemPermission: true },
   { name: "view_extracharges", description: "View extra charges", isSystemPermission: true },
+  { name: "view_finance", description: "View financial overview", isSystemPermission: true },
+  { name: "manage_finance", description: "Manage financial overview", isSystemPermission: true },
+
 
   // Loan Management
   { name: "view_loans", description: "View loan applications", isSystemPermission: true },
   { name: "view_external_loans", description: "View external loan applications", isSystemPermission: true },
+  { name: "issue_external_loans", description: "Issue external loans", isSystemPermission: true },
   { name: "approve_loans", description: "Approve or reject loans", isSystemPermission: true },
   { name: "edit_loans", description: "Modify loan terms", isSystemPermission: true },
   { name: "manage_loan_settings", description: "Configure loan parameters", isSystemPermission: true },

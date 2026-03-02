@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Application – Club De Stars</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white;
+            padding: 2.5rem 0;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(30, 58, 138, 0.3);
+        }
+
+        .logo-box {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .form-wrapper {
+            max-width: 760px;
+            margin: 2rem auto;
+            padding: 0 1rem 3rem;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.08);
+            border: 1px solid rgba(30, 58, 138, 0.06);
+        }
+
+        .section-title {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid rgba(30, 58, 138, 0.08);
+        }
+
+        .section-title .icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #374151;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid rgba(30, 58, 138, 0.1);
+            border-radius: 10px;
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.08);
+        }
+
+        .preset-badge {
+            background: rgba(30, 58, 138, 0.08);
+            color: var(--primary);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.9rem 2.5rem;
+            font-weight: 700;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(30, 58, 138, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            transform: none;
+        }
+
+        .expiry-notice {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: #92400e;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .success-screen {
+            display: none;
+            text-align: center;
+            padding: 3rem 1.5rem;
+        }
+
+        .success-icon {
+            width: 90px;
+            height: 90px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            color: var(--success);
+        }
+
+        .error-msg {
+            display: none;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: #991b1b;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <div class="logo-box">C</div>
+    <h3 class="fw-bold mb-1">Club De Stars Cooperative</h3>
+    <p class="opacity-80 mb-0">External Loan Application</p>
+</div>
+
+<div class="form-wrapper">
+
+    <!-- Expiry notice -->
+    <div class="expiry-notice">
+        <i class="fas fa-clock me-2"></i>
+        This application link expires on
+        <strong><%= new Date(invite.expiresAt).toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) %></strong>.
+        Please complete and submit before then.
+    </div>
+
+    <!-- Success screen (shown after submission) -->
+    <div class="section-card success-screen" id="successScreen">
+        <div class="success-icon"><i class="fas fa-check"></i></div>
+        <h4 class="fw-bold mb-2" style="color: var(--success);">Application Submitted!</h4>
+        <p class="text-muted mb-0">
+            Thank you. Your loan application has been received and will be reviewed by our team.
+            You will be contacted once a decision has been made.
+        </p>
+    </div>
+
+    <!-- The form -->
+    <div id="applicationForm">
+
+        <!-- Personal Information -->
+        <div class="section-card">
+            <div class="section-title">
+                <div class="icon" style="background: rgba(30,58,138,0.1); color: var(--primary);">
+                    <i class="fas fa-user"></i>
+                </div>
+                Personal Information
+            </div>
+
+            <div id="formError" class="error-msg"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Full Name / Company Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="borrowerName" placeholder="Enter full name or company name" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                    <input type="tel" class="form-control" id="borrowerPhone" placeholder="+234 800 000 0000" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="borrowerEmail" placeholder="you@example.com">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Applicant Type <span class="text-danger">*</span></label>
+                    <select class="form-select" id="borrowerType" required>
+                        <option value="">Select type...</option>
+                        <option value="individual">Individual</option>
+                        <option value="company">Company</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Address</label>
+                    <textarea class="form-control" id="borrowerAddress" rows="2" placeholder="Full residential or business address"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loan Details -->
+        <div class="section-card">
+            <div class="section-title">
+                <div class="icon" style="background: rgba(16,185,129,0.1); color: var(--success);">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                Loan Details
+            </div>
+
+            <div class="row g-3">
+                <!-- Loan Amount -->
+                <div class="col-md-6">
+                    <label class="form-label">Loan Amount (₦) <span class="text-danger">*</span></label>
+                    <% if (invite.presetAmount) { %>
+                        <div class="preset-badge">₦<%= invite.presetAmount.toLocaleString() %> <small class="fw-normal opacity-75">(set by issuer)</small></div>
+                        <input type="hidden" id="loanAmount" value="<%= invite.presetAmount %>">
+                    <% } else { %>
+                        <input type="number" class="form-control" id="loanAmount" placeholder="e.g. 500000" min="1000" required>
+                    <% } %>
+                </div>
+
+                <!-- Interest Rate -->
+                <div class="col-md-6">
+                    <label class="form-label">Interest Rate (% per month) <span class="text-danger">*</span></label>
+                    <% if (invite.presetInterestRate) { %>
+                        <div class="preset-badge"><%= invite.presetInterestRate %>% <small class="fw-normal opacity-75">(set by issuer)</small></div>
+                        <input type="hidden" id="interestRate" value="<%= invite.presetInterestRate %>">
+                    <% } else { %>
+                        <input type="number" class="form-control" id="interestRate" placeholder="e.g. 5" step="0.01" min="0.01" required>
+                    <% } %>
+                </div>
+
+                <!-- Duration -->
+                <div class="col-md-6">
+                    <label class="form-label">Loan Duration (Months) <span class="text-danger">*</span></label>
+                    <% if (invite.presetDuration) { %>
+                        <div class="preset-badge"><%= invite.presetDuration %> months <small class="fw-normal opacity-75">(set by issuer)</small></div>
+                        <input type="hidden" id="loanDuration" value="<%= invite.presetDuration %>">
+                    <% } else { %>
+                        <input type="number" class="form-control" id="loanDuration" placeholder="e.g. 6" min="1" required>
+                    <% } %>
+                </div>
+
+                <!-- Due Date -->
+                <div class="col-md-6">
+                    <label class="form-label">Preferred Due Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="dueDate" required>
+                </div>
+
+                <!-- Purpose -->
+                <div class="col-12">
+                    <label class="form-label">Loan Purpose</label>
+                    <textarea class="form-control" id="loanPurpose" rows="2" placeholder="Briefly describe how you intend to use the loan"></textarea>
+                </div>
+            </div>
+
+            <!-- Live repayment calculator -->
+            <div id="repaymentPreview" class="mt-3" style="display:none; background: rgba(30,58,138,0.04); border-radius: 10px; padding: 1rem;">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <small class="text-muted d-block">Principal</small>
+                        <strong id="calcPrincipal" style="color: var(--primary);">—</strong>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted d-block">Total Interest</small>
+                        <strong id="calcInterest" style="color: var(--warning);">—</strong>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted d-block">Total Repayment</small>
+                        <strong id="calcTotal" style="color: var(--success);">—</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guarantors -->
+        <div class="section-card">
+            <div class="section-title">
+                <div class="icon" style="background: rgba(245,158,11,0.1); color: var(--warning);">
+                    <i class="fas fa-users"></i>
+                </div>
+                Guarantors
+            </div>
+            <p class="text-muted small mb-3">
+                Two guarantors who are registered members of the cooperative are required.
+                They will receive a notification to confirm their consent.
+            </p>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">First Guarantor <span class="text-danger">*</span></label>
+                    <select class="form-select" id="guarantor1" required>
+                        <option value="">Select first guarantor...</option>
+                        <% users.forEach(user => { %>
+                            <option value="<%= user._id %>">
+                                <%= user.firstName %> <%= user.lastName %> (ID: <%= user.membershipID %>)
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Second Guarantor <span class="text-danger">*</span></label>
+                    <select class="form-select" id="guarantor2" required>
+                        <option value="">Select second guarantor...</option>
+                        <% users.forEach(user => { %>
+                            <option value="<%= user._id %>">
+                                <%= user.firstName %> <%= user.lastName %> (ID: <%= user.membershipID %>)
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <button class="submit-btn" id="submitBtn" onclick="submitApplication()">
+            <i class="fas fa-paper-plane me-2"></i>Submit Loan Application
+        </button>
+
+        <p class="text-center text-muted mt-3" style="font-size: 0.8rem;">
+            By submitting, you confirm that the information provided is accurate and complete.
+        </p>
+
+    </div><!-- /#applicationForm -->
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ── Guarantor duplicate prevention ──────────────────────────────────────
+    const g1 = document.getElementById('guarantor1');
+    const g2 = document.getElementById('guarantor2');
+
+    function syncGuarantors() {
+        Array.from(g2.options).forEach(o => { o.disabled = o.value && o.value === g1.value; });
+        Array.from(g1.options).forEach(o => { o.disabled = o.value && o.value === g2.value; });
+    }
+    g1.addEventListener('change', syncGuarantors);
+    g2.addEventListener('change', syncGuarantors);
+
+    // ── Live repayment calculator ────────────────────────────────────────────
+    function updateCalc() {
+        const amount = parseFloat(document.getElementById('loanAmount').value || 0);
+        const rate   = parseFloat(document.getElementById('interestRate').value || 0);
+        const months = parseInt(document.getElementById('loanDuration').value || 0, 10);
+
+        const preview = document.getElementById('repaymentPreview');
+        if (!amount || !rate || !months) { preview.style.display = 'none'; return; }
+
+        const interest = amount * (rate / 100) * months;
+        const total    = amount + interest;
+
+        document.getElementById('calcPrincipal').textContent = '₦' + amount.toLocaleString();
+        document.getElementById('calcInterest').textContent  = '₦' + interest.toLocaleString();
+        document.getElementById('calcTotal').textContent     = '₦' + total.toLocaleString();
+        preview.style.display = 'block';
+    }
+
+    ['loanAmount', 'interestRate', 'loanDuration'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.type !== 'hidden') el.addEventListener('input', updateCalc);
+    });
+
+    // Run once for preset values
+    updateCalc();
+
+    // ── Form submission ──────────────────────────────────────────────────────
+    async function submitApplication() {
+        const btn = document.getElementById('submitBtn');
+        const errorDiv = document.getElementById('formError');
+        errorDiv.style.display = 'none';
+
+        // Basic client-side validation
+        const required = ['borrowerName','borrowerPhone','borrowerType','loanAmount','interestRate','loanDuration','dueDate','guarantor1','guarantor2'];
+        for (const id of required) {
+            if (!document.getElementById(id)?.value?.trim()) {
+                errorDiv.textContent = 'Please fill in all required fields.';
+                errorDiv.style.display = 'block';
+                document.getElementById(id)?.focus();
+                return;
+            }
+        }
+
+        if (document.getElementById('guarantor1').value === document.getElementById('guarantor2').value) {
+            errorDiv.textContent = 'Please select two different guarantors.';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+
+        const payload = {
+            borrowerName:    document.getElementById('borrowerName').value.trim(),
+            borrowerPhone:   document.getElementById('borrowerPhone').value.trim(),
+            borrowerEmail:   document.getElementById('borrowerEmail').value.trim(),
+            borrowerType:    document.getElementById('borrowerType').value,
+            borrowerAddress: document.getElementById('borrowerAddress').value.trim(),
+            loanAmount:      document.getElementById('loanAmount').value,
+            interestRate:    document.getElementById('interestRate').value,
+            loanDuration:    document.getElementById('loanDuration').value,
+            dueDate:         document.getElementById('dueDate').value,
+            loanPurpose:     document.getElementById('loanPurpose').value.trim(),
+            guarantor1:      document.getElementById('guarantor1').value,
+            guarantor2:      document.getElementById('guarantor2').value
+        };
+
+        try {
+            const res = await fetch('/apply/external-loan/<%= token %>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                document.getElementById('applicationForm').style.display = 'none';
+                document.getElementById('successScreen').style.display = 'block';
+            } else {
+                errorDiv.textContent = data.error || 'Submission failed. Please try again.';
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit Loan Application';
+            }
+        } catch (err) {
+            errorDiv.textContent = 'A network error occurred. Please check your connection and try again.';
+            errorDiv.style.display = 'block';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit Loan Application';
+        }
+    }
+</script>
+</body>
+</html>

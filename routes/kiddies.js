@@ -1,76 +1,78 @@
 const express = require("express");
 const router = express.Router();
-const Payment = require("../models/Payment");
-const Account = require("../models/Account");
+
 const User = require("../models/User");
-const Transaction = require("../models/Transaction");
-
-const KiddiesAccount = require("../models/Kiddies/kiddiesAccount");
-const Settings = require("../models/Settings");
+const Account = require("../models/Account");
 const MemberType = require("../models/MemberType");
+const Settings = require("../models/Settings");
+const KiddiesAccount = require("../models/Kiddies/kiddiesAccount");
 const KiddiesTransaction = require("../models/Kiddies/kiddiesTransaction");
+const KiddiesPayment = require("../models/Kiddies/kiddiesPayment");
 
+// ─── Auth middleware ───────────────────────────────────────────────────────────
+function requireAuth(req, res, next) {
+  if (req.isAuthenticated()) return next();
+  return res.status(401).json({ status: false, message: "Unauthorized" });
+}
 
+// ─── Helper: generate unique kiddies account ID ───────────────────────────────
+async function generateKiddiesID(shortCode = "KID") {
+  const last = await KiddiesAccount.findOne({
+    accountID: { $regex: `^${shortCode}` },
+  }).sort({ createdAt: -1 });
 
+  let next = 1;
+  if (last && last.accountID) {
+    const match = last.accountID.match(/\d+$/);
+    if (match) next = parseInt(match[0]) + 1;
+  }
+  return `${shortCode}${String(next).padStart(3, "0")}`;
+}
 
-
+// ══════════════════════════════════════════════════════════════════════════════
+// GET  /manage/kiddies-account  — render kiddies dashboard
+// ══════════════════════════════════════════════════════════════════════════════
 router.get("/manage/kiddies-account", async (req, res) => {
   try {
-    if (!req.isAuthenticated()) {
-      return res.redirect("/login");
-    }
+    if (!req.isAuthenticated()) return res.redirect("/login");
 
-    const loggedInUserId = req.user._id;
-    const user = await User.findById(loggedInUserId);
-
+    const user = await User.findById(req.user._id);
     if (!user) return res.status(404).send("User not found");
 
-    const kiddiesAccounts = await KiddiesAccount.find({ parent: loggedInUserId })
-      .populate("account") 
-      .populate("transactions"); 
+    const kiddiesAccounts = await KiddiesAccount.find({ parent: req.user._id })
+      .populate("account")
+      .sort({ createdAt: -1 });
 
     const settings = await Settings.getSettings();
     const kiddiesRegistrationFee = settings.registrationFees.kiddiesRegistrationFee;
-
-    // --------------------------
-    // 1️⃣ Fetch all MemberTypes for frontend selection
-    // --------------------------
     const memberTypes = await MemberType.find({});
 
-    return res.render("dashboard/kiddies", {
+    return res.render("dashboard/user/kiddies", {
       user,
       kiddiesAccounts,
       kiddiesRegistrationFee,
       settings,
-      memberTypes // ✅ pass this to EJS
+      memberTypes,
     });
-
   } catch (err) {
-    console.error("Error loading kiddies account page:", err);
+    console.error("Kiddies dashboard error:", err);
     return res.status(500).send("Server error");
   }
 });
 
-// router.post("/api/kiddies/create", (req,res)=>{
-//   console.log(req.body)
-// })
-
-
-router.post("/api/kiddies/create", async (req, res) => {
+// ══════════════════════════════════════════════════════════════════════════════
+// POST /api/kiddies/create  — create a new kiddies account → init Paystack
+// ══════════════════════════════════════════════════════════════════════════════
+router.post("/api/kiddies/create", requireAuth, async (req, res) => {
   try {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ status: false, message: "Unauthorized" });
-    }
-
-    const parentId = req.user._id;
-
     const {
       childFirstName,
       childLastName,
       childDOB,
       childGender,
+      memberTypeId,
       initialDeposit,
-      memberTypeId, // ← Selected from frontend
+      lockPeriodYears,
       beneficiaryType,
       nextOfKinFullName,
       nextOfKinPhone,
@@ -81,14 +83,12 @@ router.post("/api/kiddies/create", async (req, res) => {
       lawFirm,
     } = req.body;
 
-    // Validate required fields
+    // ── Validate required fields ──
     if (
       !childFirstName ||
       !childLastName ||
       !childDOB ||
       !childGender ||
-      !initialDeposit ||
-      !memberTypeId ||
       !beneficiaryType ||
       !nextOfKinFullName ||
       !nextOfKinPhone ||
@@ -98,38 +98,57 @@ router.post("/api/kiddies/create", async (req, res) => {
     ) {
       return res
         .status(400)
-        .json({ status: false, message: "Missing required fields." });
+        .json({ status: false, message: "All required fields must be filled." });
     }
 
-    // --------------------------
-    // 0️⃣ Get MemberType
-    // --------------------------
-    const memberType = await MemberType.findById(memberTypeId);
-    if (!memberType) {
-      return res.status(400).json({ status: false, message: "Invalid account type" });
+    // ── Validate initial deposit ──
+    const depositAmount = parseFloat(initialDeposit) || 0;
+    if (depositAmount < 10000) {
+      return res.status(400).json({
+        status: false,
+        message: "Minimum initial deposit is ₦10,000.",
+      });
     }
 
-    // --------------------------
-    // 1️⃣ Create the Kiddies Wallet (balance 0 until payment verified)
-    // --------------------------
-    const kiddiesWallet = await Account.create({
-      user: parentId,
-      accountType: memberType._id,
+    // ── Resolve member type ──
+    let accountType;
+    if (memberTypeId) {
+      accountType = await MemberType.findById(memberTypeId);
+    }
+    if (!accountType) {
+      accountType = await MemberType.findOne({ isDefault: true });
+    }
+    if (!accountType) {
+      return res
+        .status(500)
+        .json({ status: false, message: "No member type configured." });
+    }
+
+    const settings = await Settings.getSettings();
+    const registrationFee = settings.registrationFees.kiddiesRegistrationFee;
+    const user = await User.findById(req.user._id);
+
+    // ── Generate accountID ──
+    const accountID = await generateKiddiesID("KID");
+
+    // ── Create sub Account ──
+    const account = await Account.create({
+      user: user._id,
+      accountType: accountType._id,
       balance: 0,
-      monthlyROI: memberType.interestRate || 0,
+      monthlyROI: accountType.interestRate || 0,
       accumulativeROI: 0,
     });
 
-    // --------------------------
-    // 2️⃣ Create Kiddies Account
-    // --------------------------
-    const newKiddiesAccount = await KiddiesAccount.create({
-      parent: parentId,
+    // ── Create KiddiesAccount ──
+    const kiddiesAccount = await KiddiesAccount.create({
+      parent: user._id,
+      accountID,
       childFirstName,
       childLastName,
-      childDOB,
+      childDOB: new Date(childDOB),
       childGender,
-      account: kiddiesWallet._id,
+      account: account._id,
       beneficiaryType,
       nextOfKin: {
         fullName: nextOfKinFullName,
@@ -137,16 +156,23 @@ router.post("/api/kiddies/create", async (req, res) => {
         email: nextOfKinEmail,
         relationship: nextOfKinRelationship,
         address: nextOfKinAddress,
-        barNumber: beneficiaryType === "lawyer" ? barNumber : undefined,
-        lawFirm: beneficiaryType === "lawyer" ? lawFirm : undefined,
+        barNumber: barNumber || undefined,
+        lawFirm: lawFirm || undefined,
       },
+      initialDeposit: depositAmount,
+      lockPeriodYears: Math.min(18, Math.max(5, parseInt(lockPeriodYears) || 5)),
       registrationStatus: "pending",
-      status: "active",
+      status: "locked", // locked until admin approves
     });
 
-    // --------------------------
-    // 3️⃣ Initialize Paystack Payment
-    // --------------------------
+    // ── Link to user ──
+    await User.findByIdAndUpdate(user._id, {
+      $push: { kiddiesAccounts: kiddiesAccount._id },
+    });
+
+    // ── Init Paystack for registration fee + initial deposit ──
+    const totalAmount = registrationFee + depositAmount;
+
     const paystackRes = await fetch(
       "https://api.paystack.co/transaction/initialize",
       {
@@ -156,69 +182,63 @@ router.post("/api/kiddies/create", async (req, res) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: req.user.email,
-          amount: Number(initialDeposit) * 100, // convert to kobo
+          email: user.email,
+          amount: totalAmount * 100, // kobo
           metadata: {
-            parentId,
-            kiddiesAccountId: newKiddiesAccount._id,
-            type: "kiddies_initial_deposit",
+            userId: user._id,
+            kiddiesAccountId: kiddiesAccount._id,
+            type: "kiddies_registration",
+            childName: `${childFirstName} ${childLastName}`,
+            registrationFee,
+            initialDeposit: depositAmount,
           },
-          callback_url: `${process.env.BASE_URL}/payment/kiddies/verify`,
+          callback_url: `${process.env.BASE_URL}/kiddies/payment/verify`,
         }),
       }
     );
 
-    const data = await paystackRes.json();
-    if (!data.status) {
-      console.log("PAYSTACK INIT ERROR → ", data);
+    const paystackData = await paystackRes.json();
+    if (!paystackData.status || !paystackData.data) {
+      // Rollback account creation if Paystack fails
+      await KiddiesAccount.findByIdAndDelete(kiddiesAccount._id);
+      await Account.findByIdAndDelete(account._id);
       return res
         .status(500)
-        .json({ status: false, message: "Payment initialization failed" });
+        .json({ status: false, message: "Payment initialization failed." });
     }
 
-    // --------------------------
-    // 4️⃣ Save Payment record
-    // --------------------------
-const payment = await Payment.create({
-  user: parentId,
-  email: req.user.email,   // required by schema
-  amount: Number(initialDeposit),
-  reference: data.data.reference,
-  status: "pending",
-  // optional: link to kiddies account
-  relatedAccount: newKiddiesAccount._id,
-});
-
-
-    newKiddiesAccount.initialDepositPayment = payment._id;
-    await newKiddiesAccount.save();
-
-    // --------------------------
-    // 5️⃣ Respond with Paystack URL
-    // --------------------------
-    res.json({
-      status: true,
-      message: "Kiddies account created. Redirect user to complete payment.",
-      authorization_url: data.data.authorization_url,
-      reference: data.data.reference,
-      kiddiesAccountId: newKiddiesAccount._id,
+    // ── Save payment record ──
+    await KiddiesPayment.create({
+      kiddiesAccount: kiddiesAccount._id,
+      parent: user._id,
+      email: user.email,
+      amount: totalAmount,
+      reference: paystackData.data.reference,
+      status: "pending",
     });
 
+    return res.json({
+      status: true,
+      message: "Account created. Redirecting to payment...",
+      authorization_url: paystackData.data.authorization_url,
+      kiddiesAccountId: kiddiesAccount._id,
+    });
   } catch (err) {
-    console.error("Kiddies Account Creation Error:", err);
-    res.status(500).json({ status: false, message: "Server error" });
+    console.error("Kiddies create error:", err);
+    return res
+      .status(500)
+      .json({ status: false, message: "Error creating kiddies account." });
   }
 });
 
-
-
-router.get("/payment/kiddies/verify", async (req, res) => {
+// ══════════════════════════════════════════════════════════════════════════════
+// GET /kiddies/payment/verify  — Paystack callback for kiddies registration
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/kiddies/payment/verify", async (req, res) => {
   const { reference } = req.query;
-
   if (!reference) return res.redirect("/manage/kiddies-account?payment=failed");
 
   try {
-    // Verify transaction with Paystack
     const verifyRes = await fetch(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -229,395 +249,422 @@ router.get("/payment/kiddies/verify", async (req, res) => {
     );
 
     const data = await verifyRes.json();
-
     if (!data.status || !data.data) {
-      console.error("Invalid Paystack response:", data);
       return res.redirect("/manage/kiddies-account?payment=failed");
     }
 
     const transaction = data.data;
+    const payment = await KiddiesPayment.findOne({ reference }).populate(
+      "kiddiesAccount"
+    );
 
-    // -------------------------------
-    // 1️⃣ Retrieve Payment Record
-    // -------------------------------
-    const payment = await Payment.findOne({ reference });
-
-    if (!payment)
+    if (!payment) {
       return res.redirect("/manage/kiddies-account?error=payment-not-found");
+    }
 
     const isPaid = transaction.status === "success";
 
-    // Update payment status
     payment.status = isPaid ? "success" : "failed";
     payment.paystackResponse = transaction;
     payment.verifiedAt = isPaid ? new Date() : null;
     await payment.save();
 
-    if (!isPaid) {
-      return res.redirect("/manage/kiddies-account?payment=failed");
-    }
+    if (isPaid && payment.kiddiesAccount) {
+      const kiddiesAccount = payment.kiddiesAccount;
+      const meta = transaction.metadata || {};
 
-    // ---------------------------------------------
-    // 2️⃣ Extract Kiddies Account from metadata
-    // ---------------------------------------------
-    const kiddiesAccountId = transaction.metadata.kiddiesAccountId;
-    const parentId = transaction.metadata.parentId;
+      // Update registration status
+      kiddiesAccount.registrationStatus = "paid";
+      // Status remains "locked" until admin approves
+      await kiddiesAccount.save();
 
-    const kiddyAcc = await KiddiesAccount.findById(kiddiesAccountId);
-    if (!kiddyAcc) {
-      console.error("Kiddies Account Not Found!");
-      return res.redirect("/manage/kiddies-account?payment=failed");
-    }
+      // Credit the initial deposit to the sub-account
+      const initialDeposit = meta.initialDeposit || 0;
+      if (initialDeposit > 0 && kiddiesAccount.account) {
+        await Account.findByIdAndUpdate(kiddiesAccount.account, {
+          $inc: { balance: initialDeposit },
+          updatedAt: new Date(),
+        });
 
-    // --------------------------------------------------
-    // 3️⃣ CREDIT the Kiddies Wallet (initial deposit)
-    // --------------------------------------------------
-    const wallet = await Account.findById(kiddyAcc.account);
+        const updatedAccount = await Account.findById(kiddiesAccount.account);
 
-    wallet.balance += Number(payment.amount);
-    await wallet.save();
-
-    // --------------------------------------------------
-    // 4️⃣ Create Kiddies Transaction Record (Deposit)
-    // --------------------------------------------------
-    const depositTxn = await KiddiesTransaction.create({
-      kiddiesAccount: kiddiesAccountId,
-      type: "deposit",
-      amount: payment.amount,
-      description: "Initial Kiddies Account Deposit",
-      status: "success",
-    });
-
-    kiddyAcc.transactions.push(depositTxn._id);
-    await kiddyAcc.save();
-
-    // --------------------------------------------------
-    // 5️⃣ PUSH Kiddies Account to the User
-    // --------------------------------------------------
-    await User.findByIdAndUpdate(parentId, {
-      $addToSet: { kiddiesAccounts: kiddiesAccountId }, // ensures no duplicates
-    });
-
-    // --------------------------------------------------
-    // 6️⃣ Redirect Success
-    // --------------------------------------------------
-    return res.redirect(
-      "/manage/kiddies-account?payment=success&kid=" + kiddiesAccountId
-    );
-
-  } catch (err) {
-    console.error("Payment verification error:", err);
-    res.redirect("/manage/kiddies-account?payment=failed");
-  }
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-router.post("/deposit/init", async (req, res) => {
-  try {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ status: false, message: "You must be logged in to make a deposit." });
-    }
-
-    const { amount } = req.body;
-    const user = req.user;
-
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ status: false, message: "Invalid amount entered." });
-    }
-
-    const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: user.email,
-        amount: amount * 100,
-        metadata: { userId: user._id, type: "deposit" },
-        callback_url: `${process.env.BASE_URL}/deposit/verify`,
-      }),
-    });
-
-    const data = await paystackRes.json();
-    if (!data.status || !data.data) throw new Error("Failed to initialize payment with Paystack.");
-
-    await Payment.create({
-      user: user._id,
-      email: user.email,
-      amount: amount * 100,
-      reference: data.data.reference,
-      status: "pending",
-    });
-
-    res.json({ status: true, authorization_url: data.data.authorization_url });
-  } catch (err) {
-    console.error("Deposit initialization error:", err);
-    res.status(500).json({ status: false, message: "Error initializing deposit." });
-  }
-});
-
-
-// Verify Deposit
-router.get("/deposit/verify", async (req, res) => {
-  const { reference } = req.query;
-
-  if (!reference) return res.redirect("/club-de-star-cooperative/dashboard?deposit=failed");
-
-  try {
-    const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-      },
-    });
-
-    const data = await verifyRes.json();
-    if (!data.status || !data.data) {
-      console.error("Invalid Paystack response:", data);
-      return res.redirect("/club-de-star-cooperative/dashboard?deposit=failed");
-    }
-
-    const transaction = data.data;
-
-    const payment = await Payment.findOne({ reference }).populate("user");
-    if (!payment) return res.redirect("/club-de-star-cooperative/dashboard?deposit=not-found");
-
-    payment.status = transaction.status === "success" ? "paid" : "failed";
-    payment.paystackResponse = transaction;
-    await payment.save();
-
-    if (payment.status === "paid") {
-      let account = await Account.findOne({ user: payment.user._id });
-
-      if (!account) {
-        console.warn(`No account found for ${payment.user.email}, creating one.`);
-        account = await Account.create({
-          user: payment.user._id,
-          accountType: payment.user.membershipID?.startsWith("CD") ? "CD" : "NCD",
-          balance: 0,
-          interestRate: payment.user.membershipID?.startsWith("CD") ? 5 : 10,
+        // Record deposit transaction
+        await KiddiesTransaction.create({
+          kiddiesAccount: kiddiesAccount._id,
+          parent: kiddiesAccount.parent,
+          type: "deposit",
+          amount: initialDeposit,
+          balanceAfter: updatedAccount.balance,
+          description: "Initial deposit on account creation",
+          reference,
+          status: "completed",
+          paymentMethod: "paystack",
+          paystackReference: reference,
         });
       }
+    }
 
-      const depositAmount = payment.amount / 100;
+    if (isPaid) {
+      return res.redirect(
+        "/manage/kiddies-account?payment=success&message=Account+created+successfully.+Pending+admin+approval."
+      );
+    } else {
+      return res.redirect("/manage/kiddies-account?payment=failed");
+    }
+  } catch (err) {
+    console.error("Kiddies payment verify error:", err);
+    return res.redirect("/manage/kiddies-account?payment=failed");
+  }
+});
 
-      account.balance += depositAmount;
-      await account.save();
+// ══════════════════════════════════════════════════════════════════════════════
+// POST /api/kiddies/deposit  — deposit into a kiddies account (Paystack)
+// ══════════════════════════════════════════════════════════════════════════════
+router.post("/api/kiddies/deposit", requireAuth, async (req, res) => {
+  try {
+    const { kiddiesAccountId, amount, paymentMethod } = req.body;
 
-      // ✅ CREATE TRANSACTION WITH STATUS, METHOD & REFERENCE
-      await Transaction.create({
-        user: payment.user._id,
+    if (!kiddiesAccountId || !amount || !paymentMethod) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Missing required fields." });
+    }
+
+    const depositAmount = parseFloat(amount);
+    if (depositAmount < 1000) {
+      return res.status(400).json({
+        status: false,
+        message: "Minimum deposit is ₦1,000.",
+      });
+    }
+
+    const kiddiesAccount = await KiddiesAccount.findOne({
+      _id: kiddiesAccountId,
+      parent: req.user._id,
+    });
+
+    if (!kiddiesAccount) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Kiddies account not found." });
+    }
+
+    if (kiddiesAccount.registrationStatus !== "paid") {
+      return res.status(400).json({
+        status: false,
+        message: "Account registration is not complete. Please pay the registration fee first.",
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+
+    if (paymentMethod === "paystack") {
+      const paystackRes = await fetch(
+        "https://api.paystack.co/transaction/initialize",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: user.email,
+            amount: depositAmount * 100,
+            metadata: {
+              userId: user._id,
+              kiddiesAccountId: kiddiesAccount._id,
+              type: "kiddies_deposit",
+              childName: `${kiddiesAccount.childFirstName} ${kiddiesAccount.childLastName}`,
+            },
+            callback_url: `${process.env.BASE_URL}/kiddies/deposit/verify`,
+          }),
+        }
+      );
+
+      const paystackData = await paystackRes.json();
+      if (!paystackData.status || !paystackData.data) {
+        return res
+          .status(500)
+          .json({ status: false, message: "Payment initialization failed." });
+      }
+
+      // Save pending payment
+      await KiddiesPayment.create({
+        kiddiesAccount: kiddiesAccount._id,
+        parent: user._id,
+        email: user.email,
+        amount: depositAmount,
+        reference: paystackData.data.reference,
+        status: "pending",
+      });
+
+      return res.json({
+        status: true,
+        authorization_url: paystackData.data.authorization_url,
+      });
+    }
+
+    // ── Cooperative (manual) deposit ──
+    if (paymentMethod === "cooperative") {
+      const { payerName } = req.body;
+
+      // Create a pending transaction; admin must approve
+      const pendingTx = await KiddiesTransaction.create({
+        kiddiesAccount: kiddiesAccount._id,
+        parent: user._id,
         type: "deposit",
         amount: depositAmount,
-        description: `Deposit (Ref: ${reference})`,
-        reference: reference,
-        method: "Paystack",
-        status: "successful",
+        balanceAfter: 0, // updated on approval
+        description: `Manual cooperative deposit${payerName ? ` by ${payerName}` : ""}`,
+        status: "pending",
+        paymentMethod: "cooperative",
       });
 
-      console.log(`✅ Deposit recorded: ₦${depositAmount} for ${payment.user.email}`);
-      return res.redirect("/club-de-star-cooperative/dashboard?deposit=success");
-
-    } else {
-      // ❌ Payment failed → store failed transaction
-      await Transaction.create({
-        user: payment.user._id,
-        type: "deposit",
-        amount: payment.amount / 100,
-        description: `Deposit Failed (Ref: ${reference})`,
-        reference: reference,
-        method: "Paystack",
-        status: "failed",
+      return res.json({
+        status: true,
+        message: "Deposit request submitted. Pending admin confirmation.",
+        transactionId: pendingTx._id,
       });
-
-      return res.redirect("/club-de-star-cooperative/dashboard?deposit=failed");
     }
 
+    return res.status(400).json({ status: false, message: "Invalid payment method." });
   } catch (err) {
-    console.error("Deposit verification error:", err);
-    res.redirect("/club-de-star-cooperative/dashboard?deposit=failed");
+    console.error("Kiddies deposit error:", err);
+    return res
+      .status(500)
+      .json({ status: false, message: "Deposit failed. Please try again." });
   }
 });
 
-
-
-
-router.post("/loan/payment", async (req, res) => {
-  try {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ status: false, message: "You must be logged in to make a deposit." });
-    }
-
-    const { amount, loanId } = req.body;
-    const user = req.user;
-
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ status: false, message: "Invalid amount entered." });
-    }
-
-    if (!loanId) {
-      return res.status(400).json({ status: false, message: "Loan ID is required." });
-    }
-
-    const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: user.email,
-        amount: amount * 100,
-        metadata: { userId: user._id, loanId, type: "loan repayment" },
-        callback_url: `${process.env.BASE_URL}/loan/verify`,
-      }),
-    });
-
-    const data = await paystackRes.json();
-    if (!data.status || !data.data) throw new Error("Failed to initialize payment with Paystack.");
-
-    await Payment.create({
-      user: user._id,
-      email: user.email,
-      loanId, // <-- save loanId here
-      amount: amount * 100,
-      reference: data.data.reference,
-      status: "pending",
-    });
-
-    res.json({ status: true, authorization_url: data.data.authorization_url });
-  } catch (err) {
-    console.error("Loan payment initialization error:", err);
-    res.status(500).json({ status: false, message: "Error initializing loan payment." });
-  }
-});
-
-
-router.get("/loan/verify", async (req, res) => {
+// ══════════════════════════════════════════════════════════════════════════════
+// GET /kiddies/deposit/verify  — Paystack callback for deposits
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/kiddies/deposit/verify", async (req, res) => {
   const { reference } = req.query;
-
-  if (!reference) return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
+  if (!reference) return res.redirect("/manage/kiddies-account?payment=failed");
 
   try {
-    // --- 1. Verify payment with Paystack ---
-    const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-      headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
-    });
+    const verifyRes = await fetch(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
+      }
+    );
 
     const data = await verifyRes.json();
     if (!data.status || !data.data) {
-      console.error("Invalid Paystack response:", data);
-      return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
+      return res.redirect("/manage/kiddies-account?payment=failed");
     }
 
     const transaction = data.data;
+    const payment = await KiddiesPayment.findOne({ reference }).populate(
+      "kiddiesAccount"
+    );
 
-    // --- 2. Find payment record ---
-    const payment = await Payment.findOne({ reference }).populate("user");
-    if (!payment) return res.redirect("/club-de-star-cooperative/dashboard?loan=not-found");
+    if (!payment) return res.redirect("/manage/kiddies-account?error=not-found");
 
-    // --- 3. Update payment status ---
-    payment.status = transaction.status === "success" ? "paid" : "failed";
+    const isPaid = transaction.status === "success";
+    payment.status = isPaid ? "success" : "failed";
     payment.paystackResponse = transaction;
+    payment.verifiedAt = isPaid ? new Date() : null;
     await payment.save();
 
-    // --- 4. Process successful payment ---
-    if (payment.status === "paid") {
+    if (isPaid && payment.kiddiesAccount) {
+      const kid = payment.kiddiesAccount;
 
-      // Fetch loan
-      const loan = await Loan.findOne({ _id: payment.loanId, user: payment.user._id });
-      if (!loan) {
-        console.warn(`No loan found for ${payment.user.email} associated with reference ${reference}`);
-        return res.redirect("/club-de-star-cooperative/dashboard?loan=not-found");
-      }
-
-      // Amount user paid now (convert from kobo)
-      const paidAmount = payment.amount / 100;
-
-      // Deduct payment from remaining balance
-      loan.totalRepay = Math.max(loan.totalRepay - paidAmount, 0);
-
-      // If loan is fully paid
-      if (loan.totalRepay === 0) {
-        // Mark as fully paid before deletion
-        loan.status = "paid";
-        await loan.save();
-
-        // Record final payment transaction
-        await Transaction.create({
-          user: payment.user._id,
-          type: "loan_payment",
-          amount: paidAmount,
-          description: `Loan fully settled (Ref: ${reference})`,
-          reference: reference,
-          method: "Paystack",
-          status: "successful",
-        });
-
-        // Create a final "LOAN CLEARED" log
-        await Transaction.create({
-          user: payment.user._id,
-          type: "loan_closed",
-          amount: 0,
-          description: `Loan account closed after full repayment`,
-          method: "system",
-          status: "successful",
-        });
-
-        // DELETE THE LOAN RECORD
-        await Loan.deleteOne({ _id: loan._id });
-
-        console.log(`🎉 Loan fully cleared & deleted for ${payment.user.email}`);
-
-        return res.redirect("/club-de-star-cooperative/dashboard?loan=cleared");
-      }
-
-      // --- If PARTIAL payment ---
-      await loan.save();
-
-      await Transaction.create({
-        user: payment.user._id,
-        type: "loan_payment",
-        amount: paidAmount,
-        description: `Loan repayment (Ref: ${reference})`,
-        reference: reference,
-        method: "Paystack",
-        status: "successful",
+      // Credit account
+      await Account.findByIdAndUpdate(kid.account, {
+        $inc: { balance: payment.amount },
+        updatedAt: new Date(),
       });
 
-      console.log(`✅ Loan payment recorded: ₦${paidAmount} for ${payment.user.email}`);
-      return res.redirect("/club-de-star-cooperative/dashboard?loan=success");
+      const updatedAccount = await Account.findById(kid.account);
+
+      await KiddiesTransaction.create({
+        kiddiesAccount: kid._id,
+        parent: kid.parent,
+        type: "deposit",
+        amount: payment.amount,
+        balanceAfter: updatedAccount.balance,
+        description: "Deposit via Paystack",
+        reference,
+        status: "completed",
+        paymentMethod: "paystack",
+        paystackReference: reference,
+      });
     }
 
-    // --- Payment failed ---
-    await Transaction.create({
-      user: payment.user._id,
-      type: "loan_payment",
-      amount: payment.amount / 100,
-      description: `Loan payment failed (Ref: ${reference})`,
-      reference: reference,
-      method: "Paystack",
-      status: "failed",
-    });
-
-    return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
-
+    return isPaid
+      ? res.redirect("/manage/kiddies-account?payment=success")
+      : res.redirect("/manage/kiddies-account?payment=failed");
   } catch (err) {
-    console.error("Loan verification error:", err);
-    return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
+    console.error("Kiddies deposit verify error:", err);
+    return res.redirect("/manage/kiddies-account?payment=failed");
   }
 });
 
+// ══════════════════════════════════════════════════════════════════════════════
+// GET /api/kiddies/accounts  — list all kiddies accounts for logged-in user
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/api/kiddies/accounts", requireAuth, async (req, res) => {
+  try {
+    const accounts = await KiddiesAccount.find({ parent: req.user._id })
+      .populate("account")
+      .sort({ createdAt: -1 });
+
+    return res.json({ status: true, accounts });
+  } catch (err) {
+    console.error("Kiddies accounts list error:", err);
+    return res.status(500).json({ status: false, message: "Error fetching accounts." });
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GET /api/kiddies/transactions/:accountId  — transactions for one kiddies account
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/api/kiddies/transactions/:accountId", requireAuth, async (req, res) => {
+  try {
+    const { accountId } = req.params;
+
+    const kiddiesAccount = await KiddiesAccount.findOne({
+      _id: accountId,
+      parent: req.user._id,
+    });
+
+    if (!kiddiesAccount) {
+      return res.status(404).json({ status: false, message: "Account not found." });
+    }
+
+    const transactions = await KiddiesTransaction.find({
+      kiddiesAccount: accountId,
+      status: { $ne: "failed" },
+    }).sort({ createdAt: -1 });
+
+    return res.json({ status: true, transactions });
+  } catch (err) {
+    console.error("Kiddies transactions error:", err);
+    return res
+      .status(500)
+      .json({ status: false, message: "Error fetching transactions." });
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GET /api/kiddies/account/:accountId  — single kiddies account details
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/api/kiddies/account/:accountId", requireAuth, async (req, res) => {
+  try {
+    const { accountId } = req.params;
+
+    const kiddiesAccount = await KiddiesAccount.findOne({
+      _id: accountId,
+      parent: req.user._id,
+    }).populate("account");
+
+    if (!kiddiesAccount) {
+      return res.status(404).json({ status: false, message: "Account not found." });
+    }
+
+    const transactions = await KiddiesTransaction.find({
+      kiddiesAccount: accountId,
+    })
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    return res.json({ status: true, kiddiesAccount, transactions });
+  } catch (err) {
+    console.error("Kiddies account detail error:", err);
+    return res.status(500).json({ status: false, message: "Error fetching account." });
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PUT /api/kiddies/beneficiary/:accountId  — update next of kin
+// ══════════════════════════════════════════════════════════════════════════════
+router.put("/api/kiddies/beneficiary/:accountId", requireAuth, async (req, res) => {
+  try {
+    const { accountId } = req.params;
+    const {
+      fullName,
+      phone,
+      email,
+      relationship,
+      address,
+      reason,
+    } = req.body;
+
+    const kiddiesAccount = await KiddiesAccount.findOne({
+      _id: accountId,
+      parent: req.user._id,
+    });
+
+    if (!kiddiesAccount) {
+      return res.status(404).json({ status: false, message: "Account not found." });
+    }
+
+    // Update next of kin fields
+    kiddiesAccount.nextOfKin = {
+      ...kiddiesAccount.nextOfKin,
+      fullName: fullName || kiddiesAccount.nextOfKin.fullName,
+      phone: phone || kiddiesAccount.nextOfKin.phone,
+      email: email || kiddiesAccount.nextOfKin.email,
+      relationship: relationship || kiddiesAccount.nextOfKin.relationship,
+      address: address || kiddiesAccount.nextOfKin.address,
+    };
+
+    kiddiesAccount.beneficiaryUpdateReason = reason;
+    kiddiesAccount.updatedAt = new Date();
+    await kiddiesAccount.save();
+
+    return res.json({
+      status: true,
+      message: "Beneficiary update request submitted. Pending admin review.",
+    });
+  } catch (err) {
+    console.error("Kiddies beneficiary update error:", err);
+    return res
+      .status(500)
+      .json({ status: false, message: "Error updating beneficiary." });
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GET /api/kiddies/summary  — aggregate stats for all kiddies accounts
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/api/kiddies/summary", requireAuth, async (req, res) => {
+  try {
+    const accounts = await KiddiesAccount.find({ parent: req.user._id }).populate(
+      "account"
+    );
+
+    let totalSavings = 0;
+    let totalInterest = 0;
+    let earliestMaturity = null;
+
+    for (const acc of accounts) {
+      if (acc.account) {
+        totalSavings += acc.account.balance || 0;
+        totalInterest += acc.account.accumulativeROI || 0;
+      }
+
+      if (acc.unlockDate) {
+        if (!earliestMaturity || acc.unlockDate < earliestMaturity) {
+          earliestMaturity = acc.unlockDate;
+        }
+      }
+    }
+
+    return res.json({
+      status: true,
+      totalAccounts: accounts.length,
+      totalSavings,
+      totalInterest,
+      earliestMaturity,
+    });
+  } catch (err) {
+    console.error("Kiddies summary error:", err);
+    return res.status(500).json({ status: false, message: "Error fetching summary." });
+  }
+});
 
 module.exports = router;

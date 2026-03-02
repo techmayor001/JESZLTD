@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
 const loanSchema = new mongoose.Schema({
-  user: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "User", 
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
   },
 
   // External borrower
@@ -12,23 +12,19 @@ const loanSchema = new mongoose.Schema({
       type: String,
       enum: ["company", "individual"]
     },
-
     borrowerName: {
       type: String,
       trim: true
     },
-
     email: {
       type: String,
       lowercase: true,
       trim: true
     },
-
     phone: {
       type: String,
       trim: true
     },
-
     address: {
       type: String,
       trim: true
@@ -37,69 +33,180 @@ const loanSchema = new mongoose.Schema({
 
   initiatedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Admin",
+    ref: "User",           // ← was "Admin" — fixed to match actual User collection
   },
 
-  amount: { 
-    type: Number, 
-    required: true 
+  amount: {
+    type: Number,
+    required: true
   },
 
-  totalRepay: { 
-    type: Number, 
-    required: true 
+  // What the borrower currently owes (grows with each penalty applied)
+  outstandingBalance: {
+    type: Number,
+    default: 0
   },
 
-  interestRate: { 
-    type: Number, 
-    required: true 
+  totalRepay: {
+    type: Number,
+    required: true
   },
 
-  duration: { 
-    type: mongoose.Schema.Types.ObjectId, 
+  // Running total of how much has been repaid (for reporting / progress bar)
+  paidAmount: {
+    type: Number,
+    default: 0
+  },
+
+  interestRate: {
+    type: Number,
+    required: true
+  },
+
+  duration: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: "LoanSettings",
   },
 
-  externalDuration: { 
-    type: Number 
+  externalDuration: {
+    type: Number
   },
 
   dueDate: {
     type: Date
   },
 
+  // ─── Penalty Tracking ────────────────────────────────────────────────────
+  penaltyPercentage: {
+    type: Number,
+    default: 0
+  },
+
+  totalPenalty: {
+    type: Number,
+    default: 0
+  },
+
+  lastPenaltyAppliedAt: {
+    type: Date,
+    default: null
+  },
+
+  penaltyHistory: [
+    {
+      appliedAt:     { type: Date, default: Date.now },
+      periodLabel:   { type: String },
+      penaltyRate:   { type: Number },
+      penaltyAmount: { type: Number },
+      balanceBefore: { type: Number },
+      balanceAfter:  { type: Number }
+    }
+  ],
+
+  // ─── Rollover Tracking ───────────────────────────────────────────────────
+  rolloverPercentage: {
+    type: Number,
+    default: 0
+  },
+
+  rolloverCount: {
+    type: Number,
+    default: 0
+  },
+
+  rolloverHistory: [
+    {
+      rolledOverAt:  { type: Date, default: Date.now },
+      rolloverFee:   { type: Number },
+      balanceBefore: { type: Number },
+      balanceAfter:  { type: Number },
+      newDueDate:    { type: Date },
+      processedBy:   { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+    }
+  ],
+
+  // When this loan is closed by a rollover, stores the ID of the replacement loan
+  rolledIntoLoan: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Loan",
+    default: null
+  },
+
+  // ─── Guarantors ──────────────────────────────────────────────────────────
   guarantors: [
     {
-      guarantor: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: "User", 
-        required: true 
+      guarantor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
       },
-      status: { 
-        type: String, 
-        enum: ["pending", "accepted", "declined"], 
-        default: "pending" 
+      status: {
+        type: String,
+        enum: ["pending", "accepted", "declined"],
+        default: "pending"
       },
-      respondedAt: { 
-        type: Date 
+      respondedAt: {
+        type: Date
       }
     }
   ],
 
-  status: { 
-    type: String, 
-    enum: ["pending", "approved", "rejected", "paid"], 
-    default: "pending" 
+  // ─── Status ──────────────────────────────────────────────────────────────
+  status: {
+    type: String,
+    enum: [
+      "pending",      // awaiting guarantor acceptance + admin approval
+      "approved",     // active loan being repaid
+      "overdue",      // past due date — set by cron
+      "rejected",     // declined by admin
+      "paid",         // fully settled by repayment
+      "rolled_over"   // closed by a rollover — replaced by a new loan
+    ],
+    default: "pending"
   },
 
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
+  overdueAt: {
+    type: Date,
+    default: null
   },
 
-  updatedAt: { 
-    type: Date, 
-    default: Date.now 
+  paidAt: {
+    type: Date,
+    default: null
+  },
+
+  disbursementMethod: {
+    type: String
+  },
+
+  disbursementDate: {
+    type: Date
+  },
+
+  approvedAt: {
+    type: Date
+  },
+
+  rejectedAt: {
+    type: Date
+  },
+
+  rejectionReason: {
+    type: String
+  },
+
+  rejectionDetails: {
+    type: String
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+
+  updatedAt: {
+    type: Date,
+    default: Date.now
   },
 });
 

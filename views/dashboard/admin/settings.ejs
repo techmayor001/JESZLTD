@@ -18,13 +18,9 @@
             --info: #06b6d4;
             --sidebar-width: 280px;
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
@@ -32,905 +28,492 @@
             overflow-x: hidden;
         }
 
-        /* Sidebar Styles */
+        /* ── Sidebar ──────────────────────────────────────────────────── */
         .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
+            position: fixed; left: 0; top: 0; bottom: 0;
             width: var(--sidebar-width);
             background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            z-index: 1040;
-            transition: all 0.3s;
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+            color: white; z-index: 1040; transition: all 0.3s;
+            overflow-y: auto; box-shadow: 4px 0 20px rgba(30,58,138,0.15);
             transform: translateX(0);
         }
-        
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        
-        .logo-box {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            flex-shrink: 0;
-        }
-        
-        .sidebar-title {
-            font-size: 1.1rem;
-            line-height: 1.2;
-        }
-        
-        .admin-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            background: rgba(239, 68, 68, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            font-weight: 600;
-            font-size: 0.8rem;
-            margin-top: 8px;
-        }
-        
-        .sidebar-menu {
-            padding: 1rem 0;
-        }
-        
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            padding: 0.875rem 1.5rem;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-        
-        .sidebar-menu a:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.1); }
+        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .logo-box { width: 45px; height: 45px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--primary); font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; }
+        .sidebar-title { font-size: 1.1rem; line-height: 1.2; }
+        .admin-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(239,68,68,0.2); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(239,68,68,0.3); font-weight: 600; font-size: 0.8rem; margin-top: 8px; }
+        .sidebar-menu { padding: 1rem 0; }
+        .sidebar-menu a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 0.875rem 1.5rem; display: flex; align-items: center; transition: all 0.3s; border-left: 3px solid transparent; font-weight: 500; font-size: 0.95rem; }
+        .sidebar-menu a:hover { background: rgba(255,255,255,0.1); color: white; border-left-color: white; }
+        .sidebar-menu a.active { background: rgba(255,255,255,0.15); color: white; border-left-color: white; }
+        .sidebar-menu a i { width: 24px; margin-right: 12px; font-size: 1.1rem; flex-shrink: 0; }
 
-        /* Top Navbar */
-        .top-navbar {
-            position: fixed;
-            top: 0;
-            left: var(--sidebar-width);
-            right: 0;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
-            z-index: 1030;
-            display: flex;
-            align-items: center;
-            padding: 0 2rem;
-            transition: all 0.3s;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
-        }
+        /* ── Top Navbar ───────────────────────────────────────────────── */
+        .top-navbar { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 70px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(30,58,138,0.08); z-index: 1030; display: flex; align-items: center; padding: 0 2rem; transition: all 0.3s; border-bottom: 1px solid rgba(30,58,138,0.1); }
 
-        /* Main Content */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            margin-top: 70px;
-            padding: 2rem;
-            transition: all 0.3s;
-            min-height: calc(100vh - 70px);
-        }
+        /* ── Main Content ─────────────────────────────────────────────── */
+        .main-content { margin-left: var(--sidebar-width); margin-top: 70px; padding: 2rem; transition: all 0.3s; min-height: calc(100vh - 70px); }
+        .settings-container { max-width: 1600px; margin: 0 auto; }
 
-        .settings-container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
+        .page-header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 2.5rem; border-radius: 20px; margin-bottom: 2.5rem; box-shadow: 0 15px 40px rgba(30,58,138,0.25); }
+        .page-header h2 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .page-header p { font-size: 1rem; opacity: 0.95; margin: 0; }
 
-        .page-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-            padding: 2.5rem;
-            border-radius: 20px;
-            margin-bottom: 2.5rem;
-            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
-        }
+        /* ── Sections ─────────────────────────────────────────────────── */
+        .settings-section { margin-bottom: 2.5rem; }
+        .section-title { color: var(--primary); font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 12px; }
+        .section-title .icon-badge { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: white; }
+        .settings-card { background: white; border-radius: 20px; padding: 2rem; box-shadow: 0 8px 25px rgba(30,58,138,0.08); border: 1px solid rgba(30,58,138,0.05); transition: all 0.3s; margin-bottom: 1.5rem; }
+        .settings-card:hover { box-shadow: 0 12px 35px rgba(30,58,138,0.12); transform: translateY(-2px); }
+        .card-header-custom { border-bottom: 2px solid rgba(30,58,138,0.08); padding-bottom: 1.25rem; margin-bottom: 2rem; }
+        .card-header-custom h5 { color: var(--primary); font-weight: 700; font-size: 1.25rem; margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 10px; }
+        .card-header-custom p { color: var(--secondary); font-size: 0.95rem; margin: 0; }
+        .icon-box { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
 
-        .page-header h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
+        /* ── Form Controls ────────────────────────────────────────────── */
+        .form-group { margin-bottom: 1.75rem; }
+        .form-label { font-weight: 600; color: var(--primary); margin-bottom: 0.75rem; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+        .form-label i { color: var(--primary-light); font-size: 0.9rem; }
+        .form-control, .form-select { border: 2px solid rgba(30,58,138,0.12); border-radius: 12px; padding: 0.875rem 1.25rem; transition: all 0.3s; font-size: 0.95rem; font-weight: 500; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 0.25rem rgba(30,58,138,0.1); }
+        .input-group-text { background: linear-gradient(135deg,rgba(30,58,138,0.08) 0%,rgba(59,130,246,0.08) 100%); border: 2px solid rgba(30,58,138,0.12); border-right: none; color: var(--primary); font-weight: 700; border-radius: 12px 0 0 12px; padding: 0.875rem 1rem; }
+        .input-group .form-control { border-left: none; border-radius: 0 12px 12px 0; }
 
-        .page-header p {
-            font-size: 1rem;
-            opacity: 0.95;
-            margin: 0;
-        }
+        /* ── Buttons ──────────────────────────────────────────────────── */
+        .btn-primary { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border: none; padding: 0.875rem 2.5rem; border-radius: 12px; font-weight: 600; font-size: 1rem; transition: all 0.3s; box-shadow: 0 4px 15px rgba(30,58,138,0.2); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(30,58,138,0.35); }
+        .btn-secondary { background: var(--secondary); border: none; padding: 0.875rem 2rem; border-radius: 12px; font-weight: 600; font-size: 1rem; transition: all 0.3s; }
+        .btn-secondary:hover { background: #475569; transform: translateY(-2px); }
+        .btn-danger-custom { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); border: none; padding: 0.875rem 2rem; border-radius: 12px; font-weight: 600; font-size: 1rem; color: white; transition: all 0.3s; box-shadow: 0 4px 15px rgba(220,38,38,0.25); cursor: pointer; }
+        .btn-danger-custom:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(220,38,38,0.4); }
+        .btn-success-custom { background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; padding: 0.875rem 2rem; border-radius: 12px; font-weight: 600; font-size: 1rem; color: white; transition: all 0.3s; box-shadow: 0 4px 15px rgba(5,150,105,0.25); cursor: pointer; }
+        .btn-success-custom:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(5,150,105,0.4); }
 
-        .settings-section {
-            margin-bottom: 2.5rem;
-        }
+        /* ── Value Displays ───────────────────────────────────────────── */
+        .current-value { background: linear-gradient(135deg,rgba(16,185,129,0.08) 0%,rgba(5,150,105,0.08) 100%); border: 2px solid rgba(16,185,129,0.2); border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+        .current-value-label { font-size: 0.85rem; color: var(--secondary); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .current-value-amount { font-size: 1.75rem; font-weight: 700; color: var(--success); display: flex; align-items: center; gap: 8px; }
+        .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
+        .divider { height: 2px; background: linear-gradient(90deg,transparent,rgba(30,58,138,0.15),transparent); margin: 2rem 0; }
+        .help-text { font-size: 0.85rem; color: var(--secondary); margin-top: 0.75rem; display: flex; align-items: start; gap: 8px; line-height: 1.5; }
+        .help-text i { margin-top: 2px; flex-shrink: 0; }
+        .alert-info-custom { background: linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%); border: 2px solid #3b82f6; border-radius: 14px; padding: 1.25rem 1.5rem; color: #1e40af; margin-bottom: 2rem; display: flex; align-items: start; gap: 12px; }
+        .alert-info-custom i { font-size: 1.25rem; margin-top: 2px; }
 
-        .section-title {
-            color: var(--primary);
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        /* ── Maintenance ──────────────────────────────────────────────── */
+        .maintenance-status-card { border-radius: 18px; padding: 2rem; margin-bottom: 1.5rem; transition: all 0.4s; border: 2px solid; }
+        .maintenance-status-card.offline { background: linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%); border-color: rgba(239,68,68,0.3); }
+        .maintenance-status-card.online { background: linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%); border-color: rgba(16,185,129,0.3); }
+        .status-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase; }
+        .status-pill.active-pill { background: rgba(239,68,68,0.15); color: #dc2626; border: 1px solid rgba(239,68,68,0.3); }
+        .status-pill.inactive-pill { background: rgba(16,185,129,0.15); color: #059669; border: 1px solid rgba(16,185,129,0.3); }
+        .status-pulse { width: 10px; height: 10px; border-radius: 50%; animation: pulse 1.5s infinite; }
+        .status-pulse.red { background: #ef4444; }
+        .status-pulse.green { background: #10b981; }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+        .maintenance-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+        .maintenance-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.4rem; }
+        .maintenance-meta { font-size: 0.9rem; color: var(--secondary); }
 
-        .section-title .icon-badge {
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            color: white;
-        }
+        /* ── Company Account Display ──────────────────────────────────── */
+        .account-display { background: linear-gradient(135deg,rgba(30,58,138,0.04) 0%,rgba(59,130,246,0.06) 100%); border: 2px solid rgba(30,58,138,0.1); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .account-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(30,58,138,0.06); }
+        .account-row:last-child { border-bottom: none; }
+        .account-row .label { font-size: 0.85rem; color: var(--secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .account-row .value { font-size: 1rem; font-weight: 700; color: var(--primary); }
 
-        .settings-card {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.08);
-            border: 1px solid rgba(30, 58, 138, 0.05);
-            transition: all 0.3s;
-            margin-bottom: 1.5rem;
-        }
+        /* ── Bank Verification States ─────────────────────────────────── */
+        .verify-spinner-wrap { display: flex; align-items: center; justify-content: center; min-width: 38px; }
+        .account-name-verified { border-color: #10b981 !important; background: rgba(16,185,129,0.04) !important; }
+        .account-name-error { border-color: #ef4444 !important; background: rgba(239,68,68,0.04) !important; }
+        .verify-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; margin-top: 6px; }
+        .verify-badge.v-success { background: rgba(16,185,129,0.12); color: #059669; border: 1px solid rgba(16,185,129,0.25); }
+        .verify-badge.v-error   { background: rgba(239,68,68,0.10); color: #dc2626; border: 1px solid rgba(239,68,68,0.2); }
+        .verify-badge.v-loading { background: rgba(59,130,246,0.10); color: #1d4ed8; border: 1px solid rgba(59,130,246,0.2); }
 
-        .settings-card:hover {
-            box-shadow: 0 12px 35px rgba(30, 58, 138, 0.12);
-            transform: translateY(-2px);
-        }
+        /* ── Toast System ─────────────────────────────────────────────── */
+        .toast-container-custom { position: fixed; top: 85px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; min-width: 300px; }
+        .toast-item { pointer-events: all; display: flex; align-items: center; gap: 12px; padding: 1.1rem 1.4rem; border-radius: 14px; color: white; font-weight: 600; font-size: 0.93rem; box-shadow: 0 10px 35px rgba(0,0,0,0.18); transform: translateX(380px); opacity: 0; transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease; }
+        .toast-item.show { transform: translateX(0); opacity: 1; }
+        .toast-item.toast-success { background: linear-gradient(135deg,#10b981 0%,#059669 100%); }
+        .toast-item.toast-error   { background: linear-gradient(135deg,#ef4444 0%,#dc2626 100%); }
+        .toast-item.toast-warning { background: linear-gradient(135deg,#f59e0b 0%,#d97706 100%); }
+        .toast-item .t-close { margin-left: auto; cursor: pointer; opacity: 0.75; }
+        .toast-item .t-close:hover { opacity: 1; }
 
-        .card-header-custom {
-            border-bottom: 2px solid rgba(30, 58, 138, 0.08);
-            padding-bottom: 1.25rem;
-            margin-bottom: 2rem;
-        }
+        /* ── Confirm Modals ───────────────────────────────────────────── */
+        .modal-content { border: none; border-radius: 20px; box-shadow: 0 25px 60px rgba(0,0,0,0.15); }
+        .modal-header { border-radius: 20px 20px 0 0; border-bottom: 2px solid rgba(30,58,138,0.07); padding: 1.5rem 1.75rem; }
+        .modal-footer { border-top: 2px solid rgba(30,58,138,0.06); border-radius: 0 0 20px 20px; padding: 1.25rem 1.75rem; }
+        .confirm-icon-circle { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.25rem; }
+        .confirm-icon-circle.ci-danger  { background: linear-gradient(135deg,#fef2f2,#fee2e2); color: #dc2626; }
+        .confirm-icon-circle.ci-success { background: linear-gradient(135deg,#f0fdf4,#dcfce7); color: #059669; }
+        .confirm-icon-circle.ci-warning { background: linear-gradient(135deg,#fffbeb,#fef3c7); color: #d97706; }
+        .confirm-title { font-size: 1.3rem; font-weight: 700; color: var(--primary); text-align: center; margin-bottom: 0.5rem; }
+        .confirm-body-text { color: var(--secondary); text-align: center; font-size: 0.96rem; line-height: 1.65; }
 
-        .card-header-custom h5 {
-            color: var(--primary);
-            font-weight: 700;
-            font-size: 1.25rem;
-            margin: 0 0 0.5rem 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        /* ── Action Buttons ───────────────────────────────────────────── */
+        .action-buttons { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; margin-top: 2rem; }
+        .powered-by { position: fixed; bottom: 20px; right: 20px; background: white; padding: 12px 20px; border-radius: 30px; box-shadow: 0 4px 20px rgba(30,58,138,0.15); font-size: 0.85rem; font-weight: 600; color: var(--primary); z-index: 1000; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1035; }
+        .overlay.active { display: block; }
 
-        .card-header-custom p {
-            color: var(--secondary);
-            font-size: 0.95rem;
-            margin: 0;
-        }
-
-        .icon-box {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            flex-shrink: 0;
-        }
-
-        .form-group {
-            margin-bottom: 1.75rem;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 0.75rem;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .form-label i {
-            color: var(--primary-light);
-            font-size: 0.9rem;
-        }
-
-        .form-control, .form-select {
-            border: 2px solid rgba(30, 58, 138, 0.12);
-            border-radius: 12px;
-            padding: 0.875rem 1.25rem;
-            transition: all 0.3s;
-            font-size: 0.95rem;
-            font-weight: 500;
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.25rem rgba(30, 58, 138, 0.1);
-        }
-
-        .input-group-text {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
-            border: 2px solid rgba(30, 58, 138, 0.12);
-            border-right: none;
-            color: var(--primary);
-            font-weight: 700;
-            border-radius: 12px 0 0 12px;
-            padding: 0.875rem 1rem;
-        }
-
-        .input-group .form-control {
-            border-left: none;
-            border-radius: 0 12px 12px 0;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none;
-            padding: 0.875rem 2.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.2);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(30, 58, 138, 0.35);
-        }
-
-        .btn-secondary {
-            background: var(--secondary);
-            border: none;
-            padding: 0.875rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        .btn-secondary:hover {
-            background: #475569;
-            transform: translateY(-2px);
-        }
-
-        .current-value {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%);
-            border: 2px solid rgba(16, 185, 129, 0.2);
-            border-radius: 14px;
-            padding: 1.25rem 1.5rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .current-value-label {
-            font-size: 0.85rem;
-            color: var(--secondary);
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .current-value-amount {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--success);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .current-value-amount i {
-            font-size: 1.5rem;
-        }
-
-        .settings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-        }
-
-        .divider {
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(30, 58, 138, 0.15), transparent);
-            margin: 2rem 0;
-        }
-
-        .help-text {
-            font-size: 0.85rem;
-            color: var(--secondary);
-            margin-top: 0.75rem;
-            display: flex;
-            align-items: start;
-            gap: 8px;
-            line-height: 1.5;
-        }
-
-        .help-text i {
-            margin-top: 2px;
-            flex-shrink: 0;
-        }
-
-        .alert-info-custom {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border: 2px solid #3b82f6;
-            border-radius: 14px;
-            padding: 1.25rem 1.5rem;
-            color: #1e40af;
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: start;
-            gap: 12px;
-        }
-
-        .alert-info-custom i {
-            font-size: 1.25rem;
-            margin-top: 2px;
-        }
-
-        .success-toast {
-            position: fixed;
-            top: 90px;
-            right: 20px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 1.25rem 1.75rem;
-            border-radius: 14px;
-            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
-            z-index: 9999;
-            display: none;
-            animation: slideIn 0.3s ease;
-            min-width: 300px;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1035;
-        }
-
-        .overlay.active {
-            display: block;
-        }
-
-        .powered-by {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 12px 20px;
-            border-radius: 30px;
-            box-shadow: 0 4px 20px rgba(30, 58, 138, 0.15);
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--primary);
-            z-index: 1000;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-            margin-top: 2rem;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1400px) {
-            .settings-grid {
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 1.5rem;
-            }
-        }
-
+        /* ── Responsive ───────────────────────────────────────────────── */
         @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .top-navbar {
-                left: 0;
-                padding: 0 1.5rem;
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 1.5rem;
-            }
-
-            .settings-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .page-header {
-                padding: 2rem;
-            }
-
-            .page-header h2 {
-                font-size: 1.75rem;
-            }
-
-            .settings-card {
-                padding: 1.75rem;
-            }
-
-            .section-title {
-                font-size: 1.35rem;
-            }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .top-navbar { left: 0; padding: 0 1.5rem; }
+            .main-content { margin-left: 0; padding: 1.5rem; }
+            .settings-grid { grid-template-columns: 1fr; gap: 1.5rem; }
         }
-
         @media (max-width: 768px) {
-            .main-content {
-                padding: 1.25rem;
-            }
-
-            .page-header {
-                padding: 1.75rem;
-                margin-bottom: 2rem;
-            }
-
-            .page-header h2 {
-                font-size: 1.5rem;
-            }
-
-            .page-header p {
-                font-size: 0.9rem;
-            }
-
-            .settings-card {
-                padding: 1.5rem;
-                border-radius: 16px;
-                margin-bottom: 1.25rem;
-            }
-
-            .section-title {
-                font-size: 1.25rem;
-                margin-bottom: 1.25rem;
-            }
-
-            .section-title .icon-badge {
-                width: 45px;
-                height: 45px;
-                font-size: 1.25rem;
-            }
-
-            .card-header-custom {
-                padding-bottom: 1rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .card-header-custom h5 {
-                font-size: 1.15rem;
-            }
-
-            .form-group {
-                margin-bottom: 1.5rem;
-            }
-
-            .current-value {
-                padding: 1rem 1.25rem;
-            }
-
-            .current-value-amount {
-                font-size: 1.5rem;
-            }
-
-            .btn-primary, .btn-secondary {
-                padding: 0.75rem 2rem;
-                font-size: 0.95rem;
-                width: 100%;
-            }
-
-            .action-buttons {
-                flex-direction: column-reverse;
-            }
-
-            .success-toast {
-                right: 15px;
-                left: 15px;
-                min-width: auto;
-            }
-
-            .powered-by {
-                bottom: 15px;
-                right: 15px;
-                font-size: 0.75rem;
-                padding: 10px 16px;
-            }
+            .main-content { padding: 1.25rem; }
+            .page-header { padding: 1.75rem; }
+            .page-header h2 { font-size: 1.5rem; }
+            .settings-card { padding: 1.5rem; }
+            .btn-primary, .btn-secondary, .btn-danger-custom, .btn-success-custom { width: 100%; }
+            .action-buttons { flex-direction: column-reverse; }
+            .toast-container-custom { right: 12px; left: 12px; min-width: auto; }
         }
-
         @media (max-width: 576px) {
-            .top-navbar {
-                height: 60px;
-                padding: 0 1rem;
-            }
-
-            .main-content {
-                margin-top: 60px;
-                padding: 1rem;
-            }
-
-            .page-header {
-                padding: 1.5rem;
-                border-radius: 16px;
-                margin-bottom: 1.5rem;
-            }
-
-            .page-header h2 {
-                font-size: 1.35rem;
-            }
-
-            .page-header .btn {
-                padding: 0.65rem 1.5rem;
-                font-size: 0.9rem;
-            }
-
-            .settings-card {
-                padding: 1.25rem;
-            }
-
-            .section-title {
-                font-size: 1.15rem;
-            }
-
-            .section-title .icon-badge {
-                width: 40px;
-                height: 40px;
-                font-size: 1.15rem;
-            }
-
-            .icon-box {
-                width: 40px;
-                height: 40px;
-                font-size: 1.15rem;
-            }
-
-            .card-header-custom h5 {
-                font-size: 1.05rem;
-            }
-
-            .form-control, .form-select {
-                padding: 0.75rem 1rem;
-                font-size: 0.9rem;
-            }
-
-            .input-group-text {
-                padding: 0.75rem 0.875rem;
-                font-size: 0.9rem;
-            }
-
-            .current-value-amount {
-                font-size: 1.35rem;
-            }
-
-            .sidebar-header {
-                padding: 1.25rem;
-            }
-            
-            .logo-box {
-                width: 40px;
-                height: 40px;
-                font-size: 1.25rem;
-            }
-            
-            .sidebar-title {
-                font-size: 1rem;
-            }
-
-            .divider {
-                margin: 1.5rem 0;
-            }
-
-            .alert-info-custom {
-                padding: 1rem 1.25rem;
-                font-size: 0.9rem;
-            }
-
-            .help-text {
-                font-size: 0.8rem;
-            }
+            .top-navbar { height: 60px; padding: 0 1rem; }
+            .main-content { margin-top: 60px; padding: 1rem; }
+            .page-header { padding: 1.4rem; border-radius: 16px; }
+            .page-header h2 { font-size: 1.3rem; }
+            .settings-card { padding: 1.25rem; }
         }
     </style>
 </head>
 <body>
-    <!-- Overlay for mobile -->
+
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-    <!-- Sidebar -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- TOAST CONTAINER                                                    -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="toast-container-custom" id="toastContainer"></div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: Reset Registration Fees                                     -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="resetRegFeesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body pt-4 px-4 text-center">
+                    <div class="confirm-icon-circle ci-warning"><i class="fas fa-undo"></i></div>
+                    <div class="confirm-title">Reset Fees?</div>
+                    <p class="confirm-body-text">Registration fees will be reset to their default values.<br><strong>Adult: ₦5,000 &nbsp;/&nbsp; Kiddies: ₦2,500</strong></p>
+                </div>
+                <div class="modal-footer justify-content-center gap-2 border-0 pb-4">
+                    <button class="btn btn-light px-4 fw-semibold" style="border-radius:12px;" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-warning px-4 fw-semibold" style="border-radius:12px;" onclick="doResetRegFees()">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: Reset Kiddies Settings                                      -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="resetKiddiesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body pt-4 px-4 text-center">
+                    <div class="confirm-icon-circle ci-warning"><i class="fas fa-undo"></i></div>
+                    <div class="confirm-title">Reset Kiddies Settings?</div>
+                    <p class="confirm-body-text">All kiddies account settings will be restored to their system defaults.</p>
+                </div>
+                <div class="modal-footer justify-content-center gap-2 border-0 pb-4">
+                    <button class="btn btn-light px-4 fw-semibold" style="border-radius:12px;" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-warning px-4 fw-semibold" style="border-radius:12px;" onclick="doResetKiddiesSettings()">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: Reset Other Fees                                            -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="resetOtherFeesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body pt-4 px-4 text-center">
+                    <div class="confirm-icon-circle ci-warning"><i class="fas fa-undo"></i></div>
+                    <div class="confirm-title">Reset Fees?</div>
+                    <p class="confirm-body-text">ROI Operating Charge will be reset to <strong>10%</strong>.</p>
+                </div>
+                <div class="modal-footer justify-content-center gap-2 border-0 pb-4">
+                    <button class="btn btn-light px-4 fw-semibold" style="border-radius:12px;" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-warning px-4 fw-semibold" style="border-radius:12px;" onclick="doResetOtherFees()">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: Enable Maintenance Mode Confirm                             -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="maintenanceEnableModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" style="color:#dc2626;"><i class="fas fa-exclamation-triangle me-2"></i>Enable Maintenance Mode</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4 py-3">
+                    <div class="confirm-icon-circle ci-danger"><i class="fas fa-tools"></i></div>
+                    <div class="confirm-title">Take System Offline?</div>
+                    <p class="confirm-body-text mb-3">
+                        This will make the portal <strong>inaccessible to all members immediately</strong>. They will see the maintenance message below until you bring the system back online.
+                    </p>
+                    <div class="alert-info-custom mb-0">
+                        <i class="fas fa-eye"></i>
+                        <div>
+                            <strong>Members will see:</strong><br>
+                            <span id="maintenancePreviewText" style="font-style:italic;opacity:0.85;font-size:0.9rem;"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer gap-2 justify-content-end">
+                    <button class="btn btn-light px-4 fw-semibold" style="border-radius:12px;" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-danger px-4 fw-semibold" style="border-radius:12px;" onclick="doToggleMaintenance(true)">
+                        <i class="fas fa-power-off me-2"></i>Take Offline
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: Disable Maintenance Mode Confirm                            -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="maintenanceDisableModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body pt-4 px-4 text-center">
+                    <div class="confirm-icon-circle ci-success"><i class="fas fa-check-circle"></i></div>
+                    <div class="confirm-title">Bring System Online?</div>
+                    <p class="confirm-body-text">Members will be able to access the portal normally again.</p>
+                </div>
+                <div class="modal-footer justify-content-center gap-2 border-0 pb-4">
+                    <button class="btn btn-light px-4 fw-semibold" style="border-radius:12px;" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-success px-4 fw-semibold" style="border-radius:12px;" onclick="doToggleMaintenance(false)">
+                        <i class="fas fa-check me-2"></i>Bring Online
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SIDEBAR                                                            -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo-container">
                 <div class="logo-box">C</div>
                 <div>
-                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
-                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform:uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size:0.75rem;">ADMIN PANEL</small>
                 </div>
             </div>
-            <div class="admin-badge">
-                <i class="fas fa-shield-alt"></i>
-                <span>SUPER ADMIN</span>
-            </div>
+            <div class="admin-badge"><i class="fas fa-shield-alt"></i><span>SUPER ADMIN</span></div>
         </div>
-          <div class="sidebar-menu">
+        <div class="sidebar-menu">
             <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
+            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
             <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
             <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
-            <a href="/admin/transaction-approvals">
-                <i class="fas fa-tasks"></i> Approvals
-                <span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span>
-            </a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
             <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
             <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
             <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
             <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
             <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
             <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
             <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
             <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
             <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
             <a href="/admin/settings" class="active"><i class="fas fa-cog"></i> Settings</a>
             <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-             <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
-            <a href="/club-de-star-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);">
-                <i class="fas fa-sign-in-alt"></i> Back to Dashboard
-            </a>
+            <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
+            <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
         </div>
     </div>
 
-    <!-- Top Navbar -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- TOP NAVBAR                                                         -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
     <div class="top-navbar">
-        <i class="fas fa-bars d-lg-none me-3"
-           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-           onclick="toggleSidebar()"></i>
-        
+        <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.5rem;" onclick="toggleSidebar()"></i>
         <div class="flex-grow-1">
-            <h5 class="mb-0 fw-bold d-none d-md-block" style="color: var(--primary)">System Settings</h5>
-            <h6 class="mb-0 fw-bold d-md-none" style="color: var(--primary)">Settings</h6>
+            <h5 class="mb-0 fw-bold d-none d-md-block" style="color:var(--primary)">System Settings</h5>
+            <h6 class="mb-0 fw-bold d-md-none" style="color:var(--primary)">Settings</h6>
             <small class="text-muted d-none d-sm-block">Configure system parameters</small>
         </div>
-        
         <div class="d-flex align-items-center gap-3">
             <div class="position-relative">
-                <i class="fas fa-bell" style="color: var(--primary); font-size: 1.25rem; cursor: pointer;"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">5</span>
+                <i class="fas fa-bell" style="color:var(--primary);font-size:1.25rem;cursor:pointer;"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.65rem;">5</span>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- MAIN CONTENT                                                       -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
     <div class="main-content">
         <div class="settings-container">
+
             <!-- Page Header -->
             <div class="page-header">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
-                        <h2 class="mb-2 fw-bold">
-                            <i class="fas fa-cog me-2"></i>System Settings
-                        </h2>
+                        <h2 class="mb-2 fw-bold"><i class="fas fa-cog me-2"></i>System Settings</h2>
                         <p class="mb-0 opacity-90">Configure system parameters and fee structures for your cooperative</p>
                     </div>
-                    <a href="dashboard.html" class="text-decoration-none">
-                        <button class="btn btn-light fw-semibold">
-                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-                        </button>
+                    <a href="/cds-cooperative/dashboard" class="text-decoration-none">
+                        <button class="btn btn-light fw-semibold"><i class="fas fa-arrow-left me-2"></i>Back to Dashboard</button>
                     </a>
                 </div>
             </div>
 
-            <!-- Interest Rates Settings -->
+            <!-- ──────────────────────────────────────────────────────── -->
+            <!-- MAINTENANCE MODE                                          -->
+            <!-- ──────────────────────────────────────────────────────── -->
             <div class="settings-section">
                 <div class="section-title">
-                    <div class="icon-badge" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                        <i class="fas fa-percentage"></i>
+                    <div class="icon-badge" style="background:linear-gradient(135deg,#dc2626 0%,#ef4444 100%);">
+                        <i class="fas fa-tools"></i>
                     </div>
-                    Interest Rate Configuration
+                    Maintenance Mode
                 </div>
 
                 <div class="settings-card">
                     <div class="card-header-custom">
                         <h5>
-                            <i class="fas fa-chart-line"></i>
-                            Annual Interest Rates
+                            <div class="icon-box" style="background:linear-gradient(135deg,#dc2626 0%,#f87171 100%);color:white;"><i class="fas fa-power-off"></i></div>
+                            System Maintenance Control
                         </h5>
-                        <p>Set interest rates for different membership types and loan products</p>
+                        <p>Take the system offline for maintenance. Members will see the maintenance message instead of the portal.</p>
                     </div>
 
-                    <div class="settings">
-                                <!-- Interest Rates Settings -->
-                        <div class="settings-card">
-                            <div class="row g-3">
-
-                                <!-- Club Member Rate -->
-                                <div class="col-md-6">
-                                    <div class="current-value">
-                                        <div class="current-value-label">Current Club Member Rate</div>
-                                        <div class="current-value-amount"><%= settings.interestRates.clubMemberRate %>%</div>
-                                    </div>
-
-                                    <label class="form-label">Club Member Interest Rate (Annual)</label>
-                                    <div class="input-group">
-                                        <input type="number"
-                                            class="form-control"
-                                            id="clubRate"
-                                            value="<%= settings.interestRates.clubMemberRate %>"
-                                            step="0.1"
-                                            min="0"
-                                            max="100">
-                                        <span class="input-group-text">%</span>
-                                    </div>
-
-                                    <div class="help-text">
-                                        <i class="fas fa-info-circle me-1"></i>Applied to CDS (Club De Stars) members
-                                    </div>
+                    <div class="maintenance-status-card <%= settings.maintenanceMode.enabled ? 'offline' : 'online' %>">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                            <div>
+                                <div class="maintenance-icon"><%= settings.maintenanceMode.enabled ? '🔧' : '✅' %></div>
+                                <div class="maintenance-title" style="color:<%= settings.maintenanceMode.enabled ? '#dc2626' : '#059669' %>">
+                                    System is Currently <strong><%= settings.maintenanceMode.enabled ? 'OFFLINE' : 'ONLINE' %></strong>
                                 </div>
-
-                                <!-- Non-Club Member Rate -->
-                                <div class="col-md-6">
-                                    <div class="current-value">
-                                        <div class="current-value-label">Current Non-Club Member Rate</div>
-                                        <div class="current-value-amount"><%= settings.interestRates.nonClubMemberRate %>%</div>
-                                    </div>
-
-                                    <label class="form-label">Non-Club Member Interest Rate (Annual)</label>
-                                    <div class="input-group">
-                                        <input type="number"
-                                            class="form-control"
-                                            id="nonClubRate"
-                                            value="<%= settings.interestRates.nonClubMemberRate %>"
-                                            step="0.1"
-                                            min="0"
-                                            max="100">
-                                        <span class="input-group-text">%</span>
-                                    </div>
-
-                                    <div class="help-text">
-                                        <i class="fas fa-info-circle me-1"></i>Applied to NCDS (Non-Club De Stars) members
-                                    </div>
+                                <div class="maintenance-meta">
+                                    <% if (settings.maintenanceMode.enabled && settings.maintenanceMode.enabledAt) { %>
+                                        Maintenance started: <strong><%= new Date(settings.maintenanceMode.enabledAt).toLocaleString() %></strong>
+                                    <% } else { %>
+                                        All systems operational — members can access the portal normally.
+                                    <% } %>
                                 </div>
-
                             </div>
-
-                            <div class="divider"></div>
-
-                            <div class="d-flex gap-2 justify-content-end flex-wrap">
-                                <button class="btn btn-secondary" onclick="resetInterestRates()">
-                                    <i class="fas fa-undo me-2"></i>Reset
-                                </button>
-                                <button class="btn btn-primary" onclick="updateInterestRates()">
-                                    <i class="fas fa-save me-2"></i>Save Changes
-                                </button>
+                            <div>
+                                <span class="status-pill <%= settings.maintenanceMode.enabled ? 'active-pill' : 'inactive-pill' %>">
+                                    <span class="status-pulse <%= settings.maintenanceMode.enabled ? 'red' : 'green' %>"></span>
+                                    <%= settings.maintenanceMode.enabled ? 'MAINTENANCE ACTIVE' : 'SYSTEM ONLINE' %>
+                                </span>
                             </div>
                         </div>
+                    </div>
 
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-comment-alt"></i>Maintenance Message</label>
+                        <textarea class="form-control" id="maintenanceMessage" rows="3" placeholder="Enter the message members will see during maintenance..."><%= settings.maintenanceMode.message %></textarea>
+                        <div class="help-text"><i class="fas fa-info-circle"></i><span>This message is displayed to members when they try to access the portal during maintenance.</span></div>
+                    </div>
 
-                        <!-- Membership Registration Fees -->
-                        <div class="settings-card">
-                            <div class="card-header-custom">
-                                <h5>
-                                    <div class="icon-box" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
-                                        <i class="fas fa-user-plus"></i>
-                                    </div>
-                                    Membership Registration Fees
-                                </h5>
-                                <p>Configure one-time registration fees for new members</p>
-                            </div>
+                    <div class="divider"></div>
 
-                            <div class="settings-grid">
-                                <div>
-                                    <div class="current-value">
-                                        <div class="current-value-label">Current Registration Fee</div>
-                                        <div class="current-value-amount">₦<%= settings.registrationFees.adultRegistrationFee.toLocaleString() %></div>
-                                    </div>
-                                    <label class="form-label">Adult Membership Registration Fee</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">₦</span>
-                                        <input type="number" class="form-control" id="adultRegFee" value="<%= settings.registrationFees.adultRegistrationFee %>" step="100" min="0">
-                                    </div>
-                                    <div class="help-text">
-                                        <i class="fas fa-info-circle me-1"></i>One-time fee for adult members (18+ years)
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div class="current-value">
-                                        <div class="current-value-label">Current Kiddies Fee</div>
-                                        <div class="current-value-amount">₦<%= settings.registrationFees.kiddiesRegistrationFee.toLocaleString() %></div>
-                                    </div>
-                                    <label class="form-label">Kiddies Account Registration Fee</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">₦</span>
-                                        <input type="number" class="form-control" id="kiddiesRegFee" value="<%= settings.registrationFees.kiddiesRegistrationFee %>" step="100" min="0">
-                                    </div>
-                                    <div class="help-text">
-                                        <i class="fas fa-info-circle me-1"></i>One-time fee for kiddies accounts
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="divider"></div>
-
-                            <div class="d-flex gap-2 justify-content-end flex-wrap">
-                                <button class="btn btn-secondary" onclick="resetRegFees()">
-                                    <i class="fas fa-undo me-2"></i>Reset
-                                </button>
-                                <button class="btn btn-primary" onclick="updateRegFees()">
-                                    <i class="fas fa-save me-2"></i>Save Changes
-                                </button>
-                            </div>
-                        </div>
-                      
-
-                       
+                    <div class="action-buttons">
+                        <% if (settings.maintenanceMode.enabled) { %>
+                            <button class="btn-success-custom" onclick="confirmMaintenanceDisable()">
+                                <i class="fas fa-check-circle me-2"></i>Bring System Online
+                            </button>
+                        <% } else { %>
+                            <button class="btn-danger-custom" onclick="confirmMaintenanceEnable()">
+                                <i class="fas fa-tools me-2"></i>Enable Maintenance Mode
+                            </button>
+                        <% } %>
                     </div>
                 </div>
             </div>
 
-            <!-- Kiddies Account Settings -->
+            <!-- ──────────────────────────────────────────────────────── -->
+            <!-- SYSTEM CONFIGURATION / REGISTRATION FEES                 -->
+            <!-- ──────────────────────────────────────────────────────── -->
             <div class="settings-section">
                 <div class="section-title">
-                    <div class="icon-badge" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);">
+                    <div class="icon-badge" style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    System Configuration
+                </div>
+
+                <div class="settings-card">
+                    <div class="settings-card">
+                        <div class="card-header-custom">
+                            <h5>
+                                <div class="icon-box" style="background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);color:white;"><i class="fas fa-user-plus"></i></div>
+                                Membership Registration Fees
+                            </h5>
+                            <p>Configure one-time registration fees for new members</p>
+                        </div>
+
+                        <div class="settings-grid">
+                            <div>
+                                <div class="current-value">
+                                    <div class="current-value-label">Current Registration Fee</div>
+                                    <div class="current-value-amount">₦<%= settings.registrationFees.adultRegistrationFee.toLocaleString() %></div>
+                                </div>
+                                <label class="form-label">Adult Membership Registration Fee</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₦</span>
+                                    <input type="number" class="form-control" id="adultRegFee" value="<%= settings.registrationFees.adultRegistrationFee %>" step="100" min="0">
+                                </div>
+                                <div class="help-text"><i class="fas fa-info-circle me-1"></i>One-time fee for adult members (18+ years)</div>
+                            </div>
+
+                            <div>
+                                <div class="current-value">
+                                    <div class="current-value-label">Current Kiddies Fee</div>
+                                    <div class="current-value-amount">₦<%= settings.registrationFees.kiddiesRegistrationFee.toLocaleString() %></div>
+                                </div>
+                                <label class="form-label">Kiddies Account Registration Fee</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₦</span>
+                                    <input type="number" class="form-control" id="kiddiesRegFee" value="<%= settings.registrationFees.kiddiesRegistrationFee %>" step="100" min="0">
+                                </div>
+                                <div class="help-text"><i class="fas fa-info-circle me-1"></i>One-time fee for kiddies accounts</div>
+                            </div>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <div class="d-flex gap-2 justify-content-end flex-wrap">
+                            <button class="btn btn-secondary" onclick="showModal('resetRegFeesModal')">
+                                <i class="fas fa-undo me-2"></i>Reset
+                            </button>
+                            <button class="btn btn-primary" onclick="updateRegFees()">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ──────────────────────────────────────────────────────── -->
+            <!-- KIDDIES ACCOUNT CONFIGURATION                            -->
+            <!-- ──────────────────────────────────────────────────────── -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <div class="icon-badge" style="background:linear-gradient(135deg,#ec4899 0%,#db2777 100%);">
                         <i class="fas fa-child"></i>
                     </div>
                     Kiddies Account Configuration
@@ -938,135 +521,87 @@
 
                 <div class="settings-card">
                     <div class="card-header-custom">
-                        <h5>
-                            <i class="fas fa-piggy-bank"></i>
-                            Children's Savings Account Settings
-                        </h5>
+                        <h5><i class="fas fa-piggy-bank"></i> Children's Savings Account Settings</h5>
                         <p>Configure parameters for children's savings accounts including age limits, fees, and upgrade rules</p>
                     </div>
 
                     <div class="alert-info-custom">
                         <i class="fas fa-lightbulb"></i>
-                        <div>
-                            <strong>About Kiddies Accounts:</strong> Special savings accounts designed for minors with automatic upgrade to adult accounts upon reaching the specified age threshold. Includes preferential interest rates and reduced fees.
-                        </div>
+                        <div><strong>About Kiddies Accounts:</strong> Special savings accounts designed for minors with automatic upgrade to adult accounts upon reaching the specified age threshold. Includes preferential interest rates and reduced fees.</div>
                     </div>
 
                     <div class="settings-grid">
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-hourglass-start"></i>
-                                Minimum Age Requirement
-                            </label>
+                            <label class="form-label"><i class="fas fa-hourglass-start"></i>Minimum Age Requirement</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" id="minAge" value="<%= settings.kiddiesSettings.minAge %>" min="0" max="17">
                                 <span class="input-group-text">years</span>
                             </div>
-                            <div class="help-text">
-                                <i class="fas fa-info-circle"></i>
-                                <span>Minimum age required to open a kiddies savings account</span>
-                            </div>
+                            <div class="help-text"><i class="fas fa-info-circle"></i><span>Minimum age required to open a kiddies savings account</span></div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-hourglass-end"></i>
-                                Maximum Age Limit
-                            </label>
+                            <label class="form-label"><i class="fas fa-hourglass-end"></i>Maximum Age Limit</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" id="maxAge" value="<%= settings.kiddiesSettings.maxAge %>" min="1" max="25">
                                 <span class="input-group-text">years</span>
                             </div>
-                            <div class="help-text">
-                                <i class="fas fa-info-circle"></i>
-                                <span>Maximum age for maintaining a kiddies account before mandatory upgrade</span>
-                            </div>
+                            <div class="help-text"><i class="fas fa-info-circle"></i><span>Maximum age before mandatory upgrade</span></div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-level-up-alt"></i>
-                                Auto-Upgrade Age Threshold
-                            </label>
+                            <label class="form-label"><i class="fas fa-level-up-alt"></i>Auto-Upgrade Age Threshold</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" id="upgradeAge" value="<%= settings.kiddiesSettings.upgradeAge %>" min="16" max="25">
                                 <span class="input-group-text">years</span>
                             </div>
-                            <div class="help-text">
-                                <i class="fas fa-info-circle"></i>
-                                <span>Account automatically converts to adult account at this age</span>
-                            </div>
+                            <div class="help-text"><i class="fas fa-info-circle"></i><span>Account automatically converts to adult account at this age</span></div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-percentage"></i>
-                                Kiddies Interest Rate (Annual)
-                            </label>
+                            <label class="form-label"><i class="fas fa-percentage"></i>Kiddies Interest Rate (Annual)</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" id="kiddiesInterest" value="<%= settings.kiddiesSettings.kiddiesInterestRate %>" step="0.1" min="0" max="100">
                                 <span class="input-group-text">%</span>
                             </div>
-                            <div class="help-text">
-                                <i class="fas fa-info-circle"></i>
-                                <span>Special preferential interest rate for kiddies savings accounts</span>
-                            </div>
+                            <div class="help-text"><i class="fas fa-info-circle"></i><span>Special preferential interest rate for kiddies savings accounts</span></div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-calendar-alt"></i>
-                                Monthly Account Maintenance Fee
-                            </label>
+                            <label class="form-label"><i class="fas fa-calendar-alt"></i>Monthly Account Maintenance Fee</label>
                             <div class="input-group">
                                 <span class="input-group-text">₦</span>
                                 <input type="number" class="form-control" id="kiddiesMonthlyFee" value="<%= settings.kiddiesSettings.monthlyMaintenanceFee %>" step="50" min="0">
                             </div>
-                            <div class="help-text">
-                                <i class="fas fa-info-circle"></i>
-                                <span>Monthly fee charged for account maintenance and administration</span>
-                            </div>
+                            <div class="help-text"><i class="fas fa-info-circle"></i><span>Monthly fee charged for account maintenance</span></div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-exchange-alt"></i>
-                                Account Upgrade Processing Fee
-                            </label>
+                            <label class="form-label"><i class="fas fa-exchange-alt"></i>Account Upgrade Processing Fee</label>
                             <div class="input-group">
                                 <span class="input-group-text">₦</span>
                                 <input type="number" class="form-control" id="upgradeFee" value="<%= settings.kiddiesSettings.upgradeProcessingFee %>" step="100" min="0">
                             </div>
-                            <div class="help-text">
-                                <i class="fas fa-info-circle"></i>
-                                <span>One-time fee charged when converting kiddies account to adult account</span>
-                            </div>
+                            <div class="help-text"><i class="fas fa-info-circle"></i><span>One-time fee when converting kiddies account to adult account</span></div>
                         </div>
                     </div>
 
                     <div class="divider"></div>
 
                     <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-bell"></i>
-                            Auto-Upgrade Notification Period
-                        </label>
+                        <label class="form-label"><i class="fas fa-bell"></i>Auto-Upgrade Notification Period</label>
                         <select class="form-select" id="autoUpgradeNotif">
                             <option value="30" <%= settings.kiddiesSettings.autoUpgradeNotificationDays == 30 ? 'selected' : '' %>>Notify 30 days before birthday</option>
                             <option value="60" <%= settings.kiddiesSettings.autoUpgradeNotificationDays == 60 ? 'selected' : '' %>>Notify 60 days before birthday</option>
                             <option value="90" <%= settings.kiddiesSettings.autoUpgradeNotificationDays == 90 ? 'selected' : '' %>>Notify 90 days before birthday</option>
                         </select>
-
-                        <div class="help-text">
-                            <i class="fas fa-info-circle"></i>
-                            <span>When to send notification to account holder about upcoming automatic upgrade to adult account</span>
-                        </div>
+                        <div class="help-text"><i class="fas fa-info-circle"></i><span>When to notify account holder about upcoming automatic upgrade</span></div>
                     </div>
 
                     <div class="divider"></div>
 
                     <div class="action-buttons">
-                        <button class="btn btn-secondary" onclick="resetKiddiesSettings()">
+                        <button class="btn btn-secondary" onclick="showModal('resetKiddiesModal')">
                             <i class="fas fa-undo me-2"></i>Reset to Default
                         </button>
                         <button class="btn btn-primary" onclick="updateKiddiesSettings()">
@@ -1076,11 +611,12 @@
                 </div>
             </div>
 
-          
-            
+            <!-- ──────────────────────────────────────────────────────── -->
+            <!-- ADDITIONAL FEES                                           -->
+            <!-- ──────────────────────────────────────────────────────── -->
             <div class="settings-section">
                 <div class="section-title">
-                    <div class="icon-badge" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                    <div class="icon-badge" style="background:linear-gradient(135deg,#06b6d4 0%,#0891b2 100%);">
                         <i class="fas fa-file-invoice-dollar"></i>
                     </div>
                     Additional Fees & Charges
@@ -1088,64 +624,25 @@
 
                 <div class="settings-card">
                     <div class="card-header-custom">
-                        <h5>
-                            <i class="fas fa-money-bill-wave"></i>
-                            Service Fees & Transaction Charges
-                        </h5>
-                        <p>Configure withdrawal penalties, loan processing fees, and operational charges</p>
+                        <h5><i class="fas fa-money-bill-wave"></i> Service Fees & Transaction Charges</h5>
+                        <p>Configure ROI operating charges and other service fees</p>
                     </div>
 
                     <div class="settings-grid">
                         <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                Force Withdrawal Penalty
-                            </label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="forceWithdrawalFee" value="<%= settings.otherFees.forceWithdrawalCharge %>" step="0.1" min="0" max="100">
-                                <span class="input-group-text">%</span>
-                            </div>
-                            <div class="help-text">
-                                <i class="fas fa-info-circle"></i>
-                                <span>Percentage penalty charged on emergency or forced withdrawals before maturity</span>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-stamp"></i>
-                                Loan Processing Fee
-                            </label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="loanProcessingFee" value="<%= settings.otherFees.loanProcessingFee || 1.5 %>" step="0.1" min="0" max="100">
-                                <span class="input-group-text">%</span>
-                            </div>
-                            <div class="help-text">
-                                <i class="fas fa-info-circle"></i>
-                                <span>One-time administrative fee charged as percentage of approved loan amount</span>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-building"></i>
-                                ROI Operating Charge
-                            </label>
+                            <label class="form-label"><i class="fas fa-building"></i>ROI Operating Charge</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" id="roiOperatingCharge" value="<%= settings.otherFees.roiOperatingCharge %>" step="0.5" min="0" max="50">
                                 <span class="input-group-text">%</span>
                             </div>
-                            <div class="help-text">
-                                <i class="fas fa-info-circle"></i>
-                                <span>Percentage of interest income retained for cooperative operating expenses and administration</span>
-                            </div>
+                            <div class="help-text"><i class="fas fa-info-circle"></i><span>Percentage of interest income retained for cooperative operating expenses</span></div>
                         </div>
                     </div>
 
                     <div class="divider"></div>
 
                     <div class="action-buttons">
-                        <button class="btn btn-secondary" onclick="resetOtherFees()">
+                        <button class="btn btn-secondary" onclick="showModal('resetOtherFeesModal')">
                             <i class="fas fa-undo me-2"></i>Reset to Default
                         </button>
                         <button class="btn btn-primary" onclick="updateOtherFees()">
@@ -1154,250 +651,394 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Powered By Footer -->
-    <div class="powered-by">
-        Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
-    </div>
+            <!-- ──────────────────────────────────────────────────────── -->
+            <!-- COMPANY BANK ACCOUNT (with live verification)            -->
+            <!-- ──────────────────────────────────────────────────────── -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <div class="icon-badge" style="background:linear-gradient(135deg,#7c3aed 0%,#6d28d9 100%);">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    Company Bank Account
+                </div>
 
-    <!-- Success Toast -->
-    <div class="success-toast" id="successToast">
-        <div class="d-flex align-items-center gap-2">
-            <i class="fas fa-check-circle fa-lg"></i>
-            <span id="toastMessage" class="fw-semibold">Settings updated successfully!</span>
-        </div>
-    </div>
+                <div class="settings-card">
+                    <div class="card-header-custom">
+                        <h5>
+                            <div class="icon-box" style="background:linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%);color:white;"><i class="fas fa-piggy-bank"></i></div>
+                            Payment Receiving Account Details
+                        </h5>
+                        <p>Set the cooperative's official bank account where members send deposits. Account name is verified live — just like on the member profile.</p>
+                    </div>
+
+                    <!-- Current account snapshot -->
+                    <% if (settings.companyAccount && settings.companyAccount.accountNumber) { %>
+                    <div class="account-display">
+                        <div class="account-row">
+                            <span class="label"><i class="fas fa-university me-2"></i>Bank Name</span>
+                            <span class="value"><%= settings.companyAccount.bankName || '—' %></span>
+                        </div>
+                        <div class="account-row">
+                            <span class="label"><i class="fas fa-hashtag me-2"></i>Account Number</span>
+                            <span class="value" style="font-family:monospace;font-size:1.1rem;letter-spacing:2px;"><%= settings.companyAccount.accountNumber %></span>
+                        </div>
+                        <div class="account-row">
+                            <span class="label"><i class="fas fa-user me-2"></i>Account Name</span>
+                            <span class="value"><%= settings.companyAccount.accountName || '—' %></span>
+                        </div>
+                    </div>
+                    <% } else { %>
+                    <div class="alert-info-custom mb-3">
+                        <i class="fas fa-info-circle"></i>
+                        <div>No company bank account configured yet. Fill in the details below and the account name will be verified automatically before saving.</div>
+                    </div>
+                    <% } %>
+
+                    <div class="settings-grid">
+                        <!-- Bank Name -->
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-university"></i>Bank Name</label>
+                            <input
+                                list="adminBanksList"
+                                id="companyBankName"
+                                class="form-control"
+                                value="<%= settings.companyAccount ? settings.companyAccount.bankName : '' %>"
+                                placeholder="e.g. First Bank of Nigeria"
+                                autocomplete="off">
+                            <datalist id="adminBanksList">
+                                <% if (typeof nigeriaBanks !== 'undefined') { nigeriaBanks.forEach(function(bank){ %>
+                                    <option value="<%= bank %>">
+                                <% }); } %>
+                            </datalist>
+                            <div class="help-text"><i class="fas fa-info-circle"></i><span>Select or type the full bank name</span></div>
+                        </div>
+
+                        <!-- Account Number -->
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-hashtag"></i>Account Number</label>
+                            <div class="input-group">
+                                <input
+                                    type="text"
+                                    id="companyAccountNumber"
+                                    class="form-control"
+                                    value="<%= settings.companyAccount ? settings.companyAccount.accountNumber : '' %>"
+                                    placeholder="10-digit NUBAN"
+                                    maxlength="10"
+                                    inputmode="numeric">
+                                <!-- Live verification indicator -->
+                                <span class="input-group-text verify-spinner-wrap" id="verifyIndicatorWrap"
+                                      style="background:white;border:2px solid rgba(30,58,138,0.12);border-left:none;border-radius:0 12px 12px 0;min-width:46px;">
+                                    <span id="verifySpinner" style="display:none;">
+                                        <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                                    </span>
+                                    <i class="fas fa-check-circle text-success" id="verifyOkIcon" style="display:none;font-size:1.1rem;"></i>
+                                    <i class="fas fa-times-circle text-danger" id="verifyFailIcon" style="display:none;font-size:1.1rem;"></i>
+                                </span>
+                            </div>
+                            <div class="help-text"><i class="fas fa-info-circle"></i><span>Account name will be fetched automatically when you enter all 10 digits</span></div>
+                        </div>
+
+                        <!-- Account Name (read-only, auto-filled) -->
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-user-tie"></i>Account Name</label>
+                            <input
+                                type="text"
+                                id="companyAccountName"
+                                class="form-control"
+                                value="<%= settings.companyAccount ? settings.companyAccount.accountName : '' %>"
+                                placeholder="Auto-filled after verification"
+                                readonly>
+                            <div id="verifyStatusBadge"></div>
+                            <div class="help-text"><i class="fas fa-info-circle"></i><span>Verified automatically from your bank record — read-only</span></div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="clearCompanyAccountFields()">
+                            <i class="fas fa-times me-2"></i>Clear Fields
+                        </button>
+                        <button class="btn btn-primary" onclick="updateCompanyAccount()">
+                            <i class="fas fa-save me-2"></i>Save Account Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /settings-container -->
+    </div><!-- /main-content -->
+
+    <div class="powered-by">Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Toggle sidebar on mobile
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        }
+    // ══════════════════════════════════════════════════════════════════
+    // TOAST SYSTEM
+    // ══════════════════════════════════════════════════════════════════
+    function showToast(message, type = 'success') {
+        const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+        const container = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast-item toast-${type}`;
+        t.innerHTML = `<i class="fas ${icons[type] || icons.success}" style="font-size:1.15rem;flex-shrink:0;"></i>
+                       <span style="flex:1;">${message}</span>
+                       <i class="fas fa-times t-close" onclick="this.parentElement.remove()"></i>`;
+        container.appendChild(t);
+        requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 420); }, 4500);
+    }
 
-        // Show success toast
-        function showToast(message) {
-            const toast = document.getElementById('successToast');
-            document.getElementById('toastMessage').textContent = message;
-            toast.style.display = 'block';
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 3500);
-        }
+    // ══════════════════════════════════════════════════════════════════
+    // MODAL HELPERS
+    // ══════════════════════════════════════════════════════════════════
+    function showModal(id) { new bootstrap.Modal(document.getElementById(id)).show(); }
+    function hideModal(id) { const m = bootstrap.Modal.getInstance(document.getElementById(id)); if (m) m.hide(); }
 
-        // Interest Rates Functions
-        async function updateInterestRates() {
-            const clubRate = document.getElementById('clubRate').value;
-            const nonClubRate = document.getElementById('nonClubRate').value;
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
+    }
 
-            try {
-                const response = await fetch('/admin/settings/interest-rates', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ clubRate, nonClubRate })
-                });
+    // ══════════════════════════════════════════════════════════════════
+    // REGISTRATION FEES
+    // ══════════════════════════════════════════════════════════════════
+    async function updateRegFees() {
+        try {
+            const res    = await fetch('/admin/settings/registration-fees', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adultFee: document.getElementById('adultRegFee').value, kiddiesFee: document.getElementById('kiddiesRegFee').value }) });
+            const result = await res.json();
+            showToast(result.message || 'Registration fees updated.', result.success ? 'success' : 'error');
+        } catch { showToast('Error updating registration fees.', 'error'); }
+    }
 
-                const result = await response.json();
+    function doResetRegFees() {
+        document.getElementById('adultRegFee').value   = '5000';
+        document.getElementById('kiddiesRegFee').value = '2500';
+        hideModal('resetRegFeesModal');
+        showToast('Registration fees reset to default values.', 'warning');
+    }
 
-                if (result.success) {
-                    showToast('Interest rates updated successfully!');
-                } else {
-                    showToast('Failed to update interest rates!');
-                }
+    // ══════════════════════════════════════════════════════════════════
+    // KIDDIES SETTINGS
+    // ══════════════════════════════════════════════════════════════════
+    async function updateKiddiesSettings() {
+        const payload = {
+            minAge:           document.getElementById('minAge').value,
+            maxAge:           document.getElementById('maxAge').value,
+            upgradeAge:       document.getElementById('upgradeAge').value,
+            monthlyFee:       document.getElementById('kiddiesMonthlyFee').value,
+            upgradeFee:       document.getElementById('upgradeFee').value,
+            interestRate:     document.getElementById('kiddiesInterest').value,
+            notificationDays: document.getElementById('autoUpgradeNotif').value
+        };
+        try {
+            const res    = await fetch('/admin/settings/kiddies-settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const result = await res.json();
+            showToast(result.message || 'Kiddies settings updated.', result.success ? 'success' : 'error');
+        } catch { showToast('Error updating kiddies settings.', 'error'); }
+    }
 
-            } catch (err) {
-                console.error(err);
-                showToast('An error occurred while updating interest rates');
+    function doResetKiddiesSettings() {
+        document.getElementById('minAge').value            = '0';
+        document.getElementById('maxAge').value            = '17';
+        document.getElementById('upgradeAge').value        = '18';
+        document.getElementById('kiddiesMonthlyFee').value = '100';
+        document.getElementById('upgradeFee').value        = '1000';
+        document.getElementById('kiddiesInterest').value   = '7.5';
+        document.getElementById('autoUpgradeNotif').value  = '60';
+        hideModal('resetKiddiesModal');
+        showToast('Kiddies settings reset to defaults.', 'warning');
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // OTHER FEES
+    // ══════════════════════════════════════════════════════════════════
+    async function updateOtherFees() {
+        try {
+            const res    = await fetch('/admin/settings/other-fees', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ roiOperating: document.getElementById('roiOperatingCharge').value }) });
+            const result = await res.json();
+            showToast(result.message || 'Additional fees updated.', result.success ? 'success' : 'error');
+        } catch { showToast('Error updating additional fees.', 'error'); }
+    }
+
+    function doResetOtherFees() {
+        document.getElementById('roiOperatingCharge').value = '10';
+        hideModal('resetOtherFeesModal');
+        showToast('Additional fees reset to defaults.', 'warning');
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // MAINTENANCE MODE
+    // ══════════════════════════════════════════════════════════════════
+    function confirmMaintenanceEnable() {
+        const msg = document.getElementById('maintenanceMessage').value.trim()
+                  || 'The system is currently undergoing scheduled maintenance. Please check back shortly.';
+        document.getElementById('maintenancePreviewText').textContent = msg;
+        showModal('maintenanceEnableModal');
+    }
+
+    function confirmMaintenanceDisable() {
+        showModal('maintenanceDisableModal');
+    }
+
+    async function doToggleMaintenance(enable) {
+        hideModal(enable ? 'maintenanceEnableModal' : 'maintenanceDisableModal');
+        const message = document.getElementById('maintenanceMessage').value.trim();
+        try {
+            const res    = await fetch('/admin/settings/maintenance-mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: enable, message }) });
+            const result = await res.json();
+            if (result.success) {
+                showToast(result.message || (enable ? 'Maintenance mode enabled.' : 'System is back online.'));
+                setTimeout(() => location.reload(), 1600);
+            } else {
+                showToast(result.message || 'Failed to update maintenance mode.', 'error');
             }
+        } catch { showToast('Error toggling maintenance mode.', 'error'); }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // COMPANY BANK ACCOUNT — LIVE VERIFICATION
+    // Mirrors the exact pattern from profile.ejs verifyAccount()
+    // Uses the same endpoint: /club-de-star-cooperative/verifyBankAccount
+    // ══════════════════════════════════════════════════════════════════
+    let _verifyTimer = null;
+
+    function _setVerifyState(state, label = '') {
+        const spinner  = document.getElementById('verifySpinner');
+        const okIcon   = document.getElementById('verifyOkIcon');
+        const failIcon = document.getElementById('verifyFailIcon');
+        const nameInput = document.getElementById('companyAccountName');
+        const badge    = document.getElementById('verifyStatusBadge');
+
+        // Reset icons
+        spinner.style.display  = 'none';
+        okIcon.style.display   = 'none';
+        failIcon.style.display = 'none';
+        nameInput.classList.remove('account-name-verified', 'account-name-error');
+        badge.innerHTML = '';
+
+        if (state === 'loading') {
+            spinner.style.display = 'inline-block';
+            badge.innerHTML = `<span class="verify-badge v-loading"><i class="fas fa-circle-notch fa-spin me-1"></i>Verifying account…</span>`;
+        } else if (state === 'success') {
+            okIcon.style.display = 'inline-block';
+            nameInput.classList.add('account-name-verified');
+            badge.innerHTML = `<span class="verify-badge v-success"><i class="fas fa-check-circle me-1"></i>Verified — ${label}</span>`;
+        } else if (state === 'error') {
+            failIcon.style.display = 'inline-block';
+            nameInput.classList.add('account-name-error');
+            nameInput.value = '';
+            badge.innerHTML = `<span class="verify-badge v-error"><i class="fas fa-exclamation-circle me-1"></i>${label || 'Verification failed. Check account number and bank.'}</span>`;
+        }
+        // 'idle' → everything hidden
+    }
+
+    async function _doVerifyCompanyAccount() {
+        const bank   = document.getElementById('companyBankName').value.trim();
+        const accNum = document.getElementById('companyAccountNumber').value.trim();
+        const nameEl = document.getElementById('companyAccountName');
+
+        if (!bank || accNum.length !== 10) {
+            _setVerifyState('idle');
+            nameEl.value = '';
+            return;
         }
 
-        function resetInterestRates() {
-            document.getElementById('clubRate').value = '5.0';
-            document.getElementById('nonClubRate').value = '10.0';
-            showToast('Interest rates reset to default values');
-        }
+        _setVerifyState('loading');
 
-        // Registration Fees Functions
-            async function updateRegFees() {
-                const adultFee = document.getElementById('adultRegFee').value;
-                const kiddiesFee = document.getElementById('kiddiesRegFee').value;
+        try {
+            // Same endpoint used in member profile.ejs
+            const res  = await fetch(`/club-de-star-cooperative/verifyBankAccount?bank=${encodeURIComponent(bank)}&accountNumber=${accNum}`);
+            const data = await res.json();
 
-                try {
-                    const response = await fetch('/admin/settings/registration-fees', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ adultFee, kiddiesFee })
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        showToast("Registration fees updated successfully!");
-                    } else {
-                        showToast("Failed to update registration fees.");
-                    }
-
-                } catch (err) {
-                    console.error(err);
-                    showToast("Error updating registration fees.");
-                }
+            if (data.success && data.accountName) {
+                nameEl.value = data.accountName;
+                _setVerifyState('success', data.accountName);
+            } else {
+                _setVerifyState('error', data.error || 'Account not found.');
             }
-
-        function resetRegFees() {
-            document.getElementById('adultRegFee').value = '5000';
-            document.getElementById('kiddiesRegFee').value = '2500';
-            showToast('Registration fees reset to default values');
+        } catch (err) {
+            console.error(err);
+            _setVerifyState('error', 'Network error. Please try again.');
         }
+    }
 
-        function updateMemberRegFee() {
-            const memberId = document.getElementById('selectMemberToEdit').value;
-            const newFee = document.getElementById('editMemberRegFee').value;
-            
-            if (!memberId) {
-                alert('Please select a member first');
-                return;
+    document.addEventListener('DOMContentLoaded', function () {
+        const accInput  = document.getElementById('companyAccountNumber');
+        const bankInput = document.getElementById('companyBankName');
+
+        // Strip non-digits + enforce 10-char limit; trigger verify when complete
+        accInput.addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+            clearTimeout(_verifyTimer);
+            if (this.value.length === 10) {
+                _verifyTimer = setTimeout(_doVerifyCompanyAccount, 600);
+            } else {
+                _setVerifyState('idle');
+                document.getElementById('companyAccountName').value = '';
             }
-            
-            if (!newFee) {
-                alert('Please enter a new fee amount');
-                return;
-            }
-            
-            // Add your API call here
-            console.log('Updating member registration fee:', { memberId, newFee });
-            showToast(`Registration fee updated for member ${memberId}`);
-            
-            // Clear fields
-            document.getElementById('selectMemberToEdit').value = '';
-            document.getElementById('editMemberRegFee').value = '';
-        }
-
-        async function updateKiddiesSettings() {
-            const settings = {
-                minAge: document.getElementById('minAge').value,
-                maxAge: document.getElementById('maxAge').value,
-                upgradeAge: document.getElementById('upgradeAge').value,
-                monthlyFee: document.getElementById('kiddiesMonthlyFee').value,
-                upgradeFee: document.getElementById('upgradeFee').value,
-                interestRate: document.getElementById('kiddiesInterest').value,
-                notificationDays: document.getElementById('autoUpgradeNotif').value
-            };
-
-            try {
-                const response = await fetch('/admin/settings/kiddies-settings', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(settings)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showToast('Kiddies account settings updated successfully!');
-                } else {
-                    showToast('Failed to update kiddies settings.');
-                }
-
-            } catch (err) {
-                console.error(err);
-                showToast('Error while updating kiddies settings.');
-            }
-        }
-
-
-        function resetKiddiesSettings() {
-            document.getElementById('minAge').value = '0';
-            document.getElementById('maxAge').value = '17';
-            document.getElementById('upgradeAge').value = '18';
-            document.getElementById('kiddiesMonthlyFee').value = '100';
-            document.getElementById('upgradeFee').value = '1000';
-            document.getElementById('kiddiesInterest').value = '7.5';
-            document.getElementById('autoUpgradeNotif').value = '60';
-            showToast('Kiddies settings reset to default values');
-        }
-
-        // Other Fees Functions
-        async function updateOtherFees() {
-            const fees = {
-                forceWithdrawal: document.getElementById('forceWithdrawalFee').value,
-                loanProcessing: document.getElementById('loanProcessingFee').value,
-                roiOperating: document.getElementById('roiOperatingCharge').value
-            };
-
-            try {
-                const response = await fetch('/admin/settings/other-fees', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(fees)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showToast('Additional fees updated successfully!');
-                } else {
-                    showToast('Failed to update additional fees.');
-                }
-
-            } catch (err) {
-                console.error(err);
-                showToast('Error while updating additional fees.');
-            }
-        }
-
-
-        function resetOtherFees() {
-            document.getElementById('forceWithdrawalFee').value = '2.5';
-            document.getElementById('loanProcessingFee').value = '1.5';
-            document.getElementById('roiOperatingCharge').value = '10';
-            showToast('Additional fees reset to default values');
-        }
-
-        // Close sidebar when clicking outside on mobile
-        document.getElementById('overlay').addEventListener('click', function() {
-            toggleSidebar();
         });
+
+        // Re-verify if bank selection changes and account number is already full
+        bankInput.addEventListener('change', function () {
+            clearTimeout(_verifyTimer);
+            if (accInput.value.length === 10) {
+                _verifyTimer = setTimeout(_doVerifyCompanyAccount, 400);
+            }
+        });
+    });
+
+    async function updateCompanyAccount() {
+        const bankName      = document.getElementById('companyBankName').value.trim();
+        const accountNumber = document.getElementById('companyAccountNumber').value.trim();
+        const accountName   = document.getElementById('companyAccountName').value.trim();
+
+        if (!bankName || !accountNumber || !accountName) {
+            showToast('Please fill all fields. Account name must be verified first.', 'error');
+            return;
+        }
+
+        // Guard: ensure the name field has been verified (has the green class)
+        const nameEl = document.getElementById('companyAccountName');
+        if (accountNumber.length === 10 && !nameEl.classList.contains('account-name-verified')) {
+            showToast('Please wait for the account verification to complete before saving.', 'warning');
+            return;
+        }
+
+        try {
+            const res    = await fetch('/admin/settings/company-account', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bankName, accountNumber, accountName }) });
+            const result = await res.json();
+            if (result.success) {
+                showToast('Company account details saved successfully!');
+                setTimeout(() => location.reload(), 1600);
+            } else {
+                showToast(result.message || 'Failed to save account details.', 'error');
+            }
+        } catch { showToast('Error saving company account details.', 'error'); }
+    }
+
+    function clearCompanyAccountFields() {
+        document.getElementById('companyBankName').value      = '';
+        document.getElementById('companyAccountNumber').value = '';
+        document.getElementById('companyAccountName').value   = '';
+        _setVerifyState('idle');
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // SIDEBAR PENDING BADGE
+    // ══════════════════════════════════════════════════════════════════
+    async function loadSidebarPendingCount() {
+        try {
+            const res  = await fetch('/admin/pending-approvals-count');
+            const data = await res.json();
+            const badge = document.getElementById('sidebarPendingBadge');
+            if (!badge) return;
+            data.count > 0 ? (badge.style.display = 'inline-block', badge.textContent = data.count) : (badge.style.display = 'none');
+        } catch (e) { console.error('Sidebar badge error:', e); }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
     </script>
-
-
-
-
-
-<script>
-async function loadSidebarPendingCount() {
-  try {
-    console.log("Loading sidebar approval count...");
-
-    const res = await fetch('/admin/pending-approvals-count');
-    const data = await res.json();
-
-    console.log("Pending approvals count:", data);
-
-    const badge = document.getElementById('sidebarPendingBadge');
-
-    if (!badge) {
-      console.log("Sidebar badge not found on page");
-      return;
-    }
-
-    if (data.count > 0) {
-      badge.style.display = 'inline-block';
-      badge.textContent = data.count;
-    } else {
-      badge.style.display = 'none';
-    }
-
-  } catch (err) {
-    console.error("Sidebar count error:", err);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", loadSidebarPendingCount);
-</script>
 </body>
 </html>

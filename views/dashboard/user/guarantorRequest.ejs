@@ -463,50 +463,26 @@
             </div>
 
         </div>
-        <div class="sidebar-menu">
-            <a href="/club-de-star-cooperative/dashboard">
-                <i class="fas fa-home"></i> Dashboard
-            </a>
-            <a href="/club-de-star-cooperative/transaction">
-                <i class="fas fa-exchange-alt"></i> Transactions
-            </a>
-            <!-- <a href="#" onclick="showSection('savings', event)">
-                <i class="fas fa-piggy-bank"></i> My Savings
-            </a> -->
-            <a href="/club-de-star-cooperative/loan">
-                <i class="fas fa-hand-holding-usd"></i> My Loans
-            </a>
-            <a href="/club-de-star-cooperative/guarantorRequest" class="active">
+         <div class="sidebar-menu">
+            <a href="/cds-cooperative/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/cds-cooperative/transaction"><i class="fas fa-exchange-alt"></i> Transactions</a>
+            <a href="/cds-cooperative/loan"><i class="fas fa-hand-holding-usd"></i> My Loans</a>
+            <a href="/cds-cooperative/guarantorRequest" class="active">
                 <i class="fas fa-user-friends"></i> Guarantor Requests
-                <% 
-                const pendingCount = user.guarantorRequests
-                    ? user.guarantorRequests.filter(r => r.status === "pending").length
-                    : 0; 
-                %>
-                <% if (pendingCount > 0) { %>
-                    <span class="badge bg-danger ms-2"><%= pendingCount %></span>
+                <% if (pendingGuarantorCount > 0) { %>
+                    <span class="badge bg-danger ms-auto" style="font-size:0.68rem;"><%= pendingGuarantorCount %></span>
                 <% } %>
             </a>
-            <!-- KIDDIES ACCOUNT  -->
-            <a href="/club-de-star-cooperative/profile">
-                <i class="fas fa-users"></i> Kiddies Account
-            </a>
-            <a href="/club-de-star-cooperative/profile">
-                <i class="fas fa-user-circle"></i> My Profile
-            </a>
-
-            <a href="/club-de-star-cooperative/kyc">
-                <i class="fas fa-shield-alt"></i> KYC Verification
-            </a>
-            <a href="/club-de-star-cooperative/referral">
-                <i class="fas fa-users"></i> Referral Program
-            </a>
-            <a href="/club-de-star-cooperative/memberContract">
-                <i class="fas fa-file-contract"></i> Terms & Conditions
-            </a>
-            <a href="/logout" class="mt-3" style="color: rgba(255,255,255,0.6);">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
+            <a href="/manage/kiddies-account"><i class="fas fa-users"></i> Kiddies Account</a>
+            <a href="/cds-cooperative/profile"><i class="fas fa-user-circle"></i> My Profile</a>
+            <a href="/cds-cooperative/kyc"><i class="fas fa-shield-alt"></i> KYC Verification</a>
+            <a href="/cds-cooperative/referral"><i class="fas fa-user-plus"></i> Referral Program</a>
+            <a href="/cds-cooperative/memberContract"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
+            <a href="/cds-cooperative/report"><i class="fas fa-chart-line"></i> Reports</a>
+            <% if (user.role && user.role.name !== 'member') { %>
+            <a href="/admin-dashboard"><i class="fas fa-tachometer-alt"></i> Administration</a>
+            <% } %>
+            <a href="/logout" style="color:rgba(255,255,255,0.52);margin-top:4px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </div>
 
@@ -517,12 +493,25 @@
         onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
 
         <!-- This will only show on lg and above -->
-        <div class="flex-grow-1 d-none d-lg-block">
-            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Welcome back, <%= user.firstName %>! 👋</h5>
-            <small class="text-muted">
-                Member ID: <%= user.membershipID %> | <%= new Date(user.createdAt).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
-            </small>
-        </div>
+      <div class="flex-grow-1">
+        <h6 class="mb-0 fw-bold d-none d-sm-block" style="color:var(--primary);font-size:0.9rem;">
+            Welcome back, <%= user.firstName %>! 👋
+        </h6>
+        <h6 class="mb-0 fw-bold d-sm-none" style="color:var(--primary);font-size:0.85rem;">Hi, <%= user.firstName %>! 👋</h6>
+        <small class="text-muted d-none d-md-block" style="font-size:0.73rem;">
+            Member ID: <%= user.membershipID %> &nbsp;|&nbsp;
+            <%= new Date(user.createdAt).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) %>
+        </small>
+        <!-- <small class="text-muted d-md-none" style="font-size:0.72rem;"><%= user.membershipID %></small> -->
+    </div>
+             <%
+      let sbadgeClass = "bg-secondary bg-opacity-10 text-secondary";
+      if (user.status === "active")   sbadgeClass = "bg-success bg-opacity-10 text-success";
+      if (user.status === "rejected") sbadgeClass = "bg-danger bg-opacity-10 text-danger";
+    %>
+    <span class="badge <%= sbadgeClass %> ms-2" style="font-size:0.7rem;padding:5px 10px;">
+        <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
+    </span>
     </div>
 
 

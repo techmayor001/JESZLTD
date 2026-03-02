@@ -144,12 +144,16 @@ const userSchema = new mongoose.Schema(
     },
 
     referralCode: String,
-    membershipID: String,
+    membershipID: {
+      type: String,
+      unique: true,
+      sparse: true
+    },
 
     password: {
       type: String,
       required: true,
-      select: false, // 🔐 prevents password from returning by default
+      select: false,
     },
 
     /* ============================================================

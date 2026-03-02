@@ -10,6 +10,11 @@ const loanLedgerSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     ref: "User", 
   },
+  externalBorrower: {
+    borrowerName: String,
+    email: String,
+    phone: String
+  },
   approvedBy: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "Admin",
@@ -23,9 +28,31 @@ const loanLedgerSchema = new mongoose.Schema({
     type: Number, 
     required: true 
   },
-  durationMonths: { 
+
+  // ── Replaces durationMonths ──────────────────────────
+  durationValue: { 
     type: Number, 
     required: true 
+  },
+  durationUnit: {
+    type: String,
+    enum: ["minutes", "hours", "days", "weeks", "months"],
+    default: "months"
+  },
+  // Keep for backwards compatibility with old records
+  durationMonths: { 
+    type: Number
+    // removed required: true
+  },
+  // ─────────────────────────────────────────────────────
+
+  penaltyPercentage: {
+    type: Number,
+    default: 0
+  },
+  rolloverPercentage: {
+    type: Number,
+    default: 0
   },
   disbursementMethod: { 
     type: String, 
@@ -35,6 +62,9 @@ const loanLedgerSchema = new mongoose.Schema({
   disbursementDate: { 
     type: Date, 
     required: true 
+  },
+  dueDate: {
+    type: Date
   },
   approvedAt: { 
     type: Date, 

@@ -16,1853 +16,1517 @@
             --danger: #ef4444;
             --warning: #f59e0b;
             --info: #06b6d4;
-            --sidebar-width: 280px;
+            --sidebar-width: 260px;
         }
-        
+
+        * { box-sizing: border-box; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            background: #f1f5f9;
             min-height: 100vh;
         }
-        
-        /* Sidebar Styles */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            z-index: 1040;
-            transition: all 0.3s;
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+
+        /* ── Loader ── */
+        .loader-screen {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #0a1a2f, #102a44);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999;
         }
-        
+        .loader-logo span {
+            font-size: 42px; font-weight: 600; color: #5cc8ff;
+            display: inline-block; letter-spacing: 1px;
+        }
+        .loader-logo span:nth-child(1)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: 0s;   }
+        .loader-logo span:nth-child(2)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .1s;  }
+        .loader-logo span:nth-child(3)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .2s;  }
+        .loader-logo span:nth-child(4)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .3s;  }
+        .loader-logo span:nth-child(5)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .4s;  }
+        .loader-logo span:nth-child(6)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .5s;  }
+        .loader-logo span:nth-child(7)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .6s;  }
+        .loader-logo span:nth-child(8)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .7s;  }
+        .loader-logo span:nth-child(9)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .8s;  }
+        @keyframes loaderFloat {
+            0%,100% { transform: translateY(0);     opacity: 0.4; }
+            50%      { transform: translateY(-12px); opacity: 1;   }
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 55%, #3b82f6 100%);
+            color: white; z-index: 1040;
+            transition: all 0.3s; overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30,58,138,0.15);
+        }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
         .sidebar-header {
-            padding: 2rem 1.5rem;
+            padding: 1.25rem 1.25rem 1rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             background: rgba(0,0,0,0.1);
         }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        
+        .logo-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
         .logo-box {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            width: 38px; height: 38px; background: white;
+            border-radius: 9px; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: var(--primary); font-size: 1.2rem;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2); overflow: hidden; flex-shrink: 0;
         }
-        
-        .sidebar-menu {
-            padding: 1rem 0;
-        }
-        
+        .logo-box img { width: 100%; height: 100%; object-fit: cover; }
+        .sidebar-menu { padding: 0.75rem 0; }
         .sidebar-menu a {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            padding: 0.875rem 1.5rem;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-            font-weight: 500;
+            color: rgba(255,255,255,0.82); text-decoration: none;
+            padding: 0.7rem 1.25rem; display: flex; align-items: center;
+            transition: all 0.25s; border-left: 3px solid transparent;
+            font-weight: 500; font-size: 0.875rem;
         }
-        
-        .sidebar-menu a:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-        }
-        
-        /* Top Navbar */
+        .sidebar-menu a:hover  { background: rgba(255,255,255,0.09); color: white; border-left-color: rgba(255,255,255,0.6); }
+        .sidebar-menu a.active { background: rgba(255,255,255,0.14); color: white; border-left-color: white; }
+        .sidebar-menu a i      { width: 20px; margin-right: 10px; font-size: 0.95rem; flex-shrink: 0; }
+
+        /* ── Top navbar ── */
         .top-navbar {
-            position: fixed;
-            top: 0;
-            left: var(--sidebar-width);
-            right: 0;
-            height: 75px;
-            background: rgba(255, 255, 255, 0.95);
+            position: fixed; top: 0; left: var(--sidebar-width); right: 0;
+            height: 62px; background: rgba(255,255,255,0.97);
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
-            z-index: 1030;
-            display: flex;
-            align-items: center;
-            padding: 0 2rem;
-            transition: all 0.3s;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+            box-shadow: 0 2px 12px rgba(30,58,138,0.08);
+            z-index: 1030; display: flex; align-items: center;
+            padding: 0 1.5rem; transition: all 0.3s;
+            border-bottom: 1px solid rgba(30,58,138,0.08);
         }
-        
-        /* Main Content */
+
+        /* ── Main content ── */
         .main-content {
-            margin-left: var(--sidebar-width);
-            margin-top: 75px;
-            padding: 2rem;
-            min-height: calc(100vh - 75px);
+            margin-left: var(--sidebar-width); margin-top: 62px;
+            padding: 1.25rem; min-height: calc(100vh - 62px);
             transition: all 0.3s;
         }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
+
+        /* ── Welcome card ── */
         .welcome-card {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            border-radius: 24px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
-            position: relative;
-            overflow: hidden;
+            color: white; border-radius: 16px;
+            padding: 1.4rem 1.5rem; margin-bottom: 1rem;
+            box-shadow: 0 8px 24px rgba(30,58,138,0.2);
+            position: relative; overflow: hidden;
         }
-        
         .welcome-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 400px;
-            height: 400px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50%;
+            content: ''; position: absolute; top: -60%; right: -10%;
+            width: 300px; height: 300px;
+            background: rgba(255,255,255,0.04); border-radius: 50%;
         }
-        
+
+        /* ── Member badge ── */
+        .member-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 11px; background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(10px); border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.25);
+            font-weight: 600; font-size: 0.76rem;
+        }
+        .club-member-badge { background: rgba(16,185,129,0.72); border-color: rgba(16,185,129,0.35); }
+        .non-club-badge    { background: rgba(245,158,11,0.72);  border-color: rgba(245,158,11,0.35); }
+
+        /* ════════════════════════════════
+           STAT CARDS — fully responsive
+           ════════════════════════════════ */
         .stat-card {
-            background: white;
-            border-radius: 20px;
-            padding: 1.75rem;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-            height: 100%;
-            border: 1px solid rgba(30, 58, 138, 0.05);
+            background: white; border-radius: 14px;
+            padding: 0.85rem 0.9rem;
+            box-shadow: 0 3px 12px rgba(30,58,138,0.07);
+            transition: transform 0.25s, box-shadow 0.25s;
+            height: 100%; overflow: hidden;
+            min-width: 0;
         }
-        
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 8px 22px rgba(30,58,138,0.13); }
+        .stat-card--overdue {
+            border: 1.5px solid rgba(239,68,68,0.38) !important;
+            animation: cardOverduePulse 2.5s ease-in-out infinite;
         }
-        
+        @keyframes cardOverduePulse {
+            0%,100% { box-shadow: 0 3px 12px rgba(239,68,68,0.08), 0 0 0 0   rgba(239,68,68,0.2); }
+            50%      { box-shadow: 0 3px 12px rgba(239,68,68,0.14), 0 0 0 5px rgba(239,68,68,0);   }
+        }
         .stat-icon {
-            width: 65px;
-            height: 65px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
+            width: 38px; height: 38px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; margin-bottom: 0.6rem; flex-shrink: 0;
         }
-        
+
+        .sc-label {
+            font-size: clamp(0.62rem, 1.8vw, 0.73rem);
+            font-weight: 600; color: #6b7280;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        .sc-value {
+            font-size: clamp(0.78rem, 2.4vw, 0.95rem);
+            font-weight: 700; line-height: 1.25;
+            word-break: break-word; overflow-wrap: anywhere;
+            margin-bottom: 3px;
+        }
+        .sc-sub {
+            font-size: clamp(0.6rem, 1.6vw, 0.7rem);
+            line-height: 1.3; word-break: break-word; overflow-wrap: anywhere;
+        }
+
+        /* ── Outstanding balance row ── */
+        .outstanding-balance-row {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: nowrap; gap: 3px;
+            background: rgba(245,158,11,0.07);
+            border: 1px dashed rgba(245,158,11,0.38);
+            border-radius: 5px; padding: 2px 5px; margin: 3px 0;
+            min-width: 0; overflow: hidden;
+        }
+        .outstanding-label {
+            color: #92400e; font-weight: 700;
+            font-size: clamp(0.55rem, 1.4vw, 0.63rem);
+            text-transform: uppercase; letter-spacing: 0.04em;
+            flex-shrink: 0; white-space: nowrap;
+        }
+        .outstanding-amount {
+            font-size: clamp(0.65rem, 1.9vw, 0.82rem);
+            font-weight: 700; text-align: right;
+            word-break: break-word; overflow-wrap: anywhere; min-width: 0;
+        }
+
+        /* ── Penalty breakdown rows ── */
+        .penalty-breakdown-row {
+            background: rgba(239,68,68,0.04);
+            border: 1px dashed rgba(239,68,68,0.26);
+            border-radius: 5px; padding: 3px 5px; margin: 3px 0;
+            min-width: 0; overflow: hidden;
+        }
+        .penalty-line,
+        .penalty-total-line {
+            display: flex; justify-content: space-between;
+            align-items: flex-start; gap: 3px; min-width: 0;
+        }
+        .penalty-total-line {
+            border-top: 1px solid rgba(239,68,68,0.16);
+            margin-top: 3px; padding-top: 3px;
+        }
+        .penalty-label,
+        .penalty-total-label {
+            color: #6b7280; font-weight: 700; flex-shrink: 0;
+            font-size: clamp(0.53rem, 1.3vw, 0.62rem);
+            text-transform: uppercase; letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+        .penalty-amount,
+        .penalty-total-amount {
+            font-size: clamp(0.62rem, 1.7vw, 0.78rem);
+            font-weight: 700; text-align: right;
+            word-break: break-word; overflow-wrap: anywhere; min-width: 0;
+        }
+
+        @media (max-width: 380px) {
+            .stat-card { padding: 0.7rem 0.65rem; }
+            .stat-icon { width: 30px; height: 30px; font-size: 0.85rem; }
+        }
+
+        /* ── Overdue ticker ── */
+        .overdue-ticker {
+            background: linear-gradient(90deg, #7f1d1d, #991b1b, #b91c1c, #991b1b, #7f1d1d);
+            background-size: 300% 100%;
+            animation: tickerBgPulse 4s ease-in-out infinite;
+            border-radius: 10px; overflow: hidden; padding: 0.45rem 0;
+            box-shadow: 0 3px 14px rgba(185,28,28,0.3);
+        }
+        @keyframes tickerBgPulse {
+            0%,100% { background-position: 0%   50%; }
+            50%      { background-position: 100% 50%; }
+        }
+        .ticker-track { display: flex; white-space: nowrap; animation: tickerScroll 28s linear infinite; }
+        .ticker-item  { display: inline-block; padding: 0 2.5rem; font-size: 0.78rem; font-weight: 600; color: #fff; letter-spacing: 0.03em; }
+        .ticker-item i { color: #fbbf24; animation: warnPulse 1s ease-in-out infinite; }
+        @keyframes warnPulse   { 0%,100% { opacity:1; transform:scale(1); }   50% { opacity:0.5; transform:scale(1.3); } }
+        @keyframes tickerScroll { 0% { transform:translateX(0); } 100% { transform:translateX(-50%); } }
+        .overdue-ticker:hover .ticker-track { animation-play-state: paused; }
+
+        /* ── Generic cards ── */
         .card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            background: white;
-            border: 1px solid rgba(30, 58, 138, 0.05);
+            border: none; border-radius: 14px;
+            box-shadow: 0 3px 12px rgba(30,58,138,0.07); background: white;
         }
-        
         .card-header {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
-            padding: 1.5rem;
-            border-radius: 20px 20px 0 0 !important;
+            background: rgba(30,58,138,0.02);
+            border-bottom: 1px solid rgba(30,58,138,0.08);
+            padding: 0.9rem 1.25rem; border-radius: 14px 14px 0 0 !important;
         }
-        
+
+        /* ── Buttons ── */
         .btn-primary {
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none;
-            padding: 0.7rem 1.75rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s;
+            border: none; border-radius: 9px; font-weight: 600; transition: all 0.25s;
         }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
-        }
-        
-        .btn-outline-primary {
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            border-radius: 12px;
-            padding: 0.7rem 1.75rem;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-outline-primary:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-        }
-        
-        .member-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.3);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .club-member-badge {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-        
-        .non-club-badge {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-        
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(30,58,138,0.28); }
+
+        /* ── Quick actions ── */
         .quick-action {
-            text-align: center;
-            padding: 1.75rem;
-            border-radius: 16px;
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border: 2px solid rgba(30, 58, 138, 0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: block;
+            text-align: center; padding: 1rem 0.6rem; border-radius: 12px;
+            background: rgba(30,58,138,0.025);
+            border: 1.5px solid rgba(30,58,138,0.09);
+            transition: all 0.25s; cursor: pointer;
+            text-decoration: none; color: inherit; display: block;
         }
-        
         .quick-action:hover {
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(30, 58, 138, 0.25);
-            border-color: transparent;
+            color: white; transform: translateY(-3px);
+            box-shadow: 0 8px 22px rgba(30,58,138,0.22); border-color: transparent;
         }
-        
-        .quick-action i {
-            font-size: 2.2rem;
-            margin-bottom: 0.75rem;
-            display: block;
-        }
-        
-        .loan-info-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 1.75rem;
-            margin-bottom: 1.25rem;
-        }
-        
-        .savings-goal-card {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 1.75rem;
-        }
-        
+        .quick-action i { font-size: 1.6rem; margin-bottom: 0.45rem; display: block; }
+        .quick-action h6 { font-size: 0.78rem; margin: 0; }
+
+        /* ── Alerts ── */
         .alert-warning-custom {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border: 2px solid #f59e0b;
-            border-radius: 16px;
-            padding: 1.25rem;
-            color: #92400e;
+            background: #fffbeb; border: 1px solid rgba(245,158,11,0.32);
+            border-radius: 11px; padding: 0.8rem 1rem; color: #92400e;
         }
-        
         .alert-info-custom {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border: 2px solid #3b82f6;
-            border-radius: 16px;
-            padding: 1.25rem;
-            color: #1e40af;
+            background: #eff6ff; border: 1px solid rgba(59,130,246,0.25);
+            border-radius: 11px; padding: 0.8rem 1rem; color: #1e40af;
         }
-        
-        .powered-by {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 12px 20px;
-            border-radius: 30px;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--primary);
-            z-index: 1000;
-        }
-        
+
+        /* ── ROI list ── */
         .loan-rules-list {
-            background: rgba(30, 58, 138, 0.02);
+            background: rgba(30,58,138,0.02); padding: 1rem;
+            border-radius: 11px; border: 1px solid rgba(30,58,138,0.08);
+        }
+
+        /* ── Loan outstanding box (modal) ── */
+        .loan-outstanding-box {
+            border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.75rem;
+            background: #eff6ff; border: 1px solid rgba(30,58,138,0.2);
+        }
+        .loan-outstanding-box.is-overdue { background: #fef2f2; border-color: rgba(239,68,68,0.3); }
+        .lob-tag {
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.06em; color: #6b7280; margin-bottom: 2px;
+        }
+        .lob-amount { font-size: 1.3rem; font-weight: 800; color: var(--primary); line-height: 1.2; }
+        .loan-outstanding-box.is-overdue .lob-amount { color: #dc2626; }
+        .lob-breakdown {
+            margin-top: 6px; padding-top: 6px;
+            border-top: 1px dashed rgba(30,58,138,0.15);
+        }
+        .loan-outstanding-box.is-overdue .lob-breakdown { border-top-color: rgba(239,68,68,0.2); }
+        .lob-row { display: flex; justify-content: space-between; font-size: 0.75rem; padding: 1px 0; color: #6b7280; }
+        .lob-row span { font-weight: 600; }
+        .lob-overdue-warn {
+            margin-top: 7px; padding: 5px 8px; border-radius: 6px;
+            background: rgba(239,68,68,0.07); font-size: 0.72rem;
+            font-weight: 600; color: #dc2626;
+        }
+
+        /* ── Powered by ── */
+        .powered-by {
+            position: fixed; bottom: 16px; right: 16px; background: white;
+            padding: 7px 14px; border-radius: 30px;
+            box-shadow: 0 3px 12px rgba(30,58,138,0.12);
+            font-size: 0.76rem; font-weight: 600; color: var(--primary); z-index: 1000;
+        }
+
+        /* ── Sidebar overlay ── */
+        .sb-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.38); z-index: 1039; }
+        .sb-overlay.show { display: block; }
+
+        /* ════════════════════════════════════════
+           MAINTENANCE MODE OVERLAY
+           ════════════════════════════════════════ */
+        .maintenance-overlay {
+            position: fixed; inset: 0; z-index: 99999;
+            background: linear-gradient(135deg, #0a1128 0%, #0f2044 50%, #0a1a3a 100%);
+            display: flex; align-items: center; justify-content: center;
             padding: 1.5rem;
-            border-radius: 16px;
-            border: 2px solid rgba(30, 58, 138, 0.1);
         }
-        
-        .loan-rules-list li {
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+        .maintenance-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            max-width: 520px; width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            backdrop-filter: blur(20px);
         }
-        
-        .loan-rules-list li:last-child {
-            border-bottom: none;
+        .maintenance-icon-ring {
+            width: 90px; height: 90px; border-radius: 50%;
+            background: rgba(245,158,11,0.12);
+            border: 2px solid rgba(245,158,11,0.35);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem;
+            animation: mRingPulse 2.5s ease-in-out infinite;
         }
-        
-        .print-button {
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            padding: 0.6rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s;
+        @keyframes mRingPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.25); }
+            50%      { box-shadow: 0 0 0 14px rgba(245,158,11,0); }
         }
-        
-        .print-button:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
+        .maintenance-icon-ring i { font-size: 2.2rem; color: #f59e0b; }
+        .maintenance-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 14px; border-radius: 20px;
+            background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3);
+            font-size: 0.7rem; font-weight: 700; color: #fbbf24;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            margin-bottom: 1rem;
         }
-        
+        .maintenance-title {
+            font-size: 1.6rem; font-weight: 800; color: #fff;
+            line-height: 1.25; margin-bottom: 0.75rem;
+        }
+        .maintenance-title span { color: #60a5fa; }
+        .maintenance-message {
+            font-size: 0.88rem; color: rgba(255,255,255,0.65);
+            line-height: 1.65; margin-bottom: 1.75rem;
+        }
+        .maintenance-info-row {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 0.75rem 1rem;
+            font-size: 0.78rem; color: rgba(255,255,255,0.5); margin-bottom: 1.5rem;
+        }
+        .maintenance-info-row i { color: #60a5fa; }
+        .maintenance-dots {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .maintenance-dots span {
+            width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;
+            animation: dotBounce 1.4s ease-in-out infinite;
+        }
+        .maintenance-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .maintenance-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotBounce {
+            0%,80%,100% { transform: scale(0.7); opacity: 0.4; }
+            40%          { transform: scale(1.2); opacity: 1;   }
+        }
+        .maintenance-footer {
+            margin-top: 1.5rem; font-size: 0.7rem;
+            color: rgba(255,255,255,0.25); letter-spacing: 0.04em;
+        }
+
+        /* ── Responsive breakpoints ── */
+        @media (max-width: 1200px) { :root { --sidebar-width: 240px; } }
         @media (max-width: 992px) {
-            .sidebar {
-                left: calc(-1 * var(--sidebar-width));
-            }
-            
-            .sidebar.active {
-                left: 0;
-            }
-            
-            .top-navbar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .powered-by {
-                bottom: 10px;
-                right: 10px;
-                font-size: 0.75rem;
-                padding: 8px 12px;
-            }
+            .sidebar { left: calc(-1 * var(--sidebar-width)); }
+            .sidebar.active { left: 0; box-shadow: 6px 0 30px rgba(0,0,0,0.25); }
+            .top-navbar { left: 0; }
+            .main-content { margin-left: 0; }
+            .powered-by { bottom: 10px; right: 10px; font-size: 0.7rem; padding: 5px 10px; }
         }
-
+        @media (max-width: 576px) {
+            .main-content { padding: 0.85rem; }
+            .welcome-card { padding: 1rem; }
+            .maintenance-card { padding: 2rem 1.25rem; }
+            .maintenance-title { font-size: 1.25rem; }
+        }
         @media print {
-            .sidebar, .top-navbar, .btn, .quick-action, .powered-by {
-                display: none !important;
-            }
-            
-            .main-content {
-                margin: 0;
-                padding: 0;
-            }
-            
-            .card {
-                break-inside: avoid;
-            }
+            .sidebar,.top-navbar,.btn,.quick-action,.powered-by,.overdue-ticker { display: none !important; }
+            .main-content { margin: 0; padding: 0; }
+            .card { break-inside: avoid; }
         }
-    </style>
-    
-    <style>
-        .hidden {
-  display: none;
-}
-
-.loader-screen {
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(135deg, #0a1a2f, #102a44);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.logo span {
-  font-size: 52px;
-  font-weight: 600;
-  color: #5cc8ff;
-  display: inline-block;
-  animation: float 1.5s infinite ease-in-out;
-  letter-spacing: 1px;
-}
-
-.logo span:nth-child(n) {
-  animation-delay: calc(var(--i) * 0.1s);
-}
-
-.logo span:nth-child(1) { --i: 0; }
-.logo span:nth-child(2) { --i: 1; }
-.logo span:nth-child(3) { --i: 2; }
-.logo span:nth-child(4) { --i: 3; }
-.logo span:nth-child(5) { --i: 4; }
-.logo span:nth-child(6) { --i: 5; }
-.logo span:nth-child(7) { --i: 6; }
-.logo span:nth-child(8) { --i: 7; }
-.logo span:nth-child(9) { --i: 8; }
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); opacity: 0.4; }
-  50% { transform: translateY(-14px); opacity: 1; }
-}
     </style>
 </head>
 <body>
-    <div id="loader-screen" class="loader-screen">
-        <div class="logo">
-            <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
+
+<!-- ══════════════════════════════════════════════════
+     MAINTENANCE MODE OVERLAY
+     Only renders when maintenanceMode.enabled is true.
+     Admins can still see the page — check role here if needed.
+     ══════════════════════════════════════════════════ -->
+<% if (maintenanceMode && maintenanceMode.enabled) { %>
+<%
+  // Allow admins to bypass the overlay — comment out this block
+  // if you want maintenance to block everyone including admins.
+  const isAdmin = user.role && user.role.name !== 'member';
+  const bypassMaintenance = isAdmin;
+%>
+<% if (!bypassMaintenance) { %>
+<div class="maintenance-overlay" id="maintenanceOverlay">
+    <div class="maintenance-card">
+        <div class="maintenance-icon-ring">
+            <i class="fas fa-wrench"></i>
         </div>
-    </div>
-    <% let sharePercentage = allMembersTotalSavings > 0 ? ((accountBalance / allMembersTotalSavings) * 100).toFixed(2) : 0; %>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <div class="logo-box">
-
-                    <img src="/media/assets/logo/log.png" alt="" width="100%" height="100%">
-                </div>
-                <div>
-                    <h5 class="mb-0 fw-bold" style="text-transform: uppercase;">Club De Stars</h5>
-                    <small class="opacity-75">COOPERATIVE SOCIETY LIMITED</small>
-                </div>
-            </div>
-            <div class="member-badge mt-2 <%= user.membershipID.startsWith('CD') ? 'club-member-badge' : 'non-club-member-badge' %>">
-                <i class="fas <%= user.membershipID.startsWith('CD') ? 'fa-star' : 'fa-user' %>"></i>
-                <span><%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Non-Club Member' %></span>
-            </div>
-
+        <div class="maintenance-badge">
+            <i class="fas fa-circle" style="font-size:0.45rem;"></i>
+            System Maintenance
         </div>
-        <div class="sidebar-menu">
-            <a href="/club-de-star-cooperative/dashboard" class="active">
-                <i class="fas fa-home"></i> Dashboard
-            </a>
-            <a href="/club-de-star-cooperative/transaction">
-                <i class="fas fa-exchange-alt"></i> Transactions
-            </a>
-            <a href="/club-de-star-cooperative/loan">
-                <i class="fas fa-hand-holding-usd"></i> My Loans
-            </a>
-            <a href="/club-de-star-cooperative/guarantorRequest">
-                <i class="fas fa-user-friends"></i> Guarantor Requests
-                <% 
-                const pendingCount = user.guarantorRequests
-                    ? user.guarantorRequests.filter(r => r.status === "pending").length
-                    : 0; 
-                %>
-                <% if (pendingCount > 0) { %>
-                    <span class="badge bg-danger ms-2"><%= pendingCount %></span>
-                <% } %>
-            </a>
-            <!-- KIDDIES ACCOUNT  -->
-            <a href="/manage/kiddies-account">
-                <i class="fas fa-users"></i> Kiddies Account
-            </a>
-
-            <a href="/club-de-star-cooperative/profile">
-                <i class="fas fa-user-circle"></i> My Profile
-            </a>
-
-            <a href="/club-de-star-cooperative/kyc">
-                <i class="fas fa-shield-alt"></i> KYC Verification
-            </a>
-            <a href="/club-de-star-cooperative/referral">
-                <i class="fas fa-user"></i> Referral Program
-            </a>
-            <a href="/club-de-star-cooperative/memberContract">
-                <i class="fas fa-file-contract"></i> Terms & Conditions
-            </a>
-            <a href="/club-de-star-cooperative/report">
-                <i class="fas fa-chart-line"></i> Reports
-            </a>
-
-                  <!-- PROFESSIONAL DASHBOARD - Visible to non-members -->
-            <% if (user.role && user.role.name !== 'member') { %>
-                <a href="/admin-dashboard">
-                    <i class="fas fa-tachometer-alt"></i> Professional Dashboard
-                </a>
-            <% } %>
-            <a href="/logout" class="mt-3" style="color: rgba(255,255,255,0.6);">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </div>
-    </div>
-
-<!-- Top Navbar -->
-    <div class="top-navbar">
-        <i class="fas fa-bars d-lg-none me-3"
-        style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-        onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
-
-        <!-- This will only show on lg and above -->
-        <div class="flex-grow-1 d-none d-lg-block">
-            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Welcome back, <%= user.firstName %>! 👋</h5>
-            <small class="text-muted">
-                Member ID: <%= user.membershipID %> | <%= new Date(user.createdAt).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
-            </small>
-        </div>
-    </div>
-
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Dashboard Section -->
-        <div id="dashboard" class="content-section">
-            <!-- Welcome Card -->
-            <div class="welcome-card position-relative">
-                <div class="row align-items-center position-relative" style="z-index: 1;">
-                    <div class="col-md-8">
-                        <h2 class="mb-3 fw-bold">Great to see you again <%= user.firstName %>!</h2>
-                        <!-- <p class="mb-3 opacity-90 fs-5">Track your savings, manage loans, and grow your wealth with <b>Club De Stars Multipurpose Cooperative Society Limited</b></p> -->
-                        <div class="d-flex gap-3 flex-wrap">
-                            <div class="member-badge">
-                                <i class="fas fa-id-card"></i>
-                                <span><%= user.membershipID %></span>
-                            </div>
-                            <div class="member-badge">
-                                <i class="fas fa-calendar"></i>
-                                <span>Member Since: 
-                                    <%= new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) %>
-                                </span>
-                            </div>
-                            <div class="member-badge club-member-badge">
-                                <i class="fas fa-star"></i>
-                                <span>
-                                    <%= interestRate %>% Loan Interest Rate
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                        <h5 class="opacity-90">Account Status</h5>
-                        <% let badgeClass = "bg-light text-secondary"; %>
-                        <% let statusText = "Pending"; %>
-
-                        <% if (user.status === "active") { %>
-                            <% badgeClass = "bg-light text-success"; %>
-                            <% statusText = "Active"; %>
-                        <% } else if (user.status === "rejected") { %>
-                            <% badgeClass = "bg-light text-danger"; %>
-                            <% statusText = "Rejected"; %>
-                        <% } %>
-
-                        <h3>
-                            <span class="badge <%= badgeClass %> fs-5 px-4 py-2"><%= statusText %></span>
-                        </h3>
-                        <p class="mb-0 mt-2 opacity-75">
-                            <% if (user.Payment && user.Payment.status === "paid") { %>
-                                KYC Verified ✓
-                            <% } else { %>
-                                KYC Pending ✗
-                            <% } %>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Important Notice -->
-            <div class="alert-warning-custom mb-4">
-                <h6 class="fw-bold mb-2"><i class="fas fa-exclamation-triangle me-2"></i>Withdrawal Window</h6>
-                <p class="mb-0">Regular withdrawals are available from <strong>1st - 10th December</strong>. Force withdrawal available with 2.5% charge (50% initial, remaining after 30 days).</p>
-            </div>
-
-            <!-- Stats Cards -->
-            <div class="row g-4 mb-4">
-              
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                            <i class="fas fa-piggy-bank"></i>
-                        </div>
-
-                        <p class="text-muted mb-1 fw-semibold">Total Savings</p>
-
-                        <!-- Total account balance -->
-                        <h3 class="mb-2 fw-bold" style="font-size: 14px;">
-                            ₦<%= user.account?.balance ? user.account.balance.toLocaleString() : "0" %>
-                        </h3>
-
-                        <!-- ROI / Member Share -->
-                        <% if (user.account && typeof ROI !== "undefined") { %>
-                            <small class="text-success fw-semibold">
-                                <i class="fas fa-arrow-up me-1"></i>
-                                ₦<%= totalBalance.toLocaleString() %> +ROI
-                            </small>
-                        <% } else { %>
-                            <small class="text-muted fw-semibold">₦0.00</small>
-                        <% } %>
-                    </div>
-
-
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
-                            <i class="fas fa-hand-holding-usd"></i>
-                        </div>
-
-                        <p class="text-muted mb-1 fw-semibold">Active Loan</p>
-
-                        <!-- Display active loan amount -->
-                        <h3 class="mb-2 fw-bold" style="font-size: 14px;">
-                            ₦<%= loan ? loan.amount.toLocaleString() : '0' %>
-                        </h3>
-
-                        <!-- Due date -->
-                        <small class="text-warning fw-semibold">
-                            <i class="fas fa-clock me-1"></i>
-                            Due: <%= loan && loan.dueDate ? loan.dueDate.toLocaleDateString() : 'N/A' %>
-                        </small>
-
-                        <!-- Max loan = 3 × account balance -->
-                        <small class="text-muted d-block mt-1">
-                            Max: ₦<%= user.account?.balance ? (user.account.balance * 3).toLocaleString() : '0' %>
-                        </small>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white;">
-                            <i class="fas fa-percentage"></i>
-                        </div>
-
-                        <p class="text-muted mb-1 fw-semibold">Monthly ROI</p>
-
-                        <!-- Display ROI computed from backend -->
-                        <h3 class="mb-2 fw-bold" style="font-size: 14px;">
-                            ₦<%= monthlyROI.toLocaleString(undefined, { maximumFractionDigits: 2 }) %>
-                        </h3>
-
-                        <small class="text-info fw-semibold">
-                            <i class="fas fa-chart-line me-1"></i>% <%=sharePercentage %>  of Shares
-                        </small>
-                    </div>
-                </div>
-
-
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
-                            <i class="fas fa-calendar-check"></i>
-                        </div>
-
-                        <p class="text-muted mb-1 fw-semibold">Total Loan Payment</p>
-
-                        <h3 class="mb-2 fw-bold" style="font-size: 14px;">
-                            ₦<%= loan ? loan.totalRepay.toLocaleString() : '0' %>
-                        </h3>
-
-                        <!-- Display due date -->
-                        <small style="color: var(--primary);" class="fw-semibold">
-                            <i class="fas fa-calendar me-1"></i>
-                            Due 
-                            <%= loan && loan.dueDate 
-                                ? new Date(loan.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
-                                : 'N/A' %>
-                        </small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-bolt me-2" style="color: var(--primary);"></i>Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-lg-3 col-md-6 col-6">
-                            <a href="#" class="quick-action" onclick="checkUserStatus('depositModal')">
-                                <i class="fas fa-plus-circle" style="color: #10b981;"></i>
-                                <h6 class="mb-0 fw-semibold">Make Deposit</h6>
-                            </a>
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-6">
-                            <a href="#" class="quick-action" onclick="checkUserStatus('withdrawModal')">
-                                <i class="fas fa-minus-circle" style="color: #ef4444;"></i>
-                                <h6 class="mb-0 fw-semibold">Withdraw</h6>
-                            </a>
-                        </div>
-
-                        <div class="col-lg-3 col-md-6 col-6">
-                            <a href="/club-de-star-cooperative/loan" class="quick-action" onclick="openModal('loanRequestModal')">
-                                <i class="fas fa-file-invoice-dollar" style="color: #f59e0b;"></i>
-                                <h6 class="mb-0 fw-semibold">Apply for Loan</h6>
-                            </a>
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-6">
-                            <a href="#" class="quick-action" onclick="openModal('loanPaymentModal')">
-                                <i class="fas fa-money-check-alt" style="color: #06b6d4;"></i>
-                                <h6 class="mb-0 fw-semibold">Loan Payment</h6>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-        </div>
-        <!-- Pending Verification Modal -->
-<div class="modal fade" id="pendingAccountModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center p-4" style="border-radius:20px">
-      <div class="modal-body">
-        <i class="fas fa-exclamation-circle text-warning fa-3x mb-3"></i>
-        <h5 class="fw-bold">Action Not Allowed</h5>
-        <p class="text-muted">
-          Your account is still pending verification. You cannot perform this action until your account is verified.
+        <h1 class="maintenance-title">
+            We'll be back<br><span>shortly!</span>
+        </h1>
+        <p class="maintenance-message">
+            <%= maintenanceMode.message || "The system is currently undergoing scheduled maintenance. Please check back shortly." %>
         </p>
-        <button class="btn btn-warning w-100" data-bs-dismiss="modal">OK</button>
-      </div>
-    </div>
-  </div>
-</div>
-<script>
-  // This should come from server-side
-  const USER_STATUS = "<%= user.status %>"; // "pending" or "verified"
-
-  function checkUserStatus(modalId) {
-    if (USER_STATUS === "pending") {
-      // Show pending verification modal
-      const pendingModal = new bootstrap.Modal(document.getElementById("pendingAccountModal"));
-      pendingModal.show();
-    } else {
-      // Open requested modal
-      const modal = new bootstrap.Modal(document.getElementById(modalId));
-      modal.show();
-    }
-  }
-</script>
-
-
-        <!-- ROI Section -->
-        <div id="roi" class="content-section" >
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-chart-line me-2"></i>ROI Calculator & Distribution</h5>
-                </div>
-                <div class="card-body">
-                    <div class="alert-info-custom mb-4">
-                        <h6 class="fw-bold mb-3">How ROI is Calculated</h6>
-                        <p class="mb-2">Monthly ROI = (Your Cumulative Savings from First Month to Current) / (Total Savings by All Members up to Current Month) × Interest for the Month - company charge</p>
-                        <p class="mb-0 small"><strong>Note:</strong> <%= roiOperatingCharge %>% of the monthly interest pool is retained as operating charges</p>
-                    </div>
-
-                <div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
-            <small class="text-muted d-block mb-2">Your Cumulative Savings</small>
-            <h3 class="mb-0 fw-bold" style="color: var(--primary); font-size: 14px;">
-                ₦<%= accountBalance.toLocaleString() %>
-            </h3>
+        <div class="maintenance-info-row">
+            <i class="fas fa-clock"></i>
+            <span>We apologise for any inconvenience caused.</span>
         </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
-            <small class="text-muted d-block mb-2">Total Balance</small>
-            <h3 class="mb-0 fw-bold" style="color: var(--primary); font-size: 14px;">
-                ₦<%= totalBalance.toLocaleString() %>
-            </h3>
+        <div class="maintenance-dots">
+            <span></span><span></span><span></span>
         </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
-            <small class="text-muted d-block mb-2">Your Share</small>
-            <h3 class="mb-0 fw-bold text-warning" style="font-size: 14px;">
-                <%= sharePercentage %>%
-            </h3>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="p-4 rounded-3 text-center" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
-            <small class="text-muted d-block mb-2">This Month's ROI</small>
-            <h3 class="mb-0 fw-bold text-success" style="font-size: 14px;">
-                ₦<%= monthlyROI.toLocaleString(undefined, { maximumFractionDigits: 2 }) %>
-            </h3>
+        <div class="maintenance-footer">
+            Club De Stars Cooperative Society &nbsp;·&nbsp; Powered by JESZ LIMITED
         </div>
     </div>
 </div>
+<% } else { %>
+<!-- Admin bypass banner -->
+<div style="position:fixed;top:0;left:0;right:0;z-index:99998;background:#92400e;color:#fef3c7;text-align:center;padding:7px;font-size:0.78rem;font-weight:600;">
+    <i class="fas fa-wrench me-2"></i>
+    <strong>Maintenance Mode is ON</strong> — You can see this page because you are an admin.
+    <a href="/admin-dashboard" style="color:#fde68a;text-decoration:underline;margin-left:10px;">Manage in Admin Panel →</a>
+</div>
+<% } %>
+<% } %>
 
+<!-- Loader -->
+<div id="loaderScreen" class="loader-screen">
+    <div class="loader-logo">
+        <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
+    </div>
+</div>
 
-                    <div class="row g-4">
+<%
+  const sharePercentage = allMembersTotalSavings > 0
+    ? ((accountBalance / allMembersTotalSavings) * 100).toFixed(2)
+    : 0;
+  const pendingGuarantorCount = user.guarantorRequests
+    ? user.guarantorRequests.filter(r => r.status === "pending").length
+    : 0;
 
-                       <div class="col-lg-6">
-    <h6 class="fw-bold mb-3" style="color: var(--primary);">Interest Sources</h6>
+  // Company account helpers — fall back to dashes if not configured
+  const bankName      = (companyAccount && companyAccount.bankName)      || "—";
+  const accountName   = (companyAccount && companyAccount.accountName)   || "—";
+  const accountNumber = (companyAccount && companyAccount.accountNumber) || "—";
+  const accountConfigured = bankName !== "—" && accountNumber !== "—";
+%>
 
-    <div class="loan-rules-list">
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
 
-        <!-- Total Loan Interest -->
-        <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+<!-- ══ SIDEBAR ══ -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-container">
+            <div class="logo-box">
+                <img src="/media/assets/logo/log.png" alt="Logo"
+                     onerror="this.style.display='none';this.parentNode.innerHTML='<b style=\'color:#1e3a8a;font-size:13px;\'>C</b>'">
+            </div>
             <div>
-                <small class="text-muted d-block">Total Loan Interest</small>
-                <h5 class="mb-0 fw-bold" style="color: var(--primary);">
-                    ₦<%= totalInterestCollected.toLocaleString() %>
-                </h5>
-            </div>
-            <div class="text-end">
-                <small class="text-muted d-block">From All Members</small>
-                <small class="fw-semibold">Current Month</small>
+                <h6 class="mb-0 fw-bold" style="text-transform:uppercase;font-size:0.8rem;">Club De Stars</h6>
+                <small style="opacity:0.65;font-size:0.67rem;">COOPERATIVE SOCIETY LIMITED</small>
             </div>
         </div>
-
-        <!-- Breakdown -->
-        <div class="mb-3">
-
-            <div class="d-flex justify-content-between mb-2">
-                <small>Distributed to Members (Net Interest For ROI)</small>
-                <strong>₦<%= netInterestForRoi.toLocaleString() %></strong>
-            </div>
-
-            <div class="d-flex justify-content-between">
-                <small>Operating Charges (Company Charge)</small>
-                <strong>₦<%= companyCharge.toLocaleString() %></strong>
-            </div>
+        <div class="member-badge mt-2 <%= user.membershipID.startsWith('CD') ? 'club-member-badge' : 'non-club-badge' %>">
+            <i class="fas <%= user.membershipID.startsWith('CD') ? 'fa-star' : 'fa-user' %>" style="font-size:0.68rem;"></i>
+            <span><%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Non-Club Member' %></span>
         </div>
     </div>
-
-    <!-- <div class="alert-warning-custom mt-3">
-        <small><i class="fas fa-info-circle me-2"></i>
-            <strong>Note:</strong> ROI is calculated and credited on the 1st of each month
-        </small>
-    </div> -->
+    <div class="sidebar-menu">
+        <a href="/cds-cooperative/dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="/cds-cooperative/transaction"><i class="fas fa-exchange-alt"></i> Transactions</a>
+        <a href="/cds-cooperative/loan"><i class="fas fa-hand-holding-usd"></i> My Loans</a>
+        <a href="/cds-cooperative/guarantorRequest">
+            <i class="fas fa-user-friends"></i> Guarantor Requests
+            <% if (pendingGuarantorCount > 0) { %>
+                <span class="badge bg-danger ms-auto" style="font-size:0.68rem;"><%= pendingGuarantorCount %></span>
+            <% } %>
+        </a>
+        <a href="/manage/kiddies-account"><i class="fas fa-users"></i> Kiddies Account</a>
+        <a href="/cds-cooperative/profile"><i class="fas fa-user-circle"></i> My Profile</a>
+        <a href="/cds-cooperative/kyc"><i class="fas fa-shield-alt"></i> KYC Verification</a>
+        <a href="/cds-cooperative/referral"><i class="fas fa-user-plus"></i> Referral Program</a>
+        <a href="/cds-cooperative/memberContract"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
+        <a href="/cds-cooperative/report"><i class="fas fa-chart-line"></i> Reports</a>
+        <% if (user.role && user.role.name !== 'member') { %>
+        <a href="/admin-dashboard"><i class="fas fa-tachometer-alt"></i> Administration</a>
+        <% } %>
+        <a href="/logout" style="color:rgba(255,255,255,0.52);margin-top:4px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
 </div>
 
+<!-- ══ TOP NAVBAR ══ -->
+<div class="top-navbar">
+    <i class="fas fa-bars d-lg-none me-3"
+       style="cursor:pointer;color:var(--primary);font-size:1.25rem;"
+       onclick="toggleSidebar()"></i>
+    <div class="flex-grow-1">
+        <h6 class="mb-0 fw-bold d-none d-sm-block" style="color:var(--primary);font-size:0.9rem;">
+            Welcome back, <%= user.firstName %>! 👋
+        </h6>
+        <h6 class="mb-0 fw-bold d-sm-none" style="color:var(--primary);font-size:0.85rem;">Hi, <%= user.firstName %>! 👋</h6>
+        <small class="text-muted d-none d-md-block" style="font-size:0.73rem;">
+            Member ID: <%= user.membershipID %> &nbsp;|&nbsp;
+            <%= new Date(user.createdAt).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) %>
+        </small>
+    </div>
+    <%
+      let sbadgeClass = "bg-secondary bg-opacity-10 text-secondary";
+      if (user.status === "active")   sbadgeClass = "bg-success bg-opacity-10 text-success";
+      if (user.status === "rejected") sbadgeClass = "bg-danger bg-opacity-10 text-danger";
+    %>
+    <span class="badge <%= sbadgeClass %> ms-2" style="font-size:0.7rem;padding:5px 10px;">
+        <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
+    </span>
+</div>
+
+<!-- ══ MAIN CONTENT ══ -->
+<div class="main-content" id="mainContent">
+
+    <!-- Welcome card -->
+    <div class="welcome-card position-relative mb-3">
+        <div class="row align-items-center position-relative" style="z-index:1;">
+            <div class="col-8">
+                <h5 class="mb-2 fw-bold" style="font-size:1rem;">Great to see you, <%= user.firstName %>!</h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <div class="member-badge"><i class="fas fa-id-card" style="font-size:0.68rem;"></i><span><%= user.membershipID %></span></div>
+                    <div class="member-badge d-none d-sm-inline-flex"><i class="fas fa-calendar" style="font-size:0.68rem;"></i><span>Since <%= new Date(user.createdAt).toLocaleDateString('en-US',{month:'short',year:'numeric'}) %></span></div>
+                    <div class="member-badge club-member-badge"><i class="fas fa-star" style="font-size:0.68rem;"></i><span><%= interestRate %>% Interest Rate</span></div>
+                </div>
+            </div>
+            <div class="col-4 text-end">
+                <%
+                  let badgeClass2 = "bg-light text-secondary";
+                  let statusText  = "Pending";
+                  if (user.status === "active")   { badgeClass2 = "bg-light text-success"; statusText = "Active";   }
+                  if (user.status === "rejected") { badgeClass2 = "bg-light text-danger";  statusText = "Rejected"; }
+                %>
+                <span class="badge <%= badgeClass2 %> px-3 py-2" style="font-size:0.8rem;"><%= statusText %></span>
+                <p class="mb-0 mt-1 opacity-75" style="font-size:0.7rem;">
+                    <% if (user.Payment && user.Payment.status === "paid") { %>KYC Verified ✓<% } else { %>KYC Pending ✗<% } %>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdrawal notice -->
+    <div class="alert-warning-custom mb-3">
+        <p class="mb-0" style="font-size:0.8rem;">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Withdrawal Window:</strong> Regular withdrawals <strong>1st – 10th December</strong>.
+            Force withdrawal available with <strong><%= forceWithdrawalCharge %>% charge</strong> (50% now, 50% after 30 days).
+        </p>
+    </div>
+
+    <!-- Overdue ticker -->
+    <% if (loanIsOverdue) { %>
+    <div class="overdue-ticker mb-3">
+        <div class="ticker-track">
+            <span class="ticker-item">
+                <i class="fas fa-exclamation-triangle"></i>&nbsp;
+                OVERDUE LOAN ALERT &mdash;
+                Your loan of <strong>₦<%= loan.amount.toLocaleString() %></strong> is past due &bull;
+                Outstanding balance now <strong>₦<%= loanOutstanding.toLocaleString() %></strong> &bull;
+                A daily penalty of <strong><%= loanPenaltyRate %>%</strong> is added every day until repaid &bull;
+                Please repay or roll over immediately &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </span>
+            <span class="ticker-item" aria-hidden="true">
+                <i class="fas fa-exclamation-triangle"></i>&nbsp;
+                OVERDUE LOAN ALERT &mdash;
+                Your loan of <strong>₦<%= loan.amount.toLocaleString() %></strong> is past due &bull;
+                Outstanding balance now <strong>₦<%= loanOutstanding.toLocaleString() %></strong> &bull;
+                A daily penalty of <strong><%= loanPenaltyRate %>%</strong> is added every day until repaid &bull;
+                Please repay or roll over immediately &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </span>
+        </div>
+    </div>
+    <% } %>
+
+    <!-- ══ STAT CARDS ══ -->
+    <div class="row g-2 g-md-3 mb-3">
+
+        <!-- Total Savings -->
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:white;">
+                    <i class="fas fa-piggy-bank"></i>
+                </div>
+                <div class="sc-label">Total Savings</div>
+                <div class="sc-value">
+                    ₦<%= user.account?.balance ? user.account.balance.toLocaleString() : "0" %>
+                </div>
+                <% if (user.account && typeof ROI !== "undefined") { %>
+                <div class="sc-sub text-success fw-semibold">
+                    <i class="fas fa-arrow-up me-1"></i>₦<%= totalBalance.toLocaleString() %> +ROI
+                </div>
+                <% } else { %>
+                <div class="sc-sub text-muted fw-semibold">₦0.00</div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Active Loan -->
+        <div class="col-6 col-lg-3">
+            <div class="stat-card <%= loanIsOverdue ? 'stat-card--overdue' : '' %>">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <div class="sc-label">Active Loan</div>
+                <div class="sc-value">
+                    ₦<%= loan ? loan.amount.toLocaleString() : '0' %>
+                </div>
+                <% if (loan && loanOutstanding > loan.amount) { %>
+                <div class="outstanding-balance-row">
+                    <span class="outstanding-label">Owed</span>
+                    <span class="outstanding-amount <%= loanIsOverdue ? 'text-danger' : 'text-warning' %>">
+                        ₦<%= loanOutstanding.toLocaleString() %>
+                    </span>
+                </div>
+                <% } %>
+                <% if (loanIsOverdue) { %>
+                <div class="sc-sub text-danger fw-bold mt-1">
+                    <i class="fas fa-circle-xmark me-1"></i>OVERDUE<br>
+                    <span style="font-weight:400;">
+                        <%= loan.dueDate ? new Date(loan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'N/A' %>
+                    </span>
+                </div>
+                <% } else { %>
+                <div class="sc-sub text-warning fw-semibold mt-1">
+                    <i class="fas fa-clock me-1"></i>Due: <%= loan && loan.dueDate ? loan.dueDate.toLocaleDateString() : 'N/A' %>
+                </div>
+                <% } %>
+                <div class="sc-sub text-muted mt-1">
+                    Max: ₦<%= user.account?.balance ? (user.account.balance * 3).toLocaleString() : '0' %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly ROI -->
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="sc-label">Monthly ROI</div>
+                <div class="sc-value">
+                    ₦<%= monthlyROI.toLocaleString(undefined,{maximumFractionDigits:2}) %>
+                </div>
+                <div class="sc-sub text-info fw-semibold">
+                    <i class="fas fa-chart-line me-1"></i><%= sharePercentage %>% of Shares
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Loan Payment -->
+        <div class="col-6 col-lg-3">
+            <div class="stat-card <%= loanIsOverdue ? 'stat-card--overdue' : '' %>">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="sc-label">Loan Payment</div>
+                <div class="sc-value">
+                    ₦<%= loan ? loan.totalRepay.toLocaleString() : '0' %>
+                </div>
+                <% if (loan && loanTotalPenalty > 0) { %>
+                <div class="penalty-breakdown-row">
+                    <div class="penalty-line">
+                        <span class="penalty-label">+Penalty</span>
+                        <span class="penalty-amount text-danger">+₦<%= loanTotalPenalty.toLocaleString() %></span>
+                    </div>
+                    <div class="penalty-total-line">
+                        <span class="penalty-total-label">Owed</span>
+                        <span class="penalty-total-amount" style="color:var(--primary);">₦<%= loanOutstanding.toLocaleString() %></span>
+                    </div>
+                </div>
+                <% } %>
+                <div class="sc-sub fw-semibold mt-1" style="color:var(--primary);">
+                    <i class="fas fa-calendar me-1"></i>Due <%= loan && loan.dueDate
+                        ? new Date(loan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'})
+                        : 'N/A' %>
+                </div>
+                <% if (loanIsOverdue) { %>
+                <div class="sc-sub text-danger mt-1">
+                    <i class="fas fa-arrow-trend-up me-1"></i>+<%= loanPenaltyRate %>%/day
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card mb-3">
+        <div class="card-header">
+            <h6 class="mb-0 fw-bold" style="font-size:0.86rem;">
+                <i class="fas fa-bolt me-2" style="color:var(--primary);"></i>Quick Actions
+            </h6>
+        </div>
+        <div class="card-body p-3">
+            <div class="row g-2">
+                <div class="col-6 col-lg-3">
+                    <a href="#" class="quick-action" onclick="checkUserStatus('depositModal')">
+                        <i class="fas fa-plus-circle" style="color:#10b981;"></i>
+                        <h6>Make Deposit</h6>
+                    </a>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <a href="#" class="quick-action" onclick="checkUserStatus('withdrawModal')">
+                        <i class="fas fa-minus-circle" style="color:#ef4444;"></i>
+                        <h6>Withdraw</h6>
+                    </a>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <a href="/cds-cooperative/loan" class="quick-action">
+                        <i class="fas fa-file-invoice-dollar" style="color:#f59e0b;"></i>
+                        <h6>Apply for Loan</h6>
+                    </a>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <a href="#" class="quick-action" onclick="openModal('loanPaymentModal')">
+                        <i class="fas fa-money-check-alt" style="color:#06b6d4;"></i>
+                        <h6>Loan Payment</h6>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROI Section -->
+    <div class="card mb-3">
+        <div class="card-header">
+            <h6 class="mb-0 fw-bold" style="color:var(--primary);font-size:0.86rem;">
+                <i class="fas fa-chart-line me-2"></i>ROI Calculator & Distribution
+            </h6>
+        </div>
+        <div class="card-body p-3">
+            <div class="alert-info-custom mb-3">
+                <p class="mb-1 fw-bold" style="font-size:0.8rem;">How ROI is Calculated</p>
+                <p class="mb-1" style="font-size:0.76rem;">
+                    Monthly ROI = (Your Cumulative Savings) / (Total All Members Savings) × Monthly Interest − company charge
+                </p>
+                <p class="mb-0" style="font-size:0.73rem;">
+                    <strong>Note:</strong> <%= roiOperatingCharge %>% of the monthly interest pool is retained as operating charges
+                </p>
+            </div>
+            <div class="row g-2 g-md-3 mb-3">
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded-3 text-center" style="background:#dbeafe;">
+                        <small class="text-muted d-block mb-1" style="font-size:0.7rem;">Your Cumulative Savings</small>
+                        <h6 class="mb-0 fw-bold" style="color:var(--primary);font-size:0.88rem;">₦<%= accountBalance.toLocaleString() %></h6>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded-3 text-center" style="background:#e0e7ff;">
+                        <small class="text-muted d-block mb-1" style="font-size:0.7rem;">Total Balance</small>
+                        <h6 class="mb-0 fw-bold" style="color:var(--primary);font-size:0.88rem;">₦<%= totalBalance.toLocaleString() %></h6>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded-3 text-center" style="background:#fef3c7;">
+                        <small class="text-muted d-block mb-1" style="font-size:0.7rem;">Your Share</small>
+                        <h6 class="mb-0 fw-bold text-warning" style="font-size:0.88rem;"><%= sharePercentage %>%</h6>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded-3 text-center" style="background:#d1fae5;">
+                        <small class="text-muted d-block mb-1" style="font-size:0.7rem;">This Month's ROI</small>
+                        <h6 class="mb-0 fw-bold text-success" style="font-size:0.88rem;">
+                            ₦<%= monthlyROI.toLocaleString(undefined,{maximumFractionDigits:2}) %>
+                        </h6>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <h6 class="fw-bold mb-2" style="color:var(--primary);font-size:0.8rem;">Interest Sources</h6>
+                    <div class="loan-rules-list">
+                        <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                            <div>
+                                <small class="text-muted d-block" style="font-size:0.7rem;">Total Loan Interest</small>
+                                <h6 class="mb-0 fw-bold" style="color:var(--primary);font-size:0.88rem;">₦<%= totalInterestCollected.toLocaleString() %></h6>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted d-block" style="font-size:0.7rem;">From All Members</small>
+                                <small class="fw-semibold" style="font-size:0.7rem;">Current Month</small>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between mb-1" style="font-size:0.76rem;">
+                                <small>Distributed to Members (Net Interest For ROI)</small>
+                                <strong>₦<%= netInterestForRoi.toLocaleString() %></strong>
+                            </div>
+                            <div class="d-flex justify-content-between" style="font-size:0.76rem;">
+                                <small>Operating Charges (Company Charge)</small>
+                                <strong>₦<%= companyCharge.toLocaleString() %></strong>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Powered By Footer -->
-    <div class="powered-by">
-        <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
-    </div>
+</div><!-- END main-content -->
 
-    <!-- Modals -->
+<div class="powered-by">
+    <strong style="color:var(--primary);">Cloudbaam</strong> · Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong>
+</div>
 
+<!-- ══════════════  MODALS  ══════════════ -->
 
-
-
-    <!-- Withdrawal Modal -->
-<div class="modal fade" id="withdrawModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content" style="border-radius: 20px;">
-            <div class="modal-header" style="border-radius: 20px 20px 0 0;">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-minus-circle me-2 text-danger"></i>Request Withdrawal
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
+<!-- Pending account -->
+<div class="modal fade" id="pendingAccountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content text-center p-3" style="border-radius:14px;">
             <div class="modal-body">
+                <i class="fas fa-exclamation-circle text-warning fa-2x mb-2"></i>
+                <h6 class="fw-bold">Action Not Allowed</h6>
+                <p class="text-muted" style="font-size:0.8rem;">Your account is still pending verification. Complete KYC first.</p>
+                <button class="btn btn-warning w-100 btn-sm" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <!-- Withdrawal Window -->
-                <div class="alert-warning-custom mb-3">
-                    <small><i class="fas fa-calendar-alt me-2"></i>
-                        <strong>Withdrawal Window:</strong> December 1st - 10th
-                    </small>
+<!-- Withdrawal modal -->
+<div class="modal fade" id="withdrawModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header py-2 px-3">
+                <h6 class="modal-title fw-bold" style="font-size:0.88rem;">
+                    <i class="fas fa-minus-circle me-2 text-danger"></i>Request Withdrawal
+                </h6>
+                <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-3 py-2">
+                <div class="alert-warning-custom mb-2" style="font-size:0.78rem;">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    <strong>Window:</strong> December 1st – 10th &nbsp;|&nbsp;
+                    <strong>Balance:</strong> ₦<%= user.account?.balance?.toLocaleString() || 0 %>
                 </div>
-
-                <!-- Real Account Balance -->
-                <div class="alert-info-custom mb-4">
-                    <div class="d-flex justify-content-between mb-2">
-                        <small>Available Balance:</small>
-                        <strong id="realBalanceDisplay">₦<%= user.account?.balance?.toLocaleString() || 0 %></strong>
-                    </div>
-                    <small>
-                        <strong>Force Withdrawal:</strong> Available anytime with 
-                        <span class="text-danger"><%= forceWithdrawalCharge %>% charge</span> 
-                        (50% now, 50% after 30 days)
-                    </small>
+                <div class="alert-info-custom mb-3" style="font-size:0.78rem;">
+                    <strong>Force Withdrawal:</strong> Available anytime with
+                    <span class="text-danger fw-bold"><%= forceWithdrawalCharge %>% charge</span>
+                    (50% now, 50% after 30 days)
                 </div>
-
-                <form>
-                    <!-- Withdrawal Type -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Withdrawal Type</label>
-                        <select class="form-select" id="withdrawalType" required onchange="updateWithdrawalFee()">
-                            <option value="">Choose withdrawal type...</option>
-                            <option value="regular">Regular Withdrawal (Dec 1-10 only)</option>
+                <form id="withdrawForm">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Withdrawal Type</label>
+                        <select class="form-select form-select-sm" id="withdrawalType" required onchange="updateWithdrawalFee()">
+                            <option value="">Choose type...</option>
+                            <option value="regular">Regular Withdrawal (Dec 1–10 only)</option>
                             <option value="force">Force Withdrawal (<%= forceWithdrawalCharge %>%)</option>
                         </select>
                     </div>
-
-                    <!-- Amount -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Amount (₦)</label>
-                        <input type="number" class="form-control" id="withdrawAmount" placeholder="Enter amount" 
-                               max="<%= user.account?.balance || 0 %>" required onchange="updateWithdrawalFee()">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Amount (₦)</label>
+                        <input type="number" class="form-control form-control-sm" id="withdrawAmount"
+                               placeholder="Enter amount" max="<%= user.account?.balance || 0 %>"
+                               required onchange="updateWithdrawalFee()">
                     </div>
-
-                    <!-- Fee Breakdown -->
-                    <div class="mb-3" id="withdrawalFeeInfo" style="display: none;">
-                        <div class="alert-warning-custom">
-
+                    <div class="mb-2" id="withdrawalFeeInfo" style="display:none;">
+                        <div class="alert-warning-custom" style="font-size:0.76rem;">
                             <div class="d-flex justify-content-between mb-1">
-                                <small>Withdrawal Amount:</small>
-                                <strong id="withdrawAmountDisplay">₦0</strong>
+                                <small>Withdrawal Amount:</small><strong id="withdrawAmountDisplay">₦0</strong>
                             </div>
-
                             <div class="d-flex justify-content-between mb-1">
-                                <small>Initial Charge (2.5%):</small>
-                                <strong id="initialFee">₦0</strong>
+                                <small>Initial Charge (<%= forceWithdrawalCharge/2 %>%):</small><strong id="initialFee">₦0</strong>
                             </div>
-
                             <div class="d-flex justify-content-between mb-1">
-                                <small>30-Day Charge (2.5%):</small>
-                                <strong id="secondFee">₦0</strong>
+                                <small>30-Day Charge (<%= forceWithdrawalCharge/2 %>%):</small><strong id="secondFee">₦0</strong>
                             </div>
-
-                            <hr class="my-2">
+                            <hr class="my-1">
                             <div class="d-flex justify-content-between">
-                                <small class="fw-bold" id="payoutLabel">You'll Receive Now:</small>
-
+                                <small class="fw-bold" id="payoutLabel">You'll Receive:</small>
                                 <strong id="netAmount">₦0</strong>
                             </div>
+                            <small id="withdrawTimingNotice" class="d-block mt-1 text-muted"></small>
                         </div>
                     </div>
-
-                    <!-- Withdrawal Method -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Withdrawal Method</label>
-                        <select class="form-select" required>
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Withdrawal Method</label>
+                        <select class="form-select form-select-sm" required>
                             <option value="">Choose method...</option>
                             <option>Bank Transfer</option>
                             <option>Cash Pickup</option>
                             <option>Mobile Money</option>
                         </select>
                     </div>
-
-                    <!-- Reason -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Reason for Withdrawal</label>
-                        <textarea class="form-control" rows="2" placeholder="Brief reason" required></textarea>
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Reason for Withdrawal</label>
+                        <textarea class="form-control form-control-sm" rows="2" placeholder="Brief reason" required></textarea>
                     </div>
-
-                    <div class="alert-info-custom">
-                        <small><i class="fas fa-clock me-2"></i>Processing time: 24-48 hours for regular withdrawals</small>
+                    <div class="alert-info-custom" style="font-size:0.75rem;">
+                        <i class="fas fa-clock me-1"></i>Processing: 24–48 hours for regular withdrawals
                     </div>
                 </form>
             </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="submitWithdrawal()">Submit Request</button>
+            <div class="modal-footer py-2 px-3">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="submitWithdrawal()">Submit Request</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- WITHDRAWAL SUCCESS MODAL -->
+<!-- Withdraw success / failed / limit -->
 <div class="modal fade" id="withdrawSuccessModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center p-4" style="border-radius:20px">
-      <div class="modal-body">
-        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-        <h5 class="fw-bold">Withdrawal Processing</h5>
-        <p class="text-muted">
-          Your withdrawal request is being processed and is expected to be
-          credited within <strong>5 minutes</strong>.
-        </p>
-        <button class="btn btn-success w-100" data-bs-dismiss="modal">
-          OK
-        </button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content text-center p-3" style="border-radius:14px;">
+            <div class="modal-body">
+                <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                <h6 class="fw-bold">Withdrawal Processing</h6>
+                <p class="text-muted" style="font-size:0.8rem;">Expected within <strong>5 minutes</strong>.</p>
+                <button class="btn btn-success w-100 btn-sm" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-
-<!-- WITHDRAWAL FAILED MODAL -->
 <div class="modal fade" id="withdrawFailedModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center p-4" style="border-radius:20px">
-      <div class="modal-body">
-        <i class="fas fa-times-circle text-danger fa-3x mb-3"></i>
-        <h5 class="fw-bold">Withdrawal Failed</h5>
-        <p class="text-muted" id="withdrawErrorMsg">
-          Unable to process withdrawal.
-        </p>
-        <button class="btn btn-danger w-100" data-bs-dismiss="modal">
-          Close
-        </button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content text-center p-3" style="border-radius:14px;">
+            <div class="modal-body">
+                <i class="fas fa-times-circle text-danger fa-2x mb-2"></i>
+                <h6 class="fw-bold">Withdrawal Failed</h6>
+                <p class="text-muted" id="withdrawErrorMsg" style="font-size:0.8rem;">Unable to process.</p>
+                <button class="btn btn-danger w-100 btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-<!-- FORCEFUL WITHDRAWAL LIMIT MODAL -->
 <div class="modal fade" id="withdrawLimitModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center p-4" style="border-radius:20px">
-      <div class="modal-body">
-        <i class="fas fa-ban text-danger fa-3x mb-3"></i>
-        <h5 class="fw-bold">Withdrawal Limit Exceeded</h5>
-        <p class="text-muted">
-          You have reached the maximum of <strong>2 forceful withdrawals</strong>
-          allowed per year.
-        </p>
-        <button class="btn btn-danger w-100" data-bs-dismiss="modal">
-          OK
-        </button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content text-center p-3" style="border-radius:14px;">
+            <div class="modal-body">
+                <i class="fas fa-ban text-danger fa-2x mb-2"></i>
+                <h6 class="fw-bold">Withdrawal Limit Exceeded</h6>
+                <p class="text-muted" style="font-size:0.8rem;">Max <strong>2 forceful withdrawals</strong> per year.</p>
+                <button class="btn btn-danger w-100 btn-sm" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
-
-    <!-- Deposit Modal -->
+<!-- ══ DEPOSIT MODAL — uses settings companyAccount ══ -->
 <div class="modal fade" id="depositModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content" style="border-radius:20px">
-
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold">
-          <i class="fas fa-plus-circle text-success me-2"></i>Make Deposit
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <div class="modal-body">
-        <form id="depositForm" method="POST">
-
-          <!-- PAYMENT METHOD -->
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Payment Method</label>
-            <select class="form-select" id="paymentMethod" name="method" required>
-              <option value="">Select method</option>
-              <option value="paystack">Paystack (Automatic)</option>
-              <option value="cooperative">Cooperative Direct</option>
-            </select>
-          </div>
-
-          <!-- PAYSTACK SECTION -->
-          <div id="paystackSection" class="d-none">
-            <label class="form-label fw-semibold">Amount (₦)</label>
-            <input
-              type="number"
-              id="paystackAmount"
-              name="amount"
-              class="form-control"
-              min="100"
-            >
-          </div>
-
-          <!-- COOPERATIVE SECTION -->
-          <div id="cooperativeSection" class="d-none">
-
-            <div class="mb-3">
-              <label class="form-label fw-semibold">
-                Paying from your cooperative account?
-              </label>
-              <select class="form-select" id="coopSource" name="source">
-                <option value="">Select</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header py-2 px-3">
+                <h6 class="modal-title fw-bold" style="font-size:0.88rem;">
+                    <i class="fas fa-plus-circle text-success me-2"></i>Make Deposit
+                </h6>
+                <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal"></button>
             </div>
-
-            <!-- BANK DETAILS -->
-            <div id="coopBankDetails" class="alert alert-info small d-none">
-              <strong>Cooperative Bank Details</strong><br>
-              Bank: Coop Bank Ltd<br>
-              Account Name: JESZ Cooperative<br>
-              Account Number: <strong>0123456789</strong>
+            <div class="modal-body px-3 py-2">
+                <form id="depositForm" method="POST">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Payment Method</label>
+                        <select class="form-select form-select-sm" id="paymentMethod" name="method" required>
+                            <option value="">Select method</option>
+                            <option value="paystack">Paystack (Automatic)</option>
+                            <option value="cooperative">Cooperative Direct</option>
+                        </select>
+                    </div>
+                    <div id="paystackSection" class="d-none mb-2">
+                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Amount (₦)</label>
+                        <input type="number" id="paystackAmount" name="amount" class="form-control form-control-sm" min="100">
+                    </div>
+                    <div id="cooperativeSection" class="d-none">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold" style="font-size:0.76rem;">From cooperative account?</label>
+                            <select class="form-select form-select-sm" id="coopSource" name="source">
+                                <option value="">Select</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <!-- ── SETTINGS-DRIVEN BANK DETAILS ── -->
+                        <div id="coopBankDetails" class="alert-info-custom mb-2 d-none" style="font-size:0.76rem;">
+                            <% if (accountConfigured) { %>
+                                <i class="fas fa-university me-1"></i>
+                                <strong>Bank:</strong> <%= bankName %> &nbsp;|&nbsp;
+                                <strong>Account:</strong> <%= accountName %> &nbsp;|&nbsp;
+                                <strong>No:</strong> <%= accountNumber %>
+                            <% } else { %>
+                                <i class="fas fa-info-circle me-1 text-warning"></i>
+                                <span class="text-warning fw-semibold">Bank account details not configured. Please contact admin.</span>
+                            <% } %>
+                        </div>
+                        <div id="coopNoExtra" class="d-none mb-2">
+                            <label class="form-label fw-semibold" style="font-size:0.76rem;">Payer Full Name</label>
+                            <input type="text" id="payerName" name="payeeName" class="form-control form-control-sm">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold" style="font-size:0.76rem;">Amount (₦)</label>
+                            <input type="number" id="coopAmount" name="coopAmount" class="form-control form-control-sm" min="100">
+                        </div>
+                        <div class="alert-warning-custom" style="font-size:0.74rem;">
+                            Deposit will be credited after admin confirmation.
+                        </div>
+                    </div>
+                    <div class="modal-footer px-0 pb-0 mt-2">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success btn-sm" id="submitDeposit">Proceed</button>
+                    </div>
+                </form>
             </div>
-
-            <!-- PAYEE NAME (ONLY IF NO) -->
-            <div id="coopNoExtra" class="d-none">
-              <label class="form-label fw-semibold">Payer Full Name</label>
-              <input
-                type="text"
-                id="payerName"
-                name="payeeName"
-                class="form-control"
-              >
-            </div>
-
-            <!-- AMOUNT -->
-            <label class="form-label fw-semibold mt-2">Amount (₦)</label>
-            <input
-              type="number"
-              id="coopAmount"
-              name="coopAmount"
-              class="form-control"
-              min="100"
-            >
-
-            <div class="alert alert-warning small mt-3">
-              Deposit will be credited after admin confirmation.
-            </div>
-
-          </div>
-
-          <div class="modal-footer px-0">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Cancel
-            </button>
-            <button type="submit" class="btn btn-success" id="submitDeposit">
-              Proceed
-            </button>
-          </div>
-
-        </form>
-      </div>
-
+        </div>
     </div>
-  </div>
 </div>
 
-<!-- SUCCESS MODAL -->
+<!-- Deposit success / failed -->
 <div class="modal fade" id="depositSuccessModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center p-4" style="border-radius:20px">
-      <div class="modal-body">
-        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-        <h5 class="fw-bold">Deposit Submitted</h5>
-        <p class="text-muted mb-3">
-          Your deposit has been submitted successfully and will be processed
-          within <strong>5 minutes</strong>.
-        </p>
-        <button class="btn btn-success w-100" data-bs-dismiss="modal">
-          OK
-        </button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content text-center p-3" style="border-radius:14px;">
+            <div class="modal-body">
+                <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                <h6 class="fw-bold">Deposit Submitted</h6>
+                <p class="text-muted" style="font-size:0.8rem;">Will be processed within <strong>5 minutes</strong>.</p>
+                <button class="btn btn-success w-100 btn-sm" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-
-<!-- FAILED MODAL -->
 <div class="modal fade" id="depositFailedModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center p-4" style="border-radius:20px">
-      <div class="modal-body">
-        <i class="fas fa-times-circle text-danger fa-3x mb-3"></i>
-        <h5 class="fw-bold">Submission Failed</h5>
-        <p class="text-muted mb-3">
-          We were unable to submit your deposit. Please try again.
-        </p>
-        <button class="btn btn-danger w-100" data-bs-dismiss="modal">
-          Try Again
-        </button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content text-center p-3" style="border-radius:14px;">
+            <div class="modal-body">
+                <i class="fas fa-times-circle text-danger fa-2x mb-2"></i>
+                <h6 class="fw-bold">Submission Failed</h6>
+                <p class="text-muted" style="font-size:0.8rem;">Please try again.</p>
+                <button class="btn btn-danger w-100 btn-sm" data-bs-dismiss="modal">Try Again</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
-
-
-
+<!-- ══ LOAN PAYMENT MODAL — uses settings companyAccount ══ -->
 <div class="modal fade" id="loanPaymentModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content" style="border-radius:20px">
-
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold">
-          <i class="fas fa-credit-card text-primary me-2"></i>Loan Repayment
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <div class="modal-body">
-        <form id="loanRepaymentForm">
-
-          <!-- SELECT LOAN -->
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Select Loan</label>
-            <select class="form-select" id="loanSelect" required>
-              <option value="">Loading loans...</option>
-            </select>
-          </div>
-
-          <!-- PAYMENT METHOD -->
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Payment Method</label>
-            <select class="form-select" id="loanPaymentMethod" required>
-              <option value="">Select method</option>
-              <option value="paystack">Paystack (Automatic)</option>
-              <option value="cooperative">Manual Transfer</option>
-            </select>
-          </div>
-
-          <!-- PAYSTACK SECTION -->
-          <div id="loanPaystackSection" class="d-none">
-            <label class="form-label fw-semibold">Amount (₦)</label>
-            <input type="number" id="loanPaystackAmount" class="form-control" min="100">
-          </div>
-
-          <!-- MANUAL SECTION -->
-          <div id="loanCoopSection" class="d-none">
-
-            <div class="alert alert-info small">
-              <strong>Transfer to:</strong><br>
-              Bank: Coop Bank Ltd<br>
-              Account Name: JESZ Cooperative<br>
-              Account Number: <strong>0123456789</strong>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header py-2 px-3">
+                <h6 class="modal-title fw-bold" style="font-size:0.88rem;">
+                    <i class="fas fa-credit-card text-primary me-2"></i>Loan Repayment
+                </h6>
+                <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal"></button>
             </div>
+            <div class="modal-body px-3 py-2">
+                <form id="loanRepaymentForm">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Select Loan</label>
+                        <select class="form-select form-select-sm" id="loanSelect" required>
+                            <option value="">Loading loans...</option>
+                        </select>
+                    </div>
 
-            <label class="form-label fw-semibold">Payer Full Name</label>
-            <input type="text" id="loanPayerName" class="form-control mb-2">
+                    <div id="loanOutstandingBox" class="loan-outstanding-box d-none mb-2">
+                        <div class="lob-tag" id="loanBoxTag">Outstanding Balance</div>
+                        <div class="lob-amount" id="loanBoxAmount">₦0</div>
+                        <div class="lob-breakdown" id="loanBoxBreakdown"></div>
+                        <div id="loanOverdueWarn" class="lob-overdue-warn d-none">
+                            <i class="fas fa-triangle-exclamation me-1"></i>
+                            This loan is <strong>OVERDUE</strong>. A <span id="penRateText"></span>% daily penalty is accruing.
+                            Pay now to stop further charges.
+                        </div>
+                    </div>
 
-            <label class="form-label fw-semibold">Amount (₦)</label>
-            <input type="number" id="loanCoopAmount" class="form-control" min="100">
-
-            <div class="alert alert-warning small mt-2">
-              Repayment will reflect after admin confirmation.
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Payment Method</label>
+                        <select class="form-select form-select-sm" id="loanPaymentMethod" required>
+                            <option value="">Select method</option>
+                            <option value="paystack">Paystack (Automatic)</option>
+                            <option value="cooperative">Manual Transfer</option>
+                        </select>
+                    </div>
+                    <div id="loanPaystackSection" class="d-none mb-2">
+                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Amount (₦)</label>
+                        <input type="number" id="loanPaystackAmount" class="form-control form-control-sm" min="100">
+                    </div>
+                    <div id="loanCoopSection" class="d-none">
+                        <!-- ── SETTINGS-DRIVEN BANK DETAILS ── -->
+                        <div class="alert-info-custom mb-2" style="font-size:0.76rem;">
+                            <% if (accountConfigured) { %>
+                                <i class="fas fa-university me-1"></i>
+                                <strong>Transfer to:</strong> <%= bankName %> &nbsp;|&nbsp;
+                                <%= accountName %> &nbsp;|&nbsp; <strong><%= accountNumber %></strong>
+                            <% } else { %>
+                                <i class="fas fa-info-circle me-1 text-warning"></i>
+                                <span class="text-warning fw-semibold">Bank account details not configured. Please contact admin.</span>
+                            <% } %>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold" style="font-size:0.76rem;">Payer Full Name</label>
+                            <input type="text" id="loanPayerName" class="form-control form-control-sm">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold" style="font-size:0.76rem;">Amount (₦)</label>
+                            <input type="number" id="loanCoopAmount" class="form-control form-control-sm" min="100">
+                        </div>
+                        <div class="alert-warning-custom mb-2" style="font-size:0.74rem;">
+                            Repayment will reflect after admin confirmation.
+                        </div>
+                    </div>
+                    <div class="modal-footer px-0 pb-0 mt-2">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm" id="submitLoanPayment">Proceed</button>
+                    </div>
+                </form>
             </div>
-          </div>
-
-          <div class="modal-footer px-0">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="submitLoanPayment">
-              Proceed
-            </button>
-          </div>
-
-        </form>
-      </div>
-
+        </div>
     </div>
-  </div>
 </div>
 
-<!-- LOAN PAYMENT SUCCESS MODAL -->
+<!-- Loan payment success / failed -->
 <div class="modal fade" id="loanPaymentSuccessModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center p-4" style="border-radius:20px">
-      <div class="modal-body">
-        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-        <h5 class="fw-bold">Payment Submitted</h5>
-        <p class="text-muted mb-3">
-          Your loan repayment has been submitted successfully and is pending admin approval.
-        </p>
-        <button class="btn btn-success w-100" data-bs-dismiss="modal">
-          OK
-        </button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content text-center p-3" style="border-radius:14px;">
+            <div class="modal-body">
+                <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                <h6 class="fw-bold">Payment Submitted</h6>
+                <p class="text-muted" style="font-size:0.8rem;">Pending admin approval.</p>
+                <button class="btn btn-success w-100 btn-sm" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-
-<!-- LOAN PAYMENT FAILED MODAL -->
 <div class="modal fade" id="loanPaymentFailedModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content text-center p-4" style="border-radius:20px">
-      <div class="modal-body">
-        <i class="fas fa-times-circle text-danger fa-3x mb-3"></i>
-        <h5 class="fw-bold">Payment Failed</h5>
-        <p class="text-muted mb-3">
-          We were unable to submit your loan payment. Please try again.
-        </p>
-        <button class="btn btn-danger w-100" data-bs-dismiss="modal">
-          Try Again
-        </button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content text-center p-3" style="border-radius:14px;">
+            <div class="modal-body">
+                <i class="fas fa-times-circle text-danger fa-2x mb-2"></i>
+                <h6 class="fw-bold">Payment Failed</h6>
+                <p class="text-muted" style="font-size:0.8rem;">Please try again.</p>
+                <button class="btn btn-danger w-100 btn-sm" data-bs-dismiss="modal">Try Again</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-
-
-
-<script>
-/* ================= SERVER FLAGS ================= */
-const USER_HAS_LOAN = <%= user.loans && user.loans.length > 0 ? "true" : "false" %>;
-const USER_IS_GUARANTOR = <%= user.guarantorRequests?.some(g => g.status === "accepted") ? "true" : "false" %>;
-const USER_BALANCE = <%= user.account?.balance || 0 %>;
-const FORCE_FEE_PERCENT = <%= forceWithdrawalCharge %>;
-const FORCEFUL_WITHDRAWAL_COUNT = <%= forcefulWithdrawalCount || 0 %>;
-const MAX_FORCEFUL_WITHDRAWALS = 2;
-
-/* ================= UPDATE FEE ================= */
-function updateWithdrawalFee() {
-    const type = document.getElementById('withdrawalType').value;
-    const amountInput = document.getElementById('withdrawAmount');
-    const feeInfo = document.getElementById('withdrawalFeeInfo');
-
-    const amount = Number(amountInput.value) || 0;
-    const halfBalance = USER_BALANCE / 2;
-    const chargeRate = FORCE_FEE_PERCENT / 100;
-
-    if (!type || amount <= 0) {
-        feeInfo.style.display = 'none';
-        return;
-    }
-
-    if (amount > USER_BALANCE) {
-        amountInput.value = USER_BALANCE;
-        return updateWithdrawalFee();
-    }
-
-    let initialFee = 0;
-    let secondFee = 0;
-    let payoutNow = 0;
-    let labelText = "";
-    let timingMessage = "";
-
-    /* ================= FORCE WITHDRAWAL ================= */
-    if (type === "force") {
-
-        if (FORCEFUL_WITHDRAWAL_COUNT >= MAX_FORCEFUL_WITHDRAWALS) {
-            new bootstrap.Modal(
-                document.getElementById("withdrawLimitModal")
-            ).show();
-
-            document.getElementById("withdrawalType").value = "";
-            feeInfo.style.display = "none";
-            return;
-        }
-
-        if (amount < halfBalance) {
-            initialFee = amount * chargeRate;
-            payoutNow = amount - initialFee;
-            labelText = "You'll Receive Immediately:";
-            timingMessage = "This withdrawal will be credited immediately.";
-
-        } else if (amount === halfBalance) {
-            initialFee = amount * chargeRate;
-            payoutNow = amount - initialFee;
-            labelText = "You'll Receive Within 30 Days:";
-            timingMessage = "This withdrawal will be credited within 30 days.";
-
-        } else {
-            initialFee = (amount * chargeRate) / 2;
-            secondFee  = (amount * chargeRate) / 2;
-            payoutNow = halfBalance - initialFee;
-            labelText = "First Payout (Within 30 Days):";
-            timingMessage = "This withdrawal will be paid in two phases. First payout within 30 days.";
-        }
-    }
-
-    /* ================= REGULAR ================= */
-    if (type === "regular") {
-        payoutNow = amount;
-        labelText = "You'll Receive:";
-        timingMessage = "This withdrawal will be processed within 24–48 hours.";
-    }
-
-    feeInfo.style.display = 'block';
-
-    document.getElementById('withdrawAmountDisplay').innerText = `₦${amount.toLocaleString()}`;
-    document.getElementById('initialFee').innerText = `₦${initialFee.toLocaleString(undefined,{minimumFractionDigits:2})}`;
-    document.getElementById('secondFee').innerText = `₦${secondFee.toLocaleString(undefined,{minimumFractionDigits:2})}`;
-    document.getElementById('netAmount').innerText = `₦${payoutNow.toLocaleString(undefined,{minimumFractionDigits:2})}`;
-    document.getElementById('payoutLabel').innerText = labelText;
-    document.getElementById('withdrawTimingNotice').innerText = timingMessage;
-}
-
-/* ================= SUBMIT WITHDRAWAL ================= */
-async function submitWithdrawal() {
-
-    const withdrawModal = document.getElementById("withdrawModal");
-    const successModal = new bootstrap.Modal(
-        document.getElementById("withdrawSuccessModal")
-    );
-    const failedModal = new bootstrap.Modal(
-        document.getElementById("withdrawFailedModal")
-    );
-    const limitModal = new bootstrap.Modal(
-        document.getElementById("withdrawLimitModal")
-    );
-
-    const errorMsg = document.getElementById("withdrawErrorMsg");
-
-    const type = document.getElementById("withdrawalType").value;
-    const amount = Number(document.getElementById("withdrawAmount").value);
-
-    try {
-        if (!type) throw new Error("Please select a withdrawal type.");
-        if (!amount || amount <= 0) throw new Error("Invalid withdrawal amount.");
-        if (amount > USER_BALANCE) throw new Error("Insufficient balance.");
-
-        if (type === "force" && FORCEFUL_WITHDRAWAL_COUNT >= MAX_FORCEFUL_WITHDRAWALS) {
-            limitModal.show();
-            return;
-        }
-
-        if (USER_HAS_LOAN === "true") {
-            throw new Error("You cannot withdraw while you have an active loan.");
-        }
-
-        if (USER_IS_GUARANTOR === "true" && amount >= USER_BALANCE) {
-            throw new Error("Guarantors cannot withdraw full balance.");
-        }
-
-        if (type === "regular") {
-            const today = new Date();
-            const day = today.getDate();
-            const month = today.getMonth();
-            if (month !== 11 || day < 1 || day > 10) {
-                throw new Error("Regular withdrawals are only allowed between Dec 1–10.");
-            }
-        }
-
-        const res = await fetch("/withdraw", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ type, amount })
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Withdrawal failed.");
-
-        /* ✅ KEEP PROCESSING MODAL */
-        bootstrap.Modal.getInstance(withdrawModal).hide();
-        successModal.show();
-
-        document.querySelector("#withdrawModal form").reset();
-        document.getElementById("withdrawalFeeInfo").style.display = "none";
-
-    } catch (err) {
-        errorMsg.innerText = err.message;
-        failedModal.show();
-    }
-}
-</script>
-
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-
-  const paymentMethod = document.getElementById("paymentMethod");
-  const paystackSection = document.getElementById("paystackSection");
-  const cooperativeSection = document.getElementById("cooperativeSection");
-  const coopSource = document.getElementById("coopSource");
-  const coopBankDetails = document.getElementById("coopBankDetails");
-  const coopNoExtra = document.getElementById("coopNoExtra");
-  const form = document.getElementById("depositForm");
-  const submitBtn = document.getElementById("submitDeposit");
-
-  /* BOOTSTRAP MODALS */
-  const depositModalEl = document.getElementById("depositModal");
-  const successModal = new bootstrap.Modal(
-    document.getElementById("depositSuccessModal")
-  );
-  const failedModal = new bootstrap.Modal(
-    document.getElementById("depositFailedModal")
-  );
-
-  /* PAYMENT METHOD SWITCH */
-  paymentMethod.addEventListener("change", () => {
-    paystackSection.classList.add("d-none");
-    cooperativeSection.classList.add("d-none");
-
-    if (paymentMethod.value === "paystack") {
-      paystackSection.classList.remove("d-none");
-    }
-
-    if (paymentMethod.value === "cooperative") {
-      cooperativeSection.classList.remove("d-none");
-    }
-  });
-
-  /* COOPERATIVE SOURCE */
-  coopSource.addEventListener("change", () => {
-    coopBankDetails.classList.toggle("d-none", !coopSource.value);
-    coopNoExtra.classList.toggle("d-none", coopSource.value !== "no");
-  });
-
-  /* SUBMIT HANDLER */
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const method = paymentMethod.value;
-
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = "Processing...";
-
-    try {
-
-      /* ================= PAYSTACK ================= */
-      if (method === "paystack") {
-        const amount = document.getElementById("paystackAmount").value;
-
-        const res = await fetch("/deposit/init", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount })
-        });
-
-        const data = await res.json();
-
-        if (data.authorization_url) {
-          window.location.href = data.authorization_url;
-          return;
-        }
-
-        throw new Error(data.message || "Paystack init failed");
-      }
-
-      /* ================= COOPERATIVE ================= */
-      if (method === "cooperative") {
-        const payload = {
-          coopAmount: document.getElementById("coopAmount").value,
-          source: document.getElementById("coopSource").value,
-          payeeName: document.getElementById("payerName")?.value || ""
-        };
-
-        const res = await fetch("/deposit/cooperative", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          throw new Error("Cooperative deposit failed");
-        }
-
-        /* CLOSE DEPOSIT MODAL */
-        bootstrap.Modal.getInstance(depositModalEl).hide();
-
-        /* SHOW SUCCESS MODAL */
-        successModal.show();
-        form.reset();
-
-        paystackSection.classList.add("d-none");
-        cooperativeSection.classList.add("d-none");
-      }
-
-    } catch (err) {
-      console.error(err);
-      failedModal.show();
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = "Proceed";
-    }
-  });
-
-});
-</script>
-
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-
-  const loanSelect = document.getElementById("loanSelect");
-  const paymentMethod = document.getElementById("loanPaymentMethod");
-  const paystackSection = document.getElementById("loanPaystackSection");
-  const coopSection = document.getElementById("loanCoopSection");
-  const form = document.getElementById("loanRepaymentForm");
-  const submitBtn = document.getElementById("submitLoanPayment");
-
-  const successModal = new bootstrap.Modal(
-    document.getElementById("loanPaymentSuccessModal")
-  );
-  const failedModal = new bootstrap.Modal(
-    document.getElementById("loanPaymentFailedModal")
-  );
-
-  /* Load all active loans */
-  async function loadLoans() {
-    const res = await fetch("/api/user/loans/active");
-    const loans = await res.json();
-
-    loanSelect.innerHTML = '<option value="">Select loan</option>';
-
-    loans.forEach(loan => {
-      const opt = document.createElement("option");
-      opt.value = loan._id;
-      opt.textContent = `₦${loan.totalRepay.toLocaleString()} due - ${new Date(loan.dueDate).toDateString()}`;
-      loanSelect.appendChild(opt);
-    });
-  }
-
-  loadLoans();
-
-  /* Payment method switch */
-  paymentMethod.addEventListener("change", () => {
-    paystackSection.classList.add("d-none");
-    coopSection.classList.add("d-none");
-
-    if (paymentMethod.value === "paystack") {
-      paystackSection.classList.remove("d-none");
-    }
-
-    if (paymentMethod.value === "cooperative") {
-      coopSection.classList.remove("d-none");
-    }
-  });
-
-  /* Submit handler */
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const loanId = loanSelect.value;
-    const method = paymentMethod.value;
-
-    if (!loanId || !method) {
-      failedModal.show();
-      return;
-    }
-
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = "Processing...";
-
-    try {
-
-      /* PAYSTACK */
-      if (method === "paystack") {
-        const amount = document.getElementById("loanPaystackAmount").value;
-
-        const res = await fetch("/loan/payment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ loanId, amount })
-        });
-
-        const data = await res.json();
-
-        if (data.authorization_url) {
-          window.location.href = data.authorization_url;
-          return;
-        }
-
-        throw new Error("Paystack failed");
-      }
-
-      /* MANUAL */
-      if (method === "cooperative") {
-        const payload = {
-          loanId,
-          amount: document.getElementById("loanCoopAmount").value,
-          payerName: document.getElementById("loanPayerName").value
-        };
-
-        const res = await fetch("/loan/payment/manual", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) throw new Error("Manual payment failed");
-
-        form.reset();
-        successModal.show();
-
-        setTimeout(() => {
-          location.reload();
-        }, 2500);
-      }
-
-    } catch (err) {
-      console.error(err);
-      failedModal.show();
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = "Proceed";
-    }
-  });
-
-});
-</script>
-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    // Navigation
-    function showSection(sectionId, event) {
-        if (event) {
-            event.preventDefault();
-        }
-        
-        document.querySelectorAll('.content-section').forEach(section => {
-            section.style.display = 'none';
-        });
-        document.getElementById(sectionId).style.display = 'block';
-        
-        document.querySelectorAll('.sidebar-menu a').forEach(link => {
-            link.classList.remove('active');
-        });
-        
-        if (event && event.target) {
-            event.target.classList.add('active');
-        }
+/* ── Server-injected constants ── */
+const USER_STATUS               = "<%= user.status %>";
+const USER_HAS_LOAN             = <%= loan ? "true" : "false" %>;
+const USER_IS_GUARANTOR         = <%= user.guarantorRequests?.some(g => g.status === "accepted") ? "true" : "false" %>;
+const USER_BALANCE              = <%= user.account?.balance || 0 %>;
+const FORCE_FEE_PERCENT         = <%= forceWithdrawalCharge %>;
+const FORCEFUL_WITHDRAWAL_COUNT = <%= forcefulWithdrawalCount || 0 %>;
+const MAX_FORCEFUL_WITHDRAWALS  = 2;
 
-        if (window.innerWidth <= 992) {
-            document.getElementById('sidebar').classList.remove('active');
-        }
-    }
-
-    // Modal Functions
-    function openModal(modalId) {
-        const modal = new bootstrap.Modal(document.getElementById(modalId));
-        modal.show();
-    }
-
-    // Loan Calculator
-function calculateLoan() {
-const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
-const duration = parseInt(document.getElementById('calcDuration').value) || 1;
-const rate = parseFloat(document.getElementById('calcRate').value) || 5;
-
-if (amount > 0) {
-    const maxLoan = parseFloat("<%= user.account.balance %>") * 3;
-
-    if (amount > maxLoan) {
-        alert(`Loan amount exceeds your max eligible amount of ₦${maxLoan.toLocaleString()}`);
-        document.getElementById('calcAmount').value = maxLoan;
-        return;
-    }
-
-    // Interest for ONE MONTH ONLY
-    const interest = (amount * rate) / 100;
-
-    // Total repayment
-    const total = amount + interest;
-
-    // Monthly payment
-    const monthly = total / duration;
-
-    document.getElementById('calcResult').style.display = 'block';
-    document.getElementById('monthlyPay').textContent = '₦' + monthly.toLocaleString('en-NG', { maximumFractionDigits: 2 });
-    document.getElementById('totalInt').textContent = '₦' + interest.toLocaleString('en-NG', { maximumFractionDigits: 2 });
-    document.getElementById('totalRep').textContent = '₦' + total.toLocaleString('en-NG', { maximumFractionDigits: 2 });
+/* ── Sidebar ── */
+function toggleSidebar() {
+    const open = document.getElementById("sidebar").classList.toggle("active");
+    document.getElementById("sbOverlay").classList.toggle("show", open);
 }
+function closeSidebar() {
+    document.getElementById("sidebar").classList.remove("active");
+    document.getElementById("sbOverlay").classList.remove("show");
 }
 
-    // Withdrawal Fee Calculator
-
-
-    // Form Submissions
-    // function submitDeposit() {
-    //     alert('✅ Deposit request submitted successfully! You will receive a confirmation shortly.');
-    //     bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
-    // }
-
-    // function submitWithdrawal() {
-    //     const type = document.getElementById('withdrawalType').value;
-    //     if (type === 'force') {
-    //         if (confirm('Force withdrawal includes a 2.5% charge. You will receive 50% now and 50% after 30 days. Continue?')) {
-    //             alert('✅ Force withdrawal request submitted! Processing time: 24-48 hours.');
-    //             bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
-    //         }
-    //     } else {
-    //         alert('✅ Withdrawal request submitted successfully! Processing time: 24-48 hours.');
-    //         bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
-    //     }
-    // }
-
-    function submitPayment() {
-        alert('✅ Payment processed successfully! Your loan balance has been updated.');
-        bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+/* ── Helpers ── */
+function checkUserStatus(modalId) {
+    if (USER_STATUS === "pending") {
+        new bootstrap.Modal(document.getElementById("pendingAccountModal")).show();
+    } else {
+        new bootstrap.Modal(document.getElementById(modalId)).show();
     }
+}
+function openModal(modalId) {
+    new bootstrap.Modal(document.getElementById(modalId)).show();
+}
 
-    function submitLoanRequest() {
-        const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
-        
-        if (amount <= 0) {
-            alert('❌ Please enter a valid loan amount');
-            return;
-        }
-        
-        if (amount > 1350000) {
-            alert('❌ Loan amount exceeds maximum eligible amount of ₦1,350,000 (3x your savings)');
-            return;
-        }
-        
-        if (!document.getElementById('agreeTerms').checked) {
-            alert('❌ Please agree to the loan terms and conditions');
-            return;
-        }
-        
-        alert('✅ Loan application submitted successfully!\n\nYour application will be reviewed within 3-5 business days.\n\nClub Member Rate: 5% p.a.\nMaximum Amount: 3x savings\nReminder: 3 days before due date');
-        bootstrap.Modal.getInstance(document.getElementById('loanRequestModal')).hide();
-    }
+/* ── Withdrawal fee calculator ── */
+function updateWithdrawalFee() {
+    const type        = document.getElementById("withdrawalType").value;
+    const amountInput = document.getElementById("withdrawAmount");
+    const feeInfo     = document.getElementById("withdrawalFeeInfo");
+    const amount      = Number(amountInput.value) || 0;
+    const halfBalance = USER_BALANCE / 2;
+    const chargeRate  = FORCE_FEE_PERCENT / 100;
 
-    function submitRollover() {
-        if (confirm('This will pay ₦8,750 interest and extend your loan with 6% interest rate. Continue?')) {
-            alert('✅ Rollover request submitted!\n\nInterest payment of ₦8,750 will be processed.\nNew interest rate: 6% p.a.\nYou will be notified once approved.');
-            bootstrap.Modal.getInstance(document.getElementById('rolloverModal')).hide();
+    if (!type || amount <= 0) { feeInfo.style.display = "none"; return; }
+    if (amount > USER_BALANCE) { amountInput.value = USER_BALANCE; return updateWithdrawalFee(); }
+
+    let initialFee = 0, secondFee = 0, payoutNow = 0, labelText = "", timingMessage = "";
+
+    if (type === "force") {
+        if (FORCEFUL_WITHDRAWAL_COUNT >= MAX_FORCEFUL_WITHDRAWALS) {
+            new bootstrap.Modal(document.getElementById("withdrawLimitModal")).show();
+            document.getElementById("withdrawalType").value = "";
+            feeInfo.style.display = "none"; return;
+        }
+        if (amount < halfBalance) {
+            initialFee    = amount * chargeRate;
+            payoutNow     = amount - initialFee;
+            labelText     = "You'll Receive Immediately:";
+            timingMessage = "This withdrawal will be credited immediately.";
+        } else if (amount === halfBalance) {
+            initialFee    = amount * chargeRate;
+            payoutNow     = amount - initialFee;
+            labelText     = "You'll Receive Within 30 Days:";
+            timingMessage = "This withdrawal will be credited within 30 days.";
+        } else {
+            initialFee    = (amount * chargeRate) / 2;
+            secondFee     = (amount * chargeRate) / 2;
+            payoutNow     = halfBalance - initialFee;
+            labelText     = "First Payout (Within 30 Days):";
+            timingMessage = "Paid in two phases. First payout within 30 days.";
         }
     }
+    if (type === "regular") {
+        payoutNow = amount; labelText = "You'll Receive:"; timingMessage = "Processed within 24–48 hours.";
+    }
 
-    // Animation on load
-    document.addEventListener('DOMContentLoaded', function() {
-        const cards = document.querySelectorAll('.stat-card, .card');
-        cards.forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-            
-            setTimeout(() => {
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, index * 100);
-        });
-    });
+    feeInfo.style.display = "block";
+    document.getElementById("withdrawAmountDisplay").innerText = `₦${amount.toLocaleString()}`;
+    document.getElementById("initialFee").innerText  = `₦${initialFee.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+    document.getElementById("secondFee").innerText   = `₦${secondFee.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+    document.getElementById("netAmount").innerText   = `₦${payoutNow.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+    document.getElementById("payoutLabel").innerText = labelText;
+    document.getElementById("withdrawTimingNotice").innerText = timingMessage;
+}
+
+async function submitWithdrawal() {
+    const successModal = new bootstrap.Modal(document.getElementById("withdrawSuccessModal"));
+    const failedModal  = new bootstrap.Modal(document.getElementById("withdrawFailedModal"));
+    const limitModal   = new bootstrap.Modal(document.getElementById("withdrawLimitModal"));
+    const errorMsg     = document.getElementById("withdrawErrorMsg");
+    const type         = document.getElementById("withdrawalType").value;
+    const amount       = Number(document.getElementById("withdrawAmount").value);
+    try {
+        if (!type)                  throw new Error("Please select a withdrawal type.");
+        if (!amount || amount <= 0) throw new Error("Invalid withdrawal amount.");
+        if (amount > USER_BALANCE)  throw new Error("Insufficient balance.");
+        if (type === "force" && FORCEFUL_WITHDRAWAL_COUNT >= MAX_FORCEFUL_WITHDRAWALS) { limitModal.show(); return; }
+        if (USER_HAS_LOAN)          throw new Error("You cannot withdraw while you have an active loan.");
+        if (USER_IS_GUARANTOR === "true" && amount >= USER_BALANCE) throw new Error("Guarantors cannot withdraw full balance.");
+        if (type === "regular") {
+            const today = new Date(), day = today.getDate(), month = today.getMonth();
+            if (month !== 11 || day < 1 || day > 10) throw new Error("Regular withdrawals are only allowed between Dec 1–10.");
+        }
+        const res  = await fetch("/withdraw", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({type, amount}) });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Withdrawal failed.");
+        bootstrap.Modal.getInstance(document.getElementById("withdrawModal")).hide();
+        successModal.show();
+        document.getElementById("withdrawForm").reset();
+        document.getElementById("withdrawalFeeInfo").style.display = "none";
+    } catch(err) {
+        errorMsg.innerText = err.message; failedModal.show();
+    }
+}
 </script>
 
-
+<!-- Deposit logic -->
 <script>
-    // Close sidebar when clicking outside (for mobile view)
-    document.addEventListener('click', function (event) {
-        const sidebar = document.getElementById('sidebar');
-        const toggleButton = document.querySelector('.fa-bars');
+document.addEventListener("DOMContentLoaded", () => {
+    const paymentMethod      = document.getElementById("paymentMethod");
+    const paystackSection    = document.getElementById("paystackSection");
+    const cooperativeSection = document.getElementById("cooperativeSection");
+    const coopSource         = document.getElementById("coopSource");
+    const coopBankDetails    = document.getElementById("coopBankDetails");
+    const coopNoExtra        = document.getElementById("coopNoExtra");
+    const form               = document.getElementById("depositForm");
+    const submitBtn          = document.getElementById("submitDeposit");
+    const depositModalEl     = document.getElementById("depositModal");
+    const successModal       = new bootstrap.Modal(document.getElementById("depositSuccessModal"));
+    const failedModal        = new bootstrap.Modal(document.getElementById("depositFailedModal"));
 
-        // Only apply this behavior on small screens
-        if (window.innerWidth <= 992) {
-            // If sidebar is active and click is outside sidebar and toggle button → close it
-            if (sidebar.classList.contains('active') &&
-                !sidebar.contains(event.target) &&
-                !toggleButton.contains(event.target)) {
-                sidebar.classList.remove('active');
+    paymentMethod.addEventListener("change", () => {
+        paystackSection.classList.add("d-none");
+        cooperativeSection.classList.add("d-none");
+        if (paymentMethod.value === "paystack")    paystackSection.classList.remove("d-none");
+        if (paymentMethod.value === "cooperative") cooperativeSection.classList.remove("d-none");
+    });
+    coopSource.addEventListener("change", () => {
+        coopBankDetails.classList.toggle("d-none", !coopSource.value);
+        coopNoExtra.classList.toggle("d-none", coopSource.value !== "no");
+    });
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const method = paymentMethod.value;
+        submitBtn.disabled = true; submitBtn.innerHTML = "Processing...";
+        try {
+            if (method === "paystack") {
+                const res  = await fetch("/deposit/init", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ amount: document.getElementById("paystackAmount").value }) });
+                const data = await res.json();
+                if (data.authorization_url) { window.location.href = data.authorization_url; return; }
+                throw new Error(data.message || "Paystack init failed");
             }
-        }
+            if (method === "cooperative") {
+                const res = await fetch("/deposit/cooperative", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        coopAmount: document.getElementById("coopAmount").value,
+                        source: coopSource.value,
+                        payeeName: document.getElementById("payerName")?.value || ""
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.message || "Cooperative deposit failed");
+                bootstrap.Modal.getInstance(depositModalEl).hide();
+                successModal.show();
+                form.reset();
+                paystackSection.classList.add("d-none");
+                cooperativeSection.classList.add("d-none");
+            }
+        } catch(err) { console.error(err); failedModal.show(); }
+        finally { submitBtn.disabled = false; submitBtn.innerHTML = "Proceed"; }
     });
-</script>
-
-
-<script>
-window.addEventListener("load", () => {
-  const loader = document.getElementById("loader-screen");
-  const main = document.getElementById("main-content");
-
-  setTimeout(() => {
-    loader.style.opacity = "0";
-    loader.style.transition = "opacity 0.6s ease";
-
-    setTimeout(() => {
-      loader.style.display = "none";
-      main.classList.remove("hidden");
-    }, 200);
-
-  }, 400); // adjust duration
 });
 </script>
+
+<!-- Loan repayment logic -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const loanSelect   = document.getElementById("loanSelect");
+    const payMethod    = document.getElementById("loanPaymentMethod");
+    const paystackSec  = document.getElementById("loanPaystackSection");
+    const coopSec      = document.getElementById("loanCoopSection");
+    const form         = document.getElementById("loanRepaymentForm");
+    const submitBtn    = document.getElementById("submitLoanPayment");
+    const successModal = new bootstrap.Modal(document.getElementById("loanPaymentSuccessModal"));
+    const failedModal  = new bootstrap.Modal(document.getElementById("loanPaymentFailedModal"));
+    const outBox       = document.getElementById("loanOutstandingBox");
+    const boxTag       = document.getElementById("loanBoxTag");
+    const boxAmount    = document.getElementById("loanBoxAmount");
+    const boxBreakdown = document.getElementById("loanBoxBreakdown");
+    const overdueWarn  = document.getElementById("loanOverdueWarn");
+    const penRateText  = document.getElementById("penRateText");
+
+    let loansData = [];
+
+    async function loadLoans() {
+        try {
+            const res = await fetch("/api/user/loans/active");
+            loansData = await res.json();
+            loanSelect.innerHTML = '<option value="">Select a loan</option>';
+            if (!Array.isArray(loansData) || !loansData.length) {
+                loanSelect.innerHTML = '<option value="">No active loans found</option>';
+                return;
+            }
+            loansData.forEach(loan => {
+                const opt         = document.createElement("option");
+                opt.value         = loan._id;
+                const outstanding = Number(loan.outstandingBalance || loan.totalRepay || 0);
+                const isOverdue   = loan.status === "overdue";
+                const dueStr      = loan.dueDate
+                    ? new Date(loan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+                    : "N/A";
+                opt.textContent = `₦${outstanding.toLocaleString()} outstanding — ${isOverdue ? "⚠️ OVERDUE" : "due"} ${dueStr}`;
+                loanSelect.appendChild(opt);
+            });
+        } catch(err) {
+            loanSelect.innerHTML = '<option value="">Error loading loans</option>';
+            console.error(err);
+        }
+    }
+
+    loanSelect.addEventListener("change", () => {
+        const loan = loansData.find(l => l._id === loanSelect.value);
+        if (!loan) { outBox.classList.add("d-none"); return; }
+
+        const outstanding  = Number(loan.outstandingBalance || loan.totalRepay || 0);
+        const totalRepay   = Number(loan.totalRepay         || 0);
+        const loanAmount   = Number(loan.amount             || 0);
+        const totalPenalty = Number(loan.totalPenalty       || 0);
+        const penaltyRate  = Number(loan.penaltyPercentage  || 0);
+        const isOverdue    = loan.status === "overdue";
+        const dueStr       = loan.dueDate
+            ? new Date(loan.dueDate).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})
+            : "N/A";
+
+        outBox.classList.remove("d-none", "is-overdue");
+        if (isOverdue) outBox.classList.add("is-overdue");
+
+        boxTag.textContent    = isOverdue ? "⚠️ Overdue — Total Amount Now Owed" : "Total Outstanding Balance";
+        boxAmount.textContent = `₦${outstanding.toLocaleString()}`;
+
+        boxBreakdown.innerHTML = "";
+        const mkRow = (lbl, val, color) => {
+            const d = document.createElement("div");
+            d.className = "lob-row";
+            d.innerHTML = `<span>${lbl}</span><span style="color:${color||'inherit'}">${val}</span>`;
+            return d;
+        };
+        boxBreakdown.appendChild(mkRow("Original loan amount:", `₦${loanAmount.toLocaleString()}`,  "#374151"));
+        boxBreakdown.appendChild(mkRow("Base repayment (with interest):", `₦${totalRepay.toLocaleString()}`, "#1e3a8a"));
+        if (totalPenalty > 0)
+            boxBreakdown.appendChild(mkRow("Penalty accrued:", `+₦${totalPenalty.toLocaleString()}`, "#dc2626"));
+        boxBreakdown.appendChild(mkRow("Due date:", dueStr, "#6b7280"));
+
+        if (isOverdue && penaltyRate > 0) {
+            overdueWarn.classList.remove("d-none");
+            penRateText.textContent = penaltyRate;
+        } else {
+            overdueWarn.classList.add("d-none");
+        }
+
+        const rounded = Math.ceil(outstanding);
+        document.getElementById("loanPaystackAmount").value = rounded;
+        document.getElementById("loanCoopAmount").value     = rounded;
+    });
+
+    payMethod.addEventListener("change", () => {
+        paystackSec.classList.add("d-none"); coopSec.classList.add("d-none");
+        if (payMethod.value === "paystack")    paystackSec.classList.remove("d-none");
+        if (payMethod.value === "cooperative") coopSec.classList.remove("d-none");
+    });
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const loanId = loanSelect.value;
+        const method = payMethod.value;
+        if (!loanId || !method) { failedModal.show(); return; }
+        submitBtn.disabled = true; submitBtn.innerHTML = "Processing...";
+        try {
+            if (method === "paystack") {
+                const res  = await fetch("/loan/payment", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ loanId, amount: document.getElementById("loanPaystackAmount").value }) });
+                const data = await res.json();
+                if (data.authorization_url) { window.location.href = data.authorization_url; return; }
+                throw new Error("Paystack init failed");
+            }
+            if (method === "cooperative") {
+                const res = await fetch("/loan/payment/manual", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ loanId, amount: document.getElementById("loanCoopAmount").value, payerName: document.getElementById("loanPayerName").value }) });
+                if (!res.ok) throw new Error("Manual payment failed");
+                form.reset(); outBox.classList.add("d-none");
+                paystackSec.classList.add("d-none"); coopSec.classList.add("d-none");
+                successModal.show();
+                setTimeout(() => location.reload(), 2500);
+            }
+        } catch(err) { console.error(err); failedModal.show(); }
+        finally { submitBtn.disabled = false; submitBtn.innerHTML = "Proceed"; }
+    });
+
+    loadLoans();
+});
+</script>
+
+<script>
+/* Sidebar outside click */
+document.addEventListener("click", function(e) {
+    const sb = document.getElementById("sidebar");
+    if (window.innerWidth <= 992 && sb.classList.contains("active") &&
+        !sb.contains(e.target) && !e.target.classList.contains("fa-bars")) {
+        closeSidebar();
+    }
+});
+
+/* Loader dismiss */
+window.addEventListener("load", () => {
+    const loader = document.getElementById("loaderScreen");
+    setTimeout(() => {
+        loader.style.opacity    = "0";
+        loader.style.transition = "opacity 0.5s ease";
+        setTimeout(() => { loader.style.display = "none"; }, 500);
+    }, 400);
+});
+
+/* Entrance animation */
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".stat-card, .card").forEach((el, i) => {
+        el.style.opacity    = "0";
+        el.style.transform  = "translateY(14px)";
+        el.style.transition = "opacity 0.45s ease, transform 0.45s ease";
+        setTimeout(() => { el.style.opacity = "1"; el.style.transform = "translateY(0)"; }, i * 80);
+    });
+});
+</script>
+
 </body>
 </html>

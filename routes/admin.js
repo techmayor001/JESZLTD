@@ -32,57 +32,86 @@ const {
   AdminActionLog,
   SubscriptionReport,
 } = require("../models/ReportSchemas");
+const CompanyLedger = require("../models/CompanyLedger");
+const LoanInvite = require("../models/LoanInvite");
+
+const KiddiesAccount = require('../models/Kiddies/kiddiesAccount');
+const KiddiesTransaction = require('../models/Kiddies/kiddiesTransaction');
+const KiddiesPayment = require('../models/Kiddies/kiddiesPayment');
 
 
 // HANDLING APPROVAL OF ACCESS TO ADMIN DASHBOARD - MIDDLEWARE ------------- TECHMAYOR COMPANY LIMITED 
 function ensureAdmin(requiredPermission = null) {
   return (req, res, next) => {
 
+    // Helper: decide response type automatically
+    const deny = (reason, status = 403) => {
+      const wantsJSON =
+        req.xhr ||                              // ajax (older)
+        req.headers.accept?.includes("json") || // fetch / api
+        req.headers["content-type"] === "application/json";
+
+      if (wantsJSON) {
+        return res.status(status).json({
+          success: false,
+          reason
+        });
+      }
+
+      return res.status(status).render("auth/forbidden", {
+        reason,
+        user: req.user
+      });
+    };
+
+    // ✅ Not authenticated
     if (!req.isAuthenticated()) {
+      const wantsJSON =
+        req.xhr ||
+        req.headers.accept?.includes("json");
+
+      if (wantsJSON) {
+        return res.status(401).json({
+          success: false,
+          message: "Authentication required"
+        });
+      }
+
       return res.redirect(
         `/login?redirect=${encodeURIComponent(req.originalUrl)}`
       );
     }
 
+    // ✅ No role
     if (!req.user.role) {
-      return res.status(403).render("auth/forbidden", {
-        reason: "norole",
-        user: req.user,
-      });
+      return deny("norole");
     }
 
+    // ✅ Role inactive
     if (!req.user.role.isActive) {
-      return res.status(403).render("auth/forbidden", {
-        reason: "inactive",
-        user: req.user,
-      });
+      return deny("inactive");
     }
 
     // ❌ Block members completely
     if (req.user.role.name === "member") {
-      return res.status(403).render("auth/forbidden", {
-        reason: "member",
-        user: req.user,
-      });
+      return deny("member");
     }
 
-    // ✅ If permission is required, check it
+    // ✅ Permission check
     if (requiredPermission) {
-      const hasPermission = req.user.role.permissions.some(
-        (perm) => perm.name === requiredPermission
+      const hasPermission = req.user.role.permissions?.some(
+        perm => perm.name === requiredPermission
       );
 
       if (!hasPermission) {
-        return res.status(403).render("auth/forbidden", {
-          reason: "permission",
-          user: req.user,
-        });
+        return deny("permission");
       }
     }
 
     return next();
   };
 }
+
 // ENDS HERE 
 
 
@@ -116,102 +145,90 @@ router.get(
   }
 );
 
-router.post('/admin/members/approve/:id', ensureAdmin("approve_members"), async (req, res) => {
+router.post(
+  '/admin/members/approve/:id',
+  ensureAdmin("approve_members"),
+  async (req, res) => {
     try {
-        const userId = req.params.id;
-        const { memberTypeId } = req.body;
+      const userId = req.params.id;
+      const { memberTypeId } = req.body;
 
-        const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ message: "User not found" });
+      // ── 1. Validate ─────────────────────────────
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
-        const type = await MemberType.findById(memberTypeId);
-        if (!type) return res.status(404).json({ message: "Member type not found" });
+      const type = await MemberType.findById(memberTypeId);
+      if (!type) {
+        return res.status(404).json({ message: "Member type not found" });
+      }
 
-        // Find the last membership ID for this type
-        const lastUser = await User.findOne({ membershipID: { $regex: `^${type.shortCode}` } })
-                                   .sort({ membershipID: -1 })
-                                   .lean();
+      // ── 2. REMOVE OLD MEMBERSHIP + REFERRAL ─────
+      const oldMembershipID = user.membershipID;
+      user.membershipID = null;
+      user.referralCode = null;
+      await user.save();
 
-        let nextNumber = 1;
+      // ── 3. SAFE MEMBERSHIP ID GENERATION ────────
+      const usersOfType = await User.find({
+        membershipID: { $regex: `^${type.shortCode}\\d+$` }
+      }).select("membershipID");
 
-        if (lastUser && lastUser.membershipID) {
-            const lastNumberStr = lastUser.membershipID.replace(type.shortCode, '');
-            const lastNumber = parseInt(lastNumberStr, 10);
-            if (!isNaN(lastNumber)) {
-                nextNumber = lastNumber + 1;
-            }
+      let maxNumber = 0;
+      for (const u of usersOfType) {
+        const match = u.membershipID?.match(/\d+$/);
+        if (match) {
+          const num = parseInt(match[0], 10);
+          if (num > maxNumber) maxNumber = num;
         }
+      }
 
-        // Generate sequential Membership ID
-        const membershipID = `${type.shortCode}${String(nextNumber).padStart(4, '0')}`;
+      const nextNumber = maxNumber + 1;
+      const newMembershipID = `${type.shortCode}${String(nextNumber).padStart(4, "0")}`;
 
-        // Update user
-        user.status = "active";
-        user.membershipID = membershipID;
-        await user.save();
+      // ── 4. Assign new identity ──────────────────
+      user.status = "active";
+      user.membershipID = newMembershipID;
+      user.referralCode = newMembershipID; // ✅ keep synced
+      await user.save();
 
-        // Update or create account
-        let account = await Account.findOne({ user: user._id });
-        if (!account) {
-            account = new Account({
-                user: user._id,
-                accountType: type._id
-            });
-        } else {
-            account.accountType = type._id;
-        }
-        await account.save();
-
-        // Return to frontend
-        res.json({
-            message: "Member approved successfully",
-            membershipID,
-            memberTypeName: type.name,
-            email: user.email
+      // ── 5. Update/Create Account ───────────────
+      let account = await Account.findOne({ user: user._id });
+      if (!account) {
+        account = await Account.create({
+          user: user._id,
+          accountType: type._id,
+          balance: 0,
+          monthlyROI: type.interestRate || 0,
+          accumulativeROI: 0,
         });
+      } else {
+        account.accountType = type._id;
+        account.monthlyROI = type.interestRate || 0;
+        await account.save();
+      }
+
+      console.log(
+        `[APPROVE MEMBER] ${user._id} | ${oldMembershipID} → ${newMembershipID} | ${type.name}`
+      );
+
+      res.json({
+        message: "Member approved successfully",
+        membershipID: newMembershipID,
+        memberTypeName: type.name,
+        email: user.email,
+      });
 
     } catch (err) {
-        console.error("Approve member error:", err);
-        res.status(500).json({ message: "Internal server error" });
+      console.error("Approve member error:", err);
+      res.status(500).json({ message: "Internal server error" });
     }
-});
-
-router.post('/admin/members/delete/:id', ensureAdmin("delete_members"), async (req, res) => {
-  try {
-    const userId = req.params.id;
-
-    // Find user
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ status: false, message: 'User not found' });
-
-    // Delete related account
-    if (user.account) {
-      await Account.findByIdAndDelete(user.account);
-    }
-
-    // Delete related payment records
-    if (user.Payment) {
-      await Payment.findByIdAndDelete(user.Payment);
-    }
-
-    // Optionally, remove references from other users' referrals
-    await User.updateMany(
-      { referredUsers: user._id },
-      { $pull: { referredUsers: user._id } }
-    );
-
-    // Delete the user
-    await User.findByIdAndDelete(userId);
-
-    res.json({ status: true, message: 'Member deleted successfully' });
-  } catch (err) {
-    console.error('Delete member error:', err);
-    res.status(500).json({ status: false, message: 'Internal server error' });
   }
-});
+);
 
 // Delete member and all associated data
-router.post("/members/delete/:id", async (req, res) => {
+router.post("/members/delete/:id", ensureAdmin("delete_members"), async (req, res) => {
     try {
         const memberId = req.params.id;
 
@@ -260,6 +277,418 @@ router.post("/members/delete/:id", async (req, res) => {
     }
 });
 
+router.post(
+  "/admin/members/edit/:id",
+  ensureAdmin("edit_members"),
+  async (req, res) => {
+    try {
+      const userId = req.params.id;
+
+      const {
+        // Personal
+        firstName, lastName, email, phone, dob,
+        state, lga, address,
+        // Bank
+        bankName, accountNumber, accountName,
+        // Next of Kin
+        nokFullName, nokRelationship, nokPhone, nokAddress,
+        // Status & type
+        status, memberTypeId,
+        // ID details (non-file)
+        idType, idNumber,
+      } = req.body;
+
+      const user = await User.findById(userId).populate({
+        path: "account",
+        populate: { path: "accountType" },
+      });
+
+      if (!user) {
+        return res.status(404).json({ status: false, message: "User not found" });
+      }
+
+      // ── 1. Update scalar fields ────────────────────────────
+      if (firstName)    user.firstName = firstName.trim();
+      if (lastName)     user.lastName  = lastName.trim();
+      if (email)        user.email     = email.toLowerCase().trim();
+      if (phone)        user.phone     = phone.trim();
+      if (dob)          user.dob       = new Date(dob);
+      if (state)        user.state     = state.trim();
+      if (lga)          user.lga       = lga.trim();
+      if (address)      user.address   = address.trim();
+      if (idType)       user.idType    = idType;
+      if (idNumber)     user.idNumber  = idNumber.trim();
+      if (status)       user.status    = status;
+
+      // ── 2. Bank details ───────────────────────────────────
+      user.bankDetails = {
+        bankName:      bankName      || user.bankDetails?.bankName      || "",
+        accountNumber: accountNumber || user.bankDetails?.accountNumber || "",
+        accountName:   accountName   || user.bankDetails?.accountName   || "",
+      };
+
+      // ── 3. Next of Kin ────────────────────────────────────
+      user.nextOfKin = {
+        fullName:     nokFullName     || user.nextOfKin?.fullName     || "",
+        relationship: nokRelationship || user.nextOfKin?.relationship || "",
+        phone:        nokPhone        || user.nextOfKin?.phone        || "",
+        address:      nokAddress      || user.nextOfKin?.address      || "",
+      };
+
+      // ── 4. Member Type change (generates new membership ID) ─
+      let newMemberTypeName = null;
+      let newMembershipID   = null;
+
+      if (memberTypeId) {
+        const currentTypeId = user.account?.accountType?._id?.toString();
+
+        if (memberTypeId !== currentTypeId) {
+          const type = await MemberType.findById(memberTypeId);
+          if (!type) {
+            return res.status(404).json({ status: false, message: "Member type not found" });
+          }
+
+          // Generate sequential ID for new type
+          const lastUser = await User
+            .findOne({ membershipID: { $regex: `^${type.shortCode}` } })
+            .sort({ membershipID: -1 })
+            .lean();
+
+          let nextNumber = 1;
+          if (lastUser?.membershipID) {
+            const num = parseInt(lastUser.membershipID.replace(type.shortCode, ""), 10);
+            if (!isNaN(num)) nextNumber = num + 1;
+          }
+
+          newMembershipID   = `${type.shortCode}${String(nextNumber).padStart(4, "0")}`;
+          newMemberTypeName = type.name;
+
+          // Clear old membership ID, assign new one
+          user.membershipID = newMembershipID;
+
+          // Update / create account
+          let account = await Account.findOne({ user: user._id });
+          if (!account) {
+            account = new Account({ user: user._id, accountType: type._id });
+          } else {
+            account.accountType = type._id;
+          }
+          await account.save();
+
+          // Re-link account to user if needed
+          if (!user.account || user.account.toString() !== account._id.toString()) {
+            user.account = account._id;
+          }
+        }
+      }
+
+      await user.save();
+
+      return res.json({
+        status: true,
+        message: "Member updated successfully",
+        ...(newMembershipID && {
+          newMembershipID,
+          newMemberTypeName,
+        }),
+      });
+    } catch (err) {
+      console.error("Edit member error:", err);
+      return res.status(500).json({ status: false, message: "Internal server error" });
+    }
+  }
+);
+
+// POST /admin/members/change-type/:id
+router.post('/admin/members/change-type/:id', ensureAdmin('edit_members'), async (req, res) => {
+    try {
+        const { memberTypeId } = req.body;
+
+        // ── 1. Validate user & new type ──────────────────────────
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ status: false, message: 'User not found' });
+
+        const type = await MemberType.findById(memberTypeId);
+        if (!type) return res.status(404).json({ status: false, message: 'Member type not found' });
+
+        // ── 2. Prevent assigning the same type they already have ──
+        const account = await Account.findOne({ user: user._id }).populate('accountType');
+        if (account?.accountType?._id?.toString() === memberTypeId) {
+            return res.status(400).json({ status: false, message: 'Member already has this membership type.' });
+        }
+
+        // ── 3. CLEAR the old membershipID first ───────────────────
+        const oldMembershipID = user.membershipID;
+        user.membershipID = null;
+        user.referralCode = null;
+        await user.save();
+
+        // ── 4. SAFE MEMBERSHIP ID GENERATION ─────────────────────
+        const usersOfType = await User.find({
+            membershipID: { $regex: `^${type.shortCode}\\d+$` }
+        }).select("membershipID");
+
+        let maxNumber = 0;
+        for (const u of usersOfType) {
+            const match = u.membershipID?.match(/\d+$/);
+            if (match) {
+                const num = parseInt(match[0], 10);
+                if (num > maxNumber) maxNumber = num;
+            }
+        }
+
+        const nextNumber = maxNumber + 1;
+        const newMembershipID = `${type.shortCode}${String(nextNumber).padStart(4, '0')}`;
+
+        // ── 5. Assign new membershipID & update referralCode ──────
+        user.membershipID = newMembershipID;
+        user.referralCode = newMembershipID;
+        await user.save();
+
+        // ── 6. Update Account's accountType ───────────────────────
+        if (!account) {
+            const newAccount = await Account.create({
+                user: user._id,
+                accountType: type._id,
+                balance: 0,
+                monthlyROI: type.interestRate || 0,
+                accumulativeROI: 0,
+            });
+            user.account = newAccount._id;
+            await user.save();
+        } else {
+            account.accountType = type._id;
+            account.monthlyROI  = type.interestRate || 0;
+            await account.save();
+        }
+
+        console.log(`[CHANGE TYPE] User ${user._id} | ${oldMembershipID} → ${newMembershipID} | Type: ${type.name}`);
+
+        res.json({
+            status: true,
+            newMembershipID,
+            newMemberTypeName: type.name,
+            oldMembershipID,
+        });
+
+    } catch (err) {
+        console.error('Change type error:', err);
+        res.status(500).json({ status: false, message: 'Internal server error' });
+    }
+});
+
+// ─────────────────────────────────────────────
+// GET /admin/kiddies-accounts  —  Main admin page
+// ─────────────────────────────────────────────
+router.get('/admin/kiddies-accounts', ensureAdmin('view_members'), async (req, res) => {
+    try {
+        const kiddiesAccounts = await KiddiesAccount.find()
+            .populate('parent', 'firstName lastName email phone membershipID displayPicture')
+            .populate('account')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // Attach recent transactions count per account
+        for (const ka of kiddiesAccounts) {
+            ka.transactionCount = await KiddiesTransaction.countDocuments({ kiddiesAccount: ka._id });
+            ka.pendingTransactionCount = await KiddiesTransaction.countDocuments({ kiddiesAccount: ka._id, status: 'pending' });
+        }
+
+        // Summary stats
+        const stats = {
+            total: kiddiesAccounts.length,
+            active: kiddiesAccounts.filter(k => k.status === 'active').length,
+            locked: kiddiesAccounts.filter(k => k.status === 'locked' && k.registrationStatus === 'paid').length,
+            pending: kiddiesAccounts.filter(k => k.registrationStatus === 'pending').length,
+            totalBalance: kiddiesAccounts.reduce((sum, k) => sum + (k.account?.balance || 0), 0),
+            totalInterest: kiddiesAccounts.reduce((sum, k) => sum + (k.account?.accumulativeROI || 0), 0),
+        };
+
+        res.render('dashboard/admin/kiddies-accounts', {
+            admin: req.user,
+            kiddiesAccounts,
+            stats
+        });
+    } catch (err) {
+        console.error('Admin kiddies page error:', err);
+        res.status(500).send('Server error loading kiddies accounts');
+    }
+});
+
+// ─────────────────────────────────────────────
+// GET /api/admin/kiddies/:id  —  Single account detail
+// ─────────────────────────────────────────────
+router.get('/api/admin/kiddies/:id', ensureAdmin('view_members'), async (req, res) => {
+    try {
+        const account = await KiddiesAccount.findById(req.params.id)
+            .populate('parent', 'firstName lastName email phone membershipID displayPicture address state lga')
+            .populate('account')
+            .lean();
+
+        if (!account) return res.status(404).json({ message: 'Account not found' });
+
+        const transactions = await KiddiesTransaction.find({ kiddiesAccount: req.params.id })
+            .sort({ createdAt: -1 })
+            .limit(20)
+            .lean();
+
+        res.json({ account, transactions });
+    } catch (err) {
+        console.error('Admin kiddies detail error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ─────────────────────────────────────────────
+// GET /api/admin/kiddies/:id/transactions  —  All transactions
+// ─────────────────────────────────────────────
+router.get('/api/admin/kiddies/:id/transactions', ensureAdmin('view_members'), async (req, res) => {
+    try {
+        const transactions = await KiddiesTransaction.find({ kiddiesAccount: req.params.id })
+            .sort({ createdAt: -1 })
+            .lean();
+        res.json({ transactions });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ─────────────────────────────────────────────
+// POST /api/admin/kiddies/:id/approve  —  Approve account
+// ─────────────────────────────────────────────
+router.post('/api/admin/kiddies/:id/approve', ensureAdmin('approve_members'), async (req, res) => {
+    try {
+        const ka = await KiddiesAccount.findById(req.params.id).populate('parent');
+        if (!ka) return res.status(404).json({ message: 'Account not found' });
+
+        if (ka.registrationStatus !== 'paid') {
+            return res.status(400).json({ message: 'Cannot approve unpaid account. Payment must be completed first.' });
+        }
+
+        ka.status = 'active';
+        ka.approvedAt = new Date();
+        ka.approvedBy = req.user._id;
+        if (req.body.note) ka.adminNote = req.body.note;
+        await ka.save();
+
+        res.json({
+            message: 'Kiddies account approved successfully',
+            accountID: ka.accountID,
+            childName: `${ka.childFirstName} ${ka.childLastName}`,
+            parentName: `${ka.parent.firstName} ${ka.parent.lastName}`
+        });
+    } catch (err) {
+        console.error('Approve kiddies error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ─────────────────────────────────────────────
+// POST /api/admin/kiddies/:id/decline  —  Decline / lock account
+// ─────────────────────────────────────────────
+router.post('/api/admin/kiddies/:id/decline', ensureAdmin('approve_members'), async (req, res) => {
+    try {
+        const ka = await KiddiesAccount.findById(req.params.id).populate('parent');
+        if (!ka) return res.status(404).json({ message: 'Account not found' });
+
+        ka.status = 'locked';
+        ka.declinedAt = new Date();
+        ka.declinedBy = req.user._id;
+        ka.declineReason = req.body.reason || 'Not specified';
+        if (req.body.note) ka.adminNote = req.body.note;
+        await ka.save();
+
+        res.json({ message: 'Kiddies account declined', accountID: ka.accountID });
+    } catch (err) {
+        console.error('Decline kiddies error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ─────────────────────────────────────────────
+// POST /api/admin/kiddies/:id/approve-transaction  —  Approve pending deposit
+// ─────────────────────────────────────────────
+router.post('/api/admin/kiddies/:id/approve-transaction', ensureAdmin('approve_members'), async (req, res) => {
+    try {
+        const { transactionId } = req.body;
+        const tx = await KiddiesTransaction.findById(transactionId);
+        if (!tx) return res.status(404).json({ message: 'Transaction not found' });
+        if (tx.status !== 'pending') return res.status(400).json({ message: 'Transaction is not pending' });
+
+        // Credit the account
+        const acct = await Account.findById(tx.account || (await KiddiesAccount.findById(req.params.id)).account);
+        if (acct) {
+            acct.balance = (acct.balance || 0) + tx.amount;
+            await acct.save();
+        }
+
+        tx.status = 'completed';
+        tx.balanceAfter = acct ? acct.balance : 0;
+        tx.approvedBy = req.user._id;
+        tx.approvedAt = new Date();
+        await tx.save();
+
+        res.json({ message: 'Transaction approved and balance credited', amount: tx.amount });
+    } catch (err) {
+        console.error('Approve transaction error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ─────────────────────────────────────────────
+// POST /api/admin/kiddies/:id/decline-transaction  —  Decline pending deposit
+// ─────────────────────────────────────────────
+router.post('/api/admin/kiddies/:id/decline-transaction', ensureAdmin('approve_members'), async (req, res) => {
+    try {
+        const { transactionId, reason } = req.body;
+        const tx = await KiddiesTransaction.findById(transactionId);
+        if (!tx) return res.status(404).json({ message: 'Transaction not found' });
+
+        tx.status = 'failed';
+        tx.declineReason = reason || 'Declined by admin';
+        tx.declinedBy = req.user._id;
+        tx.declinedAt = new Date();
+        await tx.save();
+
+        res.json({ message: 'Transaction declined' });
+    } catch (err) {
+        console.error('Decline transaction error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ─────────────────────────────────────────────
+// POST /api/admin/kiddies/:id/add-note  —  Add admin note
+// ─────────────────────────────────────────────
+router.post('/api/admin/kiddies/:id/add-note', ensureAdmin('view_members'), async (req, res) => {
+    try {
+        const ka = await KiddiesAccount.findById(req.params.id);
+        if (!ka) return res.status(404).json({ message: 'Account not found' });
+        ka.adminNote = req.body.note;
+        await ka.save();
+        res.json({ message: 'Note saved' });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ─────────────────────────────────────────────
+// POST /api/admin/kiddies/:id/close  —  Close account
+// ─────────────────────────────────────────────
+router.post('/api/admin/kiddies/:id/close', ensureAdmin('delete_members'), async (req, res) => {
+    try {
+        const ka = await KiddiesAccount.findById(req.params.id);
+        if (!ka) return res.status(404).json({ message: 'Account not found' });
+        ka.status = 'closed';
+        ka.closedAt = new Date();
+        ka.closedBy = req.user._id;
+        ka.closeReason = req.body.reason || 'Closed by admin';
+        await ka.save();
+        res.json({ message: 'Account closed successfully' });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 // GET: Display Member Type Management Page
 router.get("/admin/manage/memberType", ensureAdmin("view_membertype"), async (req, res) => {
@@ -1274,49 +1703,68 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
         ? `${payment.user.firstName} ${payment.user.lastName}`
         : "N/A";
 
-      // ✅ Detect ALL manual payments (deposit + loan)
+      // ── Detect manual payments ──────────────────────────────────────────
+      // All manual references start with one of these prefixes.
+      // Paystack references are everything else (random alphanumeric strings).
+      //
+      // Prefix inventory:
+      //   COOP-          → manual savings deposit
+      //   LOAN-MANUAL-   → member manual loan repayment
+      //   LOAN-INT-      → rollover interest payment  ← was missing, causing /100 bug
+      //   EXT-LOAN-      → external loan repayment recorded by admin
+      //
+      // If the Payment schema has a `method` field, prefer that as the
+      // ground truth and only fall back to the prefix check for old records
+      // that predate the schema change.
+      const MANUAL_PREFIXES = [
+        "COOP-",
+        "LOAN-MANUAL-",
+        "LOAN-INT-",
+        "EXT-LOAN-",
+      ];
+
       const isManual =
-        payment.reference.startsWith("COOP-") ||
-        payment.reference.startsWith("LOAN-MANUAL-");
+        payment.method === "Manual" ||
+        payment.method === "Cash" ||
+        payment.method === "Bank Transfer" ||
+        MANUAL_PREFIXES.some(prefix => payment.reference.startsWith(prefix));
 
-      const isPaystack = !isManual;
-
-      // ✅ Correct amount handling
+      // ── Amount ────────────────────────────────────────────────────────
+      // Manual payments are stored in full Naira → display as-is.
+      // Paystack payments are stored in kobo     → divide by 100.
       const amount = isManual
         ? payment.amount
         : payment.amount / 100;
 
-      // ✅ Account balance is always naira
+      // Account balance is always stored in Naira
       const balance = payment.user?.account?.balance || 0;
 
       return {
-        id: payment._id,
+        id:        payment._id,
         reference: payment.reference,
 
         date: dateObj.toLocaleDateString("en-US", {
           month: "short",
-          day: "numeric",
-          year: "numeric",
+          day:   "numeric",
+          year:  "numeric",
         }),
 
         time: dateObj.toLocaleTimeString("en-US", {
-          hour: "2-digit",
+          hour:   "2-digit",
           minute: "2-digit",
         }),
 
-        memberName: memberFullName,
-        payeeName: payment.payeeName,
-        memberId: payment.user?.membershipID || "N/A",
-        email: payment.email,
+        memberName:  memberFullName,
+        payeeName:   payment.payeeName || null,
+        memberId:    payment.user?.membershipID || "N/A",
+        email:       payment.email,
 
-        // ✅ Fixed values
         amount,
         balance,
 
-        method: isManual
-          ? "Manual Transfer"
-          : "Paystack",
+        method: isManual ? "Manual Transfer" : "Paystack",
 
+        // Normalise status labels for the view
         status:
           payment.status === "paid" || payment.status === "success"
             ? "approved"
@@ -1324,16 +1772,23 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
             ? "rejected"
             : "pending",
 
-        notes: payment.paystackResponse?.message || "Deposit / Loan payment",
+        // Payment type badge in admin table (interest, principal, deposit)
+        paymentType: payment.type || "deposit",
+
+        notes: payment.paystackResponse?.adminNote
+          || payment.paystackResponse?.message
+          || payment.notes
+          || "Deposit / Loan payment",
       };
     });
 
-    // ❌ Stats unchanged (as requested)
-    const totalIncome = payments
-      .filter(p => p.status === "paid" || p.status === "success")
-      .reduce((sum, p) => sum + p.amount, 0);
+    // ── Stats ─────────────────────────────────────────────────────────────
+    // Use the corrected `deposits` array so totalIncome is in Naira, not kobo
+    const totalIncome = deposits
+      .filter(d => d.status === "approved")
+      .reduce((sum, d) => sum + d.amount, 0);
 
-    const pendingCount = payments.filter(p => p.status === "pending").length;
+    const pendingCount = deposits.filter(d => d.status === "pending").length;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -1375,170 +1830,279 @@ router.post(
       const { id } = req.params;
       const { notes } = req.body;
 
-      const payment = await Payment.findById(id).populate({
-        path: "user",
+      // ═══════════════════════════════════════════════════════════════════════
+      // 1. ATOMIC PAYMENT APPROVAL
+      //    Mark payment success exactly once — $nin guard prevents double-approval
+      // ═══════════════════════════════════════════════════════════════════════
+      const payment = await Payment.findOneAndUpdate(
+        {
+          _id:    id,
+          status: { $nin: ["success", "paid"] },
+        },
+        {
+          $set: {
+            status: "success",
+            "paystackResponse.adminNote":  notes || "Approved by admin",
+            "paystackResponse.approvedAt": new Date(),
+          },
+        },
+        { new: true }
+      ).populate({
+        path:     "user",
         populate: { path: "account" },
       });
 
       if (!payment) {
-        return res.status(404).json({ message: "Payment not found" });
-      }
-
-      // Prevent double approval
-      if (payment.status === "success" || payment.status === "paid") {
-        return res
-          .status(400)
-          .json({ message: "Payment already approved" });
+        return res.status(400).json({ message: "Payment already approved or not found" });
       }
 
       const isLoanPayment = !!payment.loanId;
-      const amount = Number(payment.amount);
+      const amount        = Number(payment.amount); // always full ₦ value
 
-      // =========================
-      // UPDATE PAYMENT RECORD
-      // =========================
-      payment.status = "success";
-      payment.paystackResponse = {
-        ...(payment.paystackResponse || {}),
-        adminNote: notes || "Approved by admin",
-        approvedAt: new Date(),
-      };
-
-      // =========================
-      // HANDLE LOAN PAYMENT
-      // =========================
+      // ═══════════════════════════════════════════════════════════════════════
+      // 2. HANDLE LOAN PAYMENT
+      // ═══════════════════════════════════════════════════════════════════════
       if (isLoanPayment) {
-        const loan = await Loan.findOne({
-          _id: payment.loanId,
-          user: payment.user._id,
-          status: "approved",
-        });
+
+        // ── 2a. Loan lookup — member first, then external ──────────────────
+        let loan           = null;
+        let isExternalLoan = false;
+
+        if (payment.user) {
+          loan = await Loan.findOne({
+            _id:    payment.loanId,
+            user:   payment.user._id,
+            status: { $in: ["approved", "overdue"] }
+          });
+        }
 
         if (!loan) {
-          return res
-            .status(404)
-            .json({ message: "Loan not found or inactive" });
+          // External loans carry no 'user' field.
+          // payment.user here is the initiatedBy admin, stored at creation time.
+          loan = await Loan.findOne({
+            _id:      payment.loanId,
+            external: { $exists: true },
+            status:   { $in: ["approved", "overdue"] }
+          });
+          if (loan) isExternalLoan = true;
         }
 
-        // subtract payment
-        loan.totalRepay = Math.max(loan.totalRepay - amount, 0);
+        if (!loan) {
+          return res.status(404).json({ message: "Loan not found or inactive" });
+        }
+
+        // ── 2b. Principal / penalty split ─────────────────────────────────
+        //
+        //   Example: totalRepay = 5250, totalPenalty = 250, paidAmount = 5250
+        //     loanPortion    = min(5250, 5250) = 5250
+        //     penaltyPortion = 5250 - 5250     = 0
+        //
+        //   Example: totalRepay = 5500 (includes 250 penalty already baked in)
+        //   In that case penaltyPortion is derived from totalPenalty on the loan.
+        //
+        //   We always use: loanPortion = min(amount, totalRepay)
+        //                  penaltyPortion = amount - loanPortion  (never negative)
+        //
+        const loanPortion    = Math.min(amount, loan.totalRepay);
+        const penaltyPortion = parseFloat((amount - loanPortion).toFixed(2));
+
+        // ── 2c. Update loan balances ───────────────────────────────────────
+        loan.totalRepay         = parseFloat((loan.totalRepay - loanPortion).toFixed(2));
+        loan.outstandingBalance = parseFloat(
+          Math.max((loan.outstandingBalance || 0) - amount, 0).toFixed(2)
+        );
+        // track total paid for reporting
+        loan.paidAmount = parseFloat(((loan.paidAmount || 0) + amount).toFixed(2));
+
+        // ── 2d. Transaction record ─────────────────────────────────────────
+        const txDescription = isExternalLoan
+          ? `External loan repayment approved (${payment.reference}) – ${loan.external.borrowerName}`
+          : `Manual loan repayment approved (${payment.reference})`;
 
         await Transaction.create({
-          user: payment.user._id,
-          type: "loan_payment",
-          amount,
-          description: `Manual loan repayment approved (${payment.reference})`,
-          reference: payment.reference,
-          method: "Cooperative",
-          status: "successful",
+          user:        payment.user._id,
+          type:        "loan_payment",
+          amount:      loanPortion,
+          description: txDescription,
+          reference:   payment.reference,
+          method:      "Manual",
+          status:      "successful"
         });
 
-        // loan fully paid
-        if (loan.totalRepay === 0) {
-          loan.status = "paid";
-          await loan.save();
+        // ── 2e. Company Ledger — principal repayment ──────────────────────
+        //    Guard against duplicate entries (idempotency)
+        const existingLedger = await CompanyLedger.findOne({
+          "meta.reference": payment.reference,
+          type:             "loan_repayment"
+        });
 
-          await Transaction.create({
-            user: payment.user._id,
-            type: "loan_repayment",
-            amount: 0,
-            description: "Loan fully settled (manual payment)",
-            method: "system",
-            status: "successful",
+        if (!existingLedger) {
+          await CompanyLedger.create({
+            type:        "loan_repayment",
+            direction:   "in",
+            amount:      loanPortion,
+            relatedUser: payment.user._id,
+            relatedLoan: loan._id,
+            description: isExternalLoan
+              ? `External loan repayment – ${loan.external.borrowerName}`
+              : `Member loan repayment (${payment.reference})`,
+            recordedBy:  req.user._id,
+            meta: {
+              reference:  payment.reference,
+              notes:      notes || "Approved by admin",
+              isExternal: isExternalLoan
+            }
+          });
+        }
+
+        // ── 2f. Penalty income ledger (if penalty portion exists) ──────────
+        //    Fall back to loan.totalPenalty when the split yields 0
+        //    (e.g. totalRepay already includes penalty baked in)
+        const penaltyProfit = penaltyPortion > 0
+          ? penaltyPortion
+          : (loan.totalRepay === 0 ? (loan.totalPenalty || 0) : 0);
+
+        if (penaltyProfit > 0 && loan.totalRepay === 0) {
+          // Only record penalty income on full clearance to keep ledger clean
+          const existingPenaltyLedger = await CompanyLedger.findOne({
+            "meta.reference": payment.reference,
+            type:             "penalty_income"
           });
 
-          await Loan.deleteOne({ _id: loan._id });
+          if (!existingPenaltyLedger) {
+            const extraCharge = await ExtraCharge.create({
+              member:      payment.user._id,
+              chargeType:  "loan-penalty",
+              amount:      penaltyProfit,
+              relatedLoan: loan._id,
+              reason:      "Overdue penalty settlement",
+              status:      "paid",
+              paidAt:      new Date()
+            });
 
-          console.log(`🎉 Loan cleared for ${payment.user.email}`);
-        } else {
-          await loan.save();
+            await CompanyLedger.create({
+              type:        "penalty_income",
+              direction:   "in",
+              amount:      penaltyProfit,
+              relatedUser: payment.user._id,
+              relatedLoan: loan._id,
+              description: isExternalLoan
+                ? `Penalty income – ${loan.external.borrowerName}`
+                : "Penalty income from cleared loan",
+              recordedBy:  req.user._id,
+              meta: {
+                reference:    payment.reference,
+                extraChargeId: extraCharge._id
+              }
+            });
+          }
         }
+
+        // ── 2g. Fully settled — mark paid (do NOT delete) ────────────────
+        if (loan.totalRepay === 0) {
+          loan.status = "paid";
+          loan.paidAt = new Date();
+
+          await Transaction.create({
+            user:        payment.user._id,
+            type:        "loan_repayment",
+            amount:      0,
+            description: isExternalLoan
+              ? `External loan fully settled – ${loan.external.borrowerName}`
+              : "Loan fully settled (manual payment)",
+            method:      "system",
+            status:      "successful"
+          });
+        }
+
+        await loan.save(); // single save — covers both partial and full settlement
       }
 
-      // =========================
-      // HANDLE NORMAL DEPOSIT
-      // =========================
+      // ═══════════════════════════════════════════════════════════════════════
+      // 3. HANDLE NORMAL DEPOSIT
+      //    Original logic unchanged — only runs when isLoanPayment is false
+      // ═══════════════════════════════════════════════════════════════════════
       if (!isLoanPayment && payment.user?.account) {
-        const account = payment.user.account;
+        const account = await Account.findByIdAndUpdate(
+          payment.user.account._id,
+          { $inc: { balance: amount } },
+          { new: true }
+        );
 
-        // capture balances
-        const balanceBefore = account.balance;
-        const balanceAfter = balanceBefore + amount;
+        const balanceBefore = account.balance - amount;
+        const balanceAfter  = account.balance;
 
-        // credit account
-        account.balance = balanceAfter;
-        await account.save();
-
-        // ✅ CREATE DEPOSIT REPORT
         await DepositReport.create({
-          member: payment.user._id,
-          account: account._id,
+          member:          payment.user._id,
+          account:         account._id,
           amount,
-          type: "bank_transfer",
-          reference: payment.reference,
-          description: `Manual deposit approved (${payment.reference})`,
-          status: "approved",
-
+          type:            "bank_transfer",
+          reference:       payment.reference,
+          description:     `Manual deposit approved (${payment.reference})`,
+          status:          "approved",
           balanceBefore,
           balanceAfter,
-
-          processedBy: req.user._id,
+          processedBy:     req.user._id,
           processedByRole: req.user.role?.name || "admin",
-          processedAt: new Date(),
-
-          notes: notes || "Approved by admin",
+          processedAt:     new Date(),
+          notes:           notes || "Approved by admin"
         });
 
-        // update existing transaction
+        await CompanyLedger.create({
+          type:        "deposit",
+          direction:   "in",
+          amount,
+          relatedUser: payment.user._id,
+          description: `Deposit received (${payment.reference})`,
+          recordedBy:  req.user._id,
+          meta: {
+            reference: payment.reference,
+            notes:     notes || "Approved by admin"
+          }
+        });
+
         const transaction = await Transaction.findOne({
-          user: payment.user._id,
+          user:      payment.user._id,
           reference: payment.reference,
-          type: "deposit",
+          type:      "deposit"
         });
 
         if (transaction) {
-          transaction.status = "successful";
-          transaction.method = "Bank Transfer";
-          transaction.description =
-            transaction.description ||
-            `Deposit approved by admin (${payment.reference})`;
-
+          transaction.status      = "successful";
+          transaction.method      = "Bank Transfer";
+          transaction.description = transaction.description
+            || `Deposit approved by admin (${payment.reference})`;
           await transaction.save();
         }
       }
 
-      // =========================
-      // ADMIN ACTION LOG (AUDIT)
-      // =========================
+      // ═══════════════════════════════════════════════════════════════════════
+      // 4. ADMIN ACTION LOG
+      // ═══════════════════════════════════════════════════════════════════════
       await AdminActionLog.create({
-        admin: req.user._id,
-        adminRole: req.user.role?.name || "admin",
-        actionType: "deposit_approve",
-        targetUser: payment.user._id,
+        admin:       req.user._id,
+        adminRole:   req.user.role?.name || "admin",
+        actionType:  "deposit_approve",
+        targetUser:  payment.user?._id || null,
         targetModel: "Payment",
-        targetId: payment._id,
-        description: `Approved deposit ${payment.reference}`,
-        ipAddress: req.ip,
-        userAgent: req.headers["user-agent"],
-        status: "success",
+        targetId:    payment._id,
+        description: `Approved ${isLoanPayment ? "loan payment" : "deposit"} ${payment.reference}`,
+        ipAddress:   req.ip,
+        userAgent:   req.headers["user-agent"],
+        status:      "success"
       });
-
-      await payment.save();
 
       return res.json({
-        success: true,
-        message: isLoanPayment
+        success:    true,
+        message:    isLoanPayment
           ? "Loan payment approved and applied"
           : "Deposit approved successfully",
-        newBalance: payment.user?.account?.balance || 0,
+        newBalance: payment.user?.account?.balance || 0
       });
+
     } catch (error) {
       console.error("Approve payment error:", error);
-
-      res.status(500).json({
-        message: "Internal server error",
-        error: error.message,
-      });
+      res.status(500).json({ message: "Internal server error", error: error.message });
     }
   }
 );
@@ -1804,40 +2368,11 @@ router.get("/admin/manage-extra-charges", ensureAdmin("view_extracharges"), asyn
 
 
 // LOAN MANAGEMENT 
-router.get("/admin/manage-loan", ensureAdmin("view_loans"), async (req, res) => {
-  try {
-    const loans = await Loan.find()
-      .populate({
-        path: "user",
-        select: "firstName lastName membershipID email phone account", // <-- added email and phone
-        populate: {
-          path: "account",
-          select: "accountType",
-          populate: {
-            path: "accountType",
-            model: "MemberType",
-            select: "name"
-          }
-        }
-      })
-      .populate("duration") // LoanSettings
-      .populate({
-        path: "guarantors.guarantor",
-        select: "firstName lastName membershipID email phone account" // <-- added email and phone for guarantors
-      })
-      .sort({ createdAt: -1 });
-
-    res.render("dashboard/admin/loan", { admin: req.user, loans });
-
-  } catch (error) {
-    console.error("Error fetching loans:", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /admin/external-loans
+// ─────────────────────────────────────────────────────────────────────────────
 router.get("/admin/external-loans", ensureAdmin("view_external_loans"), async (req, res) => {
   try {
-    // Fetch only external loans
     const loans = await Loan.find({ external: { $exists: true } })
       .populate({
         path: "user",
@@ -1845,55 +2380,495 @@ router.get("/admin/external-loans", ensureAdmin("view_external_loans"), async (r
         populate: {
           path: "account",
           select: "accountType",
-          populate: {
-            path: "accountType",
-            model: "MemberType",
-            select: "name"
-          }
+          populate: { path: "accountType", model: "MemberType", select: "name" }
         }
       })
-      // Populate admin who initiated the loan
-      .populate({
-        path: "initiatedBy",
-        select: "fullName email role"
-      })
+      .populate({ path: "initiatedBy", select: "fullName email role" })
       .populate("duration")
-      .populate({
-        path: "guarantors.guarantor",
-        select: "firstName lastName membershipID email phone"
-      })
+      .populate({ path: "guarantors.guarantor", select: "firstName lastName membershipID email phone" })
       .sort({ createdAt: -1 });
 
-    const users = await User.find().select(
-      "firstName lastName membershipID email phone"
-    );
+    const users = await User.find().select("firstName lastName membershipID email phone");
 
-    // Fetch last 10 payments for these loans
     const payments = await Payment.find({ loan: { $in: loans.map(l => l._id) } })
-      .populate("loan") // get the loan document
-      .populate("loan.user")
-      .populate("loan.external")
-      .populate("paidBy") // admin/user who recorded payment
+      .populate("loan")
+      .populate("paidBy")
       .sort({ createdAt: -1 })
       .limit(10);
 
-    // Render template and pass payments
-    res.render("dashboard/admin/external-loans", {
-      admin: req.user,
-      loans,
-      users,
-      payments // <-- pass payments here
-    });
-
+    res.render("dashboard/admin/external-loans", { admin: req.user, loans, users, payments });
   } catch (error) {
     console.error("Error fetching external loans:", error);
     res.status(500).send("Internal Server Error");
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /admin/external-loans/:loanId/details
+// Fetch a single external loan for the details modal (includes payment history)
+// ─────────────────────────────────────────────────────────────────────────────
+router.get(
+  "/admin/external-loans/:loanId/details",
+  ensureAdmin("view_external_loans"),
+  async (req, res) => {
+    try {
+      const loan = await Loan.findById(req.params.loanId)
+        .populate({ path: "guarantors.guarantor", select: "firstName lastName membershipID email phone" })
+        .populate({ path: "initiatedBy", select: "fullName email" });
+
+      if (!loan || !loan.external) {
+        return res.status(404).json({ error: "External loan not found." });
+      }
+
+      // Fetch payment history for this loan
+      const paymentHistory = await Payment.find({ loan: loan._id })
+        .sort({ createdAt: -1 })
+        .limit(20)
+        .populate("paidBy", "fullName email")
+        .select("amount reference status type createdAt payeeName paidBy");
+
+      res.json({ ...loan.toObject(), paymentHistory });
+    } catch (err) {
+      console.error("Error fetching loan details:", err);
+      res.status(500).json({ error: "Failed to load loan details." });
+    }
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /admin/external-loans
+// Issue a loan directly (admin fills in all details)
+// ─────────────────────────────────────────────────────────────────────────────
+router.post("/admin/external-loans", ensureAdmin("issue_external_loans"), async (req, res) => {
+  try {
+    const {
+      borrowerName, borrowerPhone, borrowerEmail, borrowerType, borrowerAddress,
+      loanAmount, interestRate, loanDuration, dueDate, loanPurpose,
+      guarantor1, guarantor2
+    } = req.body;
+
+    if (!borrowerName || !borrowerPhone || !borrowerType || !loanAmount || !interestRate || !loanDuration || !dueDate) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    if (!guarantor1 || !guarantor2) {
+      return res.status(400).json({ error: "Both guarantors are required" });
+    }
+    if (guarantor1 === guarantor2) {
+      return res.status(400).json({ error: "Guarantors cannot be the same person" });
+    }
+
+    const amount     = parseFloat(loanAmount);
+    const rate       = parseFloat(interestRate);
+    const duration   = parseInt(loanDuration, 10);
+    const interest   = amount * (rate / 100) * duration;
+    const totalRepay = amount + interest;
+
+    const newLoan = new Loan({
+      external: { borrowerType, borrowerName, email: borrowerEmail, phone: borrowerPhone, address: borrowerAddress },
+      initiatedBy:      req.user._id,
+      amount,
+      totalRepay,
+      interestRate:     rate,
+      externalDuration: duration,
+      dueDate,
+      guarantors:       [{ guarantor: guarantor1 }, { guarantor: guarantor2 }],
+      status:           "pending",
+      purpose:          loanPurpose
+    });
+
+    await newLoan.save();
+
+    await Promise.all([guarantor1, guarantor2].map(async (gid) => {
+      const gUser = await User.findById(gid);
+      if (!gUser) return;
+      gUser.guarantorRequests.push({ borrower: req.user._id, loan: newLoan._id, amount, status: "pending" });
+      gUser.guarantorRequestStats.totalReceived += 1;
+      await gUser.save();
+    }));
+
+    res.status(201).json({
+      message: "External loan issued successfully. Awaiting guarantor approval.",
+      loan: newLoan
+    });
+  } catch (error) {
+    console.error("Error issuing external loan:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /admin/external-loans/invite
+// Generate a secure one-time application link.
+// Supports optional preset loan terms + penalty/rollover percentages.
+// ─────────────────────────────────────────────────────────────────────────────
+router.post(
+  "/admin/external-loans/invite",
+  ensureAdmin("issue_external_loans"),
+  async (req, res) => {
+    try {
+      const {
+        presetAmount, presetInterestRate, presetDuration,
+        penaltyPercentage, rolloverPercentage, label
+      } = req.body;
+
+      const invite = new LoanInvite({
+        generatedBy:        req.user._id,
+        presetAmount:       presetAmount       || null,
+        presetInterestRate: presetInterestRate || null,
+        presetDuration:     presetDuration     || null,
+        // Only set if explicitly provided (empty string → null)
+        penaltyPercentage:  penaltyPercentage  != null && penaltyPercentage  !== "" ? parseFloat(penaltyPercentage)  : null,
+        rolloverPercentage: rolloverPercentage != null && rolloverPercentage !== "" ? parseFloat(rolloverPercentage) : null,
+        label:              label              || null
+      });
+
+      await invite.save();
+
+      const link = `${process.env.BASE_URL}/apply/external-loan/${invite.token}`;
+
+      res.status(201).json({
+        message:   "Loan application link generated successfully.",
+        token:     invite.token,
+        link,
+        expiresAt: invite.expiresAt
+      });
+    } catch (err) {
+      console.error("Error generating loan invite:", err);
+      res.status(500).json({ error: "Failed to generate invite link." });
+    }
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /admin/external-loans/invites
+// List all invite links for the admin panel table
+// ─────────────────────────────────────────────────────────────────────────────
+router.get(
+  "/admin/external-loans/invites",
+  ensureAdmin("issue_external_loans"),
+  async (req, res) => {
+    try {
+      const invites = await LoanInvite.find()
+        .populate("generatedBy", "fullName email")
+        .populate("loan", "amount status createdAt")
+        .sort({ createdAt: -1 });
+
+      const now = new Date();
+      const enriched = invites.map((inv) => {
+        const obj = inv.toObject();
+        // Include the full shareable link so the frontend copy button works
+        obj.link = `${process.env.BASE_URL}/apply/external-loan/${inv.token}`;
+        // Compute real status (active invites past expiry surface as 'expired')
+        obj.computedStatus =
+          inv.status === "active" && now > inv.expiresAt ? "expired" : inv.status;
+        return obj;
+      });
+
+      res.json({ invites: enriched });
+    } catch (err) {
+      console.error("Error fetching invites:", err);
+      res.status(500).json({ error: "Failed to fetch invites." });
+    }
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DELETE /admin/external-loans/invite/:token
+//   ?permanent=true  →  hard-delete (only for non-active invites)
+//   (no param)        →  soft-revoke (marks as 'revoked')
+// ─────────────────────────────────────────────────────────────────────────────
+router.delete(
+  "/admin/external-loans/invite/:token",
+  ensureAdmin("issue_external_loans"),
+  async (req, res) => {
+    try {
+      const invite = await LoanInvite.findOne({ token: req.params.token });
+      if (!invite) return res.status(404).json({ error: "Invite not found." });
+
+      // Hard delete
+      if (req.query.permanent === "true") {
+        if (invite.status === "active") {
+          return res.status(400).json({
+            error: "Cannot permanently delete an active link. Revoke it first."
+          });
+        }
+        await LoanInvite.deleteOne({ _id: invite._id });
+        return res.json({ message: "Invite record permanently deleted." });
+      }
+
+      // Soft revoke
+      if (invite.status === "used") {
+        return res.status(400).json({ error: "Cannot revoke a link that has already been used." });
+      }
+      if (invite.status !== "active") {
+        return res.status(400).json({ error: `Cannot revoke a link with status: ${invite.status}.` });
+      }
+
+      invite.status = "revoked";
+      await invite.save();
+
+      res.json({ message: "Invite revoked successfully." });
+    } catch (err) {
+      console.error("Error with invite deletion/revocation:", err);
+      res.status(500).json({ error: "Failed to process request." });
+    }
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /apply/external-loan/:token  (PUBLIC)
+// Render the application form for the applicant
+// ─────────────────────────────────────────────────────────────────────────────
+router.get("/apply/external-loan/:token", async (req, res) => {
+  try {
+    const invite = await LoanInvite.findOne({ token: req.params.token })
+      .populate("generatedBy", "fullName");
+
+    if (!invite) {
+      return res.render("dashboard/admin/loan-apply-invalid", {
+        reason: "This application link is invalid or does not exist."
+      });
+    }
+
+    if (new Date() > invite.expiresAt || invite.status !== "active") {
+      return res.render("dashboard/admin/loan-apply-invalid", {
+        reason:
+          invite.status === "used"    ? "This application link has already been used."  :
+          invite.status === "revoked" ? "This application link has been revoked."       :
+                                        "This application link has expired."
+      });
+    }
+
+    const users = await User.find().select("firstName lastName membershipID phone");
+
+    res.render("dashboard/admin/loan-apply", { invite, users, token: req.params.token });
+  } catch (err) {
+    console.error("Error loading loan application:", err);
+    res.status(500).send("Something went wrong. Please contact support.");
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /apply/external-loan/:token  (PUBLIC)
+// Applicant submits the completed loan application
+// ─────────────────────────────────────────────────────────────────────────────
+router.post("/apply/external-loan/:token", async (req, res) => {
+  try {
+    const invite = await LoanInvite.findOne({ token: req.params.token });
+
+    if (!invite || invite.status !== "active" || new Date() > invite.expiresAt) {
+      return res.status(400).json({
+        error: "This application link is invalid, expired, or has already been used."
+      });
+    }
+
+    const {
+      borrowerName, borrowerPhone, borrowerEmail, borrowerType, borrowerAddress,
+      loanAmount, interestRate, loanDuration, dueDate, loanPurpose,
+      guarantor1, guarantor2
+    } = req.body;
+
+    if (!borrowerName || !borrowerPhone || !borrowerType || !loanAmount || !interestRate || !loanDuration || !dueDate) {
+      return res.status(400).json({ error: "Please fill in all required fields." });
+    }
+    if (!guarantor1 || !guarantor2) {
+      return res.status(400).json({ error: "Two guarantors are required." });
+    }
+    if (guarantor1 === guarantor2) {
+      return res.status(400).json({ error: "Guarantors must be two different people." });
+    }
+
+    const amount   = parseFloat(loanAmount);
+    const rate     = parseFloat(interestRate);
+    const duration = parseInt(loanDuration, 10);
+
+    // Admin preset values take priority — applicant cannot override them
+    const finalAmount   = invite.presetAmount       || amount;
+    const finalRate     = invite.presetInterestRate || rate;
+    const finalDuration = invite.presetDuration     || duration;
+
+    const interest   = finalAmount * (finalRate / 100) * finalDuration;
+    const totalRepay = finalAmount + interest;
+
+    const newLoan = new Loan({
+      external: {
+        borrowerType, borrowerName,
+        email:   borrowerEmail,
+        phone:   borrowerPhone,
+        address: borrowerAddress
+      },
+      initiatedBy:        invite.generatedBy,  // admin who generated the link
+      amount:             finalAmount,
+      totalRepay,
+      interestRate:       finalRate,
+      externalDuration:   finalDuration,
+      dueDate,
+      guarantors:         [{ guarantor: guarantor1 }, { guarantor: guarantor2 }],
+      status:             "pending",
+      purpose:            loanPurpose,
+      // Copy penalty & rollover from the invite onto the loan so cron jobs
+      // and approval logic can use them without looking up the invite
+      penaltyPercentage:  invite.penaltyPercentage  ?? 0,
+      rolloverPercentage: invite.rolloverPercentage ?? 0
+    });
+
+    await newLoan.save();
+
+    // Guarantor requests — use the initiating admin as the borrower reference
+    // to satisfy the required 'borrower' field. Actual borrower details live in loan.external.
+    const borrowerRef = invite.generatedBy;
+
+    await Promise.all([guarantor1, guarantor2].map(async (gid) => {
+      const gUser = await User.findById(gid);
+      if (!gUser) return;
+      gUser.guarantorRequests.push({
+        borrower: borrowerRef,
+        loan:     newLoan._id,
+        amount:   finalAmount,
+        status:   "pending"
+      });
+      gUser.guarantorRequestStats.totalReceived += 1;
+      await gUser.save();
+    }));
+
+    // Mark invite as used — cannot be submitted again
+    invite.status = "used";
+    invite.loan   = newLoan._id;
+    await invite.save();
+
+    res.status(201).json({
+      message: "Your loan application has been submitted successfully. You will be contacted once it is reviewed."
+    });
+  } catch (err) {
+    console.error("Error submitting loan application:", err);
+    res.status(500).json({ error: "Failed to submit application. Please try again." });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ─── Helper ───────────────────────────────────────────────────────────────────
+function computeDueDate(startDate, duration, durationUnit = "months") {
+  const due = new Date(startDate);
+  switch (durationUnit) {
+    case "minutes": due.setMinutes(due.getMinutes() + Number(duration)); break;
+    case "hours":   due.setHours(due.getHours()     + Number(duration)); break;
+    case "days":    due.setDate(due.getDate()        + Number(duration)); break;
+    case "weeks":   due.setDate(due.getDate()        + Number(duration) * 7); break;
+    case "months":
+    default:        due.setMonth(due.getMonth()      + Number(duration)); break;
+  }
+  return due;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /admin/manage-loan
+// ─────────────────────────────────────────────────────────────────────────────
+router.get("/admin/manage-loan", ensureAdmin("view_loans"), async (req, res) => {
+  try {
+    const loans = await Loan.find()
+      .populate({
+        path: "user",
+        select: "firstName lastName membershipID email phone account",
+        populate: {
+          path: "account",
+          select: "accountType",
+          populate: { path: "accountType", model: "MemberType", select: "name" }
+        }
+      })
+      .populate("duration")
+      .populate({
+        path: "guarantors.guarantor",
+        select: "firstName lastName membershipID email phone account"
+      })
+      .sort({ createdAt: -1 });
+
+    res.render("dashboard/admin/loan", { admin: req.user, loans });
+  } catch (error) {
+    console.error("Error fetching loans:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/loans/approve
+// ─────────────────────────────────────────────────────────────────────────────
+// ─── Helper: parse a date string safely in LOCAL time ────────────────────────
+// When a date-only string like "2025-06-01" is passed to new Date(), JS
+// treats it as UTC midnight, which can shift the date by ±hours depending
+// on the server timezone.  This helper always anchors to local midnight.
+function parseDateLocal(dateStr) {
+  if (!dateStr) return null;
+
+  // If it's already a full ISO string with time info, trust it as-is
+  if (dateStr.length > 10) return new Date(dateStr);
+
+  // "YYYY-MM-DD" — parse components and build in local time
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const d = new Date();
+  d.setFullYear(year, month - 1, day);
+  d.setHours(0, 0, 0, 0); // local midnight
+  return d;
+}
+
+// ─── Helper: compute due date from disburse date ──────────────────────────────
+// For day/month-based durations the due moment is end-of-day (23:59:59.999)
+// so the cron job does not flag the loan overdue until the day has truly passed.
+function computeDueDate(startDate, durationValue, durationUnit) {
+  const due = new Date(startDate);
+
+  switch (durationUnit) {
+    case "minutes":
+      due.setMinutes(due.getMinutes() + durationValue);
+      break;
+    case "hours":
+      due.setHours(due.getHours() + durationValue);
+      break;
+    case "days":
+      due.setDate(due.getDate() + durationValue);
+      due.setHours(23, 59, 59, 999); // end of due day
+      break;
+    case "months":
+    default:
+      due.setMonth(due.getMonth() + durationValue);
+      due.setHours(23, 59, 59, 999); // end of due day
+      break;
+  }
+
+  return due;
+}
+
+// ─── POST /api/loans/approve ──────────────────────────────────────────────────
 router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res) => {
   try {
     const { loanId, disbursementMethod, disbursementDate } = req.body;
+
     if (!loanId || !disbursementMethod || !disbursementDate)
       return res.status(400).json({ message: "Missing required fields." });
 
@@ -1901,162 +2876,222 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
     if (!approvedBy) return res.status(401).json({ message: "Unauthorized." });
 
     const loan = await Loan.findById(loanId)
-      .populate("duration")
+      .populate("duration")           // LoanSettings
       .populate("user")
+      .populate({ path: "initiatedBy", model: "User", select: "_id email firstName lastName" })
       .populate("guarantors.guarantor");
 
     if (!loan) return res.status(404).json({ message: "Loan not found." });
 
-    if (!loan.guarantors.every(g => g.status === "accepted")) {
+    if (!loan.guarantors.every(g => g.status === "accepted"))
       return res.status(400).json({ message: "All guarantors must accept." });
-    }
 
-    const durationMonths = loan.user ? loan.duration?.duration : loan.externalDuration;
-    if (!durationMonths) return res.status(400).json({ message: "Loan duration missing." });
+    // ── Duration ─────────────────────────────────────────────────────────────
+    const durationValue = loan.duration?.duration    ?? loan.externalDuration;
+    const durationUnit  = loan.duration?.durationUnit ?? "months";
 
-    // Remove previous pending loan
+    if (!durationValue)
+      return res.status(400).json({ message: "Loan duration missing." });
+
+    // ── Remove any other pending/approved loan for this user ─────────────────
     if (loan.user) {
-      const existingLoan = await Loan.findOne({
-        user: loan.user._id,
-        _id: { $ne: loan._id },
+      const existing = await Loan.findOne({
+        user:   loan.user._id,
+        _id:    { $ne: loan._id },
         status: { $in: ["pending", "approved"] }
       });
-      if (existingLoan) await Loan.deleteOne({ _id: existingLoan._id });
+      if (existing) await Loan.deleteOne({ _id: existing._id });
     }
 
-    // Approve loan
-    const disburseDate = new Date(disbursementDate);
-    const dueDate = new Date(disburseDate);
-    dueDate.setMonth(dueDate.getMonth() + durationMonths);
+    // ── Compute dates (timezone-safe) ─────────────────────────────────────────
+    const disburseDate = parseDateLocal(disbursementDate);
+    const dueDate      = computeDueDate(disburseDate, durationValue, durationUnit);
 
-    loan.status = "approved";
+    // ── Stamp penalty & rollover rates onto the loan ──────────────────────────
+    const penaltyPercentage  = loan.duration?.penaltyPercentage  ?? loan.penaltyPercentage  ?? 0;
+    const rolloverPercentage = loan.duration?.rolloverPercentage ?? loan.rolloverPercentage ?? 0;
+
+    // ── Save approved loan ────────────────────────────────────────────────────
+    loan.status             = "approved";
     loan.disbursementMethod = disbursementMethod;
-    loan.disbursementDate = disburseDate;
-    loan.dueDate = dueDate;
-    loan.approvedAt = new Date();
+    loan.disbursementDate   = disburseDate;
+    loan.dueDate            = dueDate;
+    loan.approvedAt         = new Date();
+    loan.penaltyPercentage  = penaltyPercentage;
+    loan.rolloverPercentage = rolloverPercentage;
+    loan.outstandingBalance = loan.totalRepay;   // starts equal to totalRepay
+    loan.totalPenalty       = 0;
+    loan.updatedAt          = new Date();
+
     await loan.save();
 
-    // Ledger
+    // ── Borrower label (used in descriptions throughout) ─────────────────────
+    const borrowerName = loan.user
+      ? `${loan.user.firstName} ${loan.user.lastName}`
+      : loan.external?.borrowerName || "External Borrower";
+
+    const isExternalLoan = !loan.user && !!loan.external;
+
+    // ── Resolve the user reference for ledger/log entries ────────────────────
+    // For member loans: loan.user
+    // For external loans: loan.initiatedBy (the admin who created the link/loan)
+    const ledgerUser = loan.user?._id ?? loan.initiatedBy?._id ?? approvedBy;
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // LOAN LEDGER
+    // ═══════════════════════════════════════════════════════════════════════════
     const ledgerEntry = await LoanLedger.create({
-      loan: loan._id,
+      loan:             loan._id,
       approvedBy,
-      amount: loan.amount,
-      interestRate: loan.interestRate,
-      durationMonths,
+      amount:           loan.amount,
+      interestRate:     loan.interestRate,
+      durationValue,
+      durationUnit,
+      penaltyPercentage,
+      rolloverPercentage,
       disbursementMethod,
       disbursementDate: disburseDate,
       dueDate,
-      approvedAt: new Date(),
-      status: "approved",
-      member: loan.user?._id,
+      approvedAt:       new Date(),
+      status:           "approved",
+      member:           loan.user?._id,
       externalBorrower: loan.user ? undefined : loan.external
     });
 
-    // Borrower transaction
+    // ═══════════════════════════════════════════════════════════════════════════
+    // COMPANY LEDGER — loan_disbursement (money going OUT to borrower)
+    // ═══════════════════════════════════════════════════════════════════════════
+    await CompanyLedger.create({
+      type:        "loan_disbursement",
+      direction:   "out",
+      amount:      loan.amount,
+      relatedUser: ledgerUser,
+      relatedLoan: loan._id,
+      description: isExternalLoan
+        ? `External loan disbursed to ${borrowerName} via ${disbursementMethod}`
+        : `Member loan disbursed to ${borrowerName} via ${disbursementMethod}`,
+      recordedBy:  approvedBy,
+      meta: {
+        disbursementMethod,
+        disbursementDate: disburseDate,
+        dueDate,
+        interestRate:     loan.interestRate,
+        totalRepay:       loan.totalRepay,
+        penaltyPercentage,
+        rolloverPercentage,
+        isExternal:       isExternalLoan,
+        loanLedgerId:     ledgerEntry._id
+      }
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // BORROWER TRANSACTION (member loans only — external have no user account)
+    // ═══════════════════════════════════════════════════════════════════════════
     if (loan.user) {
       await Transaction.create({
-        user: loan.user._id,
-        type: "loan_payment",
-        amount: loan.amount,
-        status: "successful",
-        method: disbursementMethod,
+        user:        loan.user._id,
+        type:        "loan_payment",
+        amount:      loan.amount,
+        status:      "successful",
+        method:      disbursementMethod,
         description: "Loan approved and disbursed"
       });
     }
 
-    // Settings
-    const settings = await Settings.getSettings();
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ADMIN ACTION LOG
+    // ═══════════════════════════════════════════════════════════════════════════
+    await AdminActionLog.create({
+      admin:       approvedBy,
+      adminRole:   req.user.role?.name || "admin",
+      actionType:  "loan_approve",
+      targetUser:  ledgerUser,
+      targetModel: "Loan",
+      targetId:    loan._id,
+      description: isExternalLoan
+        ? `Approved external loan of ₦${loan.amount.toLocaleString()} for ${borrowerName}`
+        : `Approved member loan of ₦${loan.amount.toLocaleString()} for ${borrowerName}`,
+      ipAddress:   req.ip,
+      userAgent:   req.headers["user-agent"],
+      status:      "success",
+      meta: {
+        loanId:           loan._id,
+        amount:           loan.amount,
+        totalRepay:       loan.totalRepay,
+        interestRate:     loan.interestRate,
+        disbursementMethod,
+        disbursementDate: disburseDate,
+        dueDate,
+        isExternal:       isExternalLoan
+      }
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ROI DISTRIBUTION
+    // ═══════════════════════════════════════════════════════════════════════════
+    const settings           = await Settings.getSettings();
     const roiOperatingCharge = Number(settings.otherFees?.roiOperatingCharge || 10);
+    const now                = new Date();
+    const currentMonth       = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-    // Month key
-    const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const interestForLoan          = loan.amount * (loan.interestRate / 100) * durationValue;
+    const companyChargeForThisLoan = interestForLoan * (roiOperatingCharge / 100);
+    const netInterestForThisLoan   = interestForLoan - companyChargeForThisLoan;
 
-    // Interest calculations (per loan)
-    const interestForLoan =
-      loan.amount * (loan.interestRate / 100) * durationMonths;
-
-    const companyChargeForThisLoan =
-      interestForLoan * (roiOperatingCharge / 100);
-
-    const netInterestForThisLoan =
-      interestForLoan - companyChargeForThisLoan;
-
-    // Company ROI aggregation
     let companyRoi = await CompanyROI.findOne({ month: currentMonth });
 
     if (!companyRoi) {
       companyRoi = await CompanyROI.create({
-        month: currentMonth,
+        month:                  currentMonth,
         totalInterestCollected: interestForLoan,
-        companyCharge: companyChargeForThisLoan,
-        netInterestForRoi: netInterestForThisLoan,
-        totalRoiDistributed: 0,
-        status: "open",
+        companyCharge:          companyChargeForThisLoan,
+        netInterestForRoi:      netInterestForThisLoan,
+        totalRoiDistributed:    0,
+        status:                 "open",
         loanRoiHistory: [{
-          loan: loan._id,
+          loan:                 loan._id,
           interestForLoan,
           companyChargeForLoan: companyChargeForThisLoan,
-          netInterestForLoan: netInterestForThisLoan
+          netInterestForLoan:   netInterestForThisLoan
         }]
       });
     } else {
       companyRoi.totalInterestCollected += interestForLoan;
-      companyRoi.companyCharge += companyChargeForThisLoan;
-      companyRoi.netInterestForRoi += netInterestForThisLoan;
-
+      companyRoi.companyCharge          += companyChargeForThisLoan;
+      companyRoi.netInterestForRoi      += netInterestForThisLoan;
       companyRoi.loanRoiHistory.push({
-        loan: loan._id,
+        loan:                 loan._id,
         interestForLoan,
         companyChargeForLoan: companyChargeForThisLoan,
-        netInterestForLoan: netInterestForThisLoan
+        netInterestForLoan:   netInterestForThisLoan
       });
     }
 
-    // ROI Distribution (NEW FORMULA)
-    const allAccounts = await Account.find({}).populate("user");
-
-    const totalCumulativeSavings = allAccounts.reduce(
-      (sum, acc) => sum + Number(acc.balance || 0),
-      0
-    );
-
-    const safeMoney = n => Math.round(n * 100) / 100;
-
-    let totalDistributed = 0;
+    const allAccounts            = await Account.find({}).populate("user");
+    const totalCumulativeSavings = allAccounts.reduce((sum, acc) => sum + Number(acc.balance || 0), 0);
+    const safeMoney              = n => Math.round(n * 100) / 100;
+    let   totalDistributed       = 0;
 
     for (const acc of allAccounts) {
       const userSavings = Number(acc.balance || 0);
       if (userSavings <= 0 || totalCumulativeSavings <= 0) continue;
 
-      const userROI =
-        (userSavings / totalCumulativeSavings) * netInterestForThisLoan;
-
+      const userROI    = (userSavings / totalCumulativeSavings) * netInterestForThisLoan;
       const roundedROI = safeMoney(userROI);
 
-      // Monthly history (per loan)
-      acc.monthlyRoiHistory.push({
-        month: currentMonth,
-        roi: roundedROI
-      });
-
-      // Accumulative ROI
-      acc.accumulativeROI = safeMoney(
-        acc.accumulativeROI + roundedROI
-      );
-
-      acc.lastRoiPayout = new Date();
+      acc.monthlyRoiHistory.push({ month: currentMonth, roi: roundedROI });
+      acc.accumulativeROI = safeMoney(acc.accumulativeROI + roundedROI);
+      acc.lastRoiPayout   = new Date();
       await acc.save();
 
       totalDistributed += roundedROI;
 
-      // ROI transaction
       await Transaction.create({
-        user: acc.user._id,
-        type: "roi",
-        amount: roundedROI,
-        status: "successful",
-        method: "System Distribution",
+        user:        acc.user._id,
+        type:        "roi",
+        amount:      roundedROI,
+        status:      "successful",
+        method:      "System Distribution",
         description: `ROI from loan ${loan._id} (${currentMonth})`
       });
     }
@@ -2064,15 +3099,34 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
     companyRoi.totalRoiDistributed += safeMoney(totalDistributed);
     await companyRoi.save();
 
-    const borrowerName = loan.user
-      ? `${loan.user.firstName} ${loan.user.lastName}`
-      : loan.external?.borrowerName || "Company";
+    // ═══════════════════════════════════════════════════════════════════════════
+    // COMPANY LEDGER — ROI operating charge retained by company
+    // Records the company's cut of the interest before ROI is distributed
+    // ═══════════════════════════════════════════════════════════════════════════
+    if (companyChargeForThisLoan > 0) {
+      await CompanyLedger.create({
+        type:        "external_income",
+        direction:   "in",
+        amount:      companyChargeForThisLoan,
+        relatedUser: ledgerUser,
+        relatedLoan: loan._id,
+        description: `ROI operating charge (${roiOperatingCharge}%) on loan for ${borrowerName}`,
+        recordedBy:  approvedBy,
+        meta: {
+          month:              currentMonth,
+          interestForLoan,
+          roiOperatingCharge,
+          netInterestForRoi:  netInterestForThisLoan,
+          totalDistributed:   safeMoney(totalDistributed)
+        }
+      });
+    }
 
     return res.status(200).json({
-      message: `Loan for ${borrowerName} approved successfully.`,
+      message:        `Loan for ${borrowerName} approved successfully.`,
       roiDistributed: totalDistributed,
       loan,
-      ledger: ledgerEntry,
+      ledger:         ledgerEntry,
       companyRoi
     });
 
@@ -2082,13 +3136,14 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
   }
 });
 
-
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/loans/reject
+// ─────────────────────────────────────────────────────────────────────────────
 router.post("/api/loans/reject", ensureAdmin("reject_loans"), async (req, res) => {
   try {
     const { loanId, reason, details } = req.body;
-    if (!loanId || !reason || !details) {
+    if (!loanId || !reason || !details)
       return res.status(400).json({ message: "Missing required fields." });
-    }
 
     const rejectedBy = req.user?._id;
     if (!rejectedBy) return res.status(401).json({ message: "Unauthorized." });
@@ -2100,49 +3155,35 @@ router.post("/api/loans/reject", ensureAdmin("reject_loans"), async (req, res) =
 
     if (!loan) return res.status(404).json({ message: "Loan not found." });
 
-    // --- Mark loan as rejected ---
-    loan.status = "rejected";
-    loan.rejectedAt = new Date();
-    loan.rejectionReason = reason;
+    loan.status           = "rejected";
+    loan.rejectedAt       = new Date();
+    loan.rejectionReason  = reason;
     loan.rejectionDetails = details;
     await loan.save();
 
-    // --- Remove any other pending/active loans for the user ---
     const otherLoans = await Loan.find({
-      user: loan.user._id,
-      _id: { $ne: loan._id },
+      user:   loan.user._id,
+      _id:    { $ne: loan._id },
       status: { $in: ["pending", "approved"] }
     });
+    for (const l of otherLoans) await Loan.deleteOne({ _id: l._id });
 
-    for (const l of otherLoans) {
-      await Loan.deleteOne({ _id: l._id });
-    }
-
-    // --- Update guarantor stats ---
     for (const g of loan.guarantors) {
       const guarantorUser = await User.findById(g.guarantor._id);
       if (!guarantorUser) continue;
-
       guarantorUser.guarantorRequestStats.totalReceived += 1;
-
-      if (g.status === "accepted") {
-        guarantorUser.guarantorRequestStats.totalDeclined += 1;
-      } else {
-        guarantorUser.guarantorRequestStats.totalDeclined += 1;
-      }
-
+      guarantorUser.guarantorRequestStats.totalDeclined += 1;
       await guarantorUser.save();
     }
 
-    // --- Create declined transaction for user ---
     await Transaction.create({
-      user: loan.user._id,
-      type: "loan_payment",
-      amount: loan.amount,
-      status: "declined",
+      user:        loan.user._id,
+      type:        "loan_payment",
+      amount:      loan.amount,
+      status:      "declined",
       description: `Loan rejected: ${reason}`,
-      reference: `REJECT-${loan._id}`,
-      method: "loan_application"
+      reference:   `REJECT-${loan._id}`,
+      method:      "loan_application"
     });
 
     return res.status(200).json({
@@ -2156,135 +3197,145 @@ router.post("/api/loans/reject", ensureAdmin("reject_loans"), async (req, res) =
   }
 });
 
-
-router.post("/admin/external-loans", ensureAdmin("issue_external_loans"), async (req, res) => {
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/loans/rollover
+// Admin or member triggers a rollover — pays the rollover fee, extends dueDate
+// ─────────────────────────────────────────────────────────────────────────────
+router.post("/api/loans/rollover", ensureAdmin("approve_loans"), async (req, res) => {
   try {
-    const {
-      borrowerName,
-      borrowerPhone,
-      borrowerEmail,
-      borrowerType,
-      borrowerAddress,
-      loanAmount,
-      interestRate,
-      loanDuration, // months
-      dueDate,
-      loanPurpose,
-      guarantor1,
-      guarantor2
-    } = req.body;
+    const { loanId } = req.body;
+    if (!loanId) return res.status(400).json({ message: "Missing loanId." });
 
-    // ----------------------
-    // Validation
-    // ----------------------
-    if (
-      !borrowerName ||
-      !borrowerPhone ||
-      !borrowerType ||
-      !loanAmount ||
-      !interestRate ||
-      !loanDuration ||
-      !dueDate
-    ) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
+    const loan = await Loan.findById(loanId).populate("duration");
+    if (!loan) return res.status(404).json({ message: "Loan not found." });
 
-    if (!guarantor1 || !guarantor2) {
-      return res.status(400).json({ error: "Both guarantors are required" });
-    }
+    if (!["approved", "overdue"].includes(loan.status))
+      return res.status(400).json({ message: "Only approved or overdue loans can be rolled over." });
 
-    if (guarantor1 === guarantor2) {
-      return res.status(400).json({ error: "Guarantors cannot be the same person" });
-    }
+    const durationValue      = loan.duration?.duration    ?? loan.externalDuration ?? 1;
+    const durationUnit       = loan.duration?.durationUnit ?? "months";
+    const rolloverPercentage = loan.rolloverPercentage ?? loan.duration?.rolloverPercentage ?? 0;
 
-    // ----------------------
-    // Calculate total repayment (MONTHLY simple interest)
-    // Formula:
-    // Interest = Amount × (Rate / 100) × Months
-    // ----------------------
-    const amount = parseFloat(loanAmount);
-    const rate = parseFloat(interestRate);
-    const duration = parseInt(loanDuration, 10);
+    const currentBalance = loan.outstandingBalance || loan.totalRepay;
+    const rolloverFee    = parseFloat(((currentBalance * rolloverPercentage) / 100).toFixed(2));
+    const newBalance     = parseFloat((currentBalance + rolloverFee).toFixed(2));
+    const newDueDate     = computeDueDate(new Date(), durationValue, durationUnit);
 
-    const interest = amount * (rate / 100) * duration;
-    const totalRepay = amount + interest;
+    loan.outstandingBalance = newBalance;
+    loan.totalPenalty       = parseFloat(((loan.totalPenalty || 0) + rolloverFee).toFixed(2));
+    loan.status             = "approved";   // reset from overdue
+    loan.dueDate            = newDueDate;
+    loan.rolloverCount      = (loan.rolloverCount || 0) + 1;
+    loan.updatedAt          = new Date();
 
-    // ----------------------
-    // Prepare guarantors array
-    // ----------------------
-    const guarantorsArray = [
-      { guarantor: guarantor1 },
-      { guarantor: guarantor2 }
-    ];
-
-    // ----------------------
-    // Create the loan (status: pending)
-    // ----------------------
-    const newLoan = new Loan({
-      external: {
-        borrowerType,
-        borrowerName,
-        email: borrowerEmail,
-        phone: borrowerPhone,
-        address: borrowerAddress
-      },
-      initiatedBy: req.user._id, // admin issuing loan
-      amount,
-      totalRepay,
-      interestRate: rate, // monthly %
-      externalDuration: duration, // months
-      dueDate,
-      guarantors: guarantorsArray,
-      status: "pending",
-      purpose: loanPurpose
+    loan.rolloverHistory.push({
+      rolledOverAt:  new Date(),
+      rolloverFee,
+      balanceBefore: currentBalance,
+      balanceAfter:  newBalance,
+      newDueDate,
+      processedBy:   req.user._id
     });
 
-    await newLoan.save();
+    await loan.save();
 
-    // ----------------------
-    // Create guarantor requests
-    // ----------------------
-    await Promise.all(
-      [guarantor1, guarantor2].map(async (gid) => {
-        const gUser = await User.findById(gid);
-        if (!gUser) return;
-
-        gUser.guarantorRequests.push({
-          borrower: req.user._id, // admin as borrower
-          loan: newLoan._id,
-          amount,
-          status: "pending"
-        });
-
-        gUser.guarantorRequestStats.totalReceived += 1;
-        await gUser.save();
-      })
-    );
-
-    // ----------------------
-    // Response
-    // ----------------------
-    res.status(201).json({
-      message: "External loan issued successfully. Awaiting guarantor approval.",
-      loan: newLoan
+    return res.status(200).json({
+      message:        "Loan rolled over successfully.",
+      rolloverFee,
+      newBalance,
+      newDueDate,
+      rolloverCount:  loan.rolloverCount
     });
 
   } catch (error) {
-    console.error("Error issuing external loan:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error rolling over loan:", error);
+    return res.status(500).json({ message: "Server error during rollover." });
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/loans/mark-paid
+// Mark a loan as fully repaid
+// ─────────────────────────────────────────────────────────────────────────────
+router.post("/api/loans/mark-paid", ensureAdmin("approve_loans"), async (req, res) => {
+  try {
+    const { loanId, amountPaid, paymentMethod } = req.body;
+    if (!loanId) return res.status(400).json({ message: "Missing loanId." });
+
+    const loan = await Loan.findById(loanId).populate("user");
+    if (!loan) return res.status(404).json({ message: "Loan not found." });
+
+    loan.status             = "paid";
+    loan.outstandingBalance = 0;
+    loan.updatedAt          = new Date();
+    await loan.save();
+
+    // Create repayment transaction
+    if (loan.user) {
+      await Transaction.create({
+        user:        loan.user._id,
+        type:        "loan_repayment",
+        amount:      amountPaid || loan.outstandingBalance,
+        status:      "successful",
+        method:      paymentMethod || "cash",
+        description: `Loan ${loan._id} marked as fully repaid`
+      });
+    }
+
+    return res.status(200).json({ message: "Loan marked as paid.", loan });
+
+  } catch (error) {
+    console.error("Error marking loan paid:", error);
+    return res.status(500).json({ message: "Server error." });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/loans/:loanId/penalty-history
+// Returns full penalty + rollover history for a loan
+// ─────────────────────────────────────────────────────────────────────────────
+router.get("/api/loans/:loanId/penalty-history", ensureAdmin("view_loans"), async (req, res) => {
+  try {
+    const loan = await Loan.findById(req.params.loanId)
+      .select("amount totalRepay outstandingBalance totalPenalty penaltyPercentage rolloverPercentage penaltyHistory rolloverHistory status dueDate overdueAt")
+      .populate("user", "firstName lastName membershipID");
+
+    if (!loan) return res.status(404).json({ message: "Loan not found." });
+
+    return res.status(200).json({
+      loan: {
+        id:                 loan._id,
+        borrower:           loan.user
+          ? `${loan.user.firstName} ${loan.user.lastName}`
+          : "External",
+        originalAmount:     loan.amount,
+        totalRepay:         loan.totalRepay,
+        outstandingBalance: loan.outstandingBalance,
+        totalPenalty:       loan.totalPenalty,
+        penaltyPercentage:  loan.penaltyPercentage,
+        rolloverPercentage: loan.rolloverPercentage,
+        status:             loan.status,
+        dueDate:            loan.dueDate,
+        overdueAt:          loan.overdueAt
+      },
+      penaltyHistory:  loan.penaltyHistory,
+      rolloverHistory: loan.rolloverHistory
+    });
+
+  } catch (error) {
+    console.error("Error fetching penalty history:", error);
+    return res.status(500).json({ message: "Server error." });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Loan Settings routes (unchanged from previous version)
+// ─────────────────────────────────────────────────────────────────────────────
 
 router.get("/admin/loan/settings", ensureAdmin("manage_loan_settings"), async (req, res) => {
   try {
     const loanSettings = await LoanSettings.find().sort({ loanName: 1 });
-
-    res.render("dashboard/admin/loan-settings", {
-      admin: req.user,
-      loanSettings
-    });
-
+    res.render("dashboard/admin/loan-settings", { admin: req.user, loanSettings });
   } catch (error) {
     console.error("Error fetching loan settings:", error);
     res.status(500).send("Internal Server Error");
@@ -2293,55 +3344,20 @@ router.get("/admin/loan/settings", ensureAdmin("manage_loan_settings"), async (r
 
 router.post("/api/loan/settings/add", ensureAdmin("create_loan_settings"), async (req, res) => {
   try {
-    const {
-      id, 
-      loanName,
-      duration,
-      penaltyPercentage,
-      rolloverPercentage,
-      eligibilityUnit,
-      eligibilityValue,
-      status
-    } = req.body;
+    const { id, loanName, duration, durationUnit, penaltyPercentage, rolloverPercentage, eligibilityUnit, eligibilityValue, status } = req.body;
 
-    // If ID exists → UPDATE
     if (id) {
       const updated = await LoanSettings.findByIdAndUpdate(
         id,
-        {
-          loanName,
-          duration,
-          penaltyPercentage,
-          rolloverPercentage,
-          eligibilityUnit,
-          eligibilityValue,
-          status: status === "active" ? "active" : "inactive",
-          updatedAt: Date.now()
-        },
+        { loanName, duration, durationUnit: durationUnit || "months", penaltyPercentage, rolloverPercentage, eligibilityUnit, eligibilityValue, status: status === "active" ? "active" : "inactive", updatedAt: Date.now() },
         { new: true }
       );
-
-      if (!updated) {
-        return res.json({ status: false, message: "Loan setting not found" });
-      }
-
+      if (!updated) return res.json({ status: false, message: "Loan setting not found" });
       return res.json({ status: true, message: "Loan setting updated successfully", updated });
     }
 
-    // If NO ID → CREATE NEW
-    const newSetting = new LoanSettings({
-      loanName,
-      duration,
-      penaltyPercentage,
-      rolloverPercentage,
-      eligibilityUnit,
-      eligibilityValue,
-      status: status === "active" ? "active" : "inactive",
-      updatedAt: Date.now()
-    });
-
+    const newSetting = new LoanSettings({ loanName, duration, durationUnit: durationUnit || "months", penaltyPercentage, rolloverPercentage, eligibilityUnit, eligibilityValue, status: status === "active" ? "active" : "inactive", updatedAt: Date.now() });
     await newSetting.save();
-
     return res.json({ status: true, message: "Loan setting added successfully", newSetting });
 
   } catch (error) {
@@ -2353,24 +3369,13 @@ router.post("/api/loan/settings/add", ensureAdmin("create_loan_settings"), async
 router.post("/api/loan/settings/toggle", ensureAdmin("manage_loan_settings"), async (req, res) => {
   try {
     const { id } = req.body;
-
     if (!id) return res.json({ status: false, message: "Missing setting ID" });
-
     const setting = await LoanSettings.findById(id);
     if (!setting) return res.json({ status: false, message: "Setting not found" });
-
-    // Toggle status
-    setting.status = setting.status === "active" ? "inactive" : "active";
+    setting.status    = setting.status === "active" ? "inactive" : "active";
     setting.updatedAt = Date.now();
-
     await setting.save();
-
-    return res.json({
-      status: true,
-      message: `Setting ${setting.status === "active" ? "activated" : "deactivated"} successfully`,
-      newStatus: setting.status
-    });
-
+    return res.json({ status: true, message: `Setting ${setting.status === "active" ? "activated" : "deactivated"} successfully`, newStatus: setting.status });
   } catch (error) {
     console.error("Toggle setting error:", error);
     return res.json({ status: false, message: "Failed to toggle setting" });
@@ -2378,23 +3383,16 @@ router.post("/api/loan/settings/toggle", ensureAdmin("manage_loan_settings"), as
 });
 
 router.post("/api/loan/settings/delete", ensureAdmin("delete_loan_settings"), async (req, res) => {
-    try {
-        const { id } = req.body;
-
-        if (!id) return res.status(400).send("Invalid setting ID");
-
-        // Delete the setting
-        await LoanSettings.findByIdAndDelete(id);
-
-        // Redirect back to the loan settings page
-        res.redirect("/admin/loan/settings");
-
-    } catch (error) {
-        console.error("Error deleting loan setting:", error);
-        res.status(500).send("Failed to delete loan setting");
-    }
+  try {
+    const { id } = req.body;
+    if (!id) return res.status(400).send("Invalid setting ID");
+    await LoanSettings.findByIdAndDelete(id);
+    res.redirect("/admin/loan/settings");
+  } catch (error) {
+    console.error("Error deleting loan setting:", error);
+    res.status(500).send("Failed to delete loan setting");
+  }
 });
-
 
 
 // SETTINGS ROUTE 
@@ -2413,28 +3411,11 @@ router.get("/admin/settings", ensureAdmin("manage_settings"), async (req, res) =
 });
 
 
-// Update ONLY interest rates
-router.post("/admin/settings/interest-rates", ensureAdmin("manage_settings"), async (req, res) => {
-  console.log(req.body)
-  try {
-    const { clubRate, nonClubRate } = req.body;
 
-    const settings = await Settings.getSettings();
 
-    settings.interestRates.clubMemberRate = clubRate;
-    settings.interestRates.nonClubMemberRate = nonClubRate;
-
-    await settings.save();
-
-    res.json({ success: true, message: "Interest rates updated!" });
-
-  } catch (err) {
-    console.error("Error updating interest:", err);
-    res.status(500).json({ success: false, message: "Failed to update interest" });
-  }
-});
-
+// ─────────────────────────────────────────────
 // Update Registration Fees
+// ─────────────────────────────────────────────
 router.post("/admin/settings/registration-fees", ensureAdmin("manage_settings"), async (req, res) => {
   try {
     const { adultFee, kiddiesFee } = req.body;
@@ -2447,14 +3428,16 @@ router.post("/admin/settings/registration-fees", ensureAdmin("manage_settings"),
     await settings.save();
 
     res.json({ success: true, message: "Registration fees updated successfully!" });
-
   } catch (err) {
     console.error("Error updating registration fees:", err);
     res.status(500).json({ success: false, message: "Failed to update registration fees" });
   }
 });
 
+
+// ─────────────────────────────────────────────
 // Update Kiddies Account Settings
+// ─────────────────────────────────────────────
 router.post("/admin/settings/kiddies-settings", ensureAdmin("manage_settings"), async (req, res) => {
   try {
     const {
@@ -2464,7 +3447,7 @@ router.post("/admin/settings/kiddies-settings", ensureAdmin("manage_settings"), 
       monthlyFee,
       upgradeFee,
       interestRate,
-      notificationDays
+      notificationDays,
     } = req.body;
 
     const settings = await Settings.getSettings();
@@ -2475,15 +3458,12 @@ router.post("/admin/settings/kiddies-settings", ensureAdmin("manage_settings"), 
     settings.kiddiesSettings.monthlyMaintenanceFee = monthlyFee;
     settings.kiddiesSettings.upgradeProcessingFee = upgradeFee;
     settings.kiddiesSettings.kiddiesInterestRate = interestRate;
-
-    // Enum is 30, 60, 90 – ensure valid fallback
     settings.kiddiesSettings.autoUpgradeNotificationDays =
-      [30, 60, 90].includes(Number(notificationDays)) ? notificationDays : 60;
+      [30, 60, 90].includes(Number(notificationDays)) ? Number(notificationDays) : 60;
 
     await settings.save();
 
     res.json({ success: true, message: "Kiddies settings updated successfully!" });
-
   } catch (err) {
     console.error("Error updating kiddies settings:", err);
     res.status(500).json({ success: false, message: "Failed to update kiddies settings" });
@@ -2491,27 +3471,86 @@ router.post("/admin/settings/kiddies-settings", ensureAdmin("manage_settings"), 
 });
 
 
+// ─────────────────────────────────────────────
 // Update Additional Fees & Charges
+// ─────────────────────────────────────────────
 router.post("/admin/settings/other-fees", ensureAdmin("manage_settings"), async (req, res) => {
   try {
-    const { forceWithdrawal, loanProcessing, roiOperating } = req.body;
+    const { roiOperating } = req.body;
 
     const settings = await Settings.getSettings();
 
-    settings.otherFees.forceWithdrawalCharge = forceWithdrawal;
-    settings.otherFees.loanProcessingFee = loanProcessing; // optional if you want to store separately
     settings.otherFees.roiOperatingCharge = roiOperating;
 
     await settings.save();
 
     res.json({ success: true, message: "Additional fees updated successfully!" });
-
   } catch (err) {
     console.error("Error updating other fees:", err);
     res.status(500).json({ success: false, message: "Failed to update additional fees" });
   }
 });
 
+
+// ─────────────────────────────────────────────
+// Update Company Bank Account
+// ─────────────────────────────────────────────
+router.post("/admin/settings/company-account", ensureAdmin("manage_settings"), async (req, res) => {
+  try {
+    const { bankName, accountNumber, accountName } = req.body;
+
+    if (!bankName || !accountNumber || !accountName) {
+      return res.status(400).json({ success: false, message: "All account fields are required" });
+    }
+
+    const settings = await Settings.getSettings();
+
+    settings.companyAccount.bankName = bankName.trim();
+    settings.companyAccount.accountNumber = accountNumber.trim();
+    settings.companyAccount.accountName = accountName.trim();
+
+    await settings.save();
+
+    res.json({ success: true, message: "Company account details updated successfully!" });
+  } catch (err) {
+    console.error("Error updating company account:", err);
+    res.status(500).json({ success: false, message: "Failed to update company account details" });
+  }
+});
+
+
+// ─────────────────────────────────────────────
+// Toggle Maintenance Mode
+// ─────────────────────────────────────────────
+router.post("/admin/settings/maintenance-mode", ensureAdmin("manage_settings"), async (req, res) => {
+  try {
+    const { enabled, message } = req.body;
+
+    const settings = await Settings.getSettings();
+
+    settings.maintenanceMode.enabled = Boolean(enabled);
+
+    if (message !== undefined) {
+      settings.maintenanceMode.message = message.trim();
+    }
+
+    if (Boolean(enabled)) {
+      settings.maintenanceMode.enabledAt = new Date();
+      settings.maintenanceMode.enabledBy = req.user?._id || null;
+    } else {
+      settings.maintenanceMode.enabledAt = null;
+      settings.maintenanceMode.enabledBy = null;
+    }
+
+    await settings.save();
+
+    const status = Boolean(enabled) ? "enabled" : "disabled";
+    res.json({ success: true, message: `Maintenance mode ${status} successfully!` });
+  } catch (err) {
+    console.error("Error toggling maintenance mode:", err);
+    res.status(500).json({ success: false, message: "Failed to update maintenance mode" });
+  }
+});
 
 
 
@@ -3348,6 +4387,306 @@ router.delete(
 
 
 
+
+
+
+
+
+
+
+
+// ─── Build Mongoose query from filter params ─────────────────────────────────
+function buildQuery({ type, direction, from, to }) {
+  const q = {};
+  if (type)      q.type      = type;
+  if (direction) q.direction = direction;
+  if (from || to) {
+    q.createdAt = {};
+    if (from) q.createdAt.$gte = new Date(from);
+    if (to)   q.createdAt.$lte = new Date(new Date(to).setHours(23, 59, 59, 999));
+  }
+  return q;
+}
+
+// ─── Sum amounts for a match ─────────────────────────────────────────────────
+async function aggSum(matchObj) {
+  const r = await CompanyLedger.aggregate([
+    { $match: matchObj },
+    { $group: { _id: null, total: { $sum: "$amount" } } },
+  ]);
+  return r[0]?.total || 0;
+}
+
+const populateOpts = [
+  { path: "relatedUser", select: "firstName lastName membershipID" },
+  { path: "recordedBy",  select: "firstName lastName fullName" },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /admin/finance
+// ─────────────────────────────────────────────────────────────────────────────
+router.get(
+  "/admin/finance",
+  ensureAdmin("view_finance"),
+  async (req, res) => {
+    try {
+      const perPage     = 20;
+      const currentPage = Math.max(1, parseInt(req.query.page) || 1);
+
+      const filterType      = req.query.type      || "";
+      const filterDirection = req.query.direction || "";
+      const filterFrom      = req.query.from      || "";
+      const filterTo        = req.query.to        || "";
+
+      // Full active query (type + direction + date)
+      const activeQuery = buildQuery(req.query);
+
+      // ── All-time balance for header pill ──
+      const [allIn, allOut] = await Promise.all([
+        aggSum({ direction: "in" }),
+        aggSum({ direction: "out" }),
+      ]);
+      const companyBalance = allIn - allOut;
+
+      // ── Period stats: ONLY date (and type) filter, NOT direction filter
+      //    so we always know both in and out for the period
+      const periodBase = buildQuery({ type: filterType, from: filterFrom, to: filterTo });
+      const [periodIn, periodOut] = await Promise.all([
+        aggSum({ ...periodBase, direction: "in"  }),
+        aggSum({ ...periodBase, direction: "out" }),
+      ]);
+      const periodNet = periodIn - periodOut;
+
+      // ── Opening balance: all entries BEFORE filterFrom ──
+      let openingBalance = 0;
+      if (filterFrom) {
+        const d = new Date(filterFrom);
+        const [obIn, obOut] = await Promise.all([
+          aggSum({ direction: "in",  createdAt: { $lt: d } }),
+          aggSum({ direction: "out", createdAt: { $lt: d } }),
+        ]);
+        openingBalance = obIn - obOut;
+      }
+      const closingBalance = openingBalance + periodIn - periodOut;
+
+      // ── Paginated entries ──
+      const [entries, totalEntries] = await Promise.all([
+        CompanyLedger.find(activeQuery)
+          .sort({ createdAt: 1 })
+          .skip((currentPage - 1) * perPage)
+          .limit(perPage)
+          .populate(populateOpts),
+        CompanyLedger.countDocuments(activeQuery),
+      ]);
+      const totalPages = Math.ceil(totalEntries / perPage) || 1;
+
+      // ── Running balance per row ──
+      let runningBalance = openingBalance;
+      if (currentPage > 1) {
+        const prev = await CompanyLedger.find(activeQuery)
+          .sort({ createdAt: 1 })
+          .limit((currentPage - 1) * perPage)
+          .select("amount direction");
+        for (const e of prev)
+          runningBalance += e.direction === "in" ? e.amount : -e.amount;
+      }
+
+      const entriesWithBalance = entries.map((entry) => {
+        const obj = entry.toObject();
+        runningBalance += entry.direction === "in" ? entry.amount : -entry.amount;
+        obj.runningBalance = runningBalance;
+        return obj;
+      });
+
+      res.render("dashboard/admin/finance", {
+        admin: req.user,
+        entries: entriesWithBalance,
+        totalEntries,
+        totalPages,
+        currentPage,
+        perPage,
+        filterType,
+        filterDirection,
+        filterFrom,
+        filterTo,
+        companyBalance,
+        periodIn,
+        periodOut,
+        periodNet,
+        openingBalance,
+        closingBalance,
+      });
+    } catch (err) {
+      console.error("Error loading finance page:", err);
+      res.status(500).send("Server error");
+    }
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /admin/finance/credit
+// ─────────────────────────────────────────────────────────────────────────────
+const CREDIT_TYPES = ["manual_credit", "external_income", "registration_fee", "penalty_income", "rollover_income"];
+
+router.post("/admin/finance/credit", ensureAdmin("manage_finance"), async (req, res) => {
+  try {
+    const { type, amount, description } = req.body;
+    if (!type || !amount || !description)
+      return res.status(400).json({ status: false, message: "All fields are required." });
+    if (!CREDIT_TYPES.includes(type))
+      return res.status(400).json({ status: false, message: "Invalid credit type." });
+    const n = parseFloat(amount);
+    if (isNaN(n) || n <= 0)
+      return res.status(400).json({ status: false, message: "Amount must be a positive number." });
+
+    await CompanyLedger.create({
+      type, amount: n, direction: "in",
+      description: description.trim(),
+      recordedBy: req.user._id,
+      meta: { addedManually: true, adminName: req.user.fullName || `${req.user.firstName} ${req.user.lastName}` },
+    });
+    return res.json({ status: true, message: `₦${n.toLocaleString()} credited successfully.` });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: false, message: "Server error." });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /admin/finance/debit
+// ─────────────────────────────────────────────────────────────────────────────
+const DEBIT_TYPES = ["manual_debit", "withdrawal"];
+
+router.post("/admin/finance/debit", ensureAdmin("manage_finance"), async (req, res) => {
+  try {
+    const { type, amount, description } = req.body;
+    if (!type || !amount || !description)
+      return res.status(400).json({ status: false, message: "All fields are required." });
+    if (!DEBIT_TYPES.includes(type))
+      return res.status(400).json({ status: false, message: "Invalid debit type." });
+    const n = parseFloat(amount);
+    if (isNaN(n) || n <= 0)
+      return res.status(400).json({ status: false, message: "Amount must be a positive number." });
+
+    const [aIn, aOut] = await Promise.all([aggSum({ direction: "in" }), aggSum({ direction: "out" })]);
+    const balance = aIn - aOut;
+    if (n > balance)
+      return res.status(400).json({ status: false, message: `Insufficient balance. Current: ₦${balance.toLocaleString()}.` });
+
+    await CompanyLedger.create({
+      type, amount: n, direction: "out",
+      description: description.trim(),
+      recordedBy: req.user._id,
+      meta: { debitedManually: true, adminName: req.user.fullName || `${req.user.firstName} ${req.user.lastName}` },
+    });
+    return res.json({ status: true, message: `₦${n.toLocaleString()} debited successfully.` });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: false, message: "Server error." });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /admin/finance/export/csv
+// ─────────────────────────────────────────────────────────────────────────────
+router.get("/admin/finance/export/csv", ensureAdmin("view_finance"), async (req, res) => {
+  try {
+    const activeQuery = buildQuery(req.query);
+    const filterFrom  = req.query.from || "";
+    let running = 0;
+    if (filterFrom) {
+      const d = new Date(filterFrom);
+      const [oIn, oOut] = await Promise.all([
+        aggSum({ direction: "in", createdAt: { $lt: d } }),
+        aggSum({ direction: "out", createdAt: { $lt: d } }),
+      ]);
+      running = oIn - oOut;
+    }
+
+    const entries = await CompanyLedger.find(activeQuery).sort({ createdAt: 1 }).populate(populateOpts);
+
+    const rows = [
+      ["Date", "Type", "Direction", "Amount", "Balance After", "Member", "Membership ID", "Description", "Recorded By"],
+      ...entries.map((e) => {
+        running += e.direction === "in" ? e.amount : -e.amount;
+        const rec = e.recordedBy
+          ? (e.recordedBy.fullName || `${e.recordedBy.firstName || ""} ${e.recordedBy.lastName || ""}`.trim())
+          : "System";
+        return [
+          `"${new Date(e.createdAt).toLocaleString("en-NG")}"`,
+          e.type.replace(/_/g, " "),
+          e.direction,
+          e.amount,
+          running,
+          e.relatedUser ? `${e.relatedUser.firstName} ${e.relatedUser.lastName}` : "",
+          e.relatedUser?.membershipID || "",
+          `"${(e.description || "").replace(/"/g, '""')}"`,
+          rec,
+        ];
+      }),
+    ];
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename="ledger-${Date.now()}.csv"`);
+    return res.send(rows.map((r) => r.join(",")).join("\n"));
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Error generating CSV");
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /admin/finance/export/pdf  — renders a print-ready HTML page
+// ─────────────────────────────────────────────────────────────────────────────
+router.get("/admin/finance/export/pdf", ensureAdmin("view_finance"), async (req, res) => {
+  try {
+    const filterFrom  = req.query.from || "";
+    const filterTo    = req.query.to   || "";
+    const filterType  = req.query.type || "";
+    const filterDirection = req.query.direction || "";
+
+    const activeQuery = buildQuery(req.query);
+
+    let openingBalance = 0;
+    if (filterFrom) {
+      const d = new Date(filterFrom);
+      const [oIn, oOut] = await Promise.all([
+        aggSum({ direction: "in",  createdAt: { $lt: d } }),
+        aggSum({ direction: "out", createdAt: { $lt: d } }),
+      ]);
+      openingBalance = oIn - oOut;
+    }
+
+    const periodBase = buildQuery({ type: filterType, from: filterFrom, to: filterTo });
+    const [periodIn, periodOut] = await Promise.all([
+      aggSum({ ...periodBase, direction: "in" }),
+      aggSum({ ...periodBase, direction: "out" }),
+    ]);
+    const closingBalance = openingBalance + periodIn - periodOut;
+
+    const entries = await CompanyLedger.find(activeQuery).sort({ createdAt: 1 }).populate(populateOpts);
+
+    let running = openingBalance;
+    const entriesWithBalance = entries.map((e) => {
+      running += e.direction === "in" ? e.amount : -e.amount;
+      return { ...e.toObject(), runningBalance: running };
+    });
+
+    res.render("dashboard/admin/finance-pdf", {
+      layout: false,
+      entries: entriesWithBalance,
+      filterFrom, filterTo, filterType, filterDirection,
+      periodIn, periodOut,
+      periodNet: periodIn - periodOut,
+      openingBalance, closingBalance,
+      generatedAt: new Date().toLocaleString("en-NG"),
+      adminName: req.user.fullName || `${req.user.firstName} ${req.user.lastName}`,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Error generating PDF export");
+  }
+});
 
 
 module.exports = router;

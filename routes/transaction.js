@@ -5,6 +5,8 @@ const Account = require("../models/Account");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 const Loan = require("../models/Loan");
+const CompanyLedger = require("../models/CompanyLedger");
+const ExtraCharge = require("../models/ExtraCharge");
 
 
 router.post("/deposit/init", async (req, res) => {
@@ -135,25 +137,21 @@ router.get("/deposit/verify", async (req, res) => {
 });
 
 router.post("/deposit/cooperative", async (req, res) => {
-  console.log("Raw coopAmount:", req.body.coopAmount);
-
   try {
     if (!req.isAuthenticated()) {
-      return res.redirect("/login");
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const user = req.user;
     const { coopAmount, source, payeeName } = req.body;
-
     const amount = Number(coopAmount);
 
-    // 🚨 STRONG VALIDATION
     if (!amount || isNaN(amount) || amount <= 0) {
-      return res.redirect("/club-de-star-cooperative/dashboard?deposit=invalid");
+      return res.status(400).json({ success: false, message: "Invalid deposit amount." });
     }
 
     if (source === "no" && !payeeName?.trim()) {
-      return res.redirect("/club-de-star-cooperative/dashboard?deposit=missing-payee");
+      return res.status(400).json({ success: false, message: "Payer name is required." });
     }
 
     const reference = `COOP-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
@@ -161,7 +159,7 @@ router.post("/deposit/cooperative", async (req, res) => {
     await Payment.create({
       user: user._id,
       email: user.email,
-      amount, // ✅ guaranteed number
+      amount,
       reference,
       payeeName: source === "no" ? payeeName.trim() : null,
       status: "pending",
@@ -179,11 +177,11 @@ router.post("/deposit/cooperative", async (req, res) => {
 
     console.log(`🕒 Cooperative deposit pending: ₦${amount} — ${user.email}`);
 
-    return res.redirect("/club-de-star-cooperative/dashboard?deposit=pending");
+    return res.status(200).json({ success: true, message: "Deposit submitted." });
 
   } catch (err) {
     console.error("Cooperative deposit error:", err);
-    return res.redirect("/club-de-star-cooperative/dashboard?deposit=failed");
+    return res.status(500).json({ success: false, message: "Server error. Please try again." });
   }
 });
 
@@ -243,111 +241,162 @@ router.post("/loan/payment", async (req, res) => {
 router.get("/loan/verify", async (req, res) => {
   const { reference } = req.query;
 
-  if (!reference) return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
+  if (!reference)
+    return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
 
   try {
-    // --- 1. Verify payment with Paystack ---
-    const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-      headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
-    });
+
+    // ===== VERIFY PAYSTACK =====
+    const verifyRes = await fetch(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
+    );
 
     const data = await verifyRes.json();
-    if (!data.status || !data.data) {
-      console.error("Invalid Paystack response:", data);
+    if (!data.status || !data.data)
       return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
-    }
 
-    const transaction = data.data;
-
-    // --- 2. Find payment record ---
     const payment = await Payment.findOne({ reference }).populate("user");
-    if (!payment) return res.redirect("/club-de-star-cooperative/dashboard?loan=not-found");
+    if (!payment)
+      return res.redirect("/club-de-star-cooperative/dashboard?loan=not-found");
 
-    // --- 3. Update payment status ---
-    payment.status = transaction.status === "success" ? "paid" : "failed";
-    payment.paystackResponse = transaction;
+    // 🔒 Prevent double execution
+    if (payment.status === "paid")
+      return res.redirect("/club-de-star-cooperative/dashboard?loan=success");
+
+    payment.status = data.data.status === "success" ? "paid" : "failed";
+    payment.paystackResponse = data.data;
     await payment.save();
 
-    // --- 4. Process successful payment ---
-    if (payment.status === "paid") {
+    if (payment.status !== "paid")
+      return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
 
-      // Fetch loan
-      const loan = await Loan.findOne({ _id: payment.loanId, user: payment.user._id });
-      if (!loan) {
-        console.warn(`No loan found for ${payment.user.email} associated with reference ${reference}`);
-        return res.redirect("/club-de-star-cooperative/dashboard?loan=not-found");
-      }
+    // ===== FETCH LOAN =====
+    const loan = await Loan.findOne({
+      _id:  payment.loanId,
+      user: payment.user._id,
+    });
 
-      // Amount user paid now (convert from kobo)
-      const paidAmount = payment.amount / 100;
+    if (!loan)
+      return res.redirect("/club-de-star-cooperative/dashboard?loan=not-found");
 
-      // Deduct payment from remaining balance
-      loan.totalRepay = Math.max(loan.totalRepay - paidAmount, 0);
+    const paidAmount = payment.amount / 100;
 
-      // If loan is fully paid
-      if (loan.totalRepay === 0) {
-        // Mark as fully paid before deletion
-        loan.status = "paid";
-        await loan.save();
+    // =========================================================
+    // SPLIT paidAmount into loan portion and penalty portion
+    //
+    // paidAmount may contain both — e.g. user pays 642.97 to
+    // clear a loan where totalRepay=618 and totalPenalty=24.97.
+    //
+    //   loanPortion    = Math.min(paidAmount, totalRepay)  → 618
+    //   penaltyPortion = paidAmount - loanPortion          → 24.97
+    //
+    // For a partial payment (e.g. user pays 300):
+    //   loanPortion    = 300
+    //   penaltyPortion = 0   (penalty only recorded on full clearance)
+    // =========================================================
 
-        // Record final payment transaction
-        await Transaction.create({
-          user: payment.user._id,
-          type: "loan_payment",
-          amount: paidAmount,
-          description: `Loan fully settled (Ref: ${reference})`,
-          reference: reference,
-          method: "Paystack",
-          status: "successful",
+    const loanPortion    = Math.min(paidAmount, loan.totalRepay);
+    const penaltyPortion = parseFloat((paidAmount - loanPortion).toFixed(2));
+
+    // Reduce balances
+    loan.totalRepay         = parseFloat((loan.totalRepay - loanPortion).toFixed(2));
+    loan.outstandingBalance = Math.max(parseFloat(((loan.outstandingBalance || 0) - paidAmount).toFixed(2)), 0);
+
+    // =========================================================
+    // COMPANY LEDGER — loan portion only (base repayment)
+    // =========================================================
+
+    const existingLedger = await CompanyLedger.findOne({
+      "meta.reference": reference,
+      type:             "loan_repayment",
+    });
+
+    if (!existingLedger) {
+      await CompanyLedger.create({
+        type:        "loan_repayment",
+        amount:      loanPortion,        // e.g. 618 — never includes penalty
+        direction:   "in",
+        relatedUser: payment.user._id,
+        relatedLoan: loan._id,
+        description: "Loan repayment via Paystack",
+        meta:        { reference }
+      });
+    }
+
+    await Transaction.create({
+      user:        payment.user._id,
+      type:        "loan_payment",
+      amount:      loanPortion,
+      reference,
+      method:      "Paystack",
+      status:      "successful",
+      description: "Loan repayment"
+    });
+
+    // =========================================================
+    // FULLY CLEARED → record penalty portion separately
+    //
+    // penaltyPortion comes from the split above (paidAmount - loanPortion).
+    // As a safety fallback we also cross-check against loan.totalPenalty.
+    //
+    // Company ledger for this loan (using your example data):
+    //   loan_repayment  →  618      ✅
+    //   penalty_income  →   24.97   ✅
+    //                     ──────
+    //   Total           →  642.97   ✅  matches paidAmount exactly
+    // =========================================================
+
+    if (loan.totalRepay === 0) {
+
+      // Use the split amount; fall back to cron-tracked totalPenalty if needed
+      const penaltyProfit = penaltyPortion > 0
+        ? penaltyPortion
+        : (loan.totalPenalty || (loan.penaltyHistory || []).reduce((sum, p) => sum + (p.penaltyAmount || 0), 0));
+
+      if (penaltyProfit > 0) {
+
+        const extraCharge = await ExtraCharge.create({
+          member:      payment.user._id,
+          chargeType:  "loan-penalty",
+          amount:      penaltyProfit,
+          relatedLoan: loan._id,
+          reason:      "Overdue penalty settlement",
+          status:      "paid",
+          paidAt:      new Date(),
         });
 
-        // Create a final "LOAN CLEARED" log
-        await Transaction.create({
-          user: payment.user._id,
-          type: "loan_closed",
-          amount: 0,
-          description: `Loan account closed after full repayment`,
-          method: "system",
-          status: "successful",
+        await CompanyLedger.create({
+          type:        "penalty_income",
+          amount:      penaltyProfit,
+          direction:   "in",
+          relatedLoan: loan._id,
+          relatedUser: payment.user._id,
+          description: "Penalty income from cleared loan",
+          meta:        { extraChargeId: extraCharge._id }
         });
-
-        // DELETE THE LOAN RECORD
-        await Loan.deleteOne({ _id: loan._id });
-
-        console.log(`🎉 Loan fully cleared & deleted for ${payment.user.email}`);
-
-        return res.redirect("/club-de-star-cooperative/dashboard?loan=cleared");
       }
 
-      // --- If PARTIAL payment ---
+      loan.status    = "paid";
+      loan.paidAt    = new Date();
+      loan.updatedAt = new Date();
       await loan.save();
 
       await Transaction.create({
-        user: payment.user._id,
-        type: "loan_payment",
-        amount: paidAmount,
-        description: `Loan repayment (Ref: ${reference})`,
-        reference: reference,
-        method: "Paystack",
-        status: "successful",
+        user:        payment.user._id,
+        type:        "loan_payment",
+        amount:      0,
+        description: "Loan fully cleared",
+        method:      "system",
+        status:      "successful",
       });
 
-      console.log(`✅ Loan payment recorded: ₦${paidAmount} for ${payment.user.email}`);
-      return res.redirect("/club-de-star-cooperative/dashboard?loan=success");
+      return res.redirect("/club-de-star-cooperative/dashboard?loan=cleared");
     }
 
-    // --- Payment failed ---
-    await Transaction.create({
-      user: payment.user._id,
-      type: "loan_payment",
-      amount: payment.amount / 100,
-      description: `Loan payment failed (Ref: ${reference})`,
-      reference: reference,
-      method: "Paystack",
-      status: "failed",
-    });
-
-    return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
+    // ===== PARTIAL PAYMENT =====
+    await loan.save();
+    return res.redirect("/club-de-star-cooperative/dashboard?loan=success");
 
   } catch (err) {
     console.error("Loan verification error:", err);
@@ -364,63 +413,117 @@ router.post("/loan/payment/manual", async (req, res) => {
     const user = req.user;
     const { loanId, amount, payerName } = req.body;
 
-    // ✅ Force NAIRA value (not kobo)
-    const paymentAmount = Math.round(Number(amount));
-
-    // ---------- VALIDATION ----------
+    // ── Validation ───────────────────────────────────────────────────────────
     if (!loanId) {
       return res.status(400).json({ message: "Loan is required" });
     }
 
+    const paymentAmount = Math.round(Number(amount));
     if (!paymentAmount || isNaN(paymentAmount) || paymentAmount <= 0) {
       return res.status(400).json({ message: "Invalid amount" });
-    }
-
-    const loan = await Loan.findOne({
-      _id: loanId,
-      user: user._id,
-      status: "approved"
-    });
-
-    if (!loan) {
-      return res.status(404).json({ message: "Loan not found or inactive" });
     }
 
     if (payerName && !payerName.trim()) {
       return res.status(400).json({ message: "Invalid payer name" });
     }
 
-    // ---------- REFERENCE ----------
+    // ── Loan lookup ──────────────────────────────────────────────────────────
+    // Try member loan first (original behaviour)
+
+    let loan = await Loan.findOne({
+      _id: loanId,
+      user: user._id,
+      status: { $in: ["approved", "overdue"] }
+    });
+
+    let isExternal = false;
+
+    if (!loan) {
+      // External loans have no 'user' field; they can be approved OR overdue.
+      // Populate initiatedBy so we can use the admin's _id and email to
+      // satisfy the Payment schema's required user/email fields.
+      loan = await Loan.findOne({
+        _id:      loanId,
+        external: { $exists: true },
+        status:   { $in: ["approved", "overdue"] }
+      }).populate({ path: "initiatedBy", model: "User", select: "_id email firstName lastName" });
+      if (loan) isExternal = true;
+    }
+
+    if (!loan) {
+      return res.status(404).json({ message: "Loan not found or inactive" });
+    }
+
+    // ── Reference ────────────────────────────────────────────────────────────
     const reference = `LOAN-MANUAL-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
-    // ---------- PAYMENT RECORD ----------
-    await Payment.create({
-      user: user._id,
-      email: user.email,
-      loanId: loan._id,
-      amount: paymentAmount, // ✅ FULL NAIRA VALUE
-      reference,
-      payeeName: payerName?.trim() || null,
-      status: "pending"
-    });
+    // ── Payment record ───────────────────────────────────────────────────────
+    // Both branches store 'loanId' (for the approval route's isLoanPayment check)
+    // as well as 'loan' (so the approval route can populate the full loan doc).
+    if (isExternal) {
+      // Use the admin who initiated the loan to satisfy user/email required fields.
+      // This keeps the Payment schema unchanged and ties the record to the
+      // correct admin for the approval flow.
+      const initiator = loan.initiatedBy;
+      if (!initiator) {
+        return res.status(400).json({ message: "Loan has no initiating admin — cannot record payment." });
+      }
 
-    // ---------- TRANSACTION RECORD ----------
-    await Transaction.create({
-      user: user._id,
-      type: "loan_payment",
-      amount: paymentAmount, // ✅ FULL NAIRA VALUE
-      description: "Manual loan repayment (Pending approval)",
-      reference,
-      method: "Manual", // ✅ NOT Paystack
-      status: "pending"
-    });
+      await Payment.create({
+        user:      initiator._id,            // admin who issued the loan
+        email:     initiator.email,          // their email satisfies required field
+        loan:      loan._id,
+        loanId:    loan._id,
+        amount:    paymentAmount,
+        reference,
+        payeeName: payerName?.trim() || loan.external.borrowerName,
+        paidBy:    user._id,                 // admin currently recording the payment
+        status:    "pending"
+      });
 
-    console.log(
-      `🕒 Manual loan repayment pending → ₦${paymentAmount} | Loan ${loan._id} | ${user.email}`
-    );
+      await Transaction.create({
+        user:        initiator._id,
+        type:        "loan_payment",
+        amount:      paymentAmount,
+        description: `External loan repayment – ${loan.external.borrowerName} (Pending approval)`,
+        reference,
+        method:      "Manual",
+        status:      "pending"
+      });
+
+      console.log(
+        `🕒 External loan repayment pending → ₦${paymentAmount} | Loan ${loan._id} | ${loan.external.borrowerName} | Recorded by: ${user.email}`
+      );
+    } else {
+      // Member loan — original behaviour, unchanged
+      await Payment.create({
+        user:      user._id,
+        email:     user.email,
+        loan:      loan._id,
+        loanId:    loan._id,
+        amount:    paymentAmount,
+        reference,
+        payeeName: payerName?.trim() || null,
+        status:    "pending"
+      });
+
+      await Transaction.create({
+        user:        user._id,
+        type:        "loan_payment",
+        amount:      paymentAmount,
+        description: "Manual loan repayment (Pending approval)",
+        reference,
+        method:      "Manual",
+        status:      "pending"
+      });
+
+      console.log(
+        `🕒 Manual loan repayment pending → ₦${paymentAmount} | Loan ${loan._id} | ${user.email}`
+      );
+    }
 
     return res.status(200).json({
-      status: true,
+      status:  true,
       message: "Loan repayment submitted for admin approval"
     });
 

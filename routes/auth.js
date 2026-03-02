@@ -47,7 +47,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 2 * 1024 * 1024 }
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 
  });
 
@@ -79,23 +79,24 @@ router.post(
 
       const normalizedEmail = email.toLowerCase();
 
-      // ✅ Check for existing email
+      // ✅ Check existing email
       const existingUser = await User.findOne({ email: normalizedEmail });
       if (existingUser) {
-        return res
-          .status(400)
-          .json({ status: false, message: "This email is already registered." });
+        return res.status(400).json({
+          status: false,
+          message: "This email is already registered.",
+        });
       }
 
-      // File uploads
-      const addressProof = req.files["addressProof"]?.[0]?.path;
+      // files
+      const addressProof  = req.files["addressProof"]?.[0]?.path;
       const passportPhoto = req.files["passportPhoto"]?.[0]?.path;
-      const idFile = req.files["idFile"]?.[0]?.path;
-      const signature = req.files["signature"]?.[0]?.path;
+      const idFile        = req.files["idFile"]?.[0]?.path;
+      const signature     = req.files["signature"]?.[0]?.path;
 
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      // Get default MemberType
+      // ✅ Default member type
       const defaultMemberType = await MemberType.findOne({ isDefault: true });
       if (!defaultMemberType) {
         return res.status(500).json({
@@ -105,29 +106,47 @@ router.post(
       }
 
       const settings = await Settings.getSettings();
-      const registrationFee = settings.registrationFees.adultRegistrationFee;
+      const registrationFee =
+        settings.registrationFees.adultRegistrationFee;
 
-      // Generate membershipID
-      const lastUserOfType = await User.findOne({
-        membershipID: { $regex: `^${defaultMemberType.shortCode}` },
-      }).sort({ createdAt: -1 });
+      /* =====================================================
+         ✅ SAFE MEMBERSHIP ID GENERATOR (NO createdAt)
+      ====================================================== */
 
-      let nextNumber = 1;
-      if (lastUserOfType && lastUserOfType.membershipID) {
-        const match = lastUserOfType.membershipID.match(/\d+$/);
-        if (match) nextNumber = parseInt(match[0]) + 1;
+      const usersOfType = await User.find({
+        membershipID: {
+          $regex: `^${defaultMemberType.shortCode}\\d+$`,
+        },
+      }).select("membershipID");
+
+      let maxNumber = 0;
+
+      for (const u of usersOfType) {
+        const match = u.membershipID?.match(/\d+$/);
+        if (match) {
+          const num = parseInt(match[0], 10);
+          if (num > maxNumber) maxNumber = num;
+        }
       }
 
-      const membershipID = `${defaultMemberType.shortCode}${String(nextNumber).padStart(4, "0")}`;
+      const nextNumber = maxNumber + 1;
+
+      const membershipID =
+        `${defaultMemberType.shortCode}${String(nextNumber).padStart(4, "0")}`;
+
       const newReferralCode = membershipID;
 
-      // 🔥 SUPERADMIN CHECK
-      const isSuperAdmin = normalizedEmail === process.env.SUPERADMIN_EMAIL?.toLowerCase();
+      /* ===================================================== */
 
-      // Get roles
+      // 🔥 SUPERADMIN CHECK
+      const isSuperAdmin =
+        normalizedEmail ===
+        process.env.SUPERADMIN_EMAIL?.toLowerCase();
+
       const superAdminRole = isSuperAdmin
         ? await Role.findOne({ name: "superadmin" })
         : null;
+
       const memberRole = !isSuperAdmin
         ? await Role.findOne({ name: "member" })
         : null;
@@ -162,15 +181,17 @@ router.post(
         idNumber,
         idFile,
         signature,
-        referralCode: newReferralCode,
         membershipID,
+        referralCode: newReferralCode, // ✅ synced
         password: hashedPassword,
         status: isSuperAdmin ? "active" : "pending",
         registrationStatus: isSuperAdmin ? "paid" : "pending",
-        role: isSuperAdmin ? superAdminRole._id : memberRole._id, // <-- Assign member role for normal users
+        role: isSuperAdmin
+          ? superAdminRole._id
+          : memberRole._id,
       });
 
-      // Handle referral
+      // ✅ Handle referral parent
       if (referralCode && !isSuperAdmin) {
         const referringUser = await User.findOne({ referralCode });
         if (referringUser) {
@@ -179,12 +200,12 @@ router.post(
         }
       }
 
-      // Auto-login
+      // auto login
       req.login(newUser, (err) => {
         if (err) console.error("Auto-login error:", err);
       });
 
-      // Create Account
+      // ✅ Create account
       const account = await Account.create({
         user: newUser._id,
         accountType: defaultMemberType._id,
@@ -196,7 +217,8 @@ router.post(
       newUser.account = account._id;
       await newUser.save();
 
-      // 🚀 SUPERADMIN: Skip Paystack
+      /* ================= SUPERADMIN BYPASS ================= */
+
       if (isSuperAdmin) {
         const payment = await Payment.create({
           user: newUser._id,
@@ -223,27 +245,36 @@ router.post(
         return res.json({
           status: true,
           message: "Superadmin registered successfully",
-          redirect: "/club-de-star-cooperative/dashboard",
+          redirect: "/cds-cooperative/dashboard",
         });
       }
 
-      // ✅ Normal users → Initialize Paystack
-      const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: normalizedEmail,
-          amount: registrationFee * 100,
-          metadata: { firstName, lastName, userId: newUser._id },
-          callback_url: `${process.env.BASE_URL}/payment/verify`,
-        }),
-      });
+      /* ================= PAYSTACK ================= */
+
+      const paystackRes = await fetch(
+        "https://api.paystack.co/transaction/initialize",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: normalizedEmail,
+            amount: registrationFee * 100,
+            metadata: {
+              firstName,
+              lastName,
+              userId: newUser._id,
+            },
+            callback_url: `${process.env.BASE_URL}/payment/verify`,
+          }),
+        }
+      );
 
       const data = await paystackRes.json();
-      if (!data.status || !data.data) throw new Error("Payment initialization failed");
+      if (!data.status || !data.data)
+        throw new Error("Payment initialization failed");
 
       const payment = await Payment.create({
         user: newUser._id,
@@ -256,120 +287,20 @@ router.post(
       newUser.Payment = payment._id;
       await newUser.save();
 
-      res.json({ status: true, authorization_url: data.data.authorization_url });
+      res.json({
+        status: true,
+        authorization_url: data.data.authorization_url,
+      });
 
     } catch (err) {
       console.error("Signup error:", err);
-      res.status(500).json({ status: false, message: "Error during registration." });
+      res.status(500).json({
+        status: false,
+        message: "Error during registration.",
+      });
     }
   }
 );
-
-
-
-// MIGRATION 
-router.post(
-    "/add",
-    upload.fields([
-        { name: "addressProof", maxCount: 1 },
-        { name: "passportPhoto", maxCount: 1 },
-        { name: "idFile", maxCount: 1 },
-        { name: "signature", maxCount: 1 }
-    ]),
-    async (req, res) => {
-        try {
-            const {
-                firstName,
-                lastName,
-                email,
-                phone,
-                dob,
-                state,
-                lga,
-                address,
-                idType,
-                idNumber,
-                password,
-                openingBalance,
-                monthlyROI,
-                accumulativeROI,
-                memberTypeId
-            } = req.body;
-
-            // Check if email already exists
-            if (await User.findOne({ email })) {
-                return res.status(400).json({ status: false, message: "Email already registered." });
-            }
-
-            // File uploads
-            const addressProof = req.files["addressProof"]?.[0]?.path;
-            const passportPhoto = req.files["passportPhoto"]?.[0]?.path;
-            const idFile = req.files["idFile"]?.[0]?.path;
-            const signature = req.files["signature"]?.[0]?.path;
-
-            // Hash password
-            const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-            // Get MemberType
-            const memberType = await MemberType.findById(memberTypeId);
-            if (!memberType) {
-                return res.status(400).json({ status: false, message: "Member type not found." });
-            }
-
-            // Generate membership ID
-            const lastUserOfType = await User.findOne({ membershipID: { $regex: `^${memberType.shortCode}` } }).sort({ createdAt: -1 });
-            let nextNumber = 1;
-            if (lastUserOfType && lastUserOfType.membershipID) {
-                const match = lastUserOfType.membershipID.match(/\d+$/);
-                if (match) nextNumber = parseInt(match[0]) + 1;
-            }
-            const membershipID = `${memberType.shortCode}${String(nextNumber).padStart(3, "0")}`;
-
-            // Create user
-            const newUser = await User.create({
-                firstName,
-                lastName,
-                email,
-                phone,
-                dob,
-                state,
-                lga,
-                address,
-                idType,
-                idNumber,
-                addressProof,
-                passportPhoto,
-                idFile,
-                signature,
-                membershipID,
-                referralCode: membershipID,
-                password: hashedPassword,
-                status: "active",
-                registrationStatus: "paid"
-            });
-
-            // Create user account
-            const account = await Account.create({
-                user: newUser._id,
-                accountType: memberType._id,
-                balance: parseFloat(openingBalance) || 0,
-                monthlyROI: parseFloat(monthlyROI) || 0,  // <-- now uses user input only
-                accumulativeROI: parseFloat(accumulativeROI) || 0
-            });
-
-
-            newUser.account = account._id;
-            await newUser.save();
-
-            res.json({ status: true, message: "Member added successfully.", user: newUser });
-        } catch (err) {
-            console.error("Error adding member:", err);
-            res.status(500).json({ status: false, message: "Error adding member." });
-        }
-    }
-);
-// ENDS 
-
 
 // ========== VERIFY PAYMENT ==========
 router.get("/payment/verify", async (req, res) => {
@@ -438,7 +369,7 @@ router.get("/payment/verify", async (req, res) => {
 
     // Redirect user accordingly
     if (isPaid) {
-      return res.redirect("/club-de-star-cooperative/dashboard?payment=success");
+      return res.redirect("/cds-cooperative/dashboard?payment=success");
     } else {
       return res.redirect("/signup?payment=failed");
     }
@@ -447,6 +378,157 @@ router.get("/payment/verify", async (req, res) => {
     res.redirect("/signup?payment=failed");
   }
 });
+
+
+// MIGRATION 
+router.post(
+  "/add",
+  upload.fields([
+    { name: "addressProof", maxCount: 1 },
+    { name: "passportPhoto", maxCount: 1 },
+    { name: "idFile", maxCount: 1 },
+    { name: "signature", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+
+      const {
+        firstName,
+        lastName,
+        email,
+        phone,
+        dob,
+        state,
+        lga,
+        address,
+        idType,
+        idNumber,
+        password,
+        openingBalance,
+        accumulativeROI,
+        memberTypeId,
+        referralCode // ✅ allow referral input
+      } = req.body;
+
+      const normalizedEmail = email.toLowerCase();
+
+      // ✅ email check
+      if (await User.findOne({ email: normalizedEmail })) {
+        return res.status(400).json({
+          status: false,
+          message: "Email already registered."
+        });
+      }
+
+      // ── files ─────────────────────────
+      const addressProof  = req.files["addressProof"]?.[0]?.path;
+      const passportPhoto = req.files["passportPhoto"]?.[0]?.path;
+      const idFile        = req.files["idFile"]?.[0]?.path;
+      const signature     = req.files["signature"]?.[0]?.path;
+
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // ── member type ───────────────────
+      const memberType = await MemberType.findById(memberTypeId);
+      if (!memberType) {
+        return res.status(400).json({
+          status:false,
+          message:"Member type not found"
+        });
+      }
+
+      // =====================================================
+      // ✅ SAFE MEMBERSHIP ID GENERATION (NO DUPLICATES)
+      // =====================================================
+      const usersOfType = await User.find({
+        membershipID: { $regex: `^${memberType.shortCode}\\d+$` }
+      }).select("membershipID");
+
+      let maxNumber = 0;
+
+      for (const u of usersOfType) {
+        const match = u.membershipID?.match(/\d+$/);
+        if (match) {
+          const num = parseInt(match[0], 10);
+          if (num > maxNumber) maxNumber = num;
+        }
+      }
+
+      const nextNumber = maxNumber + 1;
+
+      const membershipID =
+        `${memberType.shortCode}${String(nextNumber).padStart(4,"0")}`;
+
+      // ── role ──────────────────────────
+      const memberRole = await Role.findOne({ name: "member" });
+
+      // ── create user ───────────────────
+      const newUser = await User.create({
+        firstName,
+        lastName,
+        email: normalizedEmail,
+        phone,
+        dob,
+        state,
+        lga,
+        address,
+        idType,
+        idNumber,
+        addressProof,
+        passportPhoto,
+        idFile,
+        signature,
+        membershipID,
+        referralCode: membershipID, // self referral
+        password: hashedPassword,
+        status: "active",
+        registrationStatus: "paid",
+        role: memberRole?._id
+      });
+
+      // =====================================================
+      // ✅ HANDLE REFERRAL LINKING
+      // =====================================================
+      if (referralCode) {
+        const referringUser = await User.findOne({ referralCode });
+
+        if (referringUser) {
+          referringUser.referredUsers.push(newUser._id);
+          await referringUser.save();
+        }
+      }
+
+      // ── create account ─────────────────
+      const account = await Account.create({
+        user: newUser._id,
+        accountType: memberType._id,
+        balance: Number(openingBalance) || 0,
+        monthlyROI: memberType.interestRate || 0,
+        accumulativeROI: Number(accumulativeROI) || 0
+      });
+
+      newUser.account = account._id;
+      await newUser.save();
+
+      res.json({
+        status: true,
+        message: "Member migrated successfully",
+        membershipID,
+        user: newUser
+      });
+
+    } catch (err) {
+      console.error("Error adding member:", err);
+      res.status(500).json({
+        status:false,
+        message:"Error adding member."
+      });
+    }
+  }
+);
+// ENDS 
+
+
 
 
 router.post("/paystack/webhook", express.json(), async (req, res) => {
@@ -540,7 +622,7 @@ router.post("/login", (req, res, next) => {
       }
 
       // ✅ All users go to the same dashboard
-      return res.redirect("/club-de-star-cooperative/dashboard");
+      return res.redirect("/cds-cooperative/dashboard");
     });
 
   })(req, res, next);
@@ -754,5 +836,84 @@ router.post("/club-de-star-cooperative/updateBankDetails", async (req, res) => {
     }
 });
 
+
+
+
+router.post(
+  "/kyc/submit",
+  upload.fields([
+    { name: "addressProof", maxCount: 1 },
+    { name: "passportPhoto", maxCount: 1 },
+    { name: "idFile", maxCount: 1 },
+    { name: "signature", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ status: false, message: "Not authenticated." });
+    }
+
+    try {
+      const { idType, idNumber } = req.body;
+
+      // Validate required fields
+      if (!idType || !idNumber) {
+        return res.status(400).json({ status: false, message: "ID type and ID number are required." });
+      }
+
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return res.status(404).json({ status: false, message: "User not found." });
+      }
+
+      // Build update object — only overwrite fields if a new file was uploaded
+      const updates = { idType, idNumber };
+
+      if (req.files["addressProof"]?.[0]) {
+        // Optionally delete old file
+        if (user.addressProof) {
+          fs.unlink(path.resolve(user.addressProof), (err) => {
+            if (err) console.warn("Could not delete old addressProof:", err.message);
+          });
+        }
+        updates.addressProof = req.files["addressProof"][0].path;
+      }
+
+      if (req.files["passportPhoto"]?.[0]) {
+        if (user.passportPhoto) {
+          fs.unlink(path.resolve(user.passportPhoto), (err) => {
+            if (err) console.warn("Could not delete old passportPhoto:", err.message);
+          });
+        }
+        updates.passportPhoto = req.files["passportPhoto"][0].path;
+      }
+
+      if (req.files["idFile"]?.[0]) {
+        if (user.idFile) {
+          fs.unlink(path.resolve(user.idFile), (err) => {
+            if (err) console.warn("Could not delete old idFile:", err.message);
+          });
+        }
+        updates.idFile = req.files["idFile"][0].path;
+      }
+
+      if (req.files["signature"]?.[0]) {
+        if (user.signature) {
+          fs.unlink(path.resolve(user.signature), (err) => {
+            if (err) console.warn("Could not delete old signature:", err.message);
+          });
+        }
+        updates.signature = req.files["signature"][0].path;
+      }
+
+      await User.findByIdAndUpdate(req.user._id, updates);
+
+      return res.json({ status: true, message: "KYC documents submitted successfully." });
+
+    } catch (err) {
+      console.error("KYC submission error:", err);
+      return res.status(500).json({ status: false, message: "Server error. Please try again." });
+    }
+  }
+);
 
 module.exports = router;

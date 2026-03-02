@@ -7,9 +7,17 @@ const loanSettingsSchema = new mongoose.Schema({
     trim: true
   },
 
+  // Duration value (e.g., 5)
   duration: {
     type: Number,
     required: true
+  },
+
+  // Duration unit — supports minutes/hours for quick testing
+  durationUnit: {
+    type: String,
+    enum: ["minutes", "hours", "days", "weeks", "months"],
+    default: "months"
   },
 
   // Penalty for late repayment
@@ -27,7 +35,7 @@ const loanSettingsSchema = new mongoose.Schema({
   // Loan eligibility requirement
   eligibilityUnit: {
     type: String,
-    enum: ["daily", "days", "weeks", "months"],
+    enum: ["minutes", "hours", "daily", "days", "weeks", "months"],
     required: true
   },
 

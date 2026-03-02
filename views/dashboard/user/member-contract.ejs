@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Membership Agreement - Club De Stars Cooperative</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ADD THESE 3 LINES after the Tailwind script tag -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <style>
         @media print {
             .no-print { display: none; }
@@ -465,47 +469,26 @@
             </div>
 
         </div>
-        <div class="sidebar-menu">
-            <a href="/club-de-star-cooperative/dashboard">
-                <i class="fas fa-home"></i> Dashboard
-            </a>
-            <a href="/club-de-star-cooperative/transaction">
-                <i class="fas fa-exchange-alt"></i> Transactions
-            </a>
-            <!-- <a href="#" onclick="showSection('savings', event)">
-                <i class="fas fa-piggy-bank"></i> My Savings
-            </a> -->
-            <a href="/club-de-star-cooperative/loan">
-                <i class="fas fa-hand-holding-usd"></i> My Loans
-            </a>
-            <a href="/club-de-star-cooperative/guarantorRequest">
+       <div class="sidebar-menu">
+            <a href="/cds-cooperative/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/cds-cooperative/transaction"><i class="fas fa-exchange-alt"></i> Transactions</a>
+            <a href="/cds-cooperative/loan"><i class="fas fa-hand-holding-usd"></i> My Loans</a>
+            <a href="/cds-cooperative/guarantorRequest">
                 <i class="fas fa-user-friends"></i> Guarantor Requests
-                <% 
-                const pendingCount = user.guarantorRequests
-                    ? user.guarantorRequests.filter(r => r.status === "pending").length
-                    : 0; 
-                %>
-                <% if (pendingCount > 0) { %>
-                    <span class="badge bg-danger ms-2"><%= pendingCount %></span>
+                <% if (pendingGuarantorCount > 0) { %>
+                    <span class="badge bg-danger ms-auto" style="font-size:0.68rem;"><%= pendingGuarantorCount %></span>
                 <% } %>
             </a>
-
-            <a href="/club-de-star-cooperative/roiCalculator">
-                <i class="fas fa-chart-line"></i> ROI Calculator
-            </a>
-            <a href="/club-de-star-cooperative/profile">
-                <i class="fas fa-user-circle"></i> My Profile
-            </a>
-            <a href="/club-de-star-cooperative/referral">
-                <i class="fas fa-users"></i> Referral Program
-            </a>
-            <a href="/club-de-star-cooperative/memberContract" class="active">
-                <i class="fas fa-file-contract"></i> Terms & Conditions
-            </a>
-
-            <a href="/logout" class="mt-3" style="color: rgba(255,255,255,0.6);">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
+            <a href="/manage/kiddies-account"><i class="fas fa-users"></i> Kiddies Account</a>
+            <a href="/cds-cooperative/profile"><i class="fas fa-user-circle"></i> My Profile</a>
+            <a href="/cds-cooperative/kyc"><i class="fas fa-shield-alt"></i> KYC Verification</a>
+            <a href="/cds-cooperative/referral"><i class="fas fa-user-plus"></i> Referral Program</a>
+            <a href="/cds-cooperative/memberContract" class="active"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
+            <a href="/cds-cooperative/report"><i class="fas fa-chart-line"></i> Reports</a>
+            <% if (user.role && user.role.name !== 'member') { %>
+            <a href="/admin-dashboard"><i class="fas fa-tachometer-alt"></i> Administration</a>
+            <% } %>
+            <a href="/logout" style="color:rgba(255,255,255,0.52);margin-top:4px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </div>
 

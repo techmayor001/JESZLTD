@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club De Stars – Finance Ledger Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 11px;
+            color: #1a202c;
+            background: #fff;
+            padding: 20px 24px;
+        }
+
+        /* ── Header ── */
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 3px solid #1e3a8a;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .org-name { font-size: 20px; font-weight: 800; color: #1e3a8a; letter-spacing: -.3px; }
+        .org-sub  { font-size: 10px; color: #64748b; margin-top: 2px; }
+        .report-title { text-align: right; }
+        .report-title h2 { font-size: 14px; font-weight: 700; color: #1e3a8a; }
+        .report-title p  { font-size: 10px; color: #64748b; margin-top: 3px; }
+
+        /* ── Summary boxes ── */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .summary-box {
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            padding: 8px 10px;
+            background: #f8faff;
+        }
+        .summary-box .s-label { font-size: 9px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
+        .summary-box .s-val   { font-size: 13px; font-weight: 800; }
+        .s-val.in    { color: #059669; }
+        .s-val.out   { color: #dc2626; }
+        .s-val.net   { color: #1e3a8a; }
+        .s-val.open  { color: #475569; }
+        .s-val.close { color: #1e3a8a; }
+
+        /* ── Filter info ── */
+        .filter-info {
+            font-size: 9.5px;
+            color: #64748b;
+            margin-bottom: 12px;
+            padding: 6px 10px;
+            background: #f1f5f9;
+            border-radius: 5px;
+            border-left: 3px solid #1e3a8a;
+        }
+
+        /* ── Table ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+        thead th {
+            background: #1e3a8a;
+            color: #fff;
+            font-weight: 700;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            padding: 7px 8px;
+            white-space: nowrap;
+        }
+        tbody td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        tbody tr:nth-child(even) td { background: #f8faff; }
+        tbody tr:last-child td     { border-bottom: 2px solid #e2e8f0; }
+
+        .chip {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 8.5px;
+            font-weight: 700;
+            text-transform: capitalize;
+            white-space: nowrap;
+        }
+        .chip-deposit          { background:#dbeafe;color:#1e40af; }
+        .chip-withdrawal       { background:#fee2e2;color:#991b1b; }
+        .chip-loan_disbursement{ background:#fef3c7;color:#92400e; }
+        .chip-loan_repayment   { background:#d1fae5;color:#065f46; }
+        .chip-registration_fee { background:#ede9fe;color:#5b21b6; }
+        .chip-penalty_income   { background:#fce7f3;color:#9d174d; }
+        .chip-rollover_income  { background:#e0f2fe;color:#0369a1; }
+        .chip-manual_credit    { background:#d1fae5;color:#065f46; }
+        .chip-manual_debit     { background:#fee2e2;color:#991b1b; }
+        .chip-external_income  { background:#f3e8ff;color:#6b21a8; }
+
+        .amt-in  { color:#059669;font-weight:700; }
+        .amt-out { color:#dc2626;font-weight:700; }
+        .bal-col { color:#1e3a8a;font-weight:600; }
+
+        /* ── Footer ── */
+        .report-footer {
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 10px;
+            font-size: 9px;
+            color: #94a3b8;
+        }
+        .closing-box {
+            background: #eff6ff;
+            border: 2px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 8px 16px;
+            text-align: center;
+        }
+        .closing-box .c-label { font-size: 9px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+        .closing-box .c-val   { font-size: 16px; font-weight: 800; color: #1e3a8a; }
+
+        /* ── Print styles ── */
+        @media print {
+            body { padding: 0; }
+            @page { margin: 12mm 10mm; size: A4 landscape; }
+            .no-print { display: none !important; }
+        }
+
+        /* ── Print button (only visible on screen) ── */
+        .print-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding: 10px 12px;
+            background: #1e3a8a;
+            border-radius: 8px;
+            align-items: center;
+        }
+        .print-bar span { color: #fff; font-size: 11px; font-weight: 600; flex-grow: 1; }
+        .print-btn {
+            background: #fff;
+            color: #1e3a8a;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .close-btn {
+            background: rgba(255,255,255,.15);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,.3);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        @media print { .print-bar { display: none; } }
+    </style>
+</head>
+<body>
+
+    <!-- Print bar (screen only) -->
+    <div class="print-bar no-print">
+        <span>📄 Finance Ledger Report — Ready to print or save as PDF</span>
+        <button class="close-btn" onclick="window.close()">✕ Close</button>
+        <button class="print-btn" onclick="window.print()">🖨 Print / Save PDF</button>
+    </div>
+
+    <!-- Report Header -->
+    <div class="report-header">
+        <div>
+            <div class="org-name">Club De Stars</div>
+            <div class="org-sub">Company Finance Ledger Report &nbsp;•&nbsp; Powered by JESZ LIMITED</div>
+        </div>
+        <div class="report-title">
+            <h2>Finance Ledger Statement</h2>
+            <p>
+                <% if(filterFrom || filterTo) { %>
+                    Period: <%= filterFrom || 'All time' %> to <%= filterTo || 'Today' %>
+                <% } else { %>
+                    Period: All Time
+                <% } %>
+                <% if(filterType) { %> &nbsp;|&nbsp; Type: <%= filterType.replace(/_/g,' ') %><% } %>
+                <% if(filterDirection) { %> &nbsp;|&nbsp; Direction: <%= filterDirection.toUpperCase() %><% } %>
+            </p>
+            <p style="margin-top:2px;">Generated: <%= generatedAt %> &nbsp;|&nbsp; By: <%= adminName %></p>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-grid">
+        <div class="summary-box">
+            <div class="s-label">Opening Balance</div>
+            <div class="s-val open">₦<%= openingBalance.toLocaleString() %></div>
+        </div>
+        <div class="summary-box">
+            <div class="s-label">Money In</div>
+            <div class="s-val in">₦<%= periodIn.toLocaleString() %></div>
+        </div>
+        <div class="summary-box">
+            <div class="s-label">Money Out</div>
+            <div class="s-val out">₦<%= periodOut.toLocaleString() %></div>
+        </div>
+        <div class="summary-box">
+            <div class="s-label">Period Net</div>
+            <div class="s-val net"><%= periodNet>=0?'+':'' %>₦<%= periodNet.toLocaleString() %></div>
+        </div>
+        <div class="summary-box" style="background:#eff6ff;border-color:#bfdbfe;">
+            <div class="s-label">Closing Balance</div>
+            <div class="s-val close">₦<%= closingBalance.toLocaleString() %></div>
+        </div>
+    </div>
+
+    <!-- Filter line -->
+    <div class="filter-info">
+        <strong>Filters applied:</strong>
+        Type: <%= filterType || 'All' %> &nbsp;|&nbsp;
+        Direction: <%= filterDirection || 'All' %> &nbsp;|&nbsp;
+        From: <%= filterFrom || '—' %> &nbsp;|&nbsp;
+        To: <%= filterTo || '—' %> &nbsp;|&nbsp;
+        Total entries: <%= entries.length %>
+    </div>
+
+    <!-- Ledger Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Date & Time</th>
+                <th>Type</th>
+                <th>Dir</th>
+                <th>Amount (₦)</th>
+                <th>Balance After (₦)</th>
+                <th>Member</th>
+                <th>Membership ID</th>
+                <th>Description</th>
+                <th>Recorded By</th>
+            </tr>
+        </thead>
+        <tbody>
+        <% if(entries.length === 0) { %>
+            <tr>
+                <td colspan="10" style="text-align:center;padding:20px;color:#94a3b8;">
+                    No entries found for the selected filters.
+                </td>
+            </tr>
+        <% } else { %>
+        <% entries.forEach((e, i) => { %>
+            <tr>
+                <td style="color:#94a3b8;"><%= i+1 %></td>
+                <td style="white-space:nowrap;">
+                    <%= new Date(e.createdAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'}) %>
+                    <span style="color:#94a3b8;display:block;">
+                        <%= new Date(e.createdAt).toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'}) %>
+                    </span>
+                </td>
+                <td>
+                    <span class="chip chip-<%= e.type %>"><%= e.type.replace(/_/g,' ') %></span>
+                </td>
+                <td>
+                    <% if(e.direction==='in') { %>
+                        <span style="color:#059669;font-weight:700;">▲ IN</span>
+                    <% } else { %>
+                        <span style="color:#dc2626;font-weight:700;">▼ OUT</span>
+                    <% } %>
+                </td>
+                <td class="<%= e.direction==='in'?'amt-in':'amt-out' %>" style="white-space:nowrap;">
+                    <%= e.direction==='in'?'+':'-' %>₦<%= e.amount.toLocaleString() %>
+                </td>
+                <td class="bal-col" style="white-space:nowrap;">₦<%= e.runningBalance.toLocaleString() %></td>
+                <td>
+                    <% if(e.relatedUser) { %>
+                        <%= e.relatedUser.firstName %> <%= e.relatedUser.lastName %>
+                    <% } else { %>—<% } %>
+                </td>
+                <td>
+                    <%= e.relatedUser?.membershipID || '—' %>
+                </td>
+                <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                    title="<%= e.description %>">
+                    <%= e.description ? e.description.substring(0,55)+(e.description.length>55?'…':'') : '—' %>
+                </td>
+                <td style="white-space:nowrap;">
+                    <% if(e.recordedBy) { %>
+                        <%= e.recordedBy.fullName || ((e.recordedBy.firstName||'') + ' ' + (e.recordedBy.lastName||'')).trim() %>
+                    <% } else { %>System<% } %>
+                </td>
+            </tr>
+        <% }) %>
+        <% } %>
+        </tbody>
+    </table>
+
+    <!-- Footer -->
+    <div class="report-footer">
+        <div>
+            <div>Club De Stars Cooperative &nbsp;•&nbsp; Powered by JESZ LIMITED</div>
+            <div style="margin-top:3px;">This is a computer-generated document. No signature required.</div>
+        </div>
+        <div class="closing-box">
+            <div class="c-label">
+                <% if(filterFrom||filterTo) { %>Closing Balance<% } else { %>Current Balance<% } %>
+            </div>
+            <div class="c-val">₦<%= closingBalance.toLocaleString() %></div>
+        </div>
+    </div>
+
+</body>
+</html>
