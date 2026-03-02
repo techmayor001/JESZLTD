@@ -37,7 +37,7 @@ const LoanInvite = require("../models/LoanInvite");
 
 const KiddiesAccount = require('../models/Kiddies/kiddiesAccount');
 const KiddiesTransaction = require('../models/Kiddies/kiddiesTransaction');
-const KiddiesPayment = require('../models/Kiddies/kiddiesPayment');
+const KiddiesPayment = require("../models/Kiddies/KiddiesPayment");
 
 
 // HANDLING APPROVAL OF ACCESS TO ADMIN DASHBOARD - MIDDLEWARE ------------- TECHMAYOR COMPANY LIMITED 
