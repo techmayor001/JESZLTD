@@ -2366,7 +2366,9 @@ router.get("/admin/manage-extra-charges", ensureAdmin("view_extracharges"), asyn
 
 
 
-// LOAN MANAGEMENT 
+// LOAN MANAGEMENT
+// Route order matters in Express — specific paths MUST come before parameterized ones (:loanId)
+
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /admin/external-loans
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2401,38 +2403,6 @@ router.get("/admin/external-loans", ensureAdmin("view_external_loans"), async (r
     res.status(500).send("Internal Server Error");
   }
 });
-
-// ─────────────────────────────────────────────────────────────────────────────
-// GET /admin/external-loans/:loanId/details
-// Fetch a single external loan for the details modal (includes payment history)
-// ─────────────────────────────────────────────────────────────────────────────
-router.get(
-  "/admin/external-loans/:loanId/details",
-  ensureAdmin("view_external_loans"),
-  async (req, res) => {
-    try {
-      const loan = await Loan.findById(req.params.loanId)
-        .populate({ path: "guarantors.guarantor", select: "firstName lastName membershipID email phone" })
-        .populate({ path: "initiatedBy", select: "fullName email" });
-
-      if (!loan || !loan.external) {
-        return res.status(404).json({ error: "External loan not found." });
-      }
-
-      // Fetch payment history for this loan
-      const paymentHistory = await Payment.find({ loan: loan._id })
-        .sort({ createdAt: -1 })
-        .limit(20)
-        .populate("paidBy", "fullName email")
-        .select("amount reference status type createdAt payeeName paidBy");
-
-      res.json({ ...loan.toObject(), paymentHistory });
-    } catch (err) {
-      console.error("Error fetching loan details:", err);
-      res.status(500).json({ error: "Failed to load loan details." });
-    }
-  }
-);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /admin/external-loans
@@ -2496,7 +2466,40 @@ router.post("/admin/external-loans", ensureAdmin("issue_external_loans"), async 
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// POST /admin/external-loans/invite
+// GET /admin/external-loans/invites  ← MUST be before /:loanId/details
+// List all invite links for the admin panel table
+// ─────────────────────────────────────────────────────────────────────────────
+router.get(
+  "/admin/external-loans/invites",
+  ensureAdmin("issue_external_loans"),
+  async (req, res) => {
+    try {
+      const invites = await LoanInvite.find()
+        .populate("generatedBy", "fullName email")
+        .populate("loan", "amount status createdAt")
+        .sort({ createdAt: -1 });
+
+      const now = new Date();
+      const enriched = invites.map((inv) => {
+        const obj = inv.toObject();
+        // Include the full shareable link so the frontend copy button works
+        obj.link = `${process.env.BASE_URL}/apply/external-loan/${inv.token}`;
+        // Compute real status (active invites past expiry surface as 'expired')
+        obj.computedStatus =
+          inv.status === "active" && now > inv.expiresAt ? "expired" : inv.status;
+        return obj;
+      });
+
+      res.json({ invites: enriched });
+    } catch (err) {
+      console.error("Error fetching invites:", err);
+      res.status(500).json({ error: "Failed to fetch invites." });
+    }
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /admin/external-loans/invite  ← MUST be before /:loanId/details
 // Generate a secure one-time application link.
 // Supports optional preset loan terms + penalty/rollover percentages.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2539,40 +2542,7 @@ router.post(
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GET /admin/external-loans/invites
-// List all invite links for the admin panel table
-// ─────────────────────────────────────────────────────────────────────────────
-router.get(
-  "/admin/external-loans/invites",
-  ensureAdmin("issue_external_loans"),
-  async (req, res) => {
-    try {
-      const invites = await LoanInvite.find()
-        .populate("generatedBy", "fullName email")
-        .populate("loan", "amount status createdAt")
-        .sort({ createdAt: -1 });
-
-      const now = new Date();
-      const enriched = invites.map((inv) => {
-        const obj = inv.toObject();
-        // Include the full shareable link so the frontend copy button works
-        obj.link = `${process.env.BASE_URL}/apply/external-loan/${inv.token}`;
-        // Compute real status (active invites past expiry surface as 'expired')
-        obj.computedStatus =
-          inv.status === "active" && now > inv.expiresAt ? "expired" : inv.status;
-        return obj;
-      });
-
-      res.json({ invites: enriched });
-    } catch (err) {
-      console.error("Error fetching invites:", err);
-      res.status(500).json({ error: "Failed to fetch invites." });
-    }
-  }
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DELETE /admin/external-loans/invite/:token
+// DELETE /admin/external-loans/invite/:token  ← MUST be before /:loanId/details
 //   ?permanent=true  →  hard-delete (only for non-active invites)
 //   (no param)        →  soft-revoke (marks as 'revoked')
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2610,6 +2580,38 @@ router.delete(
     } catch (err) {
       console.error("Error with invite deletion/revocation:", err);
       res.status(500).json({ error: "Failed to process request." });
+    }
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /admin/external-loans/:loanId/details  ← parameterized route LAST
+// Fetch a single external loan for the details modal (includes payment history)
+// ─────────────────────────────────────────────────────────────────────────────
+router.get(
+  "/admin/external-loans/:loanId/details",
+  ensureAdmin("view_external_loans"),
+  async (req, res) => {
+    try {
+      const loan = await Loan.findById(req.params.loanId)
+        .populate({ path: "guarantors.guarantor", select: "firstName lastName membershipID email phone" })
+        .populate({ path: "initiatedBy", select: "fullName email" });
+
+      if (!loan || !loan.external) {
+        return res.status(404).json({ error: "External loan not found." });
+      }
+
+      // Fetch payment history for this loan
+      const paymentHistory = await Payment.find({ loan: loan._id })
+        .sort({ createdAt: -1 })
+        .limit(20)
+        .populate("paidBy", "fullName email")
+        .select("amount reference status type createdAt payeeName paidBy");
+
+      res.json({ ...loan.toObject(), paymentHistory });
+    } catch (err) {
+      console.error("Error fetching loan details:", err);
+      res.status(500).json({ error: "Failed to load loan details." });
     }
   }
 );
@@ -2743,7 +2745,6 @@ router.post("/apply/external-loan/:token", async (req, res) => {
     res.status(500).json({ error: "Failed to submit application. Please try again." });
   }
 });
-
 
 
 
