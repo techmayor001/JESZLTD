@@ -1702,19 +1702,6 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
         ? `${payment.user.firstName} ${payment.user.lastName}`
         : "N/A";
 
-      // ── Detect manual payments ──────────────────────────────────────────
-      // All manual references start with one of these prefixes.
-      // Paystack references are everything else (random alphanumeric strings).
-      //
-      // Prefix inventory:
-      //   COOP-          → manual savings deposit
-      //   LOAN-MANUAL-   → member manual loan repayment
-      //   LOAN-INT-      → rollover interest payment  ← was missing, causing /100 bug
-      //   EXT-LOAN-      → external loan repayment recorded by admin
-      //
-      // If the Payment schema has a `method` field, prefer that as the
-      // ground truth and only fall back to the prefix check for old records
-      // that predate the schema change.
       const MANUAL_PREFIXES = [
         "COOP-",
         "LOAN-MANUAL-",
@@ -1905,15 +1892,26 @@ router.post(
         const loanPortion    = Math.min(amount, loan.totalRepay);
         const penaltyPortion = parseFloat((amount - loanPortion).toFixed(2));
 
-        // ── 2c. Update loan balances ───────────────────────────────────────
+        // ── 2c. Overpayment detection ──────────────────────────────────────
+        //    If amount > totalRepay, the surplus goes back into the member's
+        //    savings account (only applies to member loans, not external ones).
+        //
+        //   Example: totalRepay = 5000, amount paid = 6000
+        //     loanPortion  = 5000   (clears the loan)
+        //     overpayment  = 1000   (credited to savings)
+        //
+        const overpayment    = parseFloat((amount - loan.totalRepay).toFixed(2));
+        const hasOverpayment = overpayment > 0 && !isExternalLoan && payment.user?.account;
+
+        // ── 2d. Update loan balances ───────────────────────────────────────
         loan.totalRepay         = parseFloat((loan.totalRepay - loanPortion).toFixed(2));
         loan.outstandingBalance = parseFloat(
-          Math.max((loan.outstandingBalance || 0) - amount, 0).toFixed(2)
+          Math.max((loan.outstandingBalance || 0) - loanPortion, 0).toFixed(2)
         );
         // track total paid for reporting
-        loan.paidAmount = parseFloat(((loan.paidAmount || 0) + amount).toFixed(2));
+        loan.paidAmount = parseFloat(((loan.paidAmount || 0) + loanPortion).toFixed(2));
 
-        // ── 2d. Transaction record ─────────────────────────────────────────
+        // ── 2e. Transaction record ─────────────────────────────────────────
         const txDescription = isExternalLoan
           ? `External loan repayment approved (${payment.reference}) – ${loan.external.borrowerName}`
           : `Manual loan repayment approved (${payment.reference})`;
@@ -1928,7 +1926,7 @@ router.post(
           status:      "successful"
         });
 
-        // ── 2e. Company Ledger — principal repayment ──────────────────────
+        // ── 2f. Company Ledger — principal repayment ──────────────────────
         //    Guard against duplicate entries (idempotency)
         const existingLedger = await CompanyLedger.findOne({
           "meta.reference": payment.reference,
@@ -1954,7 +1952,7 @@ router.post(
           });
         }
 
-        // ── 2f. Penalty income ledger (if penalty portion exists) ──────────
+        // ── 2g. Penalty income ledger (if penalty portion exists) ──────────
         //    Fall back to loan.totalPenalty when the split yields 0
         //    (e.g. totalRepay already includes penalty baked in)
         const penaltyProfit = penaltyPortion > 0
@@ -1997,7 +1995,7 @@ router.post(
           }
         }
 
-        // ── 2g. Fully settled — mark paid (do NOT delete) ────────────────
+        // ── 2h. Fully settled — mark paid (do NOT delete) ────────────────
         if (loan.totalRepay === 0) {
           loan.status = "paid";
           loan.paidAt = new Date();
@@ -2015,6 +2013,63 @@ router.post(
         }
 
         await loan.save(); // single save — covers both partial and full settlement
+
+        // ── 2i. Overpayment — credit surplus to member's savings account ──
+        //    Runs AFTER loan.save() so loan state is already committed.
+        //    External loans are excluded (no linked savings account).
+        if (hasOverpayment) {
+          const account = await Account.findByIdAndUpdate(
+            payment.user.account._id,
+            { $inc: { balance: overpayment } },
+            { new: true }
+          );
+
+          const balanceBefore = account.balance - overpayment;
+          const balanceAfter  = account.balance;
+
+          // Deposit report so the member can see the credit in their statement
+          await DepositReport.create({
+            member:          payment.user._id,
+            account:         account._id,
+            amount:          overpayment,
+            type:            "bank_transfer",
+            reference:       payment.reference,
+            description:     `Loan overpayment refund – surplus from loan repayment (${payment.reference})`,
+            status:          "approved",
+            balanceBefore,
+            balanceAfter,
+            processedBy:     req.user._id,
+            processedByRole: req.user.role?.name || "admin",
+            processedAt:     new Date(),
+            notes:           `Overpayment of ₦${overpayment.toLocaleString()} credited after loan settlement`
+          });
+
+          // Transaction visible to member
+          await Transaction.create({
+            user:        payment.user._id,
+            type:        "deposit",
+            amount:      overpayment,
+            description: `Loan overpayment refund (${payment.reference})`,
+            reference:   `${payment.reference}-overpay`,
+            method:      "system",
+            status:      "successful"
+          });
+
+          // Ledger — record outflow from loan repayment pool back to member
+          await CompanyLedger.create({
+            type:        "overpayment_refund",
+            direction:   "out",
+            amount:      overpayment,
+            relatedUser: payment.user._id,
+            relatedLoan: loan._id,
+            description: `Overpayment surplus credited to member savings (${payment.reference})`,
+            recordedBy:  req.user._id,
+            meta: {
+              reference:  payment.reference,
+              notes:      `Paid ₦${amount.toLocaleString()}, loan required ₦${loanPortion.toLocaleString()}`
+            }
+          });
+        }
       }
 
       // ═══════════════════════════════════════════════════════════════════════
@@ -2096,7 +2151,10 @@ router.post(
         message:    isLoanPayment
           ? "Loan payment approved and applied"
           : "Deposit approved successfully",
-        newBalance: payment.user?.account?.balance || 0
+        newBalance: payment.user?.account?.balance || 0,
+        ...(isLoanPayment && overpayment > 0 && !isExternalLoan && {
+          overpaymentCredited: overpayment
+        })
       });
 
     } catch (error) {

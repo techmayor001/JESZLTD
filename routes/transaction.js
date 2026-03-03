@@ -404,6 +404,7 @@ router.get("/loan/verify", async (req, res) => {
   }
 });
 
+
 router.post("/loan/payment/manual", async (req, res) => {
   try {
     if (!req.isAuthenticated()) {
