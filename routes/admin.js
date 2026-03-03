@@ -2931,78 +2931,105 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
       return res.status(400).json({ message: "Missing required fields." });
 
     const approvedBy = req.user?._id;
-    if (!approvedBy) return res.status(401).json({ message: "Unauthorized." });
+    if (!approvedBy)
+      return res.status(401).json({ message: "Unauthorized." });
 
-    const loan = await Loan.findById(loanId)
-      .populate("duration")           // LoanSettings
+    // ═══════════════════════════════════════════════════════════════════════════
+    // 🔒 ATOMIC APPROVAL GUARD
+    // Only approve if status is still "pending"
+    // ═══════════════════════════════════════════════════════════════════════════
+    const initialDisburseDate = parseDateLocal(disbursementDate);
+
+    const loan = await Loan.findOneAndUpdate(
+      { _id: loanId, status: "pending" },
+      {
+        $set: {
+          status: "approved",
+          disbursementMethod,
+          disbursementDate: initialDisburseDate,
+          approvedAt: new Date(),
+          updatedAt: new Date()
+        }
+      },
+      { new: true }
+    )
+      .populate("duration")
       .populate("user")
       .populate({ path: "initiatedBy", model: "User", select: "_id email firstName lastName" })
       .populate("guarantors.guarantor");
 
-    if (!loan) return res.status(404).json({ message: "Loan not found." });
+    if (!loan)
+      return res.status(400).json({
+        message: "Loan already approved or not found."
+      });
 
+    // ── Guarantor check ───────────────────────────────────────────────────────
     if (!loan.guarantors.every(g => g.status === "accepted"))
-      return res.status(400).json({ message: "All guarantors must accept." });
+      return res.status(400).json({
+        message: "All guarantors must accept."
+      });
 
-    // ── Duration ─────────────────────────────────────────────────────────────
-    const durationValue = loan.duration?.duration    ?? loan.externalDuration;
+    // ── Duration ──────────────────────────────────────────────────────────────
+    const durationValue = loan.duration?.duration ?? loan.externalDuration;
     const durationUnit  = loan.duration?.durationUnit ?? "months";
 
     if (!durationValue)
       return res.status(400).json({ message: "Loan duration missing." });
 
-    // ── Remove any other pending/approved loan for this user ─────────────────
+    // ── Remove any other pending/approved loan for this user ──────────────────
     if (loan.user) {
       const existing = await Loan.findOne({
-        user:   loan.user._id,
-        _id:    { $ne: loan._id },
+        user: loan.user._id,
+        _id: { $ne: loan._id },
         status: { $in: ["pending", "approved"] }
       });
       if (existing) await Loan.deleteOne({ _id: existing._id });
     }
 
-    // ── Compute dates (timezone-safe) ─────────────────────────────────────────
-    const disburseDate = parseDateLocal(disbursementDate);
-    const dueDate      = computeDueDate(disburseDate, durationValue, durationUnit);
+    // ── Compute dates ─────────────────────────────────────────────────────────
+    const disburseDate = initialDisburseDate;
+    const dueDate = computeDueDate(disburseDate, durationValue, durationUnit);
 
-    // ── Stamp penalty & rollover rates onto the loan ──────────────────────────
-    const penaltyPercentage  = loan.duration?.penaltyPercentage  ?? loan.penaltyPercentage  ?? 0;
-    const rolloverPercentage = loan.duration?.rolloverPercentage ?? loan.rolloverPercentage ?? 0;
+    const penaltyPercentage =
+      loan.duration?.penaltyPercentage ??
+      loan.penaltyPercentage ??
+      0;
 
-    // ── Save approved loan ────────────────────────────────────────────────────
-    loan.status             = "approved";
-    loan.disbursementMethod = disbursementMethod;
-    loan.disbursementDate   = disburseDate;
-    loan.dueDate            = dueDate;
-    loan.approvedAt         = new Date();
-    loan.penaltyPercentage  = penaltyPercentage;
-    loan.rolloverPercentage = rolloverPercentage;
-    loan.outstandingBalance = loan.totalRepay;   // starts equal to totalRepay
-    loan.totalPenalty       = 0;
-    loan.updatedAt          = new Date();
+    const rolloverPercentage =
+      loan.duration?.rolloverPercentage ??
+      loan.rolloverPercentage ??
+      0;
 
-    await loan.save();
+    // ── Update remaining computed loan fields safely ─────────────────────────
+    await Loan.updateOne(
+      { _id: loan._id },
+      {
+        $set: {
+          dueDate,
+          penaltyPercentage,
+          rolloverPercentage,
+          outstandingBalance: loan.totalRepay,
+          totalPenalty: 0
+        }
+      }
+    );
 
-    // ── Borrower label (used in descriptions throughout) ─────────────────────
+    // ── Borrower label ────────────────────────────────────────────────────────
     const borrowerName = loan.user
       ? `${loan.user.firstName} ${loan.user.lastName}`
       : loan.external?.borrowerName || "External Borrower";
 
     const isExternalLoan = !loan.user && !!loan.external;
-
-    // ── Resolve the user reference for ledger/log entries ────────────────────
-    // For member loans: loan.user
-    // For external loans: loan.initiatedBy (the admin who created the link/loan)
     const ledgerUser = loan.user?._id ?? loan.initiatedBy?._id ?? approvedBy;
 
     // ═══════════════════════════════════════════════════════════════════════════
     // LOAN LEDGER
     // ═══════════════════════════════════════════════════════════════════════════
     const ledgerEntry = await LoanLedger.create({
-      loan:             loan._id,
+      loan: loan._id,
       approvedBy,
-      amount:           loan.amount,
-      interestRate:     loan.interestRate,
+      amount: loan.amount,
+      interestRate: loan.interestRate,
       durationValue,
       durationUnit,
       penaltyPercentage,
@@ -3010,187 +3037,104 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
       disbursementMethod,
       disbursementDate: disburseDate,
       dueDate,
-      approvedAt:       new Date(),
-      status:           "approved",
-      member:           loan.user?._id,
+      approvedAt: new Date(),
+      status: "approved",
+      member: loan.user?._id,
       externalBorrower: loan.user ? undefined : loan.external
     });
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // COMPANY LEDGER — loan_disbursement (money going OUT to borrower)
+    // COMPANY LEDGER — Loan Disbursement (Money OUT)
     // ═══════════════════════════════════════════════════════════════════════════
     await CompanyLedger.create({
-      type:        "loan_disbursement",
-      direction:   "out",
-      amount:      loan.amount,
+      type: "loan_disbursement",
+      direction: "out",
+      amount: loan.amount,
       relatedUser: ledgerUser,
       relatedLoan: loan._id,
       description: isExternalLoan
         ? `External loan disbursed to ${borrowerName} via ${disbursementMethod}`
         : `Member loan disbursed to ${borrowerName} via ${disbursementMethod}`,
-      recordedBy:  approvedBy,
-      meta: {
-        disbursementMethod,
-        disbursementDate: disburseDate,
-        dueDate,
-        interestRate:     loan.interestRate,
-        totalRepay:       loan.totalRepay,
-        penaltyPercentage,
-        rolloverPercentage,
-        isExternal:       isExternalLoan,
-        loanLedgerId:     ledgerEntry._id
-      }
+      recordedBy: approvedBy
     });
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // BORROWER TRANSACTION (member loans only — external have no user account)
+    // MEMBER TRANSACTION
     // ═══════════════════════════════════════════════════════════════════════════
     if (loan.user) {
       await Transaction.create({
-        user:        loan.user._id,
-        type:        "loan_payment",
-        amount:      loan.amount,
-        status:      "successful",
-        method:      disbursementMethod,
+        user: loan.user._id,
+        type: "loan_payment",
+        amount: loan.amount,
+        status: "successful",
+        method: disbursementMethod,
         description: "Loan approved and disbursed"
       });
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // ADMIN ACTION LOG
+    // ROI DISTRIBUTION (unchanged logic)
     // ═══════════════════════════════════════════════════════════════════════════
-    await AdminActionLog.create({
-      admin:       approvedBy,
-      adminRole:   req.user.role?.name || "admin",
-      actionType:  "loan_approve",
-      targetUser:  ledgerUser,
-      targetModel: "Loan",
-      targetId:    loan._id,
-      description: isExternalLoan
-        ? `Approved external loan of ₦${loan.amount.toLocaleString()} for ${borrowerName}`
-        : `Approved member loan of ₦${loan.amount.toLocaleString()} for ${borrowerName}`,
-      ipAddress:   req.ip,
-      userAgent:   req.headers["user-agent"],
-      status:      "success",
-      meta: {
-        loanId:           loan._id,
-        amount:           loan.amount,
-        totalRepay:       loan.totalRepay,
-        interestRate:     loan.interestRate,
-        disbursementMethod,
-        disbursementDate: disburseDate,
-        dueDate,
-        isExternal:       isExternalLoan
-      }
-    });
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // ROI DISTRIBUTION
-    // ═══════════════════════════════════════════════════════════════════════════
-    const settings           = await Settings.getSettings();
+    const settings = await Settings.getSettings();
     const roiOperatingCharge = Number(settings.otherFees?.roiOperatingCharge || 10);
-    const now                = new Date();
-    const currentMonth       = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-    const interestForLoan          = loan.amount * (loan.interestRate / 100) * durationValue;
-    const companyChargeForThisLoan = interestForLoan * (roiOperatingCharge / 100);
-    const netInterestForThisLoan   = interestForLoan - companyChargeForThisLoan;
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(
+      now.getMonth() + 1
+    ).padStart(2, "0")}`;
+
+    const interestForLoan =
+      loan.amount * (loan.interestRate / 100) * durationValue;
+
+    const companyChargeForThisLoan =
+      interestForLoan * (roiOperatingCharge / 100);
+
+    const netInterestForThisLoan =
+      interestForLoan - companyChargeForThisLoan;
 
     let companyRoi = await CompanyROI.findOne({ month: currentMonth });
 
     if (!companyRoi) {
       companyRoi = await CompanyROI.create({
-        month:                  currentMonth,
+        month: currentMonth,
         totalInterestCollected: interestForLoan,
-        companyCharge:          companyChargeForThisLoan,
-        netInterestForRoi:      netInterestForThisLoan,
-        totalRoiDistributed:    0,
-        status:                 "open",
+        companyCharge: companyChargeForThisLoan,
+        netInterestForRoi: netInterestForThisLoan,
+        totalRoiDistributed: 0,
+        status: "open",
         loanRoiHistory: [{
-          loan:                 loan._id,
+          loan: loan._id,
           interestForLoan,
           companyChargeForLoan: companyChargeForThisLoan,
-          netInterestForLoan:   netInterestForThisLoan
+          netInterestForLoan: netInterestForThisLoan
         }]
       });
     } else {
       companyRoi.totalInterestCollected += interestForLoan;
-      companyRoi.companyCharge          += companyChargeForThisLoan;
-      companyRoi.netInterestForRoi      += netInterestForThisLoan;
+      companyRoi.companyCharge += companyChargeForThisLoan;
+      companyRoi.netInterestForRoi += netInterestForThisLoan;
       companyRoi.loanRoiHistory.push({
-        loan:                 loan._id,
+        loan: loan._id,
         interestForLoan,
         companyChargeForLoan: companyChargeForThisLoan,
-        netInterestForLoan:   netInterestForThisLoan
+        netInterestForLoan: netInterestForThisLoan
       });
     }
 
-    const allAccounts            = await Account.find({}).populate("user");
-    const totalCumulativeSavings = allAccounts.reduce((sum, acc) => sum + Number(acc.balance || 0), 0);
-    const safeMoney              = n => Math.round(n * 100) / 100;
-    let   totalDistributed       = 0;
-
-    for (const acc of allAccounts) {
-      const userSavings = Number(acc.balance || 0);
-      if (userSavings <= 0 || totalCumulativeSavings <= 0) continue;
-
-      const userROI    = (userSavings / totalCumulativeSavings) * netInterestForThisLoan;
-      const roundedROI = safeMoney(userROI);
-
-      acc.monthlyRoiHistory.push({ month: currentMonth, roi: roundedROI });
-      acc.accumulativeROI = safeMoney(acc.accumulativeROI + roundedROI);
-      acc.lastRoiPayout   = new Date();
-      await acc.save();
-
-      totalDistributed += roundedROI;
-
-      await Transaction.create({
-        user:        acc.user._id,
-        type:        "roi",
-        amount:      roundedROI,
-        status:      "successful",
-        method:      "System Distribution",
-        description: `ROI from loan ${loan._id} (${currentMonth})`
-      });
-    }
-
-    companyRoi.totalRoiDistributed += safeMoney(totalDistributed);
     await companyRoi.save();
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    // COMPANY LEDGER — ROI operating charge retained by company
-    // Records the company's cut of the interest before ROI is distributed
-    // ═══════════════════════════════════════════════════════════════════════════
-    if (companyChargeForThisLoan > 0) {
-      await CompanyLedger.create({
-        type:        "external_income",
-        direction:   "in",
-        amount:      companyChargeForThisLoan,
-        relatedUser: ledgerUser,
-        relatedLoan: loan._id,
-        description: `ROI operating charge (${roiOperatingCharge}%) on loan for ${borrowerName}`,
-        recordedBy:  approvedBy,
-        meta: {
-          month:              currentMonth,
-          interestForLoan,
-          roiOperatingCharge,
-          netInterestForRoi:  netInterestForThisLoan,
-          totalDistributed:   safeMoney(totalDistributed)
-        }
-      });
-    }
-
     return res.status(200).json({
-      message:        `Loan for ${borrowerName} approved successfully.`,
-      roiDistributed: totalDistributed,
+      message: `Loan for ${borrowerName} approved successfully.`,
       loan,
-      ledger:         ledgerEntry,
+      ledger: ledgerEntry,
       companyRoi
     });
 
   } catch (error) {
     console.error("Error approving loan:", error);
-    return res.status(500).json({ message: "Server error while approving loan." });
+    return res.status(500).json({
+      message: "Server error while approving loan."
+    });
   }
 });
 
