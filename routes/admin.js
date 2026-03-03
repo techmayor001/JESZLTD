@@ -37,6 +37,7 @@ const LoanInvite = require("../models/LoanInvite");
 
 const KiddiesAccount = require('../models/Kiddies/kiddiesAccount');
 const KiddiesTransaction = require('../models/Kiddies/kiddiesTransaction');
+const OperatingLedger = require("../models/OperatingLedger");
 
 
 // HANDLING APPROVAL OF ACCESS TO ADMIN DASHBOARD - MIDDLEWARE ------------- TECHMAYOR COMPANY LIMITED 
@@ -4690,5 +4691,197 @@ router.get("/admin/finance/export/pdf", ensureAdmin("view_finance"), async (req,
   }
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function buildOpQuery({ type, direction, from, to } = {}) {
+  const q = {};
+  if (type)      q.type      = type;
+  if (direction) q.direction = direction;
+  if (from || to) {
+    q.createdAt = {};
+    if (from) q.createdAt.$gte = new Date(from);
+    if (to) {
+      const end = new Date(to);
+      end.setHours(23, 59, 59, 999);
+      q.createdAt.$lte = end;
+    }
+  }
+  return q;
+}
+
+async function opAggSum(query) {
+  const result = await OperatingLedger.aggregate([
+    { $match: query },
+    { $group: { _id: null, total: { $sum: "$amount" } } },
+  ]);
+  return result[0]?.total || 0;
+}
+
+const opPopulateOpts = [
+  { path: "relatedUser", select: "firstName lastName membershipID" },
+  { path: "relatedLoan", select: "_id" },
+  { path: "recordedBy",  select: "firstName lastName fullName" },
+];
+
+// ── GET /admin/operating-earnings ────────────────────────────────────────────
+
+router.get(
+  "/admin/operating-earnings",
+  ensureAdmin("view_finance"),
+  async (req, res) => {
+    try {
+      const perPage     = 20;
+      const currentPage = Math.max(1, parseInt(req.query.page) || 1);
+
+      const filterType      = req.query.type      || "";
+      const filterDirection = req.query.direction || "";
+      const filterFrom      = req.query.from      || "";
+      const filterTo        = req.query.to        || "";
+
+      // Full query used for the paginated table (type + direction + date)
+      const activeQuery = buildOpQuery({
+        type:      filterType,
+        direction: filterDirection,
+        from:      filterFrom,
+        to:        filterTo,
+      });
+
+      // ── All-time operating balance (header pill) ──────────────────────────
+      const [allIn, allOut] = await Promise.all([
+        opAggSum({ direction: "in" }),
+        opAggSum({ direction: "out" }),
+      ]);
+      const operatingBalance = allIn - allOut;
+
+      // ── Period stats: type + date only, NO direction filter ───────────────
+      //    So we always get both sides of the ledger for the chosen period
+      const periodBase = buildOpQuery({ type: filterType, from: filterFrom, to: filterTo });
+      const [periodIn, periodOut] = await Promise.all([
+        opAggSum({ ...periodBase, direction: "in"  }),
+        opAggSum({ ...periodBase, direction: "out" }),
+      ]);
+      const periodNet = periodIn - periodOut;
+
+      // ── Opening balance: all entries BEFORE filterFrom ────────────────────
+      let openingBalance = 0;
+      if (filterFrom) {
+        const d = new Date(filterFrom);
+        const [obIn, obOut] = await Promise.all([
+          opAggSum({ direction: "in",  createdAt: { $lt: d } }),
+          opAggSum({ direction: "out", createdAt: { $lt: d } }),
+        ]);
+        openingBalance = obIn - obOut;
+      }
+      const closingBalance = openingBalance + periodIn - periodOut;
+
+      // ── Banner / stat card breakdowns ─────────────────────────────────────
+      const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+      const [totalLoanCharges, totalStaffPayments, monthlyCharges] = await Promise.all([
+        opAggSum({ type: "operating_charge", direction: "in" }),
+        opAggSum({ type: "staff_payment",    direction: "out" }),
+        opAggSum({ type: "operating_charge", direction: "in", createdAt: { $gte: monthStart } }),
+      ]);
+
+      // ── Current operating charge % from settings ──────────────────────────
+      const settings           = await Settings.getSettings();
+      const roiOperatingCharge = Number(settings.otherFees?.roiOperatingCharge || 10);
+
+      // ── Paginated entries ─────────────────────────────────────────────────
+      const [entries, totalEntries] = await Promise.all([
+        OperatingLedger.find(activeQuery)
+          .sort({ createdAt: 1 })
+          .skip((currentPage - 1) * perPage)
+          .limit(perPage)
+          .populate(opPopulateOpts),
+        OperatingLedger.countDocuments(activeQuery),
+      ]);
+      const totalPages = Math.ceil(totalEntries / perPage) || 1;
+
+      // ── Running balance per row ───────────────────────────────────────────
+      let runningBalance = openingBalance;
+      if (currentPage > 1) {
+        const prev = await OperatingLedger.find(activeQuery)
+          .sort({ createdAt: 1 })
+          .limit((currentPage - 1) * perPage)
+          .select("amount direction");
+        for (const e of prev)
+          runningBalance += e.direction === "in" ? e.amount : -e.amount;
+      }
+
+      const entriesWithBalance = entries.map((entry) => {
+        const obj = entry.toObject();
+        runningBalance += entry.direction === "in" ? entry.amount : -entry.amount;
+        obj.runningBalance = runningBalance;
+        return obj;
+      });
+
+      res.render("dashboard/admin/operating-earnings", {
+        admin: req.user,
+        entries: entriesWithBalance,
+        totalEntries,
+        totalPages,
+        currentPage,
+        perPage,
+        filterType,
+        filterDirection,
+        filterFrom,
+        filterTo,
+        operatingBalance,
+        periodIn,
+        periodOut,
+        periodNet,
+        openingBalance,
+        closingBalance,
+        totalLoanCharges,
+        totalStaffPayments,
+        monthlyCharges,
+        roiOperatingCharge,
+      });
+    } catch (err) {
+      console.error("Error loading operating earnings page:", err);
+      res.status(500).send("Server error");
+    }
+  }
+);
 
 module.exports = router;
