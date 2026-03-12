@@ -47,12 +47,23 @@ router.get("/manage/kiddies-account", async (req, res) => {
     const kiddiesRegistrationFee = settings.registrationFees.kiddiesRegistrationFee;
     const memberTypes = await MemberType.find({});
 
+    // Total savings across all regular member accounts (same as main dashboard)
+    const allMemberAccounts = await Account.find({ ownerType: "User" });
+    const allMembersTotalSavings = allMemberAccounts.reduce(
+      (sum, acc) => sum + Number(acc.balance || 0), 0
+    );
+
+    const companyAccount = settings.companyAccount || {};
+
     return res.render("dashboard/user/kiddies", {
       user,
       kiddiesAccounts,
       kiddiesRegistrationFee,
       settings,
       memberTypes,
+      allMembersTotalSavings,  // ← share % calculation
+      companyAccount,          // ← manual deposit bank details
+      query: req.query,        // ← payment success/failed banners
     });
   } catch (err) {
     console.error("Kiddies dashboard error:", err);
@@ -131,16 +142,7 @@ router.post("/api/kiddies/create", requireAuth, async (req, res) => {
     // ── Generate accountID ──
     const accountID = await generateKiddiesID("KID");
 
-    // ── Create sub Account ──
-    const account = await Account.create({
-      user: user._id,
-      accountType: accountType._id,
-      balance: 0,
-      monthlyROI: accountType.interestRate || 0,
-      accumulativeROI: 0,
-    });
-
-    // ── Create KiddiesAccount ──
+    // ── 1️⃣ Create KiddiesAccount first (no account ref yet) ──────────────────
     const kiddiesAccount = await KiddiesAccount.create({
       parent: user._id,
       accountID,
@@ -148,7 +150,6 @@ router.post("/api/kiddies/create", requireAuth, async (req, res) => {
       childLastName,
       childDOB: new Date(childDOB),
       childGender,
-      account: account._id,
       beneficiaryType,
       nextOfKin: {
         fullName: nextOfKinFullName,
@@ -162,15 +163,31 @@ router.post("/api/kiddies/create", requireAuth, async (req, res) => {
       initialDeposit: depositAmount,
       lockPeriodYears: Math.min(18, Math.max(5, parseInt(lockPeriodYears) || 5)),
       registrationStatus: "pending",
-      status: "locked", // locked until admin approves
+      status: "locked",
     });
 
-    // ── Link to user ──
+    // ── 2️⃣ Create Account linked to KiddiesAccount ───────────────────────────
+    // ownerType "KiddiesAccount" ensures this account is never treated as a
+    // regular member account and is correctly handled in ROI distribution.
+    const account = await Account.create({
+      ownerType:       "KiddiesAccount",
+      ownerId:         kiddiesAccount._id,
+      accountType:     accountType._id,
+      balance:         0,
+      monthlyROI:      accountType.interestRate || 0,
+      accumulativeROI: 0,
+    });
+
+    // ── 3️⃣ Link account back to KiddiesAccount ───────────────────────────────
+    kiddiesAccount.account = account._id;
+    await kiddiesAccount.save();
+
+    // ── Link KiddiesAccount to parent user ────────────────────────────────────
     await User.findByIdAndUpdate(user._id, {
       $push: { kiddiesAccounts: kiddiesAccount._id },
     });
 
-    // ── Init Paystack for registration fee + initial deposit ──
+    // ── Init Paystack for registration fee + initial deposit ──────────────────
     const totalAmount = registrationFee + depositAmount;
 
     const paystackRes = await fetch(
@@ -183,14 +200,14 @@ router.post("/api/kiddies/create", requireAuth, async (req, res) => {
         },
         body: JSON.stringify({
           email: user.email,
-          amount: totalAmount * 100, // kobo
+          amount: totalAmount * 100,
           metadata: {
-            userId: user._id,
+            userId:           user._id,
             kiddiesAccountId: kiddiesAccount._id,
-            type: "kiddies_registration",
-            childName: `${childFirstName} ${childLastName}`,
+            type:             "kiddies_registration",
+            childName:        `${childFirstName} ${childLastName}`,
             registrationFee,
-            initialDeposit: depositAmount,
+            initialDeposit:   depositAmount,
           },
           callback_url: `${process.env.BASE_URL}/kiddies/payment/verify`,
         }),
@@ -199,30 +216,34 @@ router.post("/api/kiddies/create", requireAuth, async (req, res) => {
 
     const paystackData = await paystackRes.json();
     if (!paystackData.status || !paystackData.data) {
-      // Rollback account creation if Paystack fails
+      // ── Rollback all created documents on Paystack failure ────────────────
       await KiddiesAccount.findByIdAndDelete(kiddiesAccount._id);
       await Account.findByIdAndDelete(account._id);
+      await User.findByIdAndUpdate(user._id, {
+        $pull: { kiddiesAccounts: kiddiesAccount._id },
+      });
       return res
         .status(500)
         .json({ status: false, message: "Payment initialization failed." });
     }
 
-    // ── Save payment record ──
+    // ── Save payment record ───────────────────────────────────────────────────
     await KiddiesPayment.create({
       kiddiesAccount: kiddiesAccount._id,
-      parent: user._id,
-      email: user.email,
-      amount: totalAmount,
-      reference: paystackData.data.reference,
-      status: "pending",
+      parent:         user._id,
+      email:          user.email,
+      amount:         totalAmount,
+      reference:      paystackData.data.reference,
+      status:         "pending",
     });
 
     return res.json({
-      status: true,
-      message: "Account created. Redirecting to payment...",
+      status:            true,
+      message:           "Account created. Redirecting to payment...",
       authorization_url: paystackData.data.authorization_url,
-      kiddiesAccountId: kiddiesAccount._id,
+      kiddiesAccountId:  kiddiesAccount._id,
     });
+
   } catch (err) {
     console.error("Kiddies create error:", err);
     return res

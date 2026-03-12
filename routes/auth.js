@@ -79,7 +79,7 @@ router.post(
 
       const normalizedEmail = email.toLowerCase();
 
-      // ✅ Check existing email
+      // ── Check existing email ──────────────────────────────────────────────
       const existingUser = await User.findOne({ email: normalizedEmail });
       if (existingUser) {
         return res.status(400).json({
@@ -88,7 +88,7 @@ router.post(
         });
       }
 
-      // files
+      // ── Files ─────────────────────────────────────────────────────────────
       const addressProof  = req.files["addressProof"]?.[0]?.path;
       const passportPhoto = req.files["passportPhoto"]?.[0]?.path;
       const idFile        = req.files["idFile"]?.[0]?.path;
@@ -96,7 +96,7 @@ router.post(
 
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      // ✅ Default member type
+      // ── Default member type ───────────────────────────────────────────────
       const defaultMemberType = await MemberType.findOne({ isDefault: true });
       if (!defaultMemberType) {
         return res.status(500).json({
@@ -106,13 +106,9 @@ router.post(
       }
 
       const settings = await Settings.getSettings();
-      const registrationFee =
-        settings.registrationFees.adultRegistrationFee;
+      const registrationFee = settings.registrationFees.adultRegistrationFee;
 
-      /* =====================================================
-         ✅ SAFE MEMBERSHIP ID GENERATOR (NO createdAt)
-      ====================================================== */
-
+      // ── Safe membership ID generator ──────────────────────────────────────
       const usersOfType = await User.find({
         membershipID: {
           $regex: `^${defaultMemberType.shortCode}\\d+$`,
@@ -120,7 +116,6 @@ router.post(
       }).select("membershipID");
 
       let maxNumber = 0;
-
       for (const u of usersOfType) {
         const match = u.membershipID?.match(/\d+$/);
         if (match) {
@@ -129,19 +124,14 @@ router.post(
         }
       }
 
-      const nextNumber = maxNumber + 1;
-
       const membershipID =
-        `${defaultMemberType.shortCode}${String(nextNumber).padStart(4, "0")}`;
+        `${defaultMemberType.shortCode}${String(maxNumber + 1).padStart(4, "0")}`;
 
       const newReferralCode = membershipID;
 
-      /* ===================================================== */
-
-      // 🔥 SUPERADMIN CHECK
+      // ── Superadmin check ──────────────────────────────────────────────────
       const isSuperAdmin =
-        normalizedEmail ===
-        process.env.SUPERADMIN_EMAIL?.toLowerCase();
+        normalizedEmail === process.env.SUPERADMIN_EMAIL?.toLowerCase();
 
       const superAdminRole = isSuperAdmin
         ? await Role.findOne({ name: "superadmin" })
@@ -165,7 +155,7 @@ router.post(
         });
       }
 
-      // ✅ Create user
+      // ── Create user ───────────────────────────────────────────────────────
       const newUser = await User.create({
         firstName,
         lastName,
@@ -182,16 +172,14 @@ router.post(
         idFile,
         signature,
         membershipID,
-        referralCode: newReferralCode, // ✅ synced
+        referralCode: newReferralCode,
         password: hashedPassword,
-        status: isSuperAdmin ? "active" : "pending",
-        registrationStatus: isSuperAdmin ? "paid" : "pending",
-        role: isSuperAdmin
-          ? superAdminRole._id
-          : memberRole._id,
+        status:             isSuperAdmin ? "active"  : "pending",
+        registrationStatus: isSuperAdmin ? "paid"    : "pending",
+        role: isSuperAdmin ? superAdminRole._id : memberRole._id,
       });
 
-      // ✅ Handle referral parent
+      // ── Handle referral ───────────────────────────────────────────────────
       if (referralCode && !isSuperAdmin) {
         const referringUser = await User.findOne({ referralCode });
         if (referringUser) {
@@ -200,32 +188,36 @@ router.post(
         }
       }
 
-      // auto login
+      // ── Auto login ────────────────────────────────────────────────────────
       req.login(newUser, (err) => {
         if (err) console.error("Auto-login error:", err);
       });
 
-      // ✅ Create account
+      // ── Create Account (ownerType: "User") ────────────────────────────────
+      // ownerType is set to "User" so this account is correctly identified as
+      // a regular member account and included in ROI distribution.
       const account = await Account.create({
-        user: newUser._id,
-        accountType: defaultMemberType._id,
-        balance: 0,
-        monthlyROI: defaultMemberType.interestRate || 0,
+        ownerType:       "User",
+        ownerId:         newUser._id,
+        accountType:     defaultMemberType._id,
+        balance:         0,
+        monthlyROI:      defaultMemberType.interestRate || 0,
         accumulativeROI: 0,
       });
 
       newUser.account = account._id;
       await newUser.save();
 
-      /* ================= SUPERADMIN BYPASS ================= */
-
+      // ═══════════════════════════════════════════════════════════════════════
+      // SUPERADMIN BYPASS
+      // ═══════════════════════════════════════════════════════════════════════
       if (isSuperAdmin) {
         const payment = await Payment.create({
-          user: newUser._id,
-          email: normalizedEmail,
-          amount: 0,
-          reference: `SUPERADMIN-${Date.now()}`,
-          status: "success",
+          user:       newUser._id,
+          email:      normalizedEmail,
+          amount:     0,
+          reference:  `SUPERADMIN-${Date.now()}`,
+          status:     "success",
           verifiedAt: new Date(),
         });
 
@@ -233,24 +225,25 @@ router.post(
         await newUser.save();
 
         await ExtraCharge.create({
-          member: newUser._id,
+          member:     newUser._id,
           chargeType: "registration",
-          amount: 0,
-          reason: "Superadmin registration (system bypass)",
-          status: "paid",
-          appliedAt: new Date(),
-          paidAt: new Date(),
+          amount:     0,
+          reason:     "Superadmin registration (system bypass)",
+          status:     "paid",
+          appliedAt:  new Date(),
+          paidAt:     new Date(),
         });
 
         return res.json({
-          status: true,
-          message: "Superadmin registered successfully",
+          status:   true,
+          message:  "Superadmin registered successfully",
           redirect: "/cds-cooperative/dashboard",
         });
       }
 
-      /* ================= PAYSTACK ================= */
-
+      // ═══════════════════════════════════════════════════════════════════════
+      // PAYSTACK
+      // ═══════════════════════════════════════════════════════════════════════
       const paystackRes = await fetch(
         "https://api.paystack.co/transaction/initialize",
         {
@@ -260,7 +253,7 @@ router.post(
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: normalizedEmail,
+            email:  normalizedEmail,
             amount: registrationFee * 100,
             metadata: {
               firstName,
@@ -277,18 +270,18 @@ router.post(
         throw new Error("Payment initialization failed");
 
       const payment = await Payment.create({
-        user: newUser._id,
-        email: normalizedEmail,
-        amount: registrationFee,
+        user:      newUser._id,
+        email:     normalizedEmail,
+        amount:    registrationFee,
         reference: data.data.reference,
-        status: "pending",
+        status:    "pending",
       });
 
       newUser.Payment = payment._id;
       await newUser.save();
 
-      res.json({
-        status: true,
+      return res.json({
+        status:            true,
         authorization_url: data.data.authorization_url,
       });
 
@@ -391,7 +384,6 @@ router.post(
   ]),
   async (req, res) => {
     try {
-
       const {
         firstName,
         lastName,
@@ -407,12 +399,12 @@ router.post(
         openingBalance,
         accumulativeROI,
         memberTypeId,
-        referralCode // ✅ allow referral input
+        referralCode
       } = req.body;
 
       const normalizedEmail = email.toLowerCase();
 
-      // ✅ email check
+      // ── Email check ───────────────────────────────────────────────────────
       if (await User.findOne({ email: normalizedEmail })) {
         return res.status(400).json({
           status: false,
@@ -420,7 +412,7 @@ router.post(
         });
       }
 
-      // ── files ─────────────────────────
+      // ── Files ─────────────────────────────────────────────────────────────
       const addressProof  = req.files["addressProof"]?.[0]?.path;
       const passportPhoto = req.files["passportPhoto"]?.[0]?.path;
       const idFile        = req.files["idFile"]?.[0]?.path;
@@ -428,24 +420,21 @@ router.post(
 
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      // ── member type ───────────────────
+      // ── Member type ───────────────────────────────────────────────────────
       const memberType = await MemberType.findById(memberTypeId);
       if (!memberType) {
         return res.status(400).json({
-          status:false,
-          message:"Member type not found"
+          status: false,
+          message: "Member type not found"
         });
       }
 
-      // =====================================================
-      // ✅ SAFE MEMBERSHIP ID GENERATION (NO DUPLICATES)
-      // =====================================================
+      // ── Safe membership ID generation ─────────────────────────────────────
       const usersOfType = await User.find({
         membershipID: { $regex: `^${memberType.shortCode}\\d+$` }
       }).select("membershipID");
 
       let maxNumber = 0;
-
       for (const u of usersOfType) {
         const match = u.membershipID?.match(/\d+$/);
         if (match) {
@@ -454,15 +443,13 @@ router.post(
         }
       }
 
-      const nextNumber = maxNumber + 1;
-
       const membershipID =
-        `${memberType.shortCode}${String(nextNumber).padStart(4,"0")}`;
+        `${memberType.shortCode}${String(maxNumber + 1).padStart(4, "0")}`;
 
-      // ── role ──────────────────────────
+      // ── Role ──────────────────────────────────────────────────────────────
       const memberRole = await Role.findOne({ name: "member" });
 
-      // ── create user ───────────────────
+      // ── Create user ───────────────────────────────────────────────────────
       const newUser = await User.create({
         firstName,
         lastName,
@@ -479,49 +466,49 @@ router.post(
         idFile,
         signature,
         membershipID,
-        referralCode: membershipID, // self referral
-        password: hashedPassword,
-        status: "active",
+        referralCode:       membershipID,
+        password:           hashedPassword,
+        status:             "active",
         registrationStatus: "paid",
-        role: memberRole?._id
+        role:               memberRole?._id
       });
 
-      // =====================================================
-      // ✅ HANDLE REFERRAL LINKING
-      // =====================================================
+      // ── Handle referral linking ───────────────────────────────────────────
       if (referralCode) {
         const referringUser = await User.findOne({ referralCode });
-
         if (referringUser) {
           referringUser.referredUsers.push(newUser._id);
           await referringUser.save();
         }
       }
 
-      // ── create account ─────────────────
+      // ── Create Account (ownerType: "User") ────────────────────────────────
+      // ownerType is set to "User" so this account is correctly identified as
+      // a regular member account and included in ROI distribution.
       const account = await Account.create({
-        user: newUser._id,
-        accountType: memberType._id,
-        balance: Number(openingBalance) || 0,
-        monthlyROI: memberType.interestRate || 0,
+        ownerType:       "User",
+        ownerId:         newUser._id,
+        accountType:     memberType._id,
+        balance:         Number(openingBalance) || 0,
+        monthlyROI:      memberType.interestRate || 0,
         accumulativeROI: Number(accumulativeROI) || 0
       });
 
       newUser.account = account._id;
       await newUser.save();
 
-      res.json({
-        status: true,
-        message: "Member migrated successfully",
+      return res.json({
+        status:       true,
+        message:      "Member migrated successfully",
         membershipID,
-        user: newUser
+        user:         newUser
       });
 
     } catch (err) {
       console.error("Error adding member:", err);
       res.status(500).json({
-        status:false,
-        message:"Error adding member."
+        status:  false,
+        message: "Error adding member."
       });
     }
   }

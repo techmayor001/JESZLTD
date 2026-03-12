@@ -1,79 +1,85 @@
 const mongoose = require("mongoose");
 
 const loanLedgerSchema = new mongoose.Schema({
-  loan: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "Loan", 
-    required: true 
+  loan: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Loan",
+    required: true
   },
-  member: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "User", 
+
+  member: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
   },
+
   externalBorrower: {
     borrowerName: String,
     email: String,
     phone: String
   },
-  approvedBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
+
+  processedBy: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: "Admin",
-    required: true 
-  },
-  amount: { 
-    type: Number, 
-    required: true 
-  },
-  interestRate: { 
-    type: Number, 
-    required: true 
+    required: true
   },
 
-  // ── Replaces durationMonths ──────────────────────────
-  durationValue: { 
-    type: Number, 
-    required: true 
-  },
-  durationUnit: {
+  transactionType: {
     type: String,
-    enum: ["minutes", "hours", "days", "weeks", "months"],
-    default: "months"
+    enum: [
+      "disbursement",
+      "repayment",
+      "penalty",
+      "rollover",
+      "adjustment"
+    ],
+    required: true
   },
-  // Keep for backwards compatibility with old records
-  durationMonths: { 
-    type: Number
-    // removed required: true
-  },
-  // ─────────────────────────────────────────────────────
 
-  penaltyPercentage: {
+  amount: {
+    type: Number,
+    required: true
+  },
+
+  principalPaid: {
     type: Number,
     default: 0
   },
-  rolloverPercentage: {
+
+  interestPaid: {
     type: Number,
     default: 0
   },
-  disbursementMethod: { 
-    type: String, 
-    enum: ["bank", "cash", "check"], 
-    required: true 
+
+  penaltyPaid: {
+    type: Number,
+    default: 0
   },
-  disbursementDate: { 
-    type: Date, 
-    required: true 
+
+  balanceBefore: {
+    type: Number
   },
-  dueDate: {
-    type: Date
+
+  balanceAfter: {
+    type: Number
   },
-  approvedAt: { 
-    type: Date, 
-    default: Date.now 
+
+  paymentMethod: {
+    type: String,
+    enum: ["bank", "cash", "wallet", "transfer", "paystack"]
   },
-  status: { 
-    type: String, 
-    enum: ["approved", "paid", "defaulted"], 
-    default: "approved" 
+
+  reference: {
+    type: String
+  },
+
+  notes: {
+    type: String
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now
   }
 });
 

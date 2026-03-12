@@ -61,3 +61,6 @@ app.use(require("./routes/transaction"));
 app.use(require("./routes/kiddies"));
 app.use(require("./routes/report"));
 app.use(require("./routes/adminLogs"));
+app.use(require("./routes/LoanLogic/userLoanLogic"));
+app.use(require("./routes/LoanLogic/adminLoanLogic"));
+app.use(require("./routes/KiddiesLogic/kiddies"));

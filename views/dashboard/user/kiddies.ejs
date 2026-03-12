@@ -197,6 +197,10 @@
             background:#fffbeb; border:1px solid rgba(245,158,11,0.3);
             border-radius:11px; padding:0.8rem 1rem; color:#92400e;
         }
+        .alert-info-k {
+            background:#eff6ff; border:1px solid rgba(59,130,246,0.25);
+            border-radius:11px; padding:0.8rem 1rem; color:#1e40af;
+        }
 
         /* ── Status pill ── */
         .status-pill {
@@ -221,6 +225,14 @@
         /* ── Sidebar overlay ── */
         .sb-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.38); z-index:1039; }
         .sb-overlay.show { display:block; }
+
+        /* ── Share stat card extras ── */
+        .share-pill {
+            display:inline-flex; align-items:center; gap:4px;
+            background:rgba(236,72,153,0.08); border:1px solid rgba(236,72,153,0.2);
+            border-radius:20px; padding:2px 8px;
+            font-size:0.68rem; font-weight:700; color:var(--kiddies);
+        }
 
         /* ── Responsive ── */
         @media (max-width:992px) {
@@ -299,7 +311,10 @@
             }
         });
 
-        // Payment/success notice from query params
+        // ── Share percentage (kiddies savings / all members total savings) ──
+        const kiddiesSharePercentage = allMembersTotalSavings > 0 && totalSavings > 0
+            ? ((totalSavings / allMembersTotalSavings) * 100).toFixed(2)
+            : 0;
     %>
 
     <!-- ── Payment notice banners ── -->
@@ -345,9 +360,10 @@
             Accounts require admin approval after payment.
         </div>
 
-        <!-- Stat cards -->
+        <!-- ══ STAT CARDS — now 5 cols on xl, 2 cols on sm ══ -->
         <div class="row g-2 g-md-3 mb-3">
-            <div class="col-6 col-lg-3">
+            <!-- Total Accounts -->
+            <div class="col-6 col-lg-4 col-xl">
                 <div class="stat-card">
                     <div class="stat-icon" style="background:linear-gradient(135deg,#ec4899,#be185d);color:white;">
                         <i class="fas fa-users"></i>
@@ -359,7 +375,9 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-lg-3">
+
+            <!-- Total Savings -->
+            <div class="col-6 col-lg-4 col-xl">
                 <div class="stat-card">
                     <div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:white;">
                         <i class="fas fa-piggy-bank"></i>
@@ -369,7 +387,9 @@
                     <div style="font-size:0.68rem;color:#10b981;font-weight:600;">Across all accounts</div>
                 </div>
             </div>
-            <div class="col-6 col-lg-3">
+
+            <!-- Total Interest -->
+            <div class="col-6 col-lg-4 col-xl">
                 <div class="stat-card">
                     <div class="stat-icon" style="background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;">
                         <i class="fas fa-percentage"></i>
@@ -379,7 +399,23 @@
                     <div style="font-size:0.68rem;color:#06b6d4;font-weight:600;">Earned to date</div>
                 </div>
             </div>
-            <div class="col-6 col-lg-3">
+
+            <!-- ── NEW: Share Percentage ── -->
+            <div class="col-6 col-lg-6 col-xl">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:white;">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div style="font-size:0.68rem;color:#6b7280;font-weight:600;text-transform:uppercase;margin-bottom:2px;">Pool Share</div>
+                    <div style="font-size:1rem;font-weight:800;color:#1f2937;"><%= kiddiesSharePercentage %>%</div>
+                    <div style="font-size:0.68rem;color:#8b5cf6;font-weight:600;">
+                        <i class="fas fa-users me-1"></i>of all members' savings
+                    </div>
+                </div>
+            </div>
+
+            <!-- Earliest Maturity -->
+            <div class="col-6 col-lg-6 col-xl">
                 <div class="stat-card">
                     <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;">
                         <i class="fas fa-calendar-check"></i>
@@ -466,6 +502,9 @@
                             const elapsedMs = now - created;
                             const progress = Math.min(100, Math.round((elapsedMs / totalMs) * 100));
                             const childAge = Math.floor((now - new Date(ka.childDOB)) / (365.25*24*3600*1000));
+                            // Per-account share percentage
+                            const acctShare = allMembersTotalSavings > 0 && balance > 0
+                                ? ((balance / allMembersTotalSavings) * 100).toFixed(2) : 0;
                         %>
                         <div class="col-md-4">
                             <div class="kid-card" onclick="viewAccountDetail('<%= ka._id %>')">
@@ -475,7 +514,6 @@
                                 <h6 class="text-center fw-bold mb-1" style="font-size:0.88rem;"><%= ka.childFirstName %> <%= ka.childLastName %></h6>
                                 <p class="text-center text-muted mb-2" style="font-size:0.72rem;"><%= ka.accountID %> • Age <%= childAge %></p>
 
-                                <!-- Registration status banner -->
                                 <% if (ka.registrationStatus !== 'paid') { %>
                                 <div class="payment-notice mb-2">
                                     <div style="font-size:0.72rem;color:var(--kiddies);font-weight:700;margin-bottom:4px;">
@@ -495,6 +533,11 @@
                                     <div class="d-flex justify-content-between mb-1" style="font-size:0.72rem;">
                                         <span class="text-muted">Interest</span>
                                         <span class="text-success">₦<%= roi.toLocaleString(undefined,{maximumFractionDigits:2}) %></span>
+                                    </div>
+                                    <!-- Per-account share % -->
+                                    <div class="d-flex justify-content-between mb-1" style="font-size:0.72rem;">
+                                        <span class="text-muted">Pool Share</span>
+                                        <span style="color:#8b5cf6;font-weight:700;"><%= acctShare %>%</span>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2" style="font-size:0.72rem;">
                                         <span class="text-muted">Matures</span>
@@ -554,6 +597,8 @@
                             const elapsedMs = now - created;
                             const progress = Math.min(100, Math.round((elapsedMs/totalMs)*100));
                             const childAge = Math.floor((now - new Date(ka.childDOB)) / (365.25*24*3600*1000));
+                            const acctShare = allMembersTotalSavings > 0 && balance > 0
+                                ? ((balance / allMembersTotalSavings) * 100).toFixed(2) : 0;
                         %>
                         <div class="col-md-6 col-lg-4">
                             <div class="kid-card h-100">
@@ -587,6 +632,13 @@
                                         <div style="background:rgba(16,185,129,0.05);border-radius:8px;padding:6px 8px;">
                                             <div style="font-size:0.64rem;color:#9ca3af;font-weight:600;">Interest</div>
                                             <div style="font-size:0.82rem;font-weight:700;color:#10b981;">₦<%= roi.toLocaleString(undefined,{maximumFractionDigits:0}) %></div>
+                                        </div>
+                                    </div>
+                                    <!-- Share % tile -->
+                                    <div class="col-12">
+                                        <div style="background:rgba(139,92,246,0.05);border-radius:8px;padding:5px 8px;display:flex;align-items:center;justify-content:space-between;">
+                                            <div style="font-size:0.64rem;color:#9ca3af;font-weight:600;"><i class="fas fa-chart-pie me-1" style="color:#8b5cf6;"></i>Pool Share</div>
+                                            <div style="font-size:0.82rem;font-weight:700;color:#8b5cf6;"><%= acctShare %>%</div>
                                         </div>
                                     </div>
                                 </div>
@@ -715,7 +767,6 @@
             </div>
             <div class="modal-body px-4 py-3">
 
-                <!-- Error / success banners -->
                 <div id="createError" class="alert mb-3" style="background:#fef2f2;border:1px solid rgba(239,68,68,0.3);border-radius:10px;color:#991b1b;padding:10px 14px;display:none;font-size:0.8rem;"></div>
 
                 <div class="alert-kiddies mb-3" style="font-size:0.78rem;">
@@ -821,7 +872,6 @@
                             <input type="text" name="nextOfKinAddress" class="form-control form-control-sm" required placeholder="Full address">
                         </div>
 
-                        <!-- Lawyer-only fields -->
                         <div id="lawyerFields" style="display:none;" class="col-12">
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -857,7 +907,9 @@
     </div>
 </div>
 
-<!-- Deposit Modal -->
+<!-- ══════════════════════════════════════════════════════════
+     DEPOSIT MODAL — Paystack (automatic) OR Manual Transfer
+     ══════════════════════════════════════════════════════════ -->
 <div class="modal fade" id="depositModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius:14px;">
@@ -869,6 +921,7 @@
                 <div id="depositError" class="alert mb-3" style="background:#fef2f2;border:1px solid rgba(239,68,68,0.3);border-radius:10px;color:#991b1b;padding:10px 14px;display:none;font-size:0.8rem;"></div>
 
                 <form id="depositForm">
+                    <!-- Child Account selector -->
                     <div class="mb-3">
                         <label class="form-label fw-semibold" style="font-size:0.76rem;">Child's Account *</label>
                         <select class="form-select form-select-sm" id="depositAccountSelect" name="kiddiesAccountId" required>
@@ -880,25 +933,69 @@
                             <% }) %>
                         </select>
                     </div>
+
+                    <!-- Amount -->
                     <div class="mb-3">
                         <label class="form-label fw-semibold" style="font-size:0.76rem;">Amount (₦) *</label>
-                        <input type="number" name="amount" class="form-control form-control-sm" min="1000" required placeholder="Min ₦1,000">
+                        <input type="number" name="amount" id="depositAmount" class="form-control form-control-sm" min="1000" required placeholder="Min ₦1,000">
                         <small class="text-muted" style="font-size:0.7rem;">Minimum: ₦1,000</small>
                     </div>
+
+                    <!-- Payment Method selector -->
                     <div class="mb-3">
                         <label class="form-label fw-semibold" style="font-size:0.76rem;">Payment Method *</label>
                         <select class="form-select form-select-sm" id="depositMethodSelect" name="paymentMethod" required onchange="toggleDepositMethod(this.value)">
                             <option value="">Select method...</option>
                             <option value="paystack">Paystack (Automatic)</option>
-                            <option value="cooperative">Manual Transfer</option>
+                            <option value="manual">Manual Bank Transfer</option>
                         </select>
                     </div>
-                    <div id="coopDepositSection" style="display:none;" class="mb-3">
-                        <div class="alert-kiddies mb-2" style="font-size:0.76rem;">
-                            <strong>Transfer to:</strong> Your cooperative bank account. Provide payer name for records.
+
+                    <!-- ── Paystack section (no extra fields needed) ── -->
+                    <div id="paystackDepositSection" style="display:none;">
+                        <div class="alert-info-k" style="font-size:0.76rem;">
+                            <i class="fas fa-bolt me-1" style="color:#3b82f6;"></i>
+                            You'll be redirected to Paystack's secure checkout to complete your payment instantly.
                         </div>
-                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Payer Name (optional)</label>
-                        <input type="text" name="payerName" class="form-control form-control-sm" placeholder="Name on the transfer">
+                    </div>
+
+                    <!-- ── Manual transfer section ── -->
+                    <div id="manualDepositSection" style="display:none;">
+                        <%
+                            const bankName      = (companyAccount && companyAccount.bankName)      || null;
+                            const accountName   = (companyAccount && companyAccount.accountName)   || null;
+                            const accountNumber = (companyAccount && companyAccount.accountNumber) || null;
+                            const accountConfigured = bankName && accountNumber;
+                        %>
+                        <% if (accountConfigured) { %>
+                        <div style="background:rgba(236,72,153,0.04);border:1.5px solid rgba(236,72,153,0.15);border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+                            <div style="font-size:0.68rem;color:var(--kiddies);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">
+                                <i class="fas fa-university me-1"></i>Transfer To This Account
+                            </div>
+                            <div class="row g-1" style="font-size:0.78rem;">
+                                <div class="col-5 text-muted fw-semibold">Bank</div>
+                                <div class="col-7 fw-bold"><%= bankName %></div>
+                                <div class="col-5 text-muted fw-semibold">Account Name</div>
+                                <div class="col-7 fw-bold"><%= accountName %></div>
+                                <div class="col-5 text-muted fw-semibold">Account No.</div>
+                                <div class="col-7 fw-bold" style="color:var(--kiddies);letter-spacing:0.06em;"><%= accountNumber %></div>
+                            </div>
+                        </div>
+                        <% } else { %>
+                        <div class="alert-warning-k mb-3" style="font-size:0.76rem;">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Bank account details are not yet configured. Please contact admin.
+                        </div>
+                        <% } %>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size:0.76rem;">Payer Name (optional)</label>
+                            <input type="text" name="payerName" class="form-control form-control-sm" placeholder="Name on the transfer receipt">
+                        </div>
+                        <div class="alert-warning-k" style="font-size:0.75rem;">
+                            <i class="fas fa-clock me-1"></i>
+                            Your deposit will be credited after <strong>admin confirmation</strong>. Please ensure you transfer the exact amount entered above.
+                        </div>
                     </div>
                 </form>
             </div>
@@ -1112,9 +1209,10 @@ function toggleLawyerFields() {
     document.getElementById("lawyerFields").style.display = v === "lawyer" ? "block" : "none";
 }
 
-/* ══ Toggle deposit method ══ */
+/* ══ Toggle deposit payment method sections ══ */
 function toggleDepositMethod(v) {
-    document.getElementById("coopDepositSection").style.display = v === "cooperative" ? "block" : "none";
+    document.getElementById("paystackDepositSection").style.display = v === "paystack" ? "block" : "none";
+    document.getElementById("manualDepositSection").style.display   = v === "manual"   ? "block" : "none";
 }
 
 /* ══ Create Account ══ */
@@ -1148,7 +1246,6 @@ async function submitCreateAccount() {
         text.style.display = "inline";
 
         if (res.ok && result.status && result.authorization_url) {
-            // Redirect to Paystack
             window.location.href = result.authorization_url;
         } else {
             showError("createError", result.message || "Failed to create account.");
@@ -1174,48 +1271,78 @@ function openDepositModal(accountId) {
     }
 }
 
-/* ══ Submit Deposit ══ */
+/* ══ Submit Deposit — handles both Paystack and Manual ══ */
 async function submitDeposit() {
     hideError("depositError");
-    const form = document.getElementById("depositForm");
+    const form   = document.getElementById("depositForm");
+    const method = document.getElementById("depositMethodSelect").value;
+
     if (!form.reportValidity()) return;
 
-    const btn = document.getElementById("depositBtn");
+    const btn     = document.getElementById("depositBtn");
     const spinner = document.getElementById("depositBtnSpinner");
-    const text = document.getElementById("depositBtnText");
-    btn.disabled = true;
+    const text    = document.getElementById("depositBtnText");
+    btn.disabled  = true;
     spinner.style.display = "inline-block";
-    text.style.display = "none";
+    text.style.display    = "none";
 
     try {
         const data = Object.fromEntries(new FormData(form).entries());
-        const res = await fetch("/api/kiddies/deposit", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        });
-        const result = await res.json();
 
-        btn.disabled = false;
-        spinner.style.display = "none";
-        text.style.display = "inline";
+        if (method === "paystack") {
+            // Automatic — redirect to Paystack
+            const res = await fetch("/api/kiddies/deposit", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+            const result = await res.json();
 
-        if (res.ok && result.status) {
-            if (result.authorization_url) {
+            btn.disabled = false;
+            spinner.style.display = "none";
+            text.style.display    = "inline";
+
+            if (res.ok && result.status && result.authorization_url) {
                 window.location.href = result.authorization_url;
             } else {
-                bootstrap.Modal.getInstance(document.getElementById("depositModal")).hide();
-                showSuccess("Deposit Submitted", result.message || "Pending admin confirmation.", false);
-                form.reset();
+                showError("depositError", result.message || "Failed to initialise payment.");
             }
+
+        } else if (method === "manual") {
+            // Manual transfer — post to cooperative endpoint
+            const res = await fetch("/api/kiddies/deposit/manual", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+            const result = await res.json();
+
+            btn.disabled = false;
+            spinner.style.display = "none";
+            text.style.display    = "inline";
+
+            if (res.ok && result.status) {
+                bootstrap.Modal.getInstance(document.getElementById("depositModal")).hide();
+                showSuccess("Deposit Submitted", result.message || "Your deposit is pending admin confirmation.", false);
+                form.reset();
+                // Reset visible sections
+                document.getElementById("paystackDepositSection").style.display = "none";
+                document.getElementById("manualDepositSection").style.display   = "none";
+            } else {
+                showError("depositError", result.message || "Deposit submission failed.");
+            }
+
         } else {
-            showError("depositError", result.message || "Deposit failed.");
+            btn.disabled = false;
+            spinner.style.display = "none";
+            text.style.display    = "inline";
+            showError("depositError", "Please select a payment method.");
         }
     } catch (err) {
         console.error(err);
         btn.disabled = false;
         spinner.style.display = "none";
-        text.style.display = "inline";
+        text.style.display    = "inline";
         showError("depositError", "Network error. Please try again.");
     }
 }
@@ -1243,6 +1370,11 @@ async function viewAccountDetail(accountId) {
         const unlock = ka.unlockDate ? new Date(ka.unlockDate) : null;
         const totalMs = unlock ? (unlock - created) : (5 * 365.25 * 24 * 3600 * 1000);
         const progress = Math.min(100, Math.round(((now - created) / totalMs) * 100));
+
+        // Share % for this specific account
+        const allMembersTotal = <%= allMembersTotalSavings %>;
+        const acctShare = allMembersTotal > 0 && balance > 0
+            ? ((balance / allMembersTotal) * 100).toFixed(2) : "0.00";
 
         document.getElementById("detailModalTitle").innerHTML = `<i class="fas fa-user-circle me-2"></i>${ka.childFirstName} ${ka.childLastName}`;
 
@@ -1281,6 +1413,13 @@ async function viewAccountDetail(accountId) {
                         <div style="background:white;border-radius:8px;padding:8px;">
                             <div style="font-size:0.64rem;color:#9ca3af;font-weight:600;">Interest Earned</div>
                             <div style="font-weight:800;color:#10b981;">₦${roi.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
+                        </div>
+                    </div>
+                    <!-- Share % tile inside detail modal -->
+                    <div class="col-6">
+                        <div style="background:white;border-radius:8px;padding:8px;">
+                            <div style="font-size:0.64rem;color:#9ca3af;font-weight:600;">Pool Share</div>
+                            <div style="font-weight:800;color:#8b5cf6;">${acctShare}%</div>
                         </div>
                     </div>
                     <div class="col-6">
@@ -1361,7 +1500,6 @@ async function loadTransactions() {
     container.innerHTML = '<div class="text-center py-4 text-muted" style="font-size:0.8rem;"><i class="fas fa-spinner fa-spin me-2"></i>Loading...</div>';
 
     try {
-        // Build list of account IDs to fetch
         const accountIds = filter
             ? [filter]
             : <%- JSON.stringify(kiddiesAccounts.map(k => k._id.toString())) %>;
@@ -1371,7 +1509,6 @@ async function loadTransactions() {
             return;
         }
 
-        // Fetch transactions for all relevant accounts
         const allTxs = [];
         await Promise.all(accountIds.map(async id => {
             const res = await fetch(`/api/kiddies/transactions/${id}`);
@@ -1384,13 +1521,11 @@ async function loadTransactions() {
             }
         }));
 
-        // Build account name map
         const nameMap = {};
         <%- JSON.stringify(kiddiesAccounts).replace(/<\/script>/gi, '<\\/script>') %>.forEach(ka => {
             nameMap[ka._id] = `${ka.childFirstName} ${ka.childLastName} (${ka.accountID})`;
         });
 
-        // Sort by date desc
         allTxs.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         if (allTxs.length === 0) {
@@ -1398,7 +1533,6 @@ async function loadTransactions() {
             return;
         }
 
-        // Summary
         const totalDeposits = allTxs.filter(t=>t.type==='deposit'&&t.status==='completed').reduce((s,t)=>s+t.amount,0);
         const totalInterest = allTxs.filter(t=>t.type==='interest').reduce((s,t)=>s+t.amount,0);
 
@@ -1446,7 +1580,6 @@ async function loadTransactions() {
 
 /* ══ Open edit beneficiary modal ══ */
 function openEditBeneficiary(accountId) {
-    // Find account data from embedded EJS data
     const accounts = <%- JSON.stringify(kiddiesAccounts.map(k => ({
         _id: k._id,
         nextOfKin: k.nextOfKin
@@ -1518,7 +1651,7 @@ window.addEventListener("load", () => {
     }, 600);
 });
 
-/* ══ Entrance animations ══ */
+/* ══ Entrance animations + init ══ */
 document.addEventListener("DOMContentLoaded", () => {
     syncLockPeriod('init', 5);
 
@@ -1529,14 +1662,9 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => { el.style.opacity = "1"; el.style.transform = "translateY(0)"; }, i * 70);
     });
 
-    // Show payment/error banner from URL query
     const params = new URLSearchParams(window.location.search);
-    if (params.get("payment") === "success") {
-        showToast("🎉 Account created! Pending admin approval.", "success");
-    }
-    if (params.get("payment") === "failed") {
-        showToast("Payment failed. Please try again.", "error");
-    }
+    if (params.get("payment") === "success") showToast("🎉 Account created! Pending admin approval.", "success");
+    if (params.get("payment") === "failed")  showToast("Payment failed. Please try again.", "error");
 });
 </script>
 </body>

@@ -33,12 +33,16 @@ const loanSchema = new mongoose.Schema({
 
   initiatedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",           // ← was "Admin" — fixed to match actual User collection
+    ref: "User",
   },
 
   amount: {
     type: Number,
     required: true
+  },
+
+  interestAmount: {
+    type: Number,
   },
 
   // What the borrower currently owes (grows with each penalty applied)

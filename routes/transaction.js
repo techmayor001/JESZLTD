@@ -59,7 +59,7 @@ router.post("/deposit/init", async (req, res) => {
 router.get("/deposit/verify", async (req, res) => {
   const { reference } = req.query;
 
-  if (!reference) return res.redirect("/club-de-star-cooperative/dashboard?deposit=failed");
+  if (!reference) return res.redirect("/cds-cooperative/dashboard?deposit=failed");
 
   try {
     const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
@@ -71,28 +71,36 @@ router.get("/deposit/verify", async (req, res) => {
     const data = await verifyRes.json();
     if (!data.status || !data.data) {
       console.error("Invalid Paystack response:", data);
-      return res.redirect("/club-de-star-cooperative/dashboard?deposit=failed");
+      return res.redirect("/cds-cooperative/dashboard?deposit=failed");
     }
 
     const transaction = data.data;
 
     const payment = await Payment.findOne({ reference }).populate("user");
-    if (!payment) return res.redirect("/club-de-star-cooperative/dashboard?deposit=not-found");
+    if (!payment) return res.redirect("/cds-cooperative/dashboard?deposit=not-found");
 
     payment.status = transaction.status === "success" ? "paid" : "failed";
     payment.paystackResponse = transaction;
     await payment.save();
 
     if (payment.status === "paid") {
-      let account = await Account.findOne({ user: payment.user._id });
+      // ── Find the member's account using ownerType + ownerId ──────────────
+      let account = await Account.findOne({
+        ownerType: "User",
+        ownerId:   payment.user._id
+      });
 
       if (!account) {
         console.warn(`No account found for ${payment.user.email}, creating one.`);
+
+        const defaultMemberType = await MemberType.findOne({ isDefault: true });
+
         account = await Account.create({
-          user: payment.user._id,
-          accountType: payment.user.membershipID?.startsWith("CD") ? "CD" : "NCD",
-          balance: 0,
-          interestRate: payment.user.membershipID?.startsWith("CD") ? 5 : 10,
+          ownerType:       "User",
+          ownerId:         payment.user._id,
+          accountType:     defaultMemberType?._id,
+          balance:         0,
+          accumulativeROI: 0
         });
       }
 
@@ -101,38 +109,36 @@ router.get("/deposit/verify", async (req, res) => {
       account.balance += depositAmount;
       await account.save();
 
-      // ✅ CREATE TRANSACTION WITH STATUS, METHOD & REFERENCE
       await Transaction.create({
-        user: payment.user._id,
-        type: "deposit",
-        amount: depositAmount,
+        user:        payment.user._id,
+        type:        "deposit",
+        amount:      depositAmount,
         description: `Deposit (Ref: ${reference})`,
-        reference: reference,
-        method: "Paystack",
-        status: "successful",
+        reference,
+        method:      "Paystack",
+        status:      "successful",
       });
 
       console.log(`✅ Deposit recorded: ₦${depositAmount} for ${payment.user.email}`);
-      return res.redirect("/club-de-star-cooperative/dashboard?deposit=success");
+      return res.redirect("/cds-cooperative/dashboard?deposit=success");
 
     } else {
-      // ❌ Payment failed → store failed transaction
       await Transaction.create({
-        user: payment.user._id,
-        type: "deposit",
-        amount: payment.amount / 100,
+        user:        payment.user._id,
+        type:        "deposit",
+        amount:      payment.amount / 100,
         description: `Deposit Failed (Ref: ${reference})`,
-        reference: reference,
-        method: "Paystack",
-        status: "failed",
+        reference,
+        method:      "Paystack",
+        status:      "failed",
       });
 
-      return res.redirect("/club-de-star-cooperative/dashboard?deposit=failed");
+      return res.redirect("/cds-cooperative/dashboard?deposit=failed");
     }
 
   } catch (err) {
     console.error("Deposit verification error:", err);
-    res.redirect("/club-de-star-cooperative/dashboard?deposit=failed");
+    res.redirect("/cds-cooperative/dashboard?deposit=failed");
   }
 });
 
@@ -242,7 +248,7 @@ router.get("/loan/verify", async (req, res) => {
   const { reference } = req.query;
 
   if (!reference)
-    return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
+    return res.redirect("/cds-cooperative/dashboard?loan=failed");
 
   try {
 
@@ -254,22 +260,22 @@ router.get("/loan/verify", async (req, res) => {
 
     const data = await verifyRes.json();
     if (!data.status || !data.data)
-      return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
+      return res.redirect("/cds-cooperative/dashboard?loan=failed");
 
     const payment = await Payment.findOne({ reference }).populate("user");
     if (!payment)
-      return res.redirect("/club-de-star-cooperative/dashboard?loan=not-found");
+      return res.redirect("/cds-cooperative/dashboard?loan=not-found");
 
     // 🔒 Prevent double execution
     if (payment.status === "paid")
-      return res.redirect("/club-de-star-cooperative/dashboard?loan=success");
+      return res.redirect("/cds-cooperative/dashboard?loan=success");
 
     payment.status = data.data.status === "success" ? "paid" : "failed";
     payment.paystackResponse = data.data;
     await payment.save();
 
     if (payment.status !== "paid")
-      return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
+      return res.redirect("/cds-cooperative/dashboard?loan=failed");
 
     // ===== FETCH LOAN =====
     const loan = await Loan.findOne({
@@ -278,7 +284,7 @@ router.get("/loan/verify", async (req, res) => {
     });
 
     if (!loan)
-      return res.redirect("/club-de-star-cooperative/dashboard?loan=not-found");
+      return res.redirect("/cds-cooperative/dashboard?loan=not-found");
 
     const paidAmount = payment.amount / 100;
 
@@ -391,16 +397,16 @@ router.get("/loan/verify", async (req, res) => {
         status:      "successful",
       });
 
-      return res.redirect("/club-de-star-cooperative/dashboard?loan=cleared");
+      return res.redirect("/cds-cooperative/dashboard?loan=cleared");
     }
 
     // ===== PARTIAL PAYMENT =====
     await loan.save();
-    return res.redirect("/club-de-star-cooperative/dashboard?loan=success");
+    return res.redirect("/cds-cooperative/dashboard?loan=success");
 
   } catch (err) {
     console.error("Loan verification error:", err);
-    return res.redirect("/club-de-star-cooperative/dashboard?loan=failed");
+    return res.redirect("/cds-cooperative/dashboard?loan=failed");
   }
 });
 

@@ -7,21 +7,51 @@ const monthlyRoiSchema = new mongoose.Schema({
 });
 
 const accountSchema = mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 
-  accountType: { type: mongoose.Schema.Types.ObjectId, ref: "MemberType" },
+  ownerType: {
+    type: String,
+    enum: ["User", "KiddiesAccount"],
+    required: true
+  },
 
-  balance: { type: Number, default: 0 },
+  ownerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    refPath: "ownerType"
+  },
+
+  accountType: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "MemberType"
+  },
+
+  balance: {
+    type: Number,
+    default: 0
+  },
 
   monthlyRoiHistory: [monthlyRoiSchema],
 
-  accumulativeROI: { type: Number, default: 0 },
+  accumulativeROI: {
+    type: Number,
+    default: 0
+  },
 
-  lastRoiPayout: { type: Date, default: null },
+  lastRoiPayout: {
+    type: Date,
+    default: null
+  },
 
-  createdAt: { type: Date, default: Date.now },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
 
-  updatedAt: { type: Date, default: Date.now },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+
 });
 
 module.exports = mongoose.model("Account", accountSchema);
