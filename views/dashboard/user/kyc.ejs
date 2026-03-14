@@ -1,788 +1,1031 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KYC Verification | Club De Stars</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #1e3a8a;
-            --primary-dark: #1e40af;
-            --primary-light: #3b82f6;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-            min-height: 100vh;
-        }
-        .sidebar {
-            position: fixed; left: 0; top: 0; bottom: 0; width: 280px;
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white; z-index: 1040; transition: all 0.3s;
-            overflow-y: auto; box-shadow: 4px 0 20px rgba(30,58,138,0.15);
-        }
-        .sidebar-header { padding: 2rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.1); }
-        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-        .logo-box {
-            width: 45px; height: 45px; background: white; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: var(--primary); font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        .sidebar-menu { padding: 1rem 0; }
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85); text-decoration: none;
-            padding: 0.875rem 1.5rem; display: flex; align-items: center;
-            transition: all 0.3s; border-left: 3px solid transparent; font-weight: 500;
-        }
-        .sidebar-menu a:hover { background: rgba(255,255,255,0.1); color: white; border-left-color: white; }
-        .sidebar-menu a.active { background: rgba(255,255,255,0.15); color: white; border-left-color: white; }
-        .sidebar-menu a i { width: 24px; margin-right: 12px; font-size: 1.1rem; }
-        .member-badge {
-            display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px;
-            backdrop-filter: blur(10px); border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.3); font-weight: 600; font-size: 0.9rem;
-        }
-        .club-member-badge { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-        .top-navbar {
-            position: fixed; top: 0; left: 280px; right: 0; height: 75px;
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30,58,138,0.08); z-index: 1030;
-            display: flex; align-items: center; padding: 0 2rem;
-            transition: all 0.3s; border-bottom: 1px solid rgba(30,58,138,0.1);
-        }
-        .main-content-wrapper {
-            margin-left: 280px; margin-top: 75px; padding: 2rem;
-            min-height: calc(100vh - 75px); transition: all 0.3s;
-        }
-        .kyc-container { max-width: 900px; margin: 0 auto; }
-        .kyc-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white; border-radius: 24px 24px 0 0; padding: 2.5rem;
-            text-align: center; position: relative; overflow: hidden;
-        }
-        .kyc-header::before {
-            content: ''; position: absolute; top: -50%; right: -20%;
-            width: 400px; height: 400px; background: rgba(255,255,255,0.05); border-radius: 50%;
-        }
-        .kyc-card {
-            background: white; border-radius: 0 0 24px 24px;
-            box-shadow: 0 15px 40px rgba(30,58,138,0.15); overflow: hidden;
-        }
-        .progress-container {
-            padding: 2rem;
-            background: linear-gradient(135deg, rgba(30,58,138,0.03) 0%, rgba(59,130,246,0.03) 100%);
-            border-bottom: 2px solid rgba(30,58,138,0.1);
-        }
-        .progress { height: 12px; border-radius: 10px; background: #e0e7ff; }
-        .progress-bar {
-            background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%);
-            border-radius: 10px; transition: width 0.5s ease;
-        }
-        .document-section { padding: 2rem; border-bottom: 1px solid rgba(30,58,138,0.05); }
-        .document-section:last-child { border-bottom: none; }
-        .document-item {
-            background: linear-gradient(135deg, rgba(30,58,138,0.02) 0%, rgba(59,130,246,0.02) 100%);
-            border: 2px solid rgba(30,58,138,0.1); border-radius: 16px;
-            padding: 1.5rem; margin-bottom: 1.5rem; transition: all 0.3s;
-        }
-        .document-item:hover { border-color: var(--primary-light); box-shadow: 0 8px 20px rgba(30,58,138,0.1); }
-        .document-item.completed {
-            border-color: var(--success);
-            background: linear-gradient(135deg, rgba(16,185,129,0.05) 0%, rgba(5,150,105,0.05) 100%);
-        }
-        .document-icon {
-            width: 60px; height: 60px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.75rem; margin-right: 1rem; flex-shrink: 0;
-        }
-        .document-content { flex: 1; min-width: 0; }
-        .document-header {
-            display: flex; justify-content: space-between; align-items: start;
-            gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;
-        }
-        .document-title { flex: 1; min-width: 0; }
-        .document-title h6 { margin-bottom: 0.25rem; word-wrap: break-word; }
-        .document-title small { display: block; word-wrap: break-word; }
-        .existing-doc-banner {
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 0.75rem; flex-wrap: wrap; padding: 0.875rem 1.125rem;
-            background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(5,150,105,0.08) 100%);
-            border: 1.5px solid rgba(16,185,129,0.35); border-radius: 10px; margin-bottom: 0.875rem;
-        }
-        .existing-doc-banner .doc-info {
-            display: flex; align-items: center; gap: 0.625rem;
-            font-size: 0.875rem; font-weight: 600; color: #065f46;
-        }
-        .existing-doc-banner .doc-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-        .btn-view-doc {
-            display: inline-flex; align-items: center; gap: 0.375rem;
-            padding: 0.375rem 0.875rem; border-radius: 8px; font-size: 0.8125rem; font-weight: 600;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white; border: none; cursor: pointer; transition: all 0.2s;
-        }
-        .btn-view-doc:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.35); color: white; }
-        .btn-replace-doc {
-            display: inline-flex; align-items: center; gap: 0.375rem;
-            padding: 0.375rem 0.875rem; border-radius: 8px; font-size: 0.8125rem; font-weight: 600;
-            background: transparent; color: #1e3a8a; border: 1.5px solid rgba(30,58,138,0.3); cursor: pointer; transition: all 0.2s;
-        }
-        .btn-replace-doc:hover { background: rgba(30,58,138,0.06); border-color: #1e3a8a; }
-        .replace-area-wrapper { display: none; margin-top: 0.5rem; }
-        .replace-area-wrapper.open { display: block; }
-        .upload-area {
-            border: 2px dashed var(--primary-light); border-radius: 12px; padding: 2rem;
-            text-align: center; cursor: pointer; transition: all 0.3s; background: rgba(59,130,246,0.02);
-        }
-        .upload-area:hover { border-color: var(--primary); background: rgba(59,130,246,0.05); }
-        .upload-area.dragover { border-color: var(--success); background: rgba(16,185,129,0.05); }
-        .file-preview {
-            display: none; margin-top: 1rem; padding: 1rem;
-            background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;
-        }
-        .file-preview.show { display: flex; align-items: center; justify-content: space-between; }
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none; padding: 0.875rem 2rem; border-radius: 12px; font-weight: 600; transition: all 0.3s;
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(30,58,138,0.3); }
-        .btn-outline-primary {
-            border: 2px solid var(--primary); color: var(--primary);
-            border-radius: 12px; padding: 0.875rem 2rem; font-weight: 600;
-        }
-        .alert-custom { border-radius: 16px; border: 2px solid; padding: 1.25rem; margin-bottom: 1.5rem; word-wrap: break-word; }
-        .alert-custom ul { margin-bottom: 0; padding-left: 1.25rem; }
-        .alert-custom li { word-wrap: break-word; margin-bottom: 0.5rem; }
-        .alert-warning-custom { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-color: #f59e0b; color: #92400e; }
-        .alert-info-custom { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-color: #3b82f6; color: #1e40af; }
-        .alert-success-custom { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-color: #10b981; color: #065f46; }
-        .status-badge { padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; }
-        .status-pending { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e; }
-        .status-completed { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; }
-        .form-control, .form-select { border: 2px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 1rem; transition: all 0.3s; }
-        .form-control:focus, .form-select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 0.2rem rgba(59,130,246,0.15); }
-        .requirements-list { background: rgba(30,58,138,0.02); border-radius: 12px; padding: 1.25rem; margin-top: 1rem; }
-        .requirements-list li { padding: 0.5rem 0; display: flex; align-items: flex-start; gap: 0.5rem; }
-        .requirements-list li i { flex-shrink: 0; margin-top: 0.125rem; }
-        .loading-spinner { display: none; border: 3px solid #f3f4f6; border-top: 3px solid #3b82f6; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
-        .hidden { display: none; }
-        .loader-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #0a1a2f, #102a44); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .logo span { font-size: 52px; font-weight: 600; color: #5cc8ff; display: inline-block; animation: float 1.5s infinite ease-in-out; letter-spacing: 1px; }
-        .logo span:nth-child(1){animation-delay:0s}.logo span:nth-child(2){animation-delay:.1s}.logo span:nth-child(3){animation-delay:.2s}.logo span:nth-child(4){animation-delay:.3s}.logo span:nth-child(5){animation-delay:.4s}.logo span:nth-child(6){animation-delay:.5s}.logo span:nth-child(7){animation-delay:.6s}.logo span:nth-child(8){animation-delay:.7s}.logo span:nth-child(9){animation-delay:.8s}
-        @keyframes float{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-14px);opacity:1}}
-        .powered-by { position: fixed; bottom: 20px; right: 20px; background: white; padding: 12px 20px; border-radius: 30px; box-shadow: 0 4px 15px rgba(30,58,138,0.15); font-size: .85rem; font-weight: 600; color: var(--primary); z-index: 1000; }
-        #docViewerModal .modal-dialog { max-width: 850px; }
-        #docViewerModal .modal-body { padding: 0; background: #111; min-height: 400px; display: flex; align-items: center; justify-content: center; }
-        #docViewerContent img { max-width: 100%; max-height: 80vh; object-fit: contain; display: block; margin: auto; padding: 12px; }
-        #docViewerContent iframe { width: 100%; height: 80vh; border: none; display: block; }
-        @media(max-width:992px){.sidebar{left:-280px}.sidebar.active{left:0}.top-navbar{left:0}.main-content-wrapper{margin-left:0}.powered-by{bottom:10px;right:10px;font-size:.75rem;padding:8px 12px}}
-        @media(max-width:768px){.kyc-container{padding:0 1rem}.kyc-header{padding:2rem 1.5rem;border-radius:16px 16px 0 0}.kyc-header h2{font-size:1.5rem}.document-section{padding:1.5rem 1rem}.document-item{padding:1rem}.document-item .d-flex{flex-direction:column}.document-icon{width:50px;height:50px;font-size:1.5rem;margin-right:0;margin-bottom:.75rem}.document-header{flex-direction:column;align-items:flex-start}.status-badge{align-self:flex-start;margin-top:.5rem}.main-content-wrapper{padding:1rem;margin-top:75px}.btn-primary,.btn-outline-primary{width:100%;padding:.75rem 1.5rem}.existing-doc-banner{flex-direction:column;align-items:flex-start}}
-        @media(max-width:576px){.top-navbar{padding:0 1rem;height:70px}.main-content-wrapper{padding:.75rem}}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KYC Verification — Club De Stars | Powered by JESZ LIMITED</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ THEME TOKENS ══ */
+:root{
+  --sidebar-w:230px;--nav-h:62px;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
+  --accent:#4f8ef7;--accent2:#7c5af4;
+  --green:#22c78a;--red:#f05252;--amber:#f5a623;
+  --tr:all .22s ease;
+}
+[data-theme="dark"]{
+  --bg:#0a0f1e;--bg-card:#111827;--bg-card2:#1a2235;
+  --bg-card3:rgba(255,255,255,.035);
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#f0f4ff;--text2:#c8d4f0;--muted:#8b9ab8;
+  --nav-bg:rgba(10,15,30,.93);
+  --hero-bg:linear-gradient(135deg,#111827 0%,#1a2235 100%);
+  --bar-bg:rgba(255,255,255,.07);--meta-bg:rgba(255,255,255,.03);
+  --tog-bg:rgba(255,255,255,.08);
+  --upload-bg:rgba(79,142,247,.04);--upload-border:rgba(79,142,247,.25);
+  --req-bg:rgba(255,255,255,.03);
+  --doc-bg:rgba(255,255,255,.02);
+}
+[data-theme="light"]{
+  --bg:#f4f6fb;--bg-card:#ffffff;--bg-card2:#f0f3fa;
+  --bg-card3:rgba(0,0,0,.025);
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);
+  --text:#0f1523;--text2:#2a3550;--muted:#6b7a99;
+  --nav-bg:rgba(255,255,255,.93);
+  --hero-bg:linear-gradient(135deg,#dde8ff 0%,#eef1ff 100%);
+  --bar-bg:rgba(0,0,0,.07);--meta-bg:rgba(0,0,0,.025);
+  --tog-bg:rgba(0,0,0,.07);
+  --upload-bg:rgba(79,142,247,.03);--upload-border:rgba(79,142,247,.3);
+  --req-bg:rgba(0,0,0,.025);
+  --doc-bg:rgba(0,0,0,.015);
+}
+
+/* ══ BASE ══ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;transition:background .3s,color .3s;}
+a{text-decoration:none;color:inherit;}
+button,input,select,textarea{font-family:inherit;}
+
+/* ══ LOADER ══ */
+#loader{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:20px;transition:opacity .5s;
+}
+.loader-ring{width:48px;height:48px;border:2.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
+.loader-label{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:var(--bg-card);border-right:1px solid var(--border);
+  z-index:200;display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .3s,background .3s,border-color .3s;
+}
+.sidebar-logo{padding:18px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.logo-mark{width:34px;height:34px;border-radius:10px;flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;}
+.logo-mark img{width:100%;height:100%;object-fit:cover;}
+.logo-name{font-size:13px;font-weight:600;line-height:1.2;}
+.logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;}
+.sidebar-user{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.user-chip{display:flex;align-items:center;gap:10px;background:var(--bg-card2);border-radius:10px;padding:9px 11px;border:1px solid var(--border);}
+.user-avatar{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;overflow:hidden;}
+.user-avatar img{width:100%;height:100%;object-fit:cover;}
+.user-name{font-size:13px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-id{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.04em;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 10px;}
+.sidebar-nav::-webkit-scrollbar{width:3px;}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.nav-section{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;margin-top:2px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:var(--muted);font-size:13px;font-weight:400;transition:var(--tr);margin-bottom:1px;cursor:pointer;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{background:var(--bg-card2);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,.1);color:var(--accent);}
+.nav-item i{width:18px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:20px;padding:2px 7px;}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+.member-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;background:rgba(34,199,138,.12);color:var(--green);border:1px solid rgba(34,199,138,.2);margin-bottom:8px;}
+
+/* ══ TOP NAV ══ */
+.topnav{
+  position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--nav-h);
+  background:var(--nav-bg);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);z-index:100;
+  display:flex;align-items:center;padding:0 20px;gap:12px;
+  transition:left .3s,background .3s,border-color .3s;
+}
+.hamburger{display:none;cursor:pointer;padding:7px;border-radius:8px;border:none;background:none;color:var(--muted);font-size:17px;transition:var(--tr);flex-shrink:0;}
+.hamburger:hover{background:var(--bg-card2);color:var(--text);}
+.topnav-greeting{flex:1;min-width:0;}
+.topnav-greeting h2{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-greeting p{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.status-row{display:flex;align-items:center;gap:5px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.status-label{font-size:12px;color:var(--green);font-weight:500;}
+.kyc-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);font-size:11px;font-weight:500;color:var(--amber);cursor:pointer;transition:var(--tr);text-decoration:none;white-space:nowrap;}
+.kyc-chip.verified{background:rgba(34,199,138,.08);border-color:rgba(34,199,138,.2);color:var(--green);}
+.theme-toggle{width:40px;height:22px;border-radius:20px;border:1px solid var(--border2);background:var(--tog-bg);cursor:pointer;position:relative;flex-shrink:0;transition:background .3s,border-color .3s;padding:0;}
+.tog-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:transform .25s ease,background .25s;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;pointer-events:none;}
+[data-theme="light"] .tog-thumb{transform:translateX(18px);background:var(--accent);}
+
+/* ══ MAIN ══ */
+.main{margin-left:var(--sidebar-w);margin-top:var(--nav-h);padding:22px;min-height:calc(100vh - var(--nav-h));transition:margin-left .3s;}
+
+/* ══ KYC HERO ══ */
+.kyc-hero{
+  background:var(--hero-bg);border:1px solid var(--border2);
+  border-radius:var(--r-xl);padding:24px;margin-bottom:14px;
+  display:flex;align-items:center;gap:18px;
+  position:relative;overflow:hidden;
+}
+.kyc-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(79,142,247,.07) 0%,transparent 70%);pointer-events:none;}
+.kyc-hero-icon{width:56px;height:56px;border-radius:16px;flex-shrink:0;background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.2);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--accent);}
+.kyc-hero-info{flex:1;min-width:0;}
+.kyc-hero-title{font-size:clamp(16px,3vw,20px);font-weight:500;letter-spacing:-.2px;margin-bottom:4px;}
+.kyc-hero-sub{font-size:12px;color:var(--muted);}
+
+/* ══ PROGRESS CARD ══ */
+.progress-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;margin-bottom:14px;}
+.progress-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.progress-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.progress-pct{font-size:13px;font-weight:600;color:var(--accent);font-family:'DM Mono',monospace;}
+.progress-track{background:var(--bar-bg);border-radius:4px;height:5px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .6s cubic-bezier(.4,0,.2,1);}
+.progress-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;}
+.progress-step{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.step-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);transition:var(--tr);}
+.step-dot.done{border-color:var(--green);background:rgba(34,199,138,.1);color:var(--green);}
+.step-dot.active{border-color:var(--accent);background:rgba(79,142,247,.1);color:var(--accent);}
+.step-label{font-size:10px;color:var(--muted);text-align:center;line-height:1.3;}
+
+/* ══ ALERT BARS ══ */
+.alert-bar{display:flex;align-items:flex-start;gap:10px;border-radius:var(--r-md);padding:11px 14px;margin-bottom:14px;font-size:12px;line-height:1.6;}
+.alert-bar i{flex-shrink:0;margin-top:1px;}
+.alert-warn{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.18);color:var(--amber);}
+.alert-info{background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.18);color:var(--accent);}
+.alert-success{background:rgba(34,199,138,.07);border:1px solid rgba(34,199,138,.18);color:var(--green);}
+.alert-error{background:rgba(240,82,82,.07);border:1px solid rgba(240,82,82,.18);color:var(--red);}
+.alert-bar ul{margin:4px 0 0 14px;padding:0;}
+.alert-bar li{margin-bottom:2px;}
+
+/* ══ DOCUMENT CARD ══ */
+.doc-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);margin-bottom:10px;overflow:hidden;
+  transition:border-color .22s;
+}
+.doc-card.done{border-color:rgba(34,199,138,.3);}
+.doc-card-header{
+  display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;
+  transition:background .2s;user-select:none;
+}
+.doc-card-header:hover{background:var(--bg-card2);}
+.doc-icon{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.doc-icon-blue{background:rgba(79,142,247,.12);color:var(--accent);}
+.doc-icon-green{background:rgba(34,199,138,.12);color:var(--green);}
+.doc-icon-amber{background:rgba(245,166,35,.12);color:var(--amber);}
+.doc-icon-cyan{background:rgba(6,182,212,.12);color:#06b6d4;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-size:13px;font-weight:500;margin-bottom:2px;}
+.doc-sub{font-size:11px;color:var(--muted);}
+.doc-status{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;flex-shrink:0;}
+.doc-status.pending{background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.2);}
+.doc-status.uploaded{background:rgba(34,199,138,.1);color:var(--green);border:1px solid rgba(34,199,138,.2);}
+.doc-chevron{color:var(--muted);font-size:12px;transition:transform .22s;flex-shrink:0;}
+.doc-card.open .doc-chevron{transform:rotate(180deg);}
+
+.doc-body{display:none;padding:0 18px 18px;}
+.doc-card.open .doc-body{display:block;}
+
+/* existing file banner */
+.existing-banner{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding:10px 14px;background:rgba(34,199,138,.06);border:1px solid rgba(34,199,138,.2);
+  border-radius:var(--r-md);margin-bottom:12px;
+}
+.existing-info{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:var(--green);}
+.existing-actions{display:flex;gap:8px;}
+.btn-view{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:500;background:rgba(34,199,138,.12);border:1px solid rgba(34,199,138,.25);color:var(--green);cursor:pointer;transition:var(--tr);}
+.btn-view:hover{background:rgba(34,199,138,.2);}
+.btn-replace{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:500;background:none;border:1px solid var(--border2);color:var(--muted);cursor:pointer;transition:var(--tr);}
+.btn-replace:hover{border-color:var(--accent);color:var(--accent);}
+.replace-wrap{display:none;margin-bottom:12px;}
+.replace-wrap.open{display:block;}
+
+/* ID fields */
+.id-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);}
+.form-control{width:100%;background:var(--bg-card2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;padding:10px 13px;transition:border-color .18s,background .3s;outline:none;-webkit-appearance:none;}
+.form-control:focus{border-color:var(--accent);}
+.form-control option{background:var(--bg-card);color:var(--text);}
+
+/* upload area */
+.upload-zone{
+  border:1.5px dashed var(--upload-border);border-radius:var(--r-md);
+  padding:22px;text-align:center;cursor:pointer;
+  background:var(--upload-bg);transition:border-color .2s,background .2s;
+  margin-bottom:10px;
+}
+.upload-zone:hover{border-color:var(--accent);background:rgba(79,142,247,.07);}
+.upload-zone.dragover{border-color:var(--green);background:rgba(34,199,138,.05);}
+.upload-zone-icon{font-size:22px;color:var(--accent);margin-bottom:8px;}
+.upload-zone-text{font-size:13px;font-weight:500;margin-bottom:3px;}
+.upload-zone-hint{font-size:11px;color:var(--muted);}
+.file-pill{
+  display:none;align-items:center;justify-content:space-between;
+  padding:9px 12px;background:var(--bg-card2);border:1px solid var(--border);
+  border-radius:var(--r-md);margin-bottom:10px;
+}
+.file-pill.show{display:flex;}
+.file-pill-name{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;min-width:0;}
+.file-pill-name i{color:var(--accent);flex-shrink:0;}
+.file-pill-name span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.btn-rm{background:none;border:none;color:var(--red);cursor:pointer;padding:4px 6px;border-radius:6px;font-size:12px;transition:var(--tr);}
+.btn-rm:hover{background:rgba(240,82,82,.1);}
+
+/* requirements */
+.reqs{background:var(--req-bg);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;}
+.reqs-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;}
+.req-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding:3px 0;}
+.req-item i{color:var(--green);font-size:10px;flex-shrink:0;}
+
+/* ══ SUBMIT SECTION ══ */
+.submit-section{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;margin-top:14px;}
+.submit-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.btn-back{display:inline-flex;align-items:center;gap:7px;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:500;background:var(--bg-card2);border:1px solid var(--border2);color:var(--muted);cursor:pointer;transition:var(--tr);}
+.btn-back:hover{color:var(--text);border-color:var(--accent);}
+.btn-submit{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;font-size:13px;font-weight:500;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;cursor:pointer;transition:var(--tr);}
+.btn-submit:hover{opacity:.88;transform:translateY(-1px);}
+.btn-submit:disabled{opacity:.5;pointer-events:none;}
+.submit-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:none;}
+
+/* ══ TOAST ══ */
+.toast-wrap{position:fixed;top:16px;right:16px;z-index:5000;display:flex;flex-direction:column;gap:8px;}
+.toast{padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;color:#fff;max-width:320px;opacity:0;transform:translateY(-10px);transition:opacity .35s,transform .35s;pointer-events:none;display:flex;align-items:center;gap:8px;}
+.toast.show{opacity:1;transform:none;pointer-events:auto;}
+.toast.success{background:#22c78a;}
+.toast.error{background:#f05252;}
+
+/* ══ SIDEBAR OVERLAY ══ */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190;}
+.sb-overlay.show{display:block;}
+
+/* ══ MODAL ══ */
+.modal-backdrop{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);align-items:flex-end;justify-content:center;}
+.modal-backdrop.open{display:flex;}
+.modal-box{background:var(--bg-card);border:1px solid var(--border2);border-radius:var(--r-xl) var(--r-xl) 0 0;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;animation:shup .28s cubic-bezier(.16,1,.3,1);}
+@keyframes shup{from{transform:translateY(30px);opacity:0;}to{transform:none;opacity:1;}}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:12px auto 0;}
+.modal-header{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:15px;font-weight:500;}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:7px;transition:var(--tr);}
+.modal-close:hover{background:var(--bg-card2);color:var(--text);}
+.modal-body{padding:18px 20px;}
+.modal-body img{max-width:100%;border-radius:var(--r-md);}
+.modal-body iframe{width:100%;height:70vh;border:none;border-radius:var(--r-md);}
+.modal-footer{padding:0 20px 24px;display:flex;gap:10px;}
+.btn{border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:500;cursor:pointer;transition:var(--tr);flex:1;}
+.btn-ghost{background:var(--bg-card2);color:var(--muted);}
+.btn-ghost:hover{color:var(--text);}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;flex:2;}
+.btn-primary:hover{opacity:.88;}
+.result-modal{text-align:center;padding:28px 20px;}
+.result-icon{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:24px;}
+.result-icon.success{background:rgba(34,199,138,.12);color:var(--green);}
+.result-icon.error{background:rgba(240,82,82,.12);color:var(--red);}
+.result-title{font-size:17px;font-weight:500;margin-bottom:7px;}
+.result-msg{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+
+/* Powered by */
+.powered-by{position:fixed;bottom:12px;right:14px;font-size:11px;color:var(--muted);z-index:50;}
+.powered-by strong{color:var(--accent);}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){
+  .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+  .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3);}
+  .topnav{left:0;}
+  .main{margin-left:0;}
+  .hamburger{display:flex;}
+}
+@media(max-width:600px){
+  .main{padding:14px;}
+  .topnav-greeting p{display:none;}
+  .status-label{display:none;}
+  .modal-box{max-width:100%;}
+  .id-fields{grid-template-columns:1fr;}
+  .progress-steps{grid-template-columns:repeat(2,1fr);}
+  .kyc-hero{flex-direction:column;align-items:flex-start;}
+  .submit-row{flex-direction:column-reverse;}
+  .btn-back,.btn-submit{width:100%;justify-content:center;}
+}
+@media(min-width:901px){
+  .modal-backdrop{align-items:center;padding:20px;}
+  .modal-box{border-radius:var(--r-xl);max-width:600px;}
+  .modal-handle{display:none;}
+}
+@media print{
+  .sidebar,.topnav,.powered-by{display:none!important;}
+  .main{margin:0;padding:0;}
+}
+</style>
 </head>
 <body>
 
-<div id="loader-screen" class="loader-screen">
-    <div class="logo"><span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span></div>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-ring"></div>
+  <div class="loader-label">Club De Stars</div>
 </div>
 
-<div id="main-content" class="hidden">
+<div class="toast-wrap" id="toastWrap"></div>
 
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <div class="logo-box"><i class="fas fa-star"></i></div>
-                <div>
-                    <h5 class="mb-0 fw-bold" style="text-transform:uppercase;">Club De Stars</h5>
-                    <small class="opacity-75">COOPERATIVE SOCIETY LIMITED</small>
-                </div>
-            </div>
-            <div class="member-badge mt-2 club-member-badge"><i class="fas fa-star"></i><span>Club Member</span></div>
+<%
+  const pendingGuarantorCount = user.guarantorRequests
+    ? user.guarantorRequests.filter(r => r.status === "pending").length : 0;
+%>
+
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <img src="/media/assets/logo/log.png" alt="Logo"
+           onerror="this.style.display='none';this.parentNode.innerHTML='<b>C</b>'">
+    </div>
+    <div style="min-width:0;">
+      <div class="logo-name">Club De Stars</div>
+      <div class="logo-sub">Cooperative Society</div>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-chip">
+      <div class="user-avatar">
+        <% if (user.displayPicture) { %>
+          <img src="<%= user.displayPicture.replace('public\\','/').replace(/\\/g,'/') %>" alt="">
+        <% } else { %>
+          <%= user.firstName.charAt(0).toUpperCase() %><%= user.lastName.charAt(0).toUpperCase() %>
+        <% } %>
+      </div>
+      <div style="min-width:0;">
+        <div class="user-name"><%= user.firstName %> <%= user.lastName %></div>
+        <div class="user-id"><%= user.membershipID %></div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Menu</div>
+    <a href="/cds-cooperative/dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="/cds-cooperative/transaction" class="nav-item"><i class="fas fa-exchange-alt"></i> Transactions</a>
+    <a href="/cds-cooperative/loan" class="nav-item"><i class="fas fa-coins"></i> Loans</a>
+    <a href="/cds-cooperative/guarantorRequest" class="nav-item">
+      <i class="fas fa-user-check"></i> Guarantor
+      <% if (pendingGuarantorCount > 0) { %><span class="nav-badge"><%= pendingGuarantorCount %></span><% } %>
+    </a>
+    <div class="nav-section">Account</div>
+    <a href="/manage/kiddies-account" class="nav-item"><i class="fas fa-baby"></i> Kiddies Account</a>
+    <a href="/cds-cooperative/profile" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+    <a href="/cds-cooperative/kyc" class="nav-item active"><i class="fas fa-shield-alt"></i> KYC</a>
+    <a href="/cds-cooperative/referral" class="nav-item"><i class="fas fa-user-plus"></i> Referrals</a>
+    <a href="/cds-cooperative/report" class="nav-item"><i class="fas fa-chart-bar"></i> Reports</a>
+    <a href="/cds-cooperative/memberContract" class="nav-item"><i class="fas fa-file-alt"></i> Terms</a>
+    <% if (user.role && user.role.name !== 'member') { %>
+    <div class="nav-section">Admin</div>
+    <a href="/admin-dashboard" class="nav-item"><i class="fas fa-tachometer-alt"></i> Administration</a>
+    <% } %>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="member-pill">
+      <i class="fas fa-star" style="font-size:9px;"></i>
+      <%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Associate Member' %>
+    </div>
+    <a href="/logout" class="nav-item" style="color:var(--red);margin-top:2px;">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </a>
+  </div>
+</aside>
+
+<!-- ════ TOP NAV ════ -->
+<header class="topnav">
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="topnav-greeting">
+    <h2>KYC Verification</h2>
+    <p>Upload your documents to activate your account</p>
+  </div>
+  <div class="topnav-right">
+    <div class="status-row">
+      <div class="status-dot"></div>
+      <span class="status-label">Active</span>
+    </div>
+    <% if (user.Payment && user.Payment.status === "paid") { %>
+      <div class="kyc-chip verified">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i><span>Verified</span>
+      </div>
+    <% } else { %>
+      <div class="kyc-chip">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i><span>KYC</span>
+      </div>
+    <% } %>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">
+      <div class="tog-thumb" id="togThumb">
+        <i class="fas fa-moon" id="togIcon" style="font-size:9px;"></i>
+      </div>
+    </button>
+  </div>
+</header>
+
+<!-- ════ MAIN ════ -->
+<main class="main">
+
+  <!-- Flash messages -->
+  <% if (typeof success !== 'undefined' && success) { %>
+  <div class="alert-bar alert-success" style="margin-bottom:14px;">
+    <i class="fas fa-check-circle"></i>
+    <span><%= success %></span>
+  </div>
+  <% } %>
+  <% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert-bar alert-error" style="margin-bottom:14px;">
+    <i class="fas fa-times-circle"></i>
+    <span><%= error %></span>
+  </div>
+  <% } %>
+
+  <!-- Hero -->
+  <div class="kyc-hero">
+    <div class="kyc-hero-icon"><i class="fas fa-shield-alt"></i></div>
+    <div class="kyc-hero-info">
+      <div class="kyc-hero-title">Identity Verification</div>
+      <div class="kyc-hero-sub">Complete all 4 sections below to activate your account. Documents are reviewed within 24–48 hours.</div>
+    </div>
+    <% if (user.Payment && user.Payment.status === "paid") { %>
+    <div style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;background:rgba(34,199,138,.1);border:1px solid rgba(34,199,138,.2);color:var(--green);font-size:12px;font-weight:600;flex-shrink:0;">
+      <i class="fas fa-check-circle" style="font-size:13px;"></i> Verified
+    </div>
+    <% } %>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-card">
+    <div class="progress-header">
+      <span class="progress-label"><i class="fas fa-tasks" style="margin-right:6px;color:var(--accent);"></i>Verification Progress</span>
+      <span class="progress-pct" id="progressText">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="progress-steps">
+      <div class="progress-step">
+        <div class="step-dot <%= kycDocs.addressProof ? 'done' : '' %>" id="stepAddress">
+          <i class="fas fa-<%= kycDocs.addressProof ? 'check' : 'home' %>"></i>
         </div>
-        <div class="sidebar-menu">
-            <a href="/cds-cooperative/dashboard"><i class="fas fa-home"></i> Dashboard</a>
-            <a href="/cds-cooperative/transaction"><i class="fas fa-exchange-alt"></i> Transactions</a>
-            <a href="/cds-cooperative/loan"><i class="fas fa-hand-holding-usd"></i> My Loans</a>
-            <a href="/cds-cooperative/guarantorRequest">
-                <i class="fas fa-user-friends"></i> Guarantor Requests
-                <% if (pendingGuarantorCount > 0) { %>
-                    <span class="badge bg-danger ms-auto" style="font-size:.68rem;"><%= pendingGuarantorCount %></span>
-                <% } %>
-            </a>
-            <a href="/manage/kiddies-account"><i class="fas fa-users"></i> Kiddies Account</a>
-            <a href="/cds-cooperative/profile"><i class="fas fa-user-circle"></i> My Profile</a>
-            <a href="/cds-cooperative/kyc" class="active"><i class="fas fa-shield-alt"></i> KYC Verification</a>
-            <a href="/cds-cooperative/referral"><i class="fas fa-user-plus"></i> Referral Program</a>
-            <a href="/cds-cooperative/memberContract"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
-            <a href="/cds-cooperative/report"><i class="fas fa-chart-line"></i> Reports</a>
-            <% if (user.role && user.role.name !== 'member') { %>
-            <a href="/admin-dashboard"><i class="fas fa-tachometer-alt"></i> Administration</a>
-            <% } %>
-            <a href="/logout" style="color:rgba(255,255,255,.52);margin-top:4px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <span class="step-label">Address</span>
+      </div>
+      <div class="progress-step">
+        <div class="step-dot <%= kycDocs.passportPhoto ? 'done' : '' %>" id="stepPassport">
+          <i class="fas fa-<%= kycDocs.passportPhoto ? 'check' : 'camera' %>"></i>
         </div>
+        <span class="step-label">Passport</span>
+      </div>
+      <div class="progress-step">
+        <div class="step-dot <%= kycDocs.idFile ? 'done' : '' %>" id="stepId">
+          <i class="fas fa-<%= kycDocs.idFile ? 'check' : 'id-card' %>"></i>
+        </div>
+        <span class="step-label">ID</span>
+      </div>
+      <div class="progress-step">
+        <div class="step-dot <%= kycDocs.signature ? 'done' : '' %>" id="stepSig">
+          <i class="fas fa-<%= kycDocs.signature ? 'check' : 'signature' %>"></i>
+        </div>
+        <span class="step-label">Signature</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Important notice -->
+  <div class="alert-bar alert-warn">
+    <i class="fas fa-exclamation-triangle"></i>
+    <div>
+      <strong style="display:block;margin-bottom:3px;">Important</strong>
+      All documents must be clear and legible · Max 5MB per file · Accepted: JPG, PNG, PDF · Reviewed within 24–48 hours
+    </div>
+  </div>
+
+  <form id="kycForm" enctype="multipart/form-data">
+
+    <!-- ══ 1. PROOF OF ADDRESS ══ -->
+    <div class="doc-card <%= kycDocs.addressProof ? 'done' : '' %> open" id="addressProofItem">
+      <div class="doc-card-header" onclick="toggleCard('addressProofItem')">
+        <div class="doc-icon doc-icon-blue"><i class="fas fa-file-invoice"></i></div>
+        <div class="doc-info">
+          <div class="doc-name">Proof of Address</div>
+          <div class="doc-sub">Utility bill, bank statement, or official letter</div>
+        </div>
+        <div class="doc-status <%= kycDocs.addressProof ? 'uploaded' : 'pending' %>" id="addressStatus">
+          <i class="fas fa-<%= kycDocs.addressProof ? 'check-circle' : 'clock' %>"></i>
+          <%= kycDocs.addressProof ? 'Uploaded' : 'Pending' %>
+        </div>
+        <i class="fas fa-chevron-down doc-chevron"></i>
+      </div>
+      <div class="doc-body">
+        <% if (kycDocs.addressProof) { %>
+        <div class="existing-banner" id="addressExistingBanner">
+          <div class="existing-info">
+            <i class="fas fa-check-circle"></i> Document already on file
+          </div>
+          <div class="existing-actions">
+            <button type="button" class="btn-view" data-url="<%= kycDocs.addressProof %>" data-title="Proof of Address" onclick="viewDocument(this.dataset.url,this.dataset.title)">
+              <i class="fas fa-eye"></i> View
+            </button>
+            <button type="button" class="btn-replace" onclick="toggleReplaceArea('address')">
+              <i class="fas fa-sync-alt"></i> Replace
+            </button>
+          </div>
+        </div>
+        <div class="replace-wrap" id="addressReplaceArea">
+        <% } %>
+        <div class="upload-zone" id="addressUploadArea" onclick="document.getElementById('addressProof').click()">
+          <div class="upload-zone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-zone-text">Click to upload or drag and drop</div>
+          <div class="upload-zone-hint">PDF, JPG, PNG · Max 5MB</div>
+        </div>
+        <input type="file" id="addressProof" name="addressProof" accept="image/*,.pdf" style="display:none;" onchange="handleFileSelect(this,'address',5)">
+        <div class="file-pill" id="addressPreview">
+          <div class="file-pill-name"><i class="fas fa-file-alt"></i><span id="addressFileName"></span></div>
+          <button type="button" class="btn-rm" onclick="removeFile('address')"><i class="fas fa-times"></i></button>
+        </div>
+        <% if (kycDocs.addressProof) { %></div><% } %>
+        <div class="reqs">
+          <div class="reqs-title">Requirements</div>
+          <div class="req-item"><i class="fas fa-check"></i> Must show your full name</div>
+          <div class="req-item"><i class="fas fa-check"></i> Must show your current address</div>
+          <div class="req-item"><i class="fas fa-check"></i> Dated within last 3 months</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Top Navbar -->
-    <div class="top-navbar">
-        <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.5rem;"
-           onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
-        <div class="flex-grow-1">
-            <h5 class="mb-0 fw-bold d-none d-md-block" style="color:var(--primary)">KYC Verification</h5>
-            <h6 class="mb-0 fw-bold d-md-none" style="color:var(--primary)">KYC Verification</h6>
-            <small class="text-muted">Upload your documents to activate your account</small>
+    <!-- ══ 2. PASSPORT PHOTO ══ -->
+    <div class="doc-card <%= kycDocs.passportPhoto ? 'done' : '' %>" id="passportItem">
+      <div class="doc-card-header" onclick="toggleCard('passportItem')">
+        <div class="doc-icon doc-icon-green"><i class="fas fa-camera"></i></div>
+        <div class="doc-info">
+          <div class="doc-name">Passport Photograph</div>
+          <div class="doc-sub">Clear photo with white or light background</div>
         </div>
+        <div class="doc-status <%= kycDocs.passportPhoto ? 'uploaded' : 'pending' %>" id="passportStatus">
+          <i class="fas fa-<%= kycDocs.passportPhoto ? 'check-circle' : 'clock' %>"></i>
+          <%= kycDocs.passportPhoto ? 'Uploaded' : 'Pending' %>
+        </div>
+        <i class="fas fa-chevron-down doc-chevron"></i>
+      </div>
+      <div class="doc-body">
+        <% if (kycDocs.passportPhoto) { %>
+        <div class="existing-banner" id="passportExistingBanner">
+          <div class="existing-info"><i class="fas fa-check-circle"></i> Photo already on file</div>
+          <div class="existing-actions">
+            <button type="button" class="btn-view" data-url="<%= kycDocs.passportPhoto %>" data-title="Passport Photo" onclick="viewDocument(this.dataset.url,this.dataset.title)">
+              <i class="fas fa-eye"></i> View
+            </button>
+            <button type="button" class="btn-replace" onclick="toggleReplaceArea('passport')">
+              <i class="fas fa-sync-alt"></i> Replace
+            </button>
+          </div>
+        </div>
+        <div class="replace-wrap" id="passportReplaceArea">
+        <% } %>
+        <div class="upload-zone" id="passportUploadArea" onclick="document.getElementById('passportPhoto').click()">
+          <div class="upload-zone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-zone-text">Click to upload or drag and drop</div>
+          <div class="upload-zone-hint">JPG, PNG · Max 5MB</div>
+        </div>
+        <input type="file" id="passportPhoto" name="passportPhoto" accept="image/*" style="display:none;" onchange="handleFileSelect(this,'passport',5)">
+        <div class="file-pill" id="passportPreview">
+          <div class="file-pill-name"><i class="fas fa-file-image"></i><span id="passportFileName"></span></div>
+          <button type="button" class="btn-rm" onclick="removeFile('passport')"><i class="fas fa-times"></i></button>
+        </div>
+        <% if (kycDocs.passportPhoto) { %></div><% } %>
+        <div class="reqs">
+          <div class="reqs-title">Requirements</div>
+          <div class="req-item"><i class="fas fa-check"></i> Recent photo — within 6 months</div>
+          <div class="req-item"><i class="fas fa-check"></i> Clear face, no sunglasses</div>
+          <div class="req-item"><i class="fas fa-check"></i> White or light background</div>
+        </div>
+      </div>
     </div>
 
-    <div class="main-content-wrapper">
-    <div class="kyc-container">
-
-        <div class="kyc-header">
-            <div class="position-relative" style="z-index:1;">
-                <i class="fas fa-shield-alt fa-3x mb-3"></i>
-                <h2 class="fw-bold mb-2">Complete Your KYC Verification</h2>
-                <p class="mb-0 opacity-90">Upload your documents to activate your account</p>
-            </div>
+    <!-- ══ 3. GOVERNMENT ID ══ -->
+    <div class="doc-card <%= kycDocs.idFile ? 'done' : '' %>" id="idItem">
+      <div class="doc-card-header" onclick="toggleCard('idItem')">
+        <div class="doc-icon doc-icon-amber"><i class="fas fa-id-badge"></i></div>
+        <div class="doc-info">
+          <div class="doc-name">Government-Issued ID</div>
+          <div class="doc-sub">National ID, Passport, Driver's License, or Voter's Card</div>
         </div>
-
-        <div class="kyc-card">
-
-            <% if (success) { %>
-            <div class="document-section"><div class="alert-custom alert-success-custom mb-0"><i class="fas fa-check-circle me-2"></i><%= success %></div></div>
-            <% } %>
-            <% if (error) { %>
-            <div class="document-section"><div class="alert-custom mb-0" style="background:#fee2e2;border-color:#ef4444;color:#991b1b;"><i class="fas fa-times-circle me-2"></i><%= error %></div></div>
-            <% } %>
-
-            <!-- Progress -->
-            <div class="progress-container">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="mb-0 fw-bold" style="color:var(--primary);"><i class="fas fa-tasks me-2"></i>Verification Progress</h6>
-                    <span class="fw-bold" style="color:var(--primary);" id="progressText">0% Complete</span>
-                </div>
-                <div class="progress"><div class="progress-bar" role="progressbar" id="progressBar" style="width:0%"></div></div>
-                <small class="text-muted mt-2 d-block">Complete all sections to activate your account</small>
-            </div>
-
-            <!-- Notice -->
-            <div class="document-section">
-                <div class="alert-custom alert-warning-custom mb-0">
-                    <h6 class="fw-bold mb-2"><i class="fas fa-exclamation-triangle me-2"></i>Important Information</h6>
-                    <ul class="mb-0 ps-3">
-                        <li>All documents must be clear and legible</li>
-                        <li>File size should not exceed 5MB per document</li>
-                        <li>Accepted formats: JPG, PNG, PDF</li>
-                        <li>Documents will be reviewed within 24-48 hours</li>
-                    </ul>
-                </div>
-            </div>
-
-            <form id="kycForm" enctype="multipart/form-data">
-
-                <!-- ══ PROOF OF ADDRESS ══ -->
-                <div class="document-section">
-                    <h5 class="fw-bold mb-4" style="color:var(--primary);"><i class="fas fa-home me-2"></i>Proof of Address</h5>
-                    <div class="document-item <%= kycDocs.addressProof ? 'completed' : '' %>" id="addressProofItem">
-                        <div class="d-flex align-items-start">
-                            <div class="document-icon" style="background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);color:white;"><i class="fas fa-file-invoice"></i></div>
-                            <div class="document-content">
-                                <div class="document-header">
-                                    <div class="document-title">
-                                        <h6 class="mb-1 fw-bold">Address Verification Document</h6>
-                                        <small class="text-muted">Utility bill, bank statement, or official letter</small>
-                                    </div>
-                                    <span class="status-badge <%= kycDocs.addressProof ? 'status-completed' : 'status-pending' %>" id="addressStatus">
-                                        <% if (kycDocs.addressProof) { %><i class="fas fa-check-circle"></i> Uploaded<% } else { %><i class="fas fa-clock"></i> Pending<% } %>
-                                    </span>
-                                </div>
-                                <% if (kycDocs.addressProof) { %>
-                                <div class="existing-doc-banner" id="addressExistingBanner">
-                                    <div class="doc-info"><i class="fas fa-check-circle fa-lg" style="color:#10b981;"></i>Document already on file</div>
-                                    <div class="doc-actions">
-                                        <button type="button" class="btn-view-doc" data-url="<%= kycDocs.addressProof %>" data-title="Proof of Address" onclick="viewDocument(this.dataset.url,this.dataset.title)"><i class="fas fa-eye"></i> View</button>
-                                        <button type="button" class="btn-replace-doc" onclick="toggleReplaceArea('address')"><i class="fas fa-sync-alt"></i> Replace</button>
-                                    </div>
-                                </div>
-                                <div class="replace-area-wrapper" id="addressReplaceArea">
-                                <% } %>
-                                <div class="upload-area" id="addressUploadArea" onclick="document.getElementById('addressProof').click()">
-                                    <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color:var(--primary-light);"></i>
-                                    <p class="mb-1 fw-semibold">Click to upload or drag and drop</p>
-                                    <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
-                                </div>
-                                <input type="file" id="addressProof" name="addressProof" accept="image/*,.pdf" class="d-none" onchange="handleFileSelect(this,'address',5)">
-                                <div class="file-preview" id="addressPreview">
-                                    <div class="d-flex align-items-center gap-2"><i class="fas fa-file-alt text-primary"></i><span id="addressFileName"></span></div>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile('address')"><i class="fas fa-times"></i></button>
-                                </div>
-                                <% if (kycDocs.addressProof) { %></div><% } %>
-                                <div class="requirements-list">
-                                    <small class="text-muted fw-semibold d-block mb-2">Requirements:</small>
-                                    <ul class="small mb-0 ps-0" style="list-style:none;">
-                                        <li><i class="fas fa-check-circle text-success me-2"></i>Must show your full name</li>
-                                        <li><i class="fas fa-check-circle text-success me-2"></i>Must show your current address</li>
-                                        <li><i class="fas fa-check-circle text-success me-2"></i>Should be dated within last 3 months</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ══ PASSPORT PHOTO ══ -->
-                <div class="document-section">
-                    <h5 class="fw-bold mb-4" style="color:var(--primary);"><i class="fas fa-user me-2"></i>Passport Photograph</h5>
-                    <div class="document-item <%= kycDocs.passportPhoto ? 'completed' : '' %>" id="passportItem">
-                        <div class="d-flex align-items-start">
-                            <div class="document-icon" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;"><i class="fas fa-camera"></i></div>
-                            <div class="document-content">
-                                <div class="document-header">
-                                    <div class="document-title">
-                                        <h6 class="mb-1 fw-bold">Recent Passport Photo</h6>
-                                        <small class="text-muted">Clear photo with white background</small>
-                                    </div>
-                                    <span class="status-badge <%= kycDocs.passportPhoto ? 'status-completed' : 'status-pending' %>" id="passportStatus">
-                                        <% if (kycDocs.passportPhoto) { %><i class="fas fa-check-circle"></i> Uploaded<% } else { %><i class="fas fa-clock"></i> Pending<% } %>
-                                    </span>
-                                </div>
-                                <% if (kycDocs.passportPhoto) { %>
-                                <div class="existing-doc-banner" id="passportExistingBanner">
-                                    <div class="doc-info"><i class="fas fa-check-circle fa-lg" style="color:#10b981;"></i>Photo already on file</div>
-                                    <div class="doc-actions">
-                                        <button type="button" class="btn-view-doc" data-url="<%= kycDocs.passportPhoto %>" data-title="Passport Photo" onclick="viewDocument(this.dataset.url,this.dataset.title)"><i class="fas fa-eye"></i> View</button>
-                                        <button type="button" class="btn-replace-doc" onclick="toggleReplaceArea('passport')"><i class="fas fa-sync-alt"></i> Replace</button>
-                                    </div>
-                                </div>
-                                <div class="replace-area-wrapper" id="passportReplaceArea">
-                                <% } %>
-                                <div class="upload-area" id="passportUploadArea" onclick="document.getElementById('passportPhoto').click()">
-                                    <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color:var(--primary-light);"></i>
-                                    <p class="mb-1 fw-semibold">Click to upload or drag and drop</p>
-                                    <small class="text-muted">JPG, PNG (Max 5MB)</small>
-                                </div>
-                                <input type="file" id="passportPhoto" name="passportPhoto" accept="image/*" class="d-none" onchange="handleFileSelect(this,'passport',5)">
-                                <div class="file-preview" id="passportPreview">
-                                    <div class="d-flex align-items-center gap-2"><i class="fas fa-file-image text-primary"></i><span id="passportFileName"></span></div>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile('passport')"><i class="fas fa-times"></i></button>
-                                </div>
-                                <% if (kycDocs.passportPhoto) { %></div><% } %>
-                                <div class="requirements-list">
-                                    <small class="text-muted fw-semibold d-block mb-2">Requirements:</small>
-                                    <ul class="small mb-0 ps-0" style="list-style:none;">
-                                        <li><i class="fas fa-check-circle text-success me-2"></i>Recent photo (within 6 months)</li>
-                                        <li><i class="fas fa-check-circle text-success me-2"></i>Clear face, no sunglasses</li>
-                                        <li><i class="fas fa-check-circle text-success me-2"></i>White or light background</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ══ GOVERNMENT ID ══ -->
-                <div class="document-section">
-                    <h5 class="fw-bold mb-4" style="color:var(--primary);"><i class="fas fa-id-card me-2"></i>Means of Identification</h5>
-                    <div class="document-item <%= kycDocs.idFile ? 'completed' : '' %>" id="idItem">
-                        <div class="d-flex align-items-start">
-                            <div class="document-icon" style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:white;"><i class="fas fa-id-badge"></i></div>
-                            <div class="document-content">
-                                <div class="document-header">
-                                    <div class="document-title">
-                                        <h6 class="mb-1 fw-bold">Government-Issued ID</h6>
-                                        <small class="text-muted">National ID, Passport, Driver's License, or Voter's Card</small>
-                                    </div>
-                                    <span class="status-badge <%= kycDocs.idFile ? 'status-completed' : 'status-pending' %>" id="idStatus">
-                                        <% if (kycDocs.idFile) { %><i class="fas fa-check-circle"></i> Uploaded<% } else { %><i class="fas fa-clock"></i> Pending<% } %>
-                                    </span>
-                                </div>
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">ID Type *</label>
-                                        <select class="form-select" id="idType" name="idType">
-                                            <option value="">Select ID Type</option>
-                                            <option value="nin"      <%= user.idType === 'nin'      ? 'selected' : '' %>>National ID (NIN)</option>
-                                            <option value="passport" <%= user.idType === 'passport' ? 'selected' : '' %>>International Passport</option>
-                                            <option value="drivers"  <%= user.idType === 'drivers'  ? 'selected' : '' %>>Driver's License</option>
-                                            <option value="voters"   <%= user.idType === 'voters'   ? 'selected' : '' %>>Voter's Card</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">ID Number *</label>
-                                        <input type="text" class="form-control" id="idNumber" name="idNumber" placeholder="Enter ID number" value="<%= user.idNumber || '' %>">
-                                    </div>
-                                </div>
-                                <% if (kycDocs.idFile) { %>
-                                <div class="existing-doc-banner" id="idExistingBanner">
-                                    <div class="doc-info"><i class="fas fa-check-circle fa-lg" style="color:#10b981;"></i>ID document already on file</div>
-                                    <div class="doc-actions">
-                                        <button type="button" class="btn-view-doc" data-url="<%= kycDocs.idFile %>" data-title="Government ID" onclick="viewDocument(this.dataset.url,this.dataset.title)"><i class="fas fa-eye"></i> View</button>
-                                        <button type="button" class="btn-replace-doc" onclick="toggleReplaceArea('id')"><i class="fas fa-sync-alt"></i> Replace</button>
-                                    </div>
-                                </div>
-                                <div class="replace-area-wrapper" id="idReplaceArea">
-                                <% } %>
-                                <div class="upload-area" id="idUploadArea" onclick="document.getElementById('idFile').click()">
-                                    <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color:var(--primary-light);"></i>
-                                    <p class="mb-1 fw-semibold">Click to upload or drag and drop</p>
-                                    <small class="text-muted">PDF, JPG, PNG (Max 5MB)</small>
-                                </div>
-                                <input type="file" id="idFile" name="idFile" accept="image/*,.pdf" class="d-none" onchange="handleFileSelect(this,'id',5)">
-                                <div class="file-preview" id="idPreview">
-                                    <div class="d-flex align-items-center gap-2"><i class="fas fa-file-alt text-primary"></i><span id="idFileName"></span></div>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile('id')"><i class="fas fa-times"></i></button>
-                                </div>
-                                <% if (kycDocs.idFile) { %></div><% } %>
-                                <div class="requirements-list">
-                                    <small class="text-muted fw-semibold d-block mb-2">Requirements:</small>
-                                    <ul class="small mb-0 ps-0" style="list-style:none;">
-                                        <li><i class="fas fa-check-circle text-success me-2"></i>Must be valid and not expired</li>
-                                        <li><i class="fas fa-check-circle text-success me-2"></i>All text must be clearly readable</li>
-                                        <li><i class="fas fa-check-circle text-success me-2"></i>Upload both front and back if applicable</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ══ SIGNATURE ══ -->
-                <div class="document-section">
-                    <h5 class="fw-bold mb-4" style="color:var(--primary);"><i class="fas fa-signature me-2"></i>Signature</h5>
-                    <div class="document-item <%= kycDocs.signature ? 'completed' : '' %>" id="signatureItem">
-                        <div class="d-flex align-items-start">
-                            <div class="document-icon" style="background:linear-gradient(135deg,#06b6d4 0%,#0891b2 100%);color:white;"><i class="fas fa-pen-fancy"></i></div>
-                            <div class="document-content">
-                                <div class="document-header">
-                                    <div class="document-title">
-                                        <h6 class="mb-1 fw-bold">Digital Signature</h6>
-                                        <small class="text-muted">Your signature on white paper or digital signature</small>
-                                    </div>
-                                    <span class="status-badge <%= kycDocs.signature ? 'status-completed' : 'status-pending' %>" id="signatureStatus">
-                                        <% if (kycDocs.signature) { %><i class="fas fa-check-circle"></i> Uploaded<% } else { %><i class="fas fa-clock"></i> Pending<% } %>
-                                    </span>
-                                </div>
-                                <% if (kycDocs.signature) { %>
-                                <div class="existing-doc-banner" id="signatureExistingBanner">
-                                    <div class="doc-info"><i class="fas fa-check-circle fa-lg" style="color:#10b981;"></i>Signature already on file</div>
-                                    <div class="doc-actions">
-                                        <button type="button" class="btn-view-doc" data-url="<%= kycDocs.signature %>" data-title="Signature" onclick="viewDocument(this.dataset.url,this.dataset.title)"><i class="fas fa-eye"></i> View</button>
-                                        <button type="button" class="btn-replace-doc" onclick="toggleReplaceArea('signature')"><i class="fas fa-sync-alt"></i> Replace</button>
-                                    </div>
-                                </div>
-                                <div class="replace-area-wrapper" id="signatureReplaceArea">
-                                <% } %>
-                                <div class="upload-area" id="signatureUploadArea" onclick="document.getElementById('signature').click()">
-                                    <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color:var(--primary-light);"></i>
-                                    <p class="mb-1 fw-semibold">Click to upload or drag and drop</p>
-                                    <small class="text-muted">JPG, PNG (Max 2MB)</small>
-                                </div>
-                                <input type="file" id="signature" name="signature" accept="image/*" class="d-none" onchange="handleFileSelect(this,'signature',2)">
-                                <div class="file-preview" id="signaturePreview">
-                                    <div class="d-flex align-items-center gap-2"><i class="fas fa-file-image text-primary"></i><span id="signatureFileName"></span></div>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile('signature')"><i class="fas fa-times"></i></button>
-                                </div>
-                                <% if (kycDocs.signature) { %></div><% } %>
-                                <div class="requirements-list">
-                                    <small class="text-muted fw-semibold d-block mb-2">Requirements:</small>
-                                    <ul class="small mb-0 ps-0" style="list-style:none;">
-                                        <li><i class="fas fa-check-circle text-success me-2"></i>Clear and legible signature</li>
-                                        <li><i class="fas fa-check-circle text-success me-2"></i>On white or light background</li>
-                                        <li><i class="fas fa-check-circle text-success me-2"></i>No watermarks or logos</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Submit -->
-                <div class="document-section">
-                    <div class="alert-custom alert-info-custom mb-4">
-                        <h6 class="fw-bold mb-2"><i class="fas fa-info-circle me-2"></i>Before You Submit</h6>
-                        <ul class="mb-0 ps-3">
-                            <li>Ensure all documents are clear and readable</li>
-                            <li>Verify that your information matches across all documents</li>
-                            <li>Your documents will be kept confidential and secure</li>
-                            <li>You'll receive a notification once verification is complete</li>
-                        </ul>
-                    </div>
-                    <div class="d-flex gap-3 flex-wrap justify-content-between align-items-center">
-                        <a href="/cds-cooperative/dashboard" class="btn btn-outline-primary">
-                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-                        </a>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <span id="submitText"><%= kycStatus === 'submitted' ? 'Update Documents' : 'Submit Documents' %></span>
-                            <div class="loading-spinner ms-2" id="submitSpinner"></div>
-                        </button>
-                    </div>
-                </div>
-
-            </form>
+        <div class="doc-status <%= kycDocs.idFile ? 'uploaded' : 'pending' %>" id="idStatus">
+          <i class="fas fa-<%= kycDocs.idFile ? 'check-circle' : 'clock' %>"></i>
+          <%= kycDocs.idFile ? 'Uploaded' : 'Pending' %>
         </div>
-    </div>
-    </div>
-</div>
-
-<div class="powered-by">
-    <strong style="color:var(--primary);">Cloudbaam</strong> Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong>
-</div>
-
-<!-- Document Viewer Modal -->
-<div class="modal fade" id="docViewerModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content" style="border-radius:20px;overflow:hidden;">
-            <div class="modal-header" style="background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);color:white;border:none;">
-                <h5 class="modal-title fw-bold" id="docViewerTitle"><i class="fas fa-file-alt me-2"></i>View Document</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-0" style="background:#111;min-height:400px;display:flex;align-items:center;justify-content:center;">
-                <div id="docViewerContent" style="width:100%;"></div>
-            </div>
-            <div class="modal-footer" style="border-top:1px solid #e2e8f0;">
-                <a id="docOpenLink" href="#" target="_blank" class="btn btn-outline-primary btn-sm">
-                    <i class="fas fa-external-link-alt me-1"></i>Open in New Tab
-                </a>
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            </div>
+        <i class="fas fa-chevron-down doc-chevron"></i>
+      </div>
+      <div class="doc-body">
+        <div class="id-fields">
+          <div class="form-group">
+            <label class="form-label">ID Type *</label>
+            <select class="form-control" id="idType" name="idType">
+              <option value="">Select type…</option>
+              <option value="nin"      <%= user.idType === 'nin'      ? 'selected' : '' %>>National ID (NIN)</option>
+              <option value="passport" <%= user.idType === 'passport' ? 'selected' : '' %>>International Passport</option>
+              <option value="drivers"  <%= user.idType === 'drivers'  ? 'selected' : '' %>>Driver's License</option>
+              <option value="voters"   <%= user.idType === 'voters'   ? 'selected' : '' %>>Voter's Card</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ID Number *</label>
+            <input type="text" class="form-control" id="idNumber" name="idNumber" placeholder="Enter ID number" value="<%= user.idNumber || '' %>">
+          </div>
         </div>
+        <% if (kycDocs.idFile) { %>
+        <div class="existing-banner" id="idExistingBanner">
+          <div class="existing-info"><i class="fas fa-check-circle"></i> ID document already on file</div>
+          <div class="existing-actions">
+            <button type="button" class="btn-view" data-url="<%= kycDocs.idFile %>" data-title="Government ID" onclick="viewDocument(this.dataset.url,this.dataset.title)">
+              <i class="fas fa-eye"></i> View
+            </button>
+            <button type="button" class="btn-replace" onclick="toggleReplaceArea('id')">
+              <i class="fas fa-sync-alt"></i> Replace
+            </button>
+          </div>
+        </div>
+        <div class="replace-wrap" id="idReplaceArea">
+        <% } %>
+        <div class="upload-zone" id="idUploadArea" onclick="document.getElementById('idFile').click()">
+          <div class="upload-zone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-zone-text">Click to upload or drag and drop</div>
+          <div class="upload-zone-hint">PDF, JPG, PNG · Max 5MB</div>
+        </div>
+        <input type="file" id="idFile" name="idFile" accept="image/*,.pdf" style="display:none;" onchange="handleFileSelect(this,'id',5)">
+        <div class="file-pill" id="idPreview">
+          <div class="file-pill-name"><i class="fas fa-file-alt"></i><span id="idFileName"></span></div>
+          <button type="button" class="btn-rm" onclick="removeFile('id')"><i class="fas fa-times"></i></button>
+        </div>
+        <% if (kycDocs.idFile) { %></div><% } %>
+        <div class="reqs">
+          <div class="reqs-title">Requirements</div>
+          <div class="req-item"><i class="fas fa-check"></i> Valid and not expired</div>
+          <div class="req-item"><i class="fas fa-check"></i> All text clearly readable</div>
+          <div class="req-item"><i class="fas fa-check"></i> Upload front and back if applicable</div>
+        </div>
+      </div>
     </div>
+
+    <!-- ══ 4. SIGNATURE ══ -->
+    <div class="doc-card <%= kycDocs.signature ? 'done' : '' %>" id="signatureItem">
+      <div class="doc-card-header" onclick="toggleCard('signatureItem')">
+        <div class="doc-icon doc-icon-cyan"><i class="fas fa-pen-fancy"></i></div>
+        <div class="doc-info">
+          <div class="doc-name">Signature</div>
+          <div class="doc-sub">Signature on white paper or digital signature</div>
+        </div>
+        <div class="doc-status <%= kycDocs.signature ? 'uploaded' : 'pending' %>" id="signatureStatus">
+          <i class="fas fa-<%= kycDocs.signature ? 'check-circle' : 'clock' %>"></i>
+          <%= kycDocs.signature ? 'Uploaded' : 'Pending' %>
+        </div>
+        <i class="fas fa-chevron-down doc-chevron"></i>
+      </div>
+      <div class="doc-body">
+        <% if (kycDocs.signature) { %>
+        <div class="existing-banner" id="signatureExistingBanner">
+          <div class="existing-info"><i class="fas fa-check-circle"></i> Signature already on file</div>
+          <div class="existing-actions">
+            <button type="button" class="btn-view" data-url="<%= kycDocs.signature %>" data-title="Signature" onclick="viewDocument(this.dataset.url,this.dataset.title)">
+              <i class="fas fa-eye"></i> View
+            </button>
+            <button type="button" class="btn-replace" onclick="toggleReplaceArea('signature')">
+              <i class="fas fa-sync-alt"></i> Replace
+            </button>
+          </div>
+        </div>
+        <div class="replace-wrap" id="signatureReplaceArea">
+        <% } %>
+        <div class="upload-zone" id="signatureUploadArea" onclick="document.getElementById('signature').click()">
+          <div class="upload-zone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-zone-text">Click to upload or drag and drop</div>
+          <div class="upload-zone-hint">JPG, PNG · Max 2MB</div>
+        </div>
+        <input type="file" id="signature" name="signature" accept="image/*" style="display:none;" onchange="handleFileSelect(this,'signature',2)">
+        <div class="file-pill" id="signaturePreview">
+          <div class="file-pill-name"><i class="fas fa-file-image"></i><span id="signatureFileName"></span></div>
+          <button type="button" class="btn-rm" onclick="removeFile('signature')"><i class="fas fa-times"></i></button>
+        </div>
+        <% if (kycDocs.signature) { %></div><% } %>
+        <div class="reqs">
+          <div class="reqs-title">Requirements</div>
+          <div class="req-item"><i class="fas fa-check"></i> Clear and legible signature</div>
+          <div class="req-item"><i class="fas fa-check"></i> White or light background</div>
+          <div class="req-item"><i class="fas fa-check"></i> No watermarks or logos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SUBMIT ══ -->
+    <div class="submit-section">
+      <div class="alert-bar alert-info" style="margin-bottom:14px;">
+        <i class="fas fa-info-circle"></i>
+        <span>All documents are encrypted and stored securely. You'll be notified once verification is complete.</span>
+      </div>
+      <div class="submit-row">
+        <a href="/cds-cooperative/dashboard" class="btn-back">
+          <i class="fas fa-arrow-left" style="font-size:11px;"></i> Dashboard
+        </a>
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <i class="fas fa-paper-plane" style="font-size:12px;"></i>
+          <span id="submitText"><%= kycStatus === 'submitted' ? 'Update Documents' : 'Submit Documents' %></span>
+          <div class="submit-spinner" id="submitSpinner"></div>
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+</main>
+
+<div class="powered-by">Powered by <strong>JESZ LIMITED</strong></div>
+
+<!-- ════ DOCUMENT VIEWER MODAL ════ -->
+<div class="modal-backdrop" id="docViewerModal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="docViewerTitle"><i class="fas fa-file-alt" style="color:var(--accent);margin-right:8px;font-size:13px;"></i>View Document</span>
+      <button class="modal-close" onclick="closeModal('docViewerModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="docViewerContent" style="background:var(--bg-card2);border-radius:var(--r-md);min-height:300px;display:flex;align-items:center;justify-content:center;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('docViewerModal')">Close</button>
+      <a class="btn btn-primary" id="docOpenLink" href="#" target="_blank" style="text-align:center;">
+        <i class="fas fa-external-link-alt" style="margin-right:6px;font-size:11px;"></i>Open in New Tab
+      </a>
+    </div>
+  </div>
 </div>
 
 <!-- Success Modal -->
-<div class="modal fade" id="successModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-center p-4" style="border-radius:20px;">
-            <div class="modal-body">
-                <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
-                <h5 class="fw-bold mb-3">Documents Submitted Successfully!</h5>
-                <p class="text-muted mb-4">Your documents have been submitted for verification. Our team will review them within 24–48 hours.</p>
-                <button class="btn btn-success w-100" onclick="window.location.href='/cds-cooperative/kyc'">View KYC Status</button>
-            </div>
-        </div>
+<div class="modal-backdrop" id="successModal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon success"><i class="fas fa-check"></i></div>
+      <div class="result-title">Documents Submitted!</div>
+      <div class="result-msg">Our team will review your documents within 24–48 hours. You'll receive a notification once verified.</div>
+      <button class="btn btn-primary" onclick="window.location.href='/cds-cooperative/kyc'" style="max-width:220px;margin:0 auto;">
+        <i class="fas fa-shield-alt" style="margin-right:6px;font-size:11px;"></i>View KYC Status
+      </button>
     </div>
+  </div>
 </div>
 
 <!-- Error Modal -->
-<div class="modal fade" id="errorModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-center p-4" style="border-radius:20px;">
-            <div class="modal-body">
-                <i class="fas fa-times-circle text-danger fa-4x mb-3"></i>
-                <h5 class="fw-bold mb-3">Submission Failed</h5>
-                <p class="text-muted mb-4" id="errorMessage">Unable to submit documents. Please try again.</p>
-                <button class="btn btn-danger w-100" data-bs-dismiss="modal">Try Again</button>
-            </div>
-        </div>
+<div class="modal-backdrop" id="errorModal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon error"><i class="fas fa-times"></i></div>
+      <div class="result-title">Submission Failed</div>
+      <div class="result-msg" id="errorMessage">Unable to submit documents. Please try again.</div>
+      <button class="btn btn-ghost" onclick="closeModal('errorModal')" style="max-width:180px;margin:0 auto;">Try Again</button>
     </div>
+  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<!-- ════ SCRIPTS ════ -->
 <script>
-    /* ── Server state from EJS ── */
-    const serverDocs = {
-        address:   <%= kycDocs.addressProof  ? 'true' : 'false' %>,
-        passport:  <%= kycDocs.passportPhoto ? 'true' : 'false' %>,
-        id:        <%= kycDocs.idFile         ? 'true' : 'false' %>,
-        signature: <%= kycDocs.signature      ? 'true' : 'false' %>
-    };
+/* ── Server state ── */
+const serverDocs = {
+  address:   <%= kycDocs.addressProof  ? 'true' : 'false' %>,
+  passport:  <%= kycDocs.passportPhoto ? 'true' : 'false' %>,
+  id:        <%= kycDocs.idFile        ? 'true' : 'false' %>,
+  signature: <%= kycDocs.signature     ? 'true' : 'false' %>
+};
+const keyToItem  = { address:'addressProofItem', passport:'passportItem', id:'idItem', signature:'signatureItem' };
+const keyToInput = { address:'addressProof', passport:'passportPhoto', id:'idFile', signature:'signature' };
+const uploadedFiles = { address:false, passport:false, id:false, signature:false };
 
-    const keyToItem  = { address:'addressProofItem', passport:'passportItem', id:'idItem', signature:'signatureItem' };
-    const keyToInput = { address:'addressProof', passport:'passportPhoto', id:'idFile', signature:'signature' };
-    const uploadedFiles = { address:false, passport:false, id:false, signature:false };
+/* ── Theme ── */
+(function(){
+  const saved = localStorage.getItem('cds-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+})();
+function toggleTheme(){
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('cds-theme', next);
+  updateThemeUI(next);
+}
+function updateThemeUI(t){
+  const i = document.getElementById('togIcon');
+  if(i) i.className = t === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+}
 
-    /* ── Progress ── */
-    function updateProgress() {
-        const done = ['address','passport','id','signature'].filter(t => serverDocs[t] || uploadedFiles[t]).length;
-        const pct  = Math.round((done / 4) * 100);
-        document.getElementById('progressBar').style.width = pct + '%';
-        document.getElementById('progressText').textContent = pct + '% Complete';
+/* ── Sidebar ── */
+function toggleSidebar(){
+  const open = document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', e => {
+  const sb = document.getElementById('sidebar');
+  const hb = document.querySelector('.hamburger');
+  if(window.innerWidth <= 900 && sb.classList.contains('open') && !sb.contains(e.target) && !hb.contains(e.target)) closeSidebar();
+});
+
+/* ── Modals ── */
+function openModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-backdrop').forEach(el => {
+  el.addEventListener('click', e => { if(e.target === el){ el.classList.remove('open'); document.body.style.overflow=''; }});
+});
+
+/* ── Toast ── */
+function showToast(msg, type = 'success'){
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+  wrap.appendChild(t);
+  requestAnimationFrame(() => { requestAnimationFrame(() => t.classList.add('show')); });
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 4000);
+}
+
+/* ── Collapsible doc cards ── */
+function toggleCard(id){
+  document.getElementById(id).classList.toggle('open');
+}
+
+/* ── Progress ── */
+function updateProgress(){
+  const keys = ['address','passport','id','signature'];
+  const done = keys.filter(t => serverDocs[t] || uploadedFiles[t]).length;
+  const pct  = Math.round((done / 4) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = pct + '% Complete';
+  keys.forEach((k, i) => {
+    const stepIds = ['stepAddress','stepPassport','stepId','stepSig'];
+    const icons   = ['home','camera','id-card','signature'];
+    const dot = document.getElementById(stepIds[i]);
+    if(!dot) return;
+    const isDone = serverDocs[k] || uploadedFiles[k];
+    dot.className = 'step-dot' + (isDone ? ' done' : '');
+    dot.innerHTML = `<i class="fas fa-${isDone ? 'check' : icons[i]}"></i>`;
+  });
+}
+updateProgress();
+
+/* ── Toggle replace area ── */
+function toggleReplaceArea(key){
+  const area = document.getElementById(key + 'ReplaceArea');
+  if(!area) return;
+  const opening = !area.classList.contains('open');
+  area.classList.toggle('open', opening);
+  const banner = document.getElementById(key + 'ExistingBanner');
+  if(banner){
+    const btn = banner.querySelector('.btn-replace');
+    if(btn) btn.innerHTML = opening
+      ? '<i class="fas fa-times"></i> Cancel'
+      : '<i class="fas fa-sync-alt"></i> Replace';
+  }
+}
+
+/* ── Document viewer ── */
+function viewDocument(url, title){
+  document.getElementById('docViewerTitle').innerHTML = `<i class="fas fa-file-alt" style="color:var(--accent);margin-right:8px;font-size:13px;"></i>${title}`;
+  document.getElementById('docOpenLink').href = url;
+  const content = document.getElementById('docViewerContent');
+  const isPdf   = url.toLowerCase().endsWith('.pdf');
+  if(isPdf){
+    content.innerHTML = `<iframe src="${url}" style="width:100%;height:70vh;border:none;border-radius:var(--r-md);display:block;"></iframe>`;
+  } else {
+    content.innerHTML = `<img src="${url}" alt="${title}"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+      style="max-width:100%;max-height:70vh;object-fit:contain;display:block;margin:auto;padding:12px;border-radius:var(--r-md);">
+      <div style="display:none;color:var(--muted);padding:2rem;text-align:center;font-size:13px;">
+        Could not load image. <br><a href="${url}" target="_blank" style="color:var(--accent);">Open in new tab →</a>
+      </div>`;
+  }
+  openModal('docViewerModal');
+}
+
+/* ── File selection ── */
+function handleFileSelect(input, key, maxMB){
+  const file = input.files[0];
+  if(!file) return;
+  if(file.size > maxMB * 1024 * 1024){
+    showToast(`File too large — max ${maxMB}MB`, 'error');
+    input.value = ''; return;
+  }
+  const imageOnly  = (key === 'signature' || key === 'passport');
+  const validTypes = imageOnly ? ['image/jpeg','image/png'] : ['image/jpeg','image/png','application/pdf'];
+  if(!validTypes.includes(file.type)){
+    showToast('Invalid file type. Use JPG, PNG' + (imageOnly ? '' : ' or PDF'), 'error');
+    input.value = ''; return;
+  }
+  uploadedFiles[key] = true;
+  updateProgress();
+  document.getElementById(key + 'FileName').textContent = file.name;
+  document.getElementById(key + 'Preview').classList.add('show');
+  document.getElementById(keyToItem[key])?.classList.add('done');
+  updateStatusBadge(key, 'uploaded');
+}
+
+/* ── Remove file ── */
+function removeFile(key){
+  const input = document.getElementById(keyToInput[key]);
+  if(input) input.value = '';
+  uploadedFiles[key] = false;
+  updateProgress();
+  document.getElementById(key + 'Preview')?.classList.remove('show');
+  if(!serverDocs[key]){
+    document.getElementById(keyToItem[key])?.classList.remove('done');
+    updateStatusBadge(key, 'pending');
+  }
+}
+
+/* ── Status badge ── */
+function updateStatusBadge(key, status){
+  const badge = document.getElementById(key + 'Status');
+  if(!badge) return;
+  badge.className = 'doc-status ' + (status === 'uploaded' ? 'uploaded' : 'pending');
+  badge.innerHTML  = status === 'uploaded'
+    ? '<i class="fas fa-check-circle"></i> Uploaded'
+    : '<i class="fas fa-clock"></i> Pending';
+}
+
+/* ── Drag & drop ── */
+const dropMap = {
+  addressUploadArea:   { inputId:'addressProof',  key:'address',   maxMB:5 },
+  passportUploadArea:  { inputId:'passportPhoto', key:'passport',  maxMB:5 },
+  idUploadArea:        { inputId:'idFile',         key:'id',        maxMB:5 },
+  signatureUploadArea: { inputId:'signature',      key:'signature', maxMB:2 }
+};
+document.querySelectorAll('.upload-zone').forEach(zone => {
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    const info = dropMap[zone.id];
+    if(!info || !e.dataTransfer.files.length) return;
+    const input = document.getElementById(info.inputId);
+    input.files = e.dataTransfer.files;
+    handleFileSelect(input, info.key, info.maxMB);
+  });
+});
+
+/* ── Form submit ── */
+document.getElementById('kycForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const allPresent = ['address','passport','id','signature'].every(t => serverDocs[t] || uploadedFiles[t]);
+  if(!allPresent){ showToast('Please upload all required documents first.', 'error'); return; }
+  const idType   = document.getElementById('idType').value;
+  const idNumber = document.getElementById('idNumber').value.trim();
+  if(!idType || !idNumber){ showToast('Please select ID type and enter your ID number.', 'error'); return; }
+
+  const btn     = document.getElementById('submitBtn');
+  const txt     = document.getElementById('submitText');
+  const spinner = document.getElementById('submitSpinner');
+  btn.disabled = true; txt.textContent = 'Uploading…'; spinner.style.display = 'inline-block';
+
+  try{
+    const res    = await fetch('/kyc/submit', { method:'POST', body: new FormData(kycForm) });
+    const result = await res.json();
+    if(res.ok && result.status){
+      openModal('successModal');
+    } else {
+      document.getElementById('errorMessage').textContent = result.message || 'Unable to submit. Please try again.';
+      openModal('errorModal');
     }
-    updateProgress();
+  } catch {
+    document.getElementById('errorMessage').textContent = 'Network error. Please check your connection.';
+    openModal('errorModal');
+  } finally {
+    btn.disabled = false; spinner.style.display = 'none';
+    txt.textContent = (serverDocs.address && serverDocs.passport && serverDocs.id && serverDocs.signature)
+      ? 'Update Documents' : 'Submit Documents';
+  }
+});
 
-    /* ── Toggle replace area ── */
-    function toggleReplaceArea(key) {
-        const area = document.getElementById(key + 'ReplaceArea');
-        if (!area) return;
-        const opening = !area.classList.contains('open');
-        area.classList.toggle('open', opening);
-        const banner = document.getElementById(key + 'ExistingBanner');
-        if (banner) {
-            const btn = banner.querySelector('.btn-replace-doc');
-            if (btn) btn.innerHTML = opening
-                ? '<i class="fas fa-times"></i> Cancel'
-                : '<i class="fas fa-sync-alt"></i> Replace';
-        }
-    }
+/* ── Loader ── */
+window.addEventListener('load', () => {
+  const l = document.getElementById('loader');
+  setTimeout(() => { l.style.opacity = '0'; setTimeout(() => l.style.display = 'none', 500); }, 400);
+});
 
-    /* ── Document viewer — handles both images and PDFs ── */
-    function viewDocument(url, title) {
-        document.getElementById('docViewerTitle').innerHTML = '<i class="fas fa-file-alt me-2"></i>' + title;
-        document.getElementById('docOpenLink').href = url;
+/* ── Entrance animation ── */
+document.querySelectorAll('.doc-card').forEach((card, i) => {
+  card.style.opacity = '0'; card.style.transform = 'translateY(16px)';
+  card.style.transition = 'opacity .4s ease, transform .4s ease';
+  setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'translateY(0)'; }, 300 + i * 100);
+});
 
-        const content = document.getElementById('docViewerContent');
-        const isPdf   = url.toLowerCase().endsWith('.pdf');
-
-        if (isPdf) {
-            content.innerHTML = `<iframe src="${url}" style="width:100%;height:80vh;border:none;display:block;"></iframe>`;
-        } else {
-            content.innerHTML = `<img src="${url}" alt="${title}"
-                onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
-                style="max-width:100%;max-height:80vh;object-fit:contain;display:block;margin:auto;padding:12px;">
-                <div style="display:none;color:#fff;padding:2rem;text-align:center;">
-                    Could not load image.
-                    <br><a href="${url}" target="_blank" style="color:#5cc8ff;">Open in new tab →</a>
-                </div>`;
-        }
-
-        new bootstrap.Modal(document.getElementById('docViewerModal')).show();
-    }
-
-    /* ── File selection ── */
-    function handleFileSelect(input, key, maxMB) {
-        const file = input.files[0];
-        if (!file) return;
-
-        if (file.size > maxMB * 1024 * 1024) {
-            alert(`File size exceeds ${maxMB}MB. Please choose a smaller file.`);
-            input.value = '';
-            return;
-        }
-
-        const imageOnly  = (key === 'signature' || key === 'passport');
-        const validTypes = imageOnly
-            ? ['image/jpeg','image/png']
-            : ['image/jpeg','image/png','application/pdf'];
-
-        if (!validTypes.includes(file.type)) {
-            alert('Invalid file type. Please upload JPG, PNG' + (imageOnly ? '' : ' or PDF'));
-            input.value = '';
-            return;
-        }
-
-        uploadedFiles[key] = true;
-        updateProgress();
-
-        const nameEl    = document.getElementById(key + 'FileName');
-        const previewEl = document.getElementById(key + 'Preview');
-        if (nameEl)    nameEl.textContent = file.name;
-        if (previewEl) previewEl.classList.add('show');
-
-        document.getElementById(keyToItem[key])?.classList.add('completed');
-        updateStatusBadge(key, 'completed');
-    }
-
-    /* ── Remove file ── */
-    function removeFile(key) {
-        const input = document.getElementById(keyToInput[key]);
-        if (input) input.value = '';
-        uploadedFiles[key] = false;
-        updateProgress();
-        document.getElementById(key + 'Preview')?.classList.remove('show');
-        if (!serverDocs[key]) {
-            document.getElementById(keyToItem[key])?.classList.remove('completed');
-            updateStatusBadge(key, 'pending');
-        }
-    }
-
-    /* ── Status badge ── */
-    function updateStatusBadge(key, status) {
-        const badge = document.getElementById(key + 'Status');
-        if (!badge) return;
-        badge.className = 'status-badge ' + (status === 'completed' ? 'status-completed' : 'status-pending');
-        badge.innerHTML  = status === 'completed'
-            ? '<i class="fas fa-check-circle"></i> Uploaded'
-            : '<i class="fas fa-clock"></i> Pending';
-    }
-
-    /* ── Drag & drop ── */
-    const dropMap = {
-        addressUploadArea:   { inputId:'addressProof',  key:'address',   maxMB:5 },
-        passportUploadArea:  { inputId:'passportPhoto', key:'passport',  maxMB:5 },
-        idUploadArea:        { inputId:'idFile',         key:'id',        maxMB:5 },
-        signatureUploadArea: { inputId:'signature',      key:'signature', maxMB:2 }
-    };
-    document.querySelectorAll('.upload-area').forEach(area => {
-        area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('dragover'); });
-        area.addEventListener('dragleave', () => area.classList.remove('dragover'));
-        area.addEventListener('drop', e => {
-            e.preventDefault(); area.classList.remove('dragover');
-            const info = dropMap[area.id];
-            if (!info || !e.dataTransfer.files.length) return;
-            const input = document.getElementById(info.inputId);
-            input.files = e.dataTransfer.files;
-            handleFileSelect(input, info.key, info.maxMB);
-        });
-    });
-
-    /* ── Form submit ── */
-    document.getElementById('kycForm').addEventListener('submit', async e => {
-        e.preventDefault();
-
-        const allPresent = ['address','passport','id','signature'].every(t => serverDocs[t] || uploadedFiles[t]);
-        if (!allPresent) { alert('Please upload all required documents before submitting.'); return; }
-
-        const idType   = document.getElementById('idType').value;
-        const idNumber = document.getElementById('idNumber').value.trim();
-        if (!idType || !idNumber) { alert('Please select ID type and enter your ID number.'); return; }
-
-        const btn     = document.getElementById('submitBtn');
-        const txt     = document.getElementById('submitText');
-        const spinner = document.getElementById('submitSpinner');
-        btn.disabled = true; txt.textContent = 'Uploading…'; spinner.style.display = 'inline-block';
-
-        try {
-            const res    = await fetch('/kyc/submit', { method:'POST', body:new FormData(kycForm) });
-            const result = await res.json();
-            if (res.ok && result.status) {
-                new bootstrap.Modal(document.getElementById('successModal')).show();
-            } else {
-                document.getElementById('errorMessage').textContent = result.message || 'Unable to submit. Please try again.';
-                new bootstrap.Modal(document.getElementById('errorModal')).show();
-            }
-        } catch {
-            document.getElementById('errorMessage').textContent = 'Network error. Please check your connection.';
-            new bootstrap.Modal(document.getElementById('errorModal')).show();
-        } finally {
-            btn.disabled = false; spinner.style.display = 'none';
-            txt.textContent = (serverDocs.address && serverDocs.passport && serverDocs.id && serverDocs.signature)
-                ? 'Update Documents' : 'Submit Documents';
-        }
-    });
-
-    /* ── Loader ── */
-    window.addEventListener('load', () => {
-        const loader = document.getElementById('loader-screen');
-        const main   = document.getElementById('main-content');
-        setTimeout(() => {
-            loader.style.opacity = '0'; loader.style.transition = 'opacity 0.6s ease';
-            setTimeout(() => { loader.style.display = 'none'; main.classList.remove('hidden'); }, 600);
-        }, 200);
-    });
-
-    /* ── Sidebar (mobile) ── */
-    document.addEventListener('click', e => {
-        const sidebar = document.getElementById('sidebar');
-        const toggle  = document.querySelector('.fa-bars');
-        if (window.innerWidth <= 992 && sidebar.classList.contains('active') &&
-            !sidebar.contains(e.target) && toggle && !toggle.contains(e.target)) {
-            sidebar.classList.remove('active');
-        }
-    });
-
-    /* ── Entrance animation ── */
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.document-item').forEach((item, i) => {
-            item.style.opacity = '0'; item.style.transform = 'translateY(20px)';
-            item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-            setTimeout(() => { item.style.opacity = '1'; item.style.transform = 'translateY(0)'; }, i * 150);
-        });
-    });
+/* ── Server flash toasts ── */
+<% if (typeof success !== 'undefined' && success) { %>
+window.addEventListener('load', () => showToast('<%= success %>', 'success'));
+<% } %>
+<% if (typeof error !== 'undefined' && error) { %>
+window.addEventListener('load', () => showToast('<%= error %>', 'error'));
+<% } %>
 </script>
 </body>
 </html>

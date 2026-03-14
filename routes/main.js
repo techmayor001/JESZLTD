@@ -34,14 +34,14 @@ router.get('/cds-cooperative', async (req, res) => {
   try {
     const referralCode = req.query.ref || "";
 
-    // Fetch settings (create default if not exists)
     const settings = await Settings.getSettings();
     const registrationFee = settings.registrationFees.adultRegistrationFee;
+    const companyAccount  = settings.companyAccount;
 
-    // Render the page and pass registration fee
-    res.render("auth/auth", { 
+    res.render("auth/auth", {
       referralCode,
-      registrationFee 
+      registrationFee,
+      companyAccount,   // { bankName, accountNumber, accountName }
     });
   } catch (err) {
     console.error("Error fetching settings:", err);
@@ -505,7 +505,7 @@ router.get("/cds-cooperative/profile", async (req, res) => {
     const user = await User.findById(req.user._id)
       .populate({
         path: "account",
-        populate: { path: "accountType" }  // ← populates the MemberType document
+        populate: { path: "accountType" }
       })
       .populate("loans")
       .populate("referredUsers")
@@ -517,9 +517,12 @@ router.get("/cds-cooperative/profile", async (req, res) => {
     const activeLoan = user.loans.find(l => l.status === "active") || null;
     const ROI = user.account?.monthlyROI || 0;
     const totalReferrals = user.referredUsers.length;
-
-    // Pull memberType fields cleanly for the template
     const memberType = user.account?.accountType || null;
+
+    // ── ADD THIS ──
+    const pendingGuarantorCount = user.guarantorRequests
+      ? user.guarantorRequests.filter(r => r.status === "pending").length
+      : 0;
 
     const nigeriaBanks = [
       "Access Bank", "Citibank Nigeria", "Ecobank Nigeria", "Fidelity Bank",
@@ -533,11 +536,12 @@ router.get("/cds-cooperative/profile", async (req, res) => {
 
     res.render("dashboard/user/profile", {
       user,
-      memberType,        // ← MemberType document, fully populated
+      memberType,
       accountBalance,
       loan: activeLoan,
       ROI,
       totalReferrals,
+      pendingGuarantorCount,   // ← ADD
       success: req.query.success || null,
       error: req.query.error || null,
       nigeriaBanks
@@ -703,9 +707,123 @@ router.post('/update-next-of-kin', async (req, res) => {
 
 
 // REPORT PAGE STARTS HERE 
-router.get('/user/report', (req,res)=>{
-  res.render("dashboard/report")
-})
+// ══════════════════════════════════════════════════
+//  REPORT ROUTES — paste these into your router file
+// ══════════════════════════════════════════════════
+
+// ── Financial Report (deposits, withdrawals, ROI) ──
+router.get('/cds-cooperative/report', async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) return res.redirect('/login');
+
+    const user = await User.findById(req.user._id)
+      .populate({ path: 'account', populate: { path: 'accountType' } })
+      .populate('loans')
+      .exec();
+
+    if (!user) return res.redirect('/login');
+
+    const pendingGuarantorCount = user.guarantorRequests
+      ? user.guarantorRequests.filter(r => r.status === 'pending').length : 0;
+
+    // Fetch all transactions for this user
+    // Replace 'Transaction' with your actual model name
+    const transactions = await Transaction.find({ user: user._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const accountBalance = user.account?.balance || 0;
+
+    // ROI / pool data — reuse the same logic as your dashboard route
+    const allMembersTotalSavings = await Account.aggregate([
+      { $group: { _id: null, total: { $sum: '$balance' } } }
+    ]).then(r => r[0]?.total || 0);
+
+    const totalInterestCollected = await Transaction.aggregate([
+      { $match: { type: 'roi' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]).then(r => r[0]?.total || 0);
+
+    const roiOperatingCharge = 20; // % — adjust to your setting
+    const companyCharge      = totalInterestCollected * (roiOperatingCharge / 100);
+    const netInterestForRoi  = totalInterestCollected - companyCharge;
+    const sharePercentage    = allMembersTotalSavings > 0
+      ? ((accountBalance / allMembersTotalSavings) * 100).toFixed(2) : 0;
+    const interestRate       = user.account?.accountType?.loanInterestRate || 5;
+    const monthlyROI         = netInterestForRoi * (parseFloat(sharePercentage) / 100);
+
+    res.render('dashboard/user/report', {
+      user,
+      transactions,
+      pendingGuarantorCount,
+      accountBalance,
+      monthlyROI,
+      interestRate,
+      sharePercentage,
+      totalInterestCollected,
+      netInterestForRoi,
+      companyCharge,
+      roiOperatingCharge,
+    });
+  } catch (err) {
+    console.error('Financial report error:', err);
+    res.status(500).send('Error loading financial report.');
+  }
+});
+
+
+// ── Loan Report ──
+router.get('/cds-cooperative/loan-report', async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) return res.redirect('/login');
+
+    const user = await User.findById(req.user._id)
+      .populate({ path: 'account', populate: { path: 'accountType' } })
+      .populate('loans')
+      .exec();
+
+    if (!user) return res.redirect('/login');
+
+    const pendingGuarantorCount = user.guarantorRequests
+      ? user.guarantorRequests.filter(r => r.status === 'pending').length : 0;
+
+    // All loans for this user (populated with duration/loanType if needed)
+    const loans = await Loan.find({ user: user._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const activeLoan = loans.find(l => l.status === 'active' || l.status === 'overdue') || null;
+
+    // Repayment transactions linked to any of the user's loans
+    // Replace 'LoanPayment' with your actual payment/transaction model
+    const loanPayments = await Transaction.find({
+      user: user._id,
+      type: 'loan-repayment',
+    }).sort({ createdAt: -1 }).lean();
+
+    // Days until due for active loan
+    let daysUntilDue = null;
+    if (activeLoan && activeLoan.dueDate) {
+      const diff = new Date(activeLoan.dueDate) - new Date();
+      daysUntilDue = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    }
+
+    const interestRate = user.account?.accountType?.loanInterestRate || 5;
+
+    res.render('dashboard/user/loan-report', {
+      user,
+      loans,
+      activeLoan,
+      loanPayments,
+      pendingGuarantorCount,
+      interestRate,
+      daysUntilDue,
+    });
+  } catch (err) {
+    console.error('Loan report error:', err);
+    res.status(500).send('Error loading loan report.');
+  }
+});
 
 
 

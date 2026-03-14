@@ -1,1321 +1,1122 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Club De Stars - My Profile | Powered by JESZ LIMITED</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #1e3a8a;
-            --primary-dark: #1e40af;
-            --primary-light: #3b82f6;
-            --secondary: #64748b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #06b6d4;
-            --sidebar-width: 280px;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-            min-height: 100vh;
-        }
-        
-        /* Sidebar Styles */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            z-index: 1040;
-            transition: all 0.3s;
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
-        }
-        
-        .sidebar-header {
-            padding: 2rem 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        
-        .logo-box {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        
-        .sidebar-menu {
-            padding: 1rem 0;
-        }
-        
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            padding: 0.875rem 1.5rem;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-            font-weight: 500;
-        }
-        
-        .sidebar-menu a:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-        }
-        
-        /* Top Navbar */
-        .top-navbar {
-            position: fixed;
-            top: 0;
-            left: var(--sidebar-width);
-            right: 0;
-            height: 75px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
-            z-index: 1030;
-            display: flex;
-            align-items: center;
-            padding: 0 2rem;
-            transition: all 0.3s;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            margin-top: 75px;
-            padding: 2rem;
-            min-height: calc(100vh - 75px);
-            transition: all 0.3s;
-        }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-        }
-        
-        .member-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.3);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .club-member-badge {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-        
-        .card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            background: white;
-            border: 1px solid rgba(30, 58, 138, 0.05);
-            margin-bottom: 2rem;
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
-            padding: 1.5rem;
-            border-radius: 20px 20px 0 0 !important;
-        }
-        
-        .profile-avatar {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 3.5rem;
-            font-weight: bold;
-            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.25);
-            position: relative;
-            margin: 0 auto;
-        }
-        
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-        
-        .edit-avatar-btn {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .edit-avatar-btn:hover {
-            background: var(--primary);
-            color: white;
-            transform: scale(1.1);
-        }
-        
-        .info-row {
-            padding: 1.25rem 0;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        
-        .info-label {
-            font-weight: 600;
-            color: var(--secondary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .info-label i {
-            color: var(--primary);
-            width: 20px;
-        }
-        
-        .info-value {
-            font-weight: 600;
-            color: var(--primary-dark);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none;
-            padding: 0.7rem 1.75rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
-        }
-        
-        .btn-outline-primary {
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            border-radius: 12px;
-            padding: 0.7rem 1.75rem;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-outline-primary:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-        }
-        
-        .status-badge {
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .status-active {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-            color: #065f46;
-        }
-        
-        .status-pending {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            color: #92400e;
-        }
-        
-        .security-item {
-            padding: 1.25rem;
-            border-radius: 16px;
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.02) 0%, rgba(59, 130, 246, 0.02) 100%);
-            border: 2px solid rgba(30, 58, 138, 0.1);
-            margin-bottom: 1rem;
-            transition: all 0.3s;
-        }
-        
-        .security-item:hover {
-            border-color: var(--primary);
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
-        }
-        
-        .alert-info-custom {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border: 2px solid #3b82f6;
-            border-radius: 16px;
-            padding: 1.25rem;
-            color: #1e40af;
-        }
-        
-        .powered-by {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 12px 20px;
-            border-radius: 30px;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--primary);
-            z-index: 1000;
-        }
-        
-        @media (max-width: 992px) {
-            .sidebar {
-                left: calc(-1 * var(--sidebar-width));
-            }
-            
-            .sidebar.active {
-                left: 0;
-            }
-            
-            .top-navbar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 1.5rem;
-            }
-            
-            .powered-by {
-                bottom: 10px;
-                right: 10px;
-                font-size: 0.75rem;
-                padding: 8px 12px;
-            }
-            
-            .profile-avatar {
-                width: 100px;
-                height: 100px;
-                font-size: 2.5rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .info-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-        }
-    </style>
-            <style>
-        .hidden {
-  display: none;
-}
-
-.loader-screen {
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(135deg, #0a1a2f, #102a44);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.logo span {
-  font-size: 52px;
-  font-weight: 600;
-  color: #5cc8ff;
-  display: inline-block;
-  animation: float 1.5s infinite ease-in-out;
-  letter-spacing: 1px;
-}
-
-.logo span:nth-child(n) {
-  animation-delay: calc(var(--i) * 0.1s);
-}
-
-.logo span:nth-child(1) { --i: 0; }
-.logo span:nth-child(2) { --i: 1; }
-.logo span:nth-child(3) { --i: 2; }
-.logo span:nth-child(4) { --i: 3; }
-.logo span:nth-child(5) { --i: 4; }
-.logo span:nth-child(6) { --i: 5; }
-.logo span:nth-child(7) { --i: 6; }
-.logo span:nth-child(8) { --i: 7; }
-.logo span:nth-child(9) { --i: 8; }
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); opacity: 0.4; }
-  50% { transform: translateY(-14px); opacity: 1; }
-}
-    </style>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-</head>
-<body>
-        <div id="loader-screen" class="loader-screen">
-        <div class="logo">
-            <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
-        </div>
-    </div>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <div class="logo-box">
-
-                    <img src="/media/assets/logo/log.png" alt="" width="100%" height="100%">
-                </div>
-                <div>
-                    <h5 class="mb-0 fw-bold" style="text-transform: uppercase;">Club De Stars</h5>
-                    <small class="opacity-75">COOPERATIVE SOCIETY LIMITED</small>
-                </div>
-            </div>
-            <div class="member-badge mt-2 <%= user.membershipID.startsWith('CD') ? 'club-member-badge' : 'non-club-member-badge' %>">
-                <i class="fas <%= user.membershipID.startsWith('CD') ? 'fa-star' : 'fa-user' %>"></i>
-                <span><%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Non-Club Member' %></span>
-            </div>
-
-        </div>
-         <div class="sidebar-menu">
-            <a href="/cds-cooperative/dashboard"><i class="fas fa-home"></i> Dashboard</a>
-            <a href="/cds-cooperative/transaction"><i class="fas fa-exchange-alt"></i> Transactions</a>
-            <a href="/cds-cooperative/loan"><i class="fas fa-hand-holding-usd"></i> My Loans</a>
-            <a href="/cds-cooperative/guarantorRequest">
-                <i class="fas fa-user-friends"></i> Guarantor Requests
-                <% if (pendingGuarantorCount > 0) { %>
-                    <span class="badge bg-danger ms-auto" style="font-size:0.68rem;"><%= pendingGuarantorCount %></span>
-                <% } %>
-            </a>
-            <a href="/manage/kiddies-account"><i class="fas fa-users"></i> Kiddies Account</a>
-            <a href="/cds-cooperative/profile" class="active"><i class="fas fa-user-circle"></i> My Profile</a>
-            <a href="/cds-cooperative/kyc"><i class="fas fa-shield-alt"></i> KYC Verification</a>
-            <a href="/cds-cooperative/referral"><i class="fas fa-user-plus"></i> Referral Program</a>
-            <a href="/cds-cooperative/memberContract"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
-            <a href="/cds-cooperative/report"><i class="fas fa-chart-line"></i> Reports</a>
-            <% if (user.role && user.role.name !== 'member') { %>
-            <a href="/admin-dashboard"><i class="fas fa-tachometer-alt"></i> Administration</a>
-            <% } %>
-            <a href="/logout" style="color:rgba(255,255,255,0.52);margin-top:4px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
-        </div>
-    </div>
-
-    <!-- Top Navbar -->
-    <div class="top-navbar">
-        <i class="fas fa-bars d-lg-none me-3"
-           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-           onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
-
-                 <div class="flex-grow-1">
-        <h6 class="mb-0 fw-bold d-none d-sm-block" style="color:var(--primary);font-size:0.9rem;">
-            Welcome back, <%= user.firstName %>! 👋
-        </h6>
-        <h6 class="mb-0 fw-bold d-sm-none" style="color:var(--primary);font-size:0.85rem;">Hi, <%= user.firstName %>! 👋</h6>
-        <small class="text-muted d-none d-md-block" style="font-size:0.73rem;">
-            Member ID: <%= user.membershipID %> &nbsp;|&nbsp;
-            <%= new Date(user.createdAt).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) %>
-        </small>
-        <!-- <small class="text-muted d-md-none" style="font-size:0.72rem;"><%= user.membershipID %></small> -->
-    </div>
-
-                     <%
-      let sbadgeClass = "bg-secondary bg-opacity-10 text-secondary";
-      if (user.status === "active")   sbadgeClass = "bg-success bg-opacity-10 text-success";
-      if (user.status === "rejected") sbadgeClass = "bg-danger bg-opacity-10 text-danger";
-    %>
-    <span class="badge <%= sbadgeClass %> ms-2" style="font-size:0.7rem;padding:5px 10px;">
-        <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
-    </span>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Profile Header Card -->
-        <div class="card">
-         <div class="card-body text-center py-5">
-    <div class="profile-avatar mb-3">
-        <% if (user.displayPicture) { %>
-            <img src="<%= user.displayPicture.replace('public\\', '/').replace(/\\/g, '/') %>" 
-                 alt="Profile Photo" 
-                 class="rounded-circle" 
-                 style="width:100px; height:100px; object-fit:cover;">
-        <% } else { %>
-            <span><%= user.firstName.charAt(0) + user.lastName.charAt(0) %></span>
-        <% } %>
-        <div class="edit-avatar-btn" onclick="openModal('avatarModal')">
-            <i class="fas fa-camera"></i>
-        </div>
-    </div>
-
-    <h3 class="fw-bold mb-1"><%= user.firstName %> <%= user.lastName %></h3>
-    <p class="text-muted mb-3">Member ID: <%= user.membershipID %></p>
-
-    <div class="d-flex justify-content-center gap-2 flex-wrap">
-        <% 
-            let memberBadgeClass = "status-badge bg-light text-secondary";
-            let memberBadgeText = "Pending Member";
-            if (user.status === "active") {
-                memberBadgeClass = "status-badge status-active";
-                memberBadgeText = "Active Member";
-            } else if (user.status === "rejected") {
-                memberBadgeClass = "status-badge bg-danger text-white";
-                memberBadgeText = "Rejected Member";
-            }
-        %>
-        <span class="<%= memberBadgeClass %>">
-            <i class="fas fa-check-circle me-1"></i><%= memberBadgeText %>
-        </span>
-
-        <% 
-            let kycBadgeClass = "status-badge bg-light text-secondary";
-            let kycBadgeText = "KYC Pending ✗";
-            if (user.Payment && user.Payment.status === "paid") {
-                kycBadgeClass = "status-badge" // your existing KYC verified style
-                kycBadgeText = "KYC Verified ✓";
-            }
-        %>
-        <span class="<%= kycBadgeClass %>" style="<%= user.Payment && user.Payment.status === 'paid' ? 'background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af;' : '' %>">
-            <i class="fas fa-shield-alt me-1"></i><%= kycBadgeText %>
-        </span>
-    </div>
-</div>
-
-        </div>
-
-        <div class="row g-4">
-            <!-- Personal Information -->
-          <div class="col-lg-8">
-  <!-- Personal Information -->
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0 fw-bold" style="color: var(--primary);">
-        <i class="fas fa-user me-2"></i>Personal Information
-      </h5>
-      <button class="btn btn-outline-primary btn-sm" onclick="openModal('editProfileModal')">
-        <i class="fas fa-edit me-2"></i>Edit Profile
-      </button>
-    </div>
-    <div class="card-body">
-      <div class="info-row">
-        <span class="info-label"><i class="fas fa-user"></i>Full Name</span>
-        <span class="info-value"><%= user.firstName %> <%= user.lastName %></span>
-      </div>
-      <div class="info-row">
-        <span class="info-label"><i class="fas fa-envelope"></i>Email Address</span>
-        <span class="info-value"><%= user.email %></span>
-      </div>
-      <div class="info-row">
-        <span class="info-label"><i class="fas fa-phone"></i>Phone Number</span>
-        <span class="info-value"><%= user.phone %></span>
-      </div>
-      <div class="info-row">
-        <span class="info-label"><i class="fas fa-calendar"></i>Date of Birth</span>
-        <span class="info-value"><%= new Date(user.dob).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) %></span>
-      </div>
-      <div class="info-row">
-        <span class="info-label"><i class="fas fa-map-marker-alt"></i>Address</span>
-        <span class="info-value"><%= user.address %></span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-        <h5 class="mb-0 fw-bold" style="color: var(--primary);">
-            <i class="fas fa-building me-2"></i>Account Information
-        </h5>
-    </div>
-     <div class="card">
-    <div class="card-header">
-        <h5 class="mb-0 fw-bold" style="color: var(--primary);">
-            <i class="fas fa-building me-2"></i>Account Information
-        </h5>
-    </div>
-    <div class="card-body">
-
-        <div class="info-row">
-            <span class="info-label"><i class="fas fa-id-card"></i>Membership ID</span>
-            <span class="info-value"><%= user.membershipID || 'N/A' %></span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label"><i class="fas fa-star"></i>Account Type</span>
-            <span class="info-value">
-                <% if (memberType) { %>
-                    <span class="badge" style="background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);color:white;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:600;">
-                        <%= memberType.name %>
-                    </span>
-                <% } else { %>
-                    N/A
-                <% } %>
-            </span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label"><i class="fas fa-calendar-check"></i>Member Since</span>
-            <span class="info-value"><%= user.createdAt.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) %></span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label"><i class="fas fa-percentage"></i>Loan Interest Rate</span>
-            <span class="info-value">
-                <% if (memberType) { %>
-                    <span style="color:#1e40af;font-weight:700;">
-                        <%= memberType.interestRate %>% <small class="text-muted fw-normal">p.a.</small>
-                    </span>
-                <% } else { %>
-                    N/A
-                <% } %>
-            </span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label"><i class="fas fa-hand-holding-usd"></i>Max Loan Amount</span>
-            <span class="info-value">
-                <% if (memberType && memberType.maxLoanAmount > 0) { %>
-                    ₦<%= memberType.maxLoanAmount.toLocaleString() %>
-                <% } else { %>
-                    <span class="text-muted">Unlimited</span>
-                <% } %>
-            </span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label"><i class="fas fa-percent"></i>Loan-to-Deposit Ratio</span>
-            <span class="info-value">
-                <% if (memberType) { %>
-                    <%= memberType.loanToDepositRatio %>%
-                <% } else { %>
-                    N/A
-                <% } %>
-            </span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label"><i class="fas fa-shield-check"></i>Account Status</span>
-            <span class="status-badge <%= user.status === 'active' ? 'status-active' : 'status-pending' %>">
-                <i class="fas fa-circle me-1" style="font-size:0.5rem;vertical-align:middle;"></i>
-                <%= user.status ? user.status.charAt(0).toUpperCase() + user.status.slice(1) : 'Pending' %>
-            </span>
-        </div>
-
-        <div class="info-row">
-            <span class="info-label"><i class="fas fa-chart-line"></i>ROI Frequency</span>
-            <span class="info-value text-capitalize">
-                <%= memberType?.roiDistributionFrequency || 'Monthly' %>
-            </span>
-        </div>
-
-    </div>
-  </div>
-
-</div>
-
-
-  <!-- Bank Details -->
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0 fw-bold" style="color: var(--primary);">
-        <i class="fas fa-university me-2"></i>Bank Details
-      </h5>
-      <button class="btn btn-outline-primary btn-sm" onclick="openModal('editBankModal')">
-        <i class="fas fa-edit me-2"></i>Update
-      </button>
-    </div>
-    <div class="card-body">
-      <div class="info-row">
-        <span class="info-label"><i class="fas fa-university"></i>Bank Name</span>
-        <span class="info-value"><%= user.bankDetails?.bankName || 'N/A' %></span>
-      </div>
-      <div class="info-row">
-        <span class="info-label"><i class="fas fa-credit-card"></i>Account Number</span>
-        <span class="info-value"><%= user.bankDetails?.accountNumber || 'N/A' %></span>
-      </div>
-      <div class="info-row">
-        <span class="info-label"><i class="fas fa-user-tag"></i>Account Name</span>
-        <span class="info-value"><%= user.bankDetails?.accountName || 'N/A' %></span>
-      </div>
-    </div>
-  </div>
-
-<!-- NEXT OF KIN DETAILS -->
-  <div class="card mt-4">
-  <div class="card-header d-flex justify-content-between align-items-center">
-    <h5 class="mb-0 fw-bold" style="color: var(--primary);">
-      <i class="fas fa-user-friends me-2"></i>Next of Kin Details
-    </h5>
-    <button class="btn btn-outline-primary btn-sm" onclick="openModal('editNextOfKinModal')">
-      <i class="fas fa-edit me-2"></i>Edit
-    </button>
-  </div>
-
-  <div class="card-body">
-
-    <div class="info-row">
-      <span class="info-label"><i class="fas fa-user"></i> Full Name</span>
-      <span class="info-value"><%= user.nextOfKin?.fullName || 'N/A' %></span>
-    </div>
-
-    <div class="info-row">
-      <span class="info-label"><i class="fas fa-link"></i> Relationship</span>
-      <span class="info-value"><%= user.nextOfKin?.relationship || 'N/A' %></span>
-    </div>
-
-    <div class="info-row">
-      <span class="info-label"><i class="fas fa-phone"></i> Phone</span>
-      <span class="info-value"><%= user.nextOfKin?.phone || 'N/A' %></span>
-    </div>
-
-    <div class="info-row">
-      <span class="info-label"><i class="fas fa-map-marker-alt"></i> Address</span>
-      <span class="info-value"><%= user.nextOfKin?.address || 'N/A' %></span>
-    </div>
-
-  </div>
-</div>
-
-<!-- EDIT NEXT OF KIN MODAL -->
-<div class="modal fade" id="editNextOfKinModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Edit Next of Kin Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <form action="/update-next-of-kin" method="POST">
-        <div class="modal-body">
-
-          <div class="mb-3">
-            <label class="form-label">Full Name</label>
-            <input type="text" class="form-control" name="fullName" 
-              value="<%= user.nextOfKin?.fullName || '' %>" required>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Relationship</label>
-            <input type="text" class="form-control" name="relationship" 
-              value="<%= user.nextOfKin?.relationship || '' %>" required>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Phone Number</label>
-            <input type="text" class="form-control" name="phone" 
-              value="<%= user.nextOfKin?.phone || '' %>" required>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Address</label>
-            <textarea class="form-control" name="address" rows="2" required><%= user.nextOfKin?.address || '' %></textarea>
-          </div>
-
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
-
-      </form>
-
-    </div>
-  </div>
-</div>
-<!-- ENDS  -->
-
-</div>
-
-
-            <!-- Right Sidebar -->
-            <div class="col-lg-4">
-                <!-- Security Settings -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0 fw-bold" style="color: var(--primary);">
-                            <i class="fas fa-shield-alt me-2"></i>Security
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="security-item">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div>
-                                    <h6 class="mb-1 fw-bold">Password</h6>
-                                </div>
-                                <i class="fas fa-chevron-right" style="color: var(--primary);"></i>
-                            </div>
-                            <button class="btn btn-outline-primary btn-sm w-100 mt-2" onclick="openModal('changePasswordModal')">
-                                Change Password
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Stats -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0 fw-bold" style="color: var(--primary);">
-                            <i class="fas fa-chart-bar me-2"></i>Quick Stats
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="info-row">
-                            <span class="info-label">
-                                <i class="fas fa-piggy-bank"></i>
-                                Total Savings
-                            </span>
-                            <span class="info-value text-success">₦<%= accountBalance.toLocaleString() %></span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <i class="fas fa-hand-holding-usd"></i>
-                                Active Loans
-                            </span>
-                            <span class="info-value text-warning">
-                                ₦<%= loan ? loan.amount.toLocaleString() : 0 %>
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <i class="fas fa-percentage"></i>
-                                Monthly ROI
-                            </span>
-                            <span class="info-value text-info">₦<%= ROI.toLocaleString() %></span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">
-                                <i class="fas fa-users"></i>
-                                Referrals
-                            </span>
-                            <span class="info-value"><%= totalReferrals %> Member<%= totalReferrals === 1 ? '' : 's' %></span>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- Important Notice -->
-                <div class="alert-info-custom">
-                    <h6 class="fw-bold mb-2">
-                        <i class="fas fa-info-circle me-2"></i>Profile Tips
-                    </h6>
-                    <ul class="small mb-0 ps-3">
-                        <li class="mb-2">Keep your contact information up to date</li>
-                        <li class="mb-2">Verify your bank details for smooth transactions</li>
-                        <li class="mb-0">Enable 2FA for enhanced security</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Powered By Footer -->
-    <div class="powered-by">
-        <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
-    </div>
-
-    <!-- Modals -->
-    
-    <!-- Edit Profile Modal -->
-    <div class="modal fade" id="editProfileModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" style="border-radius: 20px;">
-                <div class="modal-header" style="border-radius: 20px 20px 0 0;">
-                    <h5 class="modal-title fw-bold">
-                        <i class="fas fa-edit me-2" style="color: var(--primary);"></i>Edit Profile
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                <form id="editProfileForm">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">First Name</label>
-                    <input type="text" class="form-control" name="firstName" value="<%= user.firstName %>" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Last Name</label>
-                    <input type="text" class="form-control" name="lastName" value="<%= user.lastName %>" required>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Email Address</label>
-                    <input type="email" class="form-control" name="email" value="<%= user.email %>" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Phone Number</label>
-                    <input type="tel" class="form-control" name="phone" value="<%= user.phone %>" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Date of Birth</label>
-                <input type="date" class="form-control" name="dob" 
-                    value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Address</label>
-                    <textarea class="form-control" name="address" rows="3" required><%= user.address %></textarea>
-                </div>
-                </form>
-                <div id="profileMessage" class="mt-2"></div> 
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
-    async function saveProfile() {
-    const form = document.getElementById('editProfileForm');
-    const formData = new FormData(form);
-
-    const data = {};
-    formData.forEach((value, key) => data[key] = value);
-
-    const messageContainer = document.getElementById('profileMessage');
-    messageContainer.innerHTML = '';
-
-    try {
-        const res = await fetch('/club-de-star-cooperative/updateProfile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-        });
-        const result = await res.json();
-
-        if (result.success) {
-        messageContainer.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
-        // Optionally update the page fields dynamically without reload
-        for (const key in data) {
-            const el = document.querySelector(`.info-value[data-key="${key}"]`);
-            if (el) el.textContent = data[key];
-        }
-        setTimeout(() => bootstrap.Modal.getInstance(document.getElementById('editProfileModal')).hide(), 1500);
-        } else {
-        messageContainer.innerHTML = `<div class="alert alert-danger">${result.error}</div>`;
-        }
-    } catch (err) {
-        console.error(err);
-        messageContainer.innerHTML = `<div class="alert alert-danger">An unexpected error occurred.</div>`;
-    }
-    }
-    </script>
-
-
-    <!-- Change Password Modal -->
-    <div class="modal fade" id="changePasswordModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content" style="border-radius: 20px;">
-                <div class="modal-header" style="border-radius: 20px 20px 0 0;">
-                    <h5 class="modal-title fw-bold">
-                        <i class="fas fa-lock me-2" style="color: var(--primary);"></i>Change Password
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="changePasswordForm">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Current Password</label>
-                            <input type="password" name="password" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">New Password</label>
-                            <input type="password" name="newPassword" class="form-control" required>
-                            <small class="text-muted">Must be at least 8 characters</small>
-                        </div>
-                        <div id="passwordMessage" class="mt-2"></div> 
-                        <div class="alert-info-custom">
-                            <small>
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Password Tips:</strong> Use a mix of letters, numbers, and special characters
-                            </small>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Update Password</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-<script>
-document.getElementById("changePasswordForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    const form = e.target;
-    const formData = new FormData(form);
-    const data = {
-        password: formData.get("password"),
-        newPassword: formData.get("newPassword")
-    };
-
-    const messageContainer = document.getElementById("passwordMessage");
-    messageContainer.innerHTML = "";
-
-    try {
-        const res = await fetch("/club-de-star-cooperative/changePassword", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-
-        const result = await res.json();
-
-        if (result.success) {
-            messageContainer.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
-            // Auto logout after 5 seconds
-            setTimeout(() => window.location.href = "/logout", 5000);
-        } else {
-            messageContainer.innerHTML = `<div class="alert alert-danger">${result.error}</div>`;
-        }
-
-    } catch (err) {
-        console.error(err);
-        messageContainer.innerHTML = `<div class="alert alert-danger">An unexpected error occurred.</div>`;
-    }
-});
-</script>
-
-
-
-    <!-- Edit Bank Details Modal -->
-    <div class="modal fade" id="editBankModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content" style="border-radius: 20px;">
-                <div class="modal-header" style="border-radius: 20px 20px 0 0;">
-                    <h5 class="modal-title fw-bold">
-                        <i class="fas fa-university me-2" style="color: var(--primary);"></i>Update Bank Details
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                  <form id="bankDetailsForm" method="POST" action="/club-de-star-cooperative/updateBankDetails">
-    <div class="mb-3">
-        <label class="form-label fw-semibold">Bank Name</label>
-        <input list="banks" id="bankName" name="bankName" class="form-control" value="<%= user.bankDetails?.bankName || '' %>" required>
-        <datalist id="banks">
-            <% nigeriaBanks.forEach(bank => { %>
-            <option value="<%= bank %>">
-            <% }) %>
-        </datalist>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label fw-semibold">Account Number</label>
-        <input type="text" id="accountNumber" name="accountNumber" class="form-control" value="<%= user.bankDetails?.accountNumber || '' %>" maxlength="10" required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label fw-semibold">Account Name</label>
-        <input type="text" id="accountName" name="accountName" class="form-control" value="<%= user.bankDetails?.accountName || '' %>" required readonly>
-        <small class="text-muted">This will be verified automatically</small>
-    </div>
-    <div class="alert-info-custom">
-        <small>
-            <i class="fas fa-shield-check me-2"></i>
-            Your bank details are encrypted and secure
-        </small>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-primary" onclick="saveBankDetails()">Save Changes</button>
-    </div>
-</form>
-
-<script>
-async function verifyAccount() {
-    const bank = document.getElementById('bankName').value.trim();
-    const accountNumber = document.getElementById('accountNumber').value.trim();
-
-    if(bank && accountNumber.length === 10) {
-        try {
-            const res = await fetch(`/club-de-star-cooperative/verifyBankAccount?bank=${encodeURIComponent(bank)}&accountNumber=${accountNumber}`);
-            const data = await res.json();
-            const accountNameInput = document.getElementById('accountName');
-
-            if(data.success) {
-                accountNameInput.value = data.accountName;
-                accountNameInput.classList.remove('is-invalid');
-                accountNameInput.classList.add('is-valid');
-            } else {
-                accountNameInput.value = '';
-                accountNameInput.classList.remove('is-valid');
-                accountNameInput.classList.add('is-invalid');
-                console.warn(data.error);
-            }
-        } catch(err) {
-            console.error(err);
-        }
-    } else {
-        document.getElementById('accountName').value = '';
-        document.getElementById('accountName').classList.remove('is-valid', 'is-invalid');
-    }
-}
-
-// Trigger verification on account number input (when 10 digits entered) and bank change
-document.getElementById('accountNumber').addEventListener('input', verifyAccount);
-document.getElementById('bankName').addEventListener('change', verifyAccount);
-</script>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Avatar Upload Modal -->
-    <div class="modal fade" id="avatarModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content" style="border-radius: 20px;">
-                <div class="modal-header" style="border-radius: 20px 20px 0 0;">
-                    <h5 class="modal-title fw-bold">
-                        <i class="fas fa-camera me-2" style="color: var(--primary);"></i>Change Profile Picture
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <div class="profile-avatar mb-3" style="width: 120px; height: 120px; font-size: 3rem;">
-                        <span>JD</span>
-                    </div>
-                    <form method="post" enctype="multipart/form-data" id="avatarForm" action="/club-de-star-cooperative/uploadAvatar">
-                        <div class="mb-3">
-                            <label for="avatarUpload" class="btn btn-primary">
-                                <i class="fas fa-upload me-2"></i>Choose Image
-                            </label>
-                            <input type="file" id="avatarUpload" name="avatar" accept="image/*" style="display: none;">
-
-                        </div>
-                        <small class="text-muted">Recommended: Square image, at least 200x200px</small>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Upload</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile — Club De Stars | Powered by JESZ LIMITED</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-.toast-popup {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1055;
-  padding: 15px 25px;
-  border-radius: 8px;
-  color: #fff;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  opacity: 0;
-  transform: translateY(-20px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+/* ══ THEME TOKENS ══ */
+:root{
+  --sidebar-w:230px;--nav-h:62px;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
+  --accent:#4f8ef7;--accent2:#7c5af4;
+  --green:#22c78a;--red:#f05252;--amber:#f5a623;
+  --tr:all .22s ease;
+}
+[data-theme="dark"]{
+  --bg:#0a0f1e;--bg-card:#111827;--bg-card2:#1a2235;
+  --bg-card3:rgba(255,255,255,.035);
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#f0f4ff;--text2:#c8d4f0;--muted:#8b9ab8;
+  --nav-bg:rgba(10,15,30,.93);
+  --hero-bg:linear-gradient(135deg,#111827 0%,#1a2235 100%);
+  --bar-bg:rgba(255,255,255,.07);--meta-bg:rgba(255,255,255,.03);
+  --tog-bg:rgba(255,255,255,.08);
+}
+[data-theme="light"]{
+  --bg:#f4f6fb;--bg-card:#ffffff;--bg-card2:#f0f3fa;
+  --bg-card3:rgba(0,0,0,.025);
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);
+  --text:#0f1523;--text2:#2a3550;--muted:#6b7a99;
+  --nav-bg:rgba(255,255,255,.93);
+  --hero-bg:linear-gradient(135deg,#dde8ff 0%,#eef1ff 100%);
+  --bar-bg:rgba(0,0,0,.07);--meta-bg:rgba(0,0,0,.025);
+  --tog-bg:rgba(0,0,0,.07);
 }
 
-.toast-success { background-color: #28a745; }
-.toast-error { background-color: #dc3545; }
+/* ══ BASE ══ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{
+  height:100%;font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;
+  transition:background .3s,color .3s;
+}
+a{text-decoration:none;color:inherit;}
+button,input,select,textarea{font-family:inherit;}
 
-.toast-popup.show {
-  opacity: 1;
-  transform: translateY(0);
+/* ══ LOADER ══ */
+#loader{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:20px;transition:opacity .5s;
+}
+.loader-ring{
+  width:48px;height:48px;
+  border:2.5px solid var(--border2);border-top-color:var(--accent);
+  border-radius:50%;animation:spin 1s linear infinite;
+}
+.loader-label{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:var(--bg-card);border-right:1px solid var(--border);
+  z-index:200;display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .3s,background .3s,border-color .3s;
+}
+.sidebar-logo{
+  padding:18px 18px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.logo-mark{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;overflow:hidden;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:#fff;
+}
+.logo-mark img{width:100%;height:100%;object-fit:cover;}
+.logo-name{font-size:13px;font-weight:600;line-height:1.2;}
+.logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;}
+.sidebar-user{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.user-chip{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-card2);border-radius:10px;padding:9px 11px;
+  border:1px solid var(--border);
+}
+.user-avatar{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;color:#fff;overflow:hidden;
+}
+.user-avatar img{width:100%;height:100%;object-fit:cover;}
+.user-name{font-size:13px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-id{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.04em;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 10px;}
+.sidebar-nav::-webkit-scrollbar{width:3px;}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.nav-section{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;margin-top:2px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
+  color:var(--muted);font-size:13px;font-weight:400;
+  transition:var(--tr);margin-bottom:1px;cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--bg-card2);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,.1);color:var(--accent);}
+.nav-item i{width:18px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-badge{
+  margin-left:auto;background:var(--red);color:#fff;
+  font-size:10px;font-weight:700;border-radius:20px;padding:2px 7px;
+}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+.member-pill{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;
+  font-size:10px;font-weight:600;background:rgba(34,199,138,.12);
+  color:var(--green);border:1px solid rgba(34,199,138,.2);margin-bottom:8px;
+}
+
+/* ══ TOP NAV ══ */
+.topnav{
+  position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--nav-h);
+  background:var(--nav-bg);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);z-index:100;
+  display:flex;align-items:center;padding:0 20px;gap:12px;
+  transition:left .3s,background .3s,border-color .3s;
+}
+.hamburger{
+  display:none;cursor:pointer;padding:7px;border-radius:8px;
+  border:none;background:none;color:var(--muted);font-size:17px;
+  transition:var(--tr);flex-shrink:0;
+}
+.hamburger:hover{background:var(--bg-card2);color:var(--text);}
+.topnav-greeting{flex:1;min-width:0;}
+.topnav-greeting h2{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-greeting p{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.status-row{display:flex;align-items:center;gap:5px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.status-label{font-size:12px;color:var(--green);font-weight:500;}
+.kyc-chip{
+  display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;
+  background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);
+  font-size:11px;font-weight:500;color:var(--amber);cursor:pointer;
+  transition:var(--tr);text-decoration:none;white-space:nowrap;
+}
+.kyc-chip.verified{background:rgba(34,199,138,.08);border-color:rgba(34,199,138,.2);color:var(--green);}
+.theme-toggle{
+  width:40px;height:22px;border-radius:20px;border:1px solid var(--border2);
+  background:var(--tog-bg);cursor:pointer;position:relative;flex-shrink:0;
+  transition:background .3s,border-color .3s;padding:0;
+}
+.tog-thumb{
+  position:absolute;top:2px;left:2px;width:16px;height:16px;
+  border-radius:50%;background:var(--muted);
+  transition:transform .25s ease,background .25s;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#fff;pointer-events:none;
+}
+[data-theme="light"] .tog-thumb{transform:translateX(18px);background:var(--accent);}
+
+/* ══ MAIN ══ */
+.main{
+  margin-left:var(--sidebar-w);margin-top:var(--nav-h);
+  padding:22px;min-height:calc(100vh - var(--nav-h));
+  transition:margin-left .3s;
+}
+
+/* ══ PROFILE HERO ══ */
+.profile-hero{
+  background:var(--hero-bg);border:1px solid var(--border2);
+  border-radius:var(--r-xl);padding:24px;margin-bottom:14px;
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  position:relative;overflow:hidden;
+}
+.profile-hero::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:160px;height:160px;border-radius:50%;
+  background:radial-gradient(circle,rgba(79,142,247,.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+.profile-hero-avatar{
+  width:72px;height:72px;border-radius:18px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:600;color:#fff;
+  border:2px solid var(--border2);overflow:hidden;position:relative;cursor:pointer;
+}
+.profile-hero-avatar img{width:100%;height:100%;object-fit:cover;}
+.avatar-edit-badge{
+  position:absolute;bottom:3px;right:3px;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;border:1.5px solid var(--bg-card);
+}
+.profile-hero-info{flex:1;min-width:0;}
+.profile-hero-name{font-size:clamp(18px,3vw,24px);font-weight:500;letter-spacing:-.3px;margin-bottom:4px;}
+.profile-hero-id{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:10px;}
+.profile-hero-badges{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid;
+}
+.badge-green{background:rgba(34,199,138,.1);color:var(--green);border-color:rgba(34,199,138,.2);}
+.badge-amber{background:rgba(245,166,35,.1);color:var(--amber);border-color:rgba(245,166,35,.2);}
+.badge-accent{background:rgba(79,142,247,.1);color:var(--accent);border-color:rgba(79,142,247,.2);}
+.badge-muted{background:var(--bg-card3);color:var(--muted);border-color:var(--border);}
+.badge-red{background:rgba(240,82,82,.1);color:var(--red);border-color:rgba(240,82,82,.2);}
+
+/* ══ PAGE GRID ══ */
+.page-grid{display:grid;grid-template-columns:1fr 300px;gap:14px;}
+
+/* ══ CARD ══ */
+.card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);margin-bottom:14px;
+  transition:background .3s,border-color .3s;
+}
+.card:last-child{margin-bottom:0;}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--border);
+}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+
+/* ══ INFO ROWS ══ */
+.info-list{padding:0 18px;}
+.info-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 0;border-bottom:1px solid var(--border);gap:12px;
+  flex-wrap:wrap;
+}
+.info-row:last-child{border-bottom:none;padding-bottom:14px;}
+.info-label{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;color:var(--muted);flex-shrink:0;
+}
+.info-label i{width:14px;text-align:center;font-size:11px;color:var(--accent);}
+.info-value{font-size:13px;font-weight:500;text-align:right;word-break:break-word;}
+
+/* ══ EDIT BUTTON ══ */
+.edit-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:8px;font-size:12px;font-weight:500;
+  background:var(--bg-card2);border:1px solid var(--border2);
+  color:var(--muted);cursor:pointer;transition:var(--tr);
+}
+.edit-btn:hover{color:var(--text);border-color:var(--accent);}
+
+/* ══ SECURITY ITEM ══ */
+.security-item{
+  padding:14px;border-radius:var(--r-md);
+  background:var(--bg-card2);border:1px solid var(--border);
+  margin:14px 18px 0;
+}
+.security-item:last-child{margin-bottom:14px;}
+.security-title{font-size:13px;font-weight:500;margin-bottom:8px;}
+.security-btn{
+  width:100%;padding:9px;border-radius:9px;font-size:12px;font-weight:500;
+  background:none;border:1px solid var(--border2);color:var(--muted);
+  cursor:pointer;transition:var(--tr);
+}
+.security-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ══ TIPS BOX ══ */
+.tips-box{
+  background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.14);
+  border-radius:var(--r-md);padding:14px;margin:14px 18px 16px;
+}
+.tips-title{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+.tip-item{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:12px;color:var(--muted);padding:4px 0;line-height:1.5;
+}
+.tip-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px;}
+
+/* ══ TOAST ══ */
+.toast-wrap{position:fixed;top:16px;right:16px;z-index:5000;display:flex;flex-direction:column;gap:8px;}
+.toast{
+  padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;
+  color:#fff;max-width:320px;opacity:0;transform:translateY(-10px);
+  transition:opacity .35s,transform .35s;pointer-events:none;
+  display:flex;align-items:center;gap:8px;
+}
+.toast.show{opacity:1;transform:none;pointer-events:auto;}
+.toast.success{background:#22c78a;}
+.toast.error{background:#f05252;}
+
+/* ══ SIDEBAR OVERLAY ══ */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190;}
+.sb-overlay.show{display:block;}
+
+/* ══ MODALS ══ */
+.modal-backdrop{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(5px);
+  align-items:flex-end;justify-content:center;
+}
+.modal-backdrop.open{display:flex;}
+.modal-box{
+  background:var(--bg-card);border:1px solid var(--border2);
+  border-radius:var(--r-xl) var(--r-xl) 0 0;
+  width:100%;max-width:480px;max-height:92vh;overflow-y:auto;
+  animation:shup .28s cubic-bezier(.16,1,.3,1);
+  transition:background .3s,border-color .3s;
+}
+@keyframes shup{from{transform:translateY(30px);opacity:0;}to{transform:none;opacity:1;}}
+.modal-box::-webkit-scrollbar{width:3px;}
+.modal-box::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:12px auto 0;}
+.modal-header{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:15px;font-weight:500;}
+.modal-close{
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border-radius:7px;transition:var(--tr);
+}
+.modal-close:hover{background:var(--bg-card2);color:var(--text);}
+.modal-body{padding:18px 20px;}
+.modal-footer{padding:0 20px 24px;display:flex;gap:10px;}
+.form-group{margin-bottom:14px;}
+.form-label{
+  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--muted);display:block;margin-bottom:6px;
+}
+.form-control{
+  width:100%;background:var(--bg-card2);border:1px solid var(--border2);
+  border-radius:10px;color:var(--text);font-size:14px;padding:11px 14px;
+  transition:border-color .18s,background .3s;outline:none;-webkit-appearance:none;
+}
+.form-control:focus{border-color:var(--accent);}
+.form-control:disabled,.form-control[readonly]{opacity:.55;cursor:not-allowed;}
+.form-control option{background:var(--bg-card);color:var(--text);}
+.form-hint{font-size:11px;color:var(--muted);margin-top:5px;}
+.modal-info{
+  background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.17);
+  border-radius:10px;padding:11px;font-size:12px;color:var(--accent);
+  line-height:1.6;margin-bottom:12px;
+}
+.modal-warn{
+  background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.17);
+  border-radius:10px;padding:11px;font-size:12px;color:var(--amber);
+  line-height:1.6;margin-bottom:12px;
+}
+.modal-msg{margin-top:8px;font-size:12px;padding:9px 12px;border-radius:8px;display:none;}
+.modal-msg.success{background:rgba(34,199,138,.1);color:var(--green);display:block;}
+.modal-msg.error{background:rgba(240,82,82,.1);color:var(--red);display:block;}
+.btn{border:none;border-radius:10px;padding:12px 20px;font-size:13px;font-weight:500;cursor:pointer;transition:var(--tr);flex:1;}
+.btn-ghost{background:var(--bg-card2);color:var(--muted);}
+.btn-ghost:hover{color:var(--text);}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;flex:2;}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px);}
+.btn-primary:disabled{opacity:.5;pointer-events:none;}
+
+/* avatar upload area */
+.avatar-upload-area{
+  border:2px dashed var(--border2);border-radius:var(--r-lg);
+  padding:28px;text-align:center;cursor:pointer;
+  transition:border-color .2s;margin-bottom:12px;
+}
+.avatar-upload-area:hover{border-color:var(--accent);}
+.avatar-preview{
+  width:80px;height:80px;border-radius:20px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:600;color:#fff;margin:0 auto 12px;overflow:hidden;
+}
+.avatar-preview img{width:100%;height:100%;object-fit:cover;}
+
+/* verify badge on account name */
+.verify-status{
+  display:inline-flex;align-items:center;gap:4px;font-size:11px;
+  padding:3px 8px;border-radius:20px;margin-top:5px;
+}
+.verify-status.ok{background:rgba(34,199,138,.1);color:var(--green);}
+.verify-status.fail{background:rgba(240,82,82,.1);color:var(--red);}
+
+/* Powered by */
+.powered-by{position:fixed;bottom:12px;right:14px;font-size:11px;color:var(--muted);z-index:50;}
+.powered-by strong{color:var(--accent);}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1100px){
+  .page-grid{grid-template-columns:1fr;}
+}
+@media(max-width:900px){
+  .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+  .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3);}
+  .topnav{left:0;}
+  .main{margin-left:0;}
+  .hamburger{display:flex;}
+}
+@media(max-width:600px){
+  .main{padding:14px;}
+  .topnav-greeting p{display:none;}
+  .status-label{display:none;}
+  .modal-box{max-width:100%;}
+  .info-row{flex-direction:column;align-items:flex-start;gap:4px;}
+  .info-value{text-align:left;}
+  .profile-hero{flex-direction:column;align-items:flex-start;gap:14px;}
+}
+@media(min-width:901px){
+  .modal-backdrop{align-items:center;padding:20px;}
+  .modal-box{border-radius:var(--r-xl);max-width:460px;}
+  .modal-handle{display:none;}
+}
+@media print{
+  .sidebar,.topnav,.powered-by{display:none!important;}
+  .main{margin:0;padding:0;}
 }
 </style>
+</head>
+<body>
 
-<% if (typeof success !== 'undefined') { %>
-  <div class="toast-popup toast-success"><%= success %></div>
-<% } %>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-ring"></div>
+  <div class="loader-label">Club De Stars</div>
+</div>
 
-<% if (typeof error !== 'undefined') { %>
-  <div class="toast-popup toast-error"><%= error %></div>
-<% } %>
+<!-- Toast container -->
+<div class="toast-wrap" id="toastWrap"></div>
 
+<%# pendingGuarantorCount is passed directly from the route %>
+
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <img src="/media/assets/logo/log.png" alt="Logo"
+           onerror="this.style.display='none';this.parentNode.innerHTML='<b>C</b>'">
+    </div>
+    <div style="min-width:0;">
+      <div class="logo-name">Club De Stars</div>
+      <div class="logo-sub">Cooperative Society</div>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-chip">
+      <div class="user-avatar">
+        <% if (user.displayPicture) { %>
+          <img src="<%= user.displayPicture.replace('public\\','/').replace(/\\/g,'/') %>" alt="">
+        <% } else { %>
+          <%= user.firstName.charAt(0).toUpperCase() %><%= user.lastName.charAt(0).toUpperCase() %>
+        <% } %>
+      </div>
+      <div style="min-width:0;">
+        <div class="user-name"><%= user.firstName %> <%= user.lastName %></div>
+        <div class="user-id"><%= user.membershipID %></div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Menu</div>
+    <a href="/cds-cooperative/dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="/cds-cooperative/transaction" class="nav-item"><i class="fas fa-exchange-alt"></i> Transactions</a>
+    <a href="/cds-cooperative/loan" class="nav-item"><i class="fas fa-coins"></i> Loans</a>
+    <a href="/cds-cooperative/guarantorRequest" class="nav-item">
+      <i class="fas fa-user-check"></i> Guarantor
+      <% if (pendingGuarantorCount > 0) { %><span class="nav-badge"><%= pendingGuarantorCount %></span><% } %>
+    </a>
+    <div class="nav-section">Account</div>
+    <a href="/manage/kiddies-account" class="nav-item"><i class="fas fa-baby"></i> Kiddies Account</a>
+    <a href="/cds-cooperative/profile" class="nav-item active"><i class="fas fa-user"></i> Profile</a>
+    <a href="/cds-cooperative/kyc" class="nav-item"><i class="fas fa-shield-alt"></i> KYC</a>
+    <a href="/cds-cooperative/referral" class="nav-item"><i class="fas fa-user-plus"></i> Referrals</a>
+    <a href="/cds-cooperative/report" class="nav-item"><i class="fas fa-chart-bar"></i> Reports</a>
+    <a href="/cds-cooperative/memberContract" class="nav-item"><i class="fas fa-file-alt"></i> Terms</a>
+    <% if (user.role && user.role.name !== 'member') { %>
+    <div class="nav-section">Admin</div>
+    <a href="/admin-dashboard" class="nav-item"><i class="fas fa-tachometer-alt"></i> Administration</a>
+    <% } %>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="member-pill">
+      <i class="fas fa-star" style="font-size:9px;"></i>
+      <%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Associate Member' %>
+    </div>
+    <a href="/logout" class="nav-item" style="color:var(--red);margin-top:2px;">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </a>
+  </div>
+</aside>
+
+<!-- ════ TOP NAV ════ -->
+<header class="topnav">
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="topnav-greeting">
+    <h2>My Profile</h2>
+    <p><%= user.firstName %> <%= user.lastName %> · <%= user.membershipID %></p>
+  </div>
+  <div class="topnav-right">
+    <div class="status-row">
+      <div class="status-dot"></div>
+      <span class="status-label">Active</span>
+    </div>
+    <% if (user.Payment && user.Payment.status === "paid") { %>
+      <div class="kyc-chip verified">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i><span>Verified</span>
+      </div>
+    <% } else { %>
+      <a href="/cds-cooperative/kyc" class="kyc-chip">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i><span>KYC</span>
+      </a>
+    <% } %>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">
+      <div class="tog-thumb" id="togThumb">
+        <i class="fas fa-moon" id="togIcon" style="font-size:9px;"></i>
+      </div>
+    </button>
+  </div>
+</header>
+
+<!-- ════ MAIN ════ -->
+<main class="main">
+
+  <!-- Profile hero -->
+  <div class="profile-hero">
+    <div class="profile-hero-avatar" onclick="openModal('avatarModal')">
+      <% if (user.displayPicture) { %>
+        <img src="<%= user.displayPicture.replace('public\\','/').replace(/\\/g,'/') %>" alt="">
+      <% } else { %>
+        <%= user.firstName.charAt(0).toUpperCase() %><%= user.lastName.charAt(0).toUpperCase() %>
+      <% } %>
+      <div class="avatar-edit-badge"><i class="fas fa-camera"></i></div>
+    </div>
+    <div class="profile-hero-info">
+      <div class="profile-hero-name"><%= user.firstName %> <%= user.lastName %></div>
+      <div class="profile-hero-id"><%= user.membershipID %></div>
+      <div class="profile-hero-badges">
+        <% if (user.status === 'active') { %>
+          <span class="hero-badge badge-green"><i class="fas fa-check-circle" style="font-size:9px;"></i> Active</span>
+        <% } else if (user.status === 'rejected') { %>
+          <span class="hero-badge badge-red"><i class="fas fa-times-circle" style="font-size:9px;"></i> Rejected</span>
+        <% } else { %>
+          <span class="hero-badge badge-amber"><i class="fas fa-clock" style="font-size:9px;"></i> Pending</span>
+        <% } %>
+        <% if (user.Payment && user.Payment.status === 'paid') { %>
+          <span class="hero-badge badge-green"><i class="fas fa-shield-alt" style="font-size:9px;"></i> KYC Verified</span>
+        <% } else { %>
+          <span class="hero-badge badge-amber"><i class="fas fa-shield-alt" style="font-size:9px;"></i> KYC Pending</span>
+        <% } %>
+        <span class="hero-badge badge-accent">
+          <i class="fas fa-percentage" style="font-size:9px;"></i>
+          <%= user.membershipID.startsWith('CD') ? '5%' : '10%' %> loan rate
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page grid -->
+  <div class="page-grid">
+
+    <!-- Left column -->
+    <div>
+
+      <!-- Personal Info -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-user" style="margin-right:6px;color:var(--accent);"></i>Personal Information</span>
+          <button class="edit-btn" onclick="openModal('editProfileModal')">
+            <i class="fas fa-edit" style="font-size:11px;"></i> Edit
+          </button>
+        </div>
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-user"></i>Full Name</span>
+            <span class="info-value"><%= user.firstName %> <%= user.lastName %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-envelope"></i>Email</span>
+            <span class="info-value"><%= user.email %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-phone"></i>Phone</span>
+            <span class="info-value"><%= user.phone %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-calendar"></i>Date of Birth</span>
+            <span class="info-value"><%= new Date(user.dob).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}) %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-map-marker-alt"></i>Address</span>
+            <span class="info-value"><%= user.address %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Info -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-building" style="margin-right:6px;color:var(--accent);"></i>Account Information</span>
+        </div>
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-id-card"></i>Membership ID</span>
+            <span class="info-value" style="font-family:'DM Mono',monospace;"><%= user.membershipID || 'N/A' %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-star"></i>Account Type</span>
+            <span class="info-value">
+              <% if (memberType) { %>
+                <span class="hero-badge badge-accent"><%= memberType.name %></span>
+              <% } else { %>N/A<% } %>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-calendar-check"></i>Member Since</span>
+            <span class="info-value"><%= user.createdAt.toLocaleDateString('en-US',{month:'long',year:'numeric'}) %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-percentage"></i>Loan Interest Rate</span>
+            <span class="info-value" style="color:var(--accent);">
+              <% if (memberType) { %><%= memberType.interestRate %>% p.a.<% } else { %>N/A<% } %>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-hand-holding-usd"></i>Max Loan</span>
+            <span class="info-value">
+              <% if (memberType && memberType.maxLoanAmount > 0) { %>
+                ₦<%= memberType.maxLoanAmount.toLocaleString() %>
+              <% } else { %>Unlimited<% } %>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-percent"></i>Loan-to-Deposit</span>
+            <span class="info-value"><% if (memberType) { %><%= memberType.loanToDepositRatio %>%<% } else { %>N/A<% } %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-shield-check"></i>Account Status</span>
+            <span class="info-value">
+              <span class="hero-badge <%= user.status === 'active' ? 'badge-green' : user.status === 'rejected' ? 'badge-red' : 'badge-amber' %>">
+                <%= user.status ? user.status.charAt(0).toUpperCase() + user.status.slice(1) : 'Pending' %>
+              </span>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-chart-line"></i>ROI Frequency</span>
+            <span class="info-value" style="text-transform:capitalize;"><%= memberType?.roiDistributionFrequency || 'Monthly' %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bank Details -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-university" style="margin-right:6px;color:var(--accent);"></i>Bank Details</span>
+          <button class="edit-btn" onclick="openModal('editBankModal')">
+            <i class="fas fa-edit" style="font-size:11px;"></i> Update
+          </button>
+        </div>
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-university"></i>Bank</span>
+            <span class="info-value"><%= user.bankDetails?.bankName || 'N/A' %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-credit-card"></i>Account Number</span>
+            <span class="info-value" style="font-family:'DM Mono',monospace;"><%= user.bankDetails?.accountNumber || 'N/A' %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-user-tag"></i>Account Name</span>
+            <span class="info-value"><%= user.bankDetails?.accountName || 'N/A' %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next of Kin -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-user-friends" style="margin-right:6px;color:var(--accent);"></i>Next of Kin</span>
+          <button class="edit-btn" onclick="openModal('editNextOfKinModal')">
+            <i class="fas fa-edit" style="font-size:11px;"></i> Edit
+          </button>
+        </div>
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-user"></i>Full Name</span>
+            <span class="info-value"><%= user.nextOfKin?.fullName || 'N/A' %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-link"></i>Relationship</span>
+            <span class="info-value"><%= user.nextOfKin?.relationship || 'N/A' %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-phone"></i>Phone</span>
+            <span class="info-value"><%= user.nextOfKin?.phone || 'N/A' %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-map-marker-alt"></i>Address</span>
+            <span class="info-value"><%= user.nextOfKin?.address || 'N/A' %></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right column -->
+    <div>
+
+      <!-- Security -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-shield-alt" style="margin-right:6px;color:var(--accent);"></i>Security</span>
+        </div>
+        <div class="security-item" style="margin-top:14px;">
+          <div class="security-title">Password</div>
+          <button class="security-btn" onclick="openModal('changePasswordModal')">
+            <i class="fas fa-lock" style="margin-right:6px;font-size:11px;"></i>Change Password
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-chart-bar" style="margin-right:6px;color:var(--accent);"></i>Quick Stats</span>
+        </div>
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-piggy-bank"></i>Total Savings</span>
+            <span class="info-value" style="color:var(--green);">₦<%= accountBalance.toLocaleString() %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-hand-holding-usd"></i>Active Loan</span>
+            <span class="info-value" style="color:var(--amber);">₦<%= loan ? loan.amount.toLocaleString() : 0 %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-percentage"></i>Monthly ROI</span>
+            <span class="info-value" style="color:var(--accent);">₦<%= ROI.toLocaleString() %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="fas fa-users"></i>Referrals</span>
+            <span class="info-value"><%= totalReferrals %> member<%= totalReferrals === 1 ? '' : 's' %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-info-circle" style="margin-right:6px;color:var(--accent);"></i>Profile Tips</span>
+        </div>
+        <div class="tips-box">
+          <div class="tip-item"><div class="tip-dot"></div>Keep your contact information up to date.</div>
+          <div class="tip-item"><div class="tip-dot"></div>Verify bank details for smooth transactions.</div>
+          <div class="tip-item"><div class="tip-dot"></div>Update your next of kin details regularly.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<div class="powered-by">Powered by <strong>JESZ LIMITED</strong></div>
+
+<!-- ════════════ MODALS ════════════ -->
+
+<!-- Edit Profile -->
+<div class="modal-backdrop" id="editProfileModal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-user" style="color:var(--accent);margin-right:8px;font-size:13px;"></i>Edit Profile</span>
+      <button class="modal-close" onclick="closeModal('editProfileModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="editProfileForm">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-control" name="firstName" value="<%= user.firstName %>" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-control" name="lastName" value="<%= user.lastName %>" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-control" name="email" value="<%= user.email %>" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" class="form-control" name="phone" value="<%= user.phone %>" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date of Birth</label>
+          <input type="date" class="form-control" name="dob"
+                 value="<%= user.dob ? new Date(user.dob).toISOString().split('T')[0] : '' %>" required>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Address</label>
+          <textarea class="form-control" name="address" rows="3" required><%= user.address %></textarea>
+        </div>
+        <div id="profileMsg" class="modal-msg"></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('editProfileModal')">Cancel</button>
+      <button class="btn btn-primary" id="profileSaveBtn" onclick="saveProfile()">
+        <i class="fas fa-save" style="margin-right:5px;font-size:11px;"></i>Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password -->
+<div class="modal-backdrop" id="changePasswordModal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-lock" style="color:var(--accent);margin-right:8px;font-size:13px;"></i>Change Password</span>
+      <button class="modal-close" onclick="closeModal('changePasswordModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="changePasswordForm">
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <input type="password" class="form-control" name="password" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input type="password" class="form-control" name="newPassword" required>
+          <div class="form-hint">At least 8 characters, mix of letters and numbers</div>
+        </div>
+        <div class="modal-info" style="margin-bottom:0;"><i class="fas fa-info-circle" style="margin-right:5px;"></i>You will be logged out after a successful password change.</div>
+        <div id="passwordMsg" class="modal-msg"></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('changePasswordModal')">Cancel</button>
+      <button class="btn btn-primary" id="pwSaveBtn" onclick="changePassword()">
+        <i class="fas fa-key" style="margin-right:5px;font-size:11px;"></i>Update Password
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Bank Details -->
+<div class="modal-backdrop" id="editBankModal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-university" style="color:var(--accent);margin-right:8px;font-size:13px;"></i>Update Bank Details</span>
+      <button class="modal-close" onclick="closeModal('editBankModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="bankDetailsForm" method="POST" action="/club-de-star-cooperative/updateBankDetails">
+        <div class="form-group">
+          <label class="form-label">Bank Name</label>
+          <input list="banks" id="bankName" name="bankName" class="form-control"
+                 value="<%= user.bankDetails?.bankName || '' %>" required>
+          <datalist id="banks">
+            <% nigeriaBanks.forEach(bank => { %><option value="<%= bank %>"><% }) %>
+          </datalist>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account Number</label>
+          <input type="text" id="accountNumber" name="accountNumber" class="form-control"
+                 value="<%= user.bankDetails?.accountNumber || '' %>" maxlength="10" required>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Account Name</label>
+          <input type="text" id="accountName" name="accountName" class="form-control"
+                 value="<%= user.bankDetails?.accountName || '' %>" readonly>
+          <div class="form-hint" id="verifyHint">Auto-verified when account number is entered</div>
+        </div>
+        <div class="modal-info" style="margin-top:12px;margin-bottom:0;">
+          <i class="fas fa-shield-alt" style="margin-right:5px;"></i>Your bank details are encrypted and secure.
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('editBankModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="document.getElementById('bankDetailsForm').submit()">
+        <i class="fas fa-save" style="margin-right:5px;font-size:11px;"></i>Save Details
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Next of Kin -->
+<div class="modal-backdrop" id="editNextOfKinModal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-user-friends" style="color:var(--accent);margin-right:8px;font-size:13px;"></i>Edit Next of Kin</span>
+      <button class="modal-close" onclick="closeModal('editNextOfKinModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="nextOfKinForm" method="POST" action="/update-next-of-kin">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-control" name="fullName"
+                 value="<%= user.nextOfKin?.fullName || '' %>" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Relationship</label>
+          <input type="text" class="form-control" name="relationship"
+                 value="<%= user.nextOfKin?.relationship || '' %>" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="text" class="form-control" name="phone"
+                 value="<%= user.nextOfKin?.phone || '' %>" required>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Address</label>
+          <textarea class="form-control" name="address" rows="3" required><%= user.nextOfKin?.address || '' %></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('editNextOfKinModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="document.getElementById('nextOfKinForm').submit()">
+        <i class="fas fa-save" style="margin-right:5px;font-size:11px;"></i>Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Avatar Upload -->
+<div class="modal-backdrop" id="avatarModal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-camera" style="color:var(--accent);margin-right:8px;font-size:13px;"></i>Change Profile Picture</span>
+      <button class="modal-close" onclick="closeModal('avatarModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" enctype="multipart/form-data" id="avatarForm" action="/club-de-star-cooperative/uploadAvatar">
+        <label class="avatar-upload-area" for="avatarUpload">
+          <div class="avatar-preview" id="avatarPreview">
+            <% if (user.displayPicture) { %>
+              <img src="<%= user.displayPicture.replace('public\\','/').replace(/\\/g,'/') %>" alt="" id="avatarPreviewImg">
+            <% } else { %>
+              <span id="avatarPreviewInitials"><%= user.firstName.charAt(0).toUpperCase() %><%= user.lastName.charAt(0).toUpperCase() %></span>
+            <% } %>
+          </div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Click to choose image</div>
+          <div style="font-size:11px;color:var(--muted);">Square image recommended · Min 200×200px</div>
+          <input type="file" id="avatarUpload" name="avatar" accept="image/*" style="display:none;">
+        </label>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('avatarModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="document.getElementById('avatarForm').submit()">
+        <i class="fas fa-upload" style="margin-right:5px;font-size:11px;"></i>Upload Photo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SCRIPTS ════ -->
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const toasts = document.querySelectorAll(".toast-popup");
-  toasts.forEach(toast => {
-    // Show toast
-    toast.classList.add("show");
+/* ── Theme ── */
+(function(){
+  const saved = localStorage.getItem('cds-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+})();
+function toggleTheme(){
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('cds-theme', next);
+  updateThemeUI(next);
+}
+function updateThemeUI(t){
+  const i = document.getElementById('togIcon');
+  if(i) i.className = t === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+}
 
-    // Hide after 5 seconds
-    setTimeout(() => {
-      toast.classList.remove("show");
-      // Remove from DOM after fade out
-      setTimeout(() => toast.remove(), 500);
-    }, 5000);
-  });
+/* ── Sidebar ── */
+function toggleSidebar(){
+  const open = document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', e => {
+  const sb = document.getElementById('sidebar');
+  const hb = document.querySelector('.hamburger');
+  if(window.innerWidth <= 900 && sb.classList.contains('open') && !sb.contains(e.target) && !hb.contains(e.target)) closeSidebar();
 });
-</script>
 
-
-
-
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Close sidebar when clicking outside (for mobile view)
-        document.addEventListener('click', function (event) {
-            const sidebar = document.getElementById('sidebar');
-            const toggleButton = document.querySelector('.fa-bars');
-
-            if (window.innerWidth <= 992) {
-                if (sidebar.classList.contains('active') &&
-                    !sidebar.contains(event.target) &&
-                    !toggleButton.contains(event.target)) {
-                    sidebar.classList.remove('active');
-                }
-            }
-        });
-
-        // Modal Functions
-        function openModal(modalId) {
-            const modal = new bootstrap.Modal(document.getElementById(modalId));
-            modal.show();
-        }
-
-        // Navigation Functions
-        function goToDashboard(event) {
-            event.preventDefault();
-            alert('Navigating to Dashboard...');
-            // In real implementation: window.location.href = '/dashboard';
-        }
-
-        function showSection(sectionId, event) {
-            event.preventDefault();
-            alert(`Navigating to ${sectionId}...`);
-            // In real implementation: window.location.href = `/${sectionId}`;
-        }
-
-        function changePassword() {
-            alert('✅ Password changed successfully! Please login again.');
-            bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
-        }
-
-        function saveBankDetails() {
-            alert('✅ Bank details updated successfully!');
-            bootstrap.Modal.getInstance(document.getElementById('editBankModal')).hide();
-        }
-
-        // Avatar Upload Preview
-        document.addEventListener('DOMContentLoaded', function() {
-            const avatarUpload = document.getElementById('avatarUpload');
-            if (avatarUpload) {
-                avatarUpload.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const avatars = document.querySelectorAll('.profile-avatar span');
-                            avatars.forEach(avatar => {
-                                avatar.innerHTML = `<img src="${e.target.result}" alt="Profile">`;
-                            });
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
-
-            // Animation on load
-            const cards = document.querySelectorAll('.card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-            });
-        });
-    </script>
-
-
-
-
-
-
-
-<script>
-$(document).ready(function() {
-  $('#bankSelect').select2({
-    placeholder: "Select your bank",
-    width: '100%'
-  });
+/* ── Modals ── */
+function openModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+document.querySelectorAll('.modal-backdrop').forEach(el => {
+  el.addEventListener('click', e => { if(e.target === el){ el.classList.remove('open'); document.body.style.overflow = ''; }});
 });
-</script>
 
-<script>
-window.addEventListener("load", () => {
-  const loader = document.getElementById("loader-screen");
-  const main = document.getElementById("main-content");
-
+/* ── Toast ── */
+function showToast(msg, type = 'success'){
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+  wrap.appendChild(t);
+  requestAnimationFrame(() => { requestAnimationFrame(() => t.classList.add('show')); });
   setTimeout(() => {
-    loader.style.opacity = "0";
-    loader.style.transition = "opacity 0.6s ease";
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 400);
+  }, 4000);
+}
 
-    setTimeout(() => {
-      loader.style.display = "none";
-      main.classList.remove("hidden");
-    }, 200);
+/* ── Server flash toasts ── */
+<% if (typeof success !== 'undefined') { %>
+window.addEventListener('load', () => showToast('<%= success %>', 'success'));
+<% } %>
+<% if (typeof error !== 'undefined') { %>
+window.addEventListener('load', () => showToast('<%= error %>', 'error'));
+<% } %>
 
-  }, 400); // adjust duration
+/* ── Save profile ── */
+async function saveProfile(){
+  const form  = document.getElementById('editProfileForm');
+  const btn   = document.getElementById('profileSaveBtn');
+  const msg   = document.getElementById('profileMsg');
+  const data  = {};
+  new FormData(form).forEach((v, k) => data[k] = v);
+  msg.className = 'modal-msg';
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Saving…';
+  try{
+    const res    = await fetch('/club-de-star-cooperative/updateProfile',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+    const result = await res.json();
+    if(result.success){
+      msg.className = 'modal-msg success'; msg.textContent = result.message;
+      setTimeout(() => { closeModal('editProfileModal'); location.reload(); }, 1500);
+    } else {
+      msg.className = 'modal-msg error'; msg.textContent = result.error || 'Update failed.';
+    }
+  } catch(e){ msg.className = 'modal-msg error'; msg.textContent = 'Network error. Try again.'; }
+  finally{ btn.disabled = false; btn.innerHTML = '<i class="fas fa-save" style="margin-right:5px;font-size:11px;"></i>Save Changes'; }
+}
+
+/* ── Change password ── */
+async function changePassword(){
+  const form = document.getElementById('changePasswordForm');
+  const btn  = document.getElementById('pwSaveBtn');
+  const msg  = document.getElementById('passwordMsg');
+  const data = { password: form.password.value, newPassword: form.newPassword.value };
+  msg.className = 'modal-msg';
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Updating…';
+  try{
+    const res    = await fetch('/club-de-star-cooperative/changePassword',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+    const result = await res.json();
+    if(result.success){
+      msg.className = 'modal-msg success'; msg.textContent = result.message;
+      setTimeout(() => window.location.href = '/logout', 3000);
+    } else {
+      msg.className = 'modal-msg error'; msg.textContent = result.error || 'Failed.';
+    }
+  } catch(e){ msg.className = 'modal-msg error'; msg.textContent = 'Network error.'; }
+  finally{ btn.disabled = false; btn.innerHTML = '<i class="fas fa-key" style="margin-right:5px;font-size:11px;"></i>Update Password'; }
+}
+
+/* ── Bank account verification ── */
+async function verifyAccount(){
+  const bank   = document.getElementById('bankName').value.trim();
+  const acctNo = document.getElementById('accountNumber').value.trim();
+  const nameIn = document.getElementById('accountName');
+  const hint   = document.getElementById('verifyHint');
+  nameIn.value = '';
+  if(bank && acctNo.length === 10){
+    hint.textContent = 'Verifying…';
+    hint.style.color = 'var(--accent)';
+    try{
+      const res  = await fetch(`/club-de-star-cooperative/verifyBankAccount?bank=${encodeURIComponent(bank)}&accountNumber=${acctNo}`);
+      const data = await res.json();
+      if(data.success){
+        nameIn.value    = data.accountName;
+        hint.textContent = '✓ Account verified';
+        hint.style.color = 'var(--green)';
+      } else {
+        hint.textContent = '✗ Could not verify — enter name manually';
+        hint.style.color = 'var(--red)';
+        nameIn.removeAttribute('readonly');
+      }
+    } catch(e){ hint.textContent = 'Verification failed'; hint.style.color = 'var(--red)'; }
+  } else {
+    hint.textContent = 'Auto-verified when account number is entered';
+    hint.style.color = '';
+  }
+}
+document.getElementById('accountNumber').addEventListener('input', verifyAccount);
+document.getElementById('bankName').addEventListener('change', verifyAccount);
+
+/* ── Avatar preview ── */
+document.getElementById('avatarUpload').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const preview = document.getElementById('avatarPreview');
+    preview.innerHTML = `<img src="${ev.target.result}" alt="Preview">`;
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ── Loader ── */
+window.addEventListener('load', () => {
+  const l = document.getElementById('loader');
+  setTimeout(() => { l.style.opacity = '0'; setTimeout(() => l.style.display = 'none', 500); }, 400);
 });
 </script>
 </body>

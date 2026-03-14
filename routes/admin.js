@@ -189,9 +189,15 @@ router.post(
       user.status       = "active";
       user.membershipID = newMembershipID;
       user.referralCode = newMembershipID;
+
+      // ── 5. Set registrationStatus to paid if still pending ────────────────
+      if (user.registrationStatus === "pending") {
+        user.registrationStatus = "paid";
+      }
+
       await user.save();
 
-      // ── 5. Update or create Account ───────────────────────────────────────
+      // ── 6. Update or create Account ───────────────────────────────────────
       let account = await Account.findOne({
         ownerType: "User",
         ownerId:   user._id
@@ -215,14 +221,15 @@ router.post(
       }
 
       console.log(
-        `[APPROVE MEMBER] ${user._id} | ${oldMembershipID} → ${newMembershipID} | ${type.name}`
+        `[APPROVE MEMBER] ${user._id} | ${oldMembershipID} → ${newMembershipID} | ${type.name} | registrationStatus: ${user.registrationStatus}`
       );
 
       return res.json({
-        message:        "Member approved successfully",
-        membershipID:   newMembershipID,
-        memberTypeName: type.name,
-        email:          user.email,
+        message:            "Member approved successfully",
+        membershipID:       newMembershipID,
+        memberTypeName:     type.name,
+        email:              user.email,
+        registrationStatus: user.registrationStatus,
       });
 
     } catch (err) {
@@ -1513,6 +1520,9 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
         "LOAN-MANUAL-",
         "LOAN-INT-",
         "EXT-LOAN-",
+        "MANUAL-REG-",
+        "KD-NEW-",
+        "KD-REG-MANUAL-",
       ];
 
       const isManual =
@@ -1614,6 +1624,8 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
   }
 });
 
+
+
 router.post(
   "/admin/deposits/:id/approve",
   ensureAdmin("process_deposits"),
@@ -1647,220 +1659,19 @@ router.post(
         return res.status(400).json({ message: "Payment already approved or not found" });
       }
 
-      const isLoanPayment = !!payment.loanId;
-      const amount        = Number(payment.amount);
-
-      let overpayment    = 0;
-      let isExternalLoan = false;
-
-      // ═══════════════════════════════════════════════════════════════════════
-      // 2. HANDLE LOAN PAYMENT
-      // ═══════════════════════════════════════════════════════════════════════
-      if (isLoanPayment) {
-
-        // ── 2a. Loan lookup — member first, then external ──────────────────
-        let loan = null;
-
-        if (payment.user) {
-          loan = await Loan.findOne({
-            _id:    payment.loanId,
-            user:   payment.user._id,
-            status: { $in: ["approved", "overdue"] }
-          });
-        }
-
-        if (!loan) {
-          loan = await Loan.findOne({
-            _id:      payment.loanId,
-            external: { $exists: true },
-            status:   { $in: ["approved", "overdue"] }
-          });
-          if (loan) isExternalLoan = true;
-        }
-
-        if (!loan) {
-          return res.status(404).json({ message: "Loan not found or inactive" });
-        }
-
-        // ── 2b. Principal / penalty split ─────────────────────────────────
-        const loanPortion    = Math.min(amount, loan.totalRepay);
-        const penaltyPortion = parseFloat((amount - loanPortion).toFixed(2));
-
-        // ── 2c. Overpayment detection ──────────────────────────────────────
-        overpayment = parseFloat((amount - loan.totalRepay).toFixed(2));
-
-        // ── Resolve the member's account for overpayment credit ───────────
-        // Use ownerType + ownerId instead of the old user field.
-        const memberAccount = payment.user
-          ? await Account.findOne({ ownerType: "User", ownerId: payment.user._id })
-          : null;
-
-        const hasOverpayment = overpayment > 0 && !isExternalLoan && !!memberAccount;
-
-        // ── 2d. Update loan balances ───────────────────────────────────────
-        loan.totalRepay         = parseFloat((loan.totalRepay - loanPortion).toFixed(2));
-        loan.outstandingBalance = parseFloat(
-          Math.max((loan.outstandingBalance || 0) - loanPortion, 0).toFixed(2)
-        );
-        loan.paidAmount = parseFloat(((loan.paidAmount || 0) + loanPortion).toFixed(2));
-
-        // ── 2e. Transaction record ─────────────────────────────────────────
-        const txDescription = isExternalLoan
-          ? `External loan repayment approved (${payment.reference}) – ${loan.external.borrowerName}`
-          : `Manual loan repayment approved (${payment.reference})`;
-
-        await Transaction.create({
-          user:        payment.user._id,
-          type:        "loan_payment",
-          amount:      loanPortion,
-          description: txDescription,
-          reference:   payment.reference,
-          method:      "Manual",
-          status:      "successful"
+      // Guard: loan payments must go through the dedicated loan route
+      if (payment.loanId) {
+        return res.status(400).json({
+          message: "This is a loan payment. Use POST /admin/loans/:id/approve-payment instead.",
         });
-
-        // ── 2f. Company Ledger — principal repayment ──────────────────────
-        const existingLedger = await CompanyLedger.findOne({
-          "meta.reference": payment.reference,
-          type:             "loan_repayment"
-        });
-
-        if (!existingLedger) {
-          await CompanyLedger.create({
-            type:        "loan_repayment",
-            direction:   "in",
-            amount:      loanPortion,
-            relatedUser: payment.user._id,
-            relatedLoan: loan._id,
-            description: isExternalLoan
-              ? `External loan repayment – ${loan.external.borrowerName}`
-              : `Member loan repayment (${payment.reference})`,
-            recordedBy:  req.user._id,
-            meta: {
-              reference:  payment.reference,
-              notes:      notes || "Approved by admin",
-              isExternal: isExternalLoan
-            }
-          });
-        }
-
-        // ── 2g. Penalty income ledger ──────────────────────────────────────
-        const penaltyProfit = penaltyPortion > 0
-          ? penaltyPortion
-          : (loan.totalRepay === 0 ? (loan.totalPenalty || 0) : 0);
-
-        if (penaltyProfit > 0 && loan.totalRepay === 0) {
-          const existingPenaltyLedger = await CompanyLedger.findOne({
-            "meta.reference": payment.reference,
-            type:             "penalty_income"
-          });
-
-          if (!existingPenaltyLedger) {
-            const extraCharge = await ExtraCharge.create({
-              member:      payment.user._id,
-              chargeType:  "loan-penalty",
-              amount:      penaltyProfit,
-              relatedLoan: loan._id,
-              reason:      "Overdue penalty settlement",
-              status:      "paid",
-              paidAt:      new Date()
-            });
-
-            await CompanyLedger.create({
-              type:        "penalty_income",
-              direction:   "in",
-              amount:      penaltyProfit,
-              relatedUser: payment.user._id,
-              relatedLoan: loan._id,
-              description: isExternalLoan
-                ? `Penalty income – ${loan.external.borrowerName}`
-                : "Penalty income from cleared loan",
-              recordedBy:  req.user._id,
-              meta: {
-                reference:     payment.reference,
-                extraChargeId: extraCharge._id
-              }
-            });
-          }
-        }
-
-        // ── 2h. Fully settled ─────────────────────────────────────────────
-        if (loan.totalRepay === 0) {
-          loan.status = "paid";
-          loan.paidAt = new Date();
-
-          await Transaction.create({
-            user:        payment.user._id,
-            type:        "loan_repayment",
-            amount:      0,
-            description: isExternalLoan
-              ? `External loan fully settled – ${loan.external.borrowerName}`
-              : "Loan fully settled (manual payment)",
-            method:      "system",
-            status:      "successful"
-          });
-        }
-
-        await loan.save();
-
-        // ── 2i. Overpayment — credit surplus to member's savings account ──
-        if (hasOverpayment && memberAccount) {
-          const balanceBefore = memberAccount.balance;
-
-          memberAccount.balance = parseFloat(
-            (memberAccount.balance + overpayment).toFixed(2)
-          );
-          await memberAccount.save();
-
-          const balanceAfter = memberAccount.balance;
-
-          await DepositReport.create({
-            member:          payment.user._id,
-            account:         memberAccount._id,
-            amount:          overpayment,
-            type:            "bank_transfer",
-            reference:       payment.reference,
-            description:     `Loan overpayment refund – surplus from loan repayment (${payment.reference})`,
-            status:          "approved",
-            balanceBefore,
-            balanceAfter,
-            processedBy:     req.user._id,
-            processedByRole: req.user.role?.name || "admin",
-            processedAt:     new Date(),
-            notes:           `Overpayment of ₦${overpayment.toLocaleString()} credited after loan settlement`
-          });
-
-          await Transaction.create({
-            user:        payment.user._id,
-            type:        "deposit",
-            amount:      overpayment,
-            description: `Loan overpayment refund (${payment.reference})`,
-            reference:   `${payment.reference}-overpay`,
-            method:      "system",
-            status:      "successful"
-          });
-
-          await CompanyLedger.create({
-            type:        "overpayment_refund",
-            direction:   "out",
-            amount:      overpayment,
-            relatedUser: payment.user._id,
-            relatedLoan: loan._id,
-            description: `Overpayment surplus credited to member savings (${payment.reference})`,
-            recordedBy:  req.user._id,
-            meta: {
-              reference: payment.reference,
-              notes:     `Paid ₦${amount.toLocaleString()}, loan required ₦${loanPortion.toLocaleString()}`
-            }
-          });
-        }
       }
 
+      const amount = Number(payment.amount);
+
       // ═══════════════════════════════════════════════════════════════════════
-      // 3. HANDLE NORMAL DEPOSIT
+      // 2. HANDLE NORMAL DEPOSIT
       // ═══════════════════════════════════════════════════════════════════════
-      if (!isLoanPayment && payment.user) {
-        // Resolve account via ownerType + ownerId
+      if (payment.user) {
         const account = await Account.findOneAndUpdate(
           { ownerType: "User", ownerId: payment.user._id },
           { $inc: { balance: amount } },
@@ -1868,9 +1679,7 @@ router.post(
         );
 
         if (!account) {
-          return res.status(404).json({
-            message: "Member account not found."
-          });
+          return res.status(404).json({ message: "Member account not found." });
         }
 
         const balanceBefore = account.balance - amount;
@@ -1889,7 +1698,7 @@ router.post(
           processedBy:     req.user._id,
           processedByRole: req.user.role?.name || "admin",
           processedAt:     new Date(),
-          notes:           notes || "Approved by admin"
+          notes:           notes || "Approved by admin",
         });
 
         await CompanyLedger.create({
@@ -1901,14 +1710,14 @@ router.post(
           recordedBy:  req.user._id,
           meta: {
             reference: payment.reference,
-            notes:     notes || "Approved by admin"
-          }
+            notes:     notes || "Approved by admin",
+          },
         });
 
         const transaction = await Transaction.findOne({
           user:      payment.user._id,
           reference: payment.reference,
-          type:      "deposit"
+          type:      "deposit",
         });
 
         if (transaction) {
@@ -1921,7 +1730,7 @@ router.post(
       }
 
       // ═══════════════════════════════════════════════════════════════════════
-      // 4. ADMIN ACTION LOG
+      // 3. ADMIN ACTION LOG
       // ═══════════════════════════════════════════════════════════════════════
       await AdminActionLog.create({
         admin:       req.user._id,
@@ -1930,25 +1739,20 @@ router.post(
         targetUser:  payment.user?._id || null,
         targetModel: "Payment",
         targetId:    payment._id,
-        description: `Approved ${isLoanPayment ? "loan payment" : "deposit"} ${payment.reference}`,
+        description: `Approved deposit ${payment.reference}`,
         ipAddress:   req.ip,
         userAgent:   req.headers["user-agent"],
-        status:      "success"
+        status:      "success",
       });
 
       return res.json({
-        success: true,
-        message: isLoanPayment
-          ? "Loan payment approved and applied"
-          : "Deposit approved successfully",
+        success:    true,
+        message:    "Deposit approved successfully",
         newBalance: payment.user?.account?.balance || 0,
-        ...(isLoanPayment && overpayment > 0 && !isExternalLoan && {
-          overpaymentCredited: overpayment
-        })
       });
 
     } catch (error) {
-      console.error("Approve payment error:", error);
+      console.error("Approve deposit error:", error);
       res.status(500).json({ message: "Internal server error", error: error.message });
     }
   }

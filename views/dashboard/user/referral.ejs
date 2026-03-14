@@ -1,782 +1,794 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Club De Stars - Member Dashboard | Powered by JESZ LIMITED</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #1e3a8a;
-            --primary-dark: #1e40af;
-            --primary-light: #3b82f6;
-            --secondary: #64748b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #06b6d4;
-            --sidebar-width: 280px;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-            min-height: 100vh;
-        }
-        
-        /* Sidebar Styles */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            z-index: 1040;
-            transition: all 0.3s;
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
-        }
-        
-        .sidebar-header {
-            padding: 2rem 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        
-        .logo-box {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        
-        .sidebar-menu {
-            padding: 1rem 0;
-        }
-        
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            padding: 0.875rem 1.5rem;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-            font-weight: 500;
-        }
-        
-        .sidebar-menu a:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-        }
-        
-        /* Top Navbar */
-        .top-navbar {
-            position: fixed;
-            top: 0;
-            left: var(--sidebar-width);
-            right: 0;
-            height: 75px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
-            z-index: 1030;
-            display: flex;
-            align-items: center;
-            padding: 0 2rem;
-            transition: all 0.3s;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            margin-top: 75px;
-            padding: 2rem;
-            min-height: calc(100vh - 75px);
-            transition: all 0.3s;
-        }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .welcome-card {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            border-radius: 24px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .welcome-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 400px;
-            height: 400px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50%;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 20px;
-            padding: 1.75rem;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-            height: 100%;
-            border: 1px solid rgba(30, 58, 138, 0.05);
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
-        }
-        
-        .stat-icon {
-            width: 65px;
-            height: 65px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            background: white;
-            border: 1px solid rgba(30, 58, 138, 0.05);
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
-            padding: 1.5rem;
-            border-radius: 20px 20px 0 0 !important;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none;
-            padding: 0.7rem 1.75rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
-        }
-        
-        .btn-outline-primary {
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            border-radius: 12px;
-            padding: 0.7rem 1.75rem;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-outline-primary:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-        }
-        
-        .member-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.3);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .club-member-badge {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-        
-        .non-club-badge {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-        
-        .quick-action {
-            text-align: center;
-            padding: 1.75rem;
-            border-radius: 16px;
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border: 2px solid rgba(30, 58, 138, 0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        
-        .quick-action:hover {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(30, 58, 138, 0.25);
-            border-color: transparent;
-        }
-        
-        .quick-action i {
-            font-size: 2.2rem;
-            margin-bottom: 0.75rem;
-            display: block;
-        }
-        
-        .loan-info-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 1.75rem;
-            margin-bottom: 1.25rem;
-        }
-        
-        .savings-goal-card {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 1.75rem;
-        }
-        
-        .alert-warning-custom {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border: 2px solid #f59e0b;
-            border-radius: 16px;
-            padding: 1.25rem;
-            color: #92400e;
-        }
-        
-        .alert-info-custom {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border: 2px solid #3b82f6;
-            border-radius: 16px;
-            padding: 1.25rem;
-            color: #1e40af;
-        }
-        
-        .powered-by {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 12px 20px;
-            border-radius: 30px;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--primary);
-            z-index: 1000;
-        }
-        
-        .loan-rules-list {
-            background: rgba(30, 58, 138, 0.02);
-            padding: 1.5rem;
-            border-radius: 16px;
-            border: 2px solid rgba(30, 58, 138, 0.1);
-        }
-        
-        .loan-rules-list li {
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
-        }
-        
-        .loan-rules-list li:last-child {
-            border-bottom: none;
-        }
-        
-        .print-button {
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            padding: 0.6rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .print-button:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        @media (max-width: 992px) {
-            .sidebar {
-                left: calc(-1 * var(--sidebar-width));
-            }
-            
-            .sidebar.active {
-                left: 0;
-            }
-            
-            .top-navbar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .powered-by {
-                bottom: 10px;
-                right: 10px;
-                font-size: 0.75rem;
-                padding: 8px 12px;
-            }
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Club De Stars — Referral Program</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ THEME TOKENS ══ */
+:root{
+  --sidebar-w:230px;--nav-h:62px;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
+  --accent:#4f8ef7;--accent2:#7c5af4;
+  --green:#22c78a;--red:#f05252;--amber:#f5a623;
+  --tr:all .22s ease;
+}
+[data-theme="dark"]{
+  --bg:#0a0f1e;--bg-card:#111827;--bg-card2:#1a2235;
+  --bg-card3:rgba(255,255,255,.035);
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#f0f4ff;--text2:#c8d4f0;--muted:#8b9ab8;
+  --nav-bg:rgba(10,15,30,.93);
+  --hero-bg:linear-gradient(135deg,#111827 0%,#1a2235 100%);
+  --bar-bg:rgba(255,255,255,.07);--meta-bg:rgba(255,255,255,.03);
+  --tog-bg:rgba(255,255,255,.08);
+}
+[data-theme="light"]{
+  --bg:#f4f6fb;--bg-card:#ffffff;--bg-card2:#f0f3fa;
+  --bg-card3:rgba(0,0,0,.025);
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);
+  --text:#0f1523;--text2:#2a3550;--muted:#6b7a99;
+  --nav-bg:rgba(255,255,255,.93);
+  --hero-bg:linear-gradient(135deg,#dde8ff 0%,#eef1ff 100%);
+  --bar-bg:rgba(0,0,0,.07);--meta-bg:rgba(0,0,0,.025);
+  --tog-bg:rgba(0,0,0,.07);
+}
 
-        @media print {
-            .sidebar, .top-navbar, .btn, .quick-action, .powered-by {
-                display: none !important;
-            }
-            
-            .main-content {
-                margin: 0;
-                padding: 0;
-            }
-            
-            .card {
-                break-inside: avoid;
-            }
-        }
-    </style>
+/* ══ BASE ══ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{
+  height:100%;font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;
+  transition:background .3s,color .3s;
+}
+a{text-decoration:none;color:inherit;}
+button,input,select,textarea{font-family:inherit;}
+
+/* ══ LOADER ══ */
+#loader{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:20px;transition:opacity .5s;
+}
+.loader-ring{
+  width:48px;height:48px;
+  border:2.5px solid var(--border2);border-top-color:var(--accent);
+  border-radius:50%;animation:spin 1s linear infinite;
+}
+.loader-label{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:var(--bg-card);border-right:1px solid var(--border);
+  z-index:200;display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .3s,background .3s,border-color .3s;
+}
+.sidebar-logo{
+  padding:18px 18px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.logo-mark{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;overflow:hidden;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:#fff;
+}
+.logo-mark img{width:100%;height:100%;object-fit:cover;}
+.logo-name{font-size:13px;font-weight:600;line-height:1.2;}
+.logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;}
+.sidebar-user{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.user-chip{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-card2);border-radius:10px;padding:9px 11px;
+  border:1px solid var(--border);
+}
+.user-avatar{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;color:#fff;
+}
+.user-name{font-size:13px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-id{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.04em;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 10px;}
+.sidebar-nav::-webkit-scrollbar{width:3px;}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.nav-section{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;margin-top:2px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
+  color:var(--muted);font-size:13px;font-weight:400;
+  transition:var(--tr);margin-bottom:1px;cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--bg-card2);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,.1);color:var(--accent);}
+.nav-item i{width:18px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-badge{
+  margin-left:auto;background:var(--red);color:#fff;
+  font-size:10px;font-weight:700;border-radius:20px;padding:2px 7px;
+}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+.member-pill{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;
+  font-size:10px;font-weight:600;background:rgba(34,199,138,.12);
+  color:var(--green);border:1px solid rgba(34,199,138,.2);margin-bottom:8px;
+}
+
+/* ══ TOP NAV ══ */
+.topnav{
+  position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--nav-h);
+  background:var(--nav-bg);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);z-index:100;
+  display:flex;align-items:center;padding:0 20px;gap:12px;
+  transition:left .3s,background .3s,border-color .3s;
+}
+.hamburger{
+  display:none;cursor:pointer;padding:7px;border-radius:8px;
+  border:none;background:none;color:var(--muted);font-size:17px;
+  transition:var(--tr);flex-shrink:0;
+}
+.hamburger:hover{background:var(--bg-card2);color:var(--text);}
+.topnav-greeting{flex:1;min-width:0;}
+.topnav-greeting h2{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-greeting p{font-size:11px;color:var(--muted);}
+.topnav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.status-row{display:flex;align-items:center;gap:5px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.status-label{font-size:12px;color:var(--green);font-weight:500;}
+.kyc-chip{
+  display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;
+  background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);
+  font-size:11px;font-weight:500;color:var(--amber);cursor:pointer;transition:var(--tr);
+}
+.kyc-chip.verified{background:rgba(34,199,138,.08);border-color:rgba(34,199,138,.2);color:var(--green);}
+.theme-toggle{
+  width:40px;height:22px;border-radius:20px;border:1px solid var(--border2);
+  background:var(--tog-bg);cursor:pointer;position:relative;flex-shrink:0;
+  transition:background .3s,border-color .3s;padding:0;
+}
+.tog-thumb{
+  position:absolute;top:2px;left:2px;width:16px;height:16px;
+  border-radius:50%;background:var(--muted);
+  transition:transform .25s ease,background .25s;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#fff;pointer-events:none;
+}
+[data-theme="light"] .tog-thumb{transform:translateX(18px);background:var(--accent);}
+
+/* ══ MAIN ══ */
+.main{
+  margin-left:var(--sidebar-w);margin-top:var(--nav-h);
+  padding:22px;min-height:calc(100vh - var(--nav-h));
+  transition:margin-left .3s;
+}
+
+/* ══ PAGE HEADER ══ */
+.page-header{
+  margin-bottom:20px;
+}
+.page-header h1{
+  font-size:clamp(18px,3vw,22px);font-weight:500;letter-spacing:-.3px;margin-bottom:4px;
+}
+.page-header p{font-size:13px;color:var(--muted);}
+.breadcrumb-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:10px;}
+.breadcrumb-row a{color:var(--accent);transition:var(--tr);}
+.breadcrumb-row a:hover{opacity:.75;}
+.breadcrumb-row i{font-size:10px;}
+
+/* ══ NOTICE ══ */
+.notice-bar{
+  display:flex;align-items:flex-start;gap:10px;
+  background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.18);
+  border-radius:var(--r-md);padding:10px 14px;margin-bottom:20px;
+  font-size:12px;color:var(--amber);line-height:1.5;
+}
+.notice-bar i{flex-shrink:0;margin-top:1px;font-size:13px;}
+
+/* ══ HERO CARD ══ */
+.referral-hero{
+  background:var(--hero-bg);border:1px solid var(--border2);
+  border-radius:var(--r-xl);padding:24px;margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+.referral-hero::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(79,142,247,.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.referral-hero::after{
+  content:'';position:absolute;bottom:-60px;left:30%;
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,90,244,.05) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:20px;}
+.hero-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.hero-stat-big{font-size:clamp(32px,6vw,48px);font-weight:300;letter-spacing:-.5px;line-height:1;}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;
+  font-size:11px;font-weight:600;background:rgba(245,166,35,.12);
+  color:var(--amber);border:1px solid rgba(245,166,35,.22);
+}
+.hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;position:relative;z-index:1;}
+.hero-mini{
+  background:var(--bg-card3);border-radius:var(--r-md);
+  padding:12px 14px;border:1px solid var(--border);
+}
+.hero-mini-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.hero-mini-value{font-size:16px;font-weight:500;letter-spacing:-.2px;}
+
+/* ══ CODE BLOCK ══ */
+.code-section{
+  background:var(--bg-card);border:1px solid var(--border2);
+  border-radius:var(--r-xl);padding:20px;margin-bottom:14px;
+}
+.code-section-title{
+  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);margin-bottom:14px;
+}
+.code-row{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-card2);border:1px solid var(--border2);
+  border-radius:var(--r-md);padding:12px 14px;margin-bottom:10px;
+}
+.code-mono{
+  flex:1;font-family:'DM Mono',monospace;font-size:13px;
+  color:var(--accent);letter-spacing:.03em;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.copy-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:8px;border:1px solid var(--border2);
+  background:var(--bg-card3);color:var(--muted);
+  font-size:12px;font-weight:500;cursor:pointer;
+  transition:var(--tr);flex-shrink:0;
+}
+.copy-btn:hover{background:rgba(79,142,247,.1);border-color:rgba(79,142,247,.25);color:var(--accent);}
+.copy-btn.copied{background:rgba(34,199,138,.1);border-color:rgba(34,199,138,.25);color:var(--green);}
+.share-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.share-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:12px 8px;border-radius:var(--r-md);border:1px solid var(--border);
+  background:var(--bg-card2);cursor:pointer;transition:var(--tr);color:var(--muted);
+  font-size:11px;font-weight:500;
+}
+.share-btn:hover{border-color:var(--border2);color:var(--text);transform:translateY(-2px);}
+.share-btn i{font-size:18px;}
+.share-btn.wa:hover{border-color:rgba(37,211,102,.4);color:#25d366;}
+.share-btn.tg:hover{border-color:rgba(0,136,204,.4);color:#0088cc;}
+.share-btn.tw:hover{border-color:rgba(29,161,242,.4);color:#1da1f2;}
+.share-btn.cp:hover{border-color:rgba(79,142,247,.4);color:var(--accent);}
+
+/* ══ CARDS GRID ══ */
+.content-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.info-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:18px;
+  transition:background .3s,border-color .3s;
+}
+.ic-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.ic-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.ic-badge{
+  font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;
+  background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.2);
+}
+
+/* ══ REFERRAL TABLE ══ */
+.ref-list{display:flex;flex-direction:column;gap:6px;}
+.ref-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:var(--r-md);
+  background:var(--bg-card2);border:1px solid var(--border);
+  transition:var(--tr);
+}
+.ref-item:hover{border-color:var(--border2);}
+.ref-avatar{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:600;color:#fff;
+}
+.ref-name{font-size:13px;font-weight:500;line-height:1.2;}
+.ref-email{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.02em;}
+.ref-status{
+  margin-left:auto;flex-shrink:0;
+  font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;
+}
+.ref-status.pending{background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.2);}
+.ref-status.active{background:rgba(34,199,138,.1);color:var(--green);border:1px solid rgba(34,199,138,.2);}
+.ref-joined{font-size:10px;color:var(--muted);white-space:nowrap;}
+
+/* ══ EMPTY STATE ══ */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;gap:10px;
+  min-height:160px;padding:20px;
+}
+.empty-icon{
+  width:48px;height:48px;border-radius:14px;
+  background:rgba(79,142,247,.08);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:var(--accent);
+}
+.empty-label{font-size:14px;font-weight:500;}
+.empty-sub{font-size:12px;color:var(--muted);max-width:200px;line-height:1.5;}
+
+/* ══ HOW IT WORKS ══ */
+.steps-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:18px;margin-bottom:14px;
+}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;}
+.step-item{
+  background:var(--bg-card2);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:14px;text-align:center;
+  position:relative;
+}
+.step-number{
+  width:28px;height:28px;border-radius:8px;
+  background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);
+  color:var(--accent);font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 10px;
+}
+.step-icon{font-size:22px;display:block;margin-bottom:8px;}
+.step-title{font-size:12px;font-weight:600;margin-bottom:4px;}
+.step-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+.step-connector{
+  position:absolute;top:28px;right:-18px;
+  width:18px;height:2px;background:var(--border2);z-index:1;
+}
+
+/* ══ EARNINGS ══ */
+.earnings-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;gap:8px;
+}
+.earnings-row:last-of-type{border-bottom:none;}
+.earnings-row-label{color:var(--muted);font-size:12px;}
+.earnings-row-val{font-weight:500;}
+
+/* ══ POWERED BY ══ */
+.powered-by{position:fixed;bottom:12px;right:14px;font-size:11px;color:var(--muted);z-index:50;}
+.powered-by strong{color:var(--accent);}
+
+/* ══ SIDEBAR OVERLAY ══ */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190;}
+.sb-overlay.show{display:block;}
+
+/* ══ TOAST ══ */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--bg-card);border:1px solid var(--border2);border-radius:var(--r-md);
+  padding:10px 18px;font-size:13px;color:var(--text);z-index:9000;
+  display:flex;align-items:center;gap:8px;
+  opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast i{color:var(--green);}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){
+  .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+  .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3);}
+  .topnav{left:0;}
+  .main{margin-left:0;}
+  .hamburger{display:flex;}
+  .content-grid{grid-template-columns:1fr;}
+  .steps-grid{grid-template-columns:1fr;}
+  .step-connector{display:none;}
+}
+@media(max-width:600px){
+  .main{padding:14px;}
+  .hero-grid{grid-template-columns:1fr 1fr;}
+  .share-grid{grid-template-columns:repeat(2,1fr);}
+  .status-label{display:none;}
+  .topnav{padding:0 12px;gap:8px;}
+  .topnav-greeting h2{font-size:13px;}
+  .topnav-greeting p{display:none;}
+}
+@media(max-width:380px){
+  .hero-grid{grid-template-columns:1fr;}
+}
+@media print{
+  .sidebar,.topnav,.powered-by,.share-grid,.code-row button{display:none!important;}
+  .main{margin:0;padding:0;}
+}
+</style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <div class="logo-box">
 
-                    <img src="/media/assets/logo/log.png" alt="" width="100%" height="100%">
-                </div>
-                <div>
-                    <h5 class="mb-0 fw-bold" style="text-transform: uppercase;">Club De Stars</h5>
-                    <small class="opacity-75">COOPERATIVE SOCIETY LIMITED</small>
-                </div>
-            </div>
-            <div class="member-badge mt-2 <%= user.membershipID.startsWith('CD') ? 'club-member-badge' : 'non-club-member-badge' %>">
-                <i class="fas <%= user.membershipID.startsWith('CD') ? 'fa-star' : 'fa-user' %>"></i>
-                <span><%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Non-Club Member' %></span>
-            </div>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-ring"></div>
+  <div class="loader-label">Club De Stars</div>
+</div>
 
+<%
+  const pendingGuarantorCount = user.guarantorRequests
+    ? user.guarantorRequests.filter(r => r.status === "pending").length : 0;
+%>
+
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <img src="/media/assets/logo/log.png" alt="Logo"
+           onerror="this.style.display='none';this.parentNode.innerHTML='<b>C</b>'">
+    </div>
+    <div style="min-width:0;">
+      <div class="logo-name">Club De Stars</div>
+      <div class="logo-sub">Cooperative Society</div>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-chip">
+      <div class="user-avatar">
+        <%= user.firstName.charAt(0).toUpperCase() %><%= user.lastName.charAt(0).toUpperCase() %>
+      </div>
+      <div style="min-width:0;">
+        <div class="user-name"><%= user.firstName %> <%= user.lastName %></div>
+        <div class="user-id"><%= user.membershipID %></div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Menu</div>
+    <a href="/cds-cooperative/dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="/cds-cooperative/transaction" class="nav-item"><i class="fas fa-exchange-alt"></i> Transactions</a>
+    <a href="/cds-cooperative/loan" class="nav-item"><i class="fas fa-coins"></i> Loans</a>
+    <a href="/cds-cooperative/guarantorRequest" class="nav-item">
+      <i class="fas fa-user-check"></i> Guarantor
+      <% if (pendingGuarantorCount > 0) { %><span class="nav-badge"><%= pendingGuarantorCount %></span><% } %>
+    </a>
+    <div class="nav-section">Account</div>
+    <a href="/manage/kiddies-account" class="nav-item"><i class="fas fa-baby"></i> Kiddies Account</a>
+    <a href="/cds-cooperative/profile" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+    <a href="/cds-cooperative/kyc" class="nav-item"><i class="fas fa-shield-alt"></i> KYC</a>
+    <a href="/cds-cooperative/referral" class="nav-item active"><i class="fas fa-user-plus"></i> Referrals</a>
+    <a href="/cds-cooperative/report" class="nav-item"><i class="fas fa-chart-bar"></i> Reports</a>
+    <a href="/cds-cooperative/memberContract" class="nav-item"><i class="fas fa-file-alt"></i> Terms</a>
+    <% if (user.role && user.role.name !== 'member') { %>
+    <div class="nav-section">Admin</div>
+    <a href="/admin-dashboard" class="nav-item"><i class="fas fa-tachometer-alt"></i> Administration</a>
+    <% } %>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="member-pill">
+      <i class="fas fa-star" style="font-size:9px;"></i>
+      <%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Associate Member' %>
+    </div>
+    <a href="/logout" class="nav-item" style="color:var(--red);margin-top:2px;">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </a>
+  </div>
+</aside>
+
+<!-- ════ TOP NAV ════ -->
+<header class="topnav">
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="topnav-greeting">
+    <h2>Referral Program</h2>
+    <p>Invite friends · Build your network</p>
+  </div>
+  <div class="topnav-right">
+    <div class="status-row">
+      <div class="status-dot"></div>
+      <span class="status-label">Active</span>
+    </div>
+    <% if (user.Payment && user.Payment.status === "paid") { %>
+      <div class="kyc-chip verified">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i>
+        <span>Verified</span>
+      </div>
+    <% } else { %>
+      <a href="/cds-cooperative/kyc" class="kyc-chip">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i>
+        <span>KYC</span>
+      </a>
+    <% } %>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle light/dark mode">
+      <div class="tog-thumb" id="togThumb">
+        <i class="fas fa-moon" id="togIcon" style="font-size:9px;"></i>
+      </div>
+    </button>
+  </div>
+</header>
+
+<!-- ════ MAIN ════ -->
+<main class="main">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb-row">
+    <a href="/cds-cooperative/dashboard">Dashboard</a>
+    <i class="fas fa-chevron-right"></i>
+    <span>Referrals</span>
+  </div>
+
+  <!-- Notice: Earnings not yet live -->
+  <div class="notice-bar">
+    <i class="fas fa-clock"></i>
+    <span>Referral <strong>earnings are not activated yet</strong> — every referral you make now will count toward future rewards. Share your link anytime and start building your network early.</span>
+  </div>
+
+  <!-- Hero Card -->
+  <div class="referral-hero">
+    <div class="hero-top">
+      <div>
+        <div class="hero-label">Total Referrals</div>
+        <div class="hero-stat-big"><%= totalReferrals %></div>
+      </div>
+      <div class="hero-badge">
+        <i class="fas fa-clock" style="font-size:10px;"></i>
+        Rewards Coming Soon
+      </div>
+    </div>
+    <div class="hero-grid">
+      <div class="hero-mini">
+        <div class="hero-mini-label">Total Referrals</div>
+        <div class="hero-mini-value"><%= totalReferrals %></div>
+      </div>
+      <div class="hero-mini">
+        <div class="hero-mini-label">Earnings Unlocked</div>
+        <div class="hero-mini-value" style="color:var(--muted);">₦0</div>
+      </div>
+      <div class="hero-mini">
+        <div class="hero-mini-label">Member Since</div>
+        <div class="hero-mini-value" style="font-size:13px;">
+          <%= new Date(user.createdAt).toLocaleDateString('en-US',{month:'short',year:'numeric'}) %>
         </div>
-         <div class="sidebar-menu">
-            <a href="/cds-cooperative/dashboard"><i class="fas fa-home"></i> Dashboard</a>
-            <a href="/cds-cooperative/transaction"><i class="fas fa-exchange-alt"></i> Transactions</a>
-            <a href="/cds-cooperative/loan"><i class="fas fa-hand-holding-usd"></i> My Loans</a>
-            <a href="/cds-cooperative/guarantorRequest">
-                <i class="fas fa-user-friends"></i> Guarantor Requests
-                <% if (pendingGuarantorCount > 0) { %>
-                    <span class="badge bg-danger ms-auto" style="font-size:0.68rem;"><%= pendingGuarantorCount %></span>
-                <% } %>
-            </a>
-            <a href="/manage/kiddies-account"><i class="fas fa-users"></i> Kiddies Account</a>
-            <a href="/cds-cooperative/profile"><i class="fas fa-user-circle"></i> My Profile</a>
-            <a href="/cds-cooperative/kyc"><i class="fas fa-shield-alt"></i> KYC Verification</a>
-            <a href="/cds-cooperative/referral" class="active"><i class="fas fa-user-plus"></i> Referral Program</a>
-            <a href="/cds-cooperative/memberContract"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
-            <a href="/cds-cooperative/report"><i class="fas fa-chart-line"></i> Reports</a>
-            <% if (user.role && user.role.name !== 'member') { %>
-            <a href="/admin-dashboard"><i class="fas fa-tachometer-alt"></i> Administration</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Referral Code + Share -->
+  <div class="code-section">
+    <div class="code-section-title">Your Referral Code &amp; Link</div>
+
+    <div class="code-row" style="margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+        <span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;">Code</span>
+        <span class="code-mono"><%= referralCode %></span>
+      </div>
+      <button class="copy-btn" id="codeBtn" onclick="copyText('<%= referralCode %>','codeBtn','Code')">
+        <i class="fas fa-copy" style="font-size:11px;"></i> Copy
+      </button>
+    </div>
+
+    <div class="code-row" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+        <span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;">Link</span>
+        <span class="code-mono"><%= referralLink %></span>
+      </div>
+      <button class="copy-btn" id="linkBtn" onclick="copyText('<%= referralLink %>','linkBtn','Link')">
+        <i class="fas fa-copy" style="font-size:11px;"></i> Copy
+      </button>
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;">Share via</div>
+    <div class="share-grid">
+      <button class="share-btn wa" onclick="shareVia('whatsapp')">
+        <i class="fab fa-whatsapp"></i>
+        <span>WhatsApp</span>
+      </button>
+      <button class="share-btn tg" onclick="shareVia('telegram')">
+        <i class="fab fa-telegram"></i>
+        <span>Telegram</span>
+      </button>
+      <button class="share-btn tw" onclick="shareVia('twitter')">
+        <i class="fab fa-x-twitter"></i>
+        <span>X / Twitter</span>
+      </button>
+      <button class="share-btn cp" onclick="copyText('<%= referralLink %>','linkBtn','Link')">
+        <i class="fas fa-link"></i>
+        <span>Copy Link</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="steps-card">
+    <div class="ic-header">
+      <span class="ic-title">How It Works</span>
+    </div>
+    <div class="steps-grid">
+      <div class="step-item">
+        <div class="step-number">1</div>
+        <span class="step-icon">🔗</span>
+        <div class="step-title">Share Your Link</div>
+        <div class="step-desc">Send your unique referral link to friends and family</div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">2</div>
+        <span class="step-icon">✅</span>
+        <div class="step-title">They Register</div>
+        <div class="step-desc">Your contact signs up and completes KYC verification</div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-number">3</div>
+        <span class="step-icon">💰</span>
+        <div class="step-title">Earn Rewards</div>
+        <div class="step-desc">Rewards activate once the earnings program goes live</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Referred Users + Earnings -->
+  <div class="content-grid">
+
+    <!-- Referred Users -->
+    <div class="info-card">
+      <div class="ic-header">
+        <span class="ic-title">People You've Referred</span>
+        <% if (totalReferrals > 0) { %>
+          <span class="ic-badge"><%= totalReferrals %> total</span>
+        <% } %>
+      </div>
+
+      <% if (referredUsers && referredUsers.length > 0) { %>
+        <div class="ref-list">
+          <% referredUsers.forEach((r, i) => { %>
+          <div class="ref-item">
+            <div class="ref-avatar">
+              <%= r.firstName.charAt(0).toUpperCase() %><%= r.lastName.charAt(0).toUpperCase() %>
+            </div>
+            <div style="min-width:0;flex:1;">
+              <div class="ref-name"><%= r.firstName %> <%= r.lastName %></div>
+              <div class="ref-email"><%= r.email %></div>
+            </div>
+            <% if (r.createdAt) { %>
+              <div class="ref-joined" style="font-size:10px;color:var(--muted);">
+                <%= new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) %>
+              </div>
             <% } %>
-            <a href="/logout" style="color:rgba(255,255,255,0.52);margin-top:4px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <span class="ref-status <%= r.status === 'active' ? 'active' : 'pending' %>">
+              <%= r.status === 'active' ? 'Active' : 'Pending' %>
+            </span>
+          </div>
+          <% }) %>
         </div>
+      <% } else { %>
+        <div class="empty-state">
+          <div class="empty-icon"><i class="fas fa-user-plus"></i></div>
+          <div class="empty-label">No referrals yet</div>
+          <div class="empty-sub">Share your link above to start building your network</div>
+        </div>
+      <% } %>
     </div>
 
-<!-- Top Navbar -->
-    <div class="top-navbar">
-        <i class="fas fa-bars d-lg-none me-3"
-        style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-        onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+    <!-- Earnings Summary -->
+    <div class="info-card">
+      <div class="ic-header">
+        <span class="ic-title">Earnings Summary</span>
+        <span class="ic-badge">Coming Soon</span>
+      </div>
 
-        <!-- This will only show on lg and above -->
-                       <div class="flex-grow-1">
-        <h6 class="mb-0 fw-bold d-none d-sm-block" style="color:var(--primary);font-size:0.9rem;">
-            Welcome back, <%= user.firstName %>! 👋
-        </h6>
-        <h6 class="mb-0 fw-bold d-sm-none" style="color:var(--primary);font-size:0.85rem;">Hi, <%= user.firstName %>! 👋</h6>
-        <small class="text-muted d-none d-md-block" style="font-size:0.73rem;">
-            Member ID: <%= user.membershipID %> &nbsp;|&nbsp;
-            <%= new Date(user.createdAt).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) %>
-        </small>
-        <!-- <small class="text-muted d-md-none" style="font-size:0.72rem;"><%= user.membershipID %></small> -->
+      <div class="earnings-row">
+        <span class="earnings-row-label">Total referrals made</span>
+        <span class="earnings-row-val"><%= totalReferrals %></span>
+      </div>
+      <div class="earnings-row">
+        <span class="earnings-row-label">Earnings unlocked</span>
+        <span class="earnings-row-val" style="color:var(--muted);">₦0.00</span>
+      </div>
+      <div class="earnings-row">
+        <span class="earnings-row-label">Pending rewards</span>
+        <span class="earnings-row-val" style="color:var(--amber);">—</span>
+      </div>
+      <div class="earnings-row">
+        <span class="earnings-row-label">Total withdrawn</span>
+        <span class="earnings-row-val" style="color:var(--muted);">₦0.00</span>
+      </div>
+      <div class="earnings-row">
+        <span class="earnings-row-label">Program status</span>
+        <span class="earnings-row-val" style="color:var(--amber);">Not Active</span>
+      </div>
+
+      <div style="margin-top:16px;padding:12px;background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.14);border-radius:var(--r-md);font-size:12px;color:var(--muted);line-height:1.6;">
+        <i class="fas fa-info-circle" style="color:var(--accent);margin-right:6px;"></i>
+        Your referrals are recorded and will be credited when the rewards program launches. Keep sharing!
+      </div>
     </div>
 
-                     <%
-      let sbadgeClass = "bg-secondary bg-opacity-10 text-secondary";
-      if (user.status === "active")   sbadgeClass = "bg-success bg-opacity-10 text-success";
-      if (user.status === "rejected") sbadgeClass = "bg-danger bg-opacity-10 text-danger";
-    %>
-    <span class="badge <%= sbadgeClass %> ms-2" style="font-size:0.7rem;padding:5px 10px;">
-        <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
-    </span>
-    </div>
+  </div>
 
+</main>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Dashboard Section -->
-        <div id="dashboard" class="content-section">
-            <!-- Welcome Card -->
-            <div class="welcome-card position-relative">
-                <div class="row align-items-center position-relative" style="z-index: 1;">
-                    <div class="col-md-8">
-                        <h2 class="mb-3 fw-bold">Great to see you again <%= user.firstName %>!</h2>
-                        <!-- <p class="mb-3 opacity-90 fs-5">Track your savings, manage loans, and grow your wealth with <b>Club De Stars Multipurpose Cooperative Society Limited</b></p> -->
-                        <div class="d-flex gap-3 flex-wrap">
-                            <div class="member-badge">
-                                <i class="fas fa-id-card"></i>
-                                <span><%= user.membershipID %></span>
-                            </div>
-                            <div class="member-badge">
-                                <i class="fas fa-calendar"></i>
-                                <span>Member Since: 
-                                    <%= new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) %>
-                                </span>
-                            </div>
-                            <div class="member-badge club-member-badge">
-                                <i class="fas fa-star"></i>
-                                <span>
-                                    <%= user.membershipID && user.membershipID.startsWith('CD') ? '5%' : '10%' %> Loan Interest Rate
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                        <h5 class="opacity-90">Account Status</h5>
-                        <% let badgeClass = "bg-light text-secondary"; %>
-                        <% let statusText = "Pending"; %>
+<div class="powered-by">Powered by <strong>JESZ LIMITED</strong></div>
 
-                        <% if (user.status === "active") { %>
-                            <% badgeClass = "bg-light text-success"; %>
-                            <% statusText = "Active"; %>
-                        <% } else if (user.status === "rejected") { %>
-                            <% badgeClass = "bg-light text-danger"; %>
-                            <% statusText = "Rejected"; %>
-                        <% } %>
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg">Copied!</span></div>
 
-                        <h3>
-                            <span class="badge <%= badgeClass %> fs-5 px-4 py-2"><%= statusText %></span>
-                        </h3>
-                        <p class="mb-0 mt-2 opacity-75">
-                            <% if (user.Payment && user.Payment.status === "paid") { %>
-                                KYC Verified ✓
-                            <% } else { %>
-                                KYC Pending ✗
-                            <% } %>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Referral Notice -->
-        <div class="alert-warning-custom mb-4">
-            <h6 class="fw-bold mb-2">
-                <i class="fas fa-users me-2"></i>Referral Rewards Update
-            </h6>
-
-            <p class="mb-0">
-                Referral earnings are <strong>not activated yet</strong>, but every referral you make now will count toward future rewards.  
-                You can share your referral link anytime and start building your network early.
-            </p>
-        </div>
-
-
-
-        </div>
-
-        <!-- Referral Section -->
-        <div id="referral" class="content-section">
-        <div class="card">
-            <div class="card-header">
-            <h5 class="mb-0 fw-bold"><i class="fas fa-users me-2"></i>Referral Program</h5>
-            </div>
-
-            <div class="card-body">
-            <div class="row g-4">
-
-                <!-- Left: Referral Code -->
-                <div class="col-lg-6">
-                <div class="gradient-bg text-white p-4 rounded-3">
-                    <h5 class="fw-bold mb-3"><i class="fas fa-gift me-2"></i>Refer & Earn!</h5>
-                    <p class="mb-4">Invite friends to join Club De Stars and earn rewards for each successful referral</p>
-
-                    <div class="bg-gray-200 bg-opacity-20 p-3 rounded-3 mb-3">
-                    <small class="opacity-75 d-block mb-1">Your Referral Code</small>
-                    <h4 class="mb-0 fw-bold"><%= referralCode %></h4>
-                    </div>
-
-                    <button class="btn btn-light w-100 fw-semibold" onclick="copyReferralLink()">
-                    <i class="fas fa-copy me-2"></i>Copy Referral Link
-                    </button>
-
-                    <input type="hidden" id="refLink" value="<%= referralLink %>">
-                </div>
-                </div>
-
-                <!-- Right: Referrals Stats -->
-                <div class="col-lg-6">
-                <h6 class="fw-bold mb-3">Your Referrals</h6>
-
-                <div class="row g-3 mb-4">
-                    <div class="col-6">
-                    <div class="p-3 rounded-3 text-center" style="background: #d1fae5;">
-                        <h3 class="fw-bold text-success mb-0"><%= totalReferrals %></h3>
-                        <small>Total Referrals</small>
-                    </div>
-                    </div>
-
-                    <div class="col-6">
-                    <div class="p-3 rounded-3 text-center" style="background: #fde68a;">
-                        <!-- <h3 class="fw-bold text-warning mb-0">₦<%= referralEarning.toLocaleString() %></h3> -->
-                        <h3 class="fw-bold text-warning mb-0">₦0</h3>
-                        <small>Earned</small>
-                    </div>
-                    </div>
-                </div>
-
-                <% if (referredUsers.length > 0) { %>
-                    <ul class="list-group">
-                    <% referredUsers.forEach(r => { %>
-                        <li class="list-group-item d-flex justify-content-between">
-                        <span><%= r.firstName %> <%= r.lastName %></span>
-                        <span class="text-muted"><%= r.email %></span>
-                        </li>
-                    <% }) %>
-                    </ul>
-                <% } else { %>
-                    <p class="text-muted">No referrals yet.</p>
-                <% } %>
-
-                </div>
-            </div>
-            </div>
-        </div>
-        </div>
-
+<!-- ════ SCRIPTS ════ -->
 <script>
-function copyReferralLink() {
-  const link = document.getElementById("refLink").value;
-  navigator.clipboard.writeText(link);
-  alert("Referral link copied!");
+/* ── Theme ── */
+(function(){
+  const saved = localStorage.getItem('cds-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+})();
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('cds-theme', next);
+  updateThemeUI(next);
 }
-</script>
+function updateThemeUI(theme){
+  const icon = document.getElementById('togIcon');
+  if(icon){ icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun'; }
+}
 
-    </div>
+/* ── Sidebar ── */
+function toggleSidebar(){
+  const open = document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', e => {
+  const sb = document.getElementById('sidebar');
+  const hb = document.querySelector('.hamburger');
+  if(window.innerWidth <= 900 && sb.classList.contains('open') && !sb.contains(e.target) && hb && !hb.contains(e.target)) closeSidebar();
+});
 
-    <!-- Powered By Footer -->
-    <div class="powered-by">
-        <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
-    </div>
+/* ── Toast ── */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Navigation
-        function showSection(sectionId, event) {
-            if (event) {
-                event.preventDefault();
-            }
-            
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
-            });
-            document.getElementById(sectionId).style.display = 'block';
-            
-            document.querySelectorAll('.sidebar-menu a').forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            if (event && event.target) {
-                event.target.classList.add('active');
-            }
-
-            if (window.innerWidth <= 992) {
-                document.getElementById('sidebar').classList.remove('active');
-            }
-        }
-
-        // Modal Functions
-        function openModal(modalId) {
-            const modal = new bootstrap.Modal(document.getElementById(modalId));
-            modal.show();
-        }
-
-        // Loan Calculator
-function calculateLoan() {
-    const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
-    const duration = parseInt(document.getElementById('calcDuration').value) || 1;
-    const rate = parseFloat(document.getElementById('calcRate').value) || 5;
-
-    if (amount > 0) {
-        const maxLoan = parseFloat("<%= user.account.balance %>") * 3;
-
-        if (amount > maxLoan) {
-            alert(`Loan amount exceeds your max eligible amount of ₦${maxLoan.toLocaleString()}`);
-            document.getElementById('calcAmount').value = maxLoan;
-            return;
-        }
-
-        // Interest for ONE MONTH ONLY
-        const interest = (amount * rate) / 100;
-
-        // Total repayment
-        const total = amount + interest;
-
-        // Monthly payment
-        const monthly = total / duration;
-
-        document.getElementById('calcResult').style.display = 'block';
-        document.getElementById('monthlyPay').textContent = '₦' + monthly.toLocaleString('en-NG', { maximumFractionDigits: 2 });
-        document.getElementById('totalInt').textContent = '₦' + interest.toLocaleString('en-NG', { maximumFractionDigits: 2 });
-        document.getElementById('totalRep').textContent = '₦' + total.toLocaleString('en-NG', { maximumFractionDigits: 2 });
+/* ── Copy ── */
+function copyText(text, btnId, label){
+  navigator.clipboard.writeText(text).then(() => {
+    if(btnId){
+      const btn = document.getElementById(btnId);
+      if(btn){ btn.classList.add('copied'); btn.innerHTML = '<i class="fas fa-check" style="font-size:11px;"></i> Copied'; setTimeout(()=>{ btn.classList.remove('copied'); btn.innerHTML = '<i class="fas fa-copy" style="font-size:11px;"></i> Copy'; }, 2000); }
     }
+    showToast(label + ' copied to clipboard');
+  }).catch(() => showToast('Copy failed — please copy manually'));
 }
 
-        // Withdrawal Fee Calculator
+/* ── Share ── */
+const REFERRAL_LINK = '<%= referralLink %>';
+const REFERRAL_CODE = '<%= referralCode %>';
+const shareMsg = `Join me on Club De Stars Cooperative! Use my referral code ${REFERRAL_CODE} to sign up and start building your savings. ${REFERRAL_LINK}`;
 
+function shareVia(platform){
+  const encodedMsg = encodeURIComponent(shareMsg);
+  const urls = {
+    whatsapp: `https://wa.me/?text=${encodedMsg}`,
+    telegram: `https://t.me/share/url?url=${encodeURIComponent(REFERRAL_LINK)}&text=${encodedMsg}`,
+    twitter:  `https://twitter.com/intent/tweet?text=${encodedMsg}`,
+  };
+  if(urls[platform]) window.open(urls[platform], '_blank', 'noopener,noreferrer');
+}
 
-        // Form Submissions
-        function submitDeposit() {
-            alert('✅ Deposit request submitted successfully! You will receive a confirmation shortly.');
-            bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
-        }
-
-        function submitWithdrawal() {
-            const type = document.getElementById('withdrawalType').value;
-            if (type === 'force') {
-                if (confirm('Force withdrawal includes a 2.5% charge. You will receive 50% now and 50% after 30 days. Continue?')) {
-                    alert('✅ Force withdrawal request submitted! Processing time: 24-48 hours.');
-                    bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
-                }
-            } else {
-                alert('✅ Withdrawal request submitted successfully! Processing time: 24-48 hours.');
-                bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
-            }
-        }
-
-        function submitPayment() {
-            alert('✅ Payment processed successfully! Your loan balance has been updated.');
-            bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
-        }
-
-        function submitLoanRequest() {
-            const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
-            
-            if (amount <= 0) {
-                alert('❌ Please enter a valid loan amount');
-                return;
-            }
-            
-            if (amount > 1350000) {
-                alert('❌ Loan amount exceeds maximum eligible amount of ₦1,350,000 (3x your savings)');
-                return;
-            }
-            
-            if (!document.getElementById('agreeTerms').checked) {
-                alert('❌ Please agree to the loan terms and conditions');
-                return;
-            }
-            
-            alert('✅ Loan application submitted successfully!\n\nYour application will be reviewed within 3-5 business days.\n\nClub Member Rate: 5% p.a.\nMaximum Amount: 3x savings\nReminder: 3 days before due date');
-            bootstrap.Modal.getInstance(document.getElementById('loanRequestModal')).hide();
-        }
-
-        function submitRollover() {
-            if (confirm('This will pay ₦8,750 interest and extend your loan with 6% interest rate. Continue?')) {
-                alert('✅ Rollover request submitted!\n\nInterest payment of ₦8,750 will be processed.\nNew interest rate: 6% p.a.\nYou will be notified once approved.');
-                bootstrap.Modal.getInstance(document.getElementById('rolloverModal')).hide();
-            }
-        }
-
-        // Animation on load
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.stat-card, .card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-            });
-        });
-    </script>
-
-
-    <script>
-    // Close sidebar when clicking outside (for mobile view)
-    document.addEventListener('click', function (event) {
-        const sidebar = document.getElementById('sidebar');
-        const toggleButton = document.querySelector('.fa-bars');
-
-        // Only apply this behavior on small screens
-        if (window.innerWidth <= 992) {
-            // If sidebar is active and click is outside sidebar and toggle button → close it
-            if (sidebar.classList.contains('active') &&
-                !sidebar.contains(event.target) &&
-                !toggleButton.contains(event.target)) {
-                sidebar.classList.remove('active');
-            }
-        }
-    });
+/* ── Loader ── */
+window.addEventListener('load', () => {
+  const l = document.getElementById('loader');
+  setTimeout(() => { l.style.opacity = '0'; setTimeout(() => l.style.display = 'none', 500); }, 400);
+});
 </script>
-
 </body>
 </html>

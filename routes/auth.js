@@ -75,6 +75,8 @@ router.post(
         idNumber,
         referralCode,
         password,
+        paymentMethod, // ← ADD THIS
+        payerName,     // ← ADD THIS
       } = req.body;
 
       const normalizedEmail = email.toLowerCase();
@@ -193,9 +195,7 @@ router.post(
         if (err) console.error("Auto-login error:", err);
       });
 
-      // ── Create Account (ownerType: "User") ────────────────────────────────
-      // ownerType is set to "User" so this account is correctly identified as
-      // a regular member account and included in ROI distribution.
+      // ── Create Account ────────────────────────────────────────────────────
       const account = await Account.create({
         ownerType:       "User",
         ownerId:         newUser._id,
@@ -242,7 +242,41 @@ router.post(
       }
 
       // ═══════════════════════════════════════════════════════════════════════
-      // PAYSTACK
+      // MANUAL BANK TRANSFER
+      // ═══════════════════════════════════════════════════════════════════════
+      if (paymentMethod === "manual") {
+        if (!payerName || payerName.trim().length < 2) {
+          return res.status(400).json({
+            status:  false,
+            message: "Payer name is required for manual transfers.",
+          });
+        }
+
+        const reference = `MANUAL-REG-${newUser._id}-${Date.now()}`;
+
+        const payment = await Payment.create({
+          user:        newUser._id,
+          email:       normalizedEmail,
+          amount:      registrationFee,
+          reference,
+          payeeName:   payerName.trim(),
+          paymentType: "registration_fee",
+          status:      "pending",
+        });
+
+        newUser.Payment = payment._id;
+        await newUser.save();
+
+        return res.json({
+          status:        true,
+          manualPending: true,
+          message:
+            "Registration submitted. Your account will be activated within 30 minutes once your transfer is confirmed.",
+        });
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // PAYSTACK (default)
       // ═══════════════════════════════════════════════════════════════════════
       const paystackRes = await fetch(
         "https://api.paystack.co/transaction/initialize",
@@ -270,11 +304,12 @@ router.post(
         throw new Error("Payment initialization failed");
 
       const payment = await Payment.create({
-        user:      newUser._id,
-        email:     normalizedEmail,
-        amount:    registrationFee,
-        reference: data.data.reference,
-        status:    "pending",
+        user:        newUser._id,
+        email:       normalizedEmail,
+        amount:      registrationFee,
+        reference:   data.data.reference,
+        paymentType: "registration_fee",
+        status:      "pending",
       });
 
       newUser.Payment = payment._id;
@@ -369,6 +404,88 @@ router.get("/payment/verify", async (req, res) => {
   } catch (err) {
     console.error("Payment verification error:", err);
     res.redirect("/signup?payment=failed");
+  }
+});
+
+
+router.post("/payment/registration/manual", async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ status: false, message: "Not authenticated." });
+    }
+ 
+    const { payerName } = req.body;
+    if (!payerName || payerName.trim().length < 2) {
+      return res.status(400).json({
+        status: false,
+        message: "Payer name is required.",
+      });
+    }
+ 
+    // ── Load user ──────────────────────────────────────────────────
+    const user = await User.findById(userId).populate("Payment");
+    if (!user) {
+      return res.status(404).json({ status: false, message: "User not found." });
+    }
+ 
+    // ── Guard: already paid ────────────────────────────────────────
+    if (
+      user.registrationStatus === "paid" ||
+      (user.Payment && user.Payment.status === "paid")
+    ) {
+      return res.status(400).json({
+        status: false,
+        message: "Registration fee already paid.",
+      });
+    }
+ 
+    // ── Guard: pending manual already exists ───────────────────────
+    const existingPending = await Payment.findOne({
+      user: userId,
+      paymentType: "registration_fee",
+      status: "pending",
+    });
+    if (existingPending) {
+      return res.status(400).json({
+        status: false,
+        message:
+          "A manual payment request is already pending admin confirmation. Please wait.",
+      });
+    }
+ 
+    const settings = await Settings.getSettings();
+    const registrationFee = settings.registrationFees.adultRegistrationFee;
+ 
+    // ── Create a pending manual payment ───────────────────────────
+    const reference = `MANUAL-REG-${userId}-${Date.now()}`;
+ 
+    const payment = await Payment.create({
+      user: userId,
+      email: user.email,
+      amount: registrationFee,
+      reference,
+      payeeName: payerName.trim(),
+      paymentType: "registration_fee",
+      status: "pending",
+    });
+ 
+    // ── Link payment to user (keeps parity with Paystack flow) ────
+    user.Payment = payment._id;
+    await user.save();
+ 
+    return res.json({
+      status: true,
+      manualPending: true,
+      message:
+        "Manual payment request submitted. Your account will be activated once an admin confirms the transfer.",
+    });
+  } catch (err) {
+    console.error("Manual registration payment error:", err);
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong. Please try again.",
+    });
   }
 });
 
@@ -550,66 +667,317 @@ router.post("/paystack/webhook", express.json(), async (req, res) => {
 
 
 // USER SIGN-UP LOGIC 
-router.get("/login", (req, res) => {
-  res.render("auth/login");
-});
-
 
 router.get("/forgot-password", (req, res) => {
   res.render("auth/recovery");
 });
 
+router.get("/login", async (req, res) => {
+  try {
+    // ── No session → plain login page ────────────────────────────
+    if (!req.user) {
+      return res.render("auth/login", {
+        accountState: null,
+        stateData:    {},
+        error:        null,
+        success:      null,
+      });
+    }
+
+    const user = await User.findById(req.user._id).lean();
+
+    if (!user) {
+      return res.render("auth/login", {
+        accountState: null,
+        stateData:    {},
+        error:        "Session expired. Please log in again.",
+        success:      null,
+      });
+    }
+
+    // ── Load settings (bank details + fee) ────────────────────────
+    const settings        = await Settings.getSettings();
+    const companyAccount  = settings.companyAccount;
+    const registrationFee = settings.registrationFees.adultRegistrationFee;
+
+    // ── Find latest registration-fee payment ──────────────────────
+    const regPayment = await Payment.findOne({
+      user:        user._id,
+      paymentType: "registration_fee",
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const hoursSince = regPayment
+      ? (Date.now() - new Date(regPayment.createdAt).getTime()) / 36e5
+      : null;
+
+    const submittedAt = regPayment
+      ? new Date(regPayment.createdAt).toLocaleString("en-NG", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      : null;
+
+    // ══════════════════════════════════════════════════════════════
+    // CASE 1 — DELETED
+    // ══════════════════════════════════════════════════════════════
+    if (user.status === "deleted") {
+      return res.render("auth/login", {
+        accountState: "deleted",
+        stateData:    {},
+        error: null, success: null,
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // CASE 2 — SUSPENDED
+    // ══════════════════════════════════════════════════════════════
+    if (user.status === "suspended") {
+      return res.render("auth/login", {
+        accountState: "suspended",
+        stateData:    {},
+        error: null, success: null,
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // CASE 3 — DEACTIVATED  →  must re-pay registration fee
+    // ══════════════════════════════════════════════════════════════
+    if (user.status === "deactivated") {
+      return res.render("auth/login", {
+        accountState: "deactivated",
+        stateData:    { companyAccount, registrationFee, userId: user._id.toString() },
+        error: null, success: null,
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // CASE 4 — REJECTED
+    // ══════════════════════════════════════════════════════════════
+    if (user.status === "rejected") {
+      return res.render("auth/login", {
+        accountState: "rejected",
+        stateData:    {},
+        error: null, success: null,
+      });
+    }
+
+    // ── From here: status is "pending" or "active" ────────────────
+
+    // ══════════════════════════════════════════════════════════════
+    // CASE 5 — ACTIVE  →  go to dashboard
+    // ══════════════════════════════════════════════════════════════
+    if (user.status === "active" && user.registrationStatus === "paid") {
+      return res.redirect("/cds-cooperative/dashboard");
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // CASE 6 — registrationStatus: "pending" + no payment record
+    //           → never paid, redirect back to finish registration
+    // ══════════════════════════════════════════════════════════════
+    if (!regPayment) {
+      return res.render("auth/login", {
+        accountState: "no_payment",
+        stateData:    { registrationFee },
+        error: null, success: null,
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // CASE 7 — Payment exists but FAILED
+    // ══════════════════════════════════════════════════════════════
+    if (regPayment.status === "failed") {
+      return res.render("auth/login", {
+        accountState: "payment_failed",
+        stateData:    { registrationFee },
+        error: null, success: null,
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // CASE 8 — Payment PENDING admin approval
+    //           sub-case: > 24 hrs since submission
+    // ══════════════════════════════════════════════════════════════
+    if (regPayment.status === "pending") {
+      return res.render("auth/login", {
+        accountState: "payment_pending",
+        stateData: {
+          over24hrs:     hoursSince > 24,
+          submittedAt,
+          paymentMethod: regPayment.payeeName ? "manual" : "paystack",
+          companyAccount,
+        },
+        error: null, success: null,
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // CASE 9 — Payment PAID/SUCCESS but account still pending
+    //           Admin confirmed payment but hasn't activated account
+    // ══════════════════════════════════════════════════════════════
+    if (
+      (regPayment.status === "paid" || regPayment.status === "success") &&
+      user.status === "pending"
+    ) {
+      return res.render("auth/login", {
+        accountState: "account_pending",
+        stateData:    {},
+        error: null, success: null,
+      });
+    }
+
+    // ── Fallback ──────────────────────────────────────────────────
+    return res.render("auth/login", {
+      accountState: null,
+      stateData:    {},
+      error:        null,
+      success:      null,
+    });
+
+  } catch (err) {
+    console.error("Login GET error:", err);
+    res.render("auth/login", {
+      accountState: null,
+      stateData:    {},
+      error:        "Something went wrong. Please try again.",
+      success:      null,
+    });
+  }
+});
 
 // LOGIN ROUTE
 router.post("/login", (req, res, next) => {
-  passport.authenticate("user-local", (err, user, info) => {
+  passport.authenticate("user-local", async (err, user, info) => {
 
+    // ── Server error ──────────────────────────────────────────────
     if (err) {
-      return res.status(500).render("auth/login", {
-        error: "An error occurred. Please try again."
-      });
+      return res.status(500).json({ success: false, error: "An error occurred. Please try again." });
     }
 
+    // ── Wrong credentials ─────────────────────────────────────────
     if (!user) {
-      // Keep your custom error messages
-      if (info?.message === "No user found") {
-        return res.status(401).render("auth/login", {
-          error: "Email not found. Please register first.",
-          info: "Need an account? Click Register Here below."
-        });
-      } else if (info?.message === "Incorrect password") {
-        return res.status(401).render("auth/login", {
-          error: "Incorrect password. Please try again."
-        });
-      } else if (info?.message === "Invalid email") {
-        return res.status(401).render("auth/login", {
-          error: "Please enter a valid email address."
-        });
-      } else if (info?.message === "No role assigned") {
-        return res.status(403).render("auth/login", {
-          error: "No role assigned to this account. Contact support."
-        });
-      } else if (info?.message === "User role is inactive") {
-        return res.status(403).render("auth/login", {
-          error: "Your account role is inactive. Contact support."
-        });
-      }
-
-      // Default fallback
-      return res.status(401).render("auth/login", {
-        error: info?.message || "Invalid email or password"
-      });
+      let error = "Invalid email or password.";
+      if (info?.message === "No user found")         error = "Email not found. Please register first.";
+      else if (info?.message === "Incorrect password") error = "Incorrect password. Please try again.";
+      else if (info?.message === "No role assigned")   error = "No role assigned. Contact support.";
+      else if (info?.message === "User role is inactive") error = "Account role is inactive. Contact support.";
+      return res.status(401).json({ success: false, error });
     }
 
-    req.logIn(user, (err) => {
-      if (err) {
-        return res.status(500).render("auth/login", {
-          error: "Login failed. Please try again."
-        });
+    // ── Log the user in ───────────────────────────────────────────
+    req.logIn(user, async (loginErr) => {
+      if (loginErr) {
+        return res.status(500).json({ success: false, error: "Login failed. Please try again." });
       }
 
-      // ✅ All users go to the same dashboard
-      return res.redirect("/cds-cooperative/dashboard");
+      try {
+        // ── Reload fresh user from DB ─────────────────────────────
+        const freshUser = await User.findById(user._id).lean();
+        if (!freshUser) {
+          return res.status(404).json({ success: false, error: "User not found." });
+        }
+
+        // ── Load settings ─────────────────────────────────────────
+        const settings        = await Settings.getSettings();
+        const companyAccount  = settings.companyAccount;
+        const registrationFee = settings.registrationFees.adultRegistrationFee;
+
+        // ── Latest registration-fee payment ───────────────────────
+        const regPayment = await Payment.findOne({
+          user:        freshUser._id,
+          paymentType: "registration_fee",
+        })
+          .sort({ createdAt: -1 })
+          .lean();
+
+        const hoursSince  = regPayment
+          ? (Date.now() - new Date(regPayment.createdAt).getTime()) / 36e5
+          : null;
+
+        const submittedAt = regPayment
+          ? new Date(regPayment.createdAt).toLocaleString("en-NG", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })
+          : null;
+
+        // ══════════════════════════════════════════════════════════
+        // STATUS CHECKS — return accountState + stateData as JSON
+        // ══════════════════════════════════════════════════════════
+
+        if (freshUser.status === "deleted") {
+          return res.json({ success: true, accountState: "deleted", stateData: {} });
+        }
+
+        if (freshUser.status === "suspended") {
+          return res.json({ success: true, accountState: "suspended", stateData: {} });
+        }
+
+        if (freshUser.status === "deactivated") {
+          return res.json({
+            success: true,
+            accountState: "deactivated",
+            stateData: { companyAccount, registrationFee, userId: freshUser._id.toString() },
+          });
+        }
+
+        if (freshUser.status === "rejected") {
+          return res.json({ success: true, accountState: "rejected", stateData: {} });
+        }
+
+        // ── Active + paid → go to dashboard ───────────────────────
+        if (freshUser.status === "active" && freshUser.registrationStatus === "paid") {
+          return res.json({ success: true, accountState: "dashboard" });
+        }
+
+        // ── No payment at all ─────────────────────────────────────
+        if (!regPayment) {
+          return res.json({
+            success: true,
+            accountState: "no_payment",
+            stateData: { registrationFee },
+          });
+        }
+
+        // ── Payment failed ────────────────────────────────────────
+        if (regPayment.status === "failed") {
+          return res.json({
+            success: true,
+            accountState: "payment_failed",
+            stateData: { registrationFee },
+          });
+        }
+
+        // ── Payment pending admin ─────────────────────────────────
+        if (regPayment.status === "pending") {
+          return res.json({
+            success: true,
+            accountState: "payment_pending",
+            stateData: {
+              over24hrs:     hoursSince > 24,
+              submittedAt,
+              paymentMethod: regPayment.payeeName ? "manual" : "paystack",
+              companyAccount,
+            },
+          });
+        }
+
+        // ── Payment approved, account not yet activated ───────────
+        if (
+          (regPayment.status === "paid" || regPayment.status === "success") &&
+          freshUser.status === "pending"
+        ) {
+          return res.json({ success: true, accountState: "account_pending", stateData: {} });
+        }
+
+        // ── Fallback → dashboard ──────────────────────────────────
+        return res.json({ success: true, accountState: "dashboard" });
+
+      } catch (checkErr) {
+        console.error("Status check error:", checkErr);
+        return res.status(500).json({ success: false, error: "Something went wrong. Please try again." });
+      }
     });
 
   })(req, res, next);

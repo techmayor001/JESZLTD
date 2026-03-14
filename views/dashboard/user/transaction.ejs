@@ -1,1137 +1,855 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transactions - Club De Stars | Powered by JESZ LIMITED</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #1e3a8a;
-            --primary-dark: #1e40af;
-            --primary-light: #3b82f6;
-            --secondary: #64748b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #06b6d4;
-            --sidebar-width: 280px;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
-        
-        /* Sidebar Styles */
-        .sidebar {
-            position: fixed;
-            left: -280px;
-            top: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            z-index: 1050;
-            transition: left 0.3s ease;
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
-        }
-
-        .sidebar.active {
-            left: 0;
-        }
-
-        .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .sidebar-overlay.active {
-            display: block;
-            opacity: 1;
-        }
-        
-        .sidebar-header {
-            padding: 1.5rem 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        
-        .logo-box {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        .logo-text h5 {
-            margin: 0;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 1rem;
-            line-height: 1.2;
-        }
-
-        .logo-text small {
-            font-size: 0.65rem;
-            opacity: 0.75;
-        }
-        
-        .sidebar-menu {
-            padding: 1rem 0;
-        }
-        
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            padding: 0.875rem 1.5rem;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-            font-weight: 500;
-        }
-        
-        .sidebar-menu a:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-        }
-
-        .member-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.3);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .club-member-badge {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-        
-        /* Top Navbar */
-        .top-navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
-            z-index: 1030;
-            display: flex;
-            align-items: center;
-            padding: 0 1rem;
-            transition: all 0.3s;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
-        }
-
-        .menu-toggle {
-            background: none;
-            border: none;
-            color: var(--primary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            margin-right: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .navbar-title h5 {
-            margin: 0;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.1rem;
-        }
-
-        .navbar-title small {
-            color: #64748b;
-            font-size: 0.8rem;
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-left: 0;
-            margin-top: 70px;
-            padding: 1rem;
-            min-height: calc(100vh - 70px);
-            transition: all 0.3s;
-        }
-
-        /* Statistics */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-box {
-            background: white;
-            padding: 1.25rem 1rem;
-            border-radius: 16px;
-            box-shadow: 0 6px 15px rgba(30, 58, 138, 0.08);
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .stat-box:active {
-            transform: scale(0.98);
-        }
-
-        .stat-box i {
-            font-size: 1.75rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-box h4 {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin: 0.5rem 0 0.25rem;
-        }
-
-        .stat-box small {
-            font-size: 0.75rem;
-            color: #64748b;
-        }
-
-        /* Filter Card */
-        .filter-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 6px 15px rgba(30, 58, 138, 0.08);
-        }
-
-        .filter-card label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #1e293b;
-        }
-
-        .form-control, .form-select {
-            border: 2px solid rgba(30, 58, 138, 0.1);
-            border-radius: 12px;
-            padding: 0.625rem 0.875rem;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.1);
-        }
-
-        /* Transaction Card */
-        .card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 6px 15px rgba(30, 58, 138, 0.08);
-            background: white;
-            margin-bottom: 1.5rem;
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
-            padding: 1.25rem 1rem;
-            border-radius: 16px 16px 0 0 !important;
-        }
-
-        .card-header h5 {
-            font-size: 1rem;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .transaction-item {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.08);
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .transaction-item:last-child {
-            border-bottom: none;
-        }
-
-        .transaction-item:active {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.02) 0%, rgba(59, 130, 246, 0.02) 100%);
-        }
-
-        .transaction-content {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .transaction-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .deposit-icon {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-
-        .withdrawal-icon {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        }
-
-        .loan-icon {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-
-        .roi-icon {
-            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-        }
-
-        .payment-icon {
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-        }
-
-        .transaction-details {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .transaction-details h6 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin: 0 0 0.25rem;
-            color: #1e293b;
-        }
-
-        .transaction-meta {
-            font-size: 0.75rem;
-            color: #64748b;
-        }
-
-        .transaction-amount-section {
-            text-align: right;
-            flex-shrink: 0;
-        }
-
-        .transaction-amount {
-            font-size: 1rem;
-            font-weight: bold;
-            margin-bottom: 0.25rem;
-        }
-
-        .transaction-amount.positive {
-            color: var(--success);
-        }
-
-        .transaction-amount.negative {
-            color: var(--danger);
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.625rem;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-
-        .status-completed {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-failed {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none;
-            padding: 0.625rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-
-        .btn-outline-primary {
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            border-radius: 12px;
-            padding: 0.625rem 1.5rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-            background: white;
-        }
-
-        .btn-outline-primary:active {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-dialog {
-            margin: 1rem;
-            width: calc(100% - 2rem);
-            max-width: 500px;
-        }
-
-        .modal-content {
-            border-radius: 20px;
-            border: none;
-            background: white;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            border-radius: 20px 20px 0 0;
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
-            padding: 1.25rem;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .modal-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .btn-close {
-            padding: 0.5rem;
-            margin: 0;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .modal-footer {
-            padding: 1rem 1.25rem;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .modal-footer .btn {
-            flex: 1;
-        }
-
-        /* Receipt */
-        .receipt {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        .receipt-header {
-            text-align: center;
-            border-bottom: 2px dashed #ddd;
-            padding-bottom: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .receipt-header h4 {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .receipt-header p {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin: 0.25rem 0;
-        }
-
-        .receipt-amount-section {
-            text-align: center;
-            margin: 1.5rem 0;
-        }
-
-        .receipt-amount-section .transaction-icon {
-            width: 60px;
-            height: 60px;
-            font-size: 1.5rem;
-            margin: 0 auto 1rem;
-        }
-
-        .receipt-amount-section h5 {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-            color: #64748b;
-        }
-
-        .receipt-amount-section h2 {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin: 0;
-        }
-
-        .receipt-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .receipt-row:last-of-type {
-            border-bottom: none;
-        }
-
-        .receipt-label {
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-
-        .receipt-value {
-            font-weight: 600;
-            color: #1e293b;
-            text-align: right;
-        }
-
-        .receipt-footer {
-            text-align: center;
-            padding-top: 1rem;
-            border-top: 2px dashed #ddd;
-            margin-top: 1rem;
-        }
-
-        .receipt-footer p {
-            font-size: 0.8rem;
-            color: #64748b;
-            margin: 0.25rem 0;
-        }
-
-        .powered-by {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 10px 16px;
-            border-radius: 30px;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--primary);
-            z-index: 1000;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            color: #cbd5e1;
-            opacity: 0.3;
-        }
-
-        .empty-state p {
-            color: #64748b;
-            margin-top: 1rem;
-        }
-
-        /* Print Styles */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            
-            .modal-body.print-content, 
-            .modal-body.print-content * {
-                visibility: visible;
-            }
-            
-            .modal-body.print-content {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                padding: 20px;
-            }
-
-            .modal-header, 
-            .modal-footer, 
-            .btn-close,
-            .sidebar,
-            .top-navbar,
-            .powered-by {
-                display: none !important;
-            }
-
-            .modal-content {
-                box-shadow: none;
-                max-height: none;
-            }
-        }
-
-        /* Desktop Responsive */
-        @media (min-width: 768px) {
-            .stats-row {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 1rem;
-            }
-
-            .stat-box {
-                padding: 1.5rem;
-            }
-
-            .stat-box i {
-                font-size: 2rem;
-            }
-
-            .stat-box h4 {
-                font-size: 1.25rem;
-            }
-
-            .transaction-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.3rem;
-            }
-
-            .transaction-details h6 {
-                font-size: 1rem;
-            }
-
-            .transaction-meta {
-                font-size: 0.8rem;
-            }
-
-            .transaction-amount {
-                font-size: 1.1rem;
-            }
-        }
-
-        @media (min-width: 992px) {
-            .sidebar {
-                left: 0;
-            }
-
-            .sidebar-overlay {
-                display: none !important;
-            }
-
-            .top-navbar {
-                left: var(--sidebar-width);
-                padding: 0 2rem;
-            }
-
-            .menu-toggle {
-                display: none;
-            }
-
-            .main-content {
-                margin-left: var(--sidebar-width);
-                padding: 2rem;
-            }
-
-            .powered-by {
-                bottom: 20px;
-                right: 20px;
-            }
-        }
-    </style>
-     <style>
-        .hidden {
-  display: none;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transactions — Club De Stars | Powered by JESZ LIMITED</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ THEME TOKENS ══ */
+:root{
+  --sidebar-w:230px;--nav-h:62px;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
+  --accent:#4f8ef7;--accent2:#7c5af4;
+  --green:#22c78a;--red:#f05252;--amber:#f5a623;
+  --tr:all .22s ease;
+}
+[data-theme="dark"]{
+  --bg:#0a0f1e;--bg-card:#111827;--bg-card2:#1a2235;
+  --bg-card3:rgba(255,255,255,.035);
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#f0f4ff;--text2:#c8d4f0;--muted:#8b9ab8;
+  --nav-bg:rgba(10,15,30,.93);
+  --hero-bg:linear-gradient(135deg,#111827 0%,#1a2235 100%);
+  --bar-bg:rgba(255,255,255,.07);--meta-bg:rgba(255,255,255,.03);
+  --tog-bg:rgba(255,255,255,.08);
+}
+[data-theme="light"]{
+  --bg:#f4f6fb;--bg-card:#ffffff;--bg-card2:#f0f3fa;
+  --bg-card3:rgba(0,0,0,.025);
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);
+  --text:#0f1523;--text2:#2a3550;--muted:#6b7a99;
+  --nav-bg:rgba(255,255,255,.93);
+  --hero-bg:linear-gradient(135deg,#dde8ff 0%,#eef1ff 100%);
+  --bar-bg:rgba(0,0,0,.07);--meta-bg:rgba(0,0,0,.025);
+  --tog-bg:rgba(0,0,0,.07);
 }
 
-.loader-screen {
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(135deg, #0a1a2f, #102a44);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
+/* ══ BASE ══ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{
+  height:100%;font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;
+  transition:background .3s,color .3s;
+}
+a{text-decoration:none;color:inherit;}
+button,input,select,textarea{font-family:inherit;}
+
+/* ══ LOADER ══ */
+#loader{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:20px;transition:opacity .5s;
+}
+.loader-ring{
+  width:48px;height:48px;
+  border:2.5px solid var(--border2);border-top-color:var(--accent);
+  border-radius:50%;animation:spin 1s linear infinite;
+}
+.loader-label{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:var(--bg-card);border-right:1px solid var(--border);
+  z-index:200;display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .3s,background .3s,border-color .3s;
+}
+.sidebar-logo{
+  padding:18px 18px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.logo-mark{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;overflow:hidden;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:#fff;
+}
+.logo-mark img{width:100%;height:100%;object-fit:cover;}
+.logo-name{font-size:13px;font-weight:600;line-height:1.2;}
+.logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;}
+.sidebar-user{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.user-chip{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-card2);border-radius:10px;padding:9px 11px;
+  border:1px solid var(--border);
+}
+.user-avatar{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;color:#fff;
+}
+.user-name{font-size:13px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-id{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.04em;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 10px;}
+.sidebar-nav::-webkit-scrollbar{width:3px;}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.nav-section{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;margin-top:2px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
+  color:var(--muted);font-size:13px;font-weight:400;
+  transition:var(--tr);margin-bottom:1px;cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--bg-card2);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,.1);color:var(--accent);}
+.nav-item i{width:18px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-badge{
+  margin-left:auto;background:var(--red);color:#fff;
+  font-size:10px;font-weight:700;border-radius:20px;padding:2px 7px;
+}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+.member-pill{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;
+  font-size:10px;font-weight:600;background:rgba(34,199,138,.12);
+  color:var(--green);border:1px solid rgba(34,199,138,.2);margin-bottom:8px;
 }
 
-.logo span {
-  font-size: 52px;
-  font-weight: 600;
-  color: #5cc8ff;
-  display: inline-block;
-  animation: float 1.5s infinite ease-in-out;
-  letter-spacing: 1px;
+/* ══ TOP NAV ══ */
+.topnav{
+  position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--nav-h);
+  background:var(--nav-bg);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);z-index:100;
+  display:flex;align-items:center;padding:0 20px;gap:12px;
+  transition:left .3s,background .3s,border-color .3s;
+}
+.hamburger{
+  display:none;cursor:pointer;padding:7px;border-radius:8px;
+  border:none;background:none;color:var(--muted);font-size:17px;
+  transition:var(--tr);flex-shrink:0;
+}
+.hamburger:hover{background:var(--bg-card2);color:var(--text);}
+.topnav-greeting{flex:1;min-width:0;}
+.topnav-greeting h2{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-greeting p{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.status-row{display:flex;align-items:center;gap:5px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.status-label{font-size:12px;color:var(--green);font-weight:500;}
+.kyc-chip{
+  display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;
+  background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);
+  font-size:11px;font-weight:500;color:var(--amber);cursor:pointer;
+  transition:var(--tr);text-decoration:none;white-space:nowrap;
+}
+.kyc-chip.verified{background:rgba(34,199,138,.08);border-color:rgba(34,199,138,.2);color:var(--green);}
+.kyc-chip i,.status-dot{flex-shrink:0;}
+.theme-toggle{
+  width:40px;height:22px;border-radius:20px;border:1px solid var(--border2);
+  background:var(--tog-bg);cursor:pointer;position:relative;flex-shrink:0;
+  transition:background .3s,border-color .3s;padding:0;
+}
+.tog-thumb{
+  position:absolute;top:2px;left:2px;width:16px;height:16px;
+  border-radius:50%;background:var(--muted);
+  transition:transform .25s ease,background .25s;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#fff;pointer-events:none;
+}
+[data-theme="light"] .tog-thumb{transform:translateX(18px);background:var(--accent);}
+
+/* ══ MAIN ══ */
+.main{
+  margin-left:var(--sidebar-w);margin-top:var(--nav-h);
+  padding:22px;min-height:calc(100vh - var(--nav-h));
+  transition:margin-left .3s;
 }
 
-.logo span:nth-child(n) {
-  animation-delay: calc(var(--i) * 0.1s);
+/* ══ STATS GRID ══ */
+.stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:10px;margin-bottom:14px;
+}
+.stat-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:16px;
+  transition:border-color .22s;
+}
+.stat-card:hover{border-color:var(--border2);}
+.stat-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;margin-bottom:10px;
+}
+.stat-label{font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;}
+.stat-value{font-size:clamp(14px,2vw,18px);font-weight:500;word-break:break-word;}
+
+/* ══ FILTER BAR ══ */
+.filter-bar{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:14px 16px;margin-bottom:12px;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;
+}
+.filter-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:130px;}
+.filter-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);}
+.filter-input,.filter-select{
+  background:var(--bg-card2);border:1px solid var(--border2);
+  border-radius:9px;color:var(--text);font-size:13px;padding:8px 12px;
+  outline:none;transition:border-color .18s,background .3s;
+  -webkit-appearance:none;
+}
+.filter-input::placeholder{color:var(--muted);}
+.filter-input:focus,.filter-select:focus{border-color:var(--accent);}
+.filter-select option{background:var(--bg-card);color:var(--text);}
+.search-wrap{position:relative;flex:2;min-width:180px;}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px;pointer-events:none;}
+.search-wrap .filter-input{padding-left:32px;width:100%;}
+.filter-reset{
+  padding:8px 16px;background:var(--bg-card2);border:1px solid var(--border2);
+  border-radius:9px;color:var(--muted);font-size:13px;font-weight:500;
+  cursor:pointer;transition:var(--tr);white-space:nowrap;
+  display:flex;align-items:center;gap:6px;align-self:flex-end;
+}
+.filter-reset:hover{color:var(--text);border-color:var(--accent);}
+
+/* ══ TXN LIST CARD ══ */
+.txn-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);overflow:hidden;
+}
+.txn-card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-bottom:1px solid var(--border);
+}
+.txn-card-title{font-size:13px;font-weight:600;}
+.txn-count-pill{
+  font-size:11px;color:var(--muted);
+  background:var(--bg-card2);border:1px solid var(--border);
+  border-radius:20px;padding:2px 10px;
 }
 
-.logo span:nth-child(1) { --i: 0; }
-.logo span:nth-child(2) { --i: 1; }
-.logo span:nth-child(3) { --i: 2; }
-.logo span:nth-child(4) { --i: 3; }
-.logo span:nth-child(5) { --i: 4; }
-.logo span:nth-child(6) { --i: 5; }
-.logo span:nth-child(7) { --i: 6; }
-.logo span:nth-child(8) { --i: 7; }
-.logo span:nth-child(9) { --i: 8; }
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); opacity: 0.4; }
-  50% { transform: translateY(-14px); opacity: 1; }
+/* ── Transaction row ── */
+.txn-item{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 18px;border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .18s;
 }
-    </style>
+.txn-item:last-child{border-bottom:none;}
+.txn-item:hover{background:var(--bg-card2);}
+.txn-icon-wrap{
+  width:40px;height:40px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;
+}
+.ic-deposit{background:rgba(34,199,138,.14);color:var(--green);}
+.ic-withdrawal{background:rgba(240,82,82,.14);color:var(--red);}
+.ic-loan{background:rgba(245,166,35,.14);color:var(--amber);}
+.ic-loan_payment{background:rgba(124,90,244,.14);color:var(--accent2);}
+.ic-roi{background:rgba(79,142,247,.14);color:var(--accent);}
+.ic-default{background:rgba(139,154,184,.12);color:var(--muted);}
+.txn-info{flex:1;min-width:0;}
+.txn-desc{font-size:13px;font-weight:500;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.txn-meta{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.meta-dot{width:3px;height:3px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+.txn-ref{font-family:'DM Mono',monospace;font-size:10px;}
+.txn-right{text-align:right;flex-shrink:0;}
+.txn-amount{font-size:14px;font-weight:500;margin-bottom:4px;white-space:nowrap;}
+.txn-amount.positive{color:var(--green);}
+.txn-amount.negative{color:var(--red);}
+.status-pill{
+  display:inline-flex;align-items:center;gap:3px;
+  border-radius:20px;padding:2px 8px;font-size:10px;font-weight:600;
+}
+.st-completed{background:rgba(34,199,138,.1);color:var(--green);}
+.st-pending{background:rgba(245,166,35,.1);color:var(--amber);}
+.st-failed{background:rgba(240,82,82,.1);color:var(--red);}
+.st-default{background:var(--bg-card2);color:var(--muted);}
+
+/* ══ EMPTY STATE ══ */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;
+  gap:12px;padding:54px 20px;text-align:center;
+}
+.empty-icon{
+  width:58px;height:58px;border-radius:16px;
+  background:var(--bg-card2);display:flex;align-items:center;
+  justify-content:center;font-size:22px;color:var(--muted);opacity:.5;
+}
+.empty-title{font-size:15px;font-weight:500;}
+.empty-sub{font-size:12px;color:var(--muted);}
+
+/* ══ SIDEBAR OVERLAY ══ */
+.sb-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.5);z-index:190;
+}
+.sb-overlay.show{display:block;}
+
+/* ══ MODAL ══ */
+.modal-backdrop{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(5px);
+  align-items:flex-end;justify-content:center;
+}
+.modal-backdrop.open{display:flex;}
+.modal-box{
+  background:var(--bg-card);border:1px solid var(--border2);
+  border-radius:var(--r-xl) var(--r-xl) 0 0;
+  width:100%;max-width:520px;max-height:92vh;overflow-y:auto;
+  animation:shup .28s cubic-bezier(.16,1,.3,1);
+  transition:background .3s,border-color .3s;
+}
+@keyframes shup{from{transform:translateY(30px);opacity:0;}to{transform:none;opacity:1;}}
+.modal-box::-webkit-scrollbar{width:3px;}
+.modal-box::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:12px auto 0;}
+.modal-header{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;}
+.modal-title-text{font-size:15px;font-weight:500;}
+.modal-close{
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border-radius:7px;transition:var(--tr);
+}
+.modal-close:hover{background:var(--bg-card2);color:var(--text);}
+.modal-body{padding:20px;}
+
+/* ── Receipt ── */
+.receipt-header{
+  text-align:center;padding-bottom:16px;margin-bottom:16px;
+  border-bottom:1px dashed var(--border2);
+}
+.receipt-logo{
+  width:44px;height:44px;border-radius:12px;margin:0 auto 10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:16px;color:#fff;overflow:hidden;
+}
+.receipt-logo img{width:100%;height:100%;object-fit:cover;}
+.receipt-org{font-size:14px;font-weight:600;margin-bottom:2px;}
+.receipt-org-sub{font-size:11px;color:var(--muted);}
+.receipt-amount-block{text-align:center;padding:18px 0;}
+.receipt-txn-icon{
+  width:52px;height:52px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 12px;font-size:20px;
+}
+.receipt-type-label{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.receipt-amount{font-size:clamp(26px,6vw,34px);font-weight:300;letter-spacing:-.5px;}
+.receipt-amount.positive{color:var(--green);}
+.receipt-amount.negative{color:var(--red);}
+.receipt-rows{
+  border:1px solid var(--border);border-radius:var(--r-md);
+  overflow:hidden;margin-bottom:16px;
+}
+.receipt-row{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px 14px;border-bottom:1px solid var(--border);gap:12px;
+}
+.receipt-row:last-child{border-bottom:none;}
+.receipt-row-label{font-size:12px;color:var(--muted);flex-shrink:0;}
+.receipt-row-val{font-size:12px;font-weight:500;text-align:right;word-break:break-all;font-family:'DM Mono',monospace;}
+.receipt-footer{
+  text-align:center;padding-top:14px;margin-top:4px;
+  border-top:1px dashed var(--border2);
+  font-size:11px;color:var(--muted);line-height:1.7;
+}
+.modal-footer-btns{
+  display:flex;gap:10px;padding:0 20px 24px;
+}
+.btn{
+  border:none;border-radius:10px;padding:11px 20px;
+  font-size:13px;font-weight:500;cursor:pointer;
+  transition:var(--tr);flex:1;
+}
+.btn-ghost{background:var(--bg-card2);color:var(--muted);}
+.btn-ghost:hover{color:var(--text);}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.btn-primary:hover{opacity:.88;}
+
+/* ══ POWERED BY ══ */
+.powered-by{position:fixed;bottom:12px;right:14px;font-size:11px;color:var(--muted);z-index:50;}
+.powered-by strong{color:var(--accent);}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1100px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:900px){
+  .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+  .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3);}
+  .topnav{left:0;}
+  .main{margin-left:0;}
+  .hamburger{display:flex;}
+}
+@media(max-width:600px){
+  .main{padding:14px;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .stat-card{padding:13px;}
+  .filter-bar{gap:8px;}
+  .filter-group{min-width:calc(50% - 5px);}
+  .search-wrap{min-width:100%;order:-1;}
+  .filter-reset{width:100%;}
+  .txn-item{padding:11px 14px;gap:10px;}
+  .txn-icon-wrap{width:36px;height:36px;font-size:13px;border-radius:9px;}
+  .txn-desc{font-size:12px;}
+  .txn-amount{font-size:13px;}
+  .topnav-greeting p{display:none;}
+  .status-label{display:none;}
+}
+@media(max-width:380px){
+  .stats-grid{grid-template-columns:1fr 1fr;gap:6px;}
+}
+@media(min-width:901px){
+  .modal-backdrop{align-items:center;padding:20px;}
+  .modal-box{border-radius:var(--r-xl);max-width:480px;}
+  .modal-handle{display:none;}
+}
+@media print{
+  body *{visibility:hidden;}
+  .print-zone,.print-zone *{visibility:visible;}
+  .print-zone{position:fixed;inset:0;padding:30px;background:#fff;z-index:9999;}
+  .sidebar,.topnav,.powered-by,.modal-footer-btns,.modal-handle,.modal-close{display:none!important;}
+}
+</style>
 </head>
 <body>
-        <div id="loader-screen" class="loader-screen">
-        <div class="logo">
-            <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
-        </div>
-    </div>
-    <!-- Sidebar -->
-    <%- include('partials/header') %>
 
-<!-- Top Navbar -->
-<div class="top-navbar">
-    <i class="fas fa-bars d-lg-none me-3"
-       style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-       onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
-
-    <!-- This will only show on lg and above -->
-    <div class="flex-grow-1">
-        <h6 class="mb-0 fw-bold d-none d-sm-block" style="color:var(--primary);font-size:0.9rem;">
-            Welcome back, <%= user.firstName %>! 👋
-        </h6>
-        <h6 class="mb-0 fw-bold d-sm-none" style="color:var(--primary);font-size:0.85rem;">Hi, <%= user.firstName %>! 👋</h6>
-        <small class="text-muted d-none d-md-block" style="font-size:0.73rem;">
-            Member ID: <%= user.membershipID %> &nbsp;|&nbsp;
-            <%= new Date(user.createdAt).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) %>
-        </small>
-        <!-- <small class="text-muted d-md-none" style="font-size:0.72rem;"><%= user.membershipID %></small> -->
-    </div>
-        <%
-      let sbadgeClass = "bg-secondary bg-opacity-10 text-secondary";
-      if (user.status === "active")   sbadgeClass = "bg-success bg-opacity-10 text-success";
-      if (user.status === "rejected") sbadgeClass = "bg-danger bg-opacity-10 text-danger";
-    %>
-    <span class="badge <%= sbadgeClass %> ms-2" style="font-size:0.7rem;padding:5px 10px;">
-        <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
-    </span>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-ring"></div>
+  <div class="loader-label">Club De Stars</div>
 </div>
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Statistics -->
-        <div class="stats-row">
-            <div class="stat-box">
-                <div class="text-success"><i class="fas fa-arrow-down"></i></div>
-                <h4 class="text-success">₦<%= totalDeposits.toLocaleString() %></h4>
-                <small>Total Deposits</small>
-            </div>
-            <div class="stat-box">
-                <div class="text-danger"><i class="fas fa-arrow-up"></i></div>
-                <h4 class="text-danger">₦<%= totalWithdrawals.toLocaleString() %></h4>
-                <small>Total Withdrawals</small>
-            </div>
-            <div class="stat-box">
-                <div class="text-warning"><i class="fas fa-hand-holding-usd"></i></div>
-                <h4 class="text-warning">₦<%= totalLoanPayments.toLocaleString() %></h4>
-                <small>Loan Payments</small>
-            </div>
-            <div class="stat-box">
-                <div class="text-info"><i class="fas fa-percentage"></i></div>
-                <h4 class="text-info">₦<%= roiEarned.toLocaleString() %></h4>
-                <small>ROI Earned</small>
-            </div>
-        </div>
 
-        <!-- Filters -->
-        <div class="filter-card">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-3 col-6">
-                    <label class="form-label">Transaction Type</label>
-                    <select class="form-select" id="filterType" onchange="filterTransactions()">
-                        <option value="all">All Transactions</option>
-                        <option value="deposit">Deposits</option>
-                        <option value="withdrawal">Withdrawals</option>
-                        <option value="loan">Loans</option>
-                        <option value="payment">Loan Payments</option>
-                        <option value="roi">ROI Credits</option>
-                    </select>
-                </div>
-                <div class="col-md-3 col-6">
-                    <label class="form-label">Status</label>
-                    <select class="form-select" id="filterStatus" onchange="filterTransactions()">
-                        <option value="all">All Status</option>
-                        <option value="completed">Completed</option>
-                        <option value="pending">Pending</option>
-                        <option value="failed">Failed</option>
-                    </select>
-                </div>
-                <div class="col-md-3 col-6">
-                    <label class="form-label">Date Range</label>
-                    <select class="form-select" id="filterDate" onchange="filterTransactions()">
-                        <option value="all">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                        <option value="year">This Year</option>
-                    </select>
-                </div>
-                <div class="col-md-3 col-6">
-                    <button class="btn btn-outline-primary w-100" onclick="resetFilters()">
-                        <i class="fas fa-redo me-2"></i>Reset
-                    </button>
-                </div>
-            </div>
-        </div>
+<%
+  const pendingGuarantorCount = user.guarantorRequests
+    ? user.guarantorRequests.filter(r => r.status === "pending").length : 0;
+%>
 
-        <!-- Transactions List -->
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-list me-2" style="color: var(--primary);"></i>Recent Transactions</h5>
-            </div>
-            <div class="card-body p-0" id="transactionsList">
-                <!-- Transaction Items will be populated here -->
-            </div>
-        </div>
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <img src="/media/assets/logo/log.png" alt="Logo"
+           onerror="this.style.display='none';this.parentNode.innerHTML='<b>C</b>'">
     </div>
-
-    <!-- Powered By Footer -->
-    <div class="powered-by">
-       <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
+    <div style="min-width:0;">
+      <div class="logo-name">Club De Stars</div>
+      <div class="logo-sub">Cooperative Society</div>
     </div>
-
-    <!-- Transaction Detail Modal -->
-    <div class="modal" id="transactionModal">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-receipt me-2"></i>Transaction Details</h5>
-                    <button type="button" class="btn-close" onclick="closeModal()"></button>
-                </div>
-                <div class="modal-body print-content" id="transactionDetail">
-                    <!-- Transaction details will be populated here -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="printReceipt()">
-                        <i class="fas fa-print me-2"></i>Print Receipt
-                    </button>
-                </div>
-            </div>
-        </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-chip">
+      <div class="user-avatar">
+        <%= user.firstName.charAt(0).toUpperCase() %><%= user.lastName.charAt(0).toUpperCase() %>
+      </div>
+      <div style="min-width:0;">
+        <div class="user-name"><%= user.firstName %> <%= user.lastName %></div>
+        <div class="user-id"><%= user.membershipID %></div>
+      </div>
     </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Menu</div>
+    <a href="/cds-cooperative/dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="/cds-cooperative/transaction" class="nav-item active"><i class="fas fa-exchange-alt"></i> Transactions</a>
+    <a href="/cds-cooperative/loan" class="nav-item"><i class="fas fa-coins"></i> Loans</a>
+    <a href="/cds-cooperative/guarantorRequest" class="nav-item">
+      <i class="fas fa-user-check"></i> Guarantor
+      <% if (pendingGuarantorCount > 0) { %><span class="nav-badge"><%= pendingGuarantorCount %></span><% } %>
+    </a>
+    <div class="nav-section">Account</div>
+    <a href="/manage/kiddies-account" class="nav-item"><i class="fas fa-baby"></i> Kiddies Account</a>
+    <a href="/cds-cooperative/profile" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+    <a href="/cds-cooperative/kyc" class="nav-item"><i class="fas fa-shield-alt"></i> KYC</a>
+    <a href="/cds-cooperative/referral" class="nav-item"><i class="fas fa-user-plus"></i> Referrals</a>
+    <a href="/cds-cooperative/report" class="nav-item"><i class="fas fa-chart-bar"></i> Reports</a>
+    <a href="/cds-cooperative/memberContract" class="nav-item"><i class="fas fa-file-alt"></i> Terms</a>
+    <% if (user.role && user.role.name !== 'member') { %>
+    <div class="nav-section">Admin</div>
+    <a href="/admin-dashboard" class="nav-item"><i class="fas fa-tachometer-alt"></i> Administration</a>
+    <% } %>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="member-pill">
+      <i class="fas fa-star" style="font-size:9px;"></i>
+      <%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Associate Member' %>
+    </div>
+    <a href="/logout" class="nav-item" style="color:var(--red);margin-top:2px;">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </a>
+  </div>
+</aside>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Backend transactions
-    const transactions = <%- JSON.stringify(transactions) %>;
-    let filteredTransactions = [...transactions];
+<!-- ════ TOP NAV ════ -->
+<header class="topnav">
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="topnav-greeting">
+    <h2>Transactions</h2>
+    <p><%= user.firstName %> <%= user.lastName %> · <%= user.membershipID %></p>
+  </div>
+  <div class="topnav-right">
+    <div class="status-row">
+      <div class="status-dot"></div>
+      <span class="status-label">Active</span>
+    </div>
+    <% if (user.Payment && user.Payment.status === "paid") { %>
+      <div class="kyc-chip verified">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i>
+        <span>Verified</span>
+      </div>
+    <% } else { %>
+      <a href="/cds-cooperative/kyc" class="kyc-chip">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i>
+        <span>KYC</span>
+      </a>
+    <% } %>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle light/dark mode">
+      <div class="tog-thumb" id="togThumb">
+        <i class="fas fa-moon" id="togIcon" style="font-size:9px;"></i>
+      </div>
+    </button>
+  </div>
+</header>
 
-    // Utility functions (icons, classes, date formatting)
-    function getTransactionIcon(type) {
-        const icons = {
-            deposit: '<i class="fas fa-arrow-down"></i>',
-            withdrawal: '<i class="fas fa-arrow-up"></i>',
-            loan_payment: '<i class="fas fa-hand-holding-usd"></i>'
-        };
-        return icons[type] || '<i class="fas fa-exchange-alt"></i>';
-    }
+<!-- ════ MAIN ════ -->
+<main class="main">
 
-    function getTransactionClass(type) {
-        const classes = {
-            deposit: 'deposit-icon',
-            withdrawal: 'withdrawal-icon',
-            loan_payment: 'payment-icon'
-        };
-        return classes[type] || 'deposit-icon';
-    }
+  <!-- Stat Summary Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(34,199,138,.1);color:var(--green);">
+        <i class="fas fa-download"></i>
+      </div>
+      <div class="stat-label">Total Deposits</div>
+      <div class="stat-value" style="color:var(--green);">₦<%= totalDeposits.toLocaleString() %></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(240,82,82,.1);color:var(--red);">
+        <i class="fas fa-upload"></i>
+      </div>
+      <div class="stat-label">Total Withdrawals</div>
+      <div class="stat-value" style="color:var(--red);">₦<%= totalWithdrawals.toLocaleString() %></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(124,90,244,.1);color:var(--accent2);">
+        <i class="fas fa-credit-card"></i>
+      </div>
+      <div class="stat-label">Loan Payments</div>
+      <div class="stat-value" style="color:var(--accent2);">₦<%= totalLoanPayments.toLocaleString() %></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(79,142,247,.1);color:var(--accent);">
+        <i class="fas fa-percentage"></i>
+      </div>
+      <div class="stat-label">ROI Earned</div>
+      <div class="stat-value" style="color:var(--accent);">₦<%= roiEarned.toLocaleString() %></div>
+    </div>
+  </div>
 
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" class="filter-input" id="searchInput"
+             placeholder="Search description or reference…" oninput="applyFilters()">
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Type</label>
+      <select class="filter-select" id="filterType" onchange="applyFilters()">
+        <option value="all">All Types</option>
+        <option value="deposit">Deposits</option>
+        <option value="withdrawal">Withdrawals</option>
+        <option value="loan_payment">Loan Payments</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Status</label>
+      <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+        <option value="all">All Status</option>
+        <option value="completed">Completed</option>
+        <option value="pending">Pending</option>
+        <option value="failed">Failed</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Period</label>
+      <select class="filter-select" id="filterPeriod" onchange="applyFilters()">
+        <option value="all">All Time</option>
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+        <option value="year">This Year</option>
+      </select>
+    </div>
+    <button class="filter-reset" onclick="resetFilters()">
+      <i class="fas fa-redo" style="font-size:11px;"></i> Reset
+    </button>
+  </div>
 
-    // Main render function
-    function renderTransactions() {
-        const container = document.getElementById('transactionsList');
-        
-        if (filteredTransactions.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state text-center py-3">
-                    <i class="fas fa-inbox fa-2x"></i>
-                    <p class="mt-2">No transactions found</p>
-                </div>
-            `;
-            return;
-        }
+  <!-- Transaction List -->
+  <div class="txn-card">
+    <div class="txn-card-header">
+      <span class="txn-card-title">
+        <i class="fas fa-list" style="color:var(--accent);margin-right:7px;font-size:12px;"></i>
+        Transaction History
+      </span>
+      <span class="txn-count-pill" id="txnCount">— records</span>
+    </div>
+    <div id="txnList"></div>
+  </div>
 
-        container.innerHTML = filteredTransactions.map(txn => `
-            <div class="transaction-item" onclick="showTransactionDetail('${txn._id}')">
-                <div class="transaction-content">
-                    <div class="transaction-icon ${getTransactionClass(txn.type)}">
-                        ${getTransactionIcon(txn.type)}
-                    </div>
-                    <div class="transaction-details">
-                        <h6>${txn.description || txn.type.replace('_', ' ')}</h6>
-                        <div class="transaction-meta">
-                            <i class="fas fa-calendar me-1"></i>${formatDate(txn.createdAt)}
-                            <span class="mx-1">•</span>
-                            <i class="fas fa-hashtag me-1"></i>${txn.reference || '-'}
-                        </div>
-                    </div>
-                    <div class="transaction-amount-section">
-                        <div class="transaction-amount ${txn.type === 'withdrawal' || txn.type === 'loan_payment' ? 'negative' : 'positive'}">
-                            ${txn.type === 'withdrawal' || txn.type === 'loan_payment' ? '-' : '+'}₦${txn.amount.toLocaleString()}
-                        </div>
-                        <span class="status-badge status-${txn.status || 'pending'}">${txn.status || 'pending'}</span>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
+</main>
 
-    // Filter logic
-    function filterTransactions() {
-        const typeFilter = document.getElementById('filterType').value;
-        const statusFilter = document.getElementById('filterStatus').value;
-        const dateFilter = document.getElementById('filterDate').value;
+<div class="powered-by">Powered by <strong>JESZ LIMITED</strong></div>
 
-        filteredTransactions = transactions.filter(txn => {
-            // Type filter
-            let typeMatch = true;
-            if (typeFilter === 'deposit') typeMatch = txn.type === 'deposit';
-            if (typeFilter === 'withdrawal') typeMatch = txn.type === 'withdrawal';
-            if (typeFilter === 'payment') typeMatch = txn.type === 'loan_payment';
-            if (typeFilter === 'loan') typeMatch = false; // no loan type in transactions table
-            if (typeFilter === 'roi') typeMatch = false; // no roi type in transactions table
-            if (typeFilter === 'all') typeMatch = true;
-
-            // Status filter
-            const statusMatch = statusFilter === 'all' ? true : (txn.status === statusFilter);
-
-            // Date filter
-            const now = new Date();
-            const txnDate = new Date(txn.createdAt);
-            let dateMatch = true;
-
-            if (dateFilter === 'today') {
-                dateMatch = txnDate.toDateString() === now.toDateString();
-            } else if (dateFilter === 'week') {
-                const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-                dateMatch = txnDate >= startOfWeek;
-            } else if (dateFilter === 'month') {
-                dateMatch = txnDate.getMonth() === now.getMonth() && txnDate.getFullYear() === now.getFullYear();
-            } else if (dateFilter === 'year') {
-                dateMatch = txnDate.getFullYear() === now.getFullYear();
-            }
-
-            return typeMatch && statusMatch && dateMatch;
-        });
-
-        renderTransactions();
-    }
-
-    // Reset filters
-    function resetFilters() {
-        document.getElementById('filterType').value = 'all';
-        document.getElementById('filterStatus').value = 'all';
-        document.getElementById('filterDate').value = 'all';
-        filteredTransactions = [...transactions];
-        renderTransactions();
-    }
-
-    // Show transaction detail modal
-    function showTransactionDetail(txnId) {
-        const txn = transactions.find(t => t._id === txnId);
-        if (!txn) return;
-
-        const detailHtml = `
-            <div class="receipt">
-                <div class="receipt-header">
-                    <h4>CLUB DE STARS</h4>
-                    <p>Multipurpose Cooperative Society Limited</p>
-                    <p style="font-size: 0.75rem;">Powered by JESZ LIMITED</p>
-                </div>
-                <div class="receipt-amount-section">
-                    <div class="transaction-icon ${getTransactionClass(txn.type)}">
-                        ${getTransactionIcon(txn.type)}
-                    </div>
-                    <h5>${txn.description || txn.type.replace('_', ' ')}</h5>
-                    <h2>${txn.type === 'withdrawal' || txn.type === 'loan_payment' ? '-' : '+'}₦${txn.amount.toLocaleString()}</h2>
-                </div>
-                <div class="receipt-row">
-                    <span class="receipt-label">Transaction ID</span>
-                    <span class="receipt-value">${txn._id}</span>
-                </div>
-                <div class="receipt-row">
-                    <span class="receipt-label">Reference</span>
-                    <span class="receipt-value">${txn.reference || '-'}</span>
-                </div>
-                <div class="receipt-row">
-                    <span class="receipt-label">Date & Time</span>
-                    <span class="receipt-value">${formatDate(txn.createdAt)}</span>
-                </div>
-                <div class="receipt-row">
-                    <span class="receipt-label">Type</span>
-                    <span class="receipt-value" style="text-transform: capitalize;">${txn.type.replace('_', ' ')}</span>
-                </div>
-                <div class="receipt-row">
-                    <span class="receipt-label">Method</span>
-                    <span class="receipt-value">${txn.method || '-'}</span>
-                </div>
-                ${txn.loanId ? `
-                <div class="receipt-row">
-                    <span class="receipt-label">Loan ID</span>
-                    <span class="receipt-value">${txn.loanId}</span>
-                </div>` : ''}
-                <div class="receipt-row">
-                    <span class="receipt-label">Status</span>
-                    <span class="status-badge status-${txn.status || 'pending'}">${txn.status || 'pending'}</span>
-                </div>
-                <div class="receipt-footer">
-                    <p><i class="fas fa-shield-alt"></i> This is an official transaction receipt</p>
-                    <p style="font-size: 0.75rem;">Generated on ${new Date().toLocaleString()}</p>
-                </div>
-            </div>
-        `;
-        document.getElementById('transactionDetail').innerHTML = detailHtml;
-        document.getElementById('transactionModal').classList.add('show');
-    }
-
-    function closeModal() {
-        document.getElementById('transactionModal').classList.remove('show');
-    }
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-        renderTransactions();
-        document.getElementById('transactionModal').addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
-        });
-    });
-</script>
-
-    <script>
-    // Close sidebar when clicking outside (for mobile view)
-    document.addEventListener('click', function (event) {
-        const sidebar = document.getElementById('sidebar');
-        const toggleButton = document.querySelector('.fa-bars');
-
-        // Only apply this behavior on small screens
-        if (window.innerWidth <= 992) {
-            // If sidebar is active and click is outside sidebar and toggle button → close it
-            if (sidebar.classList.contains('active') &&
-                !sidebar.contains(event.target) &&
-                !toggleButton.contains(event.target)) {
-                sidebar.classList.remove('active');
-            }
-        }
-    });
-</script>
+<!-- ════ RECEIPT MODAL ════ -->
+<div class="modal-backdrop" id="receiptModal" onclick="handleBackdropClick(event)">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title-text">
+        <i class="fas fa-receipt" style="color:var(--accent);margin-right:8px;font-size:13px;"></i>Receipt
+      </span>
+      <button class="modal-close" onclick="closeReceipt()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body print-zone" id="receiptBody"></div>
+    <div class="modal-footer-btns">
+      <button class="btn btn-ghost" onclick="closeReceipt()">Close</button>
+      <button class="btn btn-primary" onclick="window.print()">
+        <i class="fas fa-print" style="margin-right:6px;font-size:12px;"></i>Print
+      </button>
+    </div>
+  </div>
+</div>
 
 <script>
-window.addEventListener("load", () => {
-  const loader = document.getElementById("loader-screen");
-  const main = document.getElementById("main-content");
+/* ══ SERVER DATA ══ */
+const transactions = <%- JSON.stringify(transactions) %>;
+let filtered = [...transactions];
 
-  setTimeout(() => {
-    loader.style.opacity = "0";
-    loader.style.transition = "opacity 0.6s ease";
+/* ══ THEME ══ */
+(function(){
+  const saved = localStorage.getItem('cds-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  syncThemeIcon(saved);
+})();
+function toggleTheme(){
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('cds-theme', next);
+  syncThemeIcon(next);
+}
+function syncThemeIcon(t){
+  const el = document.getElementById('togIcon');
+  if(el) el.className = t === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+}
 
-    setTimeout(() => {
-      loader.style.display = "none";
-      main.classList.remove("hidden");
-    }, 200);
-
-  }, 400); // adjust duration
+/* ══ SIDEBAR ══ */
+function toggleSidebar(){
+  const open = document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', e => {
+  const sb = document.getElementById('sidebar');
+  const hb = document.querySelector('.hamburger');
+  if(window.innerWidth <= 900 && sb.classList.contains('open')
+     && !sb.contains(e.target) && !hb.contains(e.target)) closeSidebar();
 });
+
+/* ══ HELPERS ══ */
+const iconMap = {
+  deposit:      { cls:'ic-deposit',      fa:'fa-download'     },
+  withdrawal:   { cls:'ic-withdrawal',   fa:'fa-upload'       },
+  loan_payment: { cls:'ic-loan_payment', fa:'fa-credit-card'  },
+  loan:         { cls:'ic-loan',         fa:'fa-coins'        },
+  roi:          { cls:'ic-roi',          fa:'fa-percentage'   },
+};
+function txnIcon(type){ return iconMap[type] || { cls:'ic-default', fa:'fa-exchange-alt' }; }
+function isDebit(type){ return type === 'withdrawal' || type === 'loan_payment'; }
+function statusCls(s){ return {completed:'st-completed',pending:'st-pending',failed:'st-failed'}[s] || 'st-default'; }
+function fmtDate(d){
+  return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function fmtAmt(n){ return '₦' + Number(n).toLocaleString(); }
+
+/* ══ RENDER ══ */
+function render(){
+  const list  = document.getElementById('txnList');
+  const count = document.getElementById('txnCount');
+  count.textContent = `${filtered.length} record${filtered.length !== 1 ? 's' : ''}`;
+
+  if(!filtered.length){
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+        <div class="empty-title">No transactions found</div>
+        <div class="empty-sub">Try adjusting your filters</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(t => {
+    const { cls, fa } = txnIcon(t.type);
+    const debit = isDebit(t.type);
+    const sign  = debit ? '−' : '+';
+    const amtCls = debit ? 'negative' : 'positive';
+    const sc = statusCls(t.status);
+    const desc = t.description || t.type.replace(/_/g,' ');
+    const ref  = t.reference || '';
+    return `
+      <div class="txn-item" onclick="showReceipt('${t._id}')">
+        <div class="txn-icon-wrap ${cls}"><i class="fas ${fa}"></i></div>
+        <div class="txn-info">
+          <div class="txn-desc">${desc}</div>
+          <div class="txn-meta">
+            <span>${fmtDate(t.createdAt)}</span>
+            ${ref ? `<span class="meta-dot"></span><span class="txn-ref">${ref}</span>` : ''}
+          </div>
+        </div>
+        <div class="txn-right">
+          <div class="txn-amount ${amtCls}">${sign}${fmtAmt(t.amount)}</div>
+          <span class="status-pill ${sc}">${t.status || 'pending'}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* ══ FILTERS ══ */
+function applyFilters(){
+  const type   = document.getElementById('filterType').value;
+  const status = document.getElementById('filterStatus').value;
+  const period = document.getElementById('filterPeriod').value;
+  const q      = document.getElementById('searchInput').value.toLowerCase().trim();
+  const now    = new Date();
+
+  filtered = transactions.filter(t => {
+    if(type !== 'all' && t.type !== type) return false;
+    if(status !== 'all' && t.status !== status) return false;
+
+    const td = new Date(t.createdAt);
+    if(period === 'today' && td.toDateString() !== now.toDateString()) return false;
+    if(period === 'week'){
+      const sow = new Date(now); sow.setDate(now.getDate() - now.getDay()); sow.setHours(0,0,0,0);
+      if(td < sow) return false;
+    }
+    if(period === 'month' && (td.getMonth() !== now.getMonth() || td.getFullYear() !== now.getFullYear())) return false;
+    if(period === 'year' && td.getFullYear() !== now.getFullYear()) return false;
+
+    if(q){
+      const desc = (t.description || t.type || '').toLowerCase();
+      const ref  = (t.reference || '').toLowerCase();
+      if(!desc.includes(q) && !ref.includes(q)) return false;
+    }
+    return true;
+  });
+  render();
+}
+
+function resetFilters(){
+  document.getElementById('filterType').value   = 'all';
+  document.getElementById('filterStatus').value = 'all';
+  document.getElementById('filterPeriod').value = 'all';
+  document.getElementById('searchInput').value  = '';
+  filtered = [...transactions];
+  render();
+}
+
+/* ══ RECEIPT MODAL ══ */
+function showReceipt(id){
+  const t = transactions.find(x => x._id === id);
+  if(!t) return;
+  const { cls, fa } = txnIcon(t.type);
+  const debit  = isDebit(t.type);
+  const sign   = debit ? '−' : '+';
+  const amtCls = debit ? 'negative' : 'positive';
+  const sc     = statusCls(t.status);
+
+  document.getElementById('receiptBody').innerHTML = `
+    <div class="receipt-header">
+      <div class="receipt-logo">
+        <img src="/media/assets/logo/log.png" alt="CDS"
+             onerror="this.style.display='none';this.parentNode.innerHTML='<b>C</b>'">
+      </div>
+      <div class="receipt-org">CLUB DE STARS</div>
+      <div class="receipt-org-sub">Multipurpose Cooperative Society Limited</div>
+    </div>
+    <div class="receipt-amount-block">
+      <div class="receipt-txn-icon ${cls}"><i class="fas ${fa}"></i></div>
+      <div class="receipt-type-label">${(t.description || t.type).replace(/_/g,' ')}</div>
+      <div class="receipt-amount ${amtCls}">${sign}${fmtAmt(t.amount)}</div>
+    </div>
+    <div class="receipt-rows">
+      <div class="receipt-row">
+        <span class="receipt-row-label">Transaction ID</span>
+        <span class="receipt-row-val">${t._id}</span>
+      </div>
+      <div class="receipt-row">
+        <span class="receipt-row-label">Reference</span>
+        <span class="receipt-row-val">${t.reference || '—'}</span>
+      </div>
+      <div class="receipt-row">
+        <span class="receipt-row-label">Date</span>
+        <span class="receipt-row-val">${fmtDate(t.createdAt)}</span>
+      </div>
+      <div class="receipt-row">
+        <span class="receipt-row-label">Type</span>
+        <span class="receipt-row-val" style="text-transform:capitalize;">${t.type.replace(/_/g,' ')}</span>
+      </div>
+      <div class="receipt-row">
+        <span class="receipt-row-label">Method</span>
+        <span class="receipt-row-val">${t.method || '—'}</span>
+      </div>
+      ${t.loanId ? `
+      <div class="receipt-row">
+        <span class="receipt-row-label">Loan ID</span>
+        <span class="receipt-row-val">${t.loanId}</span>
+      </div>` : ''}
+      <div class="receipt-row">
+        <span class="receipt-row-label">Status</span>
+        <span class="status-pill ${sc}">${t.status || 'pending'}</span>
+      </div>
+    </div>
+    <div class="receipt-footer">
+      <i class="fas fa-shield-alt" style="color:var(--green);margin-right:4px;"></i>
+      Official transaction receipt<br>
+      <span style="font-size:10px;">Generated ${new Date().toLocaleString()}</span>
+    </div>
+  `;
+  document.getElementById('receiptModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReceipt(){
+  document.getElementById('receiptModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleBackdropClick(e){
+  if(e.target === document.getElementById('receiptModal')) closeReceipt();
+}
+
+/* ══ LOADER ══ */
+window.addEventListener('load', () => {
+  const l = document.getElementById('loader');
+  setTimeout(() => { l.style.opacity='0'; setTimeout(()=>l.style.display='none',500); }, 400);
+});
+
+/* ══ INIT ══ */
+render();
 </script>
 </body>
 </html>

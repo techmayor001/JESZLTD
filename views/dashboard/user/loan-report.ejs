@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Report — Club De Stars</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sidebar-w:230px;--nav-h:62px;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
+  --accent:#4f8ef7;--accent2:#7c5af4;
+  --green:#22c78a;--red:#f05252;--amber:#f5a623;
+  --tr:all .22s ease;
+}
+[data-theme="dark"]{
+  --bg:#0a0f1e;--bg-card:#111827;--bg-card2:#1a2235;
+  --bg-card3:rgba(255,255,255,.035);
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#f0f4ff;--text2:#c8d4f0;--muted:#8b9ab8;
+  --nav-bg:rgba(10,15,30,.93);
+  --hero-bg:linear-gradient(135deg,#111827 0%,#1a2235 100%);
+  --bar-bg:rgba(255,255,255,.07);--meta-bg:rgba(255,255,255,.03);
+  --tog-bg:rgba(255,255,255,.08);--input-bg:#1a2235;
+}
+[data-theme="light"]{
+  --bg:#f4f6fb;--bg-card:#ffffff;--bg-card2:#f0f3fa;
+  --bg-card3:rgba(0,0,0,.025);
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);
+  --text:#0f1523;--text2:#2a3550;--muted:#6b7a99;
+  --nav-bg:rgba(255,255,255,.93);
+  --hero-bg:linear-gradient(135deg,#dde8ff 0%,#eef1ff 100%);
+  --bar-bg:rgba(0,0,0,.07);--meta-bg:rgba(0,0,0,.025);
+  --tog-bg:rgba(0,0,0,.07);--input-bg:#f0f3fa;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;transition:background .3s,color .3s;}
+a{text-decoration:none;color:inherit;}
+button,input,select{font-family:inherit;}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;transition:opacity .5s;}
+.loader-ring{width:48px;height:48px;border:2.5px solid var(--border2);border-top-color:var(--amber);border-radius:50%;animation:spin 1s linear infinite;}
+.loader-label{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:var(--bg-card);border-right:1px solid var(--border);z-index:200;display:flex;flex-direction:column;overflow:hidden;transition:transform .3s,background .3s,border-color .3s;}
+.sidebar-logo{padding:18px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.logo-mark{width:34px;height:34px;border-radius:10px;flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;}
+.logo-mark img{width:100%;height:100%;object-fit:cover;}
+.logo-name{font-size:13px;font-weight:600;line-height:1.2;}
+.logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;}
+.sidebar-user{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.user-chip{display:flex;align-items:center;gap:10px;background:var(--bg-card2);border-radius:10px;padding:9px 11px;border:1px solid var(--border);}
+.user-avatar{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;}
+.user-name{font-size:13px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-id{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.04em;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 10px;}
+.sidebar-nav::-webkit-scrollbar{width:3px;}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.nav-section{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;margin-top:2px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:var(--muted);font-size:13px;font-weight:400;transition:var(--tr);margin-bottom:1px;cursor:pointer;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{background:var(--bg-card2);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,.1);color:var(--accent);}
+.nav-item i{width:18px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:20px;padding:2px 7px;}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+.member-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;background:rgba(34,199,138,.12);color:var(--green);border:1px solid rgba(34,199,138,.2);margin-bottom:8px;}
+
+/* TOPNAV */
+.topnav{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--nav-h);background:var(--nav-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);z-index:100;display:flex;align-items:center;padding:0 20px;gap:12px;transition:left .3s,background .3s,border-color .3s;}
+.hamburger{display:none;cursor:pointer;padding:7px;border-radius:8px;border:none;background:none;color:var(--muted);font-size:17px;transition:var(--tr);flex-shrink:0;}
+.hamburger:hover{background:var(--bg-card2);color:var(--text);}
+.topnav-greeting{flex:1;min-width:0;}
+.topnav-greeting h2{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-greeting p{font-size:11px;color:var(--muted);}
+.topnav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.status-row{display:flex;align-items:center;gap:5px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.status-label{font-size:12px;color:var(--green);font-weight:500;}
+.kyc-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);font-size:11px;font-weight:500;color:var(--amber);cursor:pointer;transition:var(--tr);}
+.kyc-chip.verified{background:rgba(34,199,138,.08);border-color:rgba(34,199,138,.2);color:var(--green);}
+.theme-toggle{width:40px;height:22px;border-radius:20px;border:1px solid var(--border2);background:var(--tog-bg);cursor:pointer;position:relative;flex-shrink:0;transition:background .3s,border-color .3s;padding:0;}
+.tog-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:transform .25s ease,background .25s;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;pointer-events:none;}
+[data-theme="light"] .tog-thumb{transform:translateX(18px);background:var(--accent);}
+
+/* MAIN */
+.main{margin-left:var(--sidebar-w);margin-top:var(--nav-h);padding:22px;min-height:calc(100vh - var(--nav-h));transition:margin-left .3s;}
+
+/* BREADCRUMB */
+.breadcrumb-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:16px;}
+.breadcrumb-row a{color:var(--accent);}
+.breadcrumb-row i{font-size:10px;}
+.page-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+.page-title{font-size:clamp(18px,3vw,22px);font-weight:500;letter-spacing:-.3px;margin-bottom:3px;}
+.page-sub{font-size:12px;color:var(--muted);}
+.page-actions{display:flex;gap:8px;}
+.action-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:500;cursor:pointer;transition:var(--tr);border:1px solid var(--border2);background:var(--bg-card);color:var(--muted);}
+.action-btn:hover{color:var(--text);border-color:var(--accent);background:rgba(79,142,247,.05);}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;transition:border-color .2s;}
+.stat-card:hover{border-color:var(--border2);}
+.stat-icon-wrap{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:12px;}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.stat-value{font-size:clamp(15px,2.8vw,21px);font-weight:400;letter-spacing:-.3px;word-break:break-word;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* ACTIVE LOAN HERO */
+.loan-hero{background:var(--hero-bg);border:1px solid var(--border2);border-radius:var(--r-xl);padding:22px;margin-bottom:14px;position:relative;overflow:hidden;}
+.loan-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.06) 0%,transparent 70%);pointer-events:none;}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+.hero-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;}
+.hero-amount{font-size:clamp(26px,5vw,40px);font-weight:300;letter-spacing:-.5px;line-height:1;}
+.hero-amount .cur{font-size:.5em;vertical-align:super;color:var(--muted);margin-right:2px;}
+.hero-pill{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;border-width:1px;border-style:solid;}
+.pill-amber{background:rgba(245,166,35,.1);color:var(--amber);border-color:rgba(245,166,35,.2);}
+.pill-red{background:rgba(240,82,82,.1);color:var(--red);border-color:rgba(240,82,82,.2);}
+.pill-green{background:rgba(34,199,138,.1);color:var(--green);border-color:rgba(34,199,138,.2);}
+.pill-muted{background:var(--bg-card3);color:var(--muted);border-color:var(--border);}
+.hero-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.hero-stat{background:var(--bg-card3);border-radius:var(--r-md);padding:12px 14px;border:1px solid var(--border);}
+.hero-stat-label{font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;}
+.hero-stat-value{font-size:clamp(13px,2.5vw,17px);font-weight:500;letter-spacing:-.3px;word-break:break-word;}
+.hero-stat-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* PROGRESS */
+.progress-section{margin-bottom:12px;}
+.progress-header{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px;}
+.progress-bar{background:var(--bar-bg);border-radius:4px;height:6px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:4px;transition:width .8s ease;}
+.progress-fill.amber{background:linear-gradient(90deg,var(--amber),#f57c23);}
+.progress-fill.red{background:linear-gradient(90deg,var(--red),#c0392b);}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 330px;gap:14px;}
+
+/* CARD */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--border);}
+.card-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.card-body{padding:18px;}
+
+/* REPAYMENT TIMELINE */
+.timeline{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);}
+.tl-item:last-child{border-bottom:none;}
+.tl-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:20px;}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.tl-line{width:1px;flex:1;background:var(--border);margin-top:4px;}
+.tl-body{flex:1;min-width:0;}
+.tl-title{font-size:13px;font-weight:500;margin-bottom:2px;}
+.tl-sub{font-size:11px;color:var(--muted);}
+.tl-amount{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;text-align:right;flex-shrink:0;}
+
+/* LOAN HISTORY TABLE */
+.hist-table{width:100%;border-collapse:collapse;}
+.hist-table th{padding:10px 16px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;border-bottom:1px solid var(--border);background:var(--bg-card2);}
+.hist-table td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+.hist-table tr:last-child td{border-bottom:none;}
+.hist-table tr:hover td{background:var(--bg-card2);}
+.loan-status{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.ls-active{background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.15);}
+.ls-paid{background:rgba(34,199,138,.1);color:var(--green);border:1px solid rgba(34,199,138,.15);}
+.ls-overdue{background:rgba(240,82,82,.1);color:var(--red);border:1px solid rgba(240,82,82,.15);}
+.ls-pending{background:rgba(79,142,247,.1);color:var(--accent);border:1px solid rgba(79,142,247,.15);}
+.ls-rejected{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border);}
+
+/* SIDE CARDS */
+.side-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;margin-bottom:14px;}
+.sc-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;}
+.sc-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;gap:8px;}
+.sc-row:last-child{border-bottom:none;}
+.sc-label{color:var(--muted);font-size:12px;}
+.sc-val{font-weight:500;font-family:'DM Mono',monospace;font-size:12px;}
+.sc-divider{border:none;border-top:1px solid var(--border2);margin:8px 0;}
+
+/* ALERT */
+.alert-overdue{background:rgba(240,82,82,.07);border:1px solid rgba(240,82,82,.2);border-radius:var(--r-md);padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;}
+.alert-overdue i{color:var(--red);font-size:14px;flex-shrink:0;margin-top:1px;animation:blink 1.5s ease-in-out infinite;}
+.alert-overdue-text{font-size:12px;color:var(--red);line-height:1.6;}
+.alert-overdue-text strong{color:#ff7070;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* EMPTY */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:48px 20px;}
+.empty-icon{width:48px;height:48px;border-radius:14px;background:rgba(79,142,247,.08);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--accent);}
+
+/* CHART */
+.chart-wrap{height:160px;position:relative;}
+
+/* POWERED BY */
+.powered-by{position:fixed;bottom:12px;right:14px;font-size:11px;color:var(--muted);z-index:50;}
+.powered-by strong{color:var(--accent);}
+
+/* SB OVERLAY */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190;}
+.sb-overlay.show{display:block;}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.two-col{grid-template-columns:1fr;}.stats-grid{grid-template-columns:repeat(2,1fr);}.hero-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:900px){
+  .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}.sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3);}
+  .topnav{left:0;}.main{margin-left:0;}.hamburger{display:flex;}
+}
+@media(max-width:600px){
+  .main{padding:14px;}.stats-grid{grid-template-columns:1fr 1fr;}.hero-grid{grid-template-columns:1fr 1fr;}
+  .status-label{display:none;}.topnav{padding:0 12px;gap:8px;}
+  .topnav-greeting h2{font-size:13px;}.topnav-greeting p{display:none;}
+  .hist-table th:nth-child(3),.hist-table td:nth-child(3){display:none;}
+  .hist-table th:nth-child(5),.hist-table td:nth-child(5){display:none;}
+}
+@media print{
+  .sidebar,.topnav,.powered-by,.page-actions{display:none!important;}
+  .main{margin:0;padding:12px;}
+}
+</style>
+</head>
+<body>
+<div id="loader"><div class="loader-ring"></div><div class="loader-label">Club De Stars</div></div>
+
+<%
+  const pendingGuarantorCount = user.guarantorRequests
+    ? user.guarantorRequests.filter(r => r.status === "pending").length : 0;
+  const allLoans   = loans || [];
+  const activeLoan = allLoans.find(l => l.status === 'active' || l.status === 'overdue') || null;
+  const loanIsOverdue = activeLoan && activeLoan.status === 'overdue';
+  const totalBorrowed  = allLoans.reduce((s,l) => s + (l.amount||0), 0);
+  const totalRepaid    = allLoans.filter(l => l.status === 'paid').reduce((s,l) => s + (l.totalRepay||0), 0);
+  const interestPaid   = allLoans.filter(l => l.status === 'paid').reduce((s,l) => s + ((l.totalRepay||0)-(l.amount||0)), 0);
+  const outstanding    = activeLoan ? (activeLoan.outstandingBalance || activeLoan.totalRepay || 0) : 0;
+  const loanProgressPct = activeLoan && activeLoan.totalRepay > 0
+    ? Math.max(0,Math.min(100, ((activeLoan.totalRepay - outstanding)/activeLoan.totalRepay*100).toFixed(0))) : 0;
+  const repayments = loanPayments || [];
+  const totalPenalties = allLoans.reduce((s,l)=>s+(l.totalPenalty||0),0);
+%>
+
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark"><img src="/media/assets/logo/log.png" alt="Logo" onerror="this.style.display='none';this.parentNode.innerHTML='<b>C</b>'"></div>
+    <div style="min-width:0;"><div class="logo-name">Club De Stars</div><div class="logo-sub">Cooperative Society</div></div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-chip">
+      <div class="user-avatar"><%= user.firstName.charAt(0).toUpperCase() %><%= user.lastName.charAt(0).toUpperCase() %></div>
+      <div style="min-width:0;"><div class="user-name"><%= user.firstName %> <%= user.lastName %></div><div class="user-id"><%= user.membershipID %></div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Menu</div>
+    <a href="/cds-cooperative/dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="/cds-cooperative/transaction" class="nav-item"><i class="fas fa-exchange-alt"></i> Transactions</a>
+    <a href="/cds-cooperative/loan" class="nav-item"><i class="fas fa-coins"></i> Loans</a>
+    <a href="/cds-cooperative/guarantorRequest" class="nav-item">
+      <i class="fas fa-user-check"></i> Guarantor
+      <% if (pendingGuarantorCount > 0) { %><span class="nav-badge"><%= pendingGuarantorCount %></span><% } %>
+    </a>
+    <div class="nav-section">Account</div>
+    <a href="/manage/kiddies-account" class="nav-item"><i class="fas fa-baby"></i> Kiddies Account</a>
+    <a href="/cds-cooperative/profile" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+    <a href="/cds-cooperative/kyc" class="nav-item"><i class="fas fa-shield-alt"></i> KYC</a>
+    <a href="/cds-cooperative/referral" class="nav-item"><i class="fas fa-user-plus"></i> Referrals</a>
+    <a href="/cds-cooperative/report" class="nav-item active"><i class="fas fa-chart-bar"></i> Reports</a>
+    <a href="/cds-cooperative/memberContract" class="nav-item"><i class="fas fa-file-alt"></i> Terms</a>
+    <% if (user.role && user.role.name !== 'member') { %>
+    <div class="nav-section">Admin</div>
+    <a href="/admin-dashboard" class="nav-item"><i class="fas fa-tachometer-alt"></i> Administration</a>
+    <% } %>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="member-pill"><i class="fas fa-star" style="font-size:9px;"></i> <%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Associate Member' %></div>
+    <a href="/logout" class="nav-item" style="color:var(--red);margin-top:2px;"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+  </div>
+</aside>
+
+<!-- TOPNAV -->
+<header class="topnav">
+  <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+  <div class="topnav-greeting">
+    <h2>Loan Report</h2>
+    <p>Loan history & repayment tracking · <%= user.membershipID %></p>
+  </div>
+  <div class="topnav-right">
+    <div class="status-row"><div class="status-dot"></div><span class="status-label">Active</span></div>
+    <% if (user.Payment && user.Payment.status === "paid") { %>
+      <div class="kyc-chip verified"><i class="fas fa-shield-alt" style="font-size:11px;"></i><span>Verified</span></div>
+    <% } else { %>
+      <a href="/cds-cooperative/kyc" class="kyc-chip"><i class="fas fa-shield-alt" style="font-size:11px;"></i><span>KYC</span></a>
+    <% } %>
+    <button class="theme-toggle" onclick="toggleTheme()"><div class="tog-thumb" id="togThumb"><i class="fas fa-moon" id="togIcon" style="font-size:9px;"></i></div></button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <div class="breadcrumb-row">
+    <a href="/cds-cooperative/dashboard">Dashboard</a>
+    <i class="fas fa-chevron-right"></i>
+    <a href="/cds-cooperative/report">Reports</a>
+    <i class="fas fa-chevron-right"></i>
+    <span>Loans</span>
+  </div>
+
+  <div class="page-top">
+    <div>
+      <div class="page-title">Loan Report</div>
+      <div class="page-sub"><%= allLoans.length %> loan<%= allLoans.length !== 1 ? 's' : '' %> on record · Interest rate: <%= interestRate %>% · All figures in ₦</div>
+    </div>
+    <div class="page-actions">
+      <a href="/cds-cooperative/report" class="action-btn"><i class="fas fa-chart-line" style="font-size:12px;"></i> Financial Report</a>
+      <button class="action-btn" onclick="window.print()"><i class="fas fa-print" style="font-size:12px;"></i> Print</button>
+    </div>
+  </div>
+
+  <!-- Overdue Alert -->
+  <% if (loanIsOverdue) { %>
+  <div class="alert-overdue">
+    <i class="fas fa-exclamation-triangle"></i>
+    <div class="alert-overdue-text">
+      <strong>Overdue Loan Alert</strong> — Your loan of <strong>₦<%= activeLoan.amount.toLocaleString() %></strong> is past due.
+      Outstanding balance: <strong>₦<%= outstanding.toLocaleString() %></strong> + <%= activeLoan.penaltyPercentage || 0 %>%/day penalty.
+      <a href="/cds-cooperative/loan" style="color:#ff7070;text-decoration:underline;margin-left:4px;">Pay now →</a>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon-wrap" style="background:rgba(245,166,35,.1);color:var(--amber);"><i class="fas fa-coins"></i></div>
+      <div class="stat-label">Total Borrowed</div>
+      <div class="stat-value">₦<%= totalBorrowed.toLocaleString() %></div>
+      <div class="stat-sub"><%= allLoans.length %> loan<%= allLoans.length !== 1 ? 's' : '' %> total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-wrap" style="background:rgba(34,199,138,.1);color:var(--green);"><i class="fas fa-check-circle"></i></div>
+      <div class="stat-label">Total Repaid</div>
+      <div class="stat-value" style="color:var(--green);">₦<%= totalRepaid.toLocaleString() %></div>
+      <div class="stat-sub"><%= allLoans.filter(l=>l.status==='paid').length %> fully settled</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-wrap" style="background:rgba(240,82,82,.1);color:var(--red);"><i class="fas fa-percent"></i></div>
+      <div class="stat-label">Interest Paid</div>
+      <div class="stat-value" style="color:var(--red);">₦<%= interestPaid.toLocaleString() %></div>
+      <div class="stat-sub">Across settled loans</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-wrap" style="background:rgba(79,142,247,.1);color:var(--accent);"><i class="fas fa-balance-scale"></i></div>
+      <div class="stat-label">Outstanding</div>
+      <div class="stat-value" style="color:<%= loanIsOverdue ? 'var(--red)' : 'var(--text)' %>;">₦<%= outstanding.toLocaleString() %></div>
+      <div class="stat-sub"><%= activeLoan ? 'Active loan balance' : 'No active loan' %></div>
+    </div>
+  </div>
+
+  <!-- Active Loan Hero -->
+  <% if (activeLoan) { %>
+  <div class="loan-hero">
+    <div class="hero-top">
+      <div>
+        <div class="hero-label">Active Loan — Outstanding</div>
+        <div class="hero-amount"><span class="cur">₦</span><%= outstanding.toLocaleString() %></div>
+        <div class="hero-pill pill-<%= loanIsOverdue ? 'red' : 'amber' %>">
+          <i class="fas fa-circle" style="font-size:7px;"></i>
+          <%= loanIsOverdue ? 'Overdue' : 'Active' %> · <%= activeLoan.status %>
+        </div>
+      </div>
+      <a href="/cds-cooperative/loan" style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:500;">
+        <i class="fas fa-credit-card" style="font-size:11px;"></i> Make Payment
+      </a>
+    </div>
+    <div class="progress-section" style="margin-bottom:16px;">
+      <div class="progress-header">
+        <span>Repayment Progress</span>
+        <span><%= loanProgressPct %>% complete</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill <%= loanIsOverdue ? 'red' : 'amber' %>" style="width:<%= loanProgressPct %>%"></div>
+      </div>
+    </div>
+    <div class="hero-grid">
+      <div class="hero-stat">
+        <div class="hero-stat-label">Principal</div>
+        <div class="hero-stat-value">₦<%= activeLoan.amount.toLocaleString() %></div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Total Repay</div>
+        <div class="hero-stat-value">₦<%= activeLoan.totalRepay.toLocaleString() %></div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Due Date</div>
+        <div class="hero-stat-value" style="color:<%= loanIsOverdue ? 'var(--red)' : 'var(--amber)' %>;">
+          <%= activeLoan.dueDate ? new Date(activeLoan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}) : 'N/A' %>
+        </div>
+        <div class="hero-stat-sub"><%= loanIsOverdue ? 'Past due' : (daysUntilDue != null ? daysUntilDue + ' days left' : '') %></div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Penalty</div>
+        <div class="hero-stat-value" style="color:<%= (activeLoan.totalPenalty||0) > 0 ? 'var(--red)' : 'var(--muted)' %>;">
+          ₦<%= (activeLoan.totalPenalty||0).toLocaleString() %>
+        </div>
+        <div class="hero-stat-sub"><%= activeLoan.penaltyPercentage || 0 %>%/day rate</div>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Main 2-col -->
+  <div class="two-col">
+
+    <!-- Left: history + payments -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+
+      <!-- Loan History -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Loan History</span>
+          <span style="font-size:11px;color:var(--muted);"><%= allLoans.length %> total</span>
+        </div>
+        <% if (allLoans.length === 0) { %>
+        <div class="empty-state">
+          <div class="empty-icon"><i class="fas fa-coins"></i></div>
+          <div style="font-size:14px;font-weight:500;">No loans yet</div>
+          <div style="font-size:12px;color:var(--muted);">Your loan history will appear here</div>
+        </div>
+        <% } else { %>
+        <div style="overflow-x:auto;">
+          <table class="hist-table">
+            <thead>
+              <tr>
+                <th>Loan</th>
+                <th>Principal</th>
+                <th>Total Repay</th>
+                <th>Due Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% allLoans.slice().reverse().forEach(l => {
+                const statusClass = l.status === 'paid' ? 'ls-paid' : l.status === 'overdue' ? 'ls-overdue' : l.status === 'active' ? 'ls-active' : l.status === 'pending' ? 'ls-pending' : 'ls-rejected';
+                const dueStr = l.dueDate ? new Date(l.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'N/A';
+                const ref = l._id?.toString().slice(-8).toUpperCase();
+              %>
+              <tr>
+                <td>
+                  <div style="font-size:13px;font-weight:500;"><%= l.loanType || 'Loan' %></div>
+                  <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;"><%= ref %></div>
+                </td>
+                <td><span style="font-family:'DM Mono',monospace;font-size:13px;">₦<%= (l.amount||0).toLocaleString() %></span></td>
+                <td><span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--amber);">₦<%= (l.totalRepay||0).toLocaleString() %></span></td>
+                <td><span style="font-size:12px;color:var(--muted);white-space:nowrap;"><%= dueStr %></span></td>
+                <td><span class="loan-status <%= statusClass %>"><%= l.status.charAt(0).toUpperCase() + l.status.slice(1) %></span></td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Payment History -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Repayment History</span>
+          <span style="font-size:11px;color:var(--muted);"><%= repayments.length %> payment<%= repayments.length !== 1 ? 's' : '' %></span>
+        </div>
+        <% if (repayments.length === 0) { %>
+        <div class="empty-state" style="padding:32px 20px;">
+          <div class="empty-icon"><i class="fas fa-receipt"></i></div>
+          <div style="font-size:13px;color:var(--muted);">No repayments recorded yet</div>
+        </div>
+        <% } else { %>
+        <div class="timeline" style="padding:0 18px;">
+          <% repayments.slice().reverse().forEach((p, i) => {
+            const pDate = p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+            const pTime = p.createdAt ? new Date(p.createdAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) : '';
+            const dotColor = p.status === 'approved' || p.status === 'paid' ? 'var(--green)' : p.status === 'pending' ? 'var(--amber)' : 'var(--red)';
+          %>
+          <div class="tl-item">
+            <div class="tl-left">
+              <div class="tl-dot" style="background:<%= dotColor %>;"></div>
+              <% if (i < repayments.length - 1) { %><div class="tl-line"></div><% } %>
+            </div>
+            <div class="tl-body">
+              <div class="tl-title">Loan Payment</div>
+              <div class="tl-sub"><%= pDate %> · <%= pTime %> · <%= p.method || p.paymentMethod || 'Transfer' %></div>
+              <% if (p.status === 'pending') { %>
+                <span style="font-size:10px;background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.2);padding:2px 7px;border-radius:8px;display:inline-block;margin-top:3px;">Pending approval</span>
+              <% } %>
+            </div>
+            <div class="tl-amount" style="color:var(--green);">+₦<%= (p.amount||0).toLocaleString() %></div>
+          </div>
+          <% }); %>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Repayment Chart -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Monthly Repayments</span>
+          <i class="fas fa-chart-bar" style="color:var(--accent);font-size:13px;"></i>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap">
+            <canvas id="repayChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: summary + info -->
+    <div>
+
+      <!-- Loan Summary -->
+      <div class="side-card">
+        <div class="sc-title">Loan Summary</div>
+        <div class="sc-row"><span class="sc-label">Total loans taken</span><span class="sc-val"><%= allLoans.length %></span></div>
+        <div class="sc-row"><span class="sc-label">Settled loans</span><span class="sc-val" style="color:var(--green);"><%= allLoans.filter(l=>l.status==='paid').length %></span></div>
+        <div class="sc-row"><span class="sc-label">Active loans</span><span class="sc-val" style="color:var(--amber);"><%= allLoans.filter(l=>l.status==='active').length %></span></div>
+        <div class="sc-row"><span class="sc-label">Overdue loans</span><span class="sc-val" style="color:<%= allLoans.filter(l=>l.status==='overdue').length > 0 ? 'var(--red)' : 'var(--muted)' %>;"><%= allLoans.filter(l=>l.status==='overdue').length %></span></div>
+        <hr class="sc-divider">
+        <div class="sc-row"><span class="sc-label">Total borrowed</span><span class="sc-val">₦<%= totalBorrowed.toLocaleString() %></span></div>
+        <div class="sc-row"><span class="sc-label">Total repaid</span><span class="sc-val" style="color:var(--green);">₦<%= totalRepaid.toLocaleString() %></span></div>
+        <div class="sc-row"><span class="sc-label">Total interest paid</span><span class="sc-val" style="color:var(--red);">₦<%= interestPaid.toLocaleString() %></span></div>
+        <div class="sc-row"><span class="sc-label">Penalties incurred</span><span class="sc-val" style="color:<%= totalPenalties > 0 ? 'var(--red)' : 'var(--muted)' %>;"><%= totalPenalties > 0 ? '₦'+totalPenalties.toLocaleString() : 'None' %></span></div>
+        <div class="sc-row"><span class="sc-label">Outstanding</span><span class="sc-val" style="color:<%= loanIsOverdue ? 'var(--red)' : 'var(--amber)' %>;">₦<%= outstanding.toLocaleString() %></span></div>
+        <div class="sc-row"><span class="sc-label">Interest rate</span><span class="sc-val"><%= interestRate %>% · <%= user.membershipID.startsWith('CD') ? 'Club' : 'Standard' %></span></div>
+      </div>
+
+      <!-- Active loan repayment schedule -->
+      <% if (activeLoan) { %>
+      <div class="side-card">
+        <div class="sc-title">Current Loan Detail</div>
+        <div style="font-size:clamp(20px,3.5vw,26px);font-weight:300;letter-spacing:-.3px;margin-bottom:4px;">₦<%= outstanding.toLocaleString() %></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">Outstanding of ₦<%= activeLoan.totalRepay.toLocaleString() %> total</div>
+        <div class="progress-section">
+          <div class="progress-header"><span>Paid off</span><span><%= loanProgressPct %>%</span></div>
+          <div class="progress-bar"><div class="progress-fill <%= loanIsOverdue ? 'red' : 'amber' %>" style="width:<%= loanProgressPct %>%"></div></div>
+        </div>
+        <div class="sc-row"><span class="sc-label">Principal</span><span class="sc-val">₦<%= activeLoan.amount.toLocaleString() %></span></div>
+        <div class="sc-row"><span class="sc-label">Interest (<%= interestRate %>%)</span><span class="sc-val" style="color:var(--red);">₦<%= ((activeLoan.totalRepay||0)-(activeLoan.amount||0)).toLocaleString() %></span></div>
+        <div class="sc-row"><span class="sc-label">Amount paid</span><span class="sc-val" style="color:var(--green);">₦<%= ((activeLoan.totalRepay||0)-outstanding).toLocaleString() %></span></div>
+        <div class="sc-row"><span class="sc-label">Remaining</span><span class="sc-val" style="color:<%= loanIsOverdue ? 'var(--red)' : 'var(--amber)' %>;">₦<%= outstanding.toLocaleString() %></span></div>
+        <% if ((activeLoan.totalPenalty||0) > 0) { %>
+        <div class="sc-row"><span class="sc-label" style="color:var(--red);">Penalty accrued</span><span class="sc-val" style="color:var(--red);">+₦<%= activeLoan.totalPenalty.toLocaleString() %></span></div>
+        <% } %>
+        <div class="sc-row"><span class="sc-label">Guarantors</span><span class="sc-val"><%= (activeLoan.guarantors||[]).length || 0 %> assigned</span></div>
+        <a href="/cds-cooperative/loan" style="display:block;margin-top:12px;padding:10px;border-radius:10px;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);color:var(--accent);font-size:13px;font-weight:500;text-align:center;">
+          <i class="fas fa-credit-card" style="margin-right:6px;font-size:11px;"></i> Make a Payment
+        </a>
+      </div>
+      <% } %>
+
+      <!-- Eligibility Info -->
+      <div class="side-card">
+        <div class="sc-title">Loan Eligibility</div>
+        <div class="sc-row"><span class="sc-label">Member type</span><span class="sc-val" style="color:var(--green);"><%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Standard' %></span></div>
+        <div class="sc-row"><span class="sc-label">Interest rate</span><span class="sc-val"><%= interestRate %>% per annum</span></div>
+        <div class="sc-row"><span class="sc-label">Savings balance</span><span class="sc-val">₦<%= (user.account?.balance||0).toLocaleString() %></span></div>
+        <div class="sc-row"><span class="sc-label">Max eligible loan</span><span class="sc-val" style="color:var(--accent);">₦<%= ((user.account?.balance||0)*3).toLocaleString() %></span></div>
+        <div class="sc-row"><span class="sc-label">Can apply now</span><span class="sc-val" style="color:<%= activeLoan ? 'var(--red)' : 'var(--green)' %>;"><%= activeLoan ? 'No (active loan)' : 'Yes' %></span></div>
+        <div style="margin-top:10px;padding:10px;border-radius:9px;background:var(--meta-bg);border:1px solid var(--border);font-size:11px;color:var(--muted);line-height:1.6;">
+          <i class="fas fa-info-circle" style="margin-right:4px;color:var(--accent);"></i>
+          Maximum loan is 3× your savings. Two guarantors are required. Penalty applies at <%= activeLoan?.penaltyPercentage || 0.5 %>%/day if overdue.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<div class="powered-by">Powered by <strong>JESZ LIMITED</strong></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const REPAYMENTS_DATA = <%- JSON.stringify((loanPayments||[]).map(p=>({amount:p.amount||0,createdAt:p.createdAt,status:p.status}))) %>;
+
+/* ─ Theme ─ */
+(function(){
+  const saved = localStorage.getItem('cds-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+})();
+function toggleTheme(){
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('cds-theme', next);
+  updateThemeUI(next);
+  if(repayChart) rebuildRepayChart();
+}
+function updateThemeUI(t){
+  const i = document.getElementById('togIcon');
+  if(i) i.className = t === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+}
+function getCSSVar(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+/* ─ Sidebar ─ */
+function toggleSidebar(){
+  const open = document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', e => {
+  const sb = document.getElementById('sidebar'), hb = document.querySelector('.hamburger');
+  if(window.innerWidth<=900 && sb.classList.contains('open') && !sb.contains(e.target) && hb && !hb.contains(e.target)) closeSidebar();
+});
+
+/* ─ Repayment Chart ─ */
+let repayChart;
+function getLast6Months(){
+  const months = [];
+  for(let i=5;i>=0;i--){const d=new Date();d.setMonth(d.getMonth()-i);months.push({label:d.toLocaleDateString('en-US',{month:'short'}),year:d.getFullYear(),month:d.getMonth()});}
+  return months;
+}
+function rebuildRepayChart(){
+  if(repayChart) repayChart.destroy();
+  const months = getLast6Months();
+  const vals = months.map(m => REPAYMENTS_DATA.filter(p => (p.status==='approved'||p.status==='paid') && new Date(p.createdAt).getMonth()===m.month && new Date(p.createdAt).getFullYear()===m.year).reduce((s,p)=>s+p.amount,0));
+  const gridColor = getCSSVar('--border');
+  const textColor = getCSSVar('--muted');
+  const ctx = document.getElementById('repayChart').getContext('2d');
+  repayChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: months.map(m=>m.label),
+      datasets:[{ label:'Repayments', data:vals, backgroundColor:'rgba(34,199,138,.5)', borderRadius:5, borderSkipped:false }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: c => ' ₦'+c.raw.toLocaleString() }}},
+      scales:{
+        x:{ grid:{ color:gridColor }, ticks:{ color:textColor, font:{size:11} }},
+        y:{ grid:{ color:gridColor }, ticks:{ color:textColor, font:{size:11}, callback: v => '₦'+v.toLocaleString() }, beginAtZero:true }
+      }
+    }
+  });
+}
+
+/* ─ Loader ─ */
+window.addEventListener('load',()=>{
+  const l=document.getElementById('loader');
+  setTimeout(()=>{l.style.opacity='0';setTimeout(()=>l.style.display='none',500);},400);
+  rebuildRepayChart();
+});
+</script>
+</body>
+</html>

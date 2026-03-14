@@ -1,1532 +1,1285 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Club De Stars - Member Dashboard | Powered by JESZ LIMITED</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #1e3a8a;
-            --primary-dark: #1e40af;
-            --primary-light: #3b82f6;
-            --secondary: #64748b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #06b6d4;
-            --sidebar-width: 260px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Club De Stars — Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ THEME TOKENS ══ */
+:root{
+  --sidebar-w:230px;--nav-h:62px;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
+  --accent:#4f8ef7;--accent2:#7c5af4;
+  --green:#22c78a;--red:#f05252;--amber:#f5a623;
+  --tr:all .22s ease;
+}
+[data-theme="dark"]{
+  --bg:#0a0f1e;--bg-card:#111827;--bg-card2:#1a2235;
+  --bg-card3:rgba(255,255,255,.035);
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#f0f4ff;--text2:#c8d4f0;--muted:#8b9ab8;
+  --nav-bg:rgba(10,15,30,.93);
+  --hero-bg:linear-gradient(135deg,#111827 0%,#1a2235 100%);
+  --bar-bg:rgba(255,255,255,.07);--meta-bg:rgba(255,255,255,.03);
+  --tog-bg:rgba(255,255,255,.08);
+}
+[data-theme="light"]{
+  --bg:#f4f6fb;--bg-card:#ffffff;--bg-card2:#f0f3fa;
+  --bg-card3:rgba(0,0,0,.025);
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);
+  --text:#0f1523;--text2:#2a3550;--muted:#6b7a99;
+  --nav-bg:rgba(255,255,255,.93);
+  --hero-bg:linear-gradient(135deg,#dde8ff 0%,#eef1ff 100%);
+  --bar-bg:rgba(0,0,0,.07);--meta-bg:rgba(0,0,0,.025);
+  --tog-bg:rgba(0,0,0,.07);
+}
 
-        * { box-sizing: border-box; }
+/* ══ BASE ══ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{
+  height:100%;font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;
+  transition:background .3s,color .3s;
+}
+a{text-decoration:none;color:inherit;}
+button,input,select,textarea{font-family:inherit;}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f1f5f9;
-            min-height: 100vh;
-        }
+/* ══ LOADER ══ */
+#loader{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:20px;transition:opacity .5s;
+}
+.loader-ring{
+  width:48px;height:48px;
+  border:2.5px solid var(--border2);border-top-color:var(--accent);
+  border-radius:50%;animation:spin 1s linear infinite;
+}
+.loader-label{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-        /* ── Loader ── */
-        .loader-screen {
-            position: fixed; inset: 0;
-            background: linear-gradient(135deg, #0a1a2f, #102a44);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 9999;
-        }
-        .loader-logo span {
-            font-size: 42px; font-weight: 600; color: #5cc8ff;
-            display: inline-block; letter-spacing: 1px;
-        }
-        .loader-logo span:nth-child(1)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: 0s;   }
-        .loader-logo span:nth-child(2)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .1s;  }
-        .loader-logo span:nth-child(3)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .2s;  }
-        .loader-logo span:nth-child(4)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .3s;  }
-        .loader-logo span:nth-child(5)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .4s;  }
-        .loader-logo span:nth-child(6)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .5s;  }
-        .loader-logo span:nth-child(7)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .6s;  }
-        .loader-logo span:nth-child(8)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .7s;  }
-        .loader-logo span:nth-child(9)  { animation: loaderFloat 1.5s infinite ease-in-out; animation-delay: .8s;  }
-        @keyframes loaderFloat {
-            0%,100% { transform: translateY(0);     opacity: 0.4; }
-            50%      { transform: translateY(-12px); opacity: 1;   }
-        }
+/* ══ SIDEBAR ══ */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:var(--bg-card);border-right:1px solid var(--border);
+  z-index:200;display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .3s,background .3s,border-color .3s;
+}
+.sidebar-logo{
+  padding:18px 18px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.logo-mark{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;overflow:hidden;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:#fff;
+}
+.logo-mark img{width:100%;height:100%;object-fit:cover;}
+.logo-name{font-size:13px;font-weight:600;line-height:1.2;}
+.logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;}
+.sidebar-user{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.user-chip{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-card2);border-radius:10px;padding:9px 11px;
+  border:1px solid var(--border);
+}
+.user-avatar{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;color:#fff;
+}
+.user-name{font-size:13px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-id{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.04em;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 10px;}
+.sidebar-nav::-webkit-scrollbar{width:3px;}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.nav-section{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;margin-top:2px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
+  color:var(--muted);font-size:13px;font-weight:400;
+  transition:var(--tr);margin-bottom:1px;cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--bg-card2);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,.1);color:var(--accent);}
+.nav-item i{width:18px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-badge{
+  margin-left:auto;background:var(--red);color:#fff;
+  font-size:10px;font-weight:700;border-radius:20px;padding:2px 7px;
+}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+.member-pill{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;
+  font-size:10px;font-weight:600;background:rgba(34,199,138,.12);
+  color:var(--green);border:1px solid rgba(34,199,138,.2);margin-bottom:8px;
+}
 
-        /* ── Sidebar ── */
-        .sidebar {
-            position: fixed; left: 0; top: 0; bottom: 0;
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 55%, #3b82f6 100%);
-            color: white; z-index: 1040;
-            transition: all 0.3s; overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30,58,138,0.15);
-        }
-        .sidebar::-webkit-scrollbar { width: 4px; }
-        .sidebar::-webkit-scrollbar-track { background: transparent; }
-        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-        .sidebar-header {
-            padding: 1.25rem 1.25rem 1rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
-        }
-        .logo-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .logo-box {
-            width: 38px; height: 38px; background: white;
-            border-radius: 9px; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: var(--primary); font-size: 1.2rem;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.2); overflow: hidden; flex-shrink: 0;
-        }
-        .logo-box img { width: 100%; height: 100%; object-fit: cover; }
-        .sidebar-menu { padding: 0.75rem 0; }
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.82); text-decoration: none;
-            padding: 0.7rem 1.25rem; display: flex; align-items: center;
-            transition: all 0.25s; border-left: 3px solid transparent;
-            font-weight: 500; font-size: 0.875rem;
-        }
-        .sidebar-menu a:hover  { background: rgba(255,255,255,0.09); color: white; border-left-color: rgba(255,255,255,0.6); }
-        .sidebar-menu a.active { background: rgba(255,255,255,0.14); color: white; border-left-color: white; }
-        .sidebar-menu a i      { width: 20px; margin-right: 10px; font-size: 0.95rem; flex-shrink: 0; }
+/* ══ TOP NAV ══ */
+.topnav{
+  position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--nav-h);
+  background:var(--nav-bg);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);z-index:100;
+  display:flex;align-items:center;padding:0 20px;gap:12px;
+  transition:left .3s,background .3s,border-color .3s;
+}
+.hamburger{
+  display:none;cursor:pointer;padding:7px;border-radius:8px;
+  border:none;background:none;color:var(--muted);font-size:17px;
+  transition:var(--tr);flex-shrink:0;
+}
+.hamburger:hover{background:var(--bg-card2);color:var(--text);}
+.topnav-greeting{flex:1;min-width:0;}
+.topnav-greeting h2{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-greeting p{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.status-row{display:flex;align-items:center;gap:5px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.status-label{font-size:12px;color:var(--green);font-weight:500;}
+.kyc-chip{
+  display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;
+  background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);
+  font-size:11px;font-weight:500;color:var(--amber);cursor:pointer;
+  transition:var(--tr);text-decoration:none;white-space:nowrap;
+}
+.kyc-chip.verified{background:rgba(34,199,138,.08);border-color:rgba(34,199,138,.2);color:var(--green);}
+.kyc-chip i,.status-dot{flex-shrink:0;}
 
-        /* ── Top navbar ── */
-        .top-navbar {
-            position: fixed; top: 0; left: var(--sidebar-width); right: 0;
-            height: 62px; background: rgba(255,255,255,0.97);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 12px rgba(30,58,138,0.08);
-            z-index: 1030; display: flex; align-items: center;
-            padding: 0 1.5rem; transition: all 0.3s;
-            border-bottom: 1px solid rgba(30,58,138,0.08);
-        }
+/* ── Theme toggle ── */
+.theme-toggle{
+  width:40px;height:22px;border-radius:20px;border:1px solid var(--border2);
+  background:var(--tog-bg);cursor:pointer;position:relative;flex-shrink:0;
+  transition:background .3s,border-color .3s;padding:0;
+}
+.tog-thumb{
+  position:absolute;top:2px;left:2px;width:16px;height:16px;
+  border-radius:50%;background:var(--muted);
+  transition:transform .25s ease,background .25s;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#fff;pointer-events:none;
+}
+[data-theme="light"] .tog-thumb{transform:translateX(18px);background:var(--accent);}
 
-        /* ── Main content ── */
-        .main-content {
-            margin-left: var(--sidebar-width); margin-top: 62px;
-            padding: 1.25rem; min-height: calc(100vh - 62px);
-            transition: all 0.3s;
-        }
+/* ══ MAIN ══ */
+.main{
+  margin-left:var(--sidebar-w);margin-top:var(--nav-h);
+  padding:22px;min-height:calc(100vh - var(--nav-h));
+  transition:margin-left .3s;
+}
 
-        /* ── Welcome card ── */
-        .welcome-card {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white; border-radius: 16px;
-            padding: 1.4rem 1.5rem; margin-bottom: 1rem;
-            box-shadow: 0 8px 24px rgba(30,58,138,0.2);
-            position: relative; overflow: hidden;
-        }
-        .welcome-card::before {
-            content: ''; position: absolute; top: -60%; right: -10%;
-            width: 300px; height: 300px;
-            background: rgba(255,255,255,0.04); border-radius: 50%;
-        }
+/* ══ NOTICE / OVERDUE ══ */
+.notice-bar{
+  display:flex;align-items:flex-start;gap:10px;
+  background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.18);
+  border-radius:var(--r-md);padding:10px 14px;margin-bottom:14px;
+  font-size:12px;color:var(--amber);line-height:1.5;
+}
+.notice-bar i{flex-shrink:0;margin-top:1px;font-size:13px;}
+.overdue-banner{
+  background:rgba(240,82,82,.1);border:1px solid rgba(240,82,82,.25);
+  border-radius:var(--r-md);padding:10px 14px;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;overflow:hidden;
+}
+.overdue-icon{color:var(--red);font-size:15px;flex-shrink:0;animation:blink 1.5s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+.ticker-wrap{flex:1;overflow:hidden;min-width:0;}
+.ticker-inner{display:flex;white-space:nowrap;animation:ts 24s linear infinite;}
+.ticker-inner:hover{animation-play-state:paused;}
+.ticker-text{font-size:12px;color:var(--red);font-weight:500;padding-right:60px;}
+.ticker-text strong{color:#ff7070;}
+@keyframes ts{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
 
-        /* ── Member badge ── */
-        .member-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 4px 11px; background: rgba(255,255,255,0.18);
-            backdrop-filter: blur(10px); border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.25);
-            font-weight: 600; font-size: 0.76rem;
-        }
-        .club-member-badge { background: rgba(16,185,129,0.72); border-color: rgba(16,185,129,0.35); }
-        .non-club-badge    { background: rgba(245,158,11,0.72);  border-color: rgba(245,158,11,0.35); }
+/* ══ BALANCE HERO ══ */
+.balance-hero{
+  background:var(--hero-bg);border:1px solid var(--border2);
+  border-radius:var(--r-xl);padding:22px;margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+.balance-hero::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(79,142,247,.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.balance-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.balance-amount{font-size:clamp(26px,5.5vw,40px);font-weight:300;letter-spacing:-.5px;line-height:1;}
+.balance-amount .cur{font-size:.5em;vertical-align:super;color:var(--muted);margin-right:2px;}
+.balance-roi{
+  display:inline-flex;align-items:center;gap:5px;margin-top:8px;
+  padding:4px 10px;background:rgba(34,199,138,.1);border-radius:20px;
+  color:var(--green);font-size:12px;font-weight:500;border:1px solid rgba(34,199,138,.2);
+}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+.hero-stat{
+  background:var(--bg-card3);border-radius:var(--r-md);
+  padding:12px 14px;border:1px solid var(--border);
+}
+.hero-stat-label{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.hero-stat-value{font-size:clamp(14px,3vw,18px);font-weight:500;letter-spacing:-.3px;word-break:break-word;}
+.hero-stat-sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;}
+.overdue-value{color:var(--red)!important;}
+.overdue-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  background:rgba(240,82,82,.1);color:var(--red);
+  border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;margin-top:4px;
+}
 
-        /* ════════════════════════════════
-           STAT CARDS — fully responsive
-           ════════════════════════════════ */
-        .stat-card {
-            background: white; border-radius: 14px;
-            padding: 0.85rem 0.9rem;
-            box-shadow: 0 3px 12px rgba(30,58,138,0.07);
-            transition: transform 0.25s, box-shadow 0.25s;
-            height: 100%; overflow: hidden;
-            min-width: 0;
-        }
-        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 8px 22px rgba(30,58,138,0.13); }
-        .stat-card--overdue {
-            border: 1.5px solid rgba(239,68,68,0.38) !important;
-            animation: cardOverduePulse 2.5s ease-in-out infinite;
-        }
-        @keyframes cardOverduePulse {
-            0%,100% { box-shadow: 0 3px 12px rgba(239,68,68,0.08), 0 0 0 0   rgba(239,68,68,0.2); }
-            50%      { box-shadow: 0 3px 12px rgba(239,68,68,0.14), 0 0 0 5px rgba(239,68,68,0);   }
-        }
-        .stat-icon {
-            width: 38px; height: 38px; border-radius: 9px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1rem; margin-bottom: 0.6rem; flex-shrink: 0;
-        }
+/* ══ CTA GRID ══ */
+.cta-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;
+}
+.cta-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:7px;padding:15px 8px;border-radius:var(--r-lg);
+  border:1px solid var(--border);background:var(--bg-card);
+  cursor:pointer;text-decoration:none;color:var(--text);transition:var(--tr);
+}
+.cta-btn:hover{border-color:var(--border2);background:var(--bg-card2);transform:translateY(-2px);}
+.cta-icon{
+  width:42px;height:42px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;
+}
+.cta-label{font-size:12px;font-weight:500;color:var(--muted);text-align:center;line-height:1.3;}
+.cta-btn:hover .cta-label{color:var(--text);}
+.cta-deposit .cta-icon{background:rgba(34,199,138,.12);color:var(--green);}
+.cta-withdraw .cta-icon{background:rgba(240,82,82,.12);color:var(--red);}
+.cta-loan    .cta-icon{background:rgba(245,166,35,.12);color:var(--amber);}
+.cta-repay   .cta-icon{background:rgba(79,142,247,.12);color:var(--accent);}
 
-        .sc-label {
-            font-size: clamp(0.62rem, 1.8vw, 0.73rem);
-            font-weight: 600; color: #6b7280;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            margin-bottom: 2px;
-        }
-        .sc-value {
-            font-size: clamp(0.78rem, 2.4vw, 0.95rem);
-            font-weight: 700; line-height: 1.25;
-            word-break: break-word; overflow-wrap: anywhere;
-            margin-bottom: 3px;
-        }
-        .sc-sub {
-            font-size: clamp(0.6rem, 1.6vw, 0.7rem);
-            line-height: 1.3; word-break: break-word; overflow-wrap: anywhere;
-        }
+/* ══ CARDS ROW ══ */
+.cards-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.info-card,.loan-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:18px;
+  transition:background .3s,border-color .3s;
+}
+.loan-card.overdue-card{border-color:rgba(240,82,82,.3);}
+.ic-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.ic-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.ic-link{font-size:12px;color:var(--accent);}
+.ic-link:hover{text-decoration:underline;}
+.roi-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;gap:8px;
+}
+.roi-row:last-of-type{border-bottom:none;}
+.roi-row-label{color:var(--muted);flex:1;min-width:0;font-size:12px;}
+.roi-row-val{font-weight:500;flex-shrink:0;text-align:right;font-size:13px;}
+.share-bar-wrap{margin-top:14px;}
+.share-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px;}
+.share-bar{background:var(--bar-bg);border-radius:4px;height:5px;overflow:hidden;}
+.share-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .8s ease;}
+.loan-progress{background:var(--bar-bg);border-radius:4px;height:4px;overflow:hidden;margin:10px 0;}
+.loan-progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--amber),#f57c23);}
+.loan-progress-fill.overdue{background:linear-gradient(90deg,var(--red),#c0392b);}
+.loan-meta{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.loan-meta-item{
+  flex:1;min-width:calc(33.33% - 6px);
+  background:var(--meta-bg);border-radius:9px;
+  padding:9px 10px;border:1px solid var(--border);
+}
+.lm-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.lm-value{font-size:13px;font-weight:500;word-break:break-word;}
+.loan-pay-btn{
+  width:100%;margin-top:12px;padding:11px;
+  background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);
+  border-radius:10px;color:var(--accent);font-size:13px;font-weight:500;
+  cursor:pointer;transition:var(--tr);
+}
+.loan-pay-btn:hover{background:rgba(79,142,247,.18);}
+.no-loan-state{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;gap:12px;min-height:180px;
+}
+.no-loan-icon{
+  width:52px;height:52px;border-radius:14px;
+  background:rgba(79,142,247,.08);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:var(--accent);
+}
+.no-loan-cta{
+  padding:10px 20px;background:rgba(79,142,247,.1);
+  border:1px solid rgba(79,142,247,.2);border-radius:9px;
+  color:var(--accent);font-size:13px;font-weight:500;
+  text-decoration:none;transition:var(--tr);
+}
+.no-loan-cta:hover{background:rgba(79,142,247,.18);}
 
-        /* ── Outstanding balance row ── */
-        .outstanding-balance-row {
-            display: flex; align-items: center; justify-content: space-between;
-            flex-wrap: nowrap; gap: 3px;
-            background: rgba(245,158,11,0.07);
-            border: 1px dashed rgba(245,158,11,0.38);
-            border-radius: 5px; padding: 2px 5px; margin: 3px 0;
-            min-width: 0; overflow: hidden;
-        }
-        .outstanding-label {
-            color: #92400e; font-weight: 700;
-            font-size: clamp(0.55rem, 1.4vw, 0.63rem);
-            text-transform: uppercase; letter-spacing: 0.04em;
-            flex-shrink: 0; white-space: nowrap;
-        }
-        .outstanding-amount {
-            font-size: clamp(0.65rem, 1.9vw, 0.82rem);
-            font-weight: 700; text-align: right;
-            word-break: break-word; overflow-wrap: anywhere; min-width: 0;
-        }
+/* ══ MAINTENANCE ══ */
+.maintenance-overlay{
+  position:fixed;inset:0;z-index:9998;
+  background:linear-gradient(135deg,#050910,#0a1428);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.maint-card{
+  background:var(--bg-card);border:1px solid var(--border2);border-radius:var(--r-xl);
+  max-width:420px;width:100%;padding:40px 28px;text-align:center;
+}
+.maint-icon{
+  width:68px;height:68px;border-radius:50%;
+  background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.25);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 18px;font-size:26px;color:var(--amber);
+  animation:mpulse 2s ease-in-out infinite;
+}
+@keyframes mpulse{0%,100%{box-shadow:0 0 0 0 rgba(245,166,35,.25);}50%{box-shadow:0 0 0 10px rgba(245,166,35,0);}}
+.maint-badge{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 12px;border-radius:20px;
+  background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);
+  color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;margin-bottom:14px;
+}
+.maint-title{font-size:22px;font-weight:400;margin-bottom:10px;line-height:1.3;}
+.maint-title em{color:var(--accent);font-style:normal;}
+.maint-message{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:22px;}
+.maint-dots{display:flex;align-items:center;justify-content:center;gap:6px;}
+.maint-dots span{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:dotb 1.4s ease-in-out infinite;}
+.maint-dots span:nth-child(2){animation-delay:.2s;}
+.maint-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes dotb{0%,80%,100%{transform:scale(.7);opacity:.4;}40%{transform:scale(1.1);opacity:1;}}
+.maint-footer{margin-top:16px;font-size:11px;color:rgba(255,255,255,.2);}
 
-        /* ── Penalty breakdown rows ── */
-        .penalty-breakdown-row {
-            background: rgba(239,68,68,0.04);
-            border: 1px dashed rgba(239,68,68,0.26);
-            border-radius: 5px; padding: 3px 5px; margin: 3px 0;
-            min-width: 0; overflow: hidden;
-        }
-        .penalty-line,
-        .penalty-total-line {
-            display: flex; justify-content: space-between;
-            align-items: flex-start; gap: 3px; min-width: 0;
-        }
-        .penalty-total-line {
-            border-top: 1px solid rgba(239,68,68,0.16);
-            margin-top: 3px; padding-top: 3px;
-        }
-        .penalty-label,
-        .penalty-total-label {
-            color: #6b7280; font-weight: 700; flex-shrink: 0;
-            font-size: clamp(0.53rem, 1.3vw, 0.62rem);
-            text-transform: uppercase; letter-spacing: 0.03em;
-            white-space: nowrap;
-        }
-        .penalty-amount,
-        .penalty-total-amount {
-            font-size: clamp(0.62rem, 1.7vw, 0.78rem);
-            font-weight: 700; text-align: right;
-            word-break: break-word; overflow-wrap: anywhere; min-width: 0;
-        }
+/* ══ SIDEBAR OVERLAY ══ */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190;}
+.sb-overlay.show{display:block;}
 
-        @media (max-width: 380px) {
-            .stat-card { padding: 0.7rem 0.65rem; }
-            .stat-icon { width: 30px; height: 30px; font-size: 0.85rem; }
-        }
+/* ══ MODALS ══ */
+.modal-backdrop{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(5px);
+  align-items:flex-end;justify-content:center;padding:0;
+}
+.modal-backdrop.open{display:flex;}
+.modal-box{
+  background:var(--bg-card);border:1px solid var(--border2);
+  border-radius:var(--r-xl) var(--r-xl) 0 0;
+  width:100%;max-width:480px;max-height:92vh;overflow-y:auto;
+  animation:shup .28s cubic-bezier(.16,1,.3,1);
+  transition:background .3s,border-color .3s;
+}
+@keyframes shup{from{transform:translateY(30px);opacity:0;}to{transform:none;opacity:1;}}
+.modal-box::-webkit-scrollbar{width:3px;}
+.modal-box::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:12px auto 0;}
+.modal-header{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:16px;font-weight:500;}
+.modal-close{
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border-radius:7px;transition:var(--tr);
+}
+.modal-close:hover{background:var(--bg-card2);color:var(--text);}
+.modal-body{padding:18px 20px;}
+.form-group{margin-bottom:14px;}
+.form-label{
+  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--muted);display:block;margin-bottom:6px;
+}
+.form-control{
+  width:100%;background:var(--bg-card2);border:1px solid var(--border2);
+  border-radius:10px;color:var(--text);font-size:14px;padding:11px 14px;
+  transition:border-color .18s,background .3s;outline:none;-webkit-appearance:none;
+}
+.form-control:focus{border-color:var(--accent);}
+.form-control option{background:var(--bg-card);color:var(--text);}
+.form-hint{font-size:11px;color:var(--muted);margin-top:5px;}
+.modal-info{
+  background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.18);
+  border-radius:10px;padding:12px;font-size:12px;color:var(--accent);
+  line-height:1.6;margin-bottom:14px;
+}
+.modal-warn{
+  background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.18);
+  border-radius:10px;padding:12px;font-size:12px;color:var(--amber);
+  line-height:1.6;margin-bottom:14px;
+}
+.modal-footer{padding:0 20px 24px;display:flex;gap:10px;}
+.btn{
+  border:none;border-radius:10px;padding:12px 20px;font-size:13px;
+  font-weight:500;cursor:pointer;transition:var(--tr);flex:1;
+}
+.btn-ghost{background:var(--bg-card2);color:var(--muted);}
+.btn-ghost:hover{color:var(--text);}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;flex:2;}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px);}
+.btn-danger{background:rgba(240,82,82,.12);border:1px solid rgba(240,82,82,.25);color:var(--red);flex:2;}
+.btn-success{background:rgba(34,199,138,.12);border:1px solid rgba(34,199,138,.25);color:var(--green);flex:2;}
+.fee-breakdown{
+  background:var(--bg-card2);border:1px solid var(--border);
+  border-radius:10px;padding:12px;margin-bottom:14px;
+}
+.fee-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;}
+.fee-row-label{color:var(--muted);}
+.fee-divider{border:none;border-top:1px solid var(--border);margin:6px 0;}
+.fee-total{font-weight:500;}
+.result-modal{text-align:center;padding:28px 20px;}
+.result-icon{
+  width:60px;height:60px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 14px;font-size:24px;
+}
+.result-icon.success{background:rgba(34,199,138,.12);color:var(--green);}
+.result-icon.error{background:rgba(240,82,82,.12);color:var(--red);}
+.result-title{font-size:17px;font-weight:500;margin-bottom:7px;}
+.result-msg{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+.lob-box{
+  border-radius:12px;padding:14px;margin-bottom:14px;
+  background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.2);
+}
+.lob-box.overdue{background:rgba(240,82,82,.07);border-color:rgba(240,82,82,.25);}
+.lob-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px;}
+.lob-amount{font-size:22px;font-weight:400;letter-spacing:-.3px;color:var(--accent);}
+.lob-box.overdue .lob-amount{color:var(--red);}
+.lob-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:var(--muted);}
+.lob-row span{color:var(--text);}
+.lob-warn{background:rgba(240,82,82,.08);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:11px;color:var(--red);}
 
-        /* ── Overdue ticker ── */
-        .overdue-ticker {
-            background: linear-gradient(90deg, #7f1d1d, #991b1b, #b91c1c, #991b1b, #7f1d1d);
-            background-size: 300% 100%;
-            animation: tickerBgPulse 4s ease-in-out infinite;
-            border-radius: 10px; overflow: hidden; padding: 0.45rem 0;
-            box-shadow: 0 3px 14px rgba(185,28,28,0.3);
-        }
-        @keyframes tickerBgPulse {
-            0%,100% { background-position: 0%   50%; }
-            50%      { background-position: 100% 50%; }
-        }
-        .ticker-track { display: flex; white-space: nowrap; animation: tickerScroll 28s linear infinite; }
-        .ticker-item  { display: inline-block; padding: 0 2.5rem; font-size: 0.78rem; font-weight: 600; color: #fff; letter-spacing: 0.03em; }
-        .ticker-item i { color: #fbbf24; animation: warnPulse 1s ease-in-out infinite; }
-        @keyframes warnPulse   { 0%,100% { opacity:1; transform:scale(1); }   50% { opacity:0.5; transform:scale(1.3); } }
-        @keyframes tickerScroll { 0% { transform:translateX(0); } 100% { transform:translateX(-50%); } }
-        .overdue-ticker:hover .ticker-track { animation-play-state: paused; }
+/* Admin banner */
+.admin-banner{
+  position:fixed;top:0;left:0;right:0;z-index:9997;
+  background:#7c3a00;color:#fde68a;text-align:center;
+  padding:8px;font-size:12px;font-weight:500;
+}
+.admin-banner a{color:#fcd34d;text-decoration:underline;margin-left:8px;}
 
-        /* ── Generic cards ── */
-        .card {
-            border: none; border-radius: 14px;
-            box-shadow: 0 3px 12px rgba(30,58,138,0.07); background: white;
-        }
-        .card-header {
-            background: rgba(30,58,138,0.02);
-            border-bottom: 1px solid rgba(30,58,138,0.08);
-            padding: 0.9rem 1.25rem; border-radius: 14px 14px 0 0 !important;
-        }
+/* Powered by */
+.powered-by{position:fixed;bottom:12px;right:14px;font-size:11px;color:var(--muted);z-index:50;}
+.powered-by strong{color:var(--accent);}
 
-        /* ── Buttons ── */
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none; border-radius: 9px; font-weight: 600; transition: all 0.25s;
-        }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(30,58,138,0.28); }
-
-        /* ── Quick actions ── */
-        .quick-action {
-            text-align: center; padding: 1rem 0.6rem; border-radius: 12px;
-            background: rgba(30,58,138,0.025);
-            border: 1.5px solid rgba(30,58,138,0.09);
-            transition: all 0.25s; cursor: pointer;
-            text-decoration: none; color: inherit; display: block;
-        }
-        .quick-action:hover {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white; transform: translateY(-3px);
-            box-shadow: 0 8px 22px rgba(30,58,138,0.22); border-color: transparent;
-        }
-        .quick-action i { font-size: 1.6rem; margin-bottom: 0.45rem; display: block; }
-        .quick-action h6 { font-size: 0.78rem; margin: 0; }
-
-        /* ── Alerts ── */
-        .alert-warning-custom {
-            background: #fffbeb; border: 1px solid rgba(245,158,11,0.32);
-            border-radius: 11px; padding: 0.8rem 1rem; color: #92400e;
-        }
-        .alert-info-custom {
-            background: #eff6ff; border: 1px solid rgba(59,130,246,0.25);
-            border-radius: 11px; padding: 0.8rem 1rem; color: #1e40af;
-        }
-
-        /* ── ROI list ── */
-        .loan-rules-list {
-            background: rgba(30,58,138,0.02); padding: 1rem;
-            border-radius: 11px; border: 1px solid rgba(30,58,138,0.08);
-        }
-
-        /* ── Loan outstanding box (modal) ── */
-        .loan-outstanding-box {
-            border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.75rem;
-            background: #eff6ff; border: 1px solid rgba(30,58,138,0.2);
-        }
-        .loan-outstanding-box.is-overdue { background: #fef2f2; border-color: rgba(239,68,68,0.3); }
-        .lob-tag {
-            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.06em; color: #6b7280; margin-bottom: 2px;
-        }
-        .lob-amount { font-size: 1.3rem; font-weight: 800; color: var(--primary); line-height: 1.2; }
-        .loan-outstanding-box.is-overdue .lob-amount { color: #dc2626; }
-        .lob-breakdown {
-            margin-top: 6px; padding-top: 6px;
-            border-top: 1px dashed rgba(30,58,138,0.15);
-        }
-        .loan-outstanding-box.is-overdue .lob-breakdown { border-top-color: rgba(239,68,68,0.2); }
-        .lob-row { display: flex; justify-content: space-between; font-size: 0.75rem; padding: 1px 0; color: #6b7280; }
-        .lob-row span { font-weight: 600; }
-        .lob-overdue-warn {
-            margin-top: 7px; padding: 5px 8px; border-radius: 6px;
-            background: rgba(239,68,68,0.07); font-size: 0.72rem;
-            font-weight: 600; color: #dc2626;
-        }
-
-        /* ── Powered by ── */
-        .powered-by {
-            position: fixed; bottom: 16px; right: 16px; background: white;
-            padding: 7px 14px; border-radius: 30px;
-            box-shadow: 0 3px 12px rgba(30,58,138,0.12);
-            font-size: 0.76rem; font-weight: 600; color: var(--primary); z-index: 1000;
-        }
-
-        /* ── Sidebar overlay ── */
-        .sb-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.38); z-index: 1039; }
-        .sb-overlay.show { display: block; }
-
-        /* ════════════════════════════════════════
-           MAINTENANCE MODE OVERLAY
-           ════════════════════════════════════════ */
-        .maintenance-overlay {
-            position: fixed; inset: 0; z-index: 99999;
-            background: linear-gradient(135deg, #0a1128 0%, #0f2044 50%, #0a1a3a 100%);
-            display: flex; align-items: center; justify-content: center;
-            padding: 1.5rem;
-        }
-        .maintenance-card {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px;
-            padding: 3rem 2.5rem;
-            max-width: 520px; width: 100%;
-            text-align: center;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
-            backdrop-filter: blur(20px);
-        }
-        .maintenance-icon-ring {
-            width: 90px; height: 90px; border-radius: 50%;
-            background: rgba(245,158,11,0.12);
-            border: 2px solid rgba(245,158,11,0.35);
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 1.5rem;
-            animation: mRingPulse 2.5s ease-in-out infinite;
-        }
-        @keyframes mRingPulse {
-            0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.25); }
-            50%      { box-shadow: 0 0 0 14px rgba(245,158,11,0); }
-        }
-        .maintenance-icon-ring i { font-size: 2.2rem; color: #f59e0b; }
-        .maintenance-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 4px 14px; border-radius: 20px;
-            background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3);
-            font-size: 0.7rem; font-weight: 700; color: #fbbf24;
-            text-transform: uppercase; letter-spacing: 0.08em;
-            margin-bottom: 1rem;
-        }
-        .maintenance-title {
-            font-size: 1.6rem; font-weight: 800; color: #fff;
-            line-height: 1.25; margin-bottom: 0.75rem;
-        }
-        .maintenance-title span { color: #60a5fa; }
-        .maintenance-message {
-            font-size: 0.88rem; color: rgba(255,255,255,0.65);
-            line-height: 1.65; margin-bottom: 1.75rem;
-        }
-        .maintenance-info-row {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px; padding: 0.75rem 1rem;
-            font-size: 0.78rem; color: rgba(255,255,255,0.5); margin-bottom: 1.5rem;
-        }
-        .maintenance-info-row i { color: #60a5fa; }
-        .maintenance-dots {
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-        }
-        .maintenance-dots span {
-            width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;
-            animation: dotBounce 1.4s ease-in-out infinite;
-        }
-        .maintenance-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .maintenance-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes dotBounce {
-            0%,80%,100% { transform: scale(0.7); opacity: 0.4; }
-            40%          { transform: scale(1.2); opacity: 1;   }
-        }
-        .maintenance-footer {
-            margin-top: 1.5rem; font-size: 0.7rem;
-            color: rgba(255,255,255,0.25); letter-spacing: 0.04em;
-        }
-
-        /* ── Responsive breakpoints ── */
-        @media (max-width: 1200px) { :root { --sidebar-width: 240px; } }
-        @media (max-width: 992px) {
-            .sidebar { left: calc(-1 * var(--sidebar-width)); }
-            .sidebar.active { left: 0; box-shadow: 6px 0 30px rgba(0,0,0,0.25); }
-            .top-navbar { left: 0; }
-            .main-content { margin-left: 0; }
-            .powered-by { bottom: 10px; right: 10px; font-size: 0.7rem; padding: 5px 10px; }
-        }
-        @media (max-width: 576px) {
-            .main-content { padding: 0.85rem; }
-            .welcome-card { padding: 1rem; }
-            .maintenance-card { padding: 2rem 1.25rem; }
-            .maintenance-title { font-size: 1.25rem; }
-        }
-        @media print {
-            .sidebar,.top-navbar,.btn,.quick-action,.powered-by,.overdue-ticker { display: none !important; }
-            .main-content { margin: 0; padding: 0; }
-            .card { break-inside: avoid; }
-        }
-    </style>
+/* ══ RESPONSIVE ══ */
+@media(max-width:1100px){
+  .cards-row{grid-template-columns:1fr;}
+}
+@media(max-width:900px){
+  .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+  .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3);}
+  .topnav{left:0;}
+  .main{margin-left:0;}
+  .hamburger{display:flex;}
+}
+@media(max-width:600px){
+  .main{padding:14px;}
+  .cta-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .hero-grid{grid-template-columns:1fr 1fr;}
+  .balance-hero{padding:16px;}
+  .notice-bar{font-size:11px;}
+  .status-label{display:none;}
+  .topnav{padding:0 12px;gap:8px;}
+  .topnav-greeting h2{font-size:13px;}
+  .topnav-greeting p{display:none;}
+  .modal-box{max-width:100%;}
+  .loan-meta{gap:6px;}
+  .loan-meta-item{min-width:calc(50% - 3px);flex:none;}
+  .cta-btn{padding:13px 6px;gap:6px;}
+  .cta-icon{width:38px;height:38px;font-size:16px;}
+  .cta-label{font-size:11px;}
+}
+@media(max-width:380px){
+  .cta-icon{width:34px;height:34px;font-size:14px;}
+  .cta-label{font-size:10px;}
+  .hero-stat-value{font-size:13px;}
+  .balance-amount{font-size:24px;}
+  .hero-grid{gap:8px;}
+  .hero-stat{padding:10px 11px;}
+}
+@media(min-width:901px){
+  .modal-backdrop{align-items:center;padding:20px;}
+  .modal-box{border-radius:var(--r-xl);max-width:440px;}
+  .modal-handle{display:none;}
+}
+@media print{
+  .sidebar,.topnav,.powered-by,.cta-grid,.overdue-banner,.notice-bar{display:none!important;}
+  .main{margin:0;padding:0;}
+}
+</style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════
-     MAINTENANCE MODE OVERLAY
-     Only renders when maintenanceMode.enabled is true.
-     Admins can still see the page — check role here if needed.
-     ══════════════════════════════════════════════════ -->
-<% if (maintenanceMode && maintenanceMode.enabled) { %>
-<%
-  // Allow admins to bypass the overlay — comment out this block
-  // if you want maintenance to block everyone including admins.
-  const isAdmin = user.role && user.role.name !== 'member';
-  const bypassMaintenance = isAdmin;
-%>
-<% if (!bypassMaintenance) { %>
-<div class="maintenance-overlay" id="maintenanceOverlay">
-    <div class="maintenance-card">
-        <div class="maintenance-icon-ring">
-            <i class="fas fa-wrench"></i>
-        </div>
-        <div class="maintenance-badge">
-            <i class="fas fa-circle" style="font-size:0.45rem;"></i>
-            System Maintenance
-        </div>
-        <h1 class="maintenance-title">
-            We'll be back<br><span>shortly!</span>
-        </h1>
-        <p class="maintenance-message">
-            <%= maintenanceMode.message || "The system is currently undergoing scheduled maintenance. Please check back shortly." %>
-        </p>
-        <div class="maintenance-info-row">
-            <i class="fas fa-clock"></i>
-            <span>We apologise for any inconvenience caused.</span>
-        </div>
-        <div class="maintenance-dots">
-            <span></span><span></span><span></span>
-        </div>
-        <div class="maintenance-footer">
-            Club De Stars Cooperative Society &nbsp;·&nbsp; Powered by JESZ LIMITED
-        </div>
-    </div>
-</div>
-<% } else { %>
-<!-- Admin bypass banner -->
-<div style="position:fixed;top:0;left:0;right:0;z-index:99998;background:#92400e;color:#fef3c7;text-align:center;padding:7px;font-size:0.78rem;font-weight:600;">
-    <i class="fas fa-wrench me-2"></i>
-    <strong>Maintenance Mode is ON</strong> — You can see this page because you are an admin.
-    <a href="/admin-dashboard" style="color:#fde68a;text-decoration:underline;margin-left:10px;">Manage in Admin Panel →</a>
-</div>
-<% } %>
-<% } %>
-
-<!-- Loader -->
-<div id="loaderScreen" class="loader-screen">
-    <div class="loader-logo">
-        <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
-    </div>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-ring"></div>
+  <div class="loader-label">Club De Stars</div>
 </div>
 
 <%
   const sharePercentage = allMembersTotalSavings > 0
-    ? ((accountBalance / allMembersTotalSavings) * 100).toFixed(2)
-    : 0;
+    ? ((accountBalance / allMembersTotalSavings) * 100).toFixed(2) : 0;
   const pendingGuarantorCount = user.guarantorRequests
-    ? user.guarantorRequests.filter(r => r.status === "pending").length
-    : 0;
-
-  // Company account helpers — fall back to dashes if not configured
+    ? user.guarantorRequests.filter(r => r.status === "pending").length : 0;
   const bankName      = (companyAccount && companyAccount.bankName)      || "—";
   const accountName   = (companyAccount && companyAccount.accountName)   || "—";
   const accountNumber = (companyAccount && companyAccount.accountNumber) || "—";
   const accountConfigured = bankName !== "—" && accountNumber !== "—";
+  const isAdmin = user.role && user.role.name !== 'member';
 %>
+
+<!-- MAINTENANCE -->
+<% if (maintenanceMode && maintenanceMode.enabled) { %>
+  <% if (isAdmin) { %>
+    <div class="admin-banner">
+      <i class="fas fa-wrench" style="margin-right:6px;"></i>
+      Maintenance Mode is ON — admins only.
+      <a href="/admin-dashboard">Admin Panel →</a>
+    </div>
+  <% } else { %>
+    <div class="maintenance-overlay">
+      <div class="maint-card">
+        <div class="maint-icon"><i class="fas fa-wrench"></i></div>
+        <div class="maint-badge"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;"></span> Maintenance</div>
+        <h1 class="maint-title">We'll be back <em>shortly</em></h1>
+        <p class="maint-message"><%= maintenanceMode.message || "Scheduled maintenance in progress. Back soon." %></p>
+        <div class="maint-dots"><span></span><span></span><span></span></div>
+        <div class="maint-footer">Club De Stars · Powered by JESZ LIMITED</div>
+      </div>
+    </div>
+  <% } %>
+<% } %>
 
 <div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
 
-<!-- ══ SIDEBAR ══ -->
-<div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <div class="logo-container">
-            <div class="logo-box">
-                <img src="/media/assets/logo/log.png" alt="Logo"
-                     onerror="this.style.display='none';this.parentNode.innerHTML='<b style=\'color:#1e3a8a;font-size:13px;\'>C</b>'">
-            </div>
-            <div>
-                <h6 class="mb-0 fw-bold" style="text-transform:uppercase;font-size:0.8rem;">Club De Stars</h6>
-                <small style="opacity:0.65;font-size:0.67rem;">COOPERATIVE SOCIETY LIMITED</small>
-            </div>
-        </div>
-        <div class="member-badge mt-2 <%= user.membershipID.startsWith('CD') ? 'club-member-badge' : 'non-club-badge' %>">
-            <i class="fas <%= user.membershipID.startsWith('CD') ? 'fa-star' : 'fa-user' %>" style="font-size:0.68rem;"></i>
-            <span><%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Non-Club Member' %></span>
-        </div>
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <img src="/media/assets/logo/log.png" alt="Logo"
+           onerror="this.style.display='none';this.parentNode.innerHTML='<b>C</b>'">
     </div>
-    <div class="sidebar-menu">
-        <a href="/cds-cooperative/dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a>
-        <a href="/cds-cooperative/transaction"><i class="fas fa-exchange-alt"></i> Transactions</a>
-        <a href="/cds-cooperative/loan"><i class="fas fa-hand-holding-usd"></i> My Loans</a>
-        <a href="/cds-cooperative/guarantorRequest">
-            <i class="fas fa-user-friends"></i> Guarantor Requests
-            <% if (pendingGuarantorCount > 0) { %>
-                <span class="badge bg-danger ms-auto" style="font-size:0.68rem;"><%= pendingGuarantorCount %></span>
-            <% } %>
-        </a>
-        <a href="/manage/kiddies-account"><i class="fas fa-users"></i> Kiddies Account</a>
-        <a href="/cds-cooperative/profile"><i class="fas fa-user-circle"></i> My Profile</a>
-        <a href="/cds-cooperative/kyc"><i class="fas fa-shield-alt"></i> KYC Verification</a>
-        <a href="/cds-cooperative/referral"><i class="fas fa-user-plus"></i> Referral Program</a>
-        <a href="/cds-cooperative/memberContract"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
-        <a href="/cds-cooperative/report"><i class="fas fa-chart-line"></i> Reports</a>
-        <% if (user.role && user.role.name !== 'member') { %>
-        <a href="/admin-dashboard"><i class="fas fa-tachometer-alt"></i> Administration</a>
-        <% } %>
-        <a href="/logout" style="color:rgba(255,255,255,0.52);margin-top:4px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    <div style="min-width:0;">
+      <div class="logo-name">Club De Stars</div>
+      <div class="logo-sub">Cooperative Society</div>
     </div>
-</div>
-
-<!-- ══ TOP NAVBAR ══ -->
-<div class="top-navbar">
-    <i class="fas fa-bars d-lg-none me-3"
-       style="cursor:pointer;color:var(--primary);font-size:1.25rem;"
-       onclick="toggleSidebar()"></i>
-    <div class="flex-grow-1">
-        <h6 class="mb-0 fw-bold d-none d-sm-block" style="color:var(--primary);font-size:0.9rem;">
-            Welcome back, <%= user.firstName %>! 👋
-        </h6>
-        <h6 class="mb-0 fw-bold d-sm-none" style="color:var(--primary);font-size:0.85rem;">Hi, <%= user.firstName %>! 👋</h6>
-        <small class="text-muted d-none d-md-block" style="font-size:0.73rem;">
-            Member ID: <%= user.membershipID %> &nbsp;|&nbsp;
-            <%= new Date(user.createdAt).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) %>
-        </small>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-chip">
+      <div class="user-avatar">
+        <%= user.firstName.charAt(0).toUpperCase() %><%= user.lastName.charAt(0).toUpperCase() %>
+      </div>
+      <div style="min-width:0;">
+        <div class="user-name"><%= user.firstName %> <%= user.lastName %></div>
+        <div class="user-id"><%= user.membershipID %></div>
+      </div>
     </div>
-    <%
-      let sbadgeClass = "bg-secondary bg-opacity-10 text-secondary";
-      if (user.status === "active")   sbadgeClass = "bg-success bg-opacity-10 text-success";
-      if (user.status === "rejected") sbadgeClass = "bg-danger bg-opacity-10 text-danger";
-    %>
-    <span class="badge <%= sbadgeClass %> ms-2" style="font-size:0.7rem;padding:5px 10px;">
-        <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
-    </span>
-</div>
-
-<!-- ══ MAIN CONTENT ══ -->
-<div class="main-content" id="mainContent">
-
-    <!-- Welcome card -->
-    <div class="welcome-card position-relative mb-3">
-        <div class="row align-items-center position-relative" style="z-index:1;">
-            <div class="col-8">
-                <h5 class="mb-2 fw-bold" style="font-size:1rem;">Great to see you, <%= user.firstName %>!</h5>
-                <div class="d-flex gap-2 flex-wrap">
-                    <div class="member-badge"><i class="fas fa-id-card" style="font-size:0.68rem;"></i><span><%= user.membershipID %></span></div>
-                    <div class="member-badge d-none d-sm-inline-flex"><i class="fas fa-calendar" style="font-size:0.68rem;"></i><span>Since <%= new Date(user.createdAt).toLocaleDateString('en-US',{month:'short',year:'numeric'}) %></span></div>
-                    <div class="member-badge club-member-badge"><i class="fas fa-star" style="font-size:0.68rem;"></i><span><%= interestRate %>% Interest Rate</span></div>
-                </div>
-            </div>
-            <div class="col-4 text-end">
-                <%
-                  let badgeClass2 = "bg-light text-secondary";
-                  let statusText  = "Pending";
-                  if (user.status === "active")   { badgeClass2 = "bg-light text-success"; statusText = "Active";   }
-                  if (user.status === "rejected") { badgeClass2 = "bg-light text-danger";  statusText = "Rejected"; }
-                %>
-                <span class="badge <%= badgeClass2 %> px-3 py-2" style="font-size:0.8rem;"><%= statusText %></span>
-                <p class="mb-0 mt-1 opacity-75" style="font-size:0.7rem;">
-                    <% if (user.Payment && user.Payment.status === "paid") { %>KYC Verified ✓<% } else { %>KYC Pending ✗<% } %>
-                </p>
-            </div>
-        </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Menu</div>
+    <a href="/cds-cooperative/dashboard" class="nav-item active"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="/cds-cooperative/transaction" class="nav-item"><i class="fas fa-exchange-alt"></i> Transactions</a>
+    <a href="/cds-cooperative/loan" class="nav-item"><i class="fas fa-coins"></i> Loans</a>
+    <a href="/cds-cooperative/guarantorRequest" class="nav-item">
+      <i class="fas fa-user-check"></i> Guarantor
+      <% if (pendingGuarantorCount > 0) { %><span class="nav-badge"><%= pendingGuarantorCount %></span><% } %>
+    </a>
+    <div class="nav-section">Account</div>
+    <a href="/manage/kiddies-account" class="nav-item"><i class="fas fa-baby"></i> Kiddies Account</a>
+    <a href="/cds-cooperative/profile" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+    <a href="/cds-cooperative/kyc" class="nav-item"><i class="fas fa-shield-alt"></i> KYC</a>
+    <a href="/cds-cooperative/referral" class="nav-item"><i class="fas fa-user-plus"></i> Referrals</a>
+    <a href="/cds-cooperative/report" class="nav-item"><i class="fas fa-chart-bar"></i> Reports</a>
+    <a href="/cds-cooperative/memberContract" class="nav-item"><i class="fas fa-file-alt"></i> Terms</a>
+    <% if (user.role && user.role.name !== 'member') { %>
+    <div class="nav-section">Admin</div>
+    <a href="/admin-dashboard" class="nav-item"><i class="fas fa-tachometer-alt"></i> Administration</a>
+    <% } %>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="member-pill">
+      <i class="fas fa-star" style="font-size:9px;"></i>
+      <%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Associate Member' %>
     </div>
+    <a href="/logout" class="nav-item" style="color:var(--red);margin-top:2px;">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </a>
+  </div>
+</aside>
 
-    <!-- Withdrawal notice -->
-    <div class="alert-warning-custom mb-3">
-        <p class="mb-0" style="font-size:0.8rem;">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>Withdrawal Window:</strong> Regular withdrawals <strong>1st – 10th December</strong>.
-            Force withdrawal available with <strong><%= forceWithdrawalCharge %>% charge</strong> (50% now, 50% after 30 days).
-        </p>
+<!-- ════ TOP NAV ════ -->
+<header class="topnav">
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="topnav-greeting">
+    <h2>Hello, <%= user.firstName %> 👋</h2>
+    <p>Since <%= new Date(user.createdAt).toLocaleDateString('en-US',{month:'short',year:'numeric'}) %></p>
+  </div>
+  <div class="topnav-right">
+    <div class="status-row">
+      <div class="status-dot"></div>
+      <span class="status-label">Active</span>
     </div>
+    <% if (user.Payment && user.Payment.status === "paid") { %>
+      <div class="kyc-chip verified">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i>
+        <span>Verified</span>
+      </div>
+    <% } else { %>
+      <a href="/cds-cooperative/kyc" class="kyc-chip">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i>
+        <span>KYC</span>
+      </a>
+    <% } %>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle light/dark mode">
+      <div class="tog-thumb" id="togThumb">
+        <i class="fas fa-moon" id="togIcon" style="font-size:9px;"></i>
+      </div>
+    </button>
+  </div>
+</header>
 
-    <!-- Overdue ticker -->
-    <% if (loanIsOverdue) { %>
-    <div class="overdue-ticker mb-3">
-        <div class="ticker-track">
-            <span class="ticker-item">
-                <i class="fas fa-exclamation-triangle"></i>&nbsp;
-                OVERDUE LOAN ALERT &mdash;
-                Your loan of <strong>₦<%= loan.amount.toLocaleString() %></strong> is past due &bull;
-                Outstanding balance now <strong>₦<%= loanOutstanding.toLocaleString() %></strong> &bull;
-                A daily penalty of <strong><%= loanPenaltyRate %>%</strong> is added every day until repaid &bull;
-                Please repay or roll over immediately &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            </span>
-            <span class="ticker-item" aria-hidden="true">
-                <i class="fas fa-exclamation-triangle"></i>&nbsp;
-                OVERDUE LOAN ALERT &mdash;
-                Your loan of <strong>₦<%= loan.amount.toLocaleString() %></strong> is past due &bull;
-                Outstanding balance now <strong>₦<%= loanOutstanding.toLocaleString() %></strong> &bull;
-                A daily penalty of <strong><%= loanPenaltyRate %>%</strong> is added every day until repaid &bull;
-                Please repay or roll over immediately &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            </span>
-        </div>
+<!-- ════ MAIN ════ -->
+<main class="main">
+
+  <div class="notice-bar">
+    <i class="fas fa-calendar-check"></i>
+    <span>Withdrawal window: <strong>Dec 1–10</strong> · Force withdrawal available at <strong><%= forceWithdrawalCharge %>% charge</strong></span>
+  </div>
+
+  <% if (loanIsOverdue) { %>
+  <div class="overdue-banner">
+    <i class="fas fa-exclamation-triangle overdue-icon"></i>
+    <div class="ticker-wrap">
+      <div class="ticker-inner">
+        <span class="ticker-text">Loan of <strong>₦<%= loan.amount.toLocaleString() %></strong> is overdue · Balance <strong>₦<%= loanOutstanding.toLocaleString() %></strong> · <strong><%= loanPenaltyRate %>%</strong>/day penalty accruing &nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <span class="ticker-text">Loan of <strong>₦<%= loan.amount.toLocaleString() %></strong> is overdue · Balance <strong>₦<%= loanOutstanding.toLocaleString() %></strong> · <strong><%= loanPenaltyRate %>%</strong>/day penalty accruing &nbsp;&nbsp;&nbsp;&nbsp;</span>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Balance Hero -->
+  <div class="balance-hero">
+    <div class="balance-label">Total Savings Balance</div>
+    <div class="balance-amount">
+      <span class="cur">₦</span><%= user.account?.balance ? user.account.balance.toLocaleString() : "0" %>
+    </div>
+    <% if (typeof ROI !== "undefined" && totalBalance) { %>
+    <div class="balance-roi">
+      <i class="fas fa-chart-line" style="font-size:12px;"></i>
+      ₦<%= totalBalance.toLocaleString() %> incl. ROI
     </div>
     <% } %>
+    <div class="hero-grid">
+      <div class="hero-stat">
+        <div class="hero-stat-label">Monthly ROI</div>
+        <div class="hero-stat-value" style="color:var(--green);">₦<%= monthlyROI.toLocaleString(undefined,{maximumFractionDigits:2}) %></div>
+        <div class="hero-stat-sub"><%= sharePercentage %>% pool · <%= interestRate %>% rate</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Active Loan</div>
+        <% if (loan) { %>
+          <div class="hero-stat-value <%= loanIsOverdue ? 'overdue-value' : '' %>">₦<%= loanOutstanding.toLocaleString() %></div>
+          <% if (loanIsOverdue) { %>
+            <div class="overdue-tag"><i class="fas fa-circle" style="font-size:7px;"></i> Overdue</div>
+          <% } else { %>
+            <div class="hero-stat-sub">Due <%= loan.dueDate ? new Date(loan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'N/A' %></div>
+          <% } %>
+        <% } else { %>
+          <div class="hero-stat-value" style="color:var(--muted);">None</div>
+          <div class="hero-stat-sub">Up to ₦<%= user.account?.balance ? (user.account.balance * 3).toLocaleString() : '0' %></div>
+        <% } %>
+      </div>
+    </div>
+  </div>
 
-    <!-- ══ STAT CARDS ══ -->
-    <div class="row g-2 g-md-3 mb-3">
+  <!-- CTAs -->
+  <div class="cta-grid">
+    <a href="#" class="cta-btn cta-deposit" onclick="checkUserStatus('depositModal');return false;">
+      <div class="cta-icon"><i class="fas fa-plus"></i></div>
+      <div class="cta-label">Deposit</div>
+    </a>
+    <a href="#" class="cta-btn cta-withdraw" onclick="checkUserStatus('withdrawModal');return false;">
+      <div class="cta-icon"><i class="fas fa-minus"></i></div>
+      <div class="cta-label">Withdraw</div>
+    </a>
+    <a href="/cds-cooperative/loan" class="cta-btn cta-loan">
+      <div class="cta-icon"><i class="fas fa-coins"></i></div>
+      <div class="cta-label">Apply Loan</div>
+    </a>
+    <a href="#" class="cta-btn cta-repay" onclick="openModal('loanPaymentModal');return false;">
+      <div class="cta-icon"><i class="fas fa-credit-card"></i></div>
+      <div class="cta-label">Repay Loan</div>
+    </a>
+  </div>
 
-        <!-- Total Savings -->
-        <div class="col-6 col-lg-3">
-            <div class="stat-card">
-                <div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:white;">
-                    <i class="fas fa-piggy-bank"></i>
-                </div>
-                <div class="sc-label">Total Savings</div>
-                <div class="sc-value">
-                    ₦<%= user.account?.balance ? user.account.balance.toLocaleString() : "0" %>
-                </div>
-                <% if (user.account && typeof ROI !== "undefined") { %>
-                <div class="sc-sub text-success fw-semibold">
-                    <i class="fas fa-arrow-up me-1"></i>₦<%= totalBalance.toLocaleString() %> +ROI
-                </div>
-                <% } else { %>
-                <div class="sc-sub text-muted fw-semibold">₦0.00</div>
-                <% } %>
-            </div>
-        </div>
-
-        <!-- Active Loan -->
-        <div class="col-6 col-lg-3">
-            <div class="stat-card <%= loanIsOverdue ? 'stat-card--overdue' : '' %>">
-                <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;">
-                    <i class="fas fa-hand-holding-usd"></i>
-                </div>
-                <div class="sc-label">Active Loan</div>
-                <div class="sc-value">
-                    ₦<%= loan ? loan.amount.toLocaleString() : '0' %>
-                </div>
-                <% if (loan && loanOutstanding > loan.amount) { %>
-                <div class="outstanding-balance-row">
-                    <span class="outstanding-label">Owed</span>
-                    <span class="outstanding-amount <%= loanIsOverdue ? 'text-danger' : 'text-warning' %>">
-                        ₦<%= loanOutstanding.toLocaleString() %>
-                    </span>
-                </div>
-                <% } %>
-                <% if (loanIsOverdue) { %>
-                <div class="sc-sub text-danger fw-bold mt-1">
-                    <i class="fas fa-circle-xmark me-1"></i>OVERDUE<br>
-                    <span style="font-weight:400;">
-                        <%= loan.dueDate ? new Date(loan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'N/A' %>
-                    </span>
-                </div>
-                <% } else { %>
-                <div class="sc-sub text-warning fw-semibold mt-1">
-                    <i class="fas fa-clock me-1"></i>Due: <%= loan && loan.dueDate ? loan.dueDate.toLocaleDateString() : 'N/A' %>
-                </div>
-                <% } %>
-                <div class="sc-sub text-muted mt-1">
-                    Max: ₦<%= user.account?.balance ? (user.account.balance * 3).toLocaleString() : '0' %>
-                </div>
-            </div>
-        </div>
-
-        <!-- Monthly ROI -->
-        <div class="col-6 col-lg-3">
-            <div class="stat-card">
-                <div class="stat-icon" style="background:linear-gradient(135deg,#06b6d4,#0891b2);color:white;">
-                    <i class="fas fa-percentage"></i>
-                </div>
-                <div class="sc-label">Monthly ROI</div>
-                <div class="sc-value">
-                    ₦<%= monthlyROI.toLocaleString(undefined,{maximumFractionDigits:2}) %>
-                </div>
-                <div class="sc-sub text-info fw-semibold">
-                    <i class="fas fa-chart-line me-1"></i><%= sharePercentage %>% of Shares
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Loan Payment -->
-        <div class="col-6 col-lg-3">
-            <div class="stat-card <%= loanIsOverdue ? 'stat-card--overdue' : '' %>">
-                <div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;">
-                    <i class="fas fa-calendar-check"></i>
-                </div>
-                <div class="sc-label">Loan Payment</div>
-                <div class="sc-value">
-                    ₦<%= loan ? loan.totalRepay.toLocaleString() : '0' %>
-                </div>
-                <% if (loan && loanTotalPenalty > 0) { %>
-                <div class="penalty-breakdown-row">
-                    <div class="penalty-line">
-                        <span class="penalty-label">+Penalty</span>
-                        <span class="penalty-amount text-danger">+₦<%= loanTotalPenalty.toLocaleString() %></span>
-                    </div>
-                    <div class="penalty-total-line">
-                        <span class="penalty-total-label">Owed</span>
-                        <span class="penalty-total-amount" style="color:var(--primary);">₦<%= loanOutstanding.toLocaleString() %></span>
-                    </div>
-                </div>
-                <% } %>
-                <div class="sc-sub fw-semibold mt-1" style="color:var(--primary);">
-                    <i class="fas fa-calendar me-1"></i>Due <%= loan && loan.dueDate
-                        ? new Date(loan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'})
-                        : 'N/A' %>
-                </div>
-                <% if (loanIsOverdue) { %>
-                <div class="sc-sub text-danger mt-1">
-                    <i class="fas fa-arrow-trend-up me-1"></i>+<%= loanPenaltyRate %>%/day
-                </div>
-                <% } %>
-            </div>
-        </div>
+  <!-- ROI + Loan -->
+  <div class="cards-row">
+    <div class="info-card">
+      <div class="ic-header">
+        <span class="ic-title">ROI Breakdown</span>
+        <a href="/cds-cooperative/report" class="ic-link">Reports</a>
+      </div>
+      <div class="roi-row">
+        <span class="roi-row-label">Your savings</span>
+        <span class="roi-row-val">₦<%= accountBalance.toLocaleString() %></span>
+      </div>
+      <div class="roi-row">
+        <span class="roi-row-label">Interest pool</span>
+        <span class="roi-row-val">₦<%= totalInterestCollected.toLocaleString() %></span>
+      </div>
+      <div class="roi-row">
+        <span class="roi-row-label">Net to members</span>
+        <span class="roi-row-val" style="color:var(--green);">₦<%= netInterestForRoi.toLocaleString() %></span>
+      </div>
+      <div class="roi-row">
+        <span class="roi-row-label">Operating charge (<%= roiOperatingCharge %>%)</span>
+        <span class="roi-row-val" style="color:var(--muted);">₦<%= companyCharge.toLocaleString() %></span>
+      </div>
+      <div class="roi-row">
+        <span class="roi-row-label">Your ROI this month</span>
+        <span class="roi-row-val" style="color:var(--accent);">₦<%= monthlyROI.toLocaleString(undefined,{maximumFractionDigits:2}) %></span>
+      </div>
+      <div class="share-bar-wrap">
+        <div class="share-bar-label"><span>Pool share</span><span><%= sharePercentage %>%</span></div>
+        <div class="share-bar"><div class="share-bar-fill" style="width:<%= Math.min(parseFloat(sharePercentage),100) %>%"></div></div>
+      </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="card mb-3">
-        <div class="card-header">
-            <h6 class="mb-0 fw-bold" style="font-size:0.86rem;">
-                <i class="fas fa-bolt me-2" style="color:var(--primary);"></i>Quick Actions
-            </h6>
+    <% if (loan) { %>
+    <%
+      const progressPct = loan.totalRepay > 0
+        ? Math.max(0,Math.min(100,((loan.totalRepay - loanOutstanding)/loan.totalRepay*100).toFixed(0))) : 0;
+    %>
+    <div class="loan-card <%= loanIsOverdue ? 'overdue-card' : '' %>">
+      <div class="ic-header">
+        <span class="ic-title">Current Loan</span>
+        <a href="/cds-cooperative/loan" class="ic-link">Details</a>
+      </div>
+      <div style="font-size:clamp(20px,4.5vw,28px);font-weight:300;letter-spacing:-.3px;color:<%= loanIsOverdue ? 'var(--red)' : 'var(--text)' %>;">
+        ₦<%= loanOutstanding.toLocaleString() %>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;">Outstanding balance</div>
+      <div class="loan-progress">
+        <div class="loan-progress-fill <%= loanIsOverdue ? 'overdue' : '' %>" style="width:<%= progressPct %>%"></div>
+      </div>
+      <div class="loan-meta">
+        <div class="loan-meta-item">
+          <div class="lm-label">Principal</div>
+          <div class="lm-value">₦<%= loan.amount.toLocaleString() %></div>
         </div>
-        <div class="card-body p-3">
-            <div class="row g-2">
-                <div class="col-6 col-lg-3">
-                    <a href="#" class="quick-action" onclick="checkUserStatus('depositModal')">
-                        <i class="fas fa-plus-circle" style="color:#10b981;"></i>
-                        <h6>Make Deposit</h6>
-                    </a>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <a href="#" class="quick-action" onclick="checkUserStatus('withdrawModal')">
-                        <i class="fas fa-minus-circle" style="color:#ef4444;"></i>
-                        <h6>Withdraw</h6>
-                    </a>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <a href="/cds-cooperative/loan" class="quick-action">
-                        <i class="fas fa-file-invoice-dollar" style="color:#f59e0b;"></i>
-                        <h6>Apply for Loan</h6>
-                    </a>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <a href="#" class="quick-action" onclick="openModal('loanPaymentModal')">
-                        <i class="fas fa-money-check-alt" style="color:#06b6d4;"></i>
-                        <h6>Loan Payment</h6>
-                    </a>
-                </div>
-            </div>
+        <div class="loan-meta-item">
+          <div class="lm-label">Total Repay</div>
+          <div class="lm-value">₦<%= loan.totalRepay.toLocaleString() %></div>
         </div>
+        <div class="loan-meta-item">
+          <div class="lm-label">Due</div>
+          <div class="lm-value" style="color:<%= loanIsOverdue ? 'var(--red)' : 'var(--amber)' %>;">
+            <%= loan.dueDate ? new Date(loan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}) : 'N/A' %>
+          </div>
+        </div>
+      </div>
+      <% if (loanTotalPenalty > 0) { %>
+      <div style="margin-top:12px;padding:10px;background:rgba(240,82,82,.07);border:1px solid rgba(240,82,82,.15);border-radius:9px;display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+        <span style="color:var(--muted);">Penalty (+<%= loanPenaltyRate %>%/day)</span>
+        <span style="color:var(--red);font-weight:500;">+₦<%= loanTotalPenalty.toLocaleString() %></span>
+      </div>
+      <% } %>
+      <button class="loan-pay-btn" onclick="openModal('loanPaymentModal')">
+        Make a Payment <i class="fas fa-arrow-right" style="font-size:11px;margin-left:4px;"></i>
+      </button>
     </div>
-
-    <!-- ROI Section -->
-    <div class="card mb-3">
-        <div class="card-header">
-            <h6 class="mb-0 fw-bold" style="color:var(--primary);font-size:0.86rem;">
-                <i class="fas fa-chart-line me-2"></i>ROI Calculator & Distribution
-            </h6>
+    <% } else { %>
+    <div class="info-card">
+      <div class="no-loan-state">
+        <div class="no-loan-icon"><i class="fas fa-coins"></i></div>
+        <div>
+          <div style="font-size:15px;font-weight:500;margin-bottom:4px;">No Active Loan</div>
+          <div style="font-size:12px;color:var(--muted);">Up to ₦<%= user.account?.balance ? (user.account.balance * 3).toLocaleString() : '0' %> available</div>
         </div>
-        <div class="card-body p-3">
-            <div class="alert-info-custom mb-3">
-                <p class="mb-1 fw-bold" style="font-size:0.8rem;">How ROI is Calculated</p>
-                <p class="mb-1" style="font-size:0.76rem;">
-                    Monthly ROI = (Your Cumulative Savings) / (Total All Members Savings) × Monthly Interest − company charge
-                </p>
-                <p class="mb-0" style="font-size:0.73rem;">
-                    <strong>Note:</strong> <%= roiOperatingCharge %>% of the monthly interest pool is retained as operating charges
-                </p>
-            </div>
-            <div class="row g-2 g-md-3 mb-3">
-                <div class="col-6 col-md-3">
-                    <div class="p-3 rounded-3 text-center" style="background:#dbeafe;">
-                        <small class="text-muted d-block mb-1" style="font-size:0.7rem;">Your Cumulative Savings</small>
-                        <h6 class="mb-0 fw-bold" style="color:var(--primary);font-size:0.88rem;">₦<%= accountBalance.toLocaleString() %></h6>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="p-3 rounded-3 text-center" style="background:#e0e7ff;">
-                        <small class="text-muted d-block mb-1" style="font-size:0.7rem;">Total Balance</small>
-                        <h6 class="mb-0 fw-bold" style="color:var(--primary);font-size:0.88rem;">₦<%= totalBalance.toLocaleString() %></h6>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="p-3 rounded-3 text-center" style="background:#fef3c7;">
-                        <small class="text-muted d-block mb-1" style="font-size:0.7rem;">Your Share</small>
-                        <h6 class="mb-0 fw-bold text-warning" style="font-size:0.88rem;"><%= sharePercentage %>%</h6>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="p-3 rounded-3 text-center" style="background:#d1fae5;">
-                        <small class="text-muted d-block mb-1" style="font-size:0.7rem;">This Month's ROI</small>
-                        <h6 class="mb-0 fw-bold text-success" style="font-size:0.88rem;">
-                            ₦<%= monthlyROI.toLocaleString(undefined,{maximumFractionDigits:2}) %>
-                        </h6>
-                    </div>
-                </div>
-            </div>
-            <div class="row g-3">
-                <div class="col-lg-6">
-                    <h6 class="fw-bold mb-2" style="color:var(--primary);font-size:0.8rem;">Interest Sources</h6>
-                    <div class="loan-rules-list">
-                        <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
-                            <div>
-                                <small class="text-muted d-block" style="font-size:0.7rem;">Total Loan Interest</small>
-                                <h6 class="mb-0 fw-bold" style="color:var(--primary);font-size:0.88rem;">₦<%= totalInterestCollected.toLocaleString() %></h6>
-                            </div>
-                            <div class="text-end">
-                                <small class="text-muted d-block" style="font-size:0.7rem;">From All Members</small>
-                                <small class="fw-semibold" style="font-size:0.7rem;">Current Month</small>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="d-flex justify-content-between mb-1" style="font-size:0.76rem;">
-                                <small>Distributed to Members (Net Interest For ROI)</small>
-                                <strong>₦<%= netInterestForRoi.toLocaleString() %></strong>
-                            </div>
-                            <div class="d-flex justify-content-between" style="font-size:0.76rem;">
-                                <small>Operating Charges (Company Charge)</small>
-                                <strong>₦<%= companyCharge.toLocaleString() %></strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <a href="/cds-cooperative/loan" class="no-loan-cta">Apply for a Loan</a>
+      </div>
     </div>
+    <% } %>
+  </div>
 
-</div><!-- END main-content -->
+</main>
 
-<div class="powered-by">
-    <strong style="color:var(--primary);">Cloudbaam</strong> · Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong>
+<div class="powered-by">Powered by <strong>JESZ LIMITED</strong></div>
+
+<!-- ════════════ MODALS ════════════ -->
+
+<!-- Pending -->
+<div class="modal-backdrop" id="pendingAccountModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon error"><i class="fas fa-lock"></i></div>
+      <div class="result-title">Account Pending</div>
+      <div class="result-msg">Complete KYC verification to unlock all features.</div>
+      <a href="/cds-cooperative/kyc" style="display:block;padding:12px;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);border-radius:10px;color:var(--accent);font-size:13px;font-weight:500;text-align:center;margin-bottom:10px;">Verify Now</a>
+      <button onclick="closeModal('pendingAccountModal')" style="width:100%;padding:10px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;">Dismiss</button>
+    </div>
+  </div>
 </div>
 
-<!-- ══════════════  MODALS  ══════════════ -->
-
-<!-- Pending account -->
-<div class="modal fade" id="pendingAccountModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content text-center p-3" style="border-radius:14px;">
-            <div class="modal-body">
-                <i class="fas fa-exclamation-circle text-warning fa-2x mb-2"></i>
-                <h6 class="fw-bold">Action Not Allowed</h6>
-                <p class="text-muted" style="font-size:0.8rem;">Your account is still pending verification. Complete KYC first.</p>
-                <button class="btn btn-warning w-100 btn-sm" data-bs-dismiss="modal">OK</button>
-            </div>
-        </div>
+<!-- Withdraw -->
+<div class="modal-backdrop" id="withdrawModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-upload" style="color:var(--red);margin-right:8px;font-size:14px;"></i>Withdraw Funds</span>
+      <button class="modal-close" onclick="closeModal('withdrawModal')"><i class="fas fa-times"></i></button>
     </div>
+    <div class="modal-body">
+      <div class="modal-warn"><i class="fas fa-calendar-alt" style="margin-right:6px;"></i>Window: <strong>Dec 1–10</strong> · Force withdrawal at <strong><%= forceWithdrawalCharge %>% fee</strong></div>
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-control" id="withdrawalType" onchange="updateWithdrawalFee()">
+          <option value="">Select type…</option>
+          <option value="regular">Regular (Dec 1–10 only)</option>
+          <option value="force">Force Withdrawal (<%= forceWithdrawalCharge %>%)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount (₦)</label>
+        <input type="number" class="form-control" id="withdrawAmount" placeholder="0.00" max="<%= user.account?.balance || 0 %>" oninput="updateWithdrawalFee()">
+        <div class="form-hint">Available: ₦<%= (user.account?.balance || 0).toLocaleString() %></div>
+      </div>
+      <div id="withdrawalFeeInfo" style="display:none;">
+        <div class="fee-breakdown">
+          <div class="fee-row"><span class="fee-row-label">Amount</span><span id="withdrawAmountDisplay">₦0</span></div>
+          <div class="fee-row"><span class="fee-row-label">Fee (<%= forceWithdrawalCharge/2 %>%)</span><span id="initialFee">₦0</span></div>
+          <div class="fee-row"><span class="fee-row-label">30-day charge (<%= forceWithdrawalCharge/2 %>%)</span><span id="secondFee">₦0</span></div>
+          <hr class="fee-divider">
+          <div class="fee-row fee-total"><span id="payoutLabel">You receive</span><span id="netAmount">₦0</span></div>
+          <div class="form-hint" id="withdrawTimingNotice" style="margin-top:6px;"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Method</label>
+        <select class="form-control" id="withdrawMethod">
+          <option value="">Select method…</option>
+          <option>Bank Transfer</option><option>Cash Pickup</option><option>Mobile Money</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reason</label>
+        <textarea class="form-control" rows="2" id="withdrawReason" placeholder="Brief reason" style="resize:none;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('withdrawModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="submitWithdrawal()"><i class="fas fa-upload" style="margin-right:5px;font-size:12px;"></i>Submit</button>
+    </div>
+  </div>
 </div>
 
-<!-- Withdrawal modal -->
-<div class="modal fade" id="withdrawModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header py-2 px-3">
-                <h6 class="modal-title fw-bold" style="font-size:0.88rem;">
-                    <i class="fas fa-minus-circle me-2 text-danger"></i>Request Withdrawal
-                </h6>
-                <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body px-3 py-2">
-                <div class="alert-warning-custom mb-2" style="font-size:0.78rem;">
-                    <i class="fas fa-calendar-alt me-1"></i>
-                    <strong>Window:</strong> December 1st – 10th &nbsp;|&nbsp;
-                    <strong>Balance:</strong> ₦<%= user.account?.balance?.toLocaleString() || 0 %>
-                </div>
-                <div class="alert-info-custom mb-3" style="font-size:0.78rem;">
-                    <strong>Force Withdrawal:</strong> Available anytime with
-                    <span class="text-danger fw-bold"><%= forceWithdrawalCharge %>% charge</span>
-                    (50% now, 50% after 30 days)
-                </div>
-                <form id="withdrawForm">
-                    <div class="mb-2">
-                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Withdrawal Type</label>
-                        <select class="form-select form-select-sm" id="withdrawalType" required onchange="updateWithdrawalFee()">
-                            <option value="">Choose type...</option>
-                            <option value="regular">Regular Withdrawal (Dec 1–10 only)</option>
-                            <option value="force">Force Withdrawal (<%= forceWithdrawalCharge %>%)</option>
-                        </select>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Amount (₦)</label>
-                        <input type="number" class="form-control form-control-sm" id="withdrawAmount"
-                               placeholder="Enter amount" max="<%= user.account?.balance || 0 %>"
-                               required onchange="updateWithdrawalFee()">
-                    </div>
-                    <div class="mb-2" id="withdrawalFeeInfo" style="display:none;">
-                        <div class="alert-warning-custom" style="font-size:0.76rem;">
-                            <div class="d-flex justify-content-between mb-1">
-                                <small>Withdrawal Amount:</small><strong id="withdrawAmountDisplay">₦0</strong>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <small>Initial Charge (<%= forceWithdrawalCharge/2 %>%):</small><strong id="initialFee">₦0</strong>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <small>30-Day Charge (<%= forceWithdrawalCharge/2 %>%):</small><strong id="secondFee">₦0</strong>
-                            </div>
-                            <hr class="my-1">
-                            <div class="d-flex justify-content-between">
-                                <small class="fw-bold" id="payoutLabel">You'll Receive:</small>
-                                <strong id="netAmount">₦0</strong>
-                            </div>
-                            <small id="withdrawTimingNotice" class="d-block mt-1 text-muted"></small>
-                        </div>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Withdrawal Method</label>
-                        <select class="form-select form-select-sm" required>
-                            <option value="">Choose method...</option>
-                            <option>Bank Transfer</option>
-                            <option>Cash Pickup</option>
-                            <option>Mobile Money</option>
-                        </select>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Reason for Withdrawal</label>
-                        <textarea class="form-control form-control-sm" rows="2" placeholder="Brief reason" required></textarea>
-                    </div>
-                    <div class="alert-info-custom" style="font-size:0.75rem;">
-                        <i class="fas fa-clock me-1"></i>Processing: 24–48 hours for regular withdrawals
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer py-2 px-3">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger btn-sm" onclick="submitWithdrawal()">Submit Request</button>
-            </div>
-        </div>
+<div class="modal-backdrop" id="withdrawSuccessModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon success"><i class="fas fa-check"></i></div>
+      <div class="result-title">Request Submitted</div>
+      <div class="result-msg">Processing — expected within 5 minutes.</div>
+      <button class="btn btn-success" onclick="closeModal('withdrawSuccessModal')" style="max-width:200px;margin:0 auto;">Done</button>
     </div>
+  </div>
+</div>
+<div class="modal-backdrop" id="withdrawFailedModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon error"><i class="fas fa-times"></i></div>
+      <div class="result-title">Withdrawal Failed</div>
+      <div class="result-msg" id="withdrawErrorMsg">Unable to process.</div>
+      <button class="btn btn-danger" onclick="closeModal('withdrawFailedModal')" style="max-width:200px;margin:0 auto;">Close</button>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" id="withdrawLimitModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon error"><i class="fas fa-ban"></i></div>
+      <div class="result-title">Limit Reached</div>
+      <div class="result-msg">Maximum 2 force withdrawals per year reached.</div>
+      <button class="btn btn-ghost" onclick="closeModal('withdrawLimitModal')" style="max-width:200px;margin:0 auto;">OK</button>
+    </div>
+  </div>
 </div>
 
-<!-- Withdraw success / failed / limit -->
-<div class="modal fade" id="withdrawSuccessModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content text-center p-3" style="border-radius:14px;">
-            <div class="modal-body">
-                <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
-                <h6 class="fw-bold">Withdrawal Processing</h6>
-                <p class="text-muted" style="font-size:0.8rem;">Expected within <strong>5 minutes</strong>.</p>
-                <button class="btn btn-success w-100 btn-sm" data-bs-dismiss="modal">OK</button>
-            </div>
-        </div>
+<!-- Deposit -->
+<div class="modal-backdrop" id="depositModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-download" style="color:var(--green);margin-right:8px;font-size:14px;"></i>Make a Deposit</span>
+      <button class="modal-close" onclick="closeModal('depositModal')"><i class="fas fa-times"></i></button>
     </div>
-</div>
-<div class="modal fade" id="withdrawFailedModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content text-center p-3" style="border-radius:14px;">
-            <div class="modal-body">
-                <i class="fas fa-times-circle text-danger fa-2x mb-2"></i>
-                <h6 class="fw-bold">Withdrawal Failed</h6>
-                <p class="text-muted" id="withdrawErrorMsg" style="font-size:0.8rem;">Unable to process.</p>
-                <button class="btn btn-danger w-100 btn-sm" data-bs-dismiss="modal">Close</button>
-            </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Payment Method</label>
+        <select class="form-control" id="paymentMethod">
+          <option value="">Select method…</option>
+          <option value="paystack">Paystack — Instant</option>
+          <option value="cooperative">Manual Transfer</option>
+        </select>
+      </div>
+      <div id="paystackSection" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">Amount (₦)</label>
+          <input type="number" id="paystackAmount" class="form-control" placeholder="0.00" min="100">
         </div>
-    </div>
-</div>
-<div class="modal fade" id="withdrawLimitModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content text-center p-3" style="border-radius:14px;">
-            <div class="modal-body">
-                <i class="fas fa-ban text-danger fa-2x mb-2"></i>
-                <h6 class="fw-bold">Withdrawal Limit Exceeded</h6>
-                <p class="text-muted" style="font-size:0.8rem;">Max <strong>2 forceful withdrawals</strong> per year.</p>
-                <button class="btn btn-danger w-100 btn-sm" data-bs-dismiss="modal">OK</button>
-            </div>
+      </div>
+      <div id="cooperativeSection" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">From cooperative account?</label>
+          <select class="form-control" id="coopSource">
+            <option value="">Select…</option>
+            <option value="yes">Yes</option>
+            <option value="no">No — external transfer</option>
+          </select>
         </div>
-    </div>
-</div>
-
-<!-- ══ DEPOSIT MODAL — uses settings companyAccount ══ -->
-<div class="modal fade" id="depositModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header py-2 px-3">
-                <h6 class="modal-title fw-bold" style="font-size:0.88rem;">
-                    <i class="fas fa-plus-circle text-success me-2"></i>Make Deposit
-                </h6>
-                <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body px-3 py-2">
-                <form id="depositForm" method="POST">
-                    <div class="mb-2">
-                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Payment Method</label>
-                        <select class="form-select form-select-sm" id="paymentMethod" name="method" required>
-                            <option value="">Select method</option>
-                            <option value="paystack">Paystack (Automatic)</option>
-                            <option value="cooperative">Cooperative Direct</option>
-                        </select>
-                    </div>
-                    <div id="paystackSection" class="d-none mb-2">
-                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Amount (₦)</label>
-                        <input type="number" id="paystackAmount" name="amount" class="form-control form-control-sm" min="100">
-                    </div>
-                    <div id="cooperativeSection" class="d-none">
-                        <div class="mb-2">
-                            <label class="form-label fw-semibold" style="font-size:0.76rem;">From cooperative account?</label>
-                            <select class="form-select form-select-sm" id="coopSource" name="source">
-                                <option value="">Select</option>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                            </select>
-                        </div>
-                        <!-- ── SETTINGS-DRIVEN BANK DETAILS ── -->
-                        <div id="coopBankDetails" class="alert-info-custom mb-2 d-none" style="font-size:0.76rem;">
-                            <% if (accountConfigured) { %>
-                                <i class="fas fa-university me-1"></i>
-                                <strong>Bank:</strong> <%= bankName %> &nbsp;|&nbsp;
-                                <strong>Account:</strong> <%= accountName %> &nbsp;|&nbsp;
-                                <strong>No:</strong> <%= accountNumber %>
-                            <% } else { %>
-                                <i class="fas fa-info-circle me-1 text-warning"></i>
-                                <span class="text-warning fw-semibold">Bank account details not configured. Please contact admin.</span>
-                            <% } %>
-                        </div>
-                        <div id="coopNoExtra" class="d-none mb-2">
-                            <label class="form-label fw-semibold" style="font-size:0.76rem;">Payer Full Name</label>
-                            <input type="text" id="payerName" name="payeeName" class="form-control form-control-sm">
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label fw-semibold" style="font-size:0.76rem;">Amount (₦)</label>
-                            <input type="number" id="coopAmount" name="coopAmount" class="form-control form-control-sm" min="100">
-                        </div>
-                        <div class="alert-warning-custom" style="font-size:0.74rem;">
-                            Deposit will be credited after admin confirmation.
-                        </div>
-                    </div>
-                    <div class="modal-footer px-0 pb-0 mt-2">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success btn-sm" id="submitDeposit">Proceed</button>
-                    </div>
-                </form>
-            </div>
+        <div id="coopBankDetails" class="modal-info" style="display:none;">
+          <% if (accountConfigured) { %>
+            <i class="fas fa-university" style="margin-right:6px;"></i>
+            <strong><%= bankName %></strong> · <%= accountName %> · <strong><%= accountNumber %></strong>
+          <% } else { %>
+            <i class="fas fa-info-circle" style="margin-right:6px;color:var(--amber);"></i>
+            <span style="color:var(--amber);">Bank details not configured. Contact admin.</span>
+          <% } %>
         </div>
+        <div id="coopNoExtra" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Payer Full Name</label>
+            <input type="text" id="payerName" class="form-control" placeholder="Name on transfer receipt">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount (₦)</label>
+          <input type="number" id="coopAmount" class="form-control" placeholder="0.00" min="100">
+        </div>
+        <div class="modal-warn"><i class="fas fa-clock" style="margin-right:5px;"></i>Credited after admin confirms receipt.</div>
+      </div>
     </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('depositModal')">Cancel</button>
+      <button class="btn btn-success" id="submitDeposit" onclick="submitDeposit()">
+        <i class="fas fa-download" style="margin-right:5px;font-size:12px;"></i>Continue
+      </button>
+    </div>
+  </div>
 </div>
 
-<!-- Deposit success / failed -->
-<div class="modal fade" id="depositSuccessModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content text-center p-3" style="border-radius:14px;">
-            <div class="modal-body">
-                <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
-                <h6 class="fw-bold">Deposit Submitted</h6>
-                <p class="text-muted" style="font-size:0.8rem;">Will be processed within <strong>5 minutes</strong>.</p>
-                <button class="btn btn-success w-100 btn-sm" data-bs-dismiss="modal">OK</button>
-            </div>
-        </div>
+<div class="modal-backdrop" id="depositSuccessModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon success"><i class="fas fa-check"></i></div>
+      <div class="result-title">Deposit Submitted</div>
+      <div class="result-msg">Processed within 5 minutes.</div>
+      <button class="btn btn-success" onclick="closeModal('depositSuccessModal')" style="max-width:200px;margin:0 auto;">Done</button>
     </div>
+  </div>
 </div>
-<div class="modal fade" id="depositFailedModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content text-center p-3" style="border-radius:14px;">
-            <div class="modal-body">
-                <i class="fas fa-times-circle text-danger fa-2x mb-2"></i>
-                <h6 class="fw-bold">Submission Failed</h6>
-                <p class="text-muted" style="font-size:0.8rem;">Please try again.</p>
-                <button class="btn btn-danger w-100 btn-sm" data-bs-dismiss="modal">Try Again</button>
-            </div>
-        </div>
+<div class="modal-backdrop" id="depositFailedModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon error"><i class="fas fa-times"></i></div>
+      <div class="result-title">Deposit Failed</div>
+      <div class="result-msg">Please try again or contact support.</div>
+      <button class="btn btn-danger" onclick="closeModal('depositFailedModal')" style="max-width:200px;margin:0 auto;">Close</button>
     </div>
+  </div>
 </div>
 
-<!-- ══ LOAN PAYMENT MODAL — uses settings companyAccount ══ -->
-<div class="modal fade" id="loanPaymentModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:14px;">
-            <div class="modal-header py-2 px-3">
-                <h6 class="modal-title fw-bold" style="font-size:0.88rem;">
-                    <i class="fas fa-credit-card text-primary me-2"></i>Loan Repayment
-                </h6>
-                <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body px-3 py-2">
-                <form id="loanRepaymentForm">
-                    <div class="mb-2">
-                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Select Loan</label>
-                        <select class="form-select form-select-sm" id="loanSelect" required>
-                            <option value="">Loading loans...</option>
-                        </select>
-                    </div>
-
-                    <div id="loanOutstandingBox" class="loan-outstanding-box d-none mb-2">
-                        <div class="lob-tag" id="loanBoxTag">Outstanding Balance</div>
-                        <div class="lob-amount" id="loanBoxAmount">₦0</div>
-                        <div class="lob-breakdown" id="loanBoxBreakdown"></div>
-                        <div id="loanOverdueWarn" class="lob-overdue-warn d-none">
-                            <i class="fas fa-triangle-exclamation me-1"></i>
-                            This loan is <strong>OVERDUE</strong>. A <span id="penRateText"></span>% daily penalty is accruing.
-                            Pay now to stop further charges.
-                        </div>
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Payment Method</label>
-                        <select class="form-select form-select-sm" id="loanPaymentMethod" required>
-                            <option value="">Select method</option>
-                            <option value="paystack">Paystack (Automatic)</option>
-                            <option value="cooperative">Manual Transfer</option>
-                        </select>
-                    </div>
-                    <div id="loanPaystackSection" class="d-none mb-2">
-                        <label class="form-label fw-semibold" style="font-size:0.76rem;">Amount (₦)</label>
-                        <input type="number" id="loanPaystackAmount" class="form-control form-control-sm" min="100">
-                    </div>
-                    <div id="loanCoopSection" class="d-none">
-                        <!-- ── SETTINGS-DRIVEN BANK DETAILS ── -->
-                        <div class="alert-info-custom mb-2" style="font-size:0.76rem;">
-                            <% if (accountConfigured) { %>
-                                <i class="fas fa-university me-1"></i>
-                                <strong>Transfer to:</strong> <%= bankName %> &nbsp;|&nbsp;
-                                <%= accountName %> &nbsp;|&nbsp; <strong><%= accountNumber %></strong>
-                            <% } else { %>
-                                <i class="fas fa-info-circle me-1 text-warning"></i>
-                                <span class="text-warning fw-semibold">Bank account details not configured. Please contact admin.</span>
-                            <% } %>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label fw-semibold" style="font-size:0.76rem;">Payer Full Name</label>
-                            <input type="text" id="loanPayerName" class="form-control form-control-sm">
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label fw-semibold" style="font-size:0.76rem;">Amount (₦)</label>
-                            <input type="number" id="loanCoopAmount" class="form-control form-control-sm" min="100">
-                        </div>
-                        <div class="alert-warning-custom mb-2" style="font-size:0.74rem;">
-                            Repayment will reflect after admin confirmation.
-                        </div>
-                    </div>
-                    <div class="modal-footer px-0 pb-0 mt-2">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary btn-sm" id="submitLoanPayment">Proceed</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+<!-- Loan Payment -->
+<div class="modal-backdrop" id="loanPaymentModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-credit-card" style="color:var(--accent);margin-right:8px;font-size:14px;"></i>Loan Repayment</span>
+      <button class="modal-close" onclick="closeModal('loanPaymentModal')"><i class="fas fa-times"></i></button>
     </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Select Loan</label>
+        <select class="form-control" id="loanSelect"><option value="">Loading…</option></select>
+      </div>
+      <div id="loanOutstandingBox" class="lob-box" style="display:none;">
+        <div class="lob-label" id="loanBoxTag">Outstanding Balance</div>
+        <div class="lob-amount" id="loanBoxAmount">₦0</div>
+        <div id="loanBoxBreakdown"></div>
+        <div id="loanOverdueWarn" class="lob-warn" style="display:none;">
+          <i class="fas fa-exclamation-triangle" style="margin-right:5px;"></i>
+          OVERDUE — <span id="penRateText"></span>% daily penalty. Pay immediately.
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payment Method</label>
+        <select class="form-control" id="loanPaymentMethod">
+          <option value="">Select method…</option>
+          <option value="paystack">Paystack — Instant</option>
+          <option value="cooperative">Manual Transfer</option>
+        </select>
+      </div>
+      <div id="loanPaystackSection" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">Amount (₦)</label>
+          <input type="number" id="loanPaystackAmount" class="form-control" min="100">
+        </div>
+      </div>
+      <div id="loanCoopSection" style="display:none;">
+        <div class="modal-info" style="margin-bottom:12px;">
+          <% if (accountConfigured) { %>
+            <i class="fas fa-university" style="margin-right:6px;"></i>
+            <strong><%= bankName %></strong> · <%= accountName %> · <strong><%= accountNumber %></strong>
+          <% } else { %>
+            <span style="color:var(--amber);">Bank details not configured. Contact admin.</span>
+          <% } %>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payer Full Name</label>
+          <input type="text" id="loanPayerName" class="form-control" placeholder="Name on receipt">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount (₦)</label>
+          <input type="number" id="loanCoopAmount" class="form-control" min="100">
+        </div>
+        <div class="modal-warn"><i class="fas fa-clock" style="margin-right:5px;"></i>Reflected after admin confirmation.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('loanPaymentModal')">Cancel</button>
+      <button class="btn btn-primary" id="submitLoanPayment" onclick="submitLoanPayment()">Proceed</button>
+    </div>
+  </div>
 </div>
 
-<!-- Loan payment success / failed -->
-<div class="modal fade" id="loanPaymentSuccessModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content text-center p-3" style="border-radius:14px;">
-            <div class="modal-body">
-                <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
-                <h6 class="fw-bold">Payment Submitted</h6>
-                <p class="text-muted" style="font-size:0.8rem;">Pending admin approval.</p>
-                <button class="btn btn-success w-100 btn-sm" data-bs-dismiss="modal">OK</button>
-            </div>
-        </div>
+<div class="modal-backdrop" id="loanPaymentSuccessModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon success"><i class="fas fa-check"></i></div>
+      <div class="result-title">Payment Submitted</div>
+      <div class="result-msg">Pending admin approval.</div>
+      <button class="btn btn-success" onclick="closeModal('loanPaymentSuccessModal')" style="max-width:200px;margin:0 auto;">Done</button>
     </div>
+  </div>
 </div>
-<div class="modal fade" id="loanPaymentFailedModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content text-center p-3" style="border-radius:14px;">
-            <div class="modal-body">
-                <i class="fas fa-times-circle text-danger fa-2x mb-2"></i>
-                <h6 class="fw-bold">Payment Failed</h6>
-                <p class="text-muted" style="font-size:0.8rem;">Please try again.</p>
-                <button class="btn btn-danger w-100 btn-sm" data-bs-dismiss="modal">Try Again</button>
-            </div>
-        </div>
+<div class="modal-backdrop" id="loanPaymentFailedModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon error"><i class="fas fa-times"></i></div>
+      <div class="result-title">Payment Failed</div>
+      <div class="result-msg">Please try again.</div>
+      <button class="btn btn-danger" onclick="closeModal('loanPaymentFailedModal')" style="max-width:200px;margin:0 auto;">Close</button>
     </div>
+  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-
+<!-- ════ SCRIPTS ════ -->
 <script>
-/* ── Server-injected constants ── */
 const USER_STATUS               = "<%= user.status %>";
 const USER_HAS_LOAN             = <%= loan ? "true" : "false" %>;
-const USER_IS_GUARANTOR         = <%= user.guarantorRequests?.some(g => g.status === "accepted") ? "true" : "false" %>;
+const USER_IS_GUARANTOR         = <%= user.guarantorRequests?.some(g=>g.status==="accepted") ? "true" : "false" %>;
 const USER_BALANCE              = <%= user.account?.balance || 0 %>;
 const FORCE_FEE_PERCENT         = <%= forceWithdrawalCharge %>;
 const FORCEFUL_WITHDRAWAL_COUNT = <%= forcefulWithdrawalCount || 0 %>;
 const MAX_FORCEFUL_WITHDRAWALS  = 2;
 
+/* ── Theme: persist across page loads ── */
+(function(){
+  const saved = localStorage.getItem('cds-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+})();
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('cds-theme', next);
+  updateThemeUI(next);
+}
+function updateThemeUI(theme){
+  const icon = document.getElementById('togIcon');
+  if(icon){ icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun'; }
+}
+
 /* ── Sidebar ── */
-function toggleSidebar() {
-    const open = document.getElementById("sidebar").classList.toggle("active");
-    document.getElementById("sbOverlay").classList.toggle("show", open);
+function toggleSidebar(){
+  const open = document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
 }
-function closeSidebar() {
-    document.getElementById("sidebar").classList.remove("active");
-    document.getElementById("sbOverlay").classList.remove("show");
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('show');
+  document.body.style.overflow = '';
 }
 
-/* ── Helpers ── */
-function checkUserStatus(modalId) {
-    if (USER_STATUS === "pending") {
-        new bootstrap.Modal(document.getElementById("pendingAccountModal")).show();
-    } else {
-        new bootstrap.Modal(document.getElementById(modalId)).show();
+/* ── Modals ── */
+function openModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-backdrop').forEach(el=>{
+  el.addEventListener('click',e=>{ if(e.target===el){ el.classList.remove('open'); document.body.style.overflow=''; }});
+});
+function checkUserStatus(modalId){
+  if(USER_STATUS==='pending') openModal('pendingAccountModal');
+  else openModal(modalId);
+}
+
+/* ── Withdrawal fee ── */
+function updateWithdrawalFee(){
+  const type=document.getElementById('withdrawalType').value;
+  const input=document.getElementById('withdrawAmount');
+  const box=document.getElementById('withdrawalFeeInfo');
+  const amount=Number(input.value)||0;
+  const half=USER_BALANCE/2;
+  const rate=FORCE_FEE_PERCENT/100;
+  if(!type||amount<=0){ box.style.display='none'; return; }
+  if(amount>USER_BALANCE){ input.value=USER_BALANCE; return updateWithdrawalFee(); }
+  let fee1=0,fee2=0,payout=0,label='',timing='';
+  if(type==='force'){
+    if(FORCEFUL_WITHDRAWAL_COUNT>=MAX_FORCEFUL_WITHDRAWALS){
+      openModal('withdrawLimitModal');
+      document.getElementById('withdrawalType').value='';
+      box.style.display='none'; return;
     }
+    if(amount<half){ fee1=amount*rate; payout=amount-fee1; label='You receive immediately'; timing='Credited immediately.'; }
+    else if(amount===half){ fee1=amount*rate; payout=amount-fee1; label='You receive within 30 days'; timing='Credited within 30 days.'; }
+    else{ fee1=(amount*rate)/2; fee2=(amount*rate)/2; payout=half-fee1; label='First payout (within 30 days)'; timing='Paid in 2 phases.'; }
+  } else { payout=amount; label='You receive'; timing='Processed in 24–48 hours.'; }
+  box.style.display='block';
+  const fmt=n=>'₦'+n.toLocaleString(undefined,{minimumFractionDigits:2});
+  document.getElementById('withdrawAmountDisplay').textContent=fmt(amount);
+  document.getElementById('initialFee').textContent=fmt(fee1);
+  document.getElementById('secondFee').textContent=fmt(fee2);
+  document.getElementById('netAmount').textContent=fmt(payout);
+  document.getElementById('payoutLabel').textContent=label;
+  document.getElementById('withdrawTimingNotice').textContent=timing;
 }
-function openModal(modalId) {
-    new bootstrap.Modal(document.getElementById(modalId)).show();
-}
-
-/* ── Withdrawal fee calculator ── */
-function updateWithdrawalFee() {
-    const type        = document.getElementById("withdrawalType").value;
-    const amountInput = document.getElementById("withdrawAmount");
-    const feeInfo     = document.getElementById("withdrawalFeeInfo");
-    const amount      = Number(amountInput.value) || 0;
-    const halfBalance = USER_BALANCE / 2;
-    const chargeRate  = FORCE_FEE_PERCENT / 100;
-
-    if (!type || amount <= 0) { feeInfo.style.display = "none"; return; }
-    if (amount > USER_BALANCE) { amountInput.value = USER_BALANCE; return updateWithdrawalFee(); }
-
-    let initialFee = 0, secondFee = 0, payoutNow = 0, labelText = "", timingMessage = "";
-
-    if (type === "force") {
-        if (FORCEFUL_WITHDRAWAL_COUNT >= MAX_FORCEFUL_WITHDRAWALS) {
-            new bootstrap.Modal(document.getElementById("withdrawLimitModal")).show();
-            document.getElementById("withdrawalType").value = "";
-            feeInfo.style.display = "none"; return;
-        }
-        if (amount < halfBalance) {
-            initialFee    = amount * chargeRate;
-            payoutNow     = amount - initialFee;
-            labelText     = "You'll Receive Immediately:";
-            timingMessage = "This withdrawal will be credited immediately.";
-        } else if (amount === halfBalance) {
-            initialFee    = amount * chargeRate;
-            payoutNow     = amount - initialFee;
-            labelText     = "You'll Receive Within 30 Days:";
-            timingMessage = "This withdrawal will be credited within 30 days.";
-        } else {
-            initialFee    = (amount * chargeRate) / 2;
-            secondFee     = (amount * chargeRate) / 2;
-            payoutNow     = halfBalance - initialFee;
-            labelText     = "First Payout (Within 30 Days):";
-            timingMessage = "Paid in two phases. First payout within 30 days.";
-        }
+async function submitWithdrawal(){
+  const type=document.getElementById('withdrawalType').value;
+  const amount=Number(document.getElementById('withdrawAmount').value);
+  const errMsg=document.getElementById('withdrawErrorMsg');
+  try{
+    if(!type) throw new Error('Select a withdrawal type.');
+    if(!amount||amount<=0) throw new Error('Enter a valid amount.');
+    if(amount>USER_BALANCE) throw new Error('Insufficient balance.');
+    if(type==='force'&&FORCEFUL_WITHDRAWAL_COUNT>=MAX_FORCEFUL_WITHDRAWALS){ openModal('withdrawLimitModal'); return; }
+    if(USER_HAS_LOAN) throw new Error('Cannot withdraw with an active loan.');
+    if(USER_IS_GUARANTOR==='true'&&amount>=USER_BALANCE) throw new Error('Guarantors cannot withdraw full balance.');
+    if(type==='regular'){
+      const d=new Date(); if(d.getMonth()!==11||d.getDate()<1||d.getDate()>10) throw new Error('Regular withdrawals: Dec 1–10 only.');
     }
-    if (type === "regular") {
-        payoutNow = amount; labelText = "You'll Receive:"; timingMessage = "Processed within 24–48 hours.";
-    }
-
-    feeInfo.style.display = "block";
-    document.getElementById("withdrawAmountDisplay").innerText = `₦${amount.toLocaleString()}`;
-    document.getElementById("initialFee").innerText  = `₦${initialFee.toLocaleString(undefined,{minimumFractionDigits:2})}`;
-    document.getElementById("secondFee").innerText   = `₦${secondFee.toLocaleString(undefined,{minimumFractionDigits:2})}`;
-    document.getElementById("netAmount").innerText   = `₦${payoutNow.toLocaleString(undefined,{minimumFractionDigits:2})}`;
-    document.getElementById("payoutLabel").innerText = labelText;
-    document.getElementById("withdrawTimingNotice").innerText = timingMessage;
+    const res=await fetch('/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,amount})});
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.message||'Withdrawal failed.');
+    closeModal('withdrawModal'); openModal('withdrawSuccessModal');
+  } catch(e){ errMsg.textContent=e.message; openModal('withdrawFailedModal'); }
 }
 
-async function submitWithdrawal() {
-    const successModal = new bootstrap.Modal(document.getElementById("withdrawSuccessModal"));
-    const failedModal  = new bootstrap.Modal(document.getElementById("withdrawFailedModal"));
-    const limitModal   = new bootstrap.Modal(document.getElementById("withdrawLimitModal"));
-    const errorMsg     = document.getElementById("withdrawErrorMsg");
-    const type         = document.getElementById("withdrawalType").value;
-    const amount       = Number(document.getElementById("withdrawAmount").value);
-    try {
-        if (!type)                  throw new Error("Please select a withdrawal type.");
-        if (!amount || amount <= 0) throw new Error("Invalid withdrawal amount.");
-        if (amount > USER_BALANCE)  throw new Error("Insufficient balance.");
-        if (type === "force" && FORCEFUL_WITHDRAWAL_COUNT >= MAX_FORCEFUL_WITHDRAWALS) { limitModal.show(); return; }
-        if (USER_HAS_LOAN)          throw new Error("You cannot withdraw while you have an active loan.");
-        if (USER_IS_GUARANTOR === "true" && amount >= USER_BALANCE) throw new Error("Guarantors cannot withdraw full balance.");
-        if (type === "regular") {
-            const today = new Date(), day = today.getDate(), month = today.getMonth();
-            if (month !== 11 || day < 1 || day > 10) throw new Error("Regular withdrawals are only allowed between Dec 1–10.");
-        }
-        const res  = await fetch("/withdraw", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({type, amount}) });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Withdrawal failed.");
-        bootstrap.Modal.getInstance(document.getElementById("withdrawModal")).hide();
-        successModal.show();
-        document.getElementById("withdrawForm").reset();
-        document.getElementById("withdrawalFeeInfo").style.display = "none";
-    } catch(err) {
-        errorMsg.innerText = err.message; failedModal.show();
+/* ── Deposit ── */
+document.getElementById('paymentMethod').addEventListener('change',function(){
+  document.getElementById('paystackSection').style.display=this.value==='paystack'?'block':'none';
+  document.getElementById('cooperativeSection').style.display=this.value==='cooperative'?'block':'none';
+});
+document.getElementById('coopSource').addEventListener('change',function(){
+  document.getElementById('coopBankDetails').style.display=this.value?'block':'none';
+  document.getElementById('coopNoExtra').style.display=this.value==='no'?'block':'none';
+});
+async function submitDeposit(){
+  const method=document.getElementById('paymentMethod').value;
+  const btn=document.getElementById('submitDeposit');
+  if(!method) return;
+  btn.disabled=true; btn.textContent='Processing…';
+  try{
+    if(method==='paystack'){
+      const res=await fetch('/deposit/init',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:document.getElementById('paystackAmount').value})});
+      const data=await res.json();
+      if(data.authorization_url){ window.location.href=data.authorization_url; return; }
+      throw new Error(data.message||'Paystack init failed');
     }
+    if(method==='cooperative'){
+      const res=await fetch('/deposit/cooperative',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({coopAmount:document.getElementById('coopAmount').value,source:document.getElementById('coopSource').value,payeeName:document.getElementById('payerName')?.value||''})});
+      const data=await res.json();
+      if(!res.ok||!data.success) throw new Error(data.message||'Failed');
+      closeModal('depositModal'); openModal('depositSuccessModal');
+    }
+  } catch(e){ openModal('depositFailedModal'); }
+  finally{ btn.disabled=false; btn.innerHTML='<i class="fas fa-download" style="margin-right:5px;font-size:12px;"></i>Continue'; }
 }
+
+/* ── Loan repayment ── */
+let loansData=[];
+async function loadLoans(){
+  const sel=document.getElementById('loanSelect');
+  try{
+    loansData=await(await fetch('/api/user/loans/active')).json();
+    sel.innerHTML='<option value="">Select a loan…</option>';
+    if(!Array.isArray(loansData)||!loansData.length){ sel.innerHTML='<option value="">No active loans</option>'; return; }
+    loansData.forEach(l=>{
+      const o=document.createElement('option'); o.value=l._id;
+      const bal=Number(l.outstandingBalance||l.totalRepay||0);
+      const due=l.dueDate?new Date(l.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'N/A';
+      o.textContent=`₦${bal.toLocaleString()} outstanding — ${l.status==='overdue'?'⚠️ OVERDUE':'due'} ${due}`;
+      sel.appendChild(o);
+    });
+  } catch(e){ sel.innerHTML='<option value="">Error loading loans</option>'; }
+}
+document.getElementById('loanSelect').addEventListener('change',function(){
+  const loan=loansData.find(l=>l._id===this.value);
+  const box=document.getElementById('loanOutstandingBox');
+  if(!loan){ box.style.display='none'; return; }
+  const outstanding=Number(loan.outstandingBalance||loan.totalRepay||0);
+  const totalRepay=Number(loan.totalRepay||0);
+  const loanAmount=Number(loan.amount||0);
+  const penalty=Number(loan.totalPenalty||0);
+  const penRate=Number(loan.penaltyPercentage||0);
+  const isOverdue=loan.status==='overdue';
+  const due=loan.dueDate?new Date(loan.dueDate).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}):'N/A';
+  box.style.display='block';
+  box.className='lob-box'+(isOverdue?' overdue':'');
+  document.getElementById('loanBoxTag').textContent=isOverdue?'⚠️ Overdue — Total Owed':'Outstanding Balance';
+  document.getElementById('loanBoxAmount').textContent=`₦${outstanding.toLocaleString()}`;
+  const bd=document.getElementById('loanBoxBreakdown'); bd.innerHTML='';
+  const row=(l,v,c)=>{ const d=document.createElement('div'); d.className='lob-row'; d.innerHTML=`<span>${l}</span><span style="color:${c||'var(--text)'}">${v}</span>`; return d; };
+  bd.appendChild(row('Principal:',`₦${loanAmount.toLocaleString()}`,'var(--muted)'));
+  bd.appendChild(row('Base repayment:',`₦${totalRepay.toLocaleString()}`,'var(--accent)'));
+  if(penalty>0) bd.appendChild(row('Penalty:',`+₦${penalty.toLocaleString()}`,'var(--red)'));
+  bd.appendChild(row('Due:',due,'var(--muted)'));
+  const warn=document.getElementById('loanOverdueWarn');
+  warn.style.display=(isOverdue&&penRate>0)?'block':'none';
+  if(isOverdue&&penRate>0) document.getElementById('penRateText').textContent=penRate;
+  const rounded=Math.ceil(outstanding);
+  document.getElementById('loanPaystackAmount').value=rounded;
+  document.getElementById('loanCoopAmount').value=rounded;
+});
+document.getElementById('loanPaymentMethod').addEventListener('change',function(){
+  document.getElementById('loanPaystackSection').style.display=this.value==='paystack'?'block':'none';
+  document.getElementById('loanCoopSection').style.display=this.value==='cooperative'?'block':'none';
+});
+async function submitLoanPayment(){
+  const loanId=document.getElementById('loanSelect').value;
+  const method=document.getElementById('loanPaymentMethod').value;
+  if(!loanId||!method){ openModal('loanPaymentFailedModal'); return; }
+  const btn=document.getElementById('submitLoanPayment');
+  btn.disabled=true; btn.textContent='Processing…';
+  try{
+    if(method==='paystack'){
+      const res=await fetch('/loan/payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({loanId,amount:document.getElementById('loanPaystackAmount').value})});
+      const data=await res.json();
+      if(data.authorization_url){ window.location.href=data.authorization_url; return; }
+      throw new Error('Paystack init failed');
+    }
+    if(method==='cooperative'){
+      const res=await fetch('/loan/payment/manual',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({loanId,amount:document.getElementById('loanCoopAmount').value,payerName:document.getElementById('loanPayerName').value})});
+      if(!res.ok) throw new Error('Manual payment failed');
+      closeModal('loanPaymentModal'); openModal('loanPaymentSuccessModal');
+      setTimeout(()=>location.reload(),2500);
+    }
+  } catch(e){ openModal('loanPaymentFailedModal'); }
+  finally{ btn.disabled=false; btn.textContent='Proceed'; }
+}
+
+/* ── Loader dismiss ── */
+window.addEventListener('load',()=>{
+  const l=document.getElementById('loader');
+  setTimeout(()=>{ l.style.opacity='0'; setTimeout(()=>l.style.display='none',500); },400);
+});
+
+/* ── Close sidebar on outside click ── */
+document.addEventListener('click',e=>{
+  const sb=document.getElementById('sidebar');
+  const hb=document.querySelector('.hamburger');
+  if(window.innerWidth<=900&&sb.classList.contains('open')&&!sb.contains(e.target)&&!hb.contains(e.target)) closeSidebar();
+});
+
+loadLoans();
 </script>
-
-<!-- Deposit logic -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const paymentMethod      = document.getElementById("paymentMethod");
-    const paystackSection    = document.getElementById("paystackSection");
-    const cooperativeSection = document.getElementById("cooperativeSection");
-    const coopSource         = document.getElementById("coopSource");
-    const coopBankDetails    = document.getElementById("coopBankDetails");
-    const coopNoExtra        = document.getElementById("coopNoExtra");
-    const form               = document.getElementById("depositForm");
-    const submitBtn          = document.getElementById("submitDeposit");
-    const depositModalEl     = document.getElementById("depositModal");
-    const successModal       = new bootstrap.Modal(document.getElementById("depositSuccessModal"));
-    const failedModal        = new bootstrap.Modal(document.getElementById("depositFailedModal"));
-
-    paymentMethod.addEventListener("change", () => {
-        paystackSection.classList.add("d-none");
-        cooperativeSection.classList.add("d-none");
-        if (paymentMethod.value === "paystack")    paystackSection.classList.remove("d-none");
-        if (paymentMethod.value === "cooperative") cooperativeSection.classList.remove("d-none");
-    });
-    coopSource.addEventListener("change", () => {
-        coopBankDetails.classList.toggle("d-none", !coopSource.value);
-        coopNoExtra.classList.toggle("d-none", coopSource.value !== "no");
-    });
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const method = paymentMethod.value;
-        submitBtn.disabled = true; submitBtn.innerHTML = "Processing...";
-        try {
-            if (method === "paystack") {
-                const res  = await fetch("/deposit/init", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ amount: document.getElementById("paystackAmount").value }) });
-                const data = await res.json();
-                if (data.authorization_url) { window.location.href = data.authorization_url; return; }
-                throw new Error(data.message || "Paystack init failed");
-            }
-            if (method === "cooperative") {
-                const res = await fetch("/deposit/cooperative", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        coopAmount: document.getElementById("coopAmount").value,
-                        source: coopSource.value,
-                        payeeName: document.getElementById("payerName")?.value || ""
-                    })
-                });
-                const data = await res.json();
-                if (!res.ok || !data.success) throw new Error(data.message || "Cooperative deposit failed");
-                bootstrap.Modal.getInstance(depositModalEl).hide();
-                successModal.show();
-                form.reset();
-                paystackSection.classList.add("d-none");
-                cooperativeSection.classList.add("d-none");
-            }
-        } catch(err) { console.error(err); failedModal.show(); }
-        finally { submitBtn.disabled = false; submitBtn.innerHTML = "Proceed"; }
-    });
-});
-</script>
-
-<!-- Loan repayment logic -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const loanSelect   = document.getElementById("loanSelect");
-    const payMethod    = document.getElementById("loanPaymentMethod");
-    const paystackSec  = document.getElementById("loanPaystackSection");
-    const coopSec      = document.getElementById("loanCoopSection");
-    const form         = document.getElementById("loanRepaymentForm");
-    const submitBtn    = document.getElementById("submitLoanPayment");
-    const successModal = new bootstrap.Modal(document.getElementById("loanPaymentSuccessModal"));
-    const failedModal  = new bootstrap.Modal(document.getElementById("loanPaymentFailedModal"));
-    const outBox       = document.getElementById("loanOutstandingBox");
-    const boxTag       = document.getElementById("loanBoxTag");
-    const boxAmount    = document.getElementById("loanBoxAmount");
-    const boxBreakdown = document.getElementById("loanBoxBreakdown");
-    const overdueWarn  = document.getElementById("loanOverdueWarn");
-    const penRateText  = document.getElementById("penRateText");
-
-    let loansData = [];
-
-    async function loadLoans() {
-        try {
-            const res = await fetch("/api/user/loans/active");
-            loansData = await res.json();
-            loanSelect.innerHTML = '<option value="">Select a loan</option>';
-            if (!Array.isArray(loansData) || !loansData.length) {
-                loanSelect.innerHTML = '<option value="">No active loans found</option>';
-                return;
-            }
-            loansData.forEach(loan => {
-                const opt         = document.createElement("option");
-                opt.value         = loan._id;
-                const outstanding = Number(loan.outstandingBalance || loan.totalRepay || 0);
-                const isOverdue   = loan.status === "overdue";
-                const dueStr      = loan.dueDate
-                    ? new Date(loan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
-                    : "N/A";
-                opt.textContent = `₦${outstanding.toLocaleString()} outstanding — ${isOverdue ? "⚠️ OVERDUE" : "due"} ${dueStr}`;
-                loanSelect.appendChild(opt);
-            });
-        } catch(err) {
-            loanSelect.innerHTML = '<option value="">Error loading loans</option>';
-            console.error(err);
-        }
-    }
-
-    loanSelect.addEventListener("change", () => {
-        const loan = loansData.find(l => l._id === loanSelect.value);
-        if (!loan) { outBox.classList.add("d-none"); return; }
-
-        const outstanding  = Number(loan.outstandingBalance || loan.totalRepay || 0);
-        const totalRepay   = Number(loan.totalRepay         || 0);
-        const loanAmount   = Number(loan.amount             || 0);
-        const totalPenalty = Number(loan.totalPenalty       || 0);
-        const penaltyRate  = Number(loan.penaltyPercentage  || 0);
-        const isOverdue    = loan.status === "overdue";
-        const dueStr       = loan.dueDate
-            ? new Date(loan.dueDate).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})
-            : "N/A";
-
-        outBox.classList.remove("d-none", "is-overdue");
-        if (isOverdue) outBox.classList.add("is-overdue");
-
-        boxTag.textContent    = isOverdue ? "⚠️ Overdue — Total Amount Now Owed" : "Total Outstanding Balance";
-        boxAmount.textContent = `₦${outstanding.toLocaleString()}`;
-
-        boxBreakdown.innerHTML = "";
-        const mkRow = (lbl, val, color) => {
-            const d = document.createElement("div");
-            d.className = "lob-row";
-            d.innerHTML = `<span>${lbl}</span><span style="color:${color||'inherit'}">${val}</span>`;
-            return d;
-        };
-        boxBreakdown.appendChild(mkRow("Original loan amount:", `₦${loanAmount.toLocaleString()}`,  "#374151"));
-        boxBreakdown.appendChild(mkRow("Base repayment (with interest):", `₦${totalRepay.toLocaleString()}`, "#1e3a8a"));
-        if (totalPenalty > 0)
-            boxBreakdown.appendChild(mkRow("Penalty accrued:", `+₦${totalPenalty.toLocaleString()}`, "#dc2626"));
-        boxBreakdown.appendChild(mkRow("Due date:", dueStr, "#6b7280"));
-
-        if (isOverdue && penaltyRate > 0) {
-            overdueWarn.classList.remove("d-none");
-            penRateText.textContent = penaltyRate;
-        } else {
-            overdueWarn.classList.add("d-none");
-        }
-
-        const rounded = Math.ceil(outstanding);
-        document.getElementById("loanPaystackAmount").value = rounded;
-        document.getElementById("loanCoopAmount").value     = rounded;
-    });
-
-    payMethod.addEventListener("change", () => {
-        paystackSec.classList.add("d-none"); coopSec.classList.add("d-none");
-        if (payMethod.value === "paystack")    paystackSec.classList.remove("d-none");
-        if (payMethod.value === "cooperative") coopSec.classList.remove("d-none");
-    });
-
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const loanId = loanSelect.value;
-        const method = payMethod.value;
-        if (!loanId || !method) { failedModal.show(); return; }
-        submitBtn.disabled = true; submitBtn.innerHTML = "Processing...";
-        try {
-            if (method === "paystack") {
-                const res  = await fetch("/loan/payment", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ loanId, amount: document.getElementById("loanPaystackAmount").value }) });
-                const data = await res.json();
-                if (data.authorization_url) { window.location.href = data.authorization_url; return; }
-                throw new Error("Paystack init failed");
-            }
-            if (method === "cooperative") {
-                const res = await fetch("/loan/payment/manual", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ loanId, amount: document.getElementById("loanCoopAmount").value, payerName: document.getElementById("loanPayerName").value }) });
-                if (!res.ok) throw new Error("Manual payment failed");
-                form.reset(); outBox.classList.add("d-none");
-                paystackSec.classList.add("d-none"); coopSec.classList.add("d-none");
-                successModal.show();
-                setTimeout(() => location.reload(), 2500);
-            }
-        } catch(err) { console.error(err); failedModal.show(); }
-        finally { submitBtn.disabled = false; submitBtn.innerHTML = "Proceed"; }
-    });
-
-    loadLoans();
-});
-</script>
-
-<script>
-/* Sidebar outside click */
-document.addEventListener("click", function(e) {
-    const sb = document.getElementById("sidebar");
-    if (window.innerWidth <= 992 && sb.classList.contains("active") &&
-        !sb.contains(e.target) && !e.target.classList.contains("fa-bars")) {
-        closeSidebar();
-    }
-});
-
-/* Loader dismiss */
-window.addEventListener("load", () => {
-    const loader = document.getElementById("loaderScreen");
-    setTimeout(() => {
-        loader.style.opacity    = "0";
-        loader.style.transition = "opacity 0.5s ease";
-        setTimeout(() => { loader.style.display = "none"; }, 500);
-    }, 400);
-});
-
-/* Entrance animation */
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".stat-card, .card").forEach((el, i) => {
-        el.style.opacity    = "0";
-        el.style.transform  = "translateY(14px)";
-        el.style.transition = "opacity 0.45s ease, transform 0.45s ease";
-        setTimeout(() => { el.style.opacity = "1"; el.style.transform = "translateY(0)"; }, i * 80);
-    });
-});
-</script>
-
 </body>
 </html>

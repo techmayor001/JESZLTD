@@ -1166,30 +1166,6 @@ router.post("/apply/external-loan/:token", async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // LOAN SETTINGS LOGIC 
 router.get("/admin/loan/settings", ensureAdmin("manage_loan_settings"), async (req, res) => {
   try {
@@ -1260,6 +1236,430 @@ router.post("/api/loan/settings/delete", ensureAdmin("delete_loan_settings"), as
 
 
 
+router.get(
+  "/admin/loan-payments",
+  ensureAdmin("view_deposits"),
+  async (req, res) => {
+    try {
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 1. FETCH — query Payment, not LoanLedger
+      //    LoanLedger is written only AFTER approval, so it will never contain
+      //    pending entries. Payment is the source of truth for the queue.
+      // ═══════════════════════════════════════════════════════════════════════
+      const loanPayments = await Payment.find({
+        loanId: { $exists: true, $ne: null },
+      })
+        .populate({
+          path:   "user",
+          select: "firstName lastName membershipID email",
+        })
+        .populate({
+          path:   "loanId",
+          select: "amount totalRepay outstandingBalance paidAmount status external dueDate totalPenalty interestAmount",
+        })
+        .sort({ createdAt: -1 });
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 2. SHAPE
+      // ═══════════════════════════════════════════════════════════════════════
+      const MANUAL_PREFIXES = ["COOP-", "LOAN-MANUAL-", "LOAN-INT-", "EXT-LOAN-"];
+
+      const payments = loanPayments.map((payment) => {
+        const dateObj = new Date(payment.createdAt);
+        const loan    = payment.loanId; // populated loan doc
+
+        // ── Manual vs Paystack amount normalisation ──────────────────────
+        const isManual =
+          payment.method === "Manual"        ||
+          payment.method === "Cash"          ||
+          payment.method === "Bank Transfer" ||
+          MANUAL_PREFIXES.some((prefix) => payment.reference.startsWith(prefix));
+
+        const amount = isManual ? payment.amount : payment.amount / 100;
+
+        // ── Borrower identity ────────────────────────────────────────────
+        const isExternal   = !payment.user && !!loan?.external?.borrowerName;
+        const borrowerName = isExternal
+          ? loan.external.borrowerName
+          : payment.user
+            ? `${payment.user.firstName} ${payment.user.lastName}`
+            : "Unknown";
+
+        // ── Transaction type — derive from payment.type or ref prefix ────
+        let transactionType = "repayment";
+        if      (payment.type === "loan_rollover"  || payment.reference.startsWith("ROLLOVER-")) transactionType = "rollover";
+        else if (payment.type === "loan_interest"  || payment.reference.startsWith("LOAN-INT-")) transactionType = "interest";
+        else if (payment.type === "loan_penalty"   || payment.reference.startsWith("PENALTY-"))  transactionType = "penalty";
+
+        // ── Status normalisation ─────────────────────────────────────────
+        const status =
+          payment.status === "paid" || payment.status === "success" ? "approved"
+          : payment.status === "failed"                             ? "rejected"
+          : "pending";
+
+        return {
+          id:           payment._id.toString(),
+          reference:    payment.reference || "—",
+          loanRef:      loan?._id?.toString()?.slice(-8).toUpperCase() || "—",
+
+          date: dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+          time: dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+
+          borrowerName,
+          borrowerType:  isExternal ? "external" : "member",
+          memberId:      payment.user?.membershipID || "—",
+          email:         isExternal
+                           ? loan?.external?.email || "—"
+                           : payment.user?.email || payment.email || "—",
+
+          transactionType,
+          paymentMethod: isManual ? "Manual Transfer" : "Paystack",
+
+          amount,
+
+          // Breakdown — use stored fields if present, otherwise 0
+          principalPaid: payment.principalPaid || 0,
+          interestPaid:  payment.interestPaid  || 0,
+          penaltyPaid:   payment.penaltyPaid   || 0,
+
+          // Estimate balance snapshot from live loan doc
+          balanceBefore: loan ? (loan.outstandingBalance + amount) : null,
+          balanceAfter:  loan ?  loan.outstandingBalance            : null,
+
+          status,
+          notes:
+            payment.paystackResponse?.adminNote ||
+            payment.paystackResponse?.message   ||
+            payment.notes ||
+            "Loan payment",
+        };
+      });
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 3. STATS
+      // ═══════════════════════════════════════════════════════════════════════
+      const approved = payments.filter((p) => p.status === "approved");
+
+      const totalRepaid = approved
+        .filter((p) => ["repayment", "interest", "penalty", "rollover"].includes(p.transactionType))
+        .reduce((sum, p) => sum + p.amount, 0);
+
+      const totalPenalties = approved
+        .filter((p) => p.transactionType === "penalty")
+        .reduce((sum, p) => sum + p.amount, 0);
+
+      const pendingCount = payments.filter((p) => p.status === "pending").length;
+
+      const now        = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const rolloversCount = loanPayments.filter(
+        (p) =>
+          (p.type === "loan_rollover" || p.reference.startsWith("ROLLOVER-")) &&
+          new Date(p.createdAt) >= monthStart
+      ).length;
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 4. RENDER
+      // ═══════════════════════════════════════════════════════════════════════
+      res.render("dashboard/admin/loan-payments", {
+        admin: req.user,
+        payments,
+        stats: { totalRepaid, totalPenalties, pendingCount, rolloversCount },
+      });
+
+    } catch (error) {
+      console.error("Error fetching loan payments:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  }
+);
+
+router.post(
+  "/admin/loans/:id/approve-payment",
+  ensureAdmin("process_deposits"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { notes } = req.body;
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 1. ATOMIC PAYMENT APPROVAL
+      // ═══════════════════════════════════════════════════════════════════════
+      const payment = await Payment.findOneAndUpdate(
+        {
+          _id:    id,
+          status: { $nin: ["success", "paid"] },
+        },
+        {
+          $set: {
+            status: "success",
+            "paystackResponse.adminNote":  notes || "Approved by admin",
+            "paystackResponse.approvedAt": new Date(),
+          },
+        },
+        { new: true }
+      ).populate({
+        path:     "user",
+        populate: { path: "account" },
+      });
+
+      if (!payment) {
+        return res.status(400).json({ message: "Payment already approved or not found" });
+      }
+
+      if (!payment.loanId) {
+        return res.status(400).json({ message: "This payment is not a loan payment. Use the deposit approval route." });
+      }
+
+      const amount = Number(payment.amount);
+      let overpayment    = 0;
+      let isExternalLoan = false;
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 2. LOAN LOOKUP — member first, then external
+      // ═══════════════════════════════════════════════════════════════════════
+      let loan = null;
+
+      if (payment.user) {
+        loan = await Loan.findOne({
+          _id:    payment.loanId,
+          user:   payment.user._id,
+          status: { $in: ["approved", "overdue"] },
+        });
+      }
+
+      if (!loan) {
+        loan = await Loan.findOne({
+          _id:      payment.loanId,
+          external: { $exists: true },
+          status:   { $in: ["approved", "overdue"] },
+        });
+        if (loan) isExternalLoan = true;
+      }
+
+      if (!loan) {
+        return res.status(404).json({ message: "Loan not found or inactive" });
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 3. PRINCIPAL / PENALTY SPLIT
+      // ═══════════════════════════════════════════════════════════════════════
+      const loanPortion    = Math.min(amount, loan.totalRepay);
+      const penaltyPortion = parseFloat((amount - loanPortion).toFixed(2));
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 4. OVERPAYMENT DETECTION
+      // ═══════════════════════════════════════════════════════════════════════
+      overpayment = parseFloat((amount - loan.totalRepay).toFixed(2));
+
+      const memberAccount = payment.user
+        ? await Account.findOne({ ownerType: "User", ownerId: payment.user._id })
+        : null;
+
+      const hasOverpayment = overpayment > 0 && !isExternalLoan && !!memberAccount;
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 5. UPDATE LOAN BALANCES
+      // ═══════════════════════════════════════════════════════════════════════
+      loan.totalRepay = parseFloat((loan.totalRepay - loanPortion).toFixed(2));
+      loan.outstandingBalance = parseFloat(
+        Math.max((loan.outstandingBalance || 0) - loanPortion, 0).toFixed(2)
+      );
+      loan.paidAmount = parseFloat(((loan.paidAmount || 0) + loanPortion).toFixed(2));
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 6. TRANSACTION RECORD
+      // ═══════════════════════════════════════════════════════════════════════
+      const txDescription = isExternalLoan
+        ? `External loan repayment approved (${payment.reference}) – ${loan.external.borrowerName}`
+        : `Manual loan repayment approved (${payment.reference})`;
+
+      await Transaction.create({
+        user:        payment.user._id,
+        type:        "loan_payment",
+        amount:      loanPortion,
+        description: txDescription,
+        reference:   payment.reference,
+        method:      "Manual",
+        status:      "successful",
+      });
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 7. COMPANY LEDGER — PRINCIPAL REPAYMENT
+      // ═══════════════════════════════════════════════════════════════════════
+      const existingLedger = await CompanyLedger.findOne({
+        "meta.reference": payment.reference,
+        type:             "loan_repayment",
+      });
+
+      if (!existingLedger) {
+        await CompanyLedger.create({
+          type:        "loan_repayment",
+          direction:   "in",
+          amount:      loanPortion,
+          relatedUser: payment.user._id,
+          relatedLoan: loan._id,
+          description: isExternalLoan
+            ? `External loan repayment – ${loan.external.borrowerName}`
+            : `Member loan repayment (${payment.reference})`,
+          recordedBy:  req.user._id,
+          meta: {
+            reference:  payment.reference,
+            notes:      notes || "Approved by admin",
+            isExternal: isExternalLoan,
+          },
+        });
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 8. PENALTY INCOME LEDGER
+      // ═══════════════════════════════════════════════════════════════════════
+      const penaltyProfit = penaltyPortion > 0
+        ? penaltyPortion
+        : (loan.totalRepay === 0 ? (loan.totalPenalty || 0) : 0);
+
+      if (penaltyProfit > 0 && loan.totalRepay === 0) {
+        const existingPenaltyLedger = await CompanyLedger.findOne({
+          "meta.reference": payment.reference,
+          type:             "penalty_income",
+        });
+
+        if (!existingPenaltyLedger) {
+          const extraCharge = await ExtraCharge.create({
+            member:      payment.user._id,
+            chargeType:  "loan-penalty",
+            amount:      penaltyProfit,
+            relatedLoan: loan._id,
+            reason:      "Overdue penalty settlement",
+            status:      "paid",
+            paidAt:      new Date(),
+          });
+
+          await CompanyLedger.create({
+            type:        "penalty_income",
+            direction:   "in",
+            amount:      penaltyProfit,
+            relatedUser: payment.user._id,
+            relatedLoan: loan._id,
+            description: isExternalLoan
+              ? `Penalty income – ${loan.external.borrowerName}`
+              : "Penalty income from cleared loan",
+            recordedBy:  req.user._id,
+            meta: {
+              reference:     payment.reference,
+              extraChargeId: extraCharge._id,
+            },
+          });
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 9. FULLY SETTLED
+      // ═══════════════════════════════════════════════════════════════════════
+      if (loan.totalRepay === 0) {
+        loan.status = "paid";
+        loan.paidAt = new Date();
+
+        await Transaction.create({
+          user:        payment.user._id,
+          type:        "loan_repayment",
+          amount:      0,
+          description: isExternalLoan
+            ? `External loan fully settled – ${loan.external.borrowerName}`
+            : "Loan fully settled (manual payment)",
+          method:      "system",
+          status:      "successful",
+        });
+      }
+
+      await loan.save();
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 10. OVERPAYMENT — CREDIT SURPLUS TO MEMBER'S SAVINGS ACCOUNT
+      // ═══════════════════════════════════════════════════════════════════════
+      if (hasOverpayment && memberAccount) {
+        const balanceBefore = memberAccount.balance;
+
+        memberAccount.balance = parseFloat(
+          (memberAccount.balance + overpayment).toFixed(2)
+        );
+        await memberAccount.save();
+
+        const balanceAfter = memberAccount.balance;
+
+        await DepositReport.create({
+          member:          payment.user._id,
+          account:         memberAccount._id,
+          amount:          overpayment,
+          type:            "bank_transfer",
+          reference:       payment.reference,
+          description:     `Loan overpayment refund – surplus from loan repayment (${payment.reference})`,
+          status:          "approved",
+          balanceBefore,
+          balanceAfter,
+          processedBy:     req.user._id,
+          processedByRole: req.user.role?.name || "admin",
+          processedAt:     new Date(),
+          notes:           `Overpayment of ₦${overpayment.toLocaleString()} credited after loan settlement`,
+        });
+
+        await Transaction.create({
+          user:        payment.user._id,
+          type:        "deposit",
+          amount:      overpayment,
+          description: `Loan overpayment refund (${payment.reference})`,
+          reference:   `${payment.reference}-overpay`,
+          method:      "system",
+          status:      "successful",
+        });
+
+        await CompanyLedger.create({
+          type:        "overpayment_refund",
+          direction:   "out",
+          amount:      overpayment,
+          relatedUser: payment.user._id,
+          relatedLoan: loan._id,
+          description: `Overpayment surplus credited to member savings (${payment.reference})`,
+          recordedBy:  req.user._id,
+          meta: {
+            reference: payment.reference,
+            notes:     `Paid ₦${amount.toLocaleString()}, loan required ₦${loanPortion.toLocaleString()}`,
+          },
+        });
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 11. ADMIN ACTION LOG
+      // ═══════════════════════════════════════════════════════════════════════
+      await AdminActionLog.create({
+        admin:       req.user._id,
+        adminRole:   req.user.role?.name || "admin",
+        actionType:  "deposit_approve",
+        targetUser:  payment.user?._id || null,
+        targetModel: "Payment",
+        targetId:    payment._id,
+        description: `Approved loan payment ${payment.reference}`,
+        ipAddress:   req.ip,
+        userAgent:   req.headers["user-agent"],
+        status:      "success",
+      });
+
+      return res.json({
+        success: true,
+        message: "Loan payment approved and applied",
+        newBalance: payment.user?.account?.balance || 0,
+        ...(overpayment > 0 && !isExternalLoan && {
+          overpaymentCredited: overpayment,
+        }),
+      });
+
+    } catch (error) {
+      console.error("Approve loan payment error:", error);
+      res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+  }
+);
 
 
 module.exports = router;

@@ -1,964 +1,690 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Membership Agreement - Club De Stars Cooperative</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- ADD THESE 3 LINES after the Tailwind script tag -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <style>
-        @media print {
-            .no-print { display: none; }
-            body { background: white; }
-        }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.6s ease-out forwards;
-        }
-        
-        .signature-pad {
-            border: 2px dashed #d1d5db;
-            border-radius: 8px;
-            cursor: crosshair;
-            touch-action: none;
-            height: 200px;
-        }
-        
-        @media (max-width: 640px) {
-            .signature-pad {
-                height: 250px;
-            }
-        }
-        
-        .success-modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-        }
-        
-        .success-modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    </style>
-        <style>
-        :root {
-            --primary: #1e3a8a;
-            --primary-dark: #1e40af;
-            --primary-light: #3b82f6;
-            --secondary: #64748b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #06b6d4;
-            --sidebar-width: 280px;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-            min-height: 100vh;
-        }
-        
-        /* Sidebar Styles */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            z-index: 1040;
-            transition: all 0.3s;
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
-        }
-        
-        .sidebar-header {
-            padding: 2rem 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        
-        .logo-box {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        
-        .sidebar-menu {
-            padding: 1rem 0;
-        }
-        
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            padding: 0.875rem 1.5rem;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-            font-weight: 500;
-        }
-        
-        .sidebar-menu a:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-        }
-        
-        /* Top Navbar */
-        .top-navbar {
-            position: fixed;
-            top: 0;
-            left: var(--sidebar-width);
-            right: 0;
-            height: 75px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
-            z-index: 1030;
-            display: flex;
-            align-items: center;
-            padding: 0 2rem;
-            transition: all 0.3s;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            margin-top: 75px;
-            padding: 2rem;
-            min-height: calc(100vh - 75px);
-            transition: all 0.3s;
-        }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .welcome-card {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            border-radius: 24px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .welcome-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 400px;
-            height: 400px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50%;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 20px;
-            padding: 1.75rem;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-            height: 100%;
-            border: 1px solid rgba(30, 58, 138, 0.05);
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
-        }
-        
-        .stat-icon {
-            width: 65px;
-            height: 65px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            background: white;
-            border: 1px solid rgba(30, 58, 138, 0.05);
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
-            padding: 1.5rem;
-            border-radius: 20px 20px 0 0 !important;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none;
-            padding: 0.7rem 1.75rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
-        }
-        
-        .btn-outline-primary {
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            border-radius: 12px;
-            padding: 0.7rem 1.75rem;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-outline-primary:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-        }
-        
-        .member-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.3);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .club-member-badge {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-        
-        .non-club-badge {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-        
-        .quick-action {
-            text-align: center;
-            padding: 1.75rem;
-            border-radius: 16px;
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border: 2px solid rgba(30, 58, 138, 0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        
-        .quick-action:hover {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(30, 58, 138, 0.25);
-            border-color: transparent;
-        }
-        
-        .quick-action i {
-            font-size: 2.2rem;
-            margin-bottom: 0.75rem;
-            display: block;
-        }
-        
-        .loan-info-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 1.75rem;
-            margin-bottom: 1.25rem;
-        }
-        
-        .savings-goal-card {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 1.75rem;
-        }
-        
-        .alert-warning-custom {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border: 2px solid #f59e0b;
-            border-radius: 16px;
-            padding: 1.25rem;
-            color: #92400e;
-        }
-        
-        .alert-info-custom {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border: 2px solid #3b82f6;
-            border-radius: 16px;
-            padding: 1.25rem;
-            color: #1e40af;
-        }
-        
-        .powered-by {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 12px 20px;
-            border-radius: 30px;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--primary);
-            z-index: 1000;
-        }
-        
-        .loan-rules-list {
-            background: rgba(30, 58, 138, 0.02);
-            padding: 1.5rem;
-            border-radius: 16px;
-            border: 2px solid rgba(30, 58, 138, 0.1);
-        }
-        
-        .loan-rules-list li {
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
-        }
-        
-        .loan-rules-list li:last-child {
-            border-bottom: none;
-        }
-        
-        .print-button {
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            padding: 0.6rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .print-button:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        @media (max-width: 992px) {
-            .sidebar {
-                left: calc(-1 * var(--sidebar-width));
-            }
-            
-            .sidebar.active {
-                left: 0;
-            }
-            
-            .top-navbar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .powered-by {
-                bottom: 10px;
-                right: 10px;
-                font-size: 0.75rem;
-                padding: 8px 12px;
-            }
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Club De Stars — Membership Agreement</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ THEME TOKENS ══ */
+:root{
+  --sidebar-w:230px;--nav-h:62px;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
+  --accent:#4f8ef7;--accent2:#7c5af4;
+  --green:#22c78a;--red:#f05252;--amber:#f5a623;
+  --tr:all .22s ease;
+}
+[data-theme="dark"]{
+  --bg:#0a0f1e;--bg-card:#111827;--bg-card2:#1a2235;
+  --bg-card3:rgba(255,255,255,.035);
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#f0f4ff;--text2:#c8d4f0;--muted:#8b9ab8;
+  --nav-bg:rgba(10,15,30,.93);
+  --hero-bg:linear-gradient(135deg,#111827 0%,#1a2235 100%);
+  --bar-bg:rgba(255,255,255,.07);--meta-bg:rgba(255,255,255,.03);
+  --tog-bg:rgba(255,255,255,.08);
+  --doc-bg:#0d1526;--doc-border:rgba(255,255,255,.06);
+  --section-num-bg:rgba(79,142,247,.15);--section-num-color:var(--accent);
+  --li-marker:rgba(79,142,247,.6);
+  --party-a-bg:rgba(79,142,247,.06);--party-a-border:rgba(79,142,247,.2);
+  --party-b-bg:rgba(34,199,138,.06);--party-b-border:rgba(34,199,138,.2);
+  --sig-bg:rgba(79,142,247,.05);--sig-border:rgba(79,142,247,.15);
+  --divider:rgba(255,255,255,.06);
+}
+[data-theme="light"]{
+  --bg:#f4f6fb;--bg-card:#ffffff;--bg-card2:#f0f3fa;
+  --bg-card3:rgba(0,0,0,.025);
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);
+  --text:#0f1523;--text2:#2a3550;--muted:#6b7a99;
+  --nav-bg:rgba(255,255,255,.93);
+  --hero-bg:linear-gradient(135deg,#dde8ff 0%,#eef1ff 100%);
+  --bar-bg:rgba(0,0,0,.07);--meta-bg:rgba(0,0,0,.025);
+  --tog-bg:rgba(0,0,0,.07);
+  --doc-bg:#ffffff;--doc-border:rgba(0,0,0,.07);
+  --section-num-bg:rgba(30,58,138,.1);--section-num-color:#1e3a8a;
+  --li-marker:rgba(30,58,138,.4);
+  --party-a-bg:#eff6ff;--party-a-border:#bfdbfe;
+  --party-b-bg:#f0fdf4;--party-b-border:#bbf7d0;
+  --sig-bg:#eff6ff;--sig-border:#bfdbfe;
+  --divider:rgba(0,0,0,.06);
+}
 
-        @media print {
-            .sidebar, .top-navbar, .btn, .quick-action, .powered-by {
-                display: none !important;
-            }
-            
-            .main-content {
-                margin: 0;
-                padding: 0;
-            }
-            
-            .card {
-                break-inside: avoid;
-            }
-        }
-    </style>
+/* ══ BASE ══ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;transition:background .3s,color .3s;}
+a{text-decoration:none;color:inherit;}
+button,input{font-family:inherit;}
+
+/* ══ LOADER ══ */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;transition:opacity .5s;}
+.loader-ring{width:48px;height:48px;border:2.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
+.loader-label{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ SIDEBAR ══ */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:var(--bg-card);border-right:1px solid var(--border);z-index:200;display:flex;flex-direction:column;overflow:hidden;transition:transform .3s,background .3s,border-color .3s;}
+.sidebar-logo{padding:18px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.logo-mark{width:34px;height:34px;border-radius:10px;flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;}
+.logo-mark img{width:100%;height:100%;object-fit:cover;}
+.logo-name{font-size:13px;font-weight:600;line-height:1.2;}
+.logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;}
+.sidebar-user{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.user-chip{display:flex;align-items:center;gap:10px;background:var(--bg-card2);border-radius:10px;padding:9px 11px;border:1px solid var(--border);}
+.user-avatar{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;}
+.user-name{font-size:13px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-id{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.04em;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 10px;}
+.sidebar-nav::-webkit-scrollbar{width:3px;}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.nav-section{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;margin-top:2px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:var(--muted);font-size:13px;font-weight:400;transition:var(--tr);margin-bottom:1px;cursor:pointer;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{background:var(--bg-card2);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,.1);color:var(--accent);}
+.nav-item i{width:18px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:20px;padding:2px 7px;}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+.member-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;background:rgba(34,199,138,.12);color:var(--green);border:1px solid rgba(34,199,138,.2);margin-bottom:8px;}
+
+/* ══ TOP NAV ══ */
+.topnav{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--nav-h);background:var(--nav-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);z-index:100;display:flex;align-items:center;padding:0 20px;gap:12px;transition:left .3s,background .3s,border-color .3s;}
+.hamburger{display:none;cursor:pointer;padding:7px;border-radius:8px;border:none;background:none;color:var(--muted);font-size:17px;transition:var(--tr);flex-shrink:0;}
+.hamburger:hover{background:var(--bg-card2);color:var(--text);}
+.topnav-greeting{flex:1;min-width:0;}
+.topnav-greeting h2{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-greeting p{font-size:11px;color:var(--muted);}
+.topnav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.status-row{display:flex;align-items:center;gap:5px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.status-label{font-size:12px;color:var(--green);font-weight:500;}
+.kyc-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);font-size:11px;font-weight:500;color:var(--amber);cursor:pointer;transition:var(--tr);}
+.kyc-chip.verified{background:rgba(34,199,138,.08);border-color:rgba(34,199,138,.2);color:var(--green);}
+.theme-toggle{width:40px;height:22px;border-radius:20px;border:1px solid var(--border2);background:var(--tog-bg);cursor:pointer;position:relative;flex-shrink:0;transition:background .3s,border-color .3s;padding:0;}
+.tog-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:transform .25s ease,background .25s;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;pointer-events:none;}
+[data-theme="light"] .tog-thumb{transform:translateX(18px);background:var(--accent);}
+
+/* ══ MAIN ══ */
+.main{margin-left:var(--sidebar-w);margin-top:var(--nav-h);padding:22px;min-height:calc(100vh - var(--nav-h));transition:margin-left .3s;}
+
+/* ══ PAGE HEADER ══ */
+.breadcrumb-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:16px;}
+.breadcrumb-row a{color:var(--accent);transition:var(--tr);}
+.breadcrumb-row a:hover{opacity:.75;}
+.breadcrumb-row i{font-size:10px;}
+
+/* ══ DOCUMENT WRAPPER ══ */
+.doc-wrapper{
+  background:var(--doc-bg);border:1px solid var(--doc-border);
+  border-radius:var(--r-xl);overflow:hidden;max-width:860px;margin:0 auto;
+  transition:background .3s,border-color .3s;
+}
+
+/* ══ DOC HEADER ══ */
+.doc-header{
+  background:linear-gradient(135deg,#0f1e4a 0%,#1a2e6e 50%,#1e3a8a 100%);
+  padding:32px 36px;text-align:center;position:relative;overflow:hidden;
+}
+.doc-header::before{
+  content:'';position:absolute;top:-80px;right:-80px;width:220px;height:220px;
+  border-radius:50%;background:radial-gradient(circle,rgba(79,142,247,.12) 0%,transparent 70%);
+}
+.doc-header::after{
+  content:'';position:absolute;bottom:-60px;left:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,rgba(124,90,244,.08) 0%,transparent 70%);
+}
+.doc-header-icon{
+  width:52px;height:52px;border-radius:14px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:rgba(255,255,255,.9);margin:0 auto 14px;
+  position:relative;z-index:1;
+}
+.doc-header h1{font-size:clamp(16px,3.5vw,22px);font-weight:600;color:#fff;letter-spacing:.02em;margin-bottom:6px;position:relative;z-index:1;}
+.doc-header p{font-size:12px;color:rgba(255,255,255,.55);position:relative;z-index:1;letter-spacing:.04em;text-transform:uppercase;}
+.doc-meta-row{
+  display:flex;align-items:center;justify-content:center;gap:16px;
+  margin-top:16px;flex-wrap:wrap;position:relative;z-index:1;
+}
+.doc-meta-chip{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 12px;
+  border-radius:20px;font-size:11px;font-weight:500;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.8);
+}
+
+/* ══ DOC BODY ══ */
+.doc-body{padding:32px 36px;}
+
+/* ══ PARTIES ══ */
+.parties-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;}
+.party-card{border-radius:var(--r-md);padding:16px;border:1px solid;}
+.party-card.a{background:var(--party-a-bg);border-color:var(--party-a-border);}
+.party-card.b{background:var(--party-b-bg);border-color:var(--party-b-border);}
+.party-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.party-tag.a{color:var(--accent);}
+.party-tag.b{color:var(--green);}
+.party-name{font-size:13px;font-weight:600;margin-bottom:4px;line-height:1.3;}
+.party-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+.party-ref{font-size:11px;margin-top:8px;padding:5px 10px;border-radius:6px;display:inline-block;}
+.party-ref.a{background:rgba(79,142,247,.1);color:var(--accent);}
+.party-ref.b{background:rgba(34,199,138,.1);color:var(--green);}
+.parties-and{text-align:center;padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}
+
+/* ══ SECTIONS ══ */
+.doc-section{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--divider);}
+.doc-section:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.section-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
+.section-num{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  background:var(--section-num-bg);color:var(--section-num-color);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;
+}
+.section-title{font-size:14px;font-weight:600;line-height:1.4;padding-top:4px;}
+.section-body{padding-left:40px;}
+.section-body p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:8px;}
+.section-body p:last-child{margin-bottom:0;}
+.clause-list{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:6px;}
+.clause-list li{display:flex;gap:10px;font-size:13px;color:var(--text2);line-height:1.6;}
+.clause-marker{
+  flex-shrink:0;width:20px;height:20px;border-radius:5px;
+  background:var(--section-num-bg);color:var(--section-num-color);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;margin-top:2px;
+}
+
+/* ══ SIGNATURES ══ */
+.signatures-section{margin-top:28px;}
+.sig-intro{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.sig-card{
+  background:var(--bg-card2);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:16px;
+}
+.sig-role{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;}
+.sig-img-wrap{height:56px;display:flex;align-items:center;margin-bottom:10px;}
+.sig-img-wrap img{max-height:56px;max-width:100%;object-fit:contain;opacity:.85;}
+.sig-img-empty{height:48px;border:1px dashed var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);}
+.sig-divider{border:none;border-top:1px solid var(--border);margin:8px 0;}
+.sig-detail{font-size:12px;color:var(--muted);margin-bottom:3px;}
+.sig-detail span{color:var(--text);font-weight:500;}
+.member-sig-card{
+  background:var(--sig-bg);border:1px solid var(--sig-border);
+  border-radius:var(--r-lg);padding:20px;
+}
+.member-sig-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.member-sig-img{
+  height:80px;border:1px dashed var(--border2);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:14px;overflow:hidden;
+  background:var(--bg-card2);
+}
+.member-sig-img img{max-height:76px;object-fit:contain;}
+.member-details-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.member-detail-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 12px;}
+.member-detail-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;}
+.member-detail-value{font-size:12px;font-weight:500;word-break:break-word;}
+
+/* ══ ACTIONS ══ */
+.doc-actions{
+  display:flex;align-items:center;gap:10px;margin-top:24px;
+  padding-top:20px;border-top:1px solid var(--divider);flex-wrap:wrap;
+}
+.action-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:10px 18px;border-radius:var(--r-md);border:1px solid;
+  font-size:13px;font-weight:500;cursor:pointer;transition:var(--tr);
+}
+.btn-print{background:var(--bg-card2);border-color:var(--border2);color:var(--muted);}
+.btn-print:hover{color:var(--text);border-color:var(--accent);background:rgba(79,142,247,.05);}
+.btn-download{background:rgba(34,199,138,.08);border-color:rgba(34,199,138,.2);color:var(--green);}
+.btn-download:hover{background:rgba(34,199,138,.14);}
+
+/* ══ POWERED BY ══ */
+.powered-by{position:fixed;bottom:12px;right:14px;font-size:11px;color:var(--muted);z-index:50;}
+.powered-by strong{color:var(--accent);}
+
+/* ══ SIDEBAR OVERLAY ══ */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190;}
+.sb-overlay.show{display:block;}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){
+  .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+  .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3);}
+  .topnav{left:0;}
+  .main{margin-left:0;}
+  .hamburger{display:flex;}
+  .parties-grid{grid-template-columns:1fr;}
+  .sig-grid{grid-template-columns:1fr;}
+  .member-details-grid{grid-template-columns:1fr 1fr;}
+  .doc-body{padding:20px;}
+}
+@media(max-width:600px){
+  .main{padding:14px;}
+  .doc-header{padding:22px 20px;}
+  .doc-body{padding:16px;}
+  .section-body{padding-left:0;}
+  .member-details-grid{grid-template-columns:1fr;}
+  .status-label{display:none;}
+  .topnav{padding:0 12px;gap:8px;}
+  .topnav-greeting h2{font-size:13px;}
+  .topnav-greeting p{display:none;}
+}
+@media print{
+  .sidebar,.topnav,.powered-by,.doc-actions,.breadcrumb-row{display:none!important;}
+  .main{margin:0;padding:0;}
+  .doc-wrapper{border:none;max-width:100%;}
+  body{background:white;}
+  [data-theme="dark"] .doc-wrapper,
+  [data-theme="dark"] .doc-body,
+  [data-theme="dark"] .party-card,
+  [data-theme="dark"] .sig-card,
+  [data-theme="dark"] .member-sig-card{background:white!important;color:#000!important;}
+}
+</style>
 </head>
-<body class="bg-gray-50">
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <div class="logo-box">
+<body>
 
-                    <img src="/media/assets/logo/log.png" alt="" width="100%" height="100%">
-                </div>
-                <div>
-                    <h5 class="mb-0 fw-bold" style="text-transform: uppercase;">Club De Stars</h5>
-                    <small class="opacity-75">COOPERATIVE SOCIETY LIMITED</small>
-                </div>
-            </div>
-            <div class="member-badge mt-2 <%= user.membershipID.startsWith('CD') ? 'club-member-badge' : 'non-club-member-badge' %>">
-                <i class="fas <%= user.membershipID.startsWith('CD') ? 'fa-star' : 'fa-user' %>"></i>
-                <span><%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Non-Club Member' %></span>
-            </div>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-ring"></div>
+  <div class="loader-label">Club De Stars</div>
+</div>
 
+<%
+  const pendingGuarantorCount = user.guarantorRequests
+    ? user.guarantorRequests.filter(r => r.status === "pending").length : 0;
+  const signatureSrc = user.signature
+    ? user.signature.replace('public\\', '/').replace(/\\/g, '/')
+    : null;
+%>
+
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <img src="/media/assets/logo/log.png" alt="Logo"
+           onerror="this.style.display='none';this.parentNode.innerHTML='<b>C</b>'">
+    </div>
+    <div style="min-width:0;">
+      <div class="logo-name">Club De Stars</div>
+      <div class="logo-sub">Cooperative Society</div>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-chip">
+      <div class="user-avatar">
+        <%= user.firstName.charAt(0).toUpperCase() %><%= user.lastName.charAt(0).toUpperCase() %>
+      </div>
+      <div style="min-width:0;">
+        <div class="user-name"><%= user.firstName %> <%= user.lastName %></div>
+        <div class="user-id"><%= user.membershipID %></div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Menu</div>
+    <a href="/cds-cooperative/dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="/cds-cooperative/transaction" class="nav-item"><i class="fas fa-exchange-alt"></i> Transactions</a>
+    <a href="/cds-cooperative/loan" class="nav-item"><i class="fas fa-coins"></i> Loans</a>
+    <a href="/cds-cooperative/guarantorRequest" class="nav-item">
+      <i class="fas fa-user-check"></i> Guarantor
+      <% if (pendingGuarantorCount > 0) { %><span class="nav-badge"><%= pendingGuarantorCount %></span><% } %>
+    </a>
+    <div class="nav-section">Account</div>
+    <a href="/manage/kiddies-account" class="nav-item"><i class="fas fa-baby"></i> Kiddies Account</a>
+    <a href="/cds-cooperative/profile" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+    <a href="/cds-cooperative/kyc" class="nav-item"><i class="fas fa-shield-alt"></i> KYC</a>
+    <a href="/cds-cooperative/referral" class="nav-item"><i class="fas fa-user-plus"></i> Referrals</a>
+    <a href="/cds-cooperative/report" class="nav-item"><i class="fas fa-chart-bar"></i> Reports</a>
+    <a href="/cds-cooperative/memberContract" class="nav-item active"><i class="fas fa-file-alt"></i> Terms</a>
+    <% if (user.role && user.role.name !== 'member') { %>
+    <div class="nav-section">Admin</div>
+    <a href="/admin-dashboard" class="nav-item"><i class="fas fa-tachometer-alt"></i> Administration</a>
+    <% } %>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="member-pill">
+      <i class="fas fa-star" style="font-size:9px;"></i>
+      <%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Associate Member' %>
+    </div>
+    <a href="/logout" class="nav-item" style="color:var(--red);margin-top:2px;">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </a>
+  </div>
+</aside>
+
+<!-- ════ TOP NAV ════ -->
+<header class="topnav">
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="topnav-greeting">
+    <h2>Membership Agreement</h2>
+    <p>Terms &amp; Conditions · MOU</p>
+  </div>
+  <div class="topnav-right">
+    <div class="status-row">
+      <div class="status-dot"></div>
+      <span class="status-label">Active</span>
+    </div>
+    <% if (user.Payment && user.Payment.status === "paid") { %>
+      <div class="kyc-chip verified">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i>
+        <span>Verified</span>
+      </div>
+    <% } else { %>
+      <a href="/cds-cooperative/kyc" class="kyc-chip">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i>
+        <span>KYC</span>
+      </a>
+    <% } %>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle light/dark mode">
+      <div class="tog-thumb" id="togThumb">
+        <i class="fas fa-moon" id="togIcon" style="font-size:9px;"></i>
+      </div>
+    </button>
+  </div>
+</header>
+
+<!-- ════ MAIN ════ -->
+<main class="main">
+
+  <div class="breadcrumb-row">
+    <a href="/cds-cooperative/dashboard">Dashboard</a>
+    <i class="fas fa-chevron-right"></i>
+    <span>Terms &amp; Conditions</span>
+  </div>
+
+  <div class="doc-wrapper">
+
+    <!-- Document Header -->
+    <div class="doc-header">
+      <div class="doc-header-icon"><i class="fas fa-file-contract"></i></div>
+      <h1>MEMORANDUM OF UNDERSTANDING</h1>
+      <p>Membership Agreement &amp; Cooperative Bylaws</p>
+      <div class="doc-meta-row">
+        <span class="doc-meta-chip">
+          <i class="fas fa-registered" style="font-size:10px;"></i>
+          Reg. No: BN/CRCS/14864
+        </span>
+        <span class="doc-meta-chip">
+          <i class="fas fa-calendar" style="font-size:10px;"></i>
+          Effective: 16 March 2025
+        </span>
+        <span class="doc-meta-chip">
+          <i class="fas fa-id-card" style="font-size:10px;"></i>
+          <%= user.membershipID %>
+        </span>
+      </div>
+    </div>
+
+    <!-- Document Body -->
+    <div class="doc-body">
+
+      <!-- Parties -->
+      <div style="margin-bottom:28px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px;">Parties to this Agreement</div>
+
+        <div class="parties-grid">
+          <div class="party-card a">
+            <div class="party-tag a"><i class="fas fa-building" style="font-size:10px;"></i> The Cooperative</div>
+            <div class="party-name">Club De Stars Multipurpose Cooperative Society Limited</div>
+            <div class="party-desc">A duly registered cooperative under the laws of the Federal Republic of Nigeria, having its registered office at Makurdi, Benue State.</div>
+            <span class="party-ref a">Reg. BN/CRCS/14864</span>
+          </div>
+          <div class="party-card b">
+            <div class="party-tag b"><i class="fas fa-user" style="font-size:10px;"></i> The Member</div>
+            <div class="party-name"><%= user.firstName %> <%= user.lastName %></div>
+            <div class="party-desc">Residing at <strong><%= user.address %>, <%= user.lga %>, <%= user.state %> State, Nigeria.</strong></div>
+            <span class="party-ref b">ID: <%= user.membershipID %></span>
+          </div>
         </div>
-       <div class="sidebar-menu">
-            <a href="/cds-cooperative/dashboard"><i class="fas fa-home"></i> Dashboard</a>
-            <a href="/cds-cooperative/transaction"><i class="fas fa-exchange-alt"></i> Transactions</a>
-            <a href="/cds-cooperative/loan"><i class="fas fa-hand-holding-usd"></i> My Loans</a>
-            <a href="/cds-cooperative/guarantorRequest">
-                <i class="fas fa-user-friends"></i> Guarantor Requests
-                <% if (pendingGuarantorCount > 0) { %>
-                    <span class="badge bg-danger ms-auto" style="font-size:0.68rem;"><%= pendingGuarantorCount %></span>
-                <% } %>
-            </a>
-            <a href="/manage/kiddies-account"><i class="fas fa-users"></i> Kiddies Account</a>
-            <a href="/cds-cooperative/profile"><i class="fas fa-user-circle"></i> My Profile</a>
-            <a href="/cds-cooperative/kyc"><i class="fas fa-shield-alt"></i> KYC Verification</a>
-            <a href="/cds-cooperative/referral"><i class="fas fa-user-plus"></i> Referral Program</a>
-            <a href="/cds-cooperative/memberContract" class="active"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
-            <a href="/cds-cooperative/report"><i class="fas fa-chart-line"></i> Reports</a>
-            <% if (user.role && user.role.name !== 'member') { %>
-            <a href="/admin-dashboard"><i class="fas fa-tachometer-alt"></i> Administration</a>
+      </div>
+
+      <!-- Section 1 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">1</div>
+          <div class="section-title">Purpose of the MOU</div>
+        </div>
+        <div class="section-body">
+          <p>This Memorandum of Understanding outlines the terms and conditions of the relationship between the Cooperative and the Member regarding their rights, responsibilities, and obligations. These Terms govern the relationship between members and Club De Stars Multi-Purpose Cooperative Society Ltd., designed to promote mutual cooperation and shared benefits.</p>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">2</div>
+          <div class="section-title">Membership Obligations</div>
+        </div>
+        <div class="section-body">
+          <p>Membership is open to individuals who meet the criteria set forth by the cooperative, as determined by the Board of Directors. The Member agrees to:</p>
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>Adhere to the Cooperative's bylaws, policies, and regulations, pay annual dues, and contribute to the cooperative's objectives through active participation.</span></li>
+            <li><div class="clause-marker">b</div><span>Participate in Cooperative activities, meetings, and decision-making processes.</span></li>
+            <li><div class="clause-marker">c</div><span>Contribute financially as per the Cooperative's share capital and savings requirements.</span></li>
+            <li><div class="clause-marker">d</div><span>Uphold the values and principles of cooperation, mutual support, and good faith.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">3</div>
+          <div class="section-title">Rights and Benefits of the Member</div>
+        </div>
+        <div class="section-body">
+          <p>The Member is entitled to:</p>
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>Participate in profit-sharing or dividends as per the Cooperative's policies.</span></li>
+            <li><div class="clause-marker">b</div><span>Vote and be elected to the Cooperative's leadership positions, if eligible.</span></li>
+            <li><div class="clause-marker">c</div><span>Access loans, credit facilities, and other services provided by the Cooperative.</span></li>
+            <li><div class="clause-marker">d</div><span>Receive training, education, and support from the Cooperative.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 4 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">4</div>
+          <div class="section-title">Financial Contributions</div>
+        </div>
+        <div class="section-body">
+          <p>The Member shall contribute:</p>
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>A membership fee of <strong>₦2,000</strong> upon joining the Cooperative.</span></li>
+            <li><div class="clause-marker">b</div><span>A minimum share capital contribution of <strong>₦1,000</strong> as per Cooperative policy.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 5 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">5</div>
+          <div class="section-title">Termination of Membership</div>
+        </div>
+        <div class="section-body">
+          <p>Membership may be terminated by:</p>
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>Voluntary withdrawal, provided the Member gives 30 days' notice.</span></li>
+            <li><div class="clause-marker">b</div><span>Failure to fulfill financial obligations or breach of Cooperative policies.</span></li>
+            <li><div class="clause-marker">c</div><span>Expulsion by the Board due to misconduct, fraud, or violation of Cooperative principles.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 6 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">6</div>
+          <div class="section-title">Dispute Resolution</div>
+        </div>
+        <div class="section-body">
+          <p>Any dispute arising from this MOU shall first be resolved through dialogue and mediation within the Cooperative. If unresolved, the matter shall be referred to arbitration as per applicable law and the Cooperative Act.</p>
+        </div>
+      </div>
+
+      <!-- Section 7 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">7</div>
+          <div class="section-title">Duration and Review</div>
+        </div>
+        <div class="section-body">
+          <p>This MOU shall remain in effect for the duration of the Member's active participation in the Cooperative and may be reviewed periodically by the Board of Directors.</p>
+        </div>
+      </div>
+
+      <!-- Section 8 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">8</div>
+          <div class="section-title">Miscellaneous Provisions</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>This MOU does not create an employer-employee relationship between the parties.</span></li>
+            <li><div class="clause-marker">b</div><span>Amendments to this MOU shall be made in writing and agreed upon by both parties.</span></li>
+            <li><div class="clause-marker">c</div><span>The cooperative will hold meetings when need arises to discuss operations, financial performance, and future initiatives. Members will receive prior notice of all meetings.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 9: Signatures -->
+      <div class="doc-section signatures-section">
+        <div class="section-header">
+          <div class="section-num">9</div>
+          <div class="section-title">Signatures</div>
+        </div>
+
+        <p class="sig-intro">By signing below, all parties acknowledge that they have read, understood, and agreed to the terms outlined in this document.</p>
+
+        <!-- Cooperative + Operating Company -->
+        <div class="sig-grid" style="margin-bottom:14px;">
+          <div class="sig-card">
+            <div class="sig-role">For the Cooperative</div>
+            <div class="sig-img-wrap">
+              <img src="/images/staff-signatures/cooperative-sign.png" alt="Cooperative Signature"
+                   onerror="this.style.display='none'">
+            </div>
+            <hr class="sig-divider">
+            <div class="sig-detail">Name: <span>Adi Stanilus Duniya</span></div>
+            <div class="sig-detail">Position: <span>Director</span></div>
+            <div class="sig-detail">Date: <span>16/03/2025</span></div>
+          </div>
+          <div class="sig-card">
+            <div class="sig-role">For the Operating Company</div>
+            <div class="sig-img-wrap">
+              <img src="/images/staff-signatures/operating-sign.png" alt="Operating Signature"
+                   onerror="this.style.display='none'">
+            </div>
+            <hr class="sig-divider">
+            <div class="sig-detail">Name: <span>Eraer Paul Kulugh</span></div>
+            <div class="sig-detail">Position: <span>Manager</span></div>
+            <div class="sig-detail">Date: <span>16/03/2025</span></div>
+          </div>
+        </div>
+
+        <!-- Member Signature -->
+        <div class="member-sig-card">
+          <div class="member-sig-title">
+            <i class="fas fa-pen-nib" style="font-size:11px;"></i>
+            Member Signature
+          </div>
+          <div class="member-sig-img">
+            <% if (signatureSrc) { %>
+              <img src="<%= signatureSrc %>" alt="Member Signature">
+            <% } else { %>
+              <span style="font-size:12px;color:var(--muted);">No signature uploaded yet</span>
             <% } %>
-            <a href="/logout" style="color:rgba(255,255,255,0.52);margin-top:4px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          </div>
+          <div class="member-details-grid">
+            <div class="member-detail-item">
+              <div class="member-detail-label">Full Name</div>
+              <div class="member-detail-value"><%= user.firstName %> <%= user.lastName %></div>
+            </div>
+            <div class="member-detail-item">
+              <div class="member-detail-label">Membership No.</div>
+              <div class="member-detail-value" style="font-family:'DM Mono',monospace;font-size:11px;"><%= user.membershipID %></div>
+            </div>
+            <div class="member-detail-item">
+              <div class="member-detail-label">Date</div>
+              <div class="member-detail-value">
+                <%= new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"}) %>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Top Navbar -->
-    <div class="top-navbar">
-        <i class="fas fa-bars d-lg-none me-3"
-        style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-        onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+      <!-- Actions -->
+      <div class="doc-actions">
+        <button class="action-btn btn-print" onclick="window.print()">
+          <i class="fas fa-print" style="font-size:12px;"></i> Print Document
+        </button>
+        <button class="action-btn btn-download" onclick="window.print()">
+          <i class="fas fa-download" style="font-size:12px;"></i> Save as PDF
+        </button>
+      </div>
 
-        <!-- This will only show on lg and above -->
-        <div class="flex-grow-1 d-none d-lg-block">
-            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Welcome back, <%= user.firstName %>! 👋</h5>
-            <small class="text-muted">
-                Member ID: <%= user.membershipID %> | <%= new Date(user.createdAt).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
-            </small>
-        </div>
-    </div>
+    </div><!-- /doc-body -->
+  </div><!-- /doc-wrapper -->
 
+</main>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden fade-in">
-            <!-- Document Header -->
-            <div class="gradient-bg text-white p-6 sm:p-8">
-                <h2 class="text-2xl sm:text-3xl font-bold mb-2 text-center">MEMORANDUM OF UNDERSTANDING</h2>
-                <p class="text-blue-50 text-center text-sm sm:text-base">Membership Agreement & Bylaws</p>
-            </div>
+<div class="powered-by">Powered by <strong>JESZ LIMITED</strong></div>
 
-            <!-- Document Body -->
-            <div class="p-6 sm:p-8 lg:p-12">
-                <!-- Parties Section -->
-                <div class="mb-8">
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">BETWEEN</h3>
-                    
-                    <div class="space-y-4 text-sm sm:text-base">
-                        <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-900">
-                            <p class="font-semibold text-gray-900 mb-2">CLUB DE STARS MULTIPURPOSE COOPERATIVE SOCIETY LIMITED</p>
-                            <p class="text-gray-700">A duly registered cooperative under the laws of the Federal Republic of Nigeria, with registration number <span class="font-semibold">BN/CRCS/14864</span>, and having its registered office at Makurdi, Benue State (hereinafter referred to as <strong>"The Cooperative"</strong>).</p>
-                        </div>
+<!-- ════ SCRIPTS ════ -->
+<script>
+/* ── Theme ── */
+(function(){
+  const saved = localStorage.getItem('cds-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+})();
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('cds-theme', next);
+  updateThemeUI(next);
+}
+function updateThemeUI(theme){
+  const icon = document.getElementById('togIcon');
+  if(icon){ icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun'; }
+}
 
-                        <div class="text-center py-2">
-                            <span class="text-gray-600 font-semibold">AND</span>
-                        </div>
+/* ── Sidebar ── */
+function toggleSidebar(){
+  const open = document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', e => {
+  const sb = document.getElementById('sidebar');
+  const hb = document.querySelector('.hamburger');
+  if(window.innerWidth <= 900 && sb.classList.contains('open') && !sb.contains(e.target) && hb && !hb.contains(e.target)) closeSidebar();
+});
 
-                        <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-600">
-                            <p class="font-semibold text-gray-900 mb-2" ><%= user.firstName %> <%= user.lastName %></p>
-                            <p class="text-gray-700">A member of the Cooperative, residing at <span class="font-medium"><%= user.address %>, <%= user.lga %>, <%= user.state %> State, Nigeria</span>, with membership number <span class="font-semibold"><%= user.membershipID %></span> (hereinafter referred to as <strong>"The Member"</strong>).</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Purpose -->
-                <section class="mb-8">
-                    <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                        <span class="bg-blue-900 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">1</span>
-                        Purpose of the MOU
-                    </h3>
-                    <p class="text-gray-700 ml-11 text-sm sm:text-base">
-                        This Memorandum of Understanding (MOU) outlines the terms and conditions of the relationship between the Cooperative and the Member regarding their rights, responsibilities, and obligations. These Terms and Conditions govern the relationship between members and Club De Stars Multi-Purpose Cooperative Society Ltd. Members agree to abide by these terms, which are designed to promote mutual cooperation and benefits.
-                    </p>
-                </section>
-
-                <!-- Membership Obligations -->
-                <section class="mb-8">
-                    <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                        <span class="bg-blue-900 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">2</span>
-                        Membership Obligations
-                    </h3>
-                    <div class="ml-11 text-sm sm:text-base">
-                        <p class="text-gray-700 mb-3">Membership is open to individuals who meet the criteria set forth by the cooperative, as determined by the Board of Directors.</p>
-                        <p class="text-gray-700 mb-3 font-medium">The Member agrees to:</p>
-                        <ul class="space-y-2 text-gray-700">
-                            <li class="flex">
-                                <span class="font-semibold mr-2">a)</span>
-                                <span>Adhere to the Cooperative's bylaws, policies, and regulations, pay annual dues, and contribute to the cooperative's objectives through active participation.</span>
-                            </li>
-                            <li class="flex">
-                                <span class="font-semibold mr-2">b)</span>
-                                <span>Participate in Cooperative activities, meetings, and decision-making processes.</span>
-                            </li>
-                            <li class="flex">
-                                <span class="font-semibold mr-2">c)</span>
-                                <span>Contribute financially as per the Cooperative's share capital and savings requirements.</span>
-                            </li>
-                            <li class="flex">
-                                <span class="font-semibold mr-2">d)</span>
-                                <span>Uphold the values and principles of cooperation, mutual support, and good faith.</span>
-                            </li>
-                        </ul>
-                    </div>
-                </section>
-
-                <!-- Rights and Benefits -->
-                <section class="mb-8">
-                    <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                        <span class="bg-blue-900 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">3</span>
-                        Rights and Benefits of the Member
-                    </h3>
-                    <div class="ml-11 text-sm sm:text-base">
-                        <p class="text-gray-700 mb-3 font-medium">The Member is entitled to:</p>
-                        <ul class="space-y-2 text-gray-700">
-                            <li class="flex">
-                                <span class="font-semibold mr-2">a)</span>
-                                <span>Participate in profit-sharing or dividends as per the Cooperative's policies.</span>
-                            </li>
-                            <li class="flex">
-                                <span class="font-semibold mr-2">b)</span>
-                                <span>Vote and be elected to the Cooperative's leadership positions (if eligible).</span>
-                            </li>
-                            <li class="flex">
-                                <span class="font-semibold mr-2">c)</span>
-                                <span>Access loans, credit facilities, and other services provided by the Cooperative.</span>
-                            </li>
-                            <li class="flex">
-                                <span class="font-semibold mr-2">d)</span>
-                                <span>Receive training, education, and support from the Cooperative.</span>
-                            </li>
-                        </ul>
-                    </div>
-                </section>
-
-                <!-- Financial Contributions -->
-                <section class="mb-8">
-                    <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                        <span class="bg-blue-900 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">4</span>
-                        Financial Contributions
-                    </h3>
-                    <div class="ml-11 text-sm sm:text-base">
-                        <p class="text-gray-700 mb-3 font-medium">The Member shall contribute:</p>
-                        <ul class="space-y-2 text-gray-700">
-                            <li class="flex">
-                                <span class="font-semibold mr-2">a)</span>
-                                <span>A membership fee of <strong>₦2,000</strong> upon joining.</span>
-                            </li>
-                            <li class="flex">
-                                <span class="font-semibold mr-2">b)</span>
-                                <span>A minimum share capital contribution of <strong>₦1,000</strong> as per Cooperative policy.</span>
-                            </li>
-                        </ul>
-                    </div>
-                </section>
-
-                <!-- Termination -->
-                <section class="mb-8">
-                    <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                        <span class="bg-blue-900 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">5</span>
-                        Termination of Membership
-                    </h3>
-                    <div class="ml-11 text-sm sm:text-base">
-                        <p class="text-gray-700 mb-3 font-medium">Membership may be terminated by:</p>
-                        <ul class="space-y-2 text-gray-700">
-                            <li class="flex">
-                                <span class="font-semibold mr-2">a)</span>
-                                <span>Voluntary withdrawal, provided the Member gives 30 days' notice.</span>
-                            </li>
-                            <li class="flex">
-                                <span class="font-semibold mr-2">b)</span>
-                                <span>Failure to fulfill financial obligations or breach of Cooperative policies.</span>
-                            </li>
-                            <li class="flex">
-                                <span class="font-semibold mr-2">c)</span>
-                                <span>Expulsion by the Board due to misconduct, fraud, or violation of Cooperative principles.</span>
-                            </li>
-                        </ul>
-                    </div>
-                </section>
-
-                <!-- Dispute Resolution -->
-                <section class="mb-8">
-                    <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                        <span class="bg-blue-900 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">6</span>
-                        Dispute Resolution
-                    </h3>
-                    <p class="text-gray-700 ml-11 text-sm sm:text-base">
-                        Any dispute arising from this MOU shall first be resolved through dialogue and mediation within the Cooperative. If unresolved, the matter shall be referred to arbitration as per applicable law/Cooperative Act.
-                    </p>
-                </section>
-
-                <!-- Duration -->
-                <section class="mb-8">
-                    <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                        <span class="bg-blue-900 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">7</span>
-                        Duration and Review
-                    </h3>
-                    <p class="text-gray-700 ml-11 text-sm sm:text-base">
-                        This MOU shall remain in effect for the duration of the Member's active participation in the Cooperative and may be reviewed periodically.
-                    </p>
-                </section>
-
-                <!-- Miscellaneous -->
-                <section class="mb-8">
-                    <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                        <span class="bg-blue-900 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">8</span>
-                        Miscellaneous Provisions
-                    </h3>
-                    <div class="ml-11 text-sm sm:text-base">
-                        <ul class="space-y-2 text-gray-700">
-                            <li class="flex">
-                                <span class="font-semibold mr-2">a)</span>
-                                <span>This MOU does not create an employer-employee relationship between the parties.</span>
-                            </li>
-                            <li class="flex">
-                                <span class="font-semibold mr-2">b)</span>
-                                <span>Amendments to this MOU shall be made in writing and agreed upon by both parties.</span>
-                            </li>
-                            <li class="flex">
-                                <span class="font-semibold mr-2">c)</span>
-                                <span>The cooperative will hold meetings when need arises to discuss operations, financial performance, and future initiatives. Members will receive prior notice of all meetings.</span>
-                            </li>
-                        </ul>
-                    </div>
-                </section>
-
-                <!-- Signatures Section -->
-             <section class="mt-12">
-    <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
-        <span class="bg-blue-900 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">9</span>
-        Signatures
-    </h3>
-
-    <div>
-        <p class="text-gray-700 mb-8 text-sm sm:text-base">
-            By signing below, all parties acknowledge that they have read, understood, and agreed to the terms outlined in this document.
-        </p>
-
-        <!-- Cooperative + Operating Company Signatures -->
-        <div class="grid sm:grid-cols-2 gap-8 mb-8">
-
-            <!-- Cooperative Signature -->
-            <div class="border-t-2 border-gray-300 pt-4">
-                <p class="font-semibold text-gray-900">For the Cooperative:</p>
-                <p class="text-sm text-gray-700 mt-2">Name: <span class="font-medium">Adi Stanilus Duniya</span></p>
-                <p class="text-sm text-gray-700">Position: <span class="font-medium">Director</span></p>
-                <p class="text-sm text-gray-700">Date: <span class="font-medium">16/03/2025</span></p>
-
-                <!-- Optional: Cooperative Signature Image -->
-                <div class="mt-3">
-                    <img src="/images/staff-signatures/cooperative-sign.png" alt="Cooperative Signature" class="h-16 object-contain opacity-90">
-                </div>
-            </div>
-
-            <!-- Operating Company Signature -->
-            <div class="border-t-2 border-gray-300 pt-4">
-                <p class="font-semibold text-gray-900">For the Operating Company:</p>
-                <p class="text-sm text-gray-700 mt-2">Name: <span class="font-medium">Eraer Paul Kulugh</span></p>
-                <p class="text-sm text-gray-700">Position: <span class="font-medium">Manager</span></p>
-                <p class="text-sm text-gray-700">Date: <span class="font-medium">16/03/2025</span></p>
-
-                <!-- Optional: Operating Company Signature Image -->
-                <div class="mt-3">
-                    <img src="/images/staff-signatures/operating-sign.png" alt="Operating Company Signature" class="h-16 object-contain opacity-90">
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Member Signature Block -->
-        <div class="border-2 border-blue-200 rounded-lg p-6 bg-blue-50">
-            <p class="font-semibold text-gray-900 mb-4">For the Member:</p>
-
-            <!-- Signature Image -->
-            <div class="mb-4">
-                <% if (user.signature) { %>
-                    <img 
-                        src="<%= user.signature.replace('public\\', '/').replace(/\\/g, '/') %>" 
-                        alt="Member Signature" 
-                        class="h-20 object-contain mx-auto"
-                        style="max-width: 250px;"
-                    >
-                <% } else { %>
-                    <div class="h-20 flex items-center justify-center text-gray-500 italic">
-                        No signature uploaded yet
-                    </div>
-                <% } %>
-            </div>
-
-
-            <!-- Member Details -->
-            <div class="space-y-2 text-sm text-gray-700">
-                <p>Name: 
-                    <span class="font-semibold">
-                        <%= user.firstName %> <%= user.lastName %>
-                    </span>
-                </p>
-
-                <p>Membership No.: 
-                    <span class="font-semibold">
-                        <%= user.membershipID %>
-                    </span>
-                </p>
-
-                <p>Date: 
-                    <span class="font-semibold">
-                        <%= new Date().toLocaleDateString("en-US", { 
-                            weekday: "long", 
-                            year: "numeric", 
-                            month: "long", 
-                            day: "numeric" 
-                        }) %>
-                    </span>
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
-
-
-                <!-- Action Buttons -->
-                <div class="mt-8 flex flex-col sm:flex-row gap-4 no-print">
-                    <button onclick="window.print()" class="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                        </svg>
-                        Print Document
-                    </button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        // Initialize signature pad
-        const canvas = document.getElementById('signaturePad');
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
-        let hasSignature = false;
-
-        // Resize canvas for better quality on mobile
-        function resizeCanvas() {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * ratio;
-            canvas.height = rect.height * ratio;
-            ctx.scale(ratio, ratio);
-            
-            // Set canvas background to white
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        // Call resize on load and window resize
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        // Drawing functions
-        function getCoordinates(e) {
-            const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX || e.touches[0].clientX) - rect.left;
-            const y = (e.clientY || e.touches[0].clientY) - rect.top;
-            return { x, y };
-        }
-
-        function startDrawing(e) {
-            isDrawing = true;
-            const coords = getCoordinates(e);
-            ctx.beginPath();
-            ctx.moveTo(coords.x, coords.y);
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            e.preventDefault();
-            hasSignature = true;
-            const coords = getCoordinates(e);
-            ctx.lineTo(coords.x, coords.y);
-            ctx.strokeStyle = '#1e40af';
-            ctx.lineWidth = 2.5;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.stroke();
-        }
-
-        function stopDrawing() {
-            isDrawing = false;
-        }
-
-        // Mouse events
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseout', stopDrawing);
-
-        // Touch events
-        canvas.addEventListener('touchstart', startDrawing);
-        canvas.addEventListener('touchmove', draw);
-        canvas.addEventListener('touchend', stopDrawing);
-
-        function clearSignature() {
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            hasSignature = false;
-            
-            // Redraw after clearing
-            const rect = canvas.getBoundingClientRect();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        // Populate member data from URL parameters or storage
-        function populateMemberData() {
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            const memberData = {
-                firstName: urlParams.get('firstName') || 'John',
-                lastName: urlParams.get('lastName') || 'Doe',
-                address: urlParams.get('address') || 'Sample Address, Lagos, Nigeria',
-                membershipNumber: urlParams.get('membershipNumber') || 'NCD0000',
-                email: urlParams.get('email') || 'member@example.com'
-            };
-
-            const fullName = `${memberData.firstName} ${memberData.lastName}`.toUpperCase();
-            const currentDate = new Date().toLocaleDateString('en-GB');
-
-            document.getElementById('memberName').textContent = fullName;
-            document.getElementById('memberAddress').textContent = memberData.address;
-            document.getElementById('membershipNumber').textContent = memberData.membershipNumber;
-            document.getElementById('signatureName').textContent = fullName;
-            document.getElementById('signatureMembershipNo').textContent = memberData.membershipNumber;
-            document.getElementById('signatureDate').textContent = currentDate;
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            document.getElementById('errorText').textContent = message;
-            errorDiv.classList.remove('hidden');
-            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => errorDiv.classList.add('hidden'), 5000);
-        }
-
-        function submitAgreement() {
-            // Validate checkbox
-            if (!document.getElementById('agreeTerms').checked) {
-                showError('Please check the agreement box to proceed.');
-                return;
-            }
-
-            // Validate signature
-            if (!hasSignature) {
-                showError('Please provide your digital signature before submitting.');
-                return;
-            }
-
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...';
-
-            // Get signature data
-            const signatureData = canvas.toDataURL('image/png');
-
-            // Simulate API call
-            setTimeout(() => {
-                // In a real implementation, send this data to your backend
-                console.log('Agreement submitted with signature:', signatureData);
-                
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Accept & Submit Agreement';
-                
-                // Show success modal
-                document.getElementById('successModal').classList.add('active');
-            }, 2000);
-        }
-
-        function redirectToDashboard() {
-            // Redirect to member dashboard or home page
-            window.location.href = '/dashboard';
-        }
-
-        // Initialize on page load
-        window.addEventListener('DOMContentLoaded', populateMemberData);
-    </script>
+/* ── Loader ── */
+window.addEventListener('load', () => {
+  const l = document.getElementById('loader');
+  setTimeout(() => { l.style.opacity = '0'; setTimeout(() => l.style.display = 'none', 500); }, 400);
+});
+</script>
 </body>
 </html>

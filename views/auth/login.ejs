@@ -4,446 +4,848 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Club De Stars Cooperative</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-        }
-        .gradient-text {
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-            20%, 40%, 60%, 80% { transform: translateX(10px); }
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        .shake {
-            animation: shake 0.5s ease-in-out;
-        }
-        .alert {
-            border-radius: 0.75rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            animation: fadeIn 0.3s ease-out;
-        }
-        .alert-error {
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
-        }
-        .alert-success {
-            background-color: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-        }
-        .alert-info {
-            background-color: #eff6ff;
-            border: 1px solid #bfdbfe;
-            color: #1e40af;
-        }
-        .password-toggle {
-            cursor: pointer;
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
-        }
-        .password-toggle:hover {
-            color: #1e40af;
-        }
-        .input-wrapper {
-            position: relative;
-        }
-        .btn-loading {
-            position: relative;
-            pointer-events: none;
-        }
-        .btn-loading::after {
-            content: "";
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            top: 50%;
-            left: 50%;
-            margin-left: -8px;
-            margin-top: -8px;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 0.6s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%); }
 
-        <style>
-        .hidden {
-  display: none;
-}
+        @keyframes fadeIn  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes shake   { 0%,100%{transform:translateX(0)} 10%,30%,50%,70%,90%{transform:translateX(-8px)} 20%,40%,60%,80%{transform:translateX(8px)} }
+        @keyframes spin    { to{transform:rotate(360deg)} }
+        @keyframes float   { 0%,100%{transform:translateY(0);opacity:.4} 50%{transform:translateY(-14px);opacity:1} }
+        @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:none;opacity:1} }
 
-.loader-screen {
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(135deg, #0a1a2f, #102a44);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .shake   { animation: shake 0.45s ease-in-out; }
 
-.logo span {
-  font-size: 52px;
-  font-weight: 600;
-  color: #5cc8ff;
-  display: inline-block;
-  animation: float 1.5s infinite ease-in-out;
-  letter-spacing: 1px;
-}
+        /* ── Loader ── */
+        .loader-screen {
+            position:fixed;inset:0;background:linear-gradient(135deg,#0a1a2f,#102a44);
+            display:flex;justify-content:center;align-items:center;z-index:9999;
+        }
+        .logo span {
+            font-size:52px;font-weight:600;color:#5cc8ff;
+            display:inline-block;animation:float 1.5s infinite ease-in-out;letter-spacing:1px;
+        }
+        .logo span:nth-child(1){animation-delay:0s}  .logo span:nth-child(2){animation-delay:.1s}
+        .logo span:nth-child(3){animation-delay:.2s} .logo span:nth-child(4){animation-delay:.3s}
+        .logo span:nth-child(5){animation-delay:.4s} .logo span:nth-child(6){animation-delay:.5s}
+        .logo span:nth-child(7){animation-delay:.6s} .logo span:nth-child(8){animation-delay:.7s}
+        .logo span:nth-child(9){animation-delay:.8s}
 
-.logo span:nth-child(n) {
-  animation-delay: calc(var(--i) * 0.1s);
-}
+        /* ── Alerts ── */
+        .alert { border-radius:.75rem;padding:.9rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.75rem;font-size:13px; }
+        .alert-error   { background:#fef2f2;border:1px solid #fecaca;color:#991b1b; }
+        .alert-success { background:#f0fdf4;border:1px solid #bbf7d0;color:#166534; }
 
-.logo span:nth-child(1) { --i: 0; }
-.logo span:nth-child(2) { --i: 1; }
-.logo span:nth-child(3) { --i: 2; }
-.logo span:nth-child(4) { --i: 3; }
-.logo span:nth-child(5) { --i: 4; }
-.logo span:nth-child(6) { --i: 5; }
-.logo span:nth-child(7) { --i: 6; }
-.logo span:nth-child(8) { --i: 7; }
-.logo span:nth-child(9) { --i: 8; }
+        /* ── Form ── */
+        .pw-toggle { cursor:pointer;position:absolute;right:1rem;top:50%;transform:translateY(-50%);color:#6b7280;transition:color .2s; }
+        .pw-toggle:hover { color:#1e40af; }
+        .input-rel { position:relative; }
+        .btn-spin { position:relative;pointer-events:none;color:transparent !important; }
+        .btn-spin::after {
+            content:"";position:absolute;width:18px;height:18px;top:50%;left:50%;
+            margin:-9px 0 0 -9px;border:2px solid #fff;border-radius:50%;
+            border-top-color:transparent;animation:spin .6s linear infinite;
+        }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); opacity: 0.4; }
-  50% { transform: translateY(-14px); opacity: 1; }
-}
+        /* ── Status modal overlay ── */
+        .s-overlay {
+            display:none;position:fixed;inset:0;z-index:9900;
+            background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+            align-items:flex-end;justify-content:center;
+        }
+        .s-overlay.open { display:flex; }
+        .s-card {
+            background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;
+            max-height:92vh;overflow-y:auto;padding:24px 20px 36px;
+            animation:slideUp .3s cubic-bezier(.16,1,.3,1);
+        }
+        .s-card::-webkit-scrollbar{width:3px}
+        .s-card::-webkit-scrollbar-thumb{background:#e5e7eb;border-radius:4px;}
+        .s-handle { width:36px;height:4px;background:#e5e7eb;border-radius:2px;margin:0 auto 18px; }
+
+        /* ── Modal content ── */
+        .s-icon  { width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px; }
+        .s-badge { display:inline-flex;align-items:center;gap:5px;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px; }
+        .s-title { font-size:19px;font-weight:700;color:#111827;margin-bottom:6px;line-height:1.3; }
+        .s-body  { font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:14px; }
+
+        .info-box { background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;margin-bottom:14px;text-align:left; }
+        .info-row { display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;border-bottom:1px solid #f1f5f9; }
+        .info-row:last-child { border-bottom:none; }
+        .info-lbl { color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:.06em; }
+        .info-val { font-weight:600;font-size:13px;color:#111827; }
+
+        .bank-box { background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:14px;text-align:left; }
+        .bank-row { display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;border-bottom:1px solid #e0f2fe; }
+        .bank-row:last-child { border-bottom:none; }
+        .copy-btn { background:#dbeafe;color:#1d4ed8;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-weight:600;transition:background .2s; }
+        .copy-btn:hover { background:#bfdbfe; }
+
+        .pay-card { border:2px solid #e5e7eb;border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;background:#fff;margin-bottom:8px; }
+        .pay-card:hover { border-color:#3b82f6;background:#eff6ff; }
+        .pay-card.sel   { border-color:#1d4ed8;background:#eff6ff;box-shadow:0 0 0 3px rgba(59,130,246,.12); }
+        .pay-card-icon  { width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+
+        .ferr { color:#ef4444;font-size:12px;margin-top:4px;display:none; }
+        .ferr.show { display:block; }
+
+        .m-btn { width:100%;padding:12px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;margin-bottom:8px;display:block;text-align:center;text-decoration:none; }
+        .m-btn-primary   { background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff; }
+        .m-btn-primary:hover { opacity:.88; }
+        .m-btn-secondary { background:none;border:1px solid #e5e7eb;color:#6b7280; }
+        .m-btn-secondary:hover { background:#f9fafb; }
+        .m-btn-danger    { background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);color:#dc2626; }
+
+        .spin-ring { border:3px solid rgba(255,255,255,.3);border-top:3px solid #fff;border-radius:50%;width:16px;height:16px;animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;margin-left:8px; }
+
+        .notice-green { background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;font-size:12px;color:#166534;margin-bottom:14px; }
+        .notice-red   { background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:12px;font-size:12px;color:#991b1b;margin-bottom:14px; }
+        .notice-amber { background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:12px;font-size:12px;color:#92400e;margin-bottom:14px; }
+
+        @media(min-width:640px) {
+            .s-overlay { align-items:center;padding:20px; }
+            .s-card    { border-radius:20px;max-height:88vh;padding:32px 28px; }
+            .s-handle  { display:none; }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
 
-    <div id="loader-screen" class="loader-screen">
-        <div class="logo">
-            <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
-        </div>
+<!-- ── Loader ── -->
+<div id="loader-screen" class="loader-screen">
+    <div class="logo">
+        <span>C</span><span>l</span><span>u</span><span>b</span><span>D</span><span>e</span><span>S</span><span>t</span><span>a</span>
     </div>
-    <div id="main-content" class="hidden">
+</div>
 
-        <!-- Header -->
-        <header class="bg-white shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div class="flex justify-between items-center">
-                     
+<!-- ════════════════════════════════════════════════════════
+     ALL STATUS MODALS  (always in DOM, opened via JS)
+════════════════════════════════════════════════════════ -->
+
+<!-- MODAL 1 — Payment Pending -->
+<div class="s-overlay" id="m-payment-pending">
+  <div class="s-card">
+    <div class="s-handle"></div>
+    <div class="s-icon" id="pp-icon" style="background:#fffbeb;color:#d97706;">
+      <i class="fas fa-clock" id="pp-icon-i"></i>
+    </div>
+    <div class="text-center">
+      <div class="s-badge" id="pp-badge" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">
+        <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+        <span id="pp-badge-txt">Awaiting Approval</span>
+      </div>
+      <div class="s-title" id="pp-title">Payment Pending Approval</div>
+      <div class="s-body"  id="pp-body">Your registration payment has been submitted and is awaiting admin confirmation. This usually takes up to 30 minutes during business hours.</div>
+    </div>
+    <div class="info-box">
+      <div class="info-row"><span class="info-lbl">Submitted</span><span class="info-val" id="pp-submitted">—</span></div>
+      <div class="info-row"><span class="info-lbl">Method</span><span class="info-val" id="pp-method">—</span></div>
+      <div class="info-row"><span class="info-lbl">Status</span><span class="info-val" style="color:#d97706;">Pending Admin Review</span></div>
+    </div>
+    <!-- Shown when > 24 hrs -->
+    <div id="pp-over24" style="display:none;">
+      <div class="notice-red"><i class="fas fa-exclamation-circle mr-1"></i>It's been over 24 hours. Please contact the admin with your transfer receipt to resolve this.</div>
+      <a href="mailto:support@clubdestars.com" class="m-btn m-btn-danger"><i class="fas fa-envelope mr-1"></i>Contact Admin</a>
+    </div>
+    <!-- Shown when < 24 hrs -->
+    <div id="pp-normal">
+      <div class="notice-green"><i class="fas fa-info-circle mr-1"></i>You'll receive an email notification once your payment is confirmed and your account is activated.</div>
+    </div>
+    <button class="m-btn m-btn-secondary" onclick="closeModal('m-payment-pending')">Back to Login</button>
+  </div>
+</div>
+
+<!-- MODAL 2 — Payment Approved, Account Still Pending -->
+<div class="s-overlay" id="m-account-pending">
+  <div class="s-card">
+    <div class="s-handle"></div>
+    <div class="s-icon" style="background:#eff6ff;color:#2563eb;"><i class="fas fa-user-clock"></i></div>
+    <div class="text-center">
+      <div class="s-badge" style="background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;">
+        <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+        Under Review
+      </div>
+      <div class="s-title">Payment Confirmed</div>
+      <div class="s-body">Your registration payment has been approved. Your account details are currently being reviewed by our team and will be activated shortly.</div>
+    </div>
+    <div class="notice-amber"><i class="fas fa-info-circle mr-1"></i>If your account hasn't been activated within 24 hours, please contact support.</div>
+    <a href="mailto:support@clubdestars.com" class="m-btn m-btn-primary"><i class="fas fa-envelope mr-1"></i>Contact Support</a>
+    <button class="m-btn m-btn-secondary" onclick="closeModal('m-account-pending')">Back to Login</button>
+  </div>
+</div>
+
+<!-- MODAL 3 — Deactivated: Pay to Reactivate -->
+<div class="s-overlay" id="m-deactivated">
+  <div class="s-card">
+    <div class="s-handle"></div>
+    <div class="s-icon" style="background:#fef2f2;color:#dc2626;"><i class="fas fa-user-slash"></i></div>
+    <div class="text-center">
+      <div class="s-badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;">
+        <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+        Deactivated
+      </div>
+      <div class="s-title">Account Deactivated</div>
+      <div class="s-body">Your account has been deactivated. Pay the registration fee of <strong id="dc-fee-display">₦0</strong> to reactivate your access.</div>
+    </div>
+
+    <!-- Step 1: Choose method -->
+    <div id="deact-step1">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-bottom:10px;">Choose Payment Method</p>
+      <div class="pay-card" id="dc-card-paystack" onclick="selectDeactPay('paystack')">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="pay-card-icon" style="background:#dcfce7;"><i class="fas fa-bolt" style="color:#16a34a;"></i></div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:#111;">Paystack
+              <span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px;">Instant</span>
+            </div>
+            <div style="font-size:11px;color:#9ca3af;">Card, bank transfer or USSD</div>
+          </div>
+          <div style="width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;" id="dc-ri-paystack"></div>
+        </div>
+      </div>
+      <div class="pay-card" id="dc-card-manual" onclick="selectDeactPay('manual')">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="pay-card-icon" style="background:#dbeafe;"><i class="fas fa-university" style="color:#1d4ed8;"></i></div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:#111;">Manual Bank Transfer</div>
+            <div style="font-size:11px;color:#9ca3af;">Activated after admin confirms</div>
+          </div>
+          <div style="width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;" id="dc-ri-manual"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Manual transfer details (shown after selecting manual) -->
+    <div id="deact-step2" style="display:none;">
+      <!-- Bank details — populated dynamically by JS -->
+      <div class="bank-box" id="dc-bank-box" style="display:none;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin-bottom:8px;">
+          <i class="fas fa-university" style="color:#3b82f6;margin-right:4px;"></i>Transfer Details
+        </div>
+        <div class="bank-row">
+          <span style="color:#6b7280;font-size:12px;">Bank</span>
+          <span style="font-weight:600;" id="dc-bank-name">—</span>
+        </div>
+        <div class="bank-row">
+          <span style="color:#6b7280;font-size:12px;">Account Name</span>
+          <span style="font-weight:600;" id="dc-acct-name">—</span>
+        </div>
+        <div class="bank-row">
+          <span style="color:#6b7280;font-size:12px;">Account No.</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-weight:700;font-family:monospace;font-size:14px;" id="dc-acct-num">—</span>
+            <button type="button" class="copy-btn" onclick="copyDcAcct(event)">Copy</button>
+          </div>
+        </div>
+        <div style="background:#dbeafe;border-radius:8px;padding:8px;margin-top:8px;font-size:11px;color:#1e40af;">
+          <i class="fas fa-exclamation-circle mr-1"></i>Transfer exactly <strong id="dc-fee-transfer">₦0</strong> and use your full name as the narration.
+        </div>
+      </div>
+      <!-- Shown if no bank configured -->
+      <div class="notice-amber" id="dc-no-bank" style="display:none;">
+        <i class="fas fa-exclamation-triangle mr-1"></i>Bank details not configured. Contact admin before proceeding.
+      </div>
+      <!-- Payer name -->
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;display:block;margin-bottom:6px;">Your Name on Transfer *</label>
+        <input type="text" id="dc-payer-name" placeholder="Full name used when making the transfer"
+          style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;transition:border .2s;"
+          onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
+        <p class="ferr" id="dc-payer-err">Payer name is required.</p>
+      </div>
+      <div class="notice-green">
+        <i class="fas fa-clock mr-1"></i>Your account will be reactivated within <strong>30 minutes</strong> once the transfer is confirmed. You'll receive an email.
+      </div>
+    </div>
+
+    <!-- Hidden: stores userId populated by JS -->
+    <input type="hidden" id="dc-user-id" value="">
+
+    <p class="ferr" id="dc-method-err" style="margin-bottom:8px;">Please select a payment method.</p>
+
+    <button class="m-btn m-btn-primary" id="dc-submit-btn" onclick="submitDeactPay()">
+      <span id="dc-btn-txt">Pay to Reactivate</span>
+    </button>
+    <button class="m-btn m-btn-secondary" id="dc-cancel-btn" onclick="closeModal('m-deactivated')">Cancel</button>
+
+    <!-- Success state shown after manual submission -->
+    <div id="dc-success" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:18px;text-align:center;margin-top:4px;">
+      <i class="fas fa-check-circle" style="color:#22c55e;font-size:30px;display:block;margin-bottom:10px;"></i>
+      <div style="font-size:14px;font-weight:700;color:#166534;margin-bottom:4px;">Reactivation Request Submitted!</div>
+      <div style="font-size:12px;color:#166534;">We'll notify you by email once your account is reactivated (usually within 30 minutes).</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 4 — Suspended -->
+<div class="s-overlay" id="m-suspended">
+  <div class="s-card">
+    <div class="s-handle"></div>
+    <div class="s-icon" style="background:#fff7ed;color:#ea580c;"><i class="fas fa-ban"></i></div>
+    <div class="text-center">
+      <div class="s-badge" style="background:#ffedd5;color:#c2410c;border:1px solid #fdba74;">
+        <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+        Suspended
+      </div>
+      <div class="s-title">Account Suspended</div>
+      <div class="s-body">Your account has been temporarily suspended. Please contact support to understand the reason and resolve the issue.</div>
+    </div>
+    <a href="mailto:support@clubdestars.com" class="m-btn m-btn-primary"><i class="fas fa-envelope mr-1"></i>Contact Support</a>
+    <button class="m-btn m-btn-secondary" onclick="closeModal('m-suspended')">Back to Login</button>
+  </div>
+</div>
+
+<!-- MODAL 5 — Rejected -->
+<div class="s-overlay" id="m-rejected">
+  <div class="s-card">
+    <div class="s-handle"></div>
+    <div class="s-icon" style="background:#fef2f2;color:#dc2626;"><i class="fas fa-times-circle"></i></div>
+    <div class="text-center">
+      <div class="s-badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;">
+        <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+        Application Rejected
+      </div>
+      <div class="s-title">Registration Rejected</div>
+      <div class="s-body">Unfortunately your membership application was not approved. Contact support for more information or to appeal the decision.</div>
+    </div>
+    <a href="mailto:support@clubdestars.com" class="m-btn m-btn-primary"><i class="fas fa-envelope mr-1"></i>Contact Support</a>
+    <button class="m-btn m-btn-secondary" onclick="closeModal('m-rejected')">Back to Login</button>
+  </div>
+</div>
+
+<!-- MODAL 6 — No Payment / Payment Failed -->
+<div class="s-overlay" id="m-no-payment">
+  <div class="s-card">
+    <div class="s-handle"></div>
+    <div class="s-icon" id="np-icon" style="background:#fffbeb;color:#d97706;">
+      <i class="fas fa-receipt" id="np-icon-i"></i>
+    </div>
+    <div class="text-center">
+      <div class="s-badge" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">
+        <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+        <span id="np-badge-txt">Payment Required</span>
+      </div>
+      <div class="s-title" id="np-title">Registration Fee Unpaid</div>
+      <div class="s-body"  id="np-body">Your account was created but the registration fee hasn't been paid yet. Complete your payment to activate your account.</div>
+    </div>
+    <a href="/cds-cooperative" class="m-btn m-btn-primary"><i class="fas fa-credit-card mr-1"></i>Complete Registration</a>
+    <button class="m-btn m-btn-secondary" onclick="closeModal('m-no-payment')">Back to Login</button>
+  </div>
+</div>
+
+<!-- MODAL 7 — Deleted -->
+<div class="s-overlay" id="m-deleted">
+  <div class="s-card">
+    <div class="s-handle"></div>
+    <div class="s-icon" style="background:#fef2f2;color:#dc2626;"><i class="fas fa-user-times"></i></div>
+    <div class="text-center">
+      <div class="s-badge" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;">
+        <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+        Account Removed
+      </div>
+      <div class="s-title">Account No Longer Exists</div>
+      <div class="s-body">This account has been permanently removed. Please contact support if you believe this is an error.</div>
+    </div>
+    <a href="mailto:support@clubdestars.com" class="m-btn m-btn-primary"><i class="fas fa-envelope mr-1"></i>Contact Support</a>
+    <button class="m-btn m-btn-secondary" onclick="closeModal('m-deleted')">Back to Login</button>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════════════ -->
+<div id="main-content" style="display:none;">
+
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <img src="/media/assets/logo/log.png" alt=""
+                         style="width:40px;height:40px;object-fit:contain;"
+                         onerror="this.style.display='none'">
                     <div>
-                        <img src="log.png" alt="" width="10%" height="10%">
-                        <h1 class="text-1xl font-bold text-gray-900">CLUB DE STARS</h1>
-                        <p class="text-sm text-gray-600">Multipurpose Cooperative Society Ltd</p>
+                        <h1 class="text-base font-bold text-gray-900">CLUB DE STARS</h1>
+                        <p class="text-xs text-gray-600">Multipurpose Cooperative Society Ltd</p>
                     </div>
-                    
                 </div>
             </div>
-        </header>
-    
-        <!-- Main Content -->
-        <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-            <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-                <!-- Left Side - Welcome Info -->
-                <div class="fade-in order-2 lg:order-1">
-                    <div class="gradient-bg rounded-3xl p-6 md:p-8 text-white mb-6 md:mb-8">
-                        <h2 class="text-2xl md:text-3xl font-bold mb-4">Welcome Back!</h2>
-                        <p class="text-blue-50 mb-6">
-                            Access your Club De Stars account to manage your savings, loans, and cooperative benefits.
-                        </p>
-                        <div class="space-y-4">
-                            <div class="flex items-start">
-                                <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                </svg>
-                                <div>
-                                    <h4 class="font-semibold mb-1">Secure Access</h4>
-                                    <p class="text-blue-50 text-sm">Your data is protected with advanced security</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start">
-                                <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                </svg>
-                                <div>
-                                    <h4 class="font-semibold mb-1">Real-time Updates</h4>
-                                    <p class="text-blue-50 text-sm">Track your financial activities instantly</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start">
-                                <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                </svg>
-                                <div>
-                                    <h4 class="font-semibold mb-1">24/7 Support</h4>
-                                    <p class="text-blue-50 text-sm">We're here to help whenever you need</p>
-                                </div>
-                            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+
+            <!-- Left: Info Panel -->
+            <div class="fade-in order-2 lg:order-1">
+                <div class="gradient-bg rounded-3xl p-6 md:p-8 text-white mb-6">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4">Welcome Back!</h2>
+                    <p class="text-blue-50 mb-6">Access your Club De Stars account to manage your savings, loans, and cooperative benefits.</p>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <div><h4 class="font-semibold mb-1">Secure Access</h4><p class="text-blue-50 text-sm">Your data is protected with advanced security</p></div>
+                        </div>
+                        <div class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <div><h4 class="font-semibold mb-1">Real-time Updates</h4><p class="text-blue-50 text-sm">Track your financial activities instantly</p></div>
+                        </div>
+                        <div class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <div><h4 class="font-semibold mb-1">24/7 Support</h4><p class="text-blue-50 text-sm">We're here to help whenever you need</p></div>
                         </div>
                     </div>
-    
-                    <div class="bg-blue-50 rounded-2xl p-4 md:p-6 border border-blue-100">
-                        <h3 class="font-bold text-gray-900 text-lg mb-3">Need Help?</h3>
-                        <ul class="space-y-2 text-sm md:text-base text-gray-700">
-                            <li class="flex items-center">
-                                <svg class="w-5 h-5 text-blue-900 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-                                </svg>
-                                <a href="mailto:support@clubdestars.com" class="hover:text-blue-900 transition">support@clubdestars.com</a>
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="w-5 h-5 text-blue-900 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                                </svg>
-                                <a href="tel:+2341234567890" class="hover:text-blue-900 transition">+234 123 456 7890</a>
-                            </li>
-                        </ul>
+                </div>
+                <div class="bg-blue-50 rounded-2xl p-4 md:p-6 border border-blue-100">
+                    <h3 class="font-bold text-gray-900 text-lg mb-3">Need Help?</h3>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope text-blue-900 mr-2 w-5 text-center"></i>
+                            <a href="mailto:support@clubdestars.com" class="hover:text-blue-900">support@clubdestars.com</a>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone text-blue-900 mr-2 w-5 text-center"></i>
+                            <a href="tel:+2341234567890" class="hover:text-blue-900">+234 123 456 7890</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right: Login Form -->
+            <div class="fade-in order-1 lg:order-2">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Login to Your Account</h2>
+                    <p class="text-gray-600 mb-6 text-sm">Enter your credentials to access your dashboard</p>
+
+                    <!-- Server-side error (e.g. from password reset redirect) -->
+                    <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle flex-shrink-0"></i>
+                        <span><%= error %></span>
                     </div>
-                </div>
-    
-                <!-- Right Side - Login Form -->
-                <div class="fade-in order-1 lg:order-2">
-                    <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Login to Your Account</h2>
-                        <p class="text-gray-600 mb-6">Enter your credentials to access your dashboard</p>
-    
-                        <!-- Alert Messages (populated by backend) -->
-                        <% if (typeof error !== 'undefined' && error) { %>
-                            <div class="alert alert-error" id="alertBox">
-                                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span><%= error %></span>
-                            </div>
-                        <% } %>
-    
-                        <% if (typeof success !== 'undefined' && success) { %>
-                            <div class="alert alert-success" id="alertBox">
-                                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span><%= success %></span>
-                            </div>
-                        <% } %>
-    
-                        <% if (typeof info !== 'undefined' && info) { %>
-                            <div class="alert alert-info" id="alertBox">
-                                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span><%= info %></span>
-                            </div>
-                        <% } %>
-    
-                        <form id="loginForm" method="POST" action="/login" class="space-y-5">
-                            <div>
-                                <label for="email" class="block text-gray-700 font-medium mb-2">
-                                    Email Address <span class="text-red-500">*</span>
-                                </label>
-                                <input 
-                                    type="email" 
-                                    id="email"
-                                    name="email" 
-                                    required 
-                                    autocomplete="email"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition" 
-                                    placeholder="your@email.com">
-                                <p class="text-red-600 text-sm mt-1 hidden" id="emailError"></p>
-                            </div>
-    
-                            <div>
-                                <label for="password" class="block text-gray-700 font-medium mb-2">
-                                    Password <span class="text-red-500">*</span>
-                                </label>
-                                <div class="input-wrapper">
-                                    <input 
-                                        type="password" 
-                                        id="password"
-                                        name="password" 
-                                        required 
-                                        autocomplete="current-password"
-                                        class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition" 
-                                        placeholder="Enter your password">
-                                    <i class="fas fa-eye password-toggle" id="togglePassword" onclick="togglePasswordVisibility()"></i>
-                                </div>
-                                <p class="text-red-600 text-sm mt-1 hidden" id="passwordError"></p>
-                            </div>
-    
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                <div class="flex items-center">
-                                    <input 
-                                        type="checkbox" 
-                                        id="remember" 
-                                        name="remember"
-                                        class="w-4 h-4 text-blue-900 border-gray-300 rounded focus:ring-blue-900 cursor-pointer">
-                                    <label for="remember" class="ml-2 text-sm text-gray-700 cursor-pointer">Remember me</label>
-                                </div>
-                                <a href="/forgot-password" class="text-sm text-blue-900 hover:underline font-medium">Forgot Password?</a>
-                            </div>
-    
-                            <button 
-                                type="submit" 
-                                id="loginButton"
-                                class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg hover:shadow-xl transition transform hover:scale-105 active:scale-95">
-                                Login to Account
-                            </button>
-    
-                            <div class="text-center pt-4 border-t border-gray-200">
-                                <p class="text-gray-600">
-                                    Don't have an account? 
-                                    <a href="/cds-cooperative" class="text-blue-900 hover:underline font-semibold">Register Here</a>
-                                </p>
-                            </div>
-                        </form>
+                    <% } %>
+                    <% if (typeof success !== 'undefined' && success) { %>
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle flex-shrink-0"></i>
+                        <span><%= success %></span>
                     </div>
+                    <% } %>
+
+                    <!-- JS-populated inline error box -->
+                    <div id="loginErrorBox" class="alert alert-error" style="display:none;">
+                        <i class="fas fa-exclamation-circle flex-shrink-0"></i>
+                        <span id="loginErrorTxt"></span>
+                    </div>
+
+                    <form id="loginForm" class="space-y-5">
+                        <div>
+                            <label for="email" class="block text-gray-700 font-medium mb-2 text-sm">
+                                Email Address <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email" id="email" name="email" required autocomplete="email"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition text-sm"
+                                placeholder="your@email.com">
+                            <p class="text-red-600 text-xs mt-1 hidden" id="emailError"></p>
+                        </div>
+
+                        <div>
+                            <label for="password" class="block text-gray-700 font-medium mb-2 text-sm">
+                                Password <span class="text-red-500">*</span>
+                            </label>
+                            <div class="input-rel">
+                                <input type="password" id="password" name="password" required autocomplete="current-password"
+                                    class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition text-sm"
+                                    placeholder="Enter your password">
+                                <i class="fas fa-eye pw-toggle" id="togglePw" onclick="togglePassword()"></i>
+                            </div>
+                            <p class="text-red-600 text-xs mt-1 hidden" id="passwordError"></p>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="remember" name="remember"
+                                    class="w-4 h-4 text-blue-900 border-gray-300 rounded cursor-pointer">
+                                <label for="remember" class="ml-2 text-sm text-gray-700 cursor-pointer">Remember me</label>
+                            </div>
+                            <a href="/forgot-password" class="text-sm text-blue-900 hover:underline font-medium">Forgot Password?</a>
+                        </div>
+
+                        <button type="submit" id="loginBtn"
+                            class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-sm hover:shadow-xl transition transform hover:scale-105 active:scale-95">
+                            Login to Account
+                        </button>
+
+                        <div class="text-center pt-4 border-t border-gray-200">
+                            <p class="text-gray-600 text-sm">
+                                Don't have an account?
+                                <a href="/cds-cooperative" class="text-blue-900 hover:underline font-semibold">Register Here</a>
+                            </p>
+                        </div>
+                    </form>
                 </div>
             </div>
-    
-            <div class="text-center mt-8">
-                <a href="/" class="text-blue-900 hover:text-blue-700 font-medium inline-flex items-center gap-2">
-                    <i class="fa-solid fa-arrow-left"></i> Back to Home
-                </a>
+
+        </div>
+
+        <div class="text-center mt-8">
+            <a href="/" class="text-blue-900 hover:text-blue-700 font-medium inline-flex items-center gap-2 text-sm">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 text-white py-8 px-4 mt-16">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="text-gray-400 mb-2 text-sm">CLUB DE STARS MULTIPURPOSE COOPERATIVE SOCIETY LTD</p>
+            <p class="text-xs text-gray-500">Powered by <a href="/" class="text-blue-400 hover:text-blue-300">JESZ LTD</a></p>
+            <div class="mt-4 flex flex-wrap justify-center gap-4 text-xs text-gray-400">
+                <a href="#" class="hover:text-white">Privacy Policy</a>
+                <a href="#" class="hover:text-white">Terms of Service</a>
+                <a href="#" class="hover:text-white">Contact Support</a>
             </div>
-        </main>
-    
-        <!-- Footer -->
-        <footer class="bg-gray-900 text-white py-8 px-4 sm:px-6 lg:px-8 mt-16">
-            <div class="max-w-7xl mx-auto text-center">
-                <p class="text-gray-400 mb-2">CLUB DE STARS MULTIPURPOSE COOPERATIVE SOCIETY LTD</p>
-                <p class="text-sm text-gray-500">Powered by <a href="/" class="text-blue-400 hover:text-blue-300">JESZ LTD</a></p>
-                <div class="mt-4 flex flex-wrap justify-center gap-4 md:gap-6 text-sm text-gray-400">
-                    <a href="/privacy" class="hover:text-white transition">Privacy Policy</a>
-                    <a href="/terms" class="hover:text-white transition">Terms of Service</a>
-                    <a href="/contact" class="hover:text-white transition">Contact Support</a>
-                </div>
-            </div>
-        </footer>
-    </div>
+        </div>
+    </footer>
 
-    <script>
-        // Password visibility toggle
-        function togglePasswordVisibility() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.getElementById('togglePassword');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('fa-eye');
-                toggleIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('fa-eye-slash');
-                toggleIcon.classList.add('fa-eye');
-            }
-        }
-
-        // Client-side validation
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const emailError = document.getElementById('emailError');
-            const passwordError = document.getElementById('passwordError');
-            const loginButton = document.getElementById('loginButton');
-            
-            // Reset errors
-            emailError.classList.add('hidden');
-            passwordError.classList.add('hidden');
-            
-            let isValid = true;
-            
-            // Email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email) {
-                emailError.textContent = 'Email address is required';
-                emailError.classList.remove('hidden');
-                document.getElementById('email').classList.add('shake');
-                setTimeout(() => document.getElementById('email').classList.remove('shake'), 500);
-                isValid = false;
-            } else if (!emailRegex.test(email)) {
-                emailError.textContent = 'Please enter a valid email address';
-                emailError.classList.remove('hidden');
-                document.getElementById('email').classList.add('shake');
-                setTimeout(() => document.getElementById('email').classList.remove('shake'), 500);
-                isValid = false;
-            }
-            
-            // Password validation
-            if (!password) {
-                passwordError.textContent = 'Password is required';
-                passwordError.classList.remove('hidden');
-                document.getElementById('password').classList.add('shake');
-                setTimeout(() => document.getElementById('password').classList.remove('shake'), 500);
-                isValid = false;
-            } else if (password.length < 3) {
-                passwordError.textContent = 'Password must be at least 6 characters';
-                passwordError.classList.remove('hidden');
-                document.getElementById('password').classList.add('shake');
-                setTimeout(() => document.getElementById('password').classList.remove('shake'), 500);
-                isValid = false;
-            }
-            
-            if (!isValid) {
-                e.preventDefault();
-            } else {
-                // Show loading state
-                loginButton.classList.add('btn-loading');
-                loginButton.textContent = '';
-            }
-        });
-
-        // Auto-hide alert messages after 5 seconds
-        const alertBox = document.getElementById('alertBox');
-        if (alertBox) {
-            setTimeout(() => {
-                alertBox.style.animation = 'fadeOut 0.3s ease-out';
-                setTimeout(() => alertBox.remove(), 300);
-            }, 5000);
-        }
-
-        // Add fadeOut animation
-        const style = document.createElement('style');
-        style.textContent = '@keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }';
-        document.head.appendChild(style);
-    </script>
-
+</div><!-- /#main-content -->
 
 
 <script>
-window.addEventListener("load", () => {
-  const loader = document.getElementById("loader-screen");
-  const main = document.getElementById("main-content");
-
-  setTimeout(() => {
-    loader.style.opacity = "0";
-    loader.style.transition = "opacity 0.6s ease";
-
+/* ════════════════════════════════════════════════════════
+   LOADER
+════════════════════════════════════════════════════════ */
+window.addEventListener('load', () => {
+    const loader = document.getElementById('loader-screen');
+    const main   = document.getElementById('main-content');
     setTimeout(() => {
-      loader.style.display = "none";
-      main.classList.remove("hidden");
-    }, 600);
-
-  }, 2500); // adjust duration
+        loader.style.opacity    = '0';
+        loader.style.transition = 'opacity 0.6s ease';
+        setTimeout(() => {
+            loader.style.display = 'none';
+            main.style.display   = 'block';
+        }, 600);
+    }, 1600);
 });
+
+/* ════════════════════════════════════════════════════════
+   MODAL HELPERS
+════════════════════════════════════════════════════════ */
+function openModal(id) {
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
+}
+function closeModal(id) {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
+}
+
+/* ════════════════════════════════════════════════════════
+   SHOW MODAL — fills in dynamic data then opens
+════════════════════════════════════════════════════════ */
+function showModal(state, data) {
+    data = data || {};
+
+    switch (state) {
+
+        case 'payment_pending': {
+            const over24 = !!data.over24hrs;
+            // Icon
+            const icon = document.getElementById('pp-icon');
+            const iconI = document.getElementById('pp-icon-i');
+            icon.style.background = over24 ? '#fef2f2' : '#fffbeb';
+            icon.style.color      = over24 ? '#dc2626' : '#d97706';
+            iconI.className       = over24 ? 'fas fa-exclamation-triangle' : 'fas fa-clock';
+            // Badge
+            const badge = document.getElementById('pp-badge');
+            badge.style.background   = over24 ? '#fee2e2' : '#fef3c7';
+            badge.style.color        = over24 ? '#991b1b' : '#92400e';
+            badge.style.borderColor  = over24 ? '#fca5a5' : '#fcd34d';
+            document.getElementById('pp-badge-txt').textContent = over24 ? 'Overdue Review' : 'Awaiting Approval';
+            // Title & body
+            document.getElementById('pp-title').textContent = over24
+                ? 'Payment Not Confirmed Yet' : 'Payment Pending Approval';
+            document.getElementById('pp-body').textContent = over24
+                ? "Your payment was submitted over 24 hours ago and still hasn't been confirmed. Please contact admin with your transfer receipt."
+                : 'Your registration payment has been submitted and is awaiting admin confirmation. This usually takes up to 30 minutes during business hours.';
+            // Info rows
+            document.getElementById('pp-submitted').textContent = data.submittedAt || '—';
+            document.getElementById('pp-method').textContent    = data.paymentMethod === 'manual' ? 'Manual Bank Transfer' : 'Paystack';
+            // Banners
+            document.getElementById('pp-over24').style.display = over24 ? 'block' : 'none';
+            document.getElementById('pp-normal').style.display = over24 ? 'none'  : 'block';
+            openModal('m-payment-pending');
+            break;
+        }
+
+        case 'account_pending':
+            openModal('m-account-pending');
+            break;
+
+        case 'deactivated': {
+            const acct = data.companyAccount || {};
+            const fee  = data.registrationFee || 0;
+            const hasBank = !!(acct.bankName && acct.accountNumber);
+
+            // Fee display in body
+            document.getElementById('dc-fee-display').textContent  = '₦' + fee.toLocaleString();
+            document.getElementById('dc-fee-transfer').textContent  = '₦' + fee.toLocaleString();
+            // Button label
+            document.getElementById('dc-btn-txt').textContent = 'Pay ₦' + fee.toLocaleString() + ' to Reactivate';
+            // userId
+            document.getElementById('dc-user-id').value = data.userId || '';
+            // Bank details
+            document.getElementById('dc-bank-box').style.display  = hasBank ? 'block' : 'none';
+            document.getElementById('dc-no-bank').style.display   = hasBank ? 'none'  : 'block';
+            if (hasBank) {
+                document.getElementById('dc-bank-name').textContent = acct.bankName    || '—';
+                document.getElementById('dc-acct-name').textContent = acct.accountName  || '—';
+                document.getElementById('dc-acct-num').textContent  = acct.accountNumber || '—';
+            }
+            // Reset step states
+            document.getElementById('deact-step1').style.display   = 'block';
+            document.getElementById('deact-step2').style.display   = 'none';
+            document.getElementById('dc-submit-btn').style.display = 'block';
+            document.getElementById('dc-cancel-btn').style.display = 'block';
+            document.getElementById('dc-success').style.display    = 'none';
+            document.getElementById('dc-submit-btn').disabled      = false;
+            document.getElementById('dc-btn-txt').textContent      = 'Pay ₦' + fee.toLocaleString() + ' to Reactivate';
+            dcMethod = '';
+            // Deselect cards
+            ['paystack','manual'].forEach(m => {
+                document.getElementById(`dc-card-${m}`)?.classList.remove('sel');
+                const ri = document.getElementById(`dc-ri-${m}`);
+                if (ri) { ri.style.border = '2px solid #d1d5db'; ri.innerHTML = ''; }
+            });
+            openModal('m-deactivated');
+            break;
+        }
+
+        case 'suspended':
+            openModal('m-suspended');
+            break;
+
+        case 'rejected':
+            openModal('m-rejected');
+            break;
+
+        case 'no_payment': {
+            const fee = data.registrationFee || 0;
+            document.getElementById('np-icon-i').className         = 'fas fa-receipt';
+            document.getElementById('np-badge-txt').textContent    = 'Payment Required';
+            document.getElementById('np-title').textContent        = 'Registration Fee Unpaid';
+            document.getElementById('np-body').innerHTML           =
+                `Your account was created but the registration fee of <strong>₦${fee.toLocaleString()}</strong> hasn't been paid yet. Complete your payment to activate your account.`;
+            openModal('m-no-payment');
+            break;
+        }
+
+        case 'payment_failed': {
+            document.getElementById('np-icon-i').className         = 'fas fa-times-circle';
+            document.getElementById('np-badge-txt').textContent    = 'Payment Failed';
+            document.getElementById('np-title').textContent        = 'Payment Was Not Successful';
+            document.getElementById('np-body').textContent         =
+                'Your previous payment attempt failed. Please return to the registration page to try again.';
+            openModal('m-no-payment');
+            break;
+        }
+
+        case 'deleted':
+            openModal('m-deleted');
+            break;
+
+        default:
+            break;
+    }
+}
+
+/* ════════════════════════════════════════════════════════
+   LOGIN FORM — async fetch
+════════════════════════════════════════════════════════ */
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const email  = document.getElementById('email').value.trim();
+    const pw     = document.getElementById('password').value;
+    const eErr   = document.getElementById('emailError');
+    const pErr   = document.getElementById('passwordError');
+    const btn    = document.getElementById('loginBtn');
+    const errBox = document.getElementById('loginErrorBox');
+    const errTxt = document.getElementById('loginErrorTxt');
+
+    // Reset errors
+    eErr.classList.add('hidden');
+    pErr.classList.add('hidden');
+    errBox.style.display = 'none';
+
+    // Client-side validation
+    let ok = true;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        eErr.textContent = email ? 'Enter a valid email address' : 'Email is required';
+        eErr.classList.remove('hidden');
+        document.getElementById('email').classList.add('shake');
+        setTimeout(() => document.getElementById('email').classList.remove('shake'), 500);
+        ok = false;
+    }
+    if (!pw) {
+        pErr.textContent = 'Password is required';
+        pErr.classList.remove('hidden');
+        document.getElementById('password').classList.add('shake');
+        setTimeout(() => document.getElementById('password').classList.remove('shake'), 500);
+        ok = false;
+    }
+    if (!ok) return;
+
+    // Show spinner
+    btn.classList.add('btn-spin');
+
+    try {
+        const res  = await fetch('/login', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ email, password: pw }),
+        });
+        const data = await res.json();
+        btn.classList.remove('btn-spin');
+
+        // ── Credentials invalid ───────────────────────────────────
+        if (!data.success) {
+            errTxt.textContent   = data.error || 'Login failed. Please try again.';
+            errBox.style.display = 'flex';
+            return;
+        }
+
+        // ── Go to dashboard ───────────────────────────────────────
+        if (data.accountState === 'dashboard') {
+            window.location.href = '/cds-cooperative/dashboard';
+            return;
+        }
+
+        // ── Show status modal ─────────────────────────────────────
+        showModal(data.accountState, data.stateData);
+
+    } catch (err) {
+        btn.classList.remove('btn-spin');
+        errTxt.textContent   = 'Network error. Please check your connection and try again.';
+        errBox.style.display = 'flex';
+    }
+});
+
+/* ════════════════════════════════════════════════════════
+   PASSWORD TOGGLE
+════════════════════════════════════════════════════════ */
+function togglePassword() {
+    const inp = document.getElementById('password');
+    const ico = document.getElementById('togglePw');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    ico.classList.toggle('fa-eye');
+    ico.classList.toggle('fa-eye-slash');
+}
+
+/* ════════════════════════════════════════════════════════
+   DEACTIVATED MODAL — Reactivation Flow
+════════════════════════════════════════════════════════ */
+let dcMethod = '';
+
+function selectDeactPay(method) {
+    dcMethod = method;
+    ['paystack', 'manual'].forEach(m => {
+        const card = document.getElementById(`dc-card-${m}`);
+        const ri   = document.getElementById(`dc-ri-${m}`);
+        if (m === method) {
+            card.classList.add('sel');
+            ri.style.border = '2px solid #1d4ed8';
+            ri.innerHTML    = '<div style="width:10px;height:10px;border-radius:50%;background:#1d4ed8;"></div>';
+        } else {
+            card.classList.remove('sel');
+            ri.style.border = '2px solid #d1d5db';
+            ri.innerHTML    = '';
+        }
+    });
+    document.getElementById('deact-step2').style.display = method === 'manual' ? 'block' : 'none';
+    document.getElementById('dc-btn-txt').textContent    = method === 'paystack'
+        ? 'Continue to Paystack'
+        : 'Submit Reactivation Request';
+    document.getElementById('dc-method-err').classList.remove('show');
+}
+
+function copyDcAcct(e) {
+    const num = document.getElementById('dc-acct-num')?.textContent.trim();
+    if (!num || num === '—') return;
+    navigator.clipboard.writeText(num).then(() => {
+        const btn = e.target;
+        const orig = btn.textContent;
+        btn.textContent        = 'Copied!';
+        btn.style.background   = '#bbf7d0';
+        setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 2000);
+    });
+}
+
+async function submitDeactPay() {
+    // Clear errors
+    document.getElementById('dc-method-err').classList.remove('show');
+    document.getElementById('dc-payer-err')?.classList.remove('show');
+
+    // Validate
+    if (!dcMethod) {
+        document.getElementById('dc-method-err').classList.add('show');
+        return;
+    }
+    if (dcMethod === 'manual') {
+        const payer = document.getElementById('dc-payer-name')?.value.trim();
+        if (!payer) {
+            document.getElementById('dc-payer-err').classList.add('show');
+            return;
+        }
+    }
+
+    const btn    = document.getElementById('dc-submit-btn');
+    const btnTxt = document.getElementById('dc-btn-txt');
+    const userId = document.getElementById('dc-user-id').value;
+
+    btn.disabled     = true;
+    btnTxt.innerHTML = 'Processing… <span class="spin-ring"></span>';
+
+    try {
+        const res  = await fetch('/login/reactivate', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({
+                userId,
+                paymentMethod: dcMethod,
+                payerName:     document.getElementById('dc-payer-name')?.value.trim() || '',
+            }),
+        });
+        const data = await res.json();
+        btn.disabled = false;
+
+        // Paystack redirect
+        if (data.authorization_url) {
+            window.location.href = data.authorization_url;
+            return;
+        }
+
+        // Manual submitted successfully
+        if (data.manualPending) {
+            document.getElementById('deact-step1').style.display   = 'none';
+            document.getElementById('deact-step2').style.display   = 'none';
+            document.getElementById('dc-submit-btn').style.display = 'none';
+            document.getElementById('dc-cancel-btn').style.display = 'none';
+            document.getElementById('dc-success').style.display    = 'block';
+            return;
+        }
+
+        // Error from server
+        btnTxt.textContent = 'Pay to Reactivate';
+        alert(data.message || 'Something went wrong. Please try again.');
+
+    } catch (err) {
+        btn.disabled       = false;
+        btnTxt.textContent = 'Pay to Reactivate';
+        alert('Network error. Please try again.');
+    }
+}
 </script>
+
 </body>
 </html>

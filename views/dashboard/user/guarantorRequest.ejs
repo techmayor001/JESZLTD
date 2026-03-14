@@ -1,1019 +1,790 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Club De Stars - Member Dashboard | Powered by JESZ LIMITED</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #1e3a8a;
-            --primary-dark: #1e40af;
-            --primary-light: #3b82f6;
-            --secondary: #64748b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #06b6d4;
-            --sidebar-width: 280px;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-            min-height: 100vh;
-        }
-        
-        /* Sidebar Styles */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            z-index: 1040;
-            transition: all 0.3s;
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
-        }
-        
-        .sidebar-header {
-            padding: 2rem 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        
-        .logo-box {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        
-        .sidebar-menu {
-            padding: 1rem 0;
-        }
-        
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            padding: 0.875rem 1.5rem;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-            font-weight: 500;
-        }
-        
-        .sidebar-menu a:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-        }
-        
-        /* Top Navbar */
-        .top-navbar {
-            position: fixed;
-            top: 0;
-            left: var(--sidebar-width);
-            right: 0;
-            height: 75px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
-            z-index: 1030;
-            display: flex;
-            align-items: center;
-            padding: 0 2rem;
-            transition: all 0.3s;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            margin-top: 75px;
-            padding: 2rem;
-            min-height: calc(100vh - 75px);
-            transition: all 0.3s;
-        }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .welcome-card {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            border-radius: 24px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .welcome-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 400px;
-            height: 400px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50%;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 20px;
-            padding: 1.75rem;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-            height: 100%;
-            border: 1px solid rgba(30, 58, 138, 0.05);
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
-        }
-        
-        .stat-icon {
-            width: 65px;
-            height: 65px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            background: white;
-            border: 1px solid rgba(30, 58, 138, 0.05);
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
-            padding: 1.5rem;
-            border-radius: 20px 20px 0 0 !important;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none;
-            padding: 0.7rem 1.75rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
-        }
-        
-        .btn-outline-primary {
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            border-radius: 12px;
-            padding: 0.7rem 1.75rem;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-outline-primary:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-        }
-        
-        .member-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.3);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .club-member-badge {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-        
-        .non-club-badge {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-        
-        .quick-action {
-            text-align: center;
-            padding: 1.75rem;
-            border-radius: 16px;
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border: 2px solid rgba(30, 58, 138, 0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        
-        .quick-action:hover {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(30, 58, 138, 0.25);
-            border-color: transparent;
-        }
-        
-        .quick-action i {
-            font-size: 2.2rem;
-            margin-bottom: 0.75rem;
-            display: block;
-        }
-        
-        .loan-info-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 1.75rem;
-            margin-bottom: 1.25rem;
-        }
-        
-        .savings-goal-card {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 1.75rem;
-        }
-        
-        .alert-warning-custom {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border: 2px solid #f59e0b;
-            border-radius: 16px;
-            padding: 1.25rem;
-            color: #92400e;
-        }
-        
-        .alert-info-custom {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border: 2px solid #3b82f6;
-            border-radius: 16px;
-            padding: 1.25rem;
-            color: #1e40af;
-        }
-        
-        .powered-by {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 12px 20px;
-            border-radius: 30px;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--primary);
-            z-index: 1000;
-        }
-        
-        .loan-rules-list {
-            background: rgba(30, 58, 138, 0.02);
-            padding: 1.5rem;
-            border-radius: 16px;
-            border: 2px solid rgba(30, 58, 138, 0.1);
-        }
-        
-        .loan-rules-list li {
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
-        }
-        
-        .loan-rules-list li:last-child {
-            border-bottom: none;
-        }
-        
-        .print-button {
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            padding: 0.6rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .print-button:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        @media (max-width: 992px) {
-            .sidebar {
-                left: calc(-1 * var(--sidebar-width));
-            }
-            
-            .sidebar.active {
-                left: 0;
-            }
-            
-            .top-navbar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .powered-by {
-                bottom: 10px;
-                right: 10px;
-                font-size: 0.75rem;
-                padding: 8px 12px;
-            }
-        }
-
-        @media print {
-            .sidebar, .top-navbar, .btn, .quick-action, .powered-by {
-                display: none !important;
-            }
-            
-            .main-content {
-                margin: 0;
-                padding: 0;
-            }
-            
-            .card {
-                break-inside: avoid;
-            }
-        }
-    </style>
-        <style>
-        .hidden {
-  display: none;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guarantor Requests — Club De Stars | Powered by JESZ LIMITED</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ THEME TOKENS ══ */
+:root{
+  --sidebar-w:230px;--nav-h:62px;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
+  --accent:#4f8ef7;--accent2:#7c5af4;
+  --green:#22c78a;--red:#f05252;--amber:#f5a623;
+  --tr:all .22s ease;
+}
+[data-theme="dark"]{
+  --bg:#0a0f1e;--bg-card:#111827;--bg-card2:#1a2235;
+  --bg-card3:rgba(255,255,255,.035);
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#f0f4ff;--text2:#c8d4f0;--muted:#8b9ab8;
+  --nav-bg:rgba(10,15,30,.93);
+  --hero-bg:linear-gradient(135deg,#111827 0%,#1a2235 100%);
+  --bar-bg:rgba(255,255,255,.07);--meta-bg:rgba(255,255,255,.03);
+  --tog-bg:rgba(255,255,255,.08);
+}
+[data-theme="light"]{
+  --bg:#f4f6fb;--bg-card:#ffffff;--bg-card2:#f0f3fa;
+  --bg-card3:rgba(0,0,0,.025);
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);
+  --text:#0f1523;--text2:#2a3550;--muted:#6b7a99;
+  --nav-bg:rgba(255,255,255,.93);
+  --hero-bg:linear-gradient(135deg,#dde8ff 0%,#eef1ff 100%);
+  --bar-bg:rgba(0,0,0,.07);--meta-bg:rgba(0,0,0,.025);
+  --tog-bg:rgba(0,0,0,.07);
 }
 
-.loader-screen {
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(135deg, #0a1a2f, #102a44);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
+/* ══ BASE ══ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{
+  height:100%;font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;
+  transition:background .3s,color .3s;
+}
+a{text-decoration:none;color:inherit;}
+button,input,select,textarea{font-family:inherit;}
+
+/* ══ LOADER ══ */
+#loader{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:20px;transition:opacity .5s;
+}
+.loader-ring{
+  width:48px;height:48px;
+  border:2.5px solid var(--border2);border-top-color:var(--accent);
+  border-radius:50%;animation:spin 1s linear infinite;
+}
+.loader-label{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:var(--bg-card);border-right:1px solid var(--border);
+  z-index:200;display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .3s,background .3s,border-color .3s;
+}
+.sidebar-logo{
+  padding:18px 18px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.logo-mark{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;overflow:hidden;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:#fff;
+}
+.logo-mark img{width:100%;height:100%;object-fit:cover;}
+.logo-name{font-size:13px;font-weight:600;line-height:1.2;}
+.logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;}
+.sidebar-user{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.user-chip{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-card2);border-radius:10px;padding:9px 11px;
+  border:1px solid var(--border);
+}
+.user-avatar{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;color:#fff;
+}
+.user-name{font-size:13px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-id{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.04em;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 10px;}
+.sidebar-nav::-webkit-scrollbar{width:3px;}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.nav-section{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;margin-top:2px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
+  color:var(--muted);font-size:13px;font-weight:400;
+  transition:var(--tr);margin-bottom:1px;cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--bg-card2);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,.1);color:var(--accent);}
+.nav-item i{width:18px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-badge{
+  margin-left:auto;background:var(--red);color:#fff;
+  font-size:10px;font-weight:700;border-radius:20px;padding:2px 7px;
+}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+.member-pill{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;
+  font-size:10px;font-weight:600;background:rgba(34,199,138,.12);
+  color:var(--green);border:1px solid rgba(34,199,138,.2);margin-bottom:8px;
 }
 
-.logo span {
-  font-size: 52px;
-  font-weight: 600;
-  color: #5cc8ff;
-  display: inline-block;
-  animation: float 1.5s infinite ease-in-out;
-  letter-spacing: 1px;
+/* ══ TOP NAV ══ */
+.topnav{
+  position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--nav-h);
+  background:var(--nav-bg);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);z-index:100;
+  display:flex;align-items:center;padding:0 20px;gap:12px;
+  transition:left .3s,background .3s,border-color .3s;
+}
+.hamburger{
+  display:none;cursor:pointer;padding:7px;border-radius:8px;
+  border:none;background:none;color:var(--muted);font-size:17px;
+  transition:var(--tr);flex-shrink:0;
+}
+.hamburger:hover{background:var(--bg-card2);color:var(--text);}
+.topnav-greeting{flex:1;min-width:0;}
+.topnav-greeting h2{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-greeting p{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.status-row{display:flex;align-items:center;gap:5px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.status-label{font-size:12px;color:var(--green);font-weight:500;}
+.kyc-chip{
+  display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;
+  background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);
+  font-size:11px;font-weight:500;color:var(--amber);cursor:pointer;
+  transition:var(--tr);text-decoration:none;white-space:nowrap;
+}
+.kyc-chip.verified{background:rgba(34,199,138,.08);border-color:rgba(34,199,138,.2);color:var(--green);}
+.theme-toggle{
+  width:40px;height:22px;border-radius:20px;border:1px solid var(--border2);
+  background:var(--tog-bg);cursor:pointer;position:relative;flex-shrink:0;
+  transition:background .3s,border-color .3s;padding:0;
+}
+.tog-thumb{
+  position:absolute;top:2px;left:2px;width:16px;height:16px;
+  border-radius:50%;background:var(--muted);
+  transition:transform .25s ease,background .25s;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#fff;pointer-events:none;
+}
+[data-theme="light"] .tog-thumb{transform:translateX(18px);background:var(--accent);}
+
+/* ══ MAIN ══ */
+.main{
+  margin-left:var(--sidebar-w);margin-top:var(--nav-h);
+  padding:22px;min-height:calc(100vh - var(--nav-h));
+  transition:margin-left .3s;
 }
 
-.logo span:nth-child(n) {
-  animation-delay: calc(var(--i) * 0.1s);
+/* ══ STATS ROW ══ */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.stat-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:16px;transition:border-color .2s;
+}
+.stat-card:hover{border-color:var(--border2);}
+.stat-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;margin-bottom:10px;
+}
+.stat-label{font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;}
+.stat-value{font-size:clamp(18px,3vw,24px);font-weight:500;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ══ PAGE GRID ══ */
+.page-grid{display:grid;grid-template-columns:1fr 300px;gap:14px;}
+
+/* ══ CARD ══ */
+.card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  transition:background .3s,border-color .3s;
+}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--border);
+}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+
+/* ══ RULES ══ */
+.rules-box{
+  padding:14px 18px 2px;
+}
+.rule-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;
+}
+.rule-item:last-child{border-bottom:none;padding-bottom:12px;}
+.rule-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.rule-text{color:var(--muted);line-height:1.5;}
+.rule-text strong{color:var(--text);}
+
+/* ══ REQUESTS ══ */
+.request-list{padding:0;}
+.request-item{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 18px;border-bottom:1px solid var(--border);
+}
+.request-item:last-child{border-bottom:none;}
+.req-avatar{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:600;color:#fff;
+}
+.req-info{flex:1;min-width:0;}
+.req-name{font-size:13px;font-weight:500;margin-bottom:3px;}
+.req-meta{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.dot-sep{width:3px;height:3px;border-radius:50%;background:var(--muted);display:inline-block;}
+.req-actions{display:flex;gap:7px;flex-shrink:0;}
+.action-btn{
+  padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;
+  cursor:pointer;transition:var(--tr);border:1px solid;background:none;
+  display:flex;align-items:center;gap:5px;
+}
+.btn-approve{border-color:rgba(34,199,138,.25);color:var(--green);}
+.btn-approve:hover{background:rgba(34,199,138,.1);}
+.btn-decline{border-color:rgba(240,82,82,.25);color:var(--red);}
+.btn-decline:hover{background:rgba(240,82,82,.1);}
+
+/* ══ LIST ROWS ══ */
+.list-body{padding:0 18px;}
+.list-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;
+}
+.list-row:last-child{border-bottom:none;padding-bottom:14px;}
+.list-label{color:var(--muted);}
+
+/* pill */
+.pill{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600;border:1px solid;
+}
+.pill-amber{background:rgba(245,166,35,.1);color:var(--amber);border-color:rgba(245,166,35,.2);}
+.pill-red{background:rgba(240,82,82,.1);color:var(--red);border-color:rgba(240,82,82,.2);}
+.pill-green{background:rgba(34,199,138,.1);color:var(--green);border-color:rgba(34,199,138,.2);}
+.pill-accent{background:rgba(79,142,247,.1);color:var(--accent);border-color:rgba(79,142,247,.2);}
+
+/* ══ EMPTY STATE ══ */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;gap:10px;padding:36px 20px;
+}
+.empty-icon{
+  width:46px;height:46px;border-radius:13px;
+  background:var(--bg-card2);display:flex;align-items:center;
+  justify-content:center;font-size:18px;color:var(--muted);
 }
 
-.logo span:nth-child(1) { --i: 0; }
-.logo span:nth-child(2) { --i: 1; }
-.logo span:nth-child(3) { --i: 2; }
-.logo span:nth-child(4) { --i: 3; }
-.logo span:nth-child(5) { --i: 4; }
-.logo span:nth-child(6) { --i: 5; }
-.logo span:nth-child(7) { --i: 6; }
-.logo span:nth-child(8) { --i: 7; }
-.logo span:nth-child(9) { --i: 8; }
+/* ══ SIDEBAR OVERLAY ══ */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190;}
+.sb-overlay.show{display:block;}
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); opacity: 0.4; }
-  50% { transform: translateY(-14px); opacity: 1; }
+/* ══ MODALS ══ */
+.modal-backdrop{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(5px);
+  align-items:flex-end;justify-content:center;
 }
-    </style>
+.modal-backdrop.open{display:flex;}
+.modal-box{
+  background:var(--bg-card);border:1px solid var(--border2);
+  border-radius:var(--r-xl) var(--r-xl) 0 0;
+  width:100%;max-width:440px;max-height:88vh;overflow-y:auto;
+  animation:shup .28s cubic-bezier(.16,1,.3,1);
+  transition:background .3s,border-color .3s;
+}
+@keyframes shup{from{transform:translateY(30px);opacity:0;}to{transform:none;opacity:1;}}
+.modal-box::-webkit-scrollbar{width:3px;}
+.modal-box::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:12px auto 0;}
+.modal-header{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:15px;font-weight:500;}
+.modal-close{
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border-radius:7px;transition:var(--tr);
+}
+.modal-close:hover{background:var(--bg-card2);color:var(--text);}
+.modal-body{padding:18px 20px;}
+.modal-footer{padding:0 20px 24px;display:flex;gap:10px;}
+.modal-warn{
+  background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.18);
+  border-radius:10px;padding:12px;font-size:12px;color:var(--amber);
+  line-height:1.6;margin-bottom:14px;
+}
+.confirm-box{
+  background:var(--bg-card2);border:1px solid var(--border);
+  border-radius:10px;padding:14px;margin-bottom:14px;
+}
+.confirm-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;}
+.confirm-label{color:var(--muted);}
+.confirm-value{font-weight:500;}
+.btn{border:none;border-radius:10px;padding:12px 20px;font-size:13px;font-weight:500;cursor:pointer;transition:var(--tr);flex:1;}
+.btn-ghost{background:var(--bg-card2);color:var(--muted);}
+.btn-ghost:hover{color:var(--text);}
+.btn-confirm-approve{background:rgba(34,199,138,.1);border:1px solid rgba(34,199,138,.2);color:var(--green);flex:2;}
+.btn-confirm-approve:hover{background:rgba(34,199,138,.18);}
+.btn-confirm-decline{background:rgba(240,82,82,.1);border:1px solid rgba(240,82,82,.2);color:var(--red);flex:2;}
+.btn-confirm-decline:hover{background:rgba(240,82,82,.18);}
+.result-modal{text-align:center;padding:28px 20px;}
+.result-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px;}
+.result-icon.success{background:rgba(34,199,138,.12);color:var(--green);}
+.result-icon.error{background:rgba(240,82,82,.12);color:var(--red);}
+.result-title{font-size:16px;font-weight:500;margin-bottom:6px;}
+.result-msg{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.6;}
+
+/* Powered by */
+.powered-by{position:fixed;bottom:12px;right:14px;font-size:11px;color:var(--muted);z-index:50;}
+.powered-by strong{color:var(--accent);}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1100px){
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .page-grid{grid-template-columns:1fr;}
+}
+@media(max-width:900px){
+  .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+  .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3);}
+  .topnav{left:0;}
+  .main{margin-left:0;}
+  .hamburger{display:flex;}
+}
+@media(max-width:600px){
+  .main{padding:14px;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .request-item{flex-wrap:wrap;}
+  .req-actions{width:100%;}
+  .action-btn{flex:1;justify-content:center;}
+  .topnav-greeting p{display:none;}
+  .status-label{display:none;}
+  .modal-box{max-width:100%;}
+}
+@media(max-width:380px){.stats-row{grid-template-columns:1fr;}}
+@media(min-width:901px){
+  .modal-backdrop{align-items:center;padding:20px;}
+  .modal-box{border-radius:var(--r-xl);max-width:440px;}
+  .modal-handle{display:none;}
+}
+@media print{
+  .sidebar,.topnav,.powered-by{display:none!important;}
+  .main{margin:0;padding:0;}
+}
+</style>
 </head>
 <body>
-            <div id="loader-screen" class="loader-screen">
-        <div class="logo">
-            <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
-        </div>
-    </div>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <div class="logo-box">
 
-                    <img src="/media/assets/logo/log.png" alt="" width="100%" height="100%">
-                </div>
-                <div>
-                    <h5 class="mb-0 fw-bold" style="text-transform: uppercase;">Club De Stars</h5>
-                    <small class="opacity-75">COOPERATIVE SOCIETY LIMITED</small>
-                </div>
-            </div>
-            <div class="member-badge mt-2 <%= user.membershipID.startsWith('CD') ? 'club-member-badge' : 'non-club-member-badge' %>">
-                <i class="fas <%= user.membershipID.startsWith('CD') ? 'fa-star' : 'fa-user' %>"></i>
-                <span><%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Non-Club Member' %></span>
-            </div>
-
-        </div>
-         <div class="sidebar-menu">
-            <a href="/cds-cooperative/dashboard"><i class="fas fa-home"></i> Dashboard</a>
-            <a href="/cds-cooperative/transaction"><i class="fas fa-exchange-alt"></i> Transactions</a>
-            <a href="/cds-cooperative/loan"><i class="fas fa-hand-holding-usd"></i> My Loans</a>
-            <a href="/cds-cooperative/guarantorRequest" class="active">
-                <i class="fas fa-user-friends"></i> Guarantor Requests
-                <% if (pendingGuarantorCount > 0) { %>
-                    <span class="badge bg-danger ms-auto" style="font-size:0.68rem;"><%= pendingGuarantorCount %></span>
-                <% } %>
-            </a>
-            <a href="/manage/kiddies-account"><i class="fas fa-users"></i> Kiddies Account</a>
-            <a href="/cds-cooperative/profile"><i class="fas fa-user-circle"></i> My Profile</a>
-            <a href="/cds-cooperative/kyc"><i class="fas fa-shield-alt"></i> KYC Verification</a>
-            <a href="/cds-cooperative/referral"><i class="fas fa-user-plus"></i> Referral Program</a>
-            <a href="/cds-cooperative/memberContract"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
-            <a href="/cds-cooperative/report"><i class="fas fa-chart-line"></i> Reports</a>
-            <% if (user.role && user.role.name !== 'member') { %>
-            <a href="/admin-dashboard"><i class="fas fa-tachometer-alt"></i> Administration</a>
-            <% } %>
-            <a href="/logout" style="color:rgba(255,255,255,0.52);margin-top:4px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
-        </div>
-    </div>
-
-<!-- Top Navbar -->
-    <div class="top-navbar">
-        <i class="fas fa-bars d-lg-none me-3"
-        style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-        onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
-
-        <!-- This will only show on lg and above -->
-      <div class="flex-grow-1">
-        <h6 class="mb-0 fw-bold d-none d-sm-block" style="color:var(--primary);font-size:0.9rem;">
-            Welcome back, <%= user.firstName %>! 👋
-        </h6>
-        <h6 class="mb-0 fw-bold d-sm-none" style="color:var(--primary);font-size:0.85rem;">Hi, <%= user.firstName %>! 👋</h6>
-        <small class="text-muted d-none d-md-block" style="font-size:0.73rem;">
-            Member ID: <%= user.membershipID %> &nbsp;|&nbsp;
-            <%= new Date(user.createdAt).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) %>
-        </small>
-        <!-- <small class="text-muted d-md-none" style="font-size:0.72rem;"><%= user.membershipID %></small> -->
-    </div>
-             <%
-      let sbadgeClass = "bg-secondary bg-opacity-10 text-secondary";
-      if (user.status === "active")   sbadgeClass = "bg-success bg-opacity-10 text-success";
-      if (user.status === "rejected") sbadgeClass = "bg-danger bg-opacity-10 text-danger";
-    %>
-    <span class="badge <%= sbadgeClass %> ms-2" style="font-size:0.7rem;padding:5px 10px;">
-        <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
-    </span>
-    </div>
-
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Dashboard Section -->
-        <div id="dashboard" class="content-section">
-            <!-- Welcome Card -->
-            <div class="welcome-card position-relative">
-                <div class="row align-items-center position-relative" style="z-index: 1;">
-                    <div class="col-md-8">
-                        <h2 class="mb-3 fw-bold">Great to see you again <%= user.firstName %>!</h2>
-                        <!-- <p class="mb-3 opacity-90 fs-5">Track your savings, manage loans, and grow your wealth with <b>Club De Stars Multipurpose Cooperative Society Limited</b></p> -->
-                        <div class="d-flex gap-3 flex-wrap">
-                            <div class="member-badge">
-                                <i class="fas fa-id-card"></i>
-                                <span><%= user.membershipID %></span>
-                            </div>
-                            <div class="member-badge">
-                                <i class="fas fa-calendar"></i>
-                                <span>Member Since: 
-                                    <%= new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) %>
-                                </span>
-                            </div>
-                            <div class="member-badge club-member-badge">
-                                <i class="fas fa-star"></i>
-                                <span>
-                                    <%= user.membershipID && user.membershipID.startsWith('CD') ? '5%' : '10%' %> Loan Interest Rate
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                        <h5 class="opacity-90">Account Status</h5>
-                        <% let badgeClass = "bg-light text-secondary"; %>
-                        <% let statusText = "Pending"; %>
-
-                        <% if (user.status === "active") { %>
-                            <% badgeClass = "bg-light text-success"; %>
-                            <% statusText = "Active"; %>
-                        <% } else if (user.status === "rejected") { %>
-                            <% badgeClass = "bg-light text-danger"; %>
-                            <% statusText = "Rejected"; %>
-                        <% } %>
-
-                        <h3>
-                            <span class="badge <%= badgeClass %> fs-5 px-4 py-2"><%= statusText %></span>
-                        </h3>
-                        <p class="mb-0 mt-2 opacity-75">
-                            <% if (user.Payment && user.Payment.status === "paid") { %>
-                                KYC Verified ✓
-                            <% } else { %>
-                                KYC Pending ✗
-                            <% } %>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-<div class="row g-4 mb-4">
-
-    <!-- PENDING REQUESTS -->
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
-                <i class="fas fa-hourglass-half"></i>
-            </div>
-            <p class="text-muted mb-1 fw-semibold">Pending Requests</p>
-            <h3 class="mb-2 fw-bold"><%= pendingRequests.length %></h3>
-            <small class="text-warning fw-semibold">
-                <i class="fas fa-info-circle me-1"></i>
-                Awaiting action
-            </small>
-        </div>
-    </div>
-
-    <!-- DECLINED REQUESTS -->
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white;">
-                <i class="fas fa-times-circle"></i>
-            </div>
-            <p class="text-muted mb-1 fw-semibold">Declined Requests</p>
-            <h3 class="mb-2 fw-bold"><%= declinedRequests.length %></h3>
-            <small class="text-danger fw-semibold">
-                <i class="fas fa-info-circle me-1"></i>
-                Not approved
-            </small>
-        </div>
-    </div>
-
-    <!-- APPROVED REQUESTS -->
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <p class="text-muted mb-1 fw-semibold">Approved Requests</p>
-            <h3 class="mb-2 fw-bold"><%= acceptedRequests.length %></h3>
-            <small class="text-success fw-semibold">
-                <i class="fas fa-info-circle me-1"></i>
-                Successfully approved
-            </small>
-        </div>
-    </div>
-
-    <!-- TOTAL APPROVED AMOUNT -->
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
-                <i class="fas fa-coins"></i>
-            </div>
-            <p class="text-muted mb-1 fw-semibold">Approved Amount</p>
-            <h3 class="mb-2 fw-bold">
-                ₦<%= stats.totalAmountApproved.toLocaleString() %>
-            </h3>
-            <small style="color: var(--primary);" class="fw-semibold">
-                <i class="fas fa-info-circle me-1"></i>
-                Total approved
-            </small>
-        </div>
-    </div>
-
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-ring"></div>
+  <div class="loader-label">Club De Stars</div>
 </div>
 
+<% const pendingGuarantorCount = pendingRequests ? pendingRequests.length : 0; %>
 
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
 
-        <!-- Loans Section -->
-   <div id="guarantor-loans" class="content-section">
-    <div class="row g-4">
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <img src="/media/assets/logo/log.png" alt="Logo"
+           onerror="this.style.display='none';this.parentNode.innerHTML='<b>C</b>'">
+    </div>
+    <div style="min-width:0;">
+      <div class="logo-name">Club De Stars</div>
+      <div class="logo-sub">Cooperative Society</div>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-chip">
+      <div class="user-avatar">
+        <%= user.firstName.charAt(0).toUpperCase() %><%= user.lastName.charAt(0).toUpperCase() %>
+      </div>
+      <div style="min-width:0;">
+        <div class="user-name"><%= user.firstName %> <%= user.lastName %></div>
+        <div class="user-id"><%= user.membershipID %></div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Menu</div>
+    <a href="/cds-cooperative/dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="/cds-cooperative/transaction" class="nav-item"><i class="fas fa-exchange-alt"></i> Transactions</a>
+    <a href="/cds-cooperative/loan" class="nav-item"><i class="fas fa-coins"></i> Loans</a>
+    <a href="/cds-cooperative/guarantorRequest" class="nav-item active">
+      <i class="fas fa-user-check"></i> Guarantor
+      <% if (pendingGuarantorCount > 0) { %><span class="nav-badge"><%= pendingGuarantorCount %></span><% } %>
+    </a>
+    <div class="nav-section">Account</div>
+    <a href="/manage/kiddies-account" class="nav-item"><i class="fas fa-baby"></i> Kiddies Account</a>
+    <a href="/cds-cooperative/profile" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+    <a href="/cds-cooperative/kyc" class="nav-item"><i class="fas fa-shield-alt"></i> KYC</a>
+    <a href="/cds-cooperative/referral" class="nav-item"><i class="fas fa-user-plus"></i> Referrals</a>
+    <a href="/cds-cooperative/report" class="nav-item"><i class="fas fa-chart-bar"></i> Reports</a>
+    <a href="/cds-cooperative/memberContract" class="nav-item"><i class="fas fa-file-alt"></i> Terms</a>
+    <% if (user.role && user.role.name !== 'member') { %>
+    <div class="nav-section">Admin</div>
+    <a href="/admin-dashboard" class="nav-item"><i class="fas fa-tachometer-alt"></i> Administration</a>
+    <% } %>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="member-pill">
+      <i class="fas fa-star" style="font-size:9px;"></i>
+      <%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Associate Member' %>
+    </div>
+    <a href="/logout" class="nav-item" style="color:var(--red);margin-top:2px;">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </a>
+  </div>
+</aside>
 
-        <!-- LEFT: Loan Approval & Rules -->
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold text-primary">
-                        <i class="fas fa-hand-holding-usd me-2"></i>Guarantor Loan Approval
-                    </h5>
-                </div>
-                <div class="card-body">
-                    
-                    <!-- Loan Rules & Conditions -->
-                    <div class="alert-info-custom mb-4">
-                        <h6 class="fw-bold mb-3">
-                            <i class="fas fa-info-circle me-2"></i>Rules & Conditions
-                        </h6>
-                        <ul class="small mb-0 ps-3">
-                            <li class="mb-2">
-                                <strong>Maximum Loan:</strong> 3× user's savings. Example: ₦<%= user.account?.balance ? (user.account.balance * 3).toLocaleString() : '0' %>
-                            </li>
-                            <li class="mb-2">
-                                <strong>Shared Responsibility:</strong> If the borrower defaults, remaining balance is deducted 50/50 from guarantors' savings.
-                            </li>
-                            <li class="mb-2">
-                                <strong>Interest Rate:</strong> 5% p.a for Club Members, 10% p.a for Non-Club Members
-                            </li>
-                            <li class="mb-2">
-                                <strong>Qualification:</strong> Borrower must have sufficient funds in account
-                            </li>
-                            <li class="mb-2">
-                                <strong>Late Payment Penalty:</strong> 0.5% per day
-                            </li>
-                            <li class="mb-0">
-                                <strong>Approval:</strong> Approving loan is accepting these terms
-                            </li>
-                        </ul>
-                    </div>
+<!-- ════ TOP NAV ════ -->
+<header class="topnav">
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="topnav-greeting">
+    <h2>Guarantor Requests</h2>
+    <p><%= user.firstName %> <%= user.lastName %> · <%= user.membershipID %></p>
+  </div>
+  <div class="topnav-right">
+    <div class="status-row">
+      <div class="status-dot"></div>
+      <span class="status-label">Active</span>
+    </div>
+    <% if (user.Payment && user.Payment.status === "paid") { %>
+      <div class="kyc-chip verified">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i><span>Verified</span>
+      </div>
+    <% } else { %>
+      <a href="/cds-cooperative/kyc" class="kyc-chip">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i><span>KYC</span>
+      </a>
+    <% } %>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">
+      <div class="tog-thumb" id="togThumb">
+        <i class="fas fa-moon" id="togIcon" style="font-size:9px;"></i>
+      </div>
+    </button>
+  </div>
+</header>
 
-                    <!-- Pending Loan Requests -->
-                    <% if (pendingRequests.length > 0) { %>
-                        <h6 class="fw-bold mb-3">Pending Loan Requests</h6>
-                        <% pendingRequests.forEach(request => { %>
-                            <div class="card mb-3" style="border: 2px solid #3350b0; border-radius: 15px;">
-                                <div class="card-body d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="fw-semibold mb-1">
-                                        <%= request.borrower ? (request.borrower.firstName + ' ' + request.borrower.lastName) : 'Company Loan' %>
-                                        </h6>
-                                        <small class="text-muted">
-                                        Amount Requested: ₦<%= request.amount.toLocaleString() %> |
-                                        Status: <%= request.status.charAt(0).toUpperCase() + request.status.slice(1) %>
-                                        </small>
+<!-- ════ MAIN ════ -->
+<main class="main">
 
-                                    </div>
-                                    <div class="d-flex gap-2">
-                                        <form method="POST" action="/club-de-star-cooperative/guarantorRequest/approve">
-                                            <input type="hidden" name="requestId" value="<%= request._id %>">
-                                            <button class="btn btn-success btn-sm">
-                                                <i class="fas fa-check me-1"></i>Approve
-                                            </button>
-                                        </form>
-                                        <form method="POST" action="/club-de-star-cooperative/guarantorRequest/decline">
-                                            <input type="hidden" name="requestId" value="<%= request._id %>">
-                                            <button class="btn btn-danger btn-sm">
-                                                <i class="fas fa-times me-1"></i>Decline
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        <% }) %>
-                    <% } else { %>
-                        <div class="text-center py-4">
-                            <h6 class="fw-bold text-muted">No Pending Loan Requests</h6>
-                        </div>
-                    <% } %>
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(245,166,35,.1);color:var(--amber);"><i class="fas fa-hourglass-half"></i></div>
+      <div class="stat-label">Pending</div>
+      <div class="stat-value"><%= pendingRequests.length %></div>
+      <div class="stat-sub">Awaiting action</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(34,199,138,.1);color:var(--green);"><i class="fas fa-check-circle"></i></div>
+      <div class="stat-label">Approved</div>
+      <div class="stat-value"><%= acceptedRequests.length %></div>
+      <div class="stat-sub">You guaranteed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(240,82,82,.1);color:var(--red);"><i class="fas fa-times-circle"></i></div>
+      <div class="stat-label">Declined</div>
+      <div class="stat-value"><%= declinedRequests.length %></div>
+      <div class="stat-sub">Not approved</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(79,142,247,.1);color:var(--accent);"><i class="fas fa-coins"></i></div>
+      <div class="stat-label">Total Guaranteed</div>
+      <div class="stat-value" style="font-size:clamp(14px,2vw,18px);">₦<%= stats.totalAmountApproved.toLocaleString() %></div>
+      <div class="stat-sub">Approved sum</div>
+    </div>
+  </div>
 
-                </div>
-            </div>
+  <!-- Page grid -->
+  <div class="page-grid">
+
+    <!-- Left -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+
+      <!-- Rules -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Guarantor Responsibilities</span>
+          <i class="fas fa-shield-alt" style="color:var(--accent);font-size:13px;"></i>
         </div>
-
-        <!-- RIGHT: Stats & Approved List -->
-        <div class="col-lg-4">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h6 class="mb-3 fw-bold text-primary">
-                        <i class="fas fa-chart-bar me-2"></i>Guarantor Stats
-                    </h6>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Pending
-                            <span class="badge bg-warning"><%= pendingRequests.length %></span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Declined
-                            <span class="badge bg-danger"><%= declinedRequests.length %></span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Approved
-                            <span class="badge bg-success"><%= acceptedRequests.length %></span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Approved Amount
-                            <span class="badge bg-primary">₦<%= stats.totalAmountApproved.toLocaleString() %></span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="fw-bold mb-3 text-primary"><i class="fas fa-users me-2"></i>Loans You Approved</h6>
-            <% if (acceptedRequests.length > 0) { %>
-    <% acceptedRequests.forEach(request => { %>
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <span>
-                <%= request.borrower
-                    ? request.borrower.firstName + ' ' + request.borrower.lastName
-                    : 'Company Loan'
-                %>
-            </span>
-            <span>₦<%= request.amount.toLocaleString() %></span>
+        <div class="rules-box">
+          <div class="rule-item">
+            <div class="rule-dot" style="background:var(--accent);"></div>
+            <div class="rule-text"><strong>Shared liability:</strong> If borrower defaults, remaining balance splits 50/50 between guarantors' savings.</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-dot" style="background:var(--amber);"></div>
+            <div class="rule-text"><strong>Maximum loan:</strong> 3× borrower's savings balance.</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-dot" style="background:var(--green);"></div>
+            <div class="rule-text"><strong>Interest rate:</strong> 5% p.a. for Club members · 10% p.a. for Standard members.</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-dot" style="background:var(--red);"></div>
+            <div class="rule-text"><strong>Late penalty:</strong> 0.5% per day after due date.</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-dot" style="background:var(--muted);"></div>
+            <div class="rule-text"><strong>Approving = acceptance</strong> of all terms above.</div>
+          </div>
         </div>
-    <% }) %>
-<% } else { %>
-    <div class="text-center text-muted">No loans approved yet</div>
-<% } %>
+      </div>
 
-                </div>
-            </div>
+      <!-- Pending -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Pending Requests</span>
+          <% if (pendingRequests.length > 0) { %>
+            <span class="pill pill-amber"><%= pendingRequests.length %> pending</span>
+          <% } %>
         </div>
+        <% if (pendingRequests.length > 0) { %>
+          <div class="request-list">
+            <% pendingRequests.forEach(req => {
+              const bName = req.borrower ? req.borrower.firstName + ' ' + req.borrower.lastName : 'Unknown Member';
+              const ini = req.borrower ? req.borrower.firstName.charAt(0).toUpperCase() + req.borrower.lastName.charAt(0).toUpperCase() : '??';
+            %>
+            <div class="request-item">
+              <div class="req-avatar"><%= ini %></div>
+              <div class="req-info">
+                <div class="req-name"><%= bName %></div>
+                <div class="req-meta">
+                  Loan request
+                  <span class="dot-sep"></span>
+                  <span style="color:var(--amber);font-weight:500;">₦<%= req.amount.toLocaleString() %></span>
+                </div>
+              </div>
+              <div class="req-actions">
+                <button class="action-btn btn-approve" onclick="openConfirm('<%= req._id %>', 'approve', '<%= bName.replace(/'/g, "\\'") %>', <%= req.amount %>)">
+                  <i class="fas fa-check" style="font-size:11px;"></i> Approve
+                </button>
+                <button class="action-btn btn-decline" onclick="openConfirm('<%= req._id %>', 'decline', '<%= bName.replace(/'/g, "\\'") %>', <%= req.amount %>)">
+                  <i class="fas fa-times" style="font-size:11px;"></i> Decline
+                </button>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-user-check"></i></div>
+            <div style="font-size:14px;font-weight:500;">No Pending Requests</div>
+            <div style="font-size:12px;color:var(--muted);">You're all caught up</div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Declined (only show if any) -->
+      <% if (declinedRequests.length > 0) { %>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Declined</span>
+          <span class="pill pill-red"><%= declinedRequests.length %></span>
+        </div>
+        <div class="list-body">
+          <% declinedRequests.forEach(req => {
+            const dName = req.borrower ? req.borrower.firstName + ' ' + req.borrower.lastName : 'Unknown';
+          %>
+          <div class="list-row">
+            <span class="list-label"><%= dName %></span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--red);">₦<%= req.amount.toLocaleString() %></span>
+              <span class="pill pill-red">Declined</span>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
 
     </div>
+
+    <!-- Right -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+
+      <!-- Summary -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Summary</span>
+          <i class="fas fa-chart-bar" style="color:var(--accent);font-size:13px;"></i>
+        </div>
+        <div class="list-body">
+          <div class="list-row">
+            <span class="list-label">Pending</span>
+            <span class="pill pill-amber"><%= pendingRequests.length %></span>
+          </div>
+          <div class="list-row">
+            <span class="list-label">Declined</span>
+            <span class="pill pill-red"><%= declinedRequests.length %></span>
+          </div>
+          <div class="list-row">
+            <span class="list-label">Approved</span>
+            <span class="pill pill-green"><%= acceptedRequests.length %></span>
+          </div>
+          <div class="list-row">
+            <span class="list-label">Total guaranteed</span>
+            <span style="font-size:12px;font-weight:500;font-family:'DM Mono',monospace;color:var(--accent);">₦<%= stats.totalAmountApproved.toLocaleString() %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approved list -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Loans You Approved</span>
+          <i class="fas fa-handshake" style="color:var(--green);font-size:13px;"></i>
+        </div>
+        <% if (acceptedRequests.length > 0) { %>
+          <div class="list-body">
+            <% acceptedRequests.forEach(req => {
+              const aName = req.borrower ? req.borrower.firstName + ' ' + req.borrower.lastName : 'Unknown';
+            %>
+            <div class="list-row">
+              <span style="color:var(--text2);font-size:13px;"><%= aName %></span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--green);">₦<%= req.amount.toLocaleString() %></span>
+                <span class="pill pill-green"><i class="fas fa-check" style="font-size:8px;"></i></span>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="empty-state" style="padding:26px 16px;">
+            <div class="empty-icon" style="width:40px;height:40px;font-size:16px;"><i class="fas fa-handshake"></i></div>
+            <div style="font-size:12px;color:var(--muted);">No loans approved yet</div>
+          </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<div class="powered-by">Powered by <strong>JESZ LIMITED</strong></div>
+
+<!-- ════ CONFIRM MODAL ════ -->
+<div class="modal-backdrop" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="confirmTitle">Confirm Action</span>
+      <button class="modal-close" onclick="closeModal('confirmModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-warn" id="confirmWarn"></div>
+      <div class="confirm-box">
+        <div class="confirm-row">
+          <span class="confirm-label">Borrower</span>
+          <span class="confirm-value" id="confirmName">—</span>
+        </div>
+        <div class="confirm-row">
+          <span class="confirm-label">Loan Amount</span>
+          <span class="confirm-value" id="confirmAmount" style="color:var(--amber);">₦0</span>
+        </div>
+        <div class="confirm-row">
+          <span class="confirm-label">Your liability if default</span>
+          <span class="confirm-value" id="confirmLiability" style="color:var(--red);">₦0</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('confirmModal')">Cancel</button>
+      <form id="confirmForm" method="POST" style="flex:2;display:flex;">
+        <input type="hidden" name="requestId" id="confirmRequestId">
+        <button type="submit" class="btn" id="confirmBtn" style="flex:1;">Confirm</button>
+      </form>
+    </div>
+  </div>
 </div>
 
-
-
-
-
-<script>
-function copyReferralLink() {
-  const link = document.getElementById("refLink").value;
-  navigator.clipboard.writeText(link);
-  alert("Referral link copied!");
-}
-</script>
-
+<!-- Result modal -->
+<div class="modal-backdrop" id="resultModal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon success" id="resultIcon"><i class="fas fa-check"></i></div>
+      <div class="result-title" id="resultTitle">Done</div>
+      <div class="result-msg" id="resultMsg"></div>
+      <button class="btn btn-ghost" onclick="location.reload()" style="max-width:180px;margin:0 auto;">Close</button>
     </div>
+  </div>
+</div>
 
-    <!-- Powered By Footer -->
-    <div class="powered-by">
-        <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
-    </div>
-
-
-
-
-
+<!-- ════ SCRIPTS ════ -->
 <script>
-function updateWithdrawalFee() {
-    const type = document.getElementById('withdrawalType').value;
-    const amountInput = document.getElementById('withdrawAmount');
-    const feeInfo = document.getElementById('withdrawalFeeInfo');
-
-    const realBalance = <%= user.account?.balance || 0 %>;
-
-    // FORCE WITHDRAWAL → auto-fill full balance + readonly
-    if (type === 'force') {
-        amountInput.value = realBalance;
-        amountInput.readOnly = true;
-    } else {
-        amountInput.readOnly = false;
-    }
-
-    const amount = parseFloat(amountInput.value) || 0;
-
-    if (!type || amount <= 0) {
-        feeInfo.style.display = 'none';
-        return;
-    }
-
-    let initialFee = 0, secondFee = 0, netAmount = 0;
-
-    if (type === 'force') {
-        initialFee = amount * 0.025;
-        secondFee = amount * 0.025;
-        netAmount = (amount - (initialFee + secondFee)) / 2; // 50% now
-    } else {
-        netAmount = amount;
-    }
-
-    feeInfo.style.display = 'block';
-    document.getElementById('withdrawAmountDisplay').innerText = `₦${amount.toLocaleString()}`;
-    document.getElementById('initialFee').innerText = `₦${initialFee.toLocaleString(undefined, {minimumFractionDigits:2})}`;
-    document.getElementById('secondFee').innerText = `₦${secondFee.toLocaleString(undefined, {minimumFractionDigits:2})}`;
-    document.getElementById('netAmount').innerText = `₦${netAmount.toLocaleString(undefined, {minimumFractionDigits:2})}`;
+/* ── Theme ── */
+(function(){
+  const saved = localStorage.getItem('cds-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+})();
+function toggleTheme(){
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('cds-theme', next);
+  updateThemeUI(next);
 }
-</script>
-
-
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Navigation
-        function showSection(sectionId, event) {
-            if (event) {
-                event.preventDefault();
-            }
-            
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
-            });
-            document.getElementById(sectionId).style.display = 'block';
-            
-            document.querySelectorAll('.sidebar-menu a').forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            if (event && event.target) {
-                event.target.classList.add('active');
-            }
-
-            if (window.innerWidth <= 992) {
-                document.getElementById('sidebar').classList.remove('active');
-            }
-        }
-
-        // Modal Functions
-        function openModal(modalId) {
-            const modal = new bootstrap.Modal(document.getElementById(modalId));
-            modal.show();
-        }
-
-        // Loan Calculator
-function calculateLoan() {
-    const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
-    const duration = parseInt(document.getElementById('calcDuration').value) || 1;
-    const rate = parseFloat(document.getElementById('calcRate').value) || 5;
-
-    if (amount > 0) {
-        const maxLoan = parseFloat("<%= user.account.balance %>") * 3;
-
-        if (amount > maxLoan) {
-            alert(`Loan amount exceeds your max eligible amount of ₦${maxLoan.toLocaleString()}`);
-            document.getElementById('calcAmount').value = maxLoan;
-            return;
-        }
-
-        // Interest for ONE MONTH ONLY
-        const interest = (amount * rate) / 100;
-
-        // Total repayment
-        const total = amount + interest;
-
-        // Monthly payment
-        const monthly = total / duration;
-
-        document.getElementById('calcResult').style.display = 'block';
-        document.getElementById('monthlyPay').textContent = '₦' + monthly.toLocaleString('en-NG', { maximumFractionDigits: 2 });
-        document.getElementById('totalInt').textContent = '₦' + interest.toLocaleString('en-NG', { maximumFractionDigits: 2 });
-        document.getElementById('totalRep').textContent = '₦' + total.toLocaleString('en-NG', { maximumFractionDigits: 2 });
-    }
+function updateThemeUI(t){
+  const i = document.getElementById('togIcon');
+  if(i) i.className = t === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
 }
 
-        // Withdrawal Fee Calculator
+/* ── Sidebar ── */
+function toggleSidebar(){
+  const open = document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+document.addEventListener('click', e => {
+  const sb = document.getElementById('sidebar');
+  const hb = document.querySelector('.hamburger');
+  if(window.innerWidth <= 900 && sb.classList.contains('open') && !sb.contains(e.target) && !hb.contains(e.target)) closeSidebar();
+});
 
+/* ── Modals ── */
+function openModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+document.querySelectorAll('.modal-backdrop').forEach(el => {
+  el.addEventListener('click', e => { if(e.target === el){ el.classList.remove('open'); document.body.style.overflow = ''; }});
+});
 
-        // Form Submissions
-        function submitDeposit() {
-            alert('✅ Deposit request submitted successfully! You will receive a confirmation shortly.');
-            bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
-        }
+/* ── Confirm ── */
+function openConfirm(requestId, action, borrowerName, amount){
+  const isApprove = action === 'approve';
+  document.getElementById('confirmTitle').textContent = isApprove ? 'Approve Guarantee' : 'Decline Request';
+  document.getElementById('confirmWarn').textContent  = isApprove
+    ? 'By approving, you accept shared liability. If the borrower defaults, 50% of the remaining balance may be deducted from your savings.'
+    : 'You are declining to act as guarantor for this loan. The borrower will be notified.';
+  document.getElementById('confirmName').textContent      = borrowerName;
+  document.getElementById('confirmAmount').textContent    = '₦' + Number(amount).toLocaleString();
+  document.getElementById('confirmLiability').textContent = '₦' + (Number(amount) / 2).toLocaleString();
+  document.getElementById('confirmRequestId').value       = requestId;
 
-        function submitWithdrawal() {
-            const type = document.getElementById('withdrawalType').value;
-            if (type === 'force') {
-                if (confirm('Force withdrawal includes a 2.5% charge. You will receive 50% now and 50% after 30 days. Continue?')) {
-                    alert('✅ Force withdrawal request submitted! Processing time: 24-48 hours.');
-                    bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
-                }
-            } else {
-                alert('✅ Withdrawal request submitted successfully! Processing time: 24-48 hours.');
-                bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
-            }
-        }
+  const form = document.getElementById('confirmForm');
+  form.action = isApprove
+    ? '/club-de-star-cooperative/guarantorRequest/approve'
+    : '/club-de-star-cooperative/guarantorRequest/decline';
 
-        function submitPayment() {
-            alert('✅ Payment processed successfully! Your loan balance has been updated.');
-            bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
-        }
+  const btn = document.getElementById('confirmBtn');
+  btn.className = 'btn ' + (isApprove ? 'btn-confirm-approve' : 'btn-confirm-decline');
+  btn.innerHTML = isApprove
+    ? '<i class="fas fa-check" style="margin-right:5px;font-size:11px;"></i>Yes, Approve'
+    : '<i class="fas fa-times" style="margin-right:5px;font-size:11px;"></i>Yes, Decline';
 
-        function submitLoanRequest() {
-            const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
-            
-            if (amount <= 0) {
-                alert('❌ Please enter a valid loan amount');
-                return;
-            }
-            
-            if (amount > 1350000) {
-                alert('❌ Loan amount exceeds maximum eligible amount of ₦1,350,000 (3x your savings)');
-                return;
-            }
-            
-            if (!document.getElementById('agreeTerms').checked) {
-                alert('❌ Please agree to the loan terms and conditions');
-                return;
-            }
-            
-            alert('✅ Loan application submitted successfully!\n\nYour application will be reviewed within 3-5 business days.\n\nClub Member Rate: 5% p.a.\nMaximum Amount: 3x savings\nReminder: 3 days before due date');
-            bootstrap.Modal.getInstance(document.getElementById('loanRequestModal')).hide();
-        }
+  openModal('confirmModal');
+}
 
-        function submitRollover() {
-            if (confirm('This will pay ₦8,750 interest and extend your loan with 6% interest rate. Continue?')) {
-                alert('✅ Rollover request submitted!\n\nInterest payment of ₦8,750 will be processed.\nNew interest rate: 6% p.a.\nYou will be notified once approved.');
-                bootstrap.Modal.getInstance(document.getElementById('rolloverModal')).hide();
-            }
-        }
-
-        // Animation on load
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.stat-card, .card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-            });
-        });
-    </script>
-
-
-    <script>
-    // Close sidebar when clicking outside (for mobile view)
-    document.addEventListener('click', function (event) {
-        const sidebar = document.getElementById('sidebar');
-        const toggleButton = document.querySelector('.fa-bars');
-
-        // Only apply this behavior on small screens
-        if (window.innerWidth <= 992) {
-            // If sidebar is active and click is outside sidebar and toggle button → close it
-            if (sidebar.classList.contains('active') &&
-                !sidebar.contains(event.target) &&
-                !toggleButton.contains(event.target)) {
-                sidebar.classList.remove('active');
-            }
-        }
-    });
-</script>
-
-<script>
-window.addEventListener("load", () => {
-  const loader = document.getElementById("loader-screen");
-  const main = document.getElementById("main-content");
-
-  setTimeout(() => {
-    loader.style.opacity = "0";
-    loader.style.transition = "opacity 0.6s ease";
-
-    setTimeout(() => {
-      loader.style.display = "none";
-      main.classList.remove("hidden");
-    }, 200);
-
-  }, 400); // adjust duration
+/* ── Loader ── */
+window.addEventListener('load', () => {
+  const l = document.getElementById('loader');
+  setTimeout(() => { l.style.opacity = '0'; setTimeout(() => l.style.display = 'none', 500); }, 400);
 });
 </script>
 </body>

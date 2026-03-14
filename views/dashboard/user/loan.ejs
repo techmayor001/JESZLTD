@@ -1,1118 +1,1274 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Club De Stars - My Loans | Powered by JESZ LIMITED</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #1e3a8a;
-            --primary-dark: #1e40af;
-            --primary-light: #3b82f6;
-            --secondary: #64748b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #06b6d4;
-            --sidebar-width: 280px;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-            min-height: 100vh;
-        }
-        .sidebar {
-            position: fixed; left: 0; top: 0; bottom: 0;
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white; z-index: 1040; transition: all 0.3s;
-            overflow-y: auto; box-shadow: 4px 0 20px rgba(30,58,138,0.15);
-        }
-        .sidebar-header { padding: 2rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.1); }
-        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-        .logo-box {
-            width: 45px; height: 45px; background: white; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: var(--primary); font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        .sidebar-menu { padding: 1rem 0; }
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85); text-decoration: none;
-            padding: 0.875rem 1.5rem; display: flex; align-items: center;
-            transition: all 0.3s; border-left: 3px solid transparent; font-weight: 500;
-        }
-        .sidebar-menu a:hover { background: rgba(255,255,255,0.1); color: white; border-left-color: white; }
-        .sidebar-menu a.active { background: rgba(255,255,255,0.15); color: white; border-left-color: white; }
-        .sidebar-menu a i { width: 24px; margin-right: 12px; font-size: 1.1rem; }
-        .top-navbar {
-            position: fixed; top: 0; left: var(--sidebar-width); right: 0;
-            height: 75px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30,58,138,0.08); z-index: 1030;
-            display: flex; align-items: center; padding: 0 2rem;
-            transition: all 0.3s; border-bottom: 1px solid rgba(30,58,138,0.1);
-        }
-        .main-content { margin-left: var(--sidebar-width); margin-top: 75px; padding: 2rem; min-height: calc(100vh - 75px); }
-        .welcome-card {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white; border-radius: 24px; padding: 2.5rem; margin-bottom: 2rem;
-            box-shadow: 0 15px 40px rgba(30,58,138,0.25); position: relative; overflow: hidden;
-        }
-        .welcome-card::before {
-            content: ''; position: absolute; top: -50%; right: -20%;
-            width: 400px; height: 400px; background: rgba(255,255,255,0.05); border-radius: 50%;
-        }
-        .member-badge {
-            display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px;
-            background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);
-            border-radius: 20px; border: 1px solid rgba(255,255,255,0.3);
-            font-weight: 600; font-size: 0.9rem;
-        }
-        .club-member-badge { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-        .stat-card {
-            background: white; border-radius: 20px; padding: 1.75rem;
-            box-shadow: 0 8px 20px rgba(30,58,138,0.08); transition: transform 0.3s, box-shadow 0.3s;
-            height: 100%; border: 1px solid rgba(30,58,138,0.05);
-        }
-        .stat-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(30,58,138,0.15); }
-        .stat-icon { width: 65px; height: 65px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1rem; }
-        .card { border: none; border-radius: 20px; box-shadow: 0 8px 20px rgba(30,58,138,0.08); background: white; border: 1px solid rgba(30,58,138,0.05); }
-        .card-header {
-            background: linear-gradient(135deg, rgba(30,58,138,0.03) 0%, rgba(59,130,246,0.03) 100%);
-            border-bottom: 2px solid rgba(30,58,138,0.1); padding: 1.5rem;
-            border-radius: 20px 20px 0 0 !important;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none; padding: 0.7rem 1.75rem; border-radius: 12px; font-weight: 600; transition: all 0.3s;
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(30,58,138,0.3); }
-        .btn-outline-primary { border: 2px solid var(--primary); color: var(--primary); border-radius: 12px; padding: 0.7rem 1.75rem; font-weight: 600; transition: all 0.3s; }
-        .btn-outline-primary:hover { background: var(--primary); transform: translateY(-2px); }
-        .alert-warning-custom { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; border-radius: 16px; padding: 1.25rem; color: #92400e; }
-        .alert-info-custom { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 2px solid #3b82f6; border-radius: 16px; padding: 1.25rem; color: #1e40af; }
-        .loan-rules-list { background: rgba(30,58,138,0.02); padding: 1.5rem; border-radius: 16px; border: 2px solid rgba(30,58,138,0.1); }
-        .loan-rules-list li { padding: 0.75rem 0; border-bottom: 1px solid rgba(30,58,138,0.1); }
-        .loan-rules-list li:last-child { border-bottom: none; }
-        .powered-by {
-            position: fixed; bottom: 20px; right: 20px; background: white;
-            padding: 12px 20px; border-radius: 30px; box-shadow: 0 4px 15px rgba(30,58,138,0.15);
-            font-size: 0.85rem; font-weight: 600; color: var(--primary); z-index: 1000;
-        }
-        .loader-screen {
-            position: fixed; inset: 0; background: linear-gradient(135deg, #0a1a2f, #102a44);
-            display: flex; justify-content: center; align-items: center; z-index: 9999;
-        }
-        .logo span {
-            font-size: 52px; font-weight: 600; color: #5cc8ff;
-            display: inline-block; animation: float 1.5s infinite ease-in-out; letter-spacing: 1px;
-        }
-        .logo span:nth-child(1){--i:0}.logo span:nth-child(2){--i:1}.logo span:nth-child(3){--i:2}
-        .logo span:nth-child(4){--i:3}.logo span:nth-child(5){--i:4}.logo span:nth-child(6){--i:5}
-        .logo span:nth-child(7){--i:6}.logo span:nth-child(8){--i:7}.logo span:nth-child(9){--i:8}
-        .logo span { animation-delay: calc(var(--i) * 0.1s); }
-        @keyframes float { 0%,100%{transform:translateY(0);opacity:.4} 50%{transform:translateY(-14px);opacity:1} }
-        @media (max-width: 992px) {
-            .sidebar { left: calc(-1 * var(--sidebar-width)); }
-            .sidebar.active { left: 0; }
-            .top-navbar { left: 0; }
-            .main-content { margin-left: 0; }
-        }
-        @media print {
-            .sidebar,.top-navbar,.btn,.powered-by { display: none !important; }
-            .main-content { margin: 0; padding: 0; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loans — Club De Stars | Powered by JESZ LIMITED</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══ THEME TOKENS ══ */
+:root{
+  --sidebar-w:230px;--nav-h:62px;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
+  --accent:#4f8ef7;--accent2:#7c5af4;
+  --green:#22c78a;--red:#f05252;--amber:#f5a623;
+  --tr:all .22s ease;
+}
+[data-theme="dark"]{
+  --bg:#0a0f1e;--bg-card:#111827;--bg-card2:#1a2235;
+  --bg-card3:rgba(255,255,255,.035);
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --text:#f0f4ff;--text2:#c8d4f0;--muted:#8b9ab8;
+  --nav-bg:rgba(10,15,30,.93);
+  --hero-bg:linear-gradient(135deg,#111827 0%,#1a2235 100%);
+  --bar-bg:rgba(255,255,255,.07);--meta-bg:rgba(255,255,255,.03);
+  --tog-bg:rgba(255,255,255,.08);
+}
+[data-theme="light"]{
+  --bg:#f4f6fb;--bg-card:#ffffff;--bg-card2:#f0f3fa;
+  --bg-card3:rgba(0,0,0,.025);
+  --border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);
+  --text:#0f1523;--text2:#2a3550;--muted:#6b7a99;
+  --nav-bg:rgba(255,255,255,.93);
+  --hero-bg:linear-gradient(135deg,#dde8ff 0%,#eef1ff 100%);
+  --bar-bg:rgba(0,0,0,.07);--meta-bg:rgba(0,0,0,.025);
+  --tog-bg:rgba(0,0,0,.07);
+}
+
+/* ══ BASE ══ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{
+  height:100%;font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;
+  transition:background .3s,color .3s;
+}
+a{text-decoration:none;color:inherit;}
+button,input,select,textarea{font-family:inherit;}
+
+/* ══ LOADER ══ */
+#loader{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:20px;transition:opacity .5s;
+}
+.loader-ring{
+  width:48px;height:48px;
+  border:2.5px solid var(--border2);border-top-color:var(--accent);
+  border-radius:50%;animation:spin 1s linear infinite;
+}
+.loader-label{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:var(--bg-card);border-right:1px solid var(--border);
+  z-index:200;display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .3s,background .3s,border-color .3s;
+}
+.sidebar-logo{
+  padding:18px 18px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.logo-mark{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;overflow:hidden;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:#fff;
+}
+.logo-mark img{width:100%;height:100%;object-fit:cover;}
+.logo-name{font-size:13px;font-weight:600;line-height:1.2;}
+.logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;}
+.sidebar-user{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.user-chip{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-card2);border-radius:10px;padding:9px 11px;
+  border:1px solid var(--border);
+}
+.user-avatar{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;color:#fff;
+}
+.user-name{font-size:13px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-id{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.04em;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 10px;}
+.sidebar-nav::-webkit-scrollbar{width:3px;}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.nav-section{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;margin-top:2px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
+  color:var(--muted);font-size:13px;font-weight:400;
+  transition:var(--tr);margin-bottom:1px;cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--bg-card2);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,.1);color:var(--accent);}
+.nav-item i{width:18px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-badge{
+  margin-left:auto;background:var(--red);color:#fff;
+  font-size:10px;font-weight:700;border-radius:20px;padding:2px 7px;
+}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+.member-pill{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;
+  font-size:10px;font-weight:600;background:rgba(34,199,138,.12);
+  color:var(--green);border:1px solid rgba(34,199,138,.2);margin-bottom:8px;
+}
+
+/* ══ TOP NAV ══ */
+.topnav{
+  position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--nav-h);
+  background:var(--nav-bg);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);z-index:100;
+  display:flex;align-items:center;padding:0 20px;gap:12px;
+  transition:left .3s,background .3s,border-color .3s;
+}
+.hamburger{
+  display:none;cursor:pointer;padding:7px;border-radius:8px;
+  border:none;background:none;color:var(--muted);font-size:17px;
+  transition:var(--tr);flex-shrink:0;
+}
+.hamburger:hover{background:var(--bg-card2);color:var(--text);}
+.topnav-greeting{flex:1;min-width:0;}
+.topnav-greeting h2{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-greeting p{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topnav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.status-row{display:flex;align-items:center;gap:5px;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.status-label{font-size:12px;color:var(--green);font-weight:500;}
+.kyc-chip{
+  display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;
+  background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);
+  font-size:11px;font-weight:500;color:var(--amber);cursor:pointer;
+  transition:var(--tr);text-decoration:none;white-space:nowrap;
+}
+.kyc-chip.verified{background:rgba(34,199,138,.08);border-color:rgba(34,199,138,.2);color:var(--green);}
+.theme-toggle{
+  width:40px;height:22px;border-radius:20px;border:1px solid var(--border2);
+  background:var(--tog-bg);cursor:pointer;position:relative;flex-shrink:0;
+  transition:background .3s,border-color .3s;padding:0;
+}
+.tog-thumb{
+  position:absolute;top:2px;left:2px;width:16px;height:16px;
+  border-radius:50%;background:var(--muted);
+  transition:transform .25s ease,background .25s;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#fff;pointer-events:none;
+}
+[data-theme="light"] .tog-thumb{transform:translateX(18px);background:var(--accent);}
+
+/* ══ MAIN ══ */
+.main{
+  margin-left:var(--sidebar-w);margin-top:var(--nav-h);
+  padding:22px;min-height:calc(100vh - var(--nav-h));
+  transition:margin-left .3s;
+}
+
+/* ══ LOAN HERO ══ */
+.loan-hero{
+  background:var(--hero-bg);border:1px solid var(--border2);
+  border-radius:var(--r-xl);padding:22px;margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+.loan-hero::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,166,35,.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.hero-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;}
+.hero-amount{font-size:clamp(26px,5vw,38px);font-weight:300;letter-spacing:-.5px;line-height:1;}
+.hero-amount .cur{font-size:.5em;vertical-align:super;color:var(--muted);margin-right:2px;}
+.hero-pill{
+  display:inline-flex;align-items:center;gap:5px;margin-top:8px;
+  padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;border-width:1px;border-style:solid;
+}
+.pill-amber{background:rgba(245,166,35,.1);color:var(--amber);border-color:rgba(245,166,35,.2);}
+.pill-red{background:rgba(240,82,82,.1);color:var(--red);border-color:rgba(240,82,82,.2);}
+.pill-green{background:rgba(34,199,138,.1);color:var(--green);border-color:rgba(34,199,138,.2);}
+.pill-muted{background:var(--bg-card3);color:var(--muted);border-color:var(--border);}
+.hero-actions{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;}
+.hero-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 16px;border-radius:10px;font-size:12px;font-weight:500;
+  border:none;cursor:pointer;transition:var(--tr);
+}
+.hero-btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.hero-btn-primary:hover{opacity:.88;transform:translateY(-1px);}
+.hero-btn-ghost{background:var(--bg-card3);border:1px solid var(--border2);color:var(--text);}
+.hero-btn-ghost:hover{background:var(--bg-card2);}
+.hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.hero-stat{
+  background:var(--bg-card3);border-radius:var(--r-md);
+  padding:12px 14px;border:1px solid var(--border);
+}
+.hero-stat-label{font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;}
+.hero-stat-value{font-size:clamp(13px,2.5vw,17px);font-weight:500;letter-spacing:-.3px;word-break:break-word;}
+.hero-stat-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ══ STATS ROW ══ */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.stat-mini{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:16px;
+  transition:border-color .2s;
+}
+.stat-mini:hover{border-color:var(--border2);}
+.stat-mini-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;margin-bottom:10px;
+}
+.stat-mini-label{font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;}
+.stat-mini-value{font-size:clamp(14px,2.5vw,18px);font-weight:500;word-break:break-word;}
+
+/* ══ MAIN GRID ══ */
+.page-grid{display:grid;grid-template-columns:1fr 340px;gap:14px;}
+
+/* ══ CARD BASE ══ */
+.card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  transition:background .3s,border-color .3s;
+}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--border);
+}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.card-body{padding:18px;}
+
+/* ══ LOAN CARD ══ */
+.active-loan-wrap{margin-bottom:14px;}
+.loan-block{
+  border:1px solid var(--border);border-radius:var(--r-lg);
+  overflow:hidden;
+}
+.loan-block.overdue{border-color:rgba(240,82,82,.3);}
+.loan-block-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;background:var(--bg-card2);border-bottom:1px solid var(--border);
+  flex-wrap:wrap;gap:8px;
+}
+.loan-block-title{font-size:13px;font-weight:500;}
+.loan-block-body{padding:16px;}
+.loan-amount-display{font-size:clamp(22px,4vw,32px);font-weight:300;letter-spacing:-.4px;margin-bottom:4px;}
+.loan-sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.loan-progress-bar{background:var(--bar-bg);border-radius:4px;height:4px;overflow:hidden;margin-bottom:14px;}
+.loan-progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--amber),#f57c23);transition:width .8s ease;}
+.loan-progress-fill.overdue{background:linear-gradient(90deg,var(--red),#c0392b);}
+.loan-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.loan-detail-item{
+  background:var(--meta-bg);border-radius:9px;
+  padding:9px 10px;border:1px solid var(--border);
+}
+.ld-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.ld-value{font-size:13px;font-weight:500;word-break:break-word;}
+.penalty-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 12px;background:rgba(240,82,82,.06);
+  border:1px solid rgba(240,82,82,.15);border-radius:9px;
+  font-size:12px;margin-bottom:12px;
+}
+.loan-action-row{display:flex;gap:8px;}
+.loan-action-btn{
+  flex:1;padding:11px;border-radius:10px;font-size:13px;font-weight:500;
+  cursor:pointer;transition:var(--tr);border:none;
+}
+.btn-pay{background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);color:var(--accent);}
+.btn-pay:hover{background:rgba(79,142,247,.18);}
+.btn-rollover{background:var(--bg-card2);border:1px solid var(--border2);color:var(--muted);}
+.btn-rollover:hover{color:var(--text);}
+
+/* ══ RULES CARD ══ */
+.rule-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;
+}
+.rule-item:last-child{border-bottom:none;}
+.rule-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--accent);
+  flex-shrink:0;margin-top:5px;
+}
+.rule-text{color:var(--muted);line-height:1.5;}
+.rule-text strong{color:var(--text);}
+
+/* ══ CALCULATOR CARD ══ */
+.calc-form-group{margin-bottom:12px;}
+.calc-label{
+  font-size:11px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:5px;
+}
+.calc-input,.calc-select{
+  width:100%;background:var(--bg-card2);border:1px solid var(--border2);
+  border-radius:9px;color:var(--text);font-size:13px;padding:9px 12px;
+  transition:border-color .18s,background .3s;outline:none;-webkit-appearance:none;
+}
+.calc-input:focus,.calc-select:focus{border-color:var(--accent);}
+.calc-input[readonly]{opacity:.6;cursor:default;}
+.calc-input option,.calc-select option{background:var(--bg-card);color:var(--text);}
+.calc-hint{font-size:11px;color:var(--muted);margin-top:4px;}
+.calc-result{
+  background:var(--bg-card2);border:1px solid var(--border);
+  border-radius:10px;padding:12px;margin-top:4px;display:none;
+}
+.calc-result-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;}
+.calc-result-label{color:var(--muted);}
+.calc-result-divider{border:none;border-top:1px solid var(--border);margin:5px 0;}
+
+/* ══ EMPTY STATE ══ */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;gap:12px;padding:48px 20px;
+}
+.empty-icon{
+  width:52px;height:52px;border-radius:14px;
+  background:rgba(79,142,247,.08);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:var(--accent);
+}
+.empty-cta{
+  padding:10px 20px;background:rgba(79,142,247,.1);
+  border:1px solid rgba(79,142,247,.2);border-radius:9px;
+  color:var(--accent);font-size:13px;font-weight:500;
+  cursor:pointer;border:none;transition:var(--tr);
+}
+.empty-cta:hover{background:rgba(79,142,247,.18);}
+
+/* ══ SIDEBAR OVERLAY ══ */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190;}
+.sb-overlay.show{display:block;}
+
+/* ══ MODALS ══ */
+.modal-backdrop{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(5px);
+  align-items:flex-end;justify-content:center;padding:0;
+}
+.modal-backdrop.open{display:flex;}
+.modal-box{
+  background:var(--bg-card);border:1px solid var(--border2);
+  border-radius:var(--r-xl) var(--r-xl) 0 0;
+  width:100%;max-width:480px;max-height:92vh;overflow-y:auto;
+  animation:shup .28s cubic-bezier(.16,1,.3,1);
+  transition:background .3s,border-color .3s;
+}
+@keyframes shup{from{transform:translateY(30px);opacity:0;}to{transform:none;opacity:1;}}
+.modal-box::-webkit-scrollbar{width:3px;}
+.modal-box::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:12px auto 0;}
+.modal-header{padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:15px;font-weight:500;}
+.modal-close{
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border-radius:7px;transition:var(--tr);
+}
+.modal-close:hover{background:var(--bg-card2);color:var(--text);}
+.modal-body{padding:18px 20px;}
+.form-group{margin-bottom:14px;}
+.form-label{
+  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--muted);display:block;margin-bottom:6px;
+}
+.form-control{
+  width:100%;background:var(--bg-card2);border:1px solid var(--border2);
+  border-radius:10px;color:var(--text);font-size:14px;padding:11px 14px;
+  transition:border-color .18s,background .3s;outline:none;-webkit-appearance:none;
+}
+.form-control:focus{border-color:var(--accent);}
+.form-control:disabled{opacity:.5;cursor:not-allowed;}
+.form-control option{background:var(--bg-card);color:var(--text);}
+.form-hint{font-size:11px;color:var(--muted);margin-top:5px;}
+.modal-info{
+  background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.18);
+  border-radius:10px;padding:12px;font-size:12px;color:var(--accent);
+  line-height:1.6;margin-bottom:14px;
+}
+.modal-warn{
+  background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.18);
+  border-radius:10px;padding:12px;font-size:12px;color:var(--amber);
+  line-height:1.6;margin-bottom:14px;
+}
+.modal-danger{
+  background:rgba(240,82,82,.08);border:1px solid rgba(240,82,82,.18);
+  border-radius:10px;padding:12px;font-size:12px;color:var(--red);
+  line-height:1.6;margin-bottom:14px;
+}
+.modal-footer{padding:0 20px 24px;display:flex;gap:10px;}
+.btn{border:none;border-radius:10px;padding:12px 20px;font-size:13px;font-weight:500;cursor:pointer;transition:var(--tr);flex:1;}
+.btn-ghost{background:var(--bg-card2);color:var(--muted);}
+.btn-ghost:hover{color:var(--text);}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;flex:2;}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px);}
+.btn-primary:disabled{opacity:.5;pointer-events:none;}
+.btn-success{background:rgba(34,199,138,.12);border:1px solid rgba(34,199,138,.25);color:var(--green);flex:2;}
+.btn-amber{background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25);color:var(--amber);flex:2;}
+
+/* Summary box */
+.summary-box{background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;}
+.summary-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;}
+.summary-label{color:var(--muted);}
+.summary-divider{border:none;border-top:1px solid var(--border);margin:6px 0;}
+.summary-total{font-weight:500;}
+
+/* result modal */
+.result-modal{text-align:center;padding:28px 20px;}
+.result-icon{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:24px;}
+.result-icon.success{background:rgba(34,199,138,.12);color:var(--green);}
+.result-icon.error{background:rgba(240,82,82,.12);color:var(--red);}
+.result-title{font-size:17px;font-weight:500;margin-bottom:7px;}
+.result-msg{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+
+/* checkbox */
+.check-group{display:flex;align-items:flex-start;gap:10px;padding:12px 0;}
+.check-group input[type=checkbox]{width:16px;height:16px;flex-shrink:0;margin-top:1px;accent-color:var(--accent);}
+.check-group label{font-size:12px;color:var(--muted);line-height:1.5;}
+
+/* bank detail box */
+.bank-box{
+  background:var(--bg-card2);border:1px solid var(--border);
+  border-radius:10px;padding:12px;margin-bottom:12px;
+}
+.bank-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;}
+.bank-label{color:var(--muted);}
+.bank-value{font-weight:500;font-family:'DM Mono',monospace;}
+
+/* rollover confirm box */
+.rollover-summary{
+  background:var(--bg-card2);border:1px solid var(--border);
+  border-radius:10px;padding:14px;margin-bottom:14px;
+}
+.rs-amount{font-size:clamp(22px,4vw,28px);font-weight:300;letter-spacing:-.3px;color:var(--accent);margin-bottom:2px;}
+.rs-label{font-size:11px;color:var(--muted);}
+
+/* pending notice */
+.pending-notice{
+  background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.18);
+  border-radius:10px;padding:12px;font-size:12px;color:var(--accent);line-height:1.6;
+}
+.pending-notice button{
+  margin-top:8px;padding:6px 14px;background:rgba(79,142,247,.12);
+  border:1px solid rgba(79,142,247,.2);border-radius:7px;
+  color:var(--accent);font-size:12px;font-weight:500;cursor:pointer;transition:var(--tr);
+}
+.pending-notice button:hover{background:rgba(79,142,247,.2);}
+
+/* Powered by */
+.powered-by{position:fixed;bottom:12px;right:14px;font-size:11px;color:var(--muted);z-index:50;}
+.powered-by strong{color:var(--accent);}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1100px){
+  .page-grid{grid-template-columns:1fr;}
+}
+@media(max-width:900px){
+  .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+  .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3);}
+  .topnav{left:0;}
+  .main{margin-left:0;}
+  .hamburger{display:flex;}
+}
+@media(max-width:600px){
+  .main{padding:14px;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .hero-grid{grid-template-columns:1fr 1fr;}
+  .loan-detail-grid{grid-template-columns:1fr 1fr;}
+  .hero-top{flex-direction:column;}
+  .topnav-greeting p{display:none;}
+  .status-label{display:none;}
+  .modal-box{max-width:100%;}
+  .hero-actions{width:100%;}
+  .hero-btn{flex:1;justify-content:center;}
+}
+@media(max-width:380px){
+  .stats-row{grid-template-columns:1fr;}
+  .hero-grid{grid-template-columns:1fr;}
+  .loan-detail-grid{grid-template-columns:1fr 1fr;}
+}
+@media(min-width:901px){
+  .modal-backdrop{align-items:center;padding:20px;}
+  .modal-box{border-radius:var(--r-xl);max-width:440px;}
+  .modal-handle{display:none;}
+}
+@media print{
+  .sidebar,.topnav,.powered-by{display:none!important;}
+  .main{margin:0;padding:0;}
+}
+</style>
 </head>
 <body>
 
-<div id="loader-screen" class="loader-screen">
-    <div class="logo">
-        <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
-    </div>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-ring"></div>
+  <div class="loader-label">Club De Stars</div>
 </div>
 
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <div class="logo-container">
-            <div class="logo-box">
-                <img src="/media/assets/logo/log.png" alt="" width="100%" height="100%">
-            </div>
-            <div>
-                <h5 class="mb-0 fw-bold" style="text-transform:uppercase;">Club De Stars</h5>
-                <small class="opacity-75">COOPERATIVE SOCIETY LIMITED</small>
-            </div>
-        </div>
-        <div class="member-badge mt-2 <%= user.membershipID.startsWith('CD') ? 'club-member-badge' : '' %>">
-            <i class="fas <%= user.membershipID.startsWith('CD') ? 'fa-star' : 'fa-user' %>"></i>
-            <span><%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Non-Club Member' %></span>
-        </div>
+<%
+  const pendingGuarantorCount = user.guarantorRequests
+    ? user.guarantorRequests.filter(r => r.status === "pending").length : 0;
+  const maxLoan = user.account?.balance ? user.account.balance * 3 : 0;
+  const loanProgressPct = loan && loan.totalRepay > 0
+    ? Math.max(0,Math.min(100,((loan.totalRepay - (loan.outstandingBalance || loan.totalRepay)) / loan.totalRepay * 100).toFixed(0))) : 0;
+  const loanIsOverdue = loan && loan.status === 'overdue';
+
+  const now2 = new Date();
+  const joinDate = new Date(user.createdAt);
+  const isEligibleForLoan = (unit, value) => {
+    if (unit === "daily") return true;
+    let elapsed;
+    switch(unit) {
+      case "weeks":  elapsed = Math.floor((now2 - joinDate) / (1000*60*60*24*7)); break;
+      case "months": elapsed = (now2.getFullYear() - joinDate.getFullYear()) * 12 + (now2.getMonth() - joinDate.getMonth()); break;
+      default: elapsed = 0;
+    }
+    return elapsed >= value;
+  };
+  const eligibleLoan = loanSettings.find(ls => ls.status === "active" && isEligibleForLoan(ls.eligibilityUnit, ls.eligibilityValue));
+  const canApply = !!eligibleLoan && !loan;
+
+  const bankName      = (companyAccount && companyAccount.bankName)      || "—";
+  const accountName   = (companyAccount && companyAccount.accountName)   || "—";
+  const accountNumber = (companyAccount && companyAccount.accountNumber) || "—";
+%>
+
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <img src="/media/assets/logo/log.png" alt="Logo"
+           onerror="this.style.display='none';this.parentNode.innerHTML='<b>C</b>'">
     </div>
-    <div class="sidebar-menu">
-        <a href="/cds-cooperative/dashboard"><i class="fas fa-home"></i> Dashboard</a>
-        <a href="/cds-cooperative/transaction"><i class="fas fa-exchange-alt"></i> Transactions</a>
-        <a href="/cds-cooperative/loan" class="active"><i class="fas fa-hand-holding-usd"></i> My Loans</a>
-        <a href="/cds-cooperative/guarantorRequest">
-            <i class="fas fa-user-friends"></i> Guarantor Requests
-            <% if (pendingGuarantorCount > 0) { %>
-                <span class="badge bg-danger ms-auto" style="font-size:0.68rem;"><%= pendingGuarantorCount %></span>
-            <% } %>
-        </a>
-        <a href="/manage/kiddies-account"><i class="fas fa-users"></i> Kiddies Account</a>
-        <a href="/cds-cooperative/profile"><i class="fas fa-user-circle"></i> My Profile</a>
-        <a href="/cds-cooperative/kyc"><i class="fas fa-shield-alt"></i> KYC Verification</a>
-        <a href="/cds-cooperative/referral"><i class="fas fa-user-plus"></i> Referral Program</a>
-        <a href="/cds-cooperative/memberContract"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
-        <a href="/cds-cooperative/report"><i class="fas fa-chart-line"></i> Reports</a>
-        <% if (user.role && user.role.name !== 'member') { %>
-        <a href="/admin-dashboard"><i class="fas fa-tachometer-alt"></i> Administration</a>
+    <div style="min-width:0;">
+      <div class="logo-name">Club De Stars</div>
+      <div class="logo-sub">Cooperative Society</div>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-chip">
+      <div class="user-avatar">
+        <%= user.firstName.charAt(0).toUpperCase() %><%= user.lastName.charAt(0).toUpperCase() %>
+      </div>
+      <div style="min-width:0;">
+        <div class="user-name"><%= user.firstName %> <%= user.lastName %></div>
+        <div class="user-id"><%= user.membershipID %></div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Menu</div>
+    <a href="/cds-cooperative/dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="/cds-cooperative/transaction" class="nav-item"><i class="fas fa-exchange-alt"></i> Transactions</a>
+    <a href="/cds-cooperative/loan" class="nav-item active"><i class="fas fa-coins"></i> Loans</a>
+    <a href="/cds-cooperative/guarantorRequest" class="nav-item">
+      <i class="fas fa-user-check"></i> Guarantor
+      <% if (pendingGuarantorCount > 0) { %><span class="nav-badge"><%= pendingGuarantorCount %></span><% } %>
+    </a>
+    <div class="nav-section">Account</div>
+    <a href="/manage/kiddies-account" class="nav-item"><i class="fas fa-baby"></i> Kiddies Account</a>
+    <a href="/cds-cooperative/profile" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+    <a href="/cds-cooperative/kyc" class="nav-item"><i class="fas fa-shield-alt"></i> KYC</a>
+    <a href="/cds-cooperative/referral" class="nav-item"><i class="fas fa-user-plus"></i> Referrals</a>
+    <a href="/cds-cooperative/report" class="nav-item"><i class="fas fa-chart-bar"></i> Reports</a>
+    <a href="/cds-cooperative/memberContract" class="nav-item"><i class="fas fa-file-alt"></i> Terms</a>
+    <% if (user.role && user.role.name !== 'member') { %>
+    <div class="nav-section">Admin</div>
+    <a href="/admin-dashboard" class="nav-item"><i class="fas fa-tachometer-alt"></i> Administration</a>
+    <% } %>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="member-pill">
+      <i class="fas fa-star" style="font-size:9px;"></i>
+      <%= user.membershipID.startsWith('CD') ? 'Club Member' : 'Associate Member' %>
+    </div>
+    <a href="/logout" class="nav-item" style="color:var(--red);margin-top:2px;">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </a>
+  </div>
+</aside>
+
+<!-- ════ TOP NAV ════ -->
+<header class="topnav">
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="topnav-greeting">
+    <h2>My Loans</h2>
+    <p><%= user.firstName %> <%= user.lastName %> · <%= user.membershipID %></p>
+  </div>
+  <div class="topnav-right">
+    <div class="status-row">
+      <div class="status-dot"></div>
+      <span class="status-label">Active</span>
+    </div>
+    <% if (user.Payment && user.Payment.status === "paid") { %>
+      <div class="kyc-chip verified">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i>
+        <span>Verified</span>
+      </div>
+    <% } else { %>
+      <a href="/cds-cooperative/kyc" class="kyc-chip">
+        <i class="fas fa-shield-alt" style="font-size:11px;"></i>
+        <span>KYC</span>
+      </a>
+    <% } %>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">
+      <div class="tog-thumb" id="togThumb">
+        <i class="fas fa-moon" id="togIcon" style="font-size:9px;"></i>
+      </div>
+    </button>
+  </div>
+</header>
+
+<!-- ════ MAIN ════ -->
+<main class="main">
+
+  <!-- Hero -->
+  <div class="loan-hero">
+    <div class="hero-top">
+      <div>
+        <div class="hero-label">Eligible Loan Amount</div>
+        <div class="hero-amount"><span class="cur">₦</span><%= maxLoan.toLocaleString() %></div>
+        <div class="hero-pill pill-<%= user.membershipID.startsWith('CD') ? 'green' : 'amber' %>" style="margin-top:8px;">
+          <i class="fas fa-percentage" style="font-size:10px;"></i>
+          <%= interestRate %>% · <%= user.membershipID.startsWith('CD') ? 'Club Member Rate' : 'Standard Rate' %>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="hero-btn hero-btn-primary" onclick="openModal('loanRequestModal')">
+          <i class="fas fa-plus" style="font-size:11px;"></i> Apply for Loan
+        </button>
+        <% if (loan) { %>
+        <button class="hero-btn hero-btn-ghost" onclick="openModal('paymentModal')">
+          <i class="fas fa-credit-card" style="font-size:11px;"></i> Pay Now
+        </button>
         <% } %>
-        <a href="/logout" style="color:rgba(255,255,255,0.52);margin-top:4px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </div>
     </div>
+    <div class="hero-grid">
+      <div class="hero-stat">
+        <div class="hero-stat-label">Active Loan</div>
+        <div class="hero-stat-value" style="color:<%= loan ? (loanIsOverdue ? 'var(--red)' : 'var(--text)') : 'var(--muted)' %>;">
+          ₦<%= loan ? loan.amount.toLocaleString() : '0' %>
+        </div>
+        <div class="hero-stat-sub"><%= loan ? loan.status.toUpperCase() : 'None' %></div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Outstanding</div>
+        <div class="hero-stat-value" style="color:<%= loanIsOverdue ? 'var(--red)' : 'var(--amber)' %>;">
+          ₦<%= loan ? (loan.outstandingBalance || loan.totalRepay).toLocaleString() : '0' %>
+        </div>
+        <div class="hero-stat-sub"><%= loan ? 'Total repayment' : 'No balance' %></div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Due Date</div>
+        <div class="hero-stat-value" style="color:<%= loanIsOverdue ? 'var(--red)' : 'var(--text)' %>;">
+          <%= loan && loan.dueDate ? new Date(loan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—' %>
+        </div>
+        <div class="hero-stat-sub"><%= loan && daysUntilDue != null ? daysUntilDue + ' days left' : 'No active loan' %></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick stats -->
+  <div class="stats-row">
+    <div class="stat-mini">
+      <div class="stat-mini-icon" style="background:rgba(34,199,138,.1);color:var(--green);">
+        <i class="fas fa-wallet"></i>
+      </div>
+      <div class="stat-mini-label">Savings Balance</div>
+      <div class="stat-mini-value">₦<%= (user.account?.balance || 0).toLocaleString() %></div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-mini-icon" style="background:rgba(79,142,247,.1);color:var(--accent);">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="stat-mini-label">Repayment Progress</div>
+      <div class="stat-mini-value"><%= loanProgressPct %>%</div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-mini-icon" style="background:rgba(245,166,35,.1);color:var(--amber);">
+        <i class="fas fa-calendar-check"></i>
+      </div>
+      <div class="stat-mini-label">Days Until Due</div>
+      <div class="stat-mini-value" style="color:<%= loan && daysUntilDue < 3 ? 'var(--red)' : 'var(--text)' %>;">
+        <%= loan && daysUntilDue != null ? daysUntilDue : '—' %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main page grid -->
+  <div class="page-grid">
+
+    <!-- Left: active loan + rules -->
+    <div>
+      <!-- Active Loan -->
+      <div class="active-loan-wrap">
+        <% if (loan) { %>
+        <div class="loan-block <%= loanIsOverdue ? 'overdue' : '' %>">
+          <div class="loan-block-header">
+            <span class="loan-block-title">Current Loan</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <% if (loanIsOverdue) { %>
+                <span class="hero-pill pill-red" style="margin:0;font-size:11px;">
+                  <i class="fas fa-circle" style="font-size:7px;"></i> Overdue
+                </span>
+              <% } else { %>
+                <span class="hero-pill pill-amber" style="margin:0;font-size:11px;">
+                  <%= loan.status.charAt(0).toUpperCase() + loan.status.slice(1) %>
+                </span>
+              <% } %>
+            </div>
+          </div>
+          <div class="loan-block-body">
+            <div class="loan-amount-display" style="color:<%= loanIsOverdue ? 'var(--red)' : 'var(--text)' %>;">
+              ₦<%= (loan.outstandingBalance || loan.totalRepay).toLocaleString() %>
+            </div>
+            <div class="loan-sub">Outstanding balance</div>
+            <div class="loan-progress-bar">
+              <div class="loan-progress-fill <%= loanIsOverdue ? 'overdue' : '' %>" style="width:<%= loanProgressPct %>%"></div>
+            </div>
+            <div class="loan-detail-grid">
+              <div class="loan-detail-item">
+                <div class="ld-label">Principal</div>
+                <div class="ld-value">₦<%= loan.amount.toLocaleString() %></div>
+              </div>
+              <div class="loan-detail-item">
+                <div class="ld-label">Total Repay</div>
+                <div class="ld-value">₦<%= loan.totalRepay.toLocaleString() %></div>
+              </div>
+              <div class="loan-detail-item">
+                <div class="ld-label">Interest</div>
+                <div class="ld-value">₦<%= (loan.amount * (interestRate / 100)).toLocaleString(undefined,{maximumFractionDigits:0}) %></div>
+              </div>
+              <div class="loan-detail-item">
+                <div class="ld-label">Rate</div>
+                <div class="ld-value"><%= interestRate %>% p.a.</div>
+              </div>
+              <div class="loan-detail-item">
+                <div class="ld-label">Due</div>
+                <div class="ld-value" style="color:<%= loanIsOverdue ? 'var(--red)' : 'var(--amber)' %>;">
+                  <%= loan.dueDate ? new Date(loan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}) : 'N/A' %>
+                </div>
+              </div>
+              <div class="loan-detail-item">
+                <div class="ld-label">Progress</div>
+                <div class="ld-value" style="color:var(--green);"><%= loanProgressPct %>%</div>
+              </div>
+            </div>
+            <% if (loan.totalPenalty > 0) { %>
+            <div class="penalty-row">
+              <span style="color:var(--muted);">Penalty (<%= loan.duration?.penaltyPercentage || 0 %>%/day)</span>
+              <span style="color:var(--red);font-weight:500;">+₦<%= loan.totalPenalty.toLocaleString() %></span>
+            </div>
+            <% } %>
+            <div class="loan-action-row">
+              <button class="loan-action-btn btn-pay" onclick="openModal('paymentModal')">
+                <i class="fas fa-credit-card" style="margin-right:6px;font-size:11px;"></i>Make Payment
+              </button>
+              <button class="loan-action-btn btn-rollover" onclick="openRolloverFlow()">
+                <i class="fas fa-sync-alt" style="margin-right:6px;font-size:11px;"></i>Rollover
+              </button>
+            </div>
+          </div>
+        </div>
+        <% } else { %>
+        <div class="card">
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-coins"></i></div>
+            <div>
+              <div style="font-size:15px;font-weight:500;margin-bottom:4px;">No Active Loan</div>
+              <div style="font-size:12px;color:var(--muted);">Up to ₦<%= maxLoan.toLocaleString() %> available</div>
+            </div>
+            <button class="empty-cta" onclick="openModal('loanRequestModal')">Apply for a Loan</button>
+          </div>
+        </div>
+        <% } %>
+      </div>
+
+     
+    </div>
+
+    <!-- Right: calculator + notes -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+
+      <!-- Calculator -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Loan Calculator</span>
+          <i class="fas fa-calculator" style="color:var(--accent);font-size:13px;"></i>
+        </div>
+        <div class="card-body">
+          <div class="calc-form-group">
+            <label class="calc-label">Amount (₦)</label>
+            <input type="number" class="calc-input" id="calcAmount" placeholder="e.g. 100,000" oninput="calculateLoan()">
+            <div class="calc-hint">Max: ₦<%= maxLoan.toLocaleString() %></div>
+          </div>
+          <div class="calc-form-group">
+            <label class="calc-label">Duration</label>
+            <select class="calc-select" id="calcDuration" onchange="calculateLoan()">
+              <% loanSettings.forEach(s => { if(s.status === 'active'){ %>
+                <option value="<%= s.duration %>"><%= s.loanName %> — <%= s.duration %> months</option>
+              <% }}); %>
+            </select>
+          </div>
+          <div class="calc-form-group">
+            <label class="calc-label">Interest Rate</label>
+            <input type="number" class="calc-input" id="calcRate" value="<%= interestRate %>" readonly>
+            <div class="calc-hint" style="color:var(--green);"><i class="fas fa-star" style="font-size:9px;margin-right:3px;"></i><%= user.account?.accountType?.name || 'Member' %> rate</div>
+          </div>
+          <div class="calc-result" id="calcResult">
+            <div class="calc-result-row"><span class="calc-result-label">Monthly payment</span><span id="monthlyPay" style="font-weight:500;color:var(--accent);">₦0</span></div>
+            <div class="calc-result-row"><span class="calc-result-label">Total interest</span><span id="totalInt" style="color:var(--amber);">₦0</span></div>
+            <hr class="calc-result-divider">
+            <div class="calc-result-row"><span class="calc-result-label">Total repayment</span><span id="totalRep" style="font-weight:600;">₦0</span></div>
+          </div>
+        </div>
+      </div>
+
+  
+
+    </div>
+  </div>
+
+</main>
+
+<div class="powered-by">Powered by <strong>JESZ LIMITED</strong></div>
+
+<!-- ════════════ MODALS ════════════ -->
+
+<!-- Loan Request -->
+<div class="modal-backdrop" id="loanRequestModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-file-invoice-dollar" style="color:var(--accent);margin-right:8px;font-size:14px;"></i>Apply for Loan</span>
+      <button class="modal-close" onclick="closeModal('loanRequestModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <% if (loan) { %>
+        <div class="modal-danger"><i class="fas fa-ban" style="margin-right:6px;"></i>You have an active loan. Clear it before applying.</div>
+      <% } else if (!eligibleLoan) { %>
+        <div class="modal-danger"><i class="fas fa-clock" style="margin-right:6px;"></i>You are not yet eligible to apply for a loan.</div>
+      <% } %>
+      <div class="modal-warn"><i class="fas fa-users" style="margin-right:6px;"></i>Two guarantors required for approval.</div>
+      <form id="loanForm">
+        <div class="form-group">
+          <label class="form-label">Loan Amount (₦)</label>
+          <input type="number" class="form-control" name="amount" placeholder="0.00" max="<%= maxLoan %>" required <%= !canApply ? 'disabled' : '' %>>
+          <div class="form-hint">Max: ₦<%= maxLoan.toLocaleString() %></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Repayment Period</label>
+          <select class="form-control" name="duration" required <%= !canApply ? 'disabled' : '' %>>
+            <option value="">Select duration…</option>
+            <% loanSettings.forEach(s => { if(s.status === 'active'){ %>
+              <option value="<%= s._id %>" <%= !isEligibleForLoan(s.eligibilityUnit, s.eligibilityValue) ? 'disabled' : '' %>>
+                <%= s.loanName %><% if(!isEligibleForLoan(s.eligibilityUnit, s.eligibilityValue)){%> (Not eligible)<% } %>
+              </option>
+            <% }}); %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Guarantor 1</label>
+          <select class="form-control guarantorSelect" id="guarantor1" name="guarantor1" required <%= !canApply ? 'disabled' : '' %>>
+            <option value="">Select guarantor…</option>
+            <% users.forEach(u => { if(u._id.toString() !== user._id.toString()){ %><option value="<%= u._id %>"><%= u.firstName %> <%= u.lastName %> — <%= u.phone %></option><% }}) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Guarantor 2</label>
+          <select class="form-control guarantorSelect" id="guarantor2" name="guarantor2" required <%= !canApply ? 'disabled' : '' %>>
+            <option value="">Select guarantor…</option>
+            <% users.forEach(u => { if(u._id.toString() !== user._id.toString()){ %><option value="<%= u._id %>"><%= u.firstName %> <%= u.lastName %> — <%= u.phone %></option><% }}) %>
+          </select>
+        </div>
+        <div class="check-group">
+          <input type="checkbox" name="agreeTerms" id="agreeTerms" <%= !canApply ? 'disabled' : '' %>>
+          <label for="agreeTerms">I agree to the loan terms: <%= interestRate %>% interest rate for <%= user.membershipID.startsWith('CD') ? 'Club' : 'Standard' %> members.</label>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('loanRequestModal')">Cancel</button>
+      <button class="btn btn-primary" id="loanSubmitBtn" onclick="submitLoanApplication()" <%= !canApply ? 'disabled' : '' %>>
+        <i class="fas fa-paper-plane" style="margin-right:5px;font-size:11px;"></i>Submit Application
+      </button>
+    </div>
+  </div>
 </div>
 
-<!-- Top Navbar -->
-<div class="top-navbar">
-    <i class="fas fa-bars d-lg-none me-3"
-       style="cursor:pointer;color:var(--primary);font-size:1.5rem;"
-       onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
-    <div class="flex-grow-1">
-        <h6 class="mb-0 fw-bold d-none d-sm-block" style="color:var(--primary);font-size:0.9rem;">
-            Welcome back, <%= user.firstName %>! 👋
-        </h6>
-        <h6 class="mb-0 fw-bold d-sm-none" style="color:var(--primary);font-size:0.85rem;">Hi, <%= user.firstName %>! 👋</h6>
-        <small class="text-muted d-none d-md-block" style="font-size:0.73rem;">
-            Member ID: <%= user.membershipID %> &nbsp;|&nbsp;
-            <%= new Date(user.createdAt).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) %>
-        </small>
+<!-- Payment Modal -->
+<div class="modal-backdrop" id="paymentModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-credit-card" style="color:var(--accent);margin-right:8px;font-size:14px;"></i>Loan Payment</span>
+      <button class="modal-close" onclick="closeModal('paymentModal')"><i class="fas fa-times"></i></button>
     </div>
-    <% let sbadgeClass = "bg-secondary bg-opacity-10 text-secondary";
-       if (user.status === "active")   sbadgeClass = "bg-success bg-opacity-10 text-success";
-       if (user.status === "rejected") sbadgeClass = "bg-danger bg-opacity-10 text-danger"; %>
-    <span class="badge <%= sbadgeClass %> ms-2" style="font-size:0.7rem;padding:5px 10px;">
-        <%= user.status.charAt(0).toUpperCase() + user.status.slice(1) %>
-    </span>
+    <div class="modal-body">
+      <div class="summary-box">
+        <div class="summary-row">
+          <span class="summary-label">Outstanding balance</span>
+          <span style="font-weight:500;color:<%= loanIsOverdue ? 'var(--red)' : 'var(--text)' %>;">
+            ₦<%= loan ? (loan.outstandingBalance || loan.totalRepay).toLocaleString() : '0' %>
+          </span>
+        </div>
+        <% if (loan && loan.totalPenalty > 0) { %>
+        <div class="summary-row">
+          <span class="summary-label">Penalty accrued</span>
+          <span style="color:var(--red);">+₦<%= loan.totalPenalty.toLocaleString() %></span>
+        </div>
+        <% } %>
+      </div>
+      <form id="loanPaymentForm">
+        <div class="form-group">
+          <label class="form-label">Amount (₦)</label>
+          <input type="number" name="amount" id="paymentAmount" class="form-control"
+                 value="<%= loan ? Math.ceil((loan.outstandingBalance || loan.totalRepay) / 12) : 0 %>"
+                 min="<%= loan ? Math.ceil((loan.outstandingBalance || loan.totalRepay) / 12) : 0 %>"
+                 max="<%= loan ? (loan.outstandingBalance || loan.totalRepay) : 0 %>" required>
+          <div class="form-hint">Minimum: ₦<%= loan ? Math.ceil((loan.outstandingBalance || loan.totalRepay) / 12).toLocaleString() : '0' %></div>
+        </div>
+        <input type="hidden" name="loanId" value="<%= loan ? loan._id : '' %>">
+        <div class="modal-warn" style="margin-bottom:0;">
+          <i class="fas fa-calendar-alt" style="margin-right:6px;"></i>
+          Due <strong><%= loan && dueDate ? new Date(dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'N/A' %></strong>
+          — avoid <%= loan?.duration?.penaltyPercentage || 0.5 %>% daily penalty
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('paymentModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitLoanPayment()">
+        <i class="fas fa-arrow-right" style="margin-right:5px;font-size:11px;"></i>Proceed
+      </button>
+    </div>
+  </div>
 </div>
 
-<!-- Main Content -->
-<div class="main-content">
-
-    <!-- Welcome Card -->
-    <div class="welcome-card position-relative">
-        <div class="row align-items-center position-relative" style="z-index:1;">
-            <div class="col-md-8">
-                <h2 class="mb-3 fw-bold">Great to see you again <%= user.firstName %>!</h2>
-                <div class="d-flex gap-3 flex-wrap">
-                    <div class="member-badge"><i class="fas fa-id-card"></i><span><%= user.membershipID %></span></div>
-                    <div class="member-badge">
-                        <i class="fas fa-calendar"></i>
-                        <span>Member Since: <%= new Date(user.createdAt).toLocaleDateString('en-US',{month:'short',year:'numeric'}) %></span>
-                    </div>
-                    <div class="member-badge club-member-badge">
-                        <i class="fas fa-star"></i>
-                        <span><%= interestRate %>% Loan Interest Rate</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <h5 class="opacity-90">Account Status</h5>
-                <% let badgeClass = "bg-light text-secondary";
-                   if (user.status === "active")   badgeClass = "bg-light text-success";
-                   if (user.status === "rejected")  badgeClass = "bg-light text-danger"; %>
-                <h3><span class="badge <%= badgeClass %> fs-5 px-4 py-2"><%= user.status.charAt(0).toUpperCase()+user.status.slice(1) %></span></h3>
-            </div>
-        </div>
+<!-- Rollover: Pay Interest First -->
+<div class="modal-backdrop" id="rolloverInterestModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-exclamation-circle" style="color:var(--amber);margin-right:8px;font-size:14px;"></i>Interest Payment Required</span>
+      <button class="modal-close" onclick="closeModal('rolloverInterestModal')"><i class="fas fa-times"></i></button>
     </div>
-
-    <!-- Stat Cards -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-4 col-md-6">
-            <div class="stat-card">
-                <div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:white;"><i class="fas fa-wallet"></i></div>
-                <p class="text-muted mb-1 fw-semibold">Eligible Loan Amount</p>
-                <h3 class="mb-2 fw-bold">₦<%= (user.account.balance * 3).toLocaleString() %></h3>
-                <small class="text-success fw-semibold"><i class="fas fa-info-circle me-1"></i>Available</small>
-            </div>
+    <div class="modal-body">
+      <div class="modal-warn"><i class="fas fa-info-circle" style="margin-right:6px;"></i>Pay your loan interest before rolling over. Transfer the exact amount below, then submit proof here.</div>
+      <div class="rollover-summary">
+        <div class="rs-label">Interest Amount Due</div>
+        <div class="rs-amount" style="color:var(--amber);" id="ri_interestOwed">₦0</div>
+      </div>
+      <div class="bank-box">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Transfer to</div>
+        <div class="bank-row"><span class="bank-label">Bank</span><span class="bank-value" id="ri_bankName">—</span></div>
+        <div class="bank-row"><span class="bank-label">Account No.</span><span class="bank-value" id="ri_accountNumber">—</span></div>
+        <div class="bank-row"><span class="bank-label">Account Name</span><span class="bank-value" id="ri_accountName">—</span></div>
+      </div>
+      <div id="ri_pendingNotice" class="pending-notice" style="display:none;">
+        <i class="fas fa-clock" style="margin-right:5px;"></i>
+        Interest payment is <strong>pending admin approval</strong>. Once confirmed you can proceed.
+        <br>
+        <button onclick="checkRolloverStatus()"><i class="fas fa-sync-alt" style="margin-right:4px;"></i>Check Status</button>
+      </div>
+      <div id="ri_form">
+        <div class="form-group">
+          <label class="form-label">Amount Paid (₦)</label>
+          <input type="number" class="form-control" id="ri_amount" placeholder="Enter exact amount transferred">
         </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="stat-card">
-                <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;"><i class="fas fa-hand-holding-usd"></i></div>
-                <p class="text-muted mb-1 fw-semibold">Active Loan</p>
-                <h3 class="mb-2 fw-bold">₦<%= loan && loan.amount ? loan.amount.toLocaleString() : "0" %></h3>
-                <% if (loan) { %>
-                    <small class="text-warning fw-semibold"><i class="fas fa-clock me-1"></i>Status: <%= loan.status.toUpperCase() %></small>
-                <% } else { %>
-                    <small class="text-secondary fw-semibold">No active loan</small>
-                <% } %>
-            </div>
+        <div class="form-group">
+          <label class="form-label">Payer Name <span style="text-transform:none;color:var(--muted);font-weight:400;">(optional)</span></label>
+          <input type="text" class="form-control" id="ri_payerName" placeholder="Name on bank receipt">
         </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="stat-card">
-                <div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;"><i class="fas fa-calendar-check"></i></div>
-                <p class="text-muted mb-1 fw-semibold">Total Payment</p>
-                <h3 class="mb-2 fw-bold">
-                    <% if (loan && loan.status === "approved") { %>₦<%= loan.totalRepay.toLocaleString() %><% } else { %>₦0<% } %>
-                </h3>
-                <small style="color:var(--primary);" class="fw-semibold">
-                    <i class="fas fa-calendar me-1"></i>
-                    <% if (loan && loan.status === "approved" && dueDate) { %>
-                        Due <%= new Date(dueDate).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) %>
-                    <% } else { %>No due date<% } %>
-                </small>
-            </div>
-        </div>
+        <div id="ri_error" class="modal-danger" style="display:none;margin-bottom:0;"></div>
+      </div>
     </div>
-
-    <!-- Loan Section -->
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold" style="color:var(--primary);"><i class="fas fa-hand-holding-usd me-2"></i>My Loans</h5>
-                    <button class="btn btn-primary btn-sm" onclick="openModal('loanRequestModal')">
-                        <i class="fas fa-plus me-2"></i>Request New Loan
-                    </button>
-                </div>
-                <div class="card-body">
-
-                    <!-- Loan Rules -->
-                    <div class="alert-info-custom mb-4">
-                        <h6 class="fw-bold mb-3"><i class="fas fa-info-circle me-2"></i>Loan Rules & Conditions</h6>
-                        <ul class="small mb-0 ps-3">
-                            <li class="mb-2"><strong>Maximum Loan:</strong> 3x your total savings (Current max: ₦<%= user.account?.balance ? (user.account.balance * 3).toLocaleString() : '0' %>)</li>
-                            <li class="mb-2"><strong>Club Members (CDS):</strong> 5% interest rate per annum</li>
-                            <li class="mb-2"><strong>Non-Club Members (NCDS):</strong> 10% interest rate per annum</li>
-                            <li class="mb-2"><strong>Qualification:</strong> Must have been a member for at least 1 month</li>
-                            <li class="mb-2"><strong>Late Payment Penalty:</strong> 0.5% of loan amount per extra day</li>
-                            <li class="mb-0"><strong>Rollover:</strong> Pay interest first, then apply before expiration</li>
-                        </ul>
-                    </div>
-
-                    <!-- Active Loan Card -->
-                    <div class="card mb-3" style="border:3px solid #3350b0;border-radius:20px;">
-                        <div class="card-body">
-                            <% if (loan) { %>
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div>
-                                        <h5 class="mb-1 fw-bold">Personal Loan</h5>
-                                        <small class="text-muted">
-                                            Approved: <%= loan.approvedAt ? loan.approvedAt.toLocaleDateString('en-US') : '-' %> |
-                                            Expires: <%= loan.dueDate ? loan.dueDate.toLocaleDateString('en-US') : '-' %>
-                                        </small>
-                                    </div>
-                                    <span class="badge bg-warning text-dark px-3 py-2">
-                                        <%= loan.status.charAt(0).toUpperCase() + loan.status.slice(1) %>
-                                    </span>
-                                </div>
-
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-3 col-6">
-                                        <small class="text-muted d-block">Loan Amount</small>
-                                        <h6 class="mb-0 fw-bold">₦<%= loan.amount.toLocaleString() %></h6>
-                                    </div>
-                                    <div class="col-md-3 col-6">
-                                        <small class="text-muted d-block">Outstanding</small>
-                                        <h6 class="mb-0 fw-bold text-danger">₦<%= loan.totalRepay.toLocaleString() %></h6>
-                                    </div>
-                                    <div class="col-md-3 col-6">
-                                        <small class="text-muted d-block">Interest Amount</small>
-                                        <h6 class="mb-0 fw-bold">
-                                            ₦<%= (loan.amount * (user.account?.accountType?.interestRate || 0) / 100).toLocaleString() %>
-                                        </h6>
-                                    </div>
-                                    <div class="col-md-3 col-6">
-                                        <small class="text-muted d-block">Interest Rate</small>
-                                        <h6 class="mb-0 fw-bold"><%= interestRate %>% p.a.</h6>
-                                    </div>
-                                </div>
-
-                                <div class="alert-warning-custom mb-3">
-                                    <small>
-                                        <i class="fas fa-exclamation-triangle me-2"></i>
-                                        <strong>Payment Due in <%= daysUntilDue ?? '-' %> days!</strong>
-                                        Avoid <%= loan.duration?.penaltyPercentage ?? 0 %>% daily penalty
-                                    </small>
-                                </div>
-
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <small class="fw-semibold">Repayment Progress</small>
-                                        <small class="fw-bold"><%= loan.repaymentProgress || 0 %>% Paid</small>
-                                    </div>
-                                    <div class="progress" style="height:12px;">
-                                        <div class="progress-bar bg-success" style="width:<%= loan.repaymentProgress || 0 %>%"></div>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-primary flex-grow-1" onclick="openModal('paymentModal')">
-                                        <i class="fas fa-credit-card me-2"></i>Make Payment
-                                    </button>
-                                    <button class="btn btn-outline-primary" onclick="openRolloverFlow()">
-                                        <i class="fas fa-sync-alt me-2"></i>Rollover
-                                    </button>
-                                </div>
-
-                            <% } else { %>
-                                <div class="text-center py-4">
-                                    <h6 class="fw-bold text-muted">No Active Loans</h6>
-                                    <p>You currently have no active loans.</p>
-                                </div>
-                            <% } %>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <!-- Loan Calculator -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h6 class="mb-3 fw-bold" style="color:var(--primary);"><i class="fas fa-calculator me-2"></i>Loan Calculator</h6>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Loan Amount (₦)</label>
-                        <input type="number" class="form-control" id="calcAmount" placeholder="100000" onchange="calculateLoan()">
-                        <small class="text-muted">Max: ₦<%= user.account?.balance ? (user.account.balance * 3).toLocaleString() : '0' %></small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Duration (months)</label>
-                        <select class="form-select" id="calcDuration" onchange="calculateLoan()">
-                            <% loanSettings.forEach(setting => { %>
-                                <% if(setting.status === 'active') { %>
-                                    <option value="<%= setting.duration %>"><%= setting.loanName %> — <%= setting.duration %> months</option>
-                                <% } %>
-                            <% }) %>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Interest Rate (%)</label>
-                        <input type="number" class="form-control" id="calcRate" value="<%= user.account.accountType.interestRate %>" readonly>
-                        <small id="rateInfo" class="text-success"><i class="fas fa-star me-1"></i><%= user.account.accountType.name %> Rate</small>
-                    </div>
-                    <div class="alert-info-custom" id="calcResult" style="display:none;">
-                        <div class="d-flex justify-content-between mb-2"><small class="fw-semibold">Monthly Payment:</small><strong id="monthlyPay">₦0</strong></div>
-                        <div class="d-flex justify-content-between mb-2"><small class="fw-semibold">Total Interest:</small><strong id="totalInt">₦0</strong></div>
-                        <div class="d-flex justify-content-between"><small class="fw-semibold">Total Repayment:</small><strong id="totalRep">₦0</strong></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Important Notes -->
-            <div class="card">
-                <div class="card-body">
-                    <h6 class="mb-3 fw-bold" style="color:var(--primary);"><i class="fas fa-shield-alt me-2"></i>Important Notes</h6>
-                    <div class="loan-rules-list">
-                        <ul class="small mb-0 ps-3">
-                            <li class="mb-2">3-day reminder before payment due</li>
-                            <li class="mb-2">Pay interest first before rollover request</li>
-                            <li class="mb-2">Rollover adds a fee on outstanding balance</li>
-                            <li class="mb-0">Two guarantors required for approval</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="modal-footer" id="ri_footer">
+      <button class="btn btn-ghost" onclick="closeModal('rolloverInterestModal')">Cancel</button>
+      <button class="btn btn-amber" id="ri_submitBtn" onclick="submitInterestPayment()">
+        <i class="fas fa-paper-plane" style="margin-right:5px;font-size:11px;"></i>Submit Proof
+      </button>
     </div>
+  </div>
 </div>
 
-<div class="powered-by">
-    <strong style="color:var(--primary);">Cloudbaam</strong> Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong>
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     LOAN REQUEST MODAL
-═══════════════════════════════════════════════════════════════════════════ -->
-<div class="modal fade" id="loanRequestModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="border-radius:20px;">
-            <div class="modal-header" style="border-radius:20px 20px 0 0;">
-                <h5 class="modal-title fw-bold"><i class="fas fa-file-invoice-dollar me-2" style="color:var(--primary);"></i>Apply for Loan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert-warning-custom mb-4">
-                    <small><i class="fas fa-exclamation-triangle me-2"></i><strong>Requirements:</strong> Two guarantors required for loan approval.</small>
-                </div>
-
-                <%
-                    const now2 = new Date();
-                    const joinDate = new Date(user.createdAt);
-                    const isEligibleForLoan = (unit, value) => {
-                        if (unit === "daily") return true;
-                        let elapsed;
-                        switch(unit) {
-                            case "weeks":  elapsed = Math.floor((now2 - joinDate) / (1000*60*60*24*7)); break;
-                            case "months": elapsed = (now2.getFullYear() - joinDate.getFullYear()) * 12 + (now2.getMonth() - joinDate.getMonth()); break;
-                            default:       elapsed = 0;
-                        }
-                        return elapsed >= value;
-                    };
-                    const eligibleLoan = loanSettings.find(ls => ls.status === "active" && isEligibleForLoan(ls.eligibilityUnit, ls.eligibilityValue));
-                    const isEligible = !!eligibleLoan;
-                    const canApply = isEligible && !loan;
-                %>
-
-                <% if (loan) { %>
-                    <div class="alert alert-danger mb-3">
-                        <i class="fas fa-ban me-2"></i>You already have an active or pending loan. Clear it before applying for a new one.
-                    </div>
-                <% } %>
-                <% if (!isEligible && !loan) { %>
-                    <div class="alert alert-danger mb-3">You are not yet eligible to apply for a loan.</div>
-                <% } %>
-
-                <form id="loanForm">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Loan Amount (₦)</label>
-                            <input type="number" class="form-control" name="amount" max="<%= user.account.balance * 3 %>" placeholder="Enter amount" required <%= !canApply ? "disabled" : "" %>>
-                            <small class="text-muted">Max: ₦<%= (user.account.balance * 3).toLocaleString() %></small>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Repayment Period</label>
-                            <select class="form-select" name="duration" required <%= !canApply ? "disabled" : "" %>>
-                                <% loanSettings.forEach(setting => { %>
-                                    <% if (setting.status === "active") { %>
-                                        <option value="<%= setting._id %>" <%= !isEligibleForLoan(setting.eligibilityUnit, setting.eligibilityValue) ? "disabled" : "" %>>
-                                            <%= setting.loanName %><% if(!isEligibleForLoan(setting.eligibilityUnit, setting.eligibilityValue)){%> (Not yet eligible)<%}%>
-                                        </option>
-                                    <% } %>
-                                <% }) %>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Guarantor 1</label>
-                            <select id="guarantor1" class="form-select guarantorSelect" name="guarantor1" required <%= !canApply ? "disabled" : "" %>>
-                                <option value="">Select guarantor...</option>
-                                <% users.forEach(u => { if(u._id.toString() !== user._id.toString()){ %><option value="<%= u._id %>"><%= u.firstName %> — <%= u.phone %></option><% }}) %>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Guarantor 2</label>
-                            <select id="guarantor2" class="form-select guarantorSelect" name="guarantor2" required <%= !canApply ? "disabled" : "" %>>
-                                <option value="">Select guarantor...</option>
-                                <% users.forEach(u => { if(u._id.toString() !== user._id.toString()){ %><option value="<%= u._id %>"><%= u.firstName %> — <%= u.phone %></option><% }}) %>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-check mt-3">
-                        <input class="form-check-input" type="checkbox" name="agreeTerms" id="agreeTerms" required <%= !canApply ? "disabled" : "" %>>
-                        <label class="form-check-label" for="agreeTerms">
-                            I agree to the loan terms: <%= user.account.accountType.name %> account — <%= user.account.accountType.interestRate %>% interest rate.
-                        </label>
-                    </div>
-                    <div class="modal-footer mt-4">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" <%= !canApply ? "disabled" : "" %>>Submit Application</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+<!-- Rollover: Confirm -->
+<div class="modal-backdrop" id="rolloverConfirmModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-sync-alt" style="color:var(--accent);margin-right:8px;font-size:14px;"></i>Confirm Rollover</span>
+      <button class="modal-close" onclick="closeModal('rolloverConfirmModal')"><i class="fas fa-times"></i></button>
     </div>
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     PAYMENT MODAL
-═══════════════════════════════════════════════════════════════════════════ -->
-<div class="modal fade" id="paymentModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content" style="border-radius:20px;">
-            <div class="modal-header" style="border-radius:20px 20px 0 0;">
-                <h5 class="modal-title fw-bold"><i class="fas fa-credit-card me-2 text-primary"></i>Make Loan Payment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="loanPaymentForm">
-                    <div class="card mb-3" style="background:linear-gradient(135deg,rgba(30,58,138,0.05),rgba(59,130,246,0.05));">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted fw-semibold">Outstanding Balance</span>
-                                <strong>₦<%= loan ? loan.totalRepay.toLocaleString() : '0' %></strong>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Payment Amount (₦)</label>
-                        <input type="number" name="amount" id="paymentAmount" class="form-control"
-                               value="<%= loan ? Math.ceil(loan.totalRepay / 12) : 0 %>"
-                               min="<%= loan ? Math.ceil(loan.totalRepay / 12) : 0 %>"
-                               max="<%= loan ? loan.totalRepay : 0 %>" required>
-                        <small class="text-muted">Minimum payment: ₦<%= loan ? Math.ceil(loan.totalRepay / 12).toLocaleString() : '0' %></small>
-                    </div>
-                    <input type="hidden" name="loanId" value="<%= loan ? loan._id : '' %>">
-                    <input type="hidden" name="dueDate" value="<%= dueDate ? dueDate.toISOString() : '' %>">
-                    <div class="alert-warning-custom">
-                        <small>
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <strong>Due <%= dueDate ? dueDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'N/A' %></strong>
-                            — Avoid 0.5% daily penalty
-                        </small>
-                    </div>
-                    <div class="modal-footer px-0 pb-0">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Make Payment</button>
-                    </div>
-                </form>
-            </div>
+    <div class="modal-body">
+      <div class="modal-info"><i class="fas fa-check-circle" style="margin-right:6px;color:var(--green);"></i>Interest confirmed. Outstanding balance carries forward with rollover fee. Guarantors are retained automatically.</div>
+      <div class="rollover-summary">
+        <div class="rs-label">New Total to Repay</div>
+        <div class="rs-amount" id="rc_newTotal">₦0</div>
+        <div class="summary-row" style="margin-top:8px;">
+          <span class="summary-label">Outstanding balance</span><span id="rc_outstanding">₦0</span>
         </div>
-    </div>
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     ROLLOVER MODAL 1 — Pay Interest First
-═══════════════════════════════════════════════════════════════════════════ -->
-<div class="modal fade" id="rolloverInterestModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:20px;">
-            <div class="modal-header" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;border-radius:20px 20px 0 0;">
-                <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-circle me-2"></i>Interest Payment Required</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert-warning-custom mb-3">
-                    <small>
-                        <i class="fas fa-info-circle me-2"></i>
-                        You must pay your loan interest <strong>before</strong> rolling over.
-                        Transfer the exact amount to the company account below, then submit proof here.
-                        Admin will confirm the payment before your rollover is processed.
-                    </small>
-                </div>
-
-                <!-- Interest amount -->
-                <div class="text-center mb-3">
-                    <p class="text-muted mb-1 fw-semibold small">Interest Amount Due</p>
-                    <h3 class="fw-bold text-warning" id="ri_interestOwed">₦0</h3>
-                </div>
-
-                <!-- Company bank account -->
-                <div class="p-3 rounded mb-3" style="background:rgba(30,58,138,0.04);border:1.5px solid rgba(30,58,138,0.12);">
-                    <p class="fw-bold mb-2 small" style="color:var(--primary);"><i class="fas fa-university me-1"></i>Transfer to:</p>
-                    <div class="d-flex justify-content-between mb-1"><small class="text-muted">Bank</small><small class="fw-bold" id="ri_bankName">—</small></div>
-                    <div class="d-flex justify-content-between mb-1"><small class="text-muted">Account Number</small><small class="fw-bold" id="ri_accountNumber">—</small></div>
-                    <div class="d-flex justify-content-between"><small class="text-muted">Account Name</small><small class="fw-bold" id="ri_accountName">—</small></div>
-                </div>
-
-                <!-- Pending notice (shown after submission) -->
-                <div id="ri_pendingNotice" class="d-none alert-info-custom mb-3">
-                    <i class="fas fa-clock me-2"></i>
-                    Your interest payment is <strong>pending admin approval</strong>.
-                    Once confirmed you can proceed with rollover.
-                    <br><br>
-                    <button class="btn btn-sm btn-outline-primary mt-1" onclick="checkRolloverStatus()">
-                        <i class="fas fa-sync-alt me-1"></i>Check Status
-                    </button>
-                </div>
-
-                <!-- Submission form -->
-                <div id="ri_form">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Amount Paid (₦)</label>
-                        <input type="number" class="form-control" id="ri_amount" placeholder="Enter exact amount you transferred">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Payer Name <small class="text-muted fw-normal">(optional)</small></label>
-                        <input type="text" class="form-control" id="ri_payerName" placeholder="Name on bank receipt">
-                    </div>
-                    <div id="ri_error" class="alert alert-danger d-none mb-0" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i><span id="ri_errorMsg"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer" id="ri_footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-warning fw-semibold" id="ri_submitBtn" onclick="submitInterestPayment()">
-                    <i class="fas fa-paper-plane me-2"></i>Submit Payment Proof
-                </button>
-            </div>
+        <div class="summary-row">
+          <span class="summary-label">Rollover fee (<span id="rc_rolloverPct">0</span>%)</span>
+          <span id="rc_rolloverFee" style="color:var(--red);">₦0</span>
         </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Loan Duration</label>
+        <div class="form-control" id="rc_durationLabel" style="opacity:.6;cursor:not-allowed;pointer-events:none;">—</div>
+        <div class="form-hint"><i class="fas fa-lock" style="margin-right:3px;"></i>Rollovers retain your current loan type.</div>
+      </div>
+      <div id="rc_error" class="modal-danger" style="display:none;margin-bottom:0;"></div>
     </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('rolloverConfirmModal')">Cancel</button>
+      <button class="btn btn-primary" id="rc_submitBtn" onclick="submitRollover()">
+        <i class="fas fa-sync-alt" style="margin-right:5px;font-size:11px;"></i>Submit Rollover
+      </button>
+    </div>
+  </div>
 </div>
 
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     ROLLOVER MODAL 2 — Confirm Rollover
-     Duration is READ-ONLY — rollover always reuses the same loan type.
-═══════════════════════════════════════════════════════════════════════════ -->
-<div class="modal fade" id="rolloverConfirmModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:20px;">
-            <div class="modal-header" style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;border-radius:20px 20px 0 0;">
-                <h5 class="modal-title fw-bold"><i class="fas fa-sync-alt me-2"></i>Confirm Loan Rollover</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert-info-custom mb-3">
-                    <small>
-                        <i class="fas fa-check-circle me-2 text-success"></i>
-                        Interest payment confirmed. Your outstanding balance carries forward with a rollover fee added.
-                        Guarantors from your current loan are retained automatically.
-                    </small>
-                </div>
-
-                <!-- Rollover summary -->
-                <div class="p-3 rounded mb-3" style="background:rgba(30,58,138,0.04);border:1.5px solid rgba(30,58,138,0.12);">
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <small class="text-muted d-block">Outstanding Balance</small>
-                            <strong id="rc_outstanding" class="text-warning">₦0</strong>
-                        </div>
-                        <div class="col-6">
-                            <small class="text-muted d-block">Rollover Fee (<span id="rc_rolloverPct">0</span>%)</small>
-                            <strong id="rc_rolloverFee" class="text-danger">₦0</strong>
-                        </div>
-                        <div class="col-12">
-                            <hr class="my-2">
-                            <small class="text-muted d-block">New Total to Repay</small>
-                            <strong id="rc_newTotal" class="text-primary" style="font-size:1.2rem;">₦0</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CHANGED: Read-only loan duration — user cannot change loan type on rollover -->
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Loan Duration</label>
-                    <div class="form-control bg-light" id="rc_durationLabel"
-                         style="cursor:not-allowed;color:#6c757d;pointer-events:none;">—</div>
-                    <small class="text-muted">
-                        <i class="fas fa-lock me-1"></i>Rollovers retain the same loan type as your current loan.
-                    </small>
-                </div>
-
-                <div class="alert-warning-custom mb-0">
-                    <small>
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        The new loan requires admin approval before it becomes active.
-                    </small>
-                </div>
-
-                <div id="rc_error" class="alert alert-danger d-none mt-3 mb-0" role="alert">
-                    <i class="fas fa-exclamation-circle me-2"></i><span id="rc_errorMsg"></span>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary fw-semibold" id="rc_submitBtn" onclick="submitRollover()">
-                    <i class="fas fa-sync-alt me-2"></i>Submit Rollover Request
-                </button>
-            </div>
-        </div>
+<!-- Success Modals -->
+<div class="modal-backdrop" id="loanSuccessModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon success"><i class="fas fa-check"></i></div>
+      <div class="result-title">Application Submitted</div>
+      <div class="result-msg">Awaiting guarantor approval. You'll be notified once they respond.</div>
+      <button class="btn btn-success" onclick="closeModal('loanSuccessModal')" style="max-width:200px;margin:0 auto;">Got it</button>
     </div>
+  </div>
+</div>
+<div class="modal-backdrop" id="rolloverSuccessModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon success"><i class="fas fa-sync-alt"></i></div>
+      <div class="result-title">Rollover Submitted</div>
+      <div class="result-msg">New total: <strong id="rs_newTotal">₦0</strong> · Fee: <strong id="rs_rolloverFee">₦0</strong>. Awaiting admin approval.</div>
+      <button class="btn btn-primary" onclick="location.reload()" style="max-width:200px;margin:0 auto;">Done</button>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" id="errorModal">
+  <div class="modal-box"><div class="modal-handle"></div>
+    <div class="result-modal">
+      <div class="result-icon error"><i class="fas fa-times"></i></div>
+      <div class="result-title" id="errorModalTitle">Something went wrong</div>
+      <div class="result-msg" id="errorModalMsg">Please try again.</div>
+      <button class="btn btn-ghost" onclick="closeModal('errorModal')" style="max-width:200px;margin:0 auto;">Close</button>
+    </div>
+  </div>
 </div>
 
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     ROLLOVER MODAL 3 — Success
-═══════════════════════════════════════════════════════════════════════════ -->
-<div class="modal fade" id="rolloverSuccessModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:20px;">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold text-success"><i class="fas fa-check-circle me-2"></i>Rollover Submitted</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center">
-                <i class="fas fa-sync-alt fa-3x text-primary mb-3"></i>
-                <h5 class="fw-bold">Rollover Request Submitted 🎉</h5>
-                <p class="text-muted">Your loan has been rolled over and is awaiting admin approval.</p>
-                <div class="alert-info-custom text-start">
-                    <div class="d-flex justify-content-between mb-1">
-                        <small class="fw-semibold">New Total to Repay</small>
-                        <strong id="rs_newTotal">₦0</strong>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <small class="fw-semibold">Rollover Fee</small>
-                        <strong id="rs_rolloverFee">₦0</strong>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-0 justify-content-center">
-                <button type="button" class="btn btn-primary" onclick="location.reload()">Done</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     LOAN SUCCESS MODAL
-═══════════════════════════════════════════════════════════════════════════ -->
-<div class="modal fade" id="loanSuccessModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:20px;">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold text-success"><i class="fas fa-check-circle me-2"></i>Loan Submitted</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center">
-                <i class="fas fa-file-invoice-dollar fa-3x text-success mb-3"></i>
-                <h5 class="fw-bold">Application Successful 🎉</h5>
-                <p class="text-muted">Your loan request is awaiting <strong>guarantor approval</strong>.</p>
-                <div class="alert-info-custom"><small><i class="fas fa-info-circle me-1"></i>You will be notified once they respond.</small></div>
-            </div>
-            <div class="modal-footer border-0 justify-content-center">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Okay, Got it</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     GENERIC MESSAGE MODAL
-═══════════════════════════════════════════════════════════════════════════ -->
-<div class="modal fade" id="messageModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:18px;">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="messageModalTitle"></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center">
-                <div id="messageModalIcon" class="mb-3"></div>
-                <p id="messageModalText" class="mb-0"></p>
-            </div>
-            <div class="modal-footer border-0 justify-content-center">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Okay</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<!-- ════ SCRIPTS ════ -->
 <script>
-
-// ── Loader ────────────────────────────────────────────────────────────────────
-window.addEventListener("load", () => {
-    const loader = document.getElementById("loader-screen");
-    setTimeout(() => {
-        loader.style.opacity = "0";
-        loader.style.transition = "opacity 0.6s ease";
-        setTimeout(() => { loader.style.display = "none"; }, 600);
-    }, 400);
-});
-
-// ── Sidebar close on mobile ───────────────────────────────────────────────────
-document.addEventListener('click', function(event) {
-    const sidebar = document.getElementById('sidebar');
-    if (window.innerWidth <= 992 && sidebar.classList.contains('active') &&
-        !sidebar.contains(event.target) && !event.target.closest('.fa-bars')) {
-        sidebar.classList.remove('active');
-    }
-});
-
-// ── Generic helpers ───────────────────────────────────────────────────────────
-function openModal(modalId) {
-    new bootstrap.Modal(document.getElementById(modalId)).show();
+/* ── Theme ── */
+(function(){
+  const saved = localStorage.getItem('cds-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+})();
+function toggleTheme(){
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('cds-theme', next);
+  updateThemeUI(next);
+}
+function updateThemeUI(t){
+  const i = document.getElementById('togIcon');
+  if(i) i.className = t === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
 }
 
-function showMessageModal({ title, message, type = "info" }) {
-    const icons = {
-        success: `<i class="fas fa-check-circle fa-3x text-success"></i>`,
-        error:   `<i class="fas fa-times-circle fa-3x text-danger"></i>`,
-        warning: `<i class="fas fa-exclamation-triangle fa-3x text-warning"></i>`,
-        info:    `<i class="fas fa-info-circle fa-3x text-primary"></i>`
-    };
-    document.getElementById("messageModalTitle").innerText  = title;
-    document.getElementById("messageModalText").innerText   = message;
-    document.getElementById("messageModalIcon").innerHTML   = icons[type] || icons.info;
-    new bootstrap.Modal(document.getElementById("messageModal")).show();
+/* ── Sidebar ── */
+function toggleSidebar(){
+  const open = document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('show', open);
+  document.body.style.overflow = open ? 'hidden' : '';
 }
-
-// Safely switch from one open modal to another without backdrop stacking
-function switchModal(fromId, openFn) {
-    const fromEl = document.getElementById(fromId);
-    const inst   = bootstrap.Modal.getInstance(fromEl);
-    if (inst) {
-        fromEl.addEventListener('hidden.bs.modal', function handler() {
-            fromEl.removeEventListener('hidden.bs.modal', handler);
-            openFn();
-        });
-        inst.hide();
-    } else {
-        openFn();
-    }
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('show');
+  document.body.style.overflow = '';
 }
-
-// ── Loan calculator ───────────────────────────────────────────────────────────
-function calculateLoan() {
-    const amount   = parseFloat(document.getElementById('calcAmount').value)   || 0;
-    const duration = parseInt(document.getElementById('calcDuration').value)   || 1;
-    const rate     = parseFloat(document.getElementById('calcRate').value)     || 0;
-    const maxLoan  = parseFloat("<%= user.account.balance %>") * 3;
-    if (amount > maxLoan) { alert(`Max eligible: ₦${maxLoan.toLocaleString()}`); document.getElementById('calcAmount').value = maxLoan; return; }
-    if (amount <= 0) return;
-    const interest = amount * (rate / 100) * duration;
-    const total    = amount + interest;
-    const monthly  = total / duration;
-    document.getElementById('calcResult').style.display = 'block';
-    document.getElementById('monthlyPay').textContent = '₦' + monthly.toLocaleString('en-NG',{minimumFractionDigits:2});
-    document.getElementById('totalInt').textContent   = '₦' + interest.toLocaleString('en-NG',{minimumFractionDigits:2});
-    document.getElementById('totalRep').textContent   = '₦' + total.toLocaleString('en-NG',{minimumFractionDigits:2});
-}
-
-// ── Guarantor duplicate prevention ───────────────────────────────────────────
-document.querySelectorAll('.guarantorSelect').forEach(select => {
-    select.addEventListener('change', function() {
-        const g1 = document.getElementById('guarantor1').value;
-        const g2 = document.getElementById('guarantor2').value;
-        if (g1 && g2 && g1 === g2) {
-            this.value = "";
-            showMessageModal({ title: "Invalid Selection", message: "You cannot select the same guarantor twice.", type: "warning" });
-        }
-    });
+document.addEventListener('click', e => {
+  const sb = document.getElementById('sidebar');
+  const hb = document.querySelector('.hamburger');
+  if(window.innerWidth <= 900 && sb.classList.contains('open') && !sb.contains(e.target) && !hb.contains(e.target)) closeSidebar();
 });
 
-// ── Loan application form ─────────────────────────────────────────────────────
-document.getElementById("loanForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-    const submitBtn = this.querySelector("button[type='submit']");
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Submitting...";
-
-    const g1 = document.getElementById("guarantor1").value;
-    const g2 = document.getElementById("guarantor2").value;
-
-    if (g1 === g2) {
-        showMessageModal({ title: "Invalid Guarantors", message: "You cannot select the same guarantor twice.", type: "warning" });
-        submitBtn.disabled = false; submitBtn.innerText = "Submit Application"; return;
-    }
-    if (!document.getElementById("agreeTerms").checked) {
-        showMessageModal({ title: "Agreement Required", message: "You must agree to the loan terms.", type: "warning" });
-        submitBtn.disabled = false; submitBtn.innerText = "Submit Application"; return;
-    }
-
-    try {
-        const res    = await fetch("/club-de-star-cooperative/apply-loan", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ amount: this.amount.value, duration: this.duration.value, guarantor1: g1, guarantor2: g2, agreeTerms: true })
-        });
-        const result = await res.json();
-        if (!res.ok) throw new Error(result.message || "Submission failed.");
-        bootstrap.Modal.getInstance(document.getElementById("loanRequestModal"))?.hide();
-        setTimeout(() => new bootstrap.Modal(document.getElementById("loanSuccessModal")).show(), 400);
-        this.reset();
-    } catch (err) {
-        showMessageModal({ title: "Submission Failed", message: err.message, type: "error" });
-    } finally {
-        submitBtn.disabled = false; submitBtn.innerText = "Submit Application";
-    }
+/* ── Modals ── */
+function openModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+document.querySelectorAll('.modal-backdrop').forEach(el => {
+  el.addEventListener('click', e => { if(e.target === el){ el.classList.remove('open'); document.body.style.overflow = ''; }});
 });
 
-// ── Loan payment form ─────────────────────────────────────────────────────────
-document.getElementById("loanPaymentForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-    const amount = parseFloat(document.getElementById("paymentAmount").value);
-    const loanId = this.querySelector('input[name="loanId"]').value;
-    if (!amount || amount <= 0) { alert("Please enter a valid payment amount."); return; }
+function showError(title, msg){ document.getElementById('errorModalTitle').textContent = title; document.getElementById('errorModalMsg').textContent = msg; openModal('errorModal'); }
 
-    const btn = this.querySelector("button[type='submit']");
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+/* ── Calculator ── */
+function calculateLoan(){
+  const amount   = parseFloat(document.getElementById('calcAmount').value) || 0;
+  const duration = parseInt(document.getElementById('calcDuration').value) || 1;
+  const rate     = parseFloat(document.getElementById('calcRate').value) || 0;
+  const max      = <%= maxLoan %>;
+  const res      = document.getElementById('calcResult');
+  if(amount <= 0){ res.style.display = 'none'; return; }
+  if(amount > max){ document.getElementById('calcAmount').value = max; return calculateLoan(); }
+  const interest = amount * (rate / 100) * (duration / 12);
+  const total    = amount + interest;
+  const monthly  = total / duration;
+  res.style.display = 'block';
+  document.getElementById('monthlyPay').textContent = '₦' + monthly.toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('totalInt').textContent   = '₦' + interest.toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('totalRep').textContent   = '₦' + total.toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
 
-    try {
-        const res    = await fetch("/loan/payment", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ amount, loanId })
-        });
-        const result = await res.json();
-        if (result.status && result.authorization_url) {
-            window.location.href = result.authorization_url;
-        } else if (result.status) {
-            alert("Payment successful!"); location.reload();
-        } else {
-            alert(result.message || "Failed to process payment.");
-            btn.disabled = false; btn.innerHTML = "Make Payment";
-        }
-    } catch (err) {
-        alert("Unable to process payment. Please try again.");
-        btn.disabled = false; btn.innerHTML = "Make Payment";
-    }
+/* ── Guarantor duplicate check ── */
+document.querySelectorAll('.guarantorSelect').forEach(sel => {
+  sel.addEventListener('change', () => {
+    const g1 = document.getElementById('guarantor1').value;
+    const g2 = document.getElementById('guarantor2').value;
+    if(g1 && g2 && g1 === g2){ sel.value = ''; showError('Invalid Selection', 'You cannot select the same guarantor twice.'); }
+  });
 });
 
+/* ── Loan application ── */
+async function submitLoanApplication(){
+  const form = document.getElementById('loanForm');
+  const btn  = document.getElementById('loanSubmitBtn');
+  const g1   = document.getElementById('guarantor1').value;
+  const g2   = document.getElementById('guarantor2').value;
+  if(!document.getElementById('agreeTerms').checked){ showError('Agreement Required', 'You must agree to the loan terms.'); return; }
+  if(g1 === g2){ showError('Invalid Guarantors', 'You cannot select the same guarantor twice.'); return; }
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  try{
+    const res    = await fetch('/club-de-star-cooperative/apply-loan',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ amount: form.amount.value, duration: form.duration.value, guarantor1: g1, guarantor2: g2, agreeTerms: true })});
+    const result = await res.json();
+    if(!res.ok) throw new Error(result.message || 'Submission failed.');
+    closeModal('loanRequestModal');
+    setTimeout(() => openModal('loanSuccessModal'), 300);
+    form.reset();
+  } catch(e){ showError('Submission Failed', e.message); }
+  finally{ btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:5px;font-size:11px;"></i>Submit Application'; }
+}
 
-// ═════════════════════════════════════════════════════════════════════════════
-// ROLLOVER FLOW
-// ═════════════════════════════════════════════════════════════════════════════
+/* ── Loan payment ── */
+async function submitLoanPayment(){
+  const amount = parseFloat(document.getElementById('paymentAmount').value);
+  const loanId = document.querySelector('#loanPaymentForm input[name="loanId"]').value;
+  if(!amount || amount <= 0){ showError('Invalid Amount', 'Enter a valid payment amount.'); return; }
+  try{
+    const res    = await fetch('/loan/payment',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ amount, loanId })});
+    const result = await res.json();
+    if(result.authorization_url){ window.location.href = result.authorization_url; return; }
+    if(result.status){ closeModal('paymentModal'); setTimeout(() => location.reload(), 1500); }
+    else throw new Error(result.message || 'Payment failed.');
+  } catch(e){ showError('Payment Failed', e.message); }
+}
 
+/* ── Rollover flow ── */
 let rolloverState = null;
 
-// Entry point — triggered by the Rollover button
-async function openRolloverFlow() {
-    const btn = document.querySelector('[onclick="openRolloverFlow()"]');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking...'; }
-
-    try {
-        const res  = await fetch('/club-de-star-cooperative/rollover-status');
-        const data = await res.json();
-
-        if (!res.ok) {
-            showMessageModal({ title: 'Rollover Unavailable', message: data.message || 'No active loan found.', type: 'error' });
-            return;
-        }
-
-        rolloverState = data;
-
-        if (data.interestPaid) {
-            openRolloverConfirmModal(data);
-        } else {
-            openRolloverInterestModal(data);
-        }
-    } catch (err) {
-        showMessageModal({ title: 'Error', message: 'Could not check rollover status. Please try again.', type: 'error' });
-    } finally {
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Rollover'; }
-    }
+async function openRolloverFlow(){
+  const btn = document.querySelector('[onclick="openRolloverFlow()"]');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;font-size:11px;"></i>Checking…'; }
+  try{
+    const res  = await fetch('/club-de-star-cooperative/rollover-status');
+    const data = await res.json();
+    if(!res.ok){ showError('Rollover Unavailable', data.message || 'No active loan found.'); return; }
+    rolloverState = data;
+    data.interestPaid ? openRolloverConfirmModal(data) : openRolloverInterestModal(data);
+  } catch(e){ showError('Error', 'Could not check rollover status. Please try again.'); }
+  finally{ if(btn){ btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt" style="margin-right:6px;font-size:11px;"></i>Rollover'; }}
 }
 
-// Re-check status after submitting interest payment
-async function checkRolloverStatus() {
-    try {
-        const res  = await fetch('/club-de-star-cooperative/rollover-status');
-        const data = await res.json();
-        if (!res.ok) return;
-        rolloverState = data;
-        if (data.interestPaid) {
-            switchModal('rolloverInterestModal', () => openRolloverConfirmModal(data));
-        } else {
-            showMessageModal({ title: 'Still Pending', message: 'Your interest payment is awaiting admin approval. Please check back shortly.', type: 'warning' });
-        }
-    } catch (err) {
-        showMessageModal({ title: 'Error', message: 'Could not check status.', type: 'error' });
-    }
+async function checkRolloverStatus(){
+  try{
+    const res  = await fetch('/club-de-star-cooperative/rollover-status');
+    const data = await res.json();
+    if(!res.ok) return;
+    rolloverState = data;
+    if(data.interestPaid){ closeModal('rolloverInterestModal'); setTimeout(() => openRolloverConfirmModal(data), 300); }
+    else showError('Still Pending', 'Interest payment awaiting admin approval. Check back shortly.');
+  } catch(e){ showError('Error', 'Could not check status.'); }
 }
 
-// Open Modal 1 — interest not paid
-function openRolloverInterestModal(data) {
-    document.getElementById('ri_interestOwed').textContent  = '₦' + Number(data.interestOwed).toLocaleString();
-    document.getElementById('ri_bankName').textContent      = data.companyAccount?.bankName      || '—';
-    document.getElementById('ri_accountNumber').textContent = data.companyAccount?.accountNumber || '—';
-    document.getElementById('ri_accountName').textContent   = data.companyAccount?.accountName   || '—';
-    document.getElementById('ri_amount').value              = data.interestOwed || '';
-    // Reset state
-    document.getElementById('ri_error').classList.add('d-none');
-    document.getElementById('ri_pendingNotice').classList.add('d-none');
-    document.getElementById('ri_form').classList.remove('d-none');
-    document.getElementById('ri_footer').classList.remove('d-none');
-    new bootstrap.Modal(document.getElementById('rolloverInterestModal')).show();
+function openRolloverInterestModal(data){
+  document.getElementById('ri_interestOwed').textContent  = '₦' + Number(data.interestOwed).toLocaleString();
+  document.getElementById('ri_bankName').textContent      = data.companyAccount?.bankName      || '—';
+  document.getElementById('ri_accountNumber').textContent = data.companyAccount?.accountNumber || '—';
+  document.getElementById('ri_accountName').textContent   = data.companyAccount?.accountName   || '—';
+  document.getElementById('ri_amount').value              = data.interestOwed || '';
+  document.getElementById('ri_error').style.display      = 'none';
+  document.getElementById('ri_pendingNotice').style.display = 'none';
+  document.getElementById('ri_form').style.display       = 'block';
+  document.getElementById('ri_footer').style.display     = 'flex';
+  openModal('rolloverInterestModal');
 }
 
-// CHANGED: Open Modal 2 — populate read-only duration label (no dropdown)
-// The backend returns data.loanName from the existing loan's duration setting.
-function openRolloverConfirmModal(data) {
-    document.getElementById('rc_outstanding').textContent  = '₦' + Number(data.outstandingBalance).toLocaleString();
-    document.getElementById('rc_rolloverPct').textContent  = data.rolloverPct;
-    document.getElementById('rc_rolloverFee').textContent  = '₦' + Number(data.rolloverFee).toLocaleString();
-    document.getElementById('rc_newTotal').textContent     = '₦' + Number(data.newTotalRepay).toLocaleString();
-    // Display the locked loan type name — user cannot change it
-    document.getElementById('rc_durationLabel').textContent = data.loanName || 'Same as current loan';
-    document.getElementById('rc_error').classList.add('d-none');
-    new bootstrap.Modal(document.getElementById('rolloverConfirmModal')).show();
+function openRolloverConfirmModal(data){
+  document.getElementById('rc_outstanding').textContent  = '₦' + Number(data.outstandingBalance).toLocaleString();
+  document.getElementById('rc_rolloverPct').textContent  = data.rolloverPct;
+  document.getElementById('rc_rolloverFee').textContent  = '₦' + Number(data.rolloverFee).toLocaleString();
+  document.getElementById('rc_newTotal').textContent     = '₦' + Number(data.newTotalRepay).toLocaleString();
+  document.getElementById('rc_durationLabel').textContent = data.loanName || 'Same as current loan';
+  document.getElementById('rc_error').style.display     = 'none';
+  openModal('rolloverConfirmModal');
 }
 
-// Submit interest payment proof
-async function submitInterestPayment() {
-    const btn       = document.getElementById('ri_submitBtn');
-    const errDiv    = document.getElementById('ri_error');
-    const errMsg    = document.getElementById('ri_errorMsg');
-    const amount    = parseFloat(document.getElementById('ri_amount').value);
-    const payerName = document.getElementById('ri_payerName').value.trim();
-
-    errDiv.classList.add('d-none');
-
-    if (!amount || amount <= 0) {
-        errMsg.textContent = 'Please enter the amount you transferred.';
-        errDiv.classList.remove('d-none');
-        return;
-    }
-
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
-
-    try {
-        const res  = await fetch('/club-de-star-cooperative/rollover-interest-payment', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ loanId: rolloverState.loanId, amount, payerName })
-        });
-        const data = await res.json();
-
-        if (res.ok && data.status) {
-            // Hide form, show pending notice
-            document.getElementById('ri_form').classList.add('d-none');
-            document.getElementById('ri_footer').classList.add('d-none');
-            document.getElementById('ri_pendingNotice').classList.remove('d-none');
-        } else {
-            errMsg.textContent = data.message || 'Failed to submit. Please try again.';
-            errDiv.classList.remove('d-none');
-        }
-    } catch (err) {
-        errMsg.textContent = 'Network error. Please try again.';
-        errDiv.classList.remove('d-none');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit Payment Proof';
-    }
+async function submitInterestPayment(){
+  const btn    = document.getElementById('ri_submitBtn');
+  const errDiv = document.getElementById('ri_error');
+  const amount = parseFloat(document.getElementById('ri_amount').value);
+  const payer  = document.getElementById('ri_payerName').value.trim();
+  errDiv.style.display = 'none';
+  if(!amount || amount <= 0){ errDiv.textContent = 'Please enter the amount you transferred.'; errDiv.style.display = 'block'; return; }
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Submitting…';
+  try{
+    const res  = await fetch('/club-de-star-cooperative/rollover-interest-payment',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ loanId: rolloverState.loanId, amount, payerName: payer })});
+    const data = await res.json();
+    if(res.ok && data.status){
+      document.getElementById('ri_form').style.display    = 'none';
+      document.getElementById('ri_footer').style.display  = 'none';
+      document.getElementById('ri_pendingNotice').style.display = 'block';
+    } else { errDiv.textContent = data.message || 'Failed to submit.'; errDiv.style.display = 'block'; }
+  } catch(e){ errDiv.textContent = 'Network error. Please try again.'; errDiv.style.display = 'block'; }
+  finally{ btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:5px;font-size:11px;"></i>Submit Proof'; }
 }
 
-// CHANGED: submitRollover — no duration sent; backend reuses old loan's duration setting
-async function submitRollover() {
-    const btn      = document.getElementById('rc_submitBtn');
-    const errDiv   = document.getElementById('rc_error');
-    const errMsg   = document.getElementById('rc_errorMsg');
-
-    errDiv.classList.add('d-none');
-
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
-
-    try {
-        const res  = await fetch('/club-de-star-cooperative/rollover-loan', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({})  // duration is locked server-side to the old loan's type
-        });
-        const data = await res.json();
-
-        if (res.ok) {
-            document.getElementById('rs_newTotal').textContent    = '₦' + Number(data.newTotalRepay).toLocaleString();
-            document.getElementById('rs_rolloverFee').textContent = '₦' + Number(data.rolloverFee).toLocaleString();
-            switchModal('rolloverConfirmModal', () => {
-                new bootstrap.Modal(document.getElementById('rolloverSuccessModal')).show();
-            });
-        } else if (data.code === 'INTEREST_UNPAID') {
-            // Interest not yet approved — go back to interest modal
-            rolloverState = { ...rolloverState, ...data };
-            switchModal('rolloverConfirmModal', () => openRolloverInterestModal(rolloverState));
-        } else {
-            errMsg.textContent = data.message || 'Rollover failed. Please try again.';
-            errDiv.classList.remove('d-none');
-        }
-    } catch (err) {
-        errMsg.textContent = 'Network error. Please try again.';
-        errDiv.classList.remove('d-none');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Submit Rollover Request';
-    }
+async function submitRollover(){
+  const btn    = document.getElementById('rc_submitBtn');
+  const errDiv = document.getElementById('rc_error');
+  errDiv.style.display = 'none';
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Submitting…';
+  try{
+    const res  = await fetch('/club-de-star-cooperative/rollover-loan',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({})});
+    const data = await res.json();
+    if(res.ok){
+      document.getElementById('rs_newTotal').textContent    = '₦' + Number(data.newTotalRepay).toLocaleString();
+      document.getElementById('rs_rolloverFee').textContent = '₦' + Number(data.rolloverFee).toLocaleString();
+      closeModal('rolloverConfirmModal');
+      setTimeout(() => openModal('rolloverSuccessModal'), 300);
+    } else if(data.code === 'INTEREST_UNPAID'){
+      rolloverState = { ...rolloverState, ...data };
+      closeModal('rolloverConfirmModal');
+      setTimeout(() => openRolloverInterestModal(rolloverState), 300);
+    } else { errDiv.textContent = data.message || 'Rollover failed.'; errDiv.style.display = 'block'; }
+  } catch(e){ errDiv.textContent = 'Network error. Please try again.'; errDiv.style.display = 'block'; }
+  finally{ btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt" style="margin-right:5px;font-size:11px;"></i>Submit Rollover'; }
 }
 
-// Card entrance animation
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.stat-card, .card').forEach((card, i) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'translateY(0)'; }, i * 100);
-    });
+/* ── Loader ── */
+window.addEventListener('load', () => {
+  const l = document.getElementById('loader');
+  setTimeout(() => { l.style.opacity = '0'; setTimeout(() => l.style.display = 'none', 500); }, 400);
 });
 </script>
 </body>

@@ -5,16 +5,17 @@ const companyLedgerSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: [
-      "deposit",           // user deposits into system
-      "withdrawal",        // money leaving company
-      "loan_disbursement", // company gives loan
-      "loan_repayment",    // repayment received
+      "deposit",
+      "withdrawal",
+      "loan_disbursement",
+      "loan_repayment",
       "registration_fee",
       "penalty_income",
       "rollover_income",
-      "manual_credit",     // admin adds money
-      "manual_debit",      // admin removes money
-      "external_income"    // any other revenue
+      "manual_credit",
+      "manual_debit",
+      "external_income",
+      "overpayment_refund"
     ],
     required: true
   },

@@ -234,6 +234,21 @@
             font-size:0.68rem; font-weight:700; color:var(--kiddies);
         }
 
+        /* ── Payment method tabs ── */
+        .pay-method-btn {
+            border:2px solid rgba(236,72,153,0.2);
+            border-radius:10px; padding:10px 12px; cursor:pointer;
+            background:white; transition:all 0.2s; text-align:center;
+            display:flex; flex-direction:column; align-items:center; gap:4px;
+        }
+        .pay-method-btn:hover { border-color:var(--kiddies); background:rgba(236,72,153,0.03); }
+        .pay-method-btn.selected {
+            border-color:var(--kiddies); background:rgba(236,72,153,0.06);
+            box-shadow:0 0 0 3px rgba(236,72,153,0.12);
+        }
+        .pay-method-btn i { font-size:1.1rem; }
+        .pay-method-btn span { font-size:0.7rem; font-weight:600; color:#374151; line-height:1.2; }
+
         /* ── Responsive ── */
         @media (max-width:992px) {
             .sidebar { left:calc(-1 * var(--sidebar-width)); }
@@ -287,9 +302,14 @@
         <h6 class="mb-0 fw-bold" style="color:var(--kiddies);font-size:0.9rem;">Kiddies Account Dashboard 🎈</h6>
         <small class="text-muted d-none d-md-block" style="font-size:0.72rem;">Securing your children's future, one deposit at a time — <%= user.firstName %></small>
     </div>
-    <span class="badge" style="background:rgba(236,72,153,0.1);color:var(--kiddies);font-size:0.72rem;padding:5px 10px;">
-        <%= kiddiesAccounts.length %> Account<%= kiddiesAccounts.length !== 1 ? 's' : '' %>
-    </span>
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge" style="background:rgba(139,92,246,0.1);color:#6d28d9;font-size:0.7rem;padding:5px 10px;">
+            <i class="fas fa-wallet me-1"></i>₦<%= parentAccountBalance.toLocaleString() %>
+        </span>
+        <span class="badge" style="background:rgba(236,72,153,0.1);color:var(--kiddies);font-size:0.72rem;padding:5px 10px;">
+            <%= kiddiesAccounts.length %> Account<%= kiddiesAccounts.length !== 1 ? 's' : '' %>
+        </span>
+    </div>
 </div>
 
 <!-- ══ Toast container ══ -->
@@ -360,7 +380,7 @@
             Accounts require admin approval after payment.
         </div>
 
-        <!-- ══ STAT CARDS — now 5 cols on xl, 2 cols on sm ══ -->
+        <!-- ══ STAT CARDS ══ -->
         <div class="row g-2 g-md-3 mb-3">
             <!-- Total Accounts -->
             <div class="col-6 col-lg-4 col-xl">
@@ -400,7 +420,7 @@
                 </div>
             </div>
 
-            <!-- ── NEW: Share Percentage ── -->
+            <!-- Pool Share -->
             <div class="col-6 col-lg-6 col-xl">
                 <div class="stat-card">
                     <div class="stat-icon" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:white;">
@@ -502,7 +522,6 @@
                             const elapsedMs = now - created;
                             const progress = Math.min(100, Math.round((elapsedMs / totalMs) * 100));
                             const childAge = Math.floor((now - new Date(ka.childDOB)) / (365.25*24*3600*1000));
-                            // Per-account share percentage
                             const acctShare = allMembersTotalSavings > 0 && balance > 0
                                 ? ((balance / allMembersTotalSavings) * 100).toFixed(2) : 0;
                         %>
@@ -534,7 +553,6 @@
                                         <span class="text-muted">Interest</span>
                                         <span class="text-success">₦<%= roi.toLocaleString(undefined,{maximumFractionDigits:2}) %></span>
                                     </div>
-                                    <!-- Per-account share % -->
                                     <div class="d-flex justify-content-between mb-1" style="font-size:0.72rem;">
                                         <span class="text-muted">Pool Share</span>
                                         <span style="color:#8b5cf6;font-weight:700;"><%= acctShare %>%</span>
@@ -634,7 +652,6 @@
                                             <div style="font-size:0.82rem;font-weight:700;color:#10b981;">₦<%= roi.toLocaleString(undefined,{maximumFractionDigits:0}) %></div>
                                         </div>
                                     </div>
-                                    <!-- Share % tile -->
                                     <div class="col-12">
                                         <div style="background:rgba(139,92,246,0.05);border-radius:8px;padding:5px 8px;display:flex;align-items:center;justify-content:space-between;">
                                             <div style="font-size:0.64rem;color:#9ca3af;font-weight:600;"><i class="fas fa-chart-pie me-1" style="color:#8b5cf6;"></i>Pool Share</div>
@@ -770,8 +787,8 @@
                 <div id="createError" class="alert mb-3" style="background:#fef2f2;border:1px solid rgba(239,68,68,0.3);border-radius:10px;color:#991b1b;padding:10px 14px;display:none;font-size:0.8rem;"></div>
 
                 <div class="alert-kiddies mb-3" style="font-size:0.78rem;">
-                    <strong>Cost:</strong> ₦<%= kiddiesRegistrationFee.toLocaleString() %> registration fee + minimum ₦10,000 initial deposit
-                    (paid via Paystack). Account is activated after admin approval.
+                    <strong>Cost:</strong> ₦<%= kiddiesRegistrationFee.toLocaleString() %> registration fee + minimum ₦10,000 initial deposit.
+                    Choose your payment method below. Account is activated after admin approval.
                 </div>
 
                 <form id="createAccountForm">
@@ -892,6 +909,99 @@
                             I agree to the <strong id="agreeTermsLabel">5-year lock period</strong> and understand early withdrawals are not permitted.
                         </label>
                     </div>
+
+                    <hr class="my-3" style="border-color:rgba(236,72,153,0.15);">
+
+                    <!-- ── Payment Method for new account creation ── -->
+                    <h6 class="fw-bold mb-2" style="color:var(--kiddies);font-size:0.82rem;">
+                        <i class="fas fa-credit-card me-2"></i>Payment Method
+                    </h6>
+                    <div style="font-size:0.74rem;color:#6b7280;margin-bottom:10px;">
+                        Total due: ₦<%= kiddiesRegistrationFee.toLocaleString() %> + deposit = <span id="createTotalDue" style="font-weight:700;color:var(--kiddies);">₦<%= kiddiesRegistrationFee.toLocaleString() %></span>
+                    </div>
+                    <input type="hidden" id="createPaymentMethodHidden" value="paystack">
+                    <div class="row g-2 mb-3" id="createMethodPicker">
+                        <div class="col-4">
+                            <div class="pay-method-btn selected" id="cpm-paystack" onclick="selectCreateMethod('paystack')">
+                                <i class="fas fa-bolt" style="color:var(--kiddies);"></i>
+                                <span>Paystack</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="pay-method-btn" id="cpm-manual" onclick="selectCreateMethod('manual')">
+                                <i class="fas fa-university" style="color:#06b6d4;"></i>
+                                <span>Bank Transfer</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="pay-method-btn" id="cpm-account" onclick="selectCreateMethod('account')">
+                                <i class="fas fa-wallet" style="color:#6d28d9;"></i>
+                                <span>My Account</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paystack info -->
+                    <div id="createPaystackSection">
+                        <div class="alert-info-k" style="font-size:0.76rem;">
+                            <i class="fas fa-bolt me-1" style="color:#3b82f6;"></i>
+                            You'll be redirected to Paystack's secure checkout immediately after submitting.
+                        </div>
+                    </div>
+
+                    <!-- Manual transfer info -->
+                    <div id="createManualSection" style="display:none;">
+                        <%
+                            const regBankName      = (companyAccount && companyAccount.bankName)      || null;
+                            const regAccountName   = (companyAccount && companyAccount.accountName)   || null;
+                            const regAccountNumber = (companyAccount && companyAccount.accountNumber) || null;
+                            const regAccountConfigured = regBankName && regAccountNumber;
+                        %>
+                        <% if (regAccountConfigured) { %>
+                        <div style="background:rgba(6,182,212,0.04);border:1.5px solid rgba(6,182,212,0.2);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+                            <div style="font-size:0.68rem;color:#0891b2;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">
+                                <i class="fas fa-university me-1"></i>Transfer To This Account
+                            </div>
+                            <div class="row g-1" style="font-size:0.78rem;">
+                                <div class="col-5 text-muted fw-semibold">Bank</div>
+                                <div class="col-7 fw-bold"><%= regBankName %></div>
+                                <div class="col-5 text-muted fw-semibold">Account Name</div>
+                                <div class="col-7 fw-bold"><%= regAccountName %></div>
+                                <div class="col-5 text-muted fw-semibold">Account No.</div>
+                                <div class="col-7 fw-bold" style="color:#0891b2;letter-spacing:0.06em;"><%= regAccountNumber %></div>
+                            </div>
+                        </div>
+                        <% } else { %>
+                        <div class="alert-warning-k mb-3" style="font-size:0.76rem;">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Bank account details not yet configured. Please contact admin.
+                        </div>
+                        <% } %>
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold" style="font-size:0.76rem;">Payer Name (optional)</label>
+                            <input type="text" name="payerName" id="createPayerName" class="form-control form-control-sm" placeholder="Name on the transfer receipt">
+                        </div>
+                        <div class="alert-warning-k" style="font-size:0.75rem;">
+                            <i class="fas fa-clock me-1"></i>
+                            Your account will be activated after <strong>admin confirmation</strong> of the transfer.
+                        </div>
+                    </div>
+
+                    <!-- Parent cooperative account info -->
+                    <div id="createAccountSection" style="display:none;">
+                        <div style="background:rgba(139,92,246,0.05);border:1.5px solid rgba(139,92,246,0.2);border-radius:10px;padding:14px;">
+                            <div style="font-size:0.68rem;color:#6d28d9;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">
+                                <i class="fas fa-wallet me-1"></i>Your Cooperative Account Balance
+                            </div>
+                            <div style="font-size:1.3rem;font-weight:800;color:#6d28d9;">
+                                ₦<%= parentAccountBalance.toLocaleString() %>
+                            </div>
+                            <div style="font-size:0.7rem;color:#9ca3af;margin-top:4px;">
+                                <i class="fas fa-bolt me-1" style="color:#8b5cf6;"></i>
+                                Deducted instantly — account sent for admin approval.
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer py-2 px-4">
@@ -899,7 +1009,7 @@
                 <button type="button" class="btn btn-sm fw-bold px-4" id="createAccountBtn"
                         style="background:var(--kiddies);color:white;border-radius:8px;"
                         onclick="submitCreateAccount()">
-                    <span id="createBtnText"><i class="fas fa-credit-card me-1"></i>Create & Pay</span>
+                    <span id="createBtnText"><i class="fas fa-bolt me-1"></i>Create &amp; Pay via Paystack</span>
                     <span id="createBtnSpinner" class="spinner-border spinner-border-sm ms-1" style="display:none;"></span>
                 </button>
             </div>
@@ -908,7 +1018,7 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
-     DEPOSIT MODAL — Paystack (automatic) OR Manual Transfer
+     DEPOSIT MODAL — Paystack / Manual / Parent Account
      ══════════════════════════════════════════════════════════ -->
 <div class="modal fade" id="depositModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -941,17 +1051,33 @@
                         <small class="text-muted" style="font-size:0.7rem;">Minimum: ₦1,000</small>
                     </div>
 
-                    <!-- Payment Method selector -->
+                    <!-- Payment Method — 3-button visual picker -->
                     <div class="mb-3">
                         <label class="form-label fw-semibold" style="font-size:0.76rem;">Payment Method *</label>
-                        <select class="form-select form-select-sm" id="depositMethodSelect" name="paymentMethod" required onchange="toggleDepositMethod(this.value)">
-                            <option value="">Select method...</option>
-                            <option value="paystack">Paystack (Automatic)</option>
-                            <option value="manual">Manual Bank Transfer</option>
-                        </select>
+                        <input type="hidden" name="paymentMethod" id="depositMethodHidden">
+                        <div class="row g-2" id="depositMethodPicker">
+                            <div class="col-4">
+                                <div class="pay-method-btn" id="pm-paystack" onclick="selectDepositMethod('paystack')">
+                                    <i class="fas fa-bolt" style="color:var(--kiddies);"></i>
+                                    <span>Paystack</span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="pay-method-btn" id="pm-manual" onclick="selectDepositMethod('manual')">
+                                    <i class="fas fa-university" style="color:#06b6d4;"></i>
+                                    <span>Bank Transfer</span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="pay-method-btn" id="pm-account" onclick="selectDepositMethod('account')">
+                                    <i class="fas fa-wallet" style="color:#6d28d9;"></i>
+                                    <span>My Account</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- ── Paystack section (no extra fields needed) ── -->
+                    <!-- ── Paystack section ── -->
                     <div id="paystackDepositSection" style="display:none;">
                         <div class="alert-info-k" style="font-size:0.76rem;">
                             <i class="fas fa-bolt me-1" style="color:#3b82f6;"></i>
@@ -987,14 +1113,29 @@
                             Bank account details are not yet configured. Please contact admin.
                         </div>
                         <% } %>
-
                         <div class="mb-3">
                             <label class="form-label fw-semibold" style="font-size:0.76rem;">Payer Name (optional)</label>
                             <input type="text" name="payerName" class="form-control form-control-sm" placeholder="Name on the transfer receipt">
                         </div>
                         <div class="alert-warning-k" style="font-size:0.75rem;">
                             <i class="fas fa-clock me-1"></i>
-                            Your deposit will be credited after <strong>admin confirmation</strong>. Please ensure you transfer the exact amount entered above.
+                            Your deposit will be credited after <strong>admin confirmation</strong>. Please transfer the exact amount entered above.
+                        </div>
+                    </div>
+
+                    <!-- ── Parent Account section ── -->
+                    <div id="accountDepositSection" style="display:none;">
+                        <div style="background:rgba(139,92,246,0.05);border:1.5px solid rgba(139,92,246,0.2);border-radius:10px;padding:14px;">
+                            <div style="font-size:0.68rem;color:#6d28d9;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">
+                                <i class="fas fa-wallet me-1"></i>Your Cooperative Account Balance
+                            </div>
+                            <div style="font-size:1.3rem;font-weight:800;color:#6d28d9;" id="parentBalanceDisplay">
+                                ₦<%= parentAccountBalance.toLocaleString() %>
+                            </div>
+                            <div style="font-size:0.7rem;color:#9ca3af;margin-top:4px;">
+                                <i class="fas fa-bolt me-1" style="color:#8b5cf6;"></i>
+                                Transferred instantly — no admin approval required.
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -1082,6 +1223,71 @@
     </div>
 </div>
 
+<!-- Registration Payment Method Picker Modal -->
+<div class="modal fade" id="regPayModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header py-3 px-4" style="background:linear-gradient(135deg,#be185d,#ec4899);color:white;border-radius:14px 14px 0 0;">
+                <h6 class="modal-title fw-bold" style="font-size:0.86rem;"><i class="fas fa-credit-card me-2"></i>Pay Registration Fee</h6>
+                <button type="button" class="btn-close btn-close-white btn-sm" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4 py-3">
+                <p style="font-size:0.78rem;color:#6b7280;margin-bottom:12px;">Select how you'd like to pay the registration fee + initial deposit:</p>
+                <div id="regPayError" style="display:none;background:#fef2f2;border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#991b1b;padding:8px 12px;font-size:0.76rem;margin-bottom:10px;"></div>
+
+                <!-- Balance info -->
+                <div style="background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:0.76rem;">
+                    <span style="color:#9ca3af;font-weight:600;">Your cooperative balance: </span>
+                    <strong style="color:#6d28d9;">₦<%= parentAccountBalance.toLocaleString() %></strong>
+                </div>
+
+                <!-- Payer name — only shown when manual is chosen -->
+                <div id="regManualPayerSection" style="display:none;margin-bottom:10px;">
+                    <%
+                        const rpBankName      = (companyAccount && companyAccount.bankName)      || null;
+                        const rpAccountName   = (companyAccount && companyAccount.accountName)   || null;
+                        const rpAccountNumber = (companyAccount && companyAccount.accountNumber) || null;
+                    %>
+                    <% if (rpBankName && rpAccountNumber) { %>
+                    <div style="background:rgba(6,182,212,0.04);border:1.5px solid rgba(6,182,212,0.18);border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+                        <div style="font-size:0.64rem;color:#0891b2;font-weight:700;text-transform:uppercase;margin-bottom:6px;"><i class="fas fa-university me-1"></i>Transfer To</div>
+                        <div style="font-size:0.76rem;">
+                            <div><span style="color:#9ca3af;">Bank: </span><strong><%= rpBankName %></strong></div>
+                            <div><span style="color:#9ca3af;">Name: </span><strong><%= rpAccountName %></strong></div>
+                            <div><span style="color:#9ca3af;">Acct: </span><strong style="color:#0891b2;letter-spacing:0.05em;"><%= rpAccountNumber %></strong></div>
+                        </div>
+                    </div>
+                    <% } %>
+                    <input type="text" id="regManualPayerName" class="form-control form-control-sm" placeholder="Payer name (optional)">
+                    <div class="alert-warning-k mt-2" style="font-size:0.73rem;">
+                        <i class="fas fa-clock me-1"></i>Account activated after admin confirms your transfer.
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-sm fw-bold" id="regPayPaystackBtn"
+                            style="background:var(--kiddies);color:white;border-radius:8px;border:none;font-size:0.78rem;padding:9px;"
+                            onclick="doPayRegistration('paystack')">
+                        <i class="fas fa-bolt me-1"></i>Paystack (Card / Bank)
+                    </button>
+                    <button class="btn btn-sm fw-bold" id="regPayManualBtn"
+                            style="background:rgba(6,182,212,0.08);color:#0891b2;border:1.5px solid rgba(6,182,212,0.3);border-radius:8px;font-size:0.78rem;padding:9px;"
+                            onclick="doPayRegistration('manual')">
+                        <span id="regPayManualBtnText"><i class="fas fa-university me-1"></i>Manual Bank Transfer</span>
+                        <span id="regPayManualBtnSpinner" class="spinner-border spinner-border-sm ms-1" style="display:none;"></span>
+                    </button>
+                    <button class="btn btn-sm fw-bold" id="regPayAccountBtn"
+                            style="background:rgba(109,40,217,0.08);color:#6d28d9;border:1.5px solid rgba(109,40,217,0.25);border-radius:8px;font-size:0.78rem;padding:9px;"
+                            onclick="doPayRegistration('account')">
+                        <span id="regPayAccountBtnText"><i class="fas fa-wallet me-1"></i>From My Cooperative Account</span>
+                        <span id="regPayAccountBtnSpinner" class="spinner-border spinner-border-sm ms-1" style="display:none;"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Success Modal -->
 <div class="modal fade" id="successModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -1101,6 +1307,9 @@
 
 /* ══ Constants ══ */
 const REGISTRATION_FEE = <%= kiddiesRegistrationFee %>;
+
+/* ══ State — registration target account ══ */
+let _regTargetAccountId = null;
 
 /* ══ Sidebar ══ */
 function toggleSidebar() {
@@ -1133,7 +1342,9 @@ function showSuccess(title, msg, reload) {
     document.getElementById("successMsg").textContent = msg;
     const m = new bootstrap.Modal(document.getElementById("successModal"));
     m.show();
-    if (reload) document.getElementById("successModal").addEventListener("hidden.bs.modal", () => location.reload(), { once: true });
+    if (reload) {
+        document.getElementById("successModal").addEventListener("hidden.bs.modal", () => location.reload(), { once: true });
+    }
 }
 function showError(elId, msg) {
     const el = document.getElementById(elId);
@@ -1158,8 +1369,12 @@ function showToast(msg, type = "success") {
 /* ══ Total cost updater ══ */
 function updateTotalCost(val) {
     const deposit = parseFloat(val) || 0;
-    const total = REGISTRATION_FEE + deposit;
-    document.getElementById("totalCostDisplay").textContent = "₦" + total.toLocaleString();
+    const total   = REGISTRATION_FEE + deposit;
+    const fmt     = "₦" + total.toLocaleString();
+    const el1 = document.getElementById("totalCostDisplay");
+    const el2 = document.getElementById("createTotalDue");
+    if (el1) el1.textContent = fmt;
+    if (el2) el2.textContent = fmt;
 }
 
 /* ══ Lock Period Controls ══ */
@@ -1209,60 +1424,128 @@ function toggleLawyerFields() {
     document.getElementById("lawyerFields").style.display = v === "lawyer" ? "block" : "none";
 }
 
-/* ══ Toggle deposit payment method sections ══ */
-function toggleDepositMethod(v) {
-    document.getElementById("paystackDepositSection").style.display = v === "paystack" ? "block" : "none";
-    document.getElementById("manualDepositSection").style.display   = v === "manual"   ? "block" : "none";
+/* ══ Create Account — payment method picker ══ */
+const CREATE_METHOD_LABELS = {
+    paystack: '<i class="fas fa-bolt me-1"></i>Create &amp; Pay via Paystack',
+    manual:   '<i class="fas fa-university me-1"></i>Create &amp; Submit Transfer',
+    account:  '<i class="fas fa-wallet me-1"></i>Create &amp; Deduct from Account',
+};
+
+function selectCreateMethod(method) {
+    document.getElementById("createPaymentMethodHidden").value = method;
+
+    ["paystack", "manual", "account"].forEach(m => {
+        const btn = document.getElementById("cpm-" + m);
+        if (btn) btn.classList.toggle("selected", m === method);
+    });
+
+    document.getElementById("createPaystackSection").style.display = method === "paystack" ? "block" : "none";
+    document.getElementById("createManualSection").style.display   = method === "manual"   ? "block" : "none";
+    document.getElementById("createAccountSection").style.display  = method === "account"  ? "block" : "none";
+
+    const btnText = document.getElementById("createBtnText");
+    if (btnText) btnText.innerHTML = CREATE_METHOD_LABELS[method] || CREATE_METHOD_LABELS.paystack;
+}
+
+/* ══ Deposit method — visual button picker ══ */
+function selectDepositMethod(method) {
+    // Update hidden input
+    document.getElementById("depositMethodHidden").value = method;
+
+    // Update button states
+    ["paystack", "manual", "account"].forEach(m => {
+        const btn = document.getElementById("pm-" + m);
+        if (btn) btn.classList.toggle("selected", m === method);
+    });
+
+    // Show/hide sections
+    document.getElementById("paystackDepositSection").style.display = method === "paystack" ? "block" : "none";
+    document.getElementById("manualDepositSection").style.display   = method === "manual"   ? "block" : "none";
+    document.getElementById("accountDepositSection").style.display  = method === "account"  ? "block" : "none";
 }
 
 /* ══ Create Account ══ */
 async function submitCreateAccount() {
     hideError("createError");
-    const form = document.getElementById("createAccountForm");
+    const form   = document.getElementById("createAccountForm");
+    const method = document.getElementById("createPaymentMethodHidden").value || "paystack";
+
     if (!form.reportValidity()) return;
     if (!document.getElementById("agreeKiddiesTerms").checked) {
         showError("createError", "Please agree to the terms and conditions.");
         return;
     }
 
-    const btn = document.getElementById("createAccountBtn");
+    const btn     = document.getElementById("createAccountBtn");
     const spinner = document.getElementById("createBtnSpinner");
-    const text = document.getElementById("createBtnText");
-    btn.disabled = true;
+    const text    = document.getElementById("createBtnText");
+    btn.disabled  = true;
     spinner.style.display = "inline-block";
-    text.style.display = "none";
+    text.style.display    = "none";
+
+    const reset = () => {
+        btn.disabled = false;
+        spinner.style.display = "none";
+        text.style.display    = "inline";
+    };
 
     try {
-        const data = Object.fromEntries(new FormData(form).entries());
-        const res = await fetch("/api/kiddies/create", {
-            method: "POST",
+        const formData = Object.fromEntries(new FormData(form).entries());
+        // Inject payment method + payer name (from dedicated input, not form field name collision)
+        formData.paymentMethod = method;
+        if (method === "manual") {
+            formData.payerName = document.getElementById("createPayerName")?.value || "";
+        }
+
+        const res    = await fetch("/api/kiddies/create", {
+            method:  "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
+            body:    JSON.stringify(formData),
         });
         const result = await res.json();
 
-        btn.disabled = false;
-        spinner.style.display = "none";
-        text.style.display = "inline";
+        reset();
 
-        if (res.ok && result.status && result.authorization_url) {
-            window.location.href = result.authorization_url;
-        } else {
+        if (!res.ok || !result.status) {
             showError("createError", result.message || "Failed to create account.");
+            return;
         }
+
+        // ── Paystack: redirect ────────────────────────────────────
+        if (method === "paystack" && result.authorization_url) {
+            window.location.href = result.authorization_url;
+            return;
+        }
+
+        // ── Manual / Account: show success + reload ───────────────
+        bootstrap.Modal.getInstance(document.getElementById("createAccountModal")).hide();
+        showSuccess(
+            method === "account" ? "Account Created!" : "Account Created — Transfer Pending",
+            result.message,
+            true  // reload so new account appears in the list
+        );
+
     } catch (err) {
         console.error(err);
-        btn.disabled = false;
-        spinner.style.display = "none";
-        text.style.display = "inline";
+        reset();
         showError("createError", "Network error. Please try again.");
     }
 }
 
 /* ══ Open deposit modal (optionally pre-select account) ══ */
 function openDepositModal(accountId) {
+    // Reset method selection
+    selectDepositMethod("");
+    ["paystack", "manual", "account"].forEach(m => {
+        const btn = document.getElementById("pm-" + m);
+        if (btn) btn.classList.remove("selected");
+    });
+    document.getElementById("depositMethodHidden").value = "";
+    hideError("depositError");
+
     const modal = new bootstrap.Modal(document.getElementById("depositModal"));
     modal.show();
+
     if (accountId) {
         setTimeout(() => {
             const sel = document.getElementById("depositAccountSelect");
@@ -1271,13 +1554,23 @@ function openDepositModal(accountId) {
     }
 }
 
-/* ══ Submit Deposit — handles both Paystack and Manual ══ */
+/* ══ Submit Deposit — Paystack / Manual / Parent Account ══ */
 async function submitDeposit() {
     hideError("depositError");
-    const form   = document.getElementById("depositForm");
-    const method = document.getElementById("depositMethodSelect").value;
 
-    if (!form.reportValidity()) return;
+    const method = document.getElementById("depositMethodHidden").value;
+    if (!method) {
+        showError("depositError", "Please select a payment method.");
+        return;
+    }
+
+    const form = document.getElementById("depositForm");
+
+    // Validate account + amount manually (hidden input breaks reportValidity for method)
+    const accountId = document.getElementById("depositAccountSelect").value;
+    const amount    = document.getElementById("depositAmount").value;
+    if (!accountId) { showError("depositError", "Please select a child's account."); return; }
+    if (!amount || Number(amount) < 1000) { showError("depositError", "Minimum deposit is ₦1,000."); return; }
 
     const btn     = document.getElementById("depositBtn");
     const spinner = document.getElementById("depositBtnSpinner");
@@ -1286,22 +1579,24 @@ async function submitDeposit() {
     spinner.style.display = "inline-block";
     text.style.display    = "none";
 
+    const reset = () => {
+        btn.disabled = false;
+        spinner.style.display = "none";
+        text.style.display    = "inline";
+    };
+
+    const data = {
+        kiddiesAccountId: accountId,
+        amount:           amount,
+        paymentMethod:    method,
+        payerName:        form.querySelector('[name="payerName"]')?.value || "",
+    };
+
     try {
-        const data = Object.fromEntries(new FormData(form).entries());
-
         if (method === "paystack") {
-            // Automatic — redirect to Paystack
-            const res = await fetch("/api/kiddies/deposit", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
+            const res    = await fetch("/api/kiddies/deposit", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data) });
             const result = await res.json();
-
-            btn.disabled = false;
-            spinner.style.display = "none";
-            text.style.display    = "inline";
-
+            reset();
             if (res.ok && result.status && result.authorization_url) {
                 window.location.href = result.authorization_url;
             } else {
@@ -1309,81 +1604,232 @@ async function submitDeposit() {
             }
 
         } else if (method === "manual") {
-            // Manual transfer — post to cooperative endpoint
-            const res = await fetch("/api/kiddies/deposit/manual", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
+            const res    = await fetch("/api/kiddies/deposit/manual", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data) });
             const result = await res.json();
-
-            btn.disabled = false;
-            spinner.style.display = "none";
-            text.style.display    = "inline";
-
+            reset();
             if (res.ok && result.status) {
                 bootstrap.Modal.getInstance(document.getElementById("depositModal")).hide();
-                showSuccess("Deposit Submitted", result.message || "Your deposit is pending admin confirmation.", false);
+                showSuccess("Deposit Submitted", result.message || "Pending admin confirmation.", false);
                 form.reset();
-                // Reset visible sections
-                document.getElementById("paystackDepositSection").style.display = "none";
-                document.getElementById("manualDepositSection").style.display   = "none";
+                selectDepositMethod("");
             } else {
                 showError("depositError", result.message || "Deposit submission failed.");
             }
 
+        } else if (method === "account") {
+            const res    = await fetch("/api/kiddies/deposit/from-account", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data) });
+            const result = await res.json();
+            reset();
+            if (res.ok && result.status) {
+                // Update live balance display
+                if (result.newParentBalance !== undefined) {
+                    document.getElementById("parentBalanceDisplay").textContent =
+                        "₦" + result.newParentBalance.toLocaleString();
+                }
+                bootstrap.Modal.getInstance(document.getElementById("depositModal")).hide();
+                showSuccess("Transfer Successful", result.message, true);
+            } else {
+                showError("depositError", result.message || "Transfer failed.");
+            }
+
         } else {
-            btn.disabled = false;
-            spinner.style.display = "none";
-            text.style.display    = "inline";
+            reset();
             showError("depositError", "Please select a payment method.");
         }
     } catch (err) {
         console.error(err);
-        btn.disabled = false;
-        spinner.style.display = "none";
-        text.style.display    = "inline";
+        reset();
         showError("depositError", "Network error. Please try again.");
+    }
+}
+
+/* ══ Pay registration fee — opens picker modal ══ */
+function payRegistration(accountId) {
+    _regTargetAccountId = accountId;
+
+    // Reset all error + spinner states
+    const errEl = document.getElementById("regPayError");
+    errEl.style.display = "none";
+    errEl.textContent   = "";
+
+    // Reset all buttons
+    [
+        { btn: "regPayPaystackBtn",  spin: null,                     txt: null },
+        { btn: "regPayManualBtn",    spin: "regPayManualBtnSpinner",  txt: "regPayManualBtnText" },
+        { btn: "regPayAccountBtn",   spin: "regPayAccountBtnSpinner", txt: "regPayAccountBtnText" },
+    ].forEach(({ btn, spin, txt }) => {
+        const b = document.getElementById(btn);
+        if (b) b.disabled = false;
+        if (spin) { const s = document.getElementById(spin); if (s) s.style.display = "none"; }
+        if (txt)  { const t = document.getElementById(txt);  if (t) t.style.display = "inline"; }
+    });
+
+    // Hide manual section
+    const manualSec = document.getElementById("regManualPayerSection");
+    if (manualSec) manualSec.style.display = "none";
+    const payerInput = document.getElementById("regManualPayerName");
+    if (payerInput) payerInput.value = "";
+
+    openModal("regPayModal");
+}
+
+async function doPayRegistration(method) {
+    const accountId = _regTargetAccountId;
+    if (!accountId) return;
+
+    const errEl = document.getElementById("regPayError");
+    errEl.style.display = "none";
+
+    // ── Show manual section on first click, submit on second ──────
+    if (method === "manual") {
+        const manualSec = document.getElementById("regManualPayerSection");
+        if (manualSec && manualSec.style.display === "none") {
+            // First click: reveal the bank details + payer name input
+            manualSec.style.display = "block";
+            document.getElementById("regPayManualBtnText").innerHTML =
+                '<i class="fas fa-check me-1"></i>Confirm Manual Transfer';
+            return;
+        }
+        // Second click: submit
+        const spinnerEl = document.getElementById("regPayManualBtnSpinner");
+        const textEl    = document.getElementById("regPayManualBtnText");
+        const btn       = document.getElementById("regPayManualBtn");
+        btn.disabled            = true;
+        spinnerEl.style.display = "inline-block";
+        textEl.style.display    = "none";
+
+        const payerName = document.getElementById("regManualPayerName")?.value || "";
+
+        try {
+            const res    = await fetch("/api/kiddies/register/manual", {
+                method:  "POST",
+                headers: { "Content-Type": "application/json" },
+                body:    JSON.stringify({ existingAccountId: accountId, payerName }),
+            });
+            const result = await res.json();
+
+            if (res.ok && result.status) {
+                bootstrap.Modal.getInstance(document.getElementById("regPayModal")).hide();
+                showSuccess("Transfer Submitted", result.message, false);
+            } else {
+                btn.disabled            = false;
+                spinnerEl.style.display = "none";
+                textEl.style.display    = "inline";
+                errEl.textContent       = result.message || "Submission failed.";
+                errEl.style.display     = "block";
+            }
+        } catch {
+            btn.disabled            = false;
+            spinnerEl.style.display = "none";
+            textEl.style.display    = "inline";
+            errEl.textContent       = "Network error. Please try again.";
+            errEl.style.display     = "block";
+        }
+        return;
+    }
+
+    if (method === "paystack") {
+        document.getElementById("regPayPaystackBtn").disabled = true;
+        showToast("Initializing payment...", "info");
+
+        try {
+            const res    = await fetch("/api/kiddies/create", {
+                method:  "POST",
+                headers: { "Content-Type": "application/json" },
+                body:    JSON.stringify({ existingAccountId: accountId }),
+            });
+            const result = await res.json();
+
+            if (result.authorization_url) {
+                window.location.href = result.authorization_url;
+            } else {
+                document.getElementById("regPayPaystackBtn").disabled = false;
+                errEl.textContent   = result.message || "Could not initialize payment.";
+                errEl.style.display = "block";
+            }
+        } catch {
+            document.getElementById("regPayPaystackBtn").disabled = false;
+            errEl.textContent   = "Network error. Please try again.";
+            errEl.style.display = "block";
+        }
+        return;
+    }
+
+    if (method === "account") {
+        const spinnerEl = document.getElementById("regPayAccountBtnSpinner");
+        const textEl    = document.getElementById("regPayAccountBtnText");
+        const btn       = document.getElementById("regPayAccountBtn");
+        btn.disabled            = true;
+        spinnerEl.style.display = "inline-block";
+        textEl.style.display    = "none";
+
+        try {
+            const res    = await fetch("/api/kiddies/register/from-account", {
+                method:  "POST",
+                headers: { "Content-Type": "application/json" },
+                body:    JSON.stringify({ existingAccountId: accountId }),
+            });
+            const result = await res.json();
+
+            if (res.ok && result.status) {
+                bootstrap.Modal.getInstance(document.getElementById("regPayModal")).hide();
+                showSuccess("Registration Complete", result.message, true);
+            } else {
+                btn.disabled            = false;
+                spinnerEl.style.display = "none";
+                textEl.style.display    = "inline";
+                errEl.textContent       = result.message || "Registration failed.";
+                errEl.style.display     = "block";
+            }
+        } catch {
+            btn.disabled            = false;
+            spinnerEl.style.display = "none";
+            textEl.style.display    = "inline";
+            errEl.textContent       = "Network error. Please try again.";
+            errEl.style.display     = "block";
+        }
     }
 }
 
 /* ══ View Account Detail ══ */
 async function viewAccountDetail(accountId) {
     openModal("accountDetailModal");
-    document.getElementById("accountDetailContent").innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin" style="color:var(--kiddies);font-size:1.5rem;"></i></div>';
+    document.getElementById("accountDetailContent").innerHTML =
+        '<div class="text-center py-4"><i class="fas fa-spinner fa-spin" style="color:var(--kiddies);font-size:1.5rem;"></i></div>';
 
     try {
-        const res = await fetch(`/api/kiddies/account/${accountId}`);
+        const res    = await fetch(`/api/kiddies/account/${accountId}`);
         const result = await res.json();
 
         if (!result.status) {
-            document.getElementById("accountDetailContent").innerHTML = '<p class="text-muted text-center py-4" style="font-size:0.8rem;">Could not load account details.</p>';
+            document.getElementById("accountDetailContent").innerHTML =
+                '<p class="text-muted text-center py-4" style="font-size:0.8rem;">Could not load account details.</p>';
             return;
         }
 
-        const ka = result.kiddiesAccount;
-        const txs = result.transactions || [];
+        const ka      = result.kiddiesAccount;
+        const txs     = result.transactions || [];
         const balance = ka.account ? ka.account.balance : 0;
-        const roi = ka.account ? (ka.account.accumulativeROI || 0) : 0;
-        const now = new Date();
+        const roi     = ka.account ? (ka.account.accumulativeROI || 0) : 0;
+        const now     = new Date();
         const created = new Date(ka.createdAt);
-        const unlock = ka.unlockDate ? new Date(ka.unlockDate) : null;
+        const unlock  = ka.unlockDate ? new Date(ka.unlockDate) : null;
         const totalMs = unlock ? (unlock - created) : (5 * 365.25 * 24 * 3600 * 1000);
         const progress = Math.min(100, Math.round(((now - created) / totalMs) * 100));
 
-        // Share % for this specific account
         const allMembersTotal = <%= allMembersTotalSavings %>;
         const acctShare = allMembersTotal > 0 && balance > 0
             ? ((balance / allMembersTotal) * 100).toFixed(2) : "0.00";
 
-        document.getElementById("detailModalTitle").innerHTML = `<i class="fas fa-user-circle me-2"></i>${ka.childFirstName} ${ka.childLastName}`;
+        document.getElementById("detailModalTitle").innerHTML =
+            `<i class="fas fa-user-circle me-2"></i>${ka.childFirstName} ${ka.childLastName}`;
 
         const txHTML = txs.length === 0
             ? '<p class="text-muted text-center py-3" style="font-size:0.78rem;">No transactions yet.</p>'
             : txs.slice(0,8).map(tx => `
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(236,72,153,0.07);">
                     <div>
-                        <span class="badge" style="background:rgba(${tx.type==='deposit'?'16,185,129':'tx.type==="interest"?6,182,212:236,72,153'},0.1);color:${tx.type==='deposit'?'#059669':tx.type==='interest'?'#0891b2':'#be185d'};font-size:0.65rem;">${tx.type}</span>
+                        <span class="badge" style="background:${tx.type==='deposit'?'rgba(16,185,129,0.1)':tx.type==='interest'?'rgba(6,182,212,0.1)':'rgba(236,72,153,0.1)'};color:${tx.type==='deposit'?'#059669':tx.type==='interest'?'#0891b2':'#be185d'};font-size:0.65rem;">${tx.type}</span>
                         <div style="font-size:0.72rem;color:#6b7280;margin-top:2px;">${new Date(tx.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
                         <div style="font-size:0.7rem;color:#9ca3af;">${tx.description||''}</div>
                     </div>
@@ -1415,7 +1861,6 @@ async function viewAccountDetail(accountId) {
                             <div style="font-weight:800;color:#10b981;">₦${roi.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
                         </div>
                     </div>
-                    <!-- Share % tile inside detail modal -->
                     <div class="col-6">
                         <div style="background:white;border-radius:8px;padding:8px;">
                             <div style="font-size:0.64rem;color:#9ca3af;font-weight:600;">Pool Share</div>
@@ -1468,34 +1913,15 @@ async function viewAccountDetail(accountId) {
         `;
     } catch (err) {
         console.error(err);
-        document.getElementById("accountDetailContent").innerHTML = '<p class="text-muted text-center py-4" style="font-size:0.8rem;">Error loading details.</p>';
-    }
-}
-
-/* ══ Pay registration fee for existing unpaid account ══ */
-async function payRegistration(accountId) {
-    showToast("Initializing payment...", "info");
-    try {
-        const res = await fetch("/api/kiddies/create", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ existingAccountId: accountId }),
-        });
-        const result = await res.json();
-        if (result.authorization_url) {
-            window.location.href = result.authorization_url;
-        } else {
-            showToast(result.message || "Could not initialize payment.", "error");
-        }
-    } catch (err) {
-        showToast("Network error.", "error");
+        document.getElementById("accountDetailContent").innerHTML =
+            '<p class="text-muted text-center py-4" style="font-size:0.8rem;">Error loading details.</p>';
     }
 }
 
 /* ══ Load Transactions ══ */
 async function loadTransactions() {
     const container = document.getElementById("transactionsContainer");
-    const filter = document.getElementById("txAccountFilter").value;
+    const filter    = document.getElementById("txAccountFilter").value;
 
     container.innerHTML = '<div class="text-center py-4 text-muted" style="font-size:0.8rem;"><i class="fas fa-spinner fa-spin me-2"></i>Loading...</div>';
 
@@ -1511,7 +1937,7 @@ async function loadTransactions() {
 
         const allTxs = [];
         await Promise.all(accountIds.map(async id => {
-            const res = await fetch(`/api/kiddies/transactions/${id}`);
+            const res  = await fetch(`/api/kiddies/transactions/${id}`);
             const data = await res.json();
             if (data.status && data.transactions) {
                 data.transactions.forEach(tx => {
@@ -1537,7 +1963,7 @@ async function loadTransactions() {
         const totalInterest = allTxs.filter(t=>t.type==='interest').reduce((s,t)=>s+t.amount,0);
 
         const typeColors = { deposit:'#10b981', interest:'#06b6d4', fee:'#f59e0b', withdrawal:'#ef4444' };
-        const typeBg = { deposit:'rgba(16,185,129,0.1)', interest:'rgba(6,182,212,0.1)', fee:'rgba(245,158,11,0.1)', withdrawal:'rgba(239,68,68,0.1)' };
+        const typeBg     = { deposit:'rgba(16,185,129,0.1)', interest:'rgba(6,182,212,0.1)', fee:'rgba(245,158,11,0.1)', withdrawal:'rgba(239,68,68,0.1)' };
 
         container.innerHTML = `
             <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
@@ -1587,12 +2013,12 @@ function openEditBeneficiary(accountId) {
     const ka = accounts.find(a => a._id === accountId);
     if (!ka) return;
 
-    document.getElementById("editBeneficiaryAccountId").value = accountId;
-    document.getElementById("editBeneficiaryFullName").value = ka.nextOfKin.fullName || '';
-    document.getElementById("editBeneficiaryPhone").value = ka.nextOfKin.phone || '';
-    document.getElementById("editBeneficiaryEmail").value = ka.nextOfKin.email || '';
-    document.getElementById("editBeneficiaryRelationship").value = ka.nextOfKin.relationship || '';
-    document.getElementById("editBeneficiaryAddress").value = ka.nextOfKin.address || '';
+    document.getElementById("editBeneficiaryAccountId").value      = accountId;
+    document.getElementById("editBeneficiaryFullName").value        = ka.nextOfKin.fullName || '';
+    document.getElementById("editBeneficiaryPhone").value           = ka.nextOfKin.phone || '';
+    document.getElementById("editBeneficiaryEmail").value           = ka.nextOfKin.email || '';
+    document.getElementById("editBeneficiaryRelationship").value    = ka.nextOfKin.relationship || '';
+    document.getElementById("editBeneficiaryAddress").value         = ka.nextOfKin.address || '';
 
     openModal("editBeneficiaryModal");
 }
@@ -1602,23 +2028,27 @@ async function submitBeneficiaryUpdate() {
     const form = document.getElementById("editBeneficiaryForm");
     if (!form.reportValidity()) return;
 
-    const btn = document.getElementById("editBeneficiaryBtn");
+    const btn     = document.getElementById("editBeneficiaryBtn");
     const spinner = document.getElementById("editBenBtnSpinner");
-    const text = document.getElementById("editBenBtnText");
-    btn.disabled = true; spinner.style.display="inline-block"; text.style.display="none";
+    const text    = document.getElementById("editBenBtnText");
+    btn.disabled  = true;
+    spinner.style.display = "inline-block";
+    text.style.display    = "none";
 
     const accountId = document.getElementById("editBeneficiaryAccountId").value;
-    const data = Object.fromEntries(new FormData(form).entries());
+    const data      = Object.fromEntries(new FormData(form).entries());
 
     try {
-        const res = await fetch(`/api/kiddies/beneficiary/${accountId}`, {
+        const res    = await fetch(`/api/kiddies/beneficiary/${accountId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
         });
         const result = await res.json();
 
-        btn.disabled = false; spinner.style.display="none"; text.style.display="inline";
+        btn.disabled = false;
+        spinner.style.display = "none";
+        text.style.display    = "inline";
 
         if (res.ok && result.status) {
             bootstrap.Modal.getInstance(document.getElementById("editBeneficiaryModal")).hide();
@@ -1627,7 +2057,9 @@ async function submitBeneficiaryUpdate() {
             showToast(result.message || "Update failed.", "error");
         }
     } catch (err) {
-        btn.disabled = false; spinner.style.display="none"; text.style.display="inline";
+        btn.disabled = false;
+        spinner.style.display = "none";
+        text.style.display    = "inline";
         showToast("Network error.", "error");
     }
 }
@@ -1645,7 +2077,7 @@ document.addEventListener("click", e => {
 window.addEventListener("load", () => {
     const loader = document.getElementById("loaderScreen");
     setTimeout(() => {
-        loader.style.opacity = "0";
+        loader.style.opacity    = "0";
         loader.style.transition = "opacity 0.5s ease";
         setTimeout(() => loader.style.display = "none", 500);
     }, 600);
@@ -1656,7 +2088,7 @@ document.addEventListener("DOMContentLoaded", () => {
     syncLockPeriod('init', 5);
 
     document.querySelectorAll(".stat-card, .card, .kid-card").forEach((el, i) => {
-        el.style.opacity = "0";
+        el.style.opacity   = "0";
         el.style.transform = "translateY(14px)";
         el.style.transition = "opacity 0.4s ease, transform 0.4s ease";
         setTimeout(() => { el.style.opacity = "1"; el.style.transform = "translateY(0)"; }, i * 70);

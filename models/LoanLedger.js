@@ -20,7 +20,7 @@ const loanLedgerSchema = new mongoose.Schema({
 
   processedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Admin",
+    ref: "User",
     required: true
   },
 

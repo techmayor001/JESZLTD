@@ -35,6 +35,18 @@ const paymentSchema = new mongoose.Schema({
     default: null
   },
 
+  paymentType: {
+    type: String,
+    enum: [
+      "registration_fee",
+      "loan_repayment",
+      "deposit",
+      "penalty_payment",
+      "extra_charge",
+      "external_payment"
+    ]
+  },
+
   status: {
     type: String,
     enum: ["pending", "paid", "failed", "success"],

@@ -5,6 +5,10 @@ const mongoose = require("mongoose");
 const Loan = require("../../models/Loan");
 const LoanSettings = require("../../models/LoanSettings");
 const User = require("../../models/User");
+const Settings = require("../../models/Settings");
+const Payment = require("../../models/Payment");
+const Transaction = require("../../models/Transaction");
+const CompanyLedger = require("../../models/CompanyLedger");
 
 
 
@@ -18,7 +22,8 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       .populate({
         path: "account",
         populate: { path: "accountType", model: "MemberType" }
-      });
+      })
+      .populate("guarantorRequests");
 
     if (!user) return res.redirect("/login");
 
@@ -46,33 +51,39 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       })
       .lean();
 
-    // === ✅ DUE DATE BASED ON duration.months ===
+    // Due date based on duration.months
     let dueDate = null;
     let daysUntilDue = null;
 
     if (activeLoan && activeLoan.duration) {
       const createdAt = new Date(activeLoan.createdAt);
-      const monthsToAdd = activeLoan.duration.duration; // <--- number of months
+      const monthsToAdd = activeLoan.duration.duration;
 
-      // Add the loan duration (months)
       dueDate = new Date(createdAt);
       dueDate.setMonth(dueDate.getMonth() + monthsToAdd);
 
-      // Calculate days left
       const today = new Date();
       const msDiff = dueDate - today;
       daysUntilDue = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
 
-      if (daysUntilDue < 0) daysUntilDue = 0; // overdue handling
+      if (daysUntilDue < 0) daysUntilDue = 0;
     }
 
     const interestRate = user.account?.accountType?.interestRate || 0;
 
-    // Account age in months
     const today = new Date();
     const monthsSinceJoin = Math.floor(
       (today - user.createdAt) / (1000 * 60 * 60 * 24 * 30)
     );
+
+    // Settings
+    const settings = await Settings.getSettings();
+    const companyAccount = settings.companyAccount || {};
+
+    // Pending guarantor requests
+    const pendingGuarantorCount = user.guarantorRequests
+      ? user.guarantorRequests.filter(r => r.status === "pending").length
+      : 0;
 
     res.render("dashboard/user/loan", {
       user,
@@ -82,12 +93,14 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       monthsSinceJoin,
       loanSettings,
       dueDate,
-      daysUntilDue
+      daysUntilDue,
+      companyAccount,
+      pendingGuarantorCount,
     });
 
   } catch (err) {
     console.error("Loan page error:", err);
-    res.redirect("/club-de-star-cooperative/dashboard");
+    res.redirect("/cds-cooperative/dashboard");
   }
 });
 
