@@ -665,7 +665,7 @@ button,input,select,textarea{font-family:inherit;}
       <div class="hero-stat">
         <div class="hero-stat-label">Monthly ROI</div>
         <div class="hero-stat-value" style="color:var(--green);">₦<%= monthlyROI.toLocaleString(undefined,{maximumFractionDigits:2}) %></div>
-        <div class="hero-stat-sub"><%= sharePercentage %>% pool · <%= interestRate %>% rate</div>
+        <div class="hero-stat-sub"><%= sharePercentage %>% Shares</div>
       </div>
       <div class="hero-stat">
         <div class="hero-stat-label">Active Loan</div>
@@ -716,23 +716,11 @@ button,input,select,textarea{font-family:inherit;}
         <span class="roi-row-val">₦<%= accountBalance.toLocaleString() %></span>
       </div>
       <div class="roi-row">
-        <span class="roi-row-label">Interest pool</span>
-        <span class="roi-row-val">₦<%= totalInterestCollected.toLocaleString() %></span>
-      </div>
-      <div class="roi-row">
-        <span class="roi-row-label">Net to members</span>
-        <span class="roi-row-val" style="color:var(--green);">₦<%= netInterestForRoi.toLocaleString() %></span>
-      </div>
-      <div class="roi-row">
-        <span class="roi-row-label">Operating charge (<%= roiOperatingCharge %>%)</span>
-        <span class="roi-row-val" style="color:var(--muted);">₦<%= companyCharge.toLocaleString() %></span>
-      </div>
-      <div class="roi-row">
         <span class="roi-row-label">Your ROI this month</span>
         <span class="roi-row-val" style="color:var(--accent);">₦<%= monthlyROI.toLocaleString(undefined,{maximumFractionDigits:2}) %></span>
       </div>
       <div class="share-bar-wrap">
-        <div class="share-bar-label"><span>Pool share</span><span><%= sharePercentage %>%</span></div>
+        <div class="share-bar-label"><span>Shares</span><span><%= sharePercentage %>%</span></div>
         <div class="share-bar"><div class="share-bar-fill" style="width:<%= Math.min(parseFloat(sharePercentage),100) %>%"></div></div>
       </div>
     </div>

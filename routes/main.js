@@ -118,9 +118,8 @@ router.get("/cds-cooperative/dashboard", async (req, res) => {
     }
     console.log("Monthly ROI:", monthlyROI);
 
-    // ── Total savings across all member accounts (ownerType: "User" only) ──
-    // Kiddies accounts are excluded — they are tracked separately.
-    const allMemberAccounts = await Account.find({ ownerType: "User" });
+    // ── Total savings across ALL accounts (members + kiddies) ──
+    const allMemberAccounts = await Account.find({});
 
     const totalSavingsAllMembers = allMemberAccounts.reduce(
       (sum, acc) => sum + Number(acc.balance || 0), 0

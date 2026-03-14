@@ -8,7 +8,6 @@ const Settings = require("../models/Settings");
 const KiddiesAccount = require("../models/Kiddies/kiddiesAccount");
 const KiddiesTransaction = require("../models/Kiddies/kiddiesTransaction");
 const KiddiesPayment = require("../models/Kiddies/KiddiesPayment");
-const Payment = require("../models/Payment");
 const Transaction = require("../models/Transaction");
 
 // ─── Auth middleware ───────────────────────────────────────────────────────────
@@ -30,48 +29,44 @@ async function generateKiddiesID(shortCode = "KID") {
   }
   return `${shortCode}${String(next).padStart(3, "0")}`;
 }
-
 // ───────────────────────────────────────────────────────────────────
-// GET  /manage/kiddies-account
-// Parent-facing kiddies dashboard
+// GET /manage/kiddies-account  — parent dashboard
 // ───────────────────────────────────────────────────────────────────
 router.get("/manage/kiddies-account", async (req, res) => {
   try {
     if (!req.isAuthenticated()) return res.redirect("/login");
- 
+
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).send("User not found");
- 
+
     const kiddiesAccounts = await KiddiesAccount.find({ parent: req.user._id })
       .populate("account")
       .sort({ createdAt: -1 });
- 
-    const settings              = await Settings.getSettings();
+
+    const settings               = await Settings.getSettings();
     const kiddiesRegistrationFee = settings.registrationFees.kiddiesRegistrationFee;
-    const memberTypes           = await MemberType.find({});
- 
-    // Total savings across ALL regular member accounts (for pool-share %)
-    const allMemberAccounts     = await Account.find({ ownerType: "User" });
+    const memberTypes            = await MemberType.find({});
+
+    // ── Total savings across ALL accounts (members + kiddies) ──
+    const allMemberAccounts      = await Account.find({});
     const allMembersTotalSavings = allMemberAccounts.reduce(
       (sum, acc) => sum + Number(acc.balance || 0), 0
     );
- 
-    // Parent's own cooperative account balance (shown in navbar + deposit modal)
+
     const parentAccount        = await Account.findOne({ ownerType: "User", ownerId: user._id });
     const parentAccountBalance = parentAccount ? (parentAccount.balance || 0) : 0;
- 
-    const companyAccount = settings.companyAccount || {};
- 
+    const companyAccount       = settings.companyAccount || {};
+
     return res.render("dashboard/user/kiddies", {
       user,
       kiddiesAccounts,
       kiddiesRegistrationFee,
       settings,
       memberTypes,
-      allMembersTotalSavings,   // for share-% calculations in the view
-      parentAccountBalance,      // for the "My Account" payment panel + navbar badge
-      companyAccount,            // manual-deposit bank details
-      query: req.query,          // payment=success / payment=failed banners
+      allMembersTotalSavings,
+      parentAccountBalance,
+      companyAccount,
+      query: req.query,
     });
   } catch (err) {
     console.error("Kiddies dashboard error:", err);
@@ -80,17 +75,14 @@ router.get("/manage/kiddies-account", async (req, res) => {
 });
  
  
- 
 // ───────────────────────────────────────────────────────────────────
 // POST /api/kiddies/create
-// Create a new kiddies account and handle payment via one of 3 methods:
-//   paymentMethod = "paystack"  → Paystack redirect (existing flow)
-//   paymentMethod = "manual"    → Pending Payment + Transaction records
+// Creates a new kiddies account then handles payment via:
+//   paymentMethod = "paystack"  → Paystack redirect
+//   paymentMethod = "manual"    → Pending KiddiesPayment (paymentType: "registration")
 //   paymentMethod = "account"   → Instant debit from parent's coop account
 //
-// Also accepts { existingAccountId } to re-trigger payment for an
-// already-created unpaid account (Paystack only on re-trigger;
-// manual/account re-trigger handled by dedicated routes).
+// { existingAccountId } re-triggers Paystack for an unpaid account.
 // ───────────────────────────────────────────────────────────────────
 router.post("/api/kiddies/create", async (req, res) => {
   try {
@@ -100,14 +92,9 @@ router.post("/api/kiddies/create", async (req, res) => {
  
     const user = await User.findById(req.user._id);
     const {
-      // ── Payment method ──────────────────────────────────────────
-      paymentMethod = "paystack",   // "paystack" | "manual" | "account"
-      payerName,                    // only used when paymentMethod = "manual"
- 
-      // ── Re-trigger path (existing unpaid account) ───────────────
+      paymentMethod = "paystack",
+      payerName,
       existingAccountId,
- 
-      // ── New account fields ──────────────────────────────────────
       childFirstName,
       childLastName,
       childDOB,
@@ -125,14 +112,10 @@ router.post("/api/kiddies/create", async (req, res) => {
       lawFirm,
     } = req.body;
  
-    const settings            = await Settings.getSettings();
-    const registrationFee     = settings.registrationFees.kiddiesRegistrationFee;
+    const settings        = await Settings.getSettings();
+    const registrationFee = settings.registrationFees.kiddiesRegistrationFee;
  
-    // ══════════════════════════════════════════════════════════════
-    // RE-TRIGGER: existing unpaid account  → Paystack only
-    // (manual/account re-trigger uses /register/manual and
-    //  /register/from-account respectively)
-    // ══════════════════════════════════════════════════════════════
+    // ── RE-TRIGGER: existing unpaid account → Paystack only ───────
     if (existingAccountId) {
       const kiddiesAccount = await KiddiesAccount.findOne({
         _id:    existingAccountId,
@@ -173,12 +156,15 @@ router.post("/api/kiddies/create", async (req, res) => {
       }
  
       await KiddiesPayment.create({
-        kiddiesAccount: kiddiesAccount._id,
-        parent:         user._id,
-        email:          user.email,
-        amount:         totalAmount,
-        reference:      paystackData.data.reference,
-        status:         "pending",
+        kiddiesAccount:   kiddiesAccount._id,
+        parent:           user._id,
+        email:            user.email,
+        amount:           totalAmount,
+        reference:        paystackData.data.reference,
+        payeeName:        null,
+        paymentType:      "registration",
+        status:           "pending",
+        paystackResponse: paystackData.data,
       });
  
       return res.json({
@@ -189,9 +175,7 @@ router.post("/api/kiddies/create", async (req, res) => {
       });
     }
  
-    // ══════════════════════════════════════════════════════════════
-    // NEW ACCOUNT: validate fields
-    // ══════════════════════════════════════════════════════════════
+    // ── NEW ACCOUNT: validate fields ──────────────────────────────
     if (
       !childFirstName || !childLastName || !childDOB || !childGender ||
       !beneficiaryType || !nextOfKinFullName || !nextOfKinPhone ||
@@ -205,17 +189,13 @@ router.post("/api/kiddies/create", async (req, res) => {
       return res.status(400).json({ status: false, message: "Minimum initial deposit is ₦10,000." });
     }
  
-    // ── Resolve member type ───────────────────────────────────────
     let accountType = memberTypeId ? await MemberType.findById(memberTypeId) : null;
     if (!accountType) accountType = await MemberType.findOne({ isDefault: true });
     if (!accountType) {
       return res.status(500).json({ status: false, message: "No member type configured." });
     }
  
-    // ── 1. Generate accountID ─────────────────────────────────────
-    const accountID = await generateKiddiesID("KID");
- 
-    // ── 2. Create KiddiesAccount ──────────────────────────────────
+    const accountID      = await generateKiddiesID("KID");
     const kiddiesAccount = await KiddiesAccount.create({
       parent: user._id,
       accountID,
@@ -233,13 +213,12 @@ router.post("/api/kiddies/create", async (req, res) => {
         barNumber:    barNumber || undefined,
         lawFirm:      lawFirm   || undefined,
       },
-      initialDeposit:  depositAmount,
-      lockPeriodYears: Math.min(18, Math.max(5, parseInt(lockPeriodYears) || 5)),
+      initialDeposit:     depositAmount,
+      lockPeriodYears:    Math.min(18, Math.max(5, parseInt(lockPeriodYears) || 5)),
       registrationStatus: "pending",
       status:             "locked",
     });
  
-    // ── 3. Create linked Account ──────────────────────────────────
     const account = await Account.create({
       ownerType:       "KiddiesAccount",
       ownerId:         kiddiesAccount._id,
@@ -249,58 +228,47 @@ router.post("/api/kiddies/create", async (req, res) => {
       accumulativeROI: 0,
     });
  
-    // ── 4. Back-link account → KiddiesAccount ─────────────────────
     kiddiesAccount.account = account._id;
     await kiddiesAccount.save();
  
-    // ── 5. Link KiddiesAccount to parent user ─────────────────────
     await User.findByIdAndUpdate(user._id, {
       $push: { kiddiesAccounts: kiddiesAccount._id },
     });
  
-    const totalAmount   = registrationFee + depositAmount;
-    const reference     = `KD-NEW-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
- 
-    // ══════════════════════════════════════════════════════════════
-    // BRANCH: payment method
-    // ══════════════════════════════════════════════════════════════
+    const totalAmount = registrationFee + depositAmount;
+    const reference   = `KD-NEW-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
  
     // ── A. MANUAL ─────────────────────────────────────────────────
     if (paymentMethod === "manual") {
-      await Payment.create({
-        user:      user._id,
-        email:     user.email,
-        amount:    totalAmount,
+      await KiddiesPayment.create({
+        kiddiesAccount:   kiddiesAccount._id,
+        parent:           user._id,
+        email:            user.email,
+        amount:           totalAmount,
         reference,
-        payeeName: payerName?.trim() || null,
-        status:    "pending",
-        meta: {
-          type:             "kiddies_registration",
-          kiddiesAccountId: kiddiesAccount._id,
-          method:           "manual",
-        },
+        payeeName:        payerName?.trim() || null,
+        paymentType:      "registration",
+        status:           "pending",
+        paystackResponse: null,
       });
  
-      // Kiddies transaction — pending initial deposit, kiddies schema
       await KiddiesTransaction.create({
         kiddiesAccount: kiddiesAccount._id,
         parent:         user._id,
         type:           "deposit",
         amount:         depositAmount,
-        balanceAfter:   0,   // balance is still 0 until admin confirms
+        balanceAfter:   0,
         description:    `Initial Deposit — Registration via Manual Transfer (Pending) — ${accountID}`,
         reference,
         status:         "pending",
         paymentMethod:  "cooperative",
       });
  
-      console.log(
-        `🕒 Kiddies manual registration pending: ₦${totalAmount} — ${user.email} → ${accountID}`
-      );
+      console.log(`🕒 Kiddies manual registration pending: ₦${totalAmount} — ${user.email} → ${accountID}`);
  
       return res.status(200).json({
         status:  true,
-        message: `Account created! Transfer ₦${totalAmount.toLocaleString()} (₦${registrationFee.toLocaleString()} fee + ₦${depositAmount.toLocaleString()} deposit) to our account and it will be activated after confirmation.`,
+        message: `Account created! Transfer ₦${totalAmount.toLocaleString()} (₦${registrationFee.toLocaleString()} fee + ₦${depositAmount.toLocaleString()} deposit) to our account. It will be activated after admin confirmation.`,
         kiddiesAccountId: kiddiesAccount._id,
       });
     }
@@ -310,7 +278,6 @@ router.post("/api/kiddies/create", async (req, res) => {
       const parentAccount = await Account.findOne({ ownerType: "User", ownerId: user._id });
  
       if (!parentAccount) {
-        // Rollback
         await KiddiesAccount.findByIdAndDelete(kiddiesAccount._id);
         await Account.findByIdAndDelete(account._id);
         await User.findByIdAndUpdate(user._id, { $pull: { kiddiesAccounts: kiddiesAccount._id } });
@@ -318,7 +285,6 @@ router.post("/api/kiddies/create", async (req, res) => {
       }
  
       if ((parentAccount.balance || 0) < totalAmount) {
-        // Rollback
         await KiddiesAccount.findByIdAndDelete(kiddiesAccount._id);
         await Account.findByIdAndDelete(account._id);
         await User.findByIdAndUpdate(user._id, { $pull: { kiddiesAccounts: kiddiesAccount._id } });
@@ -328,11 +294,9 @@ router.post("/api/kiddies/create", async (req, res) => {
         });
       }
  
-      // Debit parent cooperative account (full: fee + deposit)
       parentAccount.balance -= totalAmount;
       await parentAccount.save();
  
-      // Parent transaction — cooperative schema
       await Transaction.create({
         user:        user._id,
         type:        "withdrawal",
@@ -343,11 +307,9 @@ router.post("/api/kiddies/create", async (req, res) => {
         method:      "Internal Transfer",
       });
  
-      // Credit kiddies account with initial deposit only
       account.balance = depositAmount;
       await account.save();
  
-      // Kiddies transaction — kiddies schema
       await KiddiesTransaction.create({
         kiddiesAccount: kiddiesAccount._id,
         parent:         user._id,
@@ -360,13 +322,10 @@ router.post("/api/kiddies/create", async (req, res) => {
         paymentMethod:  "cooperative",
       });
  
-      // Mark registration paid immediately
       kiddiesAccount.registrationStatus = "paid";
       await kiddiesAccount.save();
  
-      console.log(
-        `✅ Kiddies registration via parent account: ₦${totalAmount} | ${user.email} → ${accountID} | Ref: ${reference}`
-      );
+      console.log(`✅ Kiddies registration via parent account: ₦${totalAmount} | ${user.email} → ${accountID} | Ref: ${reference}`);
  
       return res.status(200).json({
         status:           true,
@@ -397,7 +356,6 @@ router.post("/api/kiddies/create", async (req, res) => {
  
     const paystackData = await paystackRes.json();
     if (!paystackData.status || !paystackData.data) {
-      // Rollback
       await KiddiesAccount.findByIdAndDelete(kiddiesAccount._id);
       await Account.findByIdAndDelete(account._id);
       await User.findByIdAndUpdate(user._id, { $pull: { kiddiesAccounts: kiddiesAccount._id } });
@@ -405,12 +363,15 @@ router.post("/api/kiddies/create", async (req, res) => {
     }
  
     await KiddiesPayment.create({
-      kiddiesAccount: kiddiesAccount._id,
-      parent:         user._id,
-      email:          user.email,
-      amount:         totalAmount,
-      reference:      paystackData.data.reference,
-      status:         "pending",
+      kiddiesAccount:   kiddiesAccount._id,
+      parent:           user._id,
+      email:            user.email,
+      amount:           totalAmount,
+      reference:        paystackData.data.reference,
+      payeeName:        null,
+      paymentType:      "registration",
+      status:           "pending",
+      paystackResponse: paystackData.data,
     });
  
     return res.json({
@@ -429,8 +390,8 @@ router.post("/api/kiddies/create", async (req, res) => {
  
 // ───────────────────────────────────────────────────────────────────
 // POST /api/kiddies/register/manual
-// Re-trigger registration payment via manual transfer for an existing
-// unpaid kiddies account. Creates pending Payment + Transaction.
+// Re-triggers registration for an existing unpaid account via manual
+// bank transfer. KiddiesPayment paymentType = "registration".
 // ───────────────────────────────────────────────────────────────────
 router.post("/api/kiddies/register/manual", async (req, res) => {
   try {
@@ -438,7 +399,7 @@ router.post("/api/kiddies/register/manual", async (req, res) => {
       return res.status(401).json({ status: false, message: "Unauthorized" });
     }
  
-    const user                    = req.user;
+    const user                         = req.user;
     const { existingAccountId, payerName } = req.body;
  
     if (!existingAccountId) {
@@ -457,27 +418,24 @@ router.post("/api/kiddies/register/manual", async (req, res) => {
       return res.status(400).json({ status: false, message: "Registration already completed." });
     }
  
-    const settings            = await Settings.getSettings();
-    const registrationFee     = settings.registrationFees.kiddiesRegistrationFee;
-    const depositAmount       = Number(kiddiesAccount.initialDeposit || 10000);
-    const totalAmount         = registrationFee + depositAmount;
-    const reference           = `KD-REG-MANUAL-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+    const settings        = await Settings.getSettings();
+    const registrationFee = settings.registrationFees.kiddiesRegistrationFee;
+    const depositAmount   = Number(kiddiesAccount.initialDeposit || 10000);
+    const totalAmount     = registrationFee + depositAmount;
+    const reference       = `KD-REG-MANUAL-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
  
-    await Payment.create({
-      user:      user._id,
-      email:     user.email,
-      amount:    totalAmount,
+    await KiddiesPayment.create({
+      kiddiesAccount:   kiddiesAccount._id,
+      parent:           user._id,
+      email:            user.email,
+      amount:           totalAmount,
       reference,
-      payeeName: payerName?.trim() || null,
-      status:    "pending",
-      meta: {
-        type:             "kiddies_registration",
-        kiddiesAccountId: kiddiesAccount._id,
-        method:           "manual",
-      },
+      payeeName:        payerName?.trim() || null,
+      paymentType:      "registration",
+      status:           "pending",
+      paystackResponse: null,
     });
  
-    // Kiddies transaction — pending initial deposit, kiddies schema
     await KiddiesTransaction.create({
       kiddiesAccount: kiddiesAccount._id,
       parent:         user._id,
@@ -490,9 +448,7 @@ router.post("/api/kiddies/register/manual", async (req, res) => {
       paymentMethod:  "cooperative",
     });
  
-    console.log(
-      `🕒 Kiddies manual registration pending: ₦${totalAmount} — ${user.email} → ${kiddiesAccount.accountID}`
-    );
+    console.log(`🕒 Kiddies manual registration pending: ₦${totalAmount} — ${user.email} → ${kiddiesAccount.accountID}`);
  
     return res.status(200).json({
       status:  true,
@@ -506,8 +462,108 @@ router.post("/api/kiddies/register/manual", async (req, res) => {
 });
  
  
-// Create a PENDING payment + transaction record for admin to confirm.
-// Mirrors the cooperative manual-deposit pattern.
+// ───────────────────────────────────────────────────────────────────
+// POST /api/kiddies/register/from-account
+// Pays registration fee + initial deposit from parent's coop account.
+// Marks registrationStatus = "paid" immediately.
+// ───────────────────────────────────────────────────────────────────
+router.post("/api/kiddies/register/from-account", async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ status: false, message: "Unauthorized" });
+    }
+ 
+    const user                  = req.user;
+    const { existingAccountId } = req.body;
+ 
+    if (!existingAccountId) {
+      return res.status(400).json({ status: false, message: "Account ID is required." });
+    }
+ 
+    const parentAccount = await Account.findOne({ ownerType: "User", ownerId: user._id });
+    if (!parentAccount) {
+      return res.status(404).json({ status: false, message: "Your cooperative account was not found." });
+    }
+ 
+    const kiddiesAccount = await KiddiesAccount.findOne({
+      _id:    existingAccountId,
+      parent: user._id,
+    }).populate("account");
+ 
+    if (!kiddiesAccount) {
+      return res.status(404).json({ status: false, message: "Kiddies account not found." });
+    }
+    if (kiddiesAccount.registrationStatus === "paid") {
+      return res.status(400).json({ status: false, message: "Registration already completed." });
+    }
+ 
+    const settings               = await Settings.getSettings();
+    const kiddiesRegistrationFee = settings.registrationFees.kiddiesRegistrationFee;
+    const initialDeposit         = Number(kiddiesAccount.initialDeposit || 10000);
+    const totalCharge            = kiddiesRegistrationFee + initialDeposit;
+ 
+    if ((parentAccount.balance || 0) < totalCharge) {
+      return res.status(400).json({
+        status:  false,
+        message: `Insufficient balance. ₦${totalCharge.toLocaleString()} required (₦${kiddiesRegistrationFee.toLocaleString()} fee + ₦${initialDeposit.toLocaleString()} deposit). Your balance is ₦${parentAccount.balance.toLocaleString()}.`,
+      });
+    }
+ 
+    const reference = `KD-REG-ACCT-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+ 
+    parentAccount.balance -= totalCharge;
+    await parentAccount.save();
+ 
+    await Transaction.create({
+      user:        user._id,
+      type:        "withdrawal",
+      amount:      totalCharge,
+      status:      "successful",
+      description: `Kiddies Account Registration — ${kiddiesAccount.childFirstName} ${kiddiesAccount.childLastName} (${kiddiesAccount.accountID})`,
+      reference,
+      method:      "Internal Transfer",
+    });
+ 
+    const kiddiesLinkedAccount = kiddiesAccount.account;
+    if (kiddiesLinkedAccount) {
+      kiddiesLinkedAccount.balance += initialDeposit;
+      await kiddiesLinkedAccount.save();
+ 
+      await KiddiesTransaction.create({
+        kiddiesAccount: kiddiesAccount._id,
+        parent:         user._id,
+        type:           "deposit",
+        amount:         initialDeposit,
+        balanceAfter:   kiddiesLinkedAccount.balance,
+        description:    `Initial Deposit — Registration via Parent Cooperative Account`,
+        reference,
+        status:         "completed",
+        paymentMethod:  "cooperative",
+      });
+    }
+ 
+    kiddiesAccount.registrationStatus = "paid";
+    await kiddiesAccount.save();
+ 
+    console.log(`✅ Kiddies registration via parent account: ₦${totalCharge} | ${user.email} → ${kiddiesAccount.accountID} | Ref: ${reference}`);
+ 
+    return res.status(200).json({
+      status:           true,
+      message:          `Registration complete! ${kiddiesAccount.childFirstName}'s account is now pending admin approval.`,
+      newParentBalance: parentAccount.balance,
+    });
+ 
+  } catch (err) {
+    console.error("Kiddies registration via account error:", err);
+    return res.status(500).json({ status: false, message: "Server error. Please try again." });
+  }
+});
+ 
+ 
+// ───────────────────────────────────────────────────────────────────
+// POST /api/kiddies/deposit/manual
+// Pending top-up deposit via manual bank transfer.
+// KiddiesPayment paymentType = "deposit".
 // ───────────────────────────────────────────────────────────────────
 router.post("/api/kiddies/deposit/manual", async (req, res) => {
   try {
@@ -519,7 +575,6 @@ router.post("/api/kiddies/deposit/manual", async (req, res) => {
     const { kiddiesAccountId, amount, payerName } = req.body;
     const depositAmount = Number(amount);
  
-    // ── Validate inputs ───────────────────────────────────────────
     if (!kiddiesAccountId) {
       return res.status(400).json({ status: false, message: "Kiddies account is required." });
     }
@@ -527,7 +582,6 @@ router.post("/api/kiddies/deposit/manual", async (req, res) => {
       return res.status(400).json({ status: false, message: "Minimum deposit is ₦1,000." });
     }
  
-    // ── Verify ownership ──────────────────────────────────────────
     const kiddiesAccount = await KiddiesAccount.findOne({
       _id:    kiddiesAccountId,
       parent: user._id,
@@ -538,29 +592,25 @@ router.post("/api/kiddies/deposit/manual", async (req, res) => {
     }
     if (kiddiesAccount.registrationStatus !== "paid") {
       return res.status(400).json({
-        status: false,
+        status:  false,
         message: "Account registration is not yet completed. Please pay the registration fee first.",
       });
     }
  
     const reference = `KD-MANUAL-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
  
-    // ── Pending payment record ────────────────────────────────────
-    await Payment.create({
-      user:      user._id,
-      email:     user.email,
-      amount:    depositAmount,
+    await KiddiesPayment.create({
+      kiddiesAccount:   kiddiesAccount._id,
+      parent:           user._id,
+      email:            user.email,
+      amount:           depositAmount,
       reference,
-      payeeName: payerName?.trim() || null,
-      status:    "pending",
-      meta: {
-        type:             "kiddies_deposit",
-        kiddiesAccountId: kiddiesAccount._id,
-        method:           "manual",
-      },
+      payeeName:        payerName?.trim() || null,
+      paymentType:      "deposit",
+      status:           "pending",
+      paystackResponse: null,
     });
  
-    // Kiddies transaction — pending, kiddies schema
     await KiddiesTransaction.create({
       kiddiesAccount: kiddiesAccount._id,
       parent:         user._id,
@@ -573,13 +623,11 @@ router.post("/api/kiddies/deposit/manual", async (req, res) => {
       paymentMethod:  "cooperative",
     });
  
-    console.log(
-      `🕒 Kiddies manual deposit pending: ₦${depositAmount} — ${user.email} → ${kiddiesAccount.accountID}`
-    );
+    console.log(`🕒 Kiddies manual deposit pending: ₦${depositAmount} — ${user.email} → ${kiddiesAccount.accountID}`);
  
     return res.status(200).json({
       status:  true,
-      message: "Deposit submitted successfully. It will be credited to your child's account after admin confirmation.",
+      message: "Deposit submitted. It will be credited to your child's account after admin confirmation.",
     });
  
   } catch (err) {
@@ -591,10 +639,11 @@ router.post("/api/kiddies/deposit/manual", async (req, res) => {
  
 // ───────────────────────────────────────────────────────────────────
 // POST /api/kiddies/deposit/from-account
-// Instantly debit the parent's cooperative account and credit the
-// child's kiddies account.
-//   • Parent side  → Transaction        (existing cooperative schema)
-//   • Kiddies side → KiddiesTransaction (kiddies-specific schema)
+// Instantly debits parent's coop account and credits the child's
+// kiddies account. No KiddiesPayment record needed — this is an
+// internal transfer, not a payment gateway event.
+//   Parent side  → Transaction        (cooperative schema)
+//   Kiddies side → KiddiesTransaction (kiddies schema)
 // ───────────────────────────────────────────────────────────────────
 router.post("/api/kiddies/deposit/from-account", async (req, res) => {
   try {
@@ -606,7 +655,6 @@ router.post("/api/kiddies/deposit/from-account", async (req, res) => {
     const { kiddiesAccountId, amount } = req.body;
     const depositAmount = Number(amount);
  
-    // ── Validate inputs ───────────────────────────────────────────
     if (!kiddiesAccountId) {
       return res.status(400).json({ status: false, message: "Kiddies account is required." });
     }
@@ -614,7 +662,6 @@ router.post("/api/kiddies/deposit/from-account", async (req, res) => {
       return res.status(400).json({ status: false, message: "Minimum deposit is ₦1,000." });
     }
  
-    // ── 1. Fetch the parent's main cooperative account ────────────
     const parentAccount = await Account.findOne({ ownerType: "User", ownerId: user._id });
     if (!parentAccount) {
       return res.status(404).json({ status: false, message: "Your cooperative account was not found." });
@@ -622,11 +669,10 @@ router.post("/api/kiddies/deposit/from-account", async (req, res) => {
     if ((parentAccount.balance || 0) < depositAmount) {
       return res.status(400).json({
         status:  false,
-        message: `Insufficient balance. Your account balance is ₦${parentAccount.balance.toLocaleString()} but ₦${depositAmount.toLocaleString()} is required.`,
+        message: `Insufficient balance. Your balance is ₦${parentAccount.balance.toLocaleString()} but ₦${depositAmount.toLocaleString()} is required.`,
       });
     }
  
-    // ── 2. Fetch and verify the kiddies account ───────────────────
     const kiddiesAccount = await KiddiesAccount.findOne({
       _id:    kiddiesAccountId,
       parent: user._id,
@@ -652,11 +698,10 @@ router.post("/api/kiddies/deposit/from-account", async (req, res) => {
  
     const reference = `KD-ACCT-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
  
-    // ── 3. Debit parent's cooperative account ────────────────────
+    // Debit parent
     parentAccount.balance -= depositAmount;
     await parentAccount.save();
  
-    // Parent transaction — uses the cooperative Transaction schema
     await Transaction.create({
       user:        user._id,
       type:        "withdrawal",
@@ -667,11 +712,10 @@ router.post("/api/kiddies/deposit/from-account", async (req, res) => {
       method:      "Internal Transfer",
     });
  
-    // ── 4. Credit kiddies linked account ─────────────────────────
+    // Credit kiddies
     kiddiesLinkedAccount.balance += depositAmount;
     await kiddiesLinkedAccount.save();
  
-    // Kiddies transaction — uses the KiddiesTransaction schema
     await KiddiesTransaction.create({
       kiddiesAccount: kiddiesAccount._id,
       parent:         user._id,
@@ -684,13 +728,11 @@ router.post("/api/kiddies/deposit/from-account", async (req, res) => {
       paymentMethod:  "cooperative",
     });
  
-    console.log(
-      `✅ Kiddies internal transfer: ₦${depositAmount} | ${user.email} → ${kiddiesAccount.accountID} | Ref: ${reference}`
-    );
+    console.log(`✅ Kiddies internal transfer: ₦${depositAmount} | ${user.email} → ${kiddiesAccount.accountID} | Ref: ${reference}`);
  
     return res.status(200).json({
       status:           true,
-      message:          `₦${depositAmount.toLocaleString()} has been successfully transferred to ${kiddiesAccount.childFirstName}'s account.`,
+      message:          `₦${depositAmount.toLocaleString()} successfully transferred to ${kiddiesAccount.childFirstName}'s account.`,
       newParentBalance: parentAccount.balance,
     });
  
@@ -700,115 +742,6 @@ router.post("/api/kiddies/deposit/from-account", async (req, res) => {
   }
 });
  
- 
-// ───────────────────────────────────────────────────────────────────
-// POST /api/kiddies/register/from-account
-// Pay the registration fee + initial deposit from the parent's
-// cooperative account balance. Marks registrationStatus = "paid"
-// immediately; account still awaits admin approval.
-// ───────────────────────────────────────────────────────────────────
-router.post("/api/kiddies/register/from-account", async (req, res) => {
-  try {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ status: false, message: "Unauthorized" });
-    }
- 
-    const user                = req.user;
-    const { existingAccountId } = req.body;
- 
-    if (!existingAccountId) {
-      return res.status(400).json({ status: false, message: "Account ID is required." });
-    }
- 
-    // ── 1. Fetch parent's cooperative account ─────────────────────
-    const parentAccount = await Account.findOne({ ownerType: "User", ownerId: user._id });
-    if (!parentAccount) {
-      return res.status(404).json({ status: false, message: "Your cooperative account was not found." });
-    }
- 
-    // ── 2. Fetch and validate the kiddies account ─────────────────
-    const kiddiesAccount = await KiddiesAccount.findOne({
-      _id:    existingAccountId,
-      parent: user._id,
-    }).populate("account");
- 
-    if (!kiddiesAccount) {
-      return res.status(404).json({ status: false, message: "Kiddies account not found." });
-    }
-    if (kiddiesAccount.registrationStatus === "paid") {
-      return res.status(400).json({ status: false, message: "Registration has already been completed for this account." });
-    }
- 
-    // ── 3. Calculate total charge ─────────────────────────────────
-    const settings               = await Settings.getSettings();
-    const kiddiesRegistrationFee = settings.registrationFees.kiddiesRegistrationFee;
-    const initialDeposit         = Number(kiddiesAccount.initialDeposit || 10000);
-    const totalCharge            = kiddiesRegistrationFee + initialDeposit;
- 
-    if ((parentAccount.balance || 0) < totalCharge) {
-      return res.status(400).json({
-        status:  false,
-        message: `Insufficient balance. ₦${totalCharge.toLocaleString()} is required (₦${kiddiesRegistrationFee.toLocaleString()} fee + ₦${initialDeposit.toLocaleString()} deposit). Your balance is ₦${parentAccount.balance.toLocaleString()}.`,
-      });
-    }
- 
-    const reference = `KD-REG-ACCT-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
- 
-    // ── 4. Debit parent's cooperative account (full charge) ───────
-    parentAccount.balance -= totalCharge;
-    await parentAccount.save();
- 
-    // Parent transaction — cooperative schema (withdrawal)
-    await Transaction.create({
-      user:        user._id,
-      type:        "withdrawal",
-      amount:      totalCharge,
-      status:      "successful",
-      description: `Kiddies Account Registration — ${kiddiesAccount.childFirstName} ${kiddiesAccount.childLastName} (${kiddiesAccount.accountID})`,
-      reference,
-      method:      "Internal Transfer",
-    });
- 
-    // ── 5. Credit kiddies linked account with initial deposit only ─
-    //       (registration fee is a cost, not deposited into the account)
-    const kiddiesLinkedAccount = kiddiesAccount.account;
-    if (kiddiesLinkedAccount) {
-      kiddiesLinkedAccount.balance += initialDeposit;
-      await kiddiesLinkedAccount.save();
- 
-      // Kiddies transaction — kiddies schema (deposit)
-      await KiddiesTransaction.create({
-        kiddiesAccount: kiddiesAccount._id,
-        parent:         user._id,
-        type:           "deposit",
-        amount:         initialDeposit,
-        balanceAfter:   kiddiesLinkedAccount.balance,
-        description:    `Initial Deposit — Registration via Parent Cooperative Account`,
-        reference,
-        status:         "completed",
-        paymentMethod:  "cooperative",
-      });
-    }
- 
-    // ── 6. Mark registration as paid ──────────────────────────────
-    kiddiesAccount.registrationStatus = "paid";
-    await kiddiesAccount.save();
- 
-    console.log(
-      `✅ Kiddies registration via parent account: ₦${totalCharge} | ${user.email} → ${kiddiesAccount.accountID} | Ref: ${reference}`
-    );
- 
-    return res.status(200).json({
-      status:           true,
-      message:          `Registration complete! ${kiddiesAccount.childFirstName}'s account is now pending admin approval.`,
-      newParentBalance: parentAccount.balance,
-    });
- 
-  } catch (err) {
-    console.error("Kiddies registration via account error:", err);
-    return res.status(500).json({ status: false, message: "Server error. Please try again." });
-  }
-});
 
 // ══════════════════════════════════════════════════════════════════════════════
 // GET /kiddies/payment/verify  — Paystack callback for kiddies registration
