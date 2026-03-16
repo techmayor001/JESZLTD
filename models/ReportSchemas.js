@@ -533,6 +533,7 @@ const adminActionLogSchema = new mongoose.Schema(
         "roi_distribute",
         "extra_charge_add",
         "extra_charge_waive",
+        "kiddies_deposit_approve",
         // System
         "role_create",
         "role_edit",

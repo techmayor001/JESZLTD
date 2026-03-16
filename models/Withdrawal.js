@@ -7,6 +7,7 @@ const withdrawalSchema = new mongoose.Schema({
     required: true,
   },
 
+  /* ── Gross amount the member requested — full amount leaves the account immediately ── */
   amount: {
     type: Number,
     required: true,
@@ -36,13 +37,71 @@ const withdrawalSchema = new mongoose.Schema({
     trim: true,
   },
 
+  /*
+   * "regular"  — regular withdrawal (Dec 1–10 window, no fee)
+   * "ondemand" — on-demand withdrawal (anytime, max 2/year, fee applies, max 50% of balance)
+   */
   type: {
     type: String,
-    enum: ["normal", "forceful"],
-    default: "normal",
+    enum: ["regular", "ondemand", "child-withdrawal"],
+    default: "regular",
   },
 
-  
+  /* ══════════════════════════════════════════════════════════════════════════
+     ON-DEMAND FEE FIELDS
+     Admin visibility:
+       amount        — gross requested (full balance debited)
+       penaltyRate   — % from MemberType.forceWithdrawalPenalty
+       penaltyAmount — ₦ fee charged (gross × penaltyRate / 100)
+       netAmount     — ₦ actually disbursed to member (gross − fee)
+  ══════════════════════════════════════════════════════════════════════════ */
+
+  /** Penalty % rate (from MemberType). 0 for normal withdrawals. */
+  penaltyRate: {
+    type: Number,
+    default: 0,
+  },
+
+  /** ₦ fee charged. 0 for normal withdrawals. */
+  penaltyAmount: {
+    type: Number,
+    default: 0,
+  },
+
+  /** ₦ disbursed to the member (gross − fee). Equals gross for normal withdrawals. */
+  netAmount: {
+    type: Number,
+    default: 0,
+  },
+
+  /**
+   * "immediate" — single payout, credited immediately (always the case for on-demand
+   *               since amount is capped at 50% of balance).
+   * "split"     — retained for legacy/edge-case records only.
+   */
+  payoutType: {
+    type: String,
+    enum: ["immediate", "split"],
+    default: "immediate",
+  },
+
+  /** Phase 1 net amount disbursed (= netAmount for immediate; first tranche for split). */
+  phase1Amount: {
+    type: Number,
+    default: 0,
+  },
+
+  /** Phase 2 net amount disbursed within 30 days. Always 0 for on-demand (50% cap). */
+  phase2Amount: {
+    type: Number,
+    default: 0,
+  },
+
+  /** true when this withdrawal triggered account deactivation (balance dropped below ₦10,000) */
+  triggeredDeactivation: {
+    type: Boolean,
+    default: false,
+  },
 
   status: {
     type: String,

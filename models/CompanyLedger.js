@@ -6,7 +6,10 @@ const companyLedgerSchema = new mongoose.Schema({
     type: String,
     enum: [
       "deposit",
+      "kiddies_deposit_approve",
       "withdrawal",
+      "foreced_withdrawal",   // legacy — kept so old records still validate
+      "forced_withdrawal",    // correct spelling — used by all new code
       "loan_disbursement",
       "loan_repayment",
       "registration_fee",
@@ -15,53 +18,53 @@ const companyLedgerSchema = new mongoose.Schema({
       "manual_credit",
       "manual_debit",
       "external_income",
-      "overpayment_refund"
+      "overpayment_refund",
     ],
-    required: true
+    required: true,
   },
 
   amount: {
     type: Number,
-    required: true
+    required: true,
   },
 
   direction: {
     type: String,
     enum: ["in", "out"],
-    required: true
+    required: true,
   },
 
   relatedUser: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
+    ref: "User",
   },
 
   relatedLoan: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Loan"
+    ref: "Loan",
   },
 
   relatedTransaction: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Transaction"
+    ref: "Transaction",
   },
 
   description: String,
 
   recordedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Admin"
+    ref: "User",   // was "Admin" — changed to "User" since admins are Users in this system
   },
 
   meta: {
-    type: Object
+    type: Object,
   },
 
   createdAt: {
     type: Date,
     default: Date.now,
-    index: true
-  }
+    index: true,
+  },
 
 });
 

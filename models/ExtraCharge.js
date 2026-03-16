@@ -37,7 +37,11 @@ const extraChargeSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "paid"],
+      enum: [
+        "pending",    // charge recorded but not yet collected
+        "paid",       // charge collected
+        "reversed",   // charge was paid but then reversed (e.g. withdrawal rejected)
+      ],
       default: "pending",
     },
 
@@ -48,6 +52,20 @@ const extraChargeSchema = new mongoose.Schema(
 
     paidAt: {
       type: Date,
+    },
+
+    /* Populated when status is set to "reversed" */
+    reversedAt: {
+      type: Date,
+    },
+
+    reversedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    reversalReason: {
+      type: String,
     },
   },
   { timestamps: true }

@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiddies Deposit Management - Club De Stars Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --kiddies: #8b5cf6;
+            --kiddies-light: #a78bfa;
+            --sidebar-width: 280px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #ede9fe 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white; z-index: 1040; transition: all 0.3s;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(30,58,138,0.15);
+            transform: translateX(0);
+        }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.1); }
+        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .logo-box { width: 45px; height: 45px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--primary); font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; }
+        .sidebar-title { font-size: 1.1rem; line-height: 1.2; }
+        .admin-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(239,68,68,0.2); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(239,68,68,0.3); font-weight: 600; font-size: 0.8rem; margin-top: 8px; }
+        .sidebar-menu { padding: 1rem 0; }
+        .sidebar-menu a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 0.875rem 1.5rem; display: flex; align-items: center; transition: all 0.3s; border-left: 3px solid transparent; font-weight: 500; font-size: 0.95rem; }
+        .sidebar-menu a:hover { background: rgba(255,255,255,0.1); color: white; border-left-color: white; }
+        .sidebar-menu a.active { background: rgba(255,255,255,0.15); color: white; border-left-color: white; }
+        .sidebar-menu a i { width: 24px; margin-right: 12px; font-size: 1.1rem; flex-shrink: 0; }
+
+        /* ── Top Navbar ── */
+        .top-navbar {
+            position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 70px;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30,58,138,0.08); z-index: 1030;
+            display: flex; align-items: center; padding: 0 1.5rem; transition: all 0.3s;
+            border-bottom: 1px solid rgba(30,58,138,0.1);
+        }
+
+        /* ── Main Content ── */
+        .main-content { margin-left: var(--sidebar-width); margin-top: 70px; padding: 1.5rem; min-height: calc(100vh - 70px); transition: all 0.3s; }
+
+        /* ── Page Header ── */
+        .page-header {
+            background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #8b5cf6 100%);
+            color: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem;
+            box-shadow: 0 15px 40px rgba(109,40,217,0.3); position: relative; overflow: hidden;
+        }
+        .page-header::before { content: ''; position: absolute; top: -50%; right: -20%; width: 400px; height: 400px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+        .page-header::after { content: '🧒'; position: absolute; right: 2rem; bottom: -10px; font-size: 5rem; opacity: 0.15; }
+
+        /* ── Stats Cards ── */
+        .stats-card {
+            background: white; border-radius: 16px; padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30,58,138,0.08); transition: all 0.3s;
+            border: 2px solid transparent; height: 100%; position: relative; overflow: hidden;
+        }
+        .stats-card::before { content: ''; position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: rgba(139,92,246,0.04); border-radius: 0 16px 0 100%; }
+        .stats-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(139,92,246,0.15); border-color: var(--kiddies); }
+        .stats-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1rem; }
+        .stats-value { font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .stats-label { color: var(--secondary); font-size: 0.9rem; font-weight: 500; }
+
+        /* ── Card ── */
+        .card { border: none; border-radius: 16px; box-shadow: 0 8px 20px rgba(30,58,138,0.08); background: white; border: 1px solid rgba(30,58,138,0.05); }
+        .card-header { background: linear-gradient(135deg, rgba(139,92,246,0.04) 0%, rgba(167,139,250,0.04) 100%); border-bottom: 2px solid rgba(139,92,246,0.12); padding: 1.25rem; border-radius: 16px 16px 0 0 !important; }
+
+        /* ── Status Badges ── */
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-pending  { background: rgba(245,158,11,0.1);  color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
+        .status-success  { background: rgba(16,185,129,0.1);  color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+        .status-approved { background: rgba(16,185,129,0.1);  color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+        .status-failed   { background: rgba(239,68,68,0.1);   color: var(--danger);  border: 1px solid rgba(239,68,68,0.3); }
+        .status-rejected { background: rgba(239,68,68,0.1);   color: var(--danger);  border: 1px solid rgba(239,68,68,0.3); }
+
+        /* ── Action Buttons ── */
+        .action-btn { padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; transition: all 0.3s; border: none; cursor: pointer; }
+        .btn-approve { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+        .btn-approve:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
+        .btn-reject  { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; }
+        .btn-reject:hover  { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239,68,68,0.3); }
+        .btn-view    { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; }
+        .btn-view:hover    { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(139,92,246,0.3); }
+
+        /* ── Filter Section ── */
+        .filter-section { background: white; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(30,58,138,0.06); }
+        .filter-btn { padding: 8px 16px; border-radius: 8px; border: 2px solid rgba(139,92,246,0.15); background: white; color: var(--kiddies); font-weight: 600; transition: all 0.3s; cursor: pointer; }
+        .filter-btn:hover, .filter-btn.active { background: var(--kiddies); color: white; border-color: var(--kiddies); }
+
+        /* ── Table ── */
+        .table-responsive { border-radius: 0 0 16px 16px; overflow: hidden; }
+        .table { margin: 0; }
+        .table thead { background: linear-gradient(135deg, rgba(139,92,246,0.05) 0%, rgba(167,139,250,0.05) 100%); }
+        .table thead th { border: none; padding: 1rem; font-weight: 600; color: var(--kiddies); white-space: nowrap; }
+        .table tbody td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid rgba(139,92,246,0.05); }
+        .table tbody tr:last-child td { border-bottom: none; }
+        .table tbody tr:hover { background: rgba(139,92,246,0.02); }
+
+        /* ── Child Avatar ── */
+        .child-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; flex-shrink: 0; }
+
+        /* ── Receipt ── */
+        .receipt-container { max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border: 2px solid #e5e7eb; }
+        .receipt-header { text-align: center; border-bottom: 3px solid var(--kiddies); padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+        .receipt-logo { width: 80px; height: 80px; background: linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; margin: 0 auto 1rem; }
+        .receipt-title { font-size: 1.8rem; font-weight: bold; color: var(--kiddies); margin-bottom: 0.5rem; }
+        .receipt-subtitle { color: var(--secondary); font-size: 0.9rem; }
+        .receipt-section { margin-bottom: 1.5rem; }
+        .receipt-section-title { font-weight: bold; color: var(--kiddies); border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .receipt-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed #e5e7eb; }
+        .receipt-row:last-child { border-bottom: none; }
+        .receipt-amount { background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border: 2px solid var(--kiddies); border-radius: 10px; padding: 1rem; text-align: center; margin: 1.5rem 0; }
+        .receipt-amount-value { font-size: 2.5rem; font-weight: bold; color: var(--kiddies); }
+        .receipt-footer { text-align: center; border-top: 3px solid var(--kiddies); padding-top: 1.5rem; margin-top: 2rem; }
+        .receipt-stamp { display: inline-block; border: 3px solid var(--success); color: var(--success); padding: 0.5rem 1.5rem; border-radius: 10px; font-weight: bold; transform: rotate(-5deg); margin: 1rem 0; }
+
+        /* ── Alert Modal ── */
+        #alertModal .modal-content { border: none; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(139,92,246,0.2); }
+        #alertModal .modal-header { padding: 1.25rem 1.5rem; border-bottom: none; }
+        #alertModal .modal-body { padding: 1.5rem; text-align: center; }
+        #alertModal .alert-icon-wrapper { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; }
+        #alertModal .modal-footer { border-top: none; padding: 0 1.5rem 1.5rem; justify-content: center; }
+
+        .powered-by { position: fixed; bottom: 15px; right: 15px; background: white; padding: 10px 16px; border-radius: 25px; box-shadow: 0 4px 15px rgba(30,58,138,0.15); font-size: 0.8rem; font-weight: 600; color: var(--primary); z-index: 1000; }
+
+        /* ── Responsive ── */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .top-navbar { left: 0; }
+            .main-content { margin-left: 0; padding: 1rem; }
+            .table thead { display: none; }
+            .table tbody tr { display: block; margin-bottom: 1rem; border: 2px solid rgba(139,92,246,0.1); border-radius: 12px; overflow: hidden; background: white; }
+            .table tbody td { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid rgba(139,92,246,0.05); }
+            .table tbody td:last-child { border-bottom: none; }
+            .table tbody td::before { content: attr(data-label); font-weight: 600; color: var(--kiddies); margin-right: 1rem; }
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printReceipt, #printReceipt * { visibility: visible; }
+            #printReceipt { position: absolute; left: 0; top: 0; width: 100%; }
+            .sidebar, .top-navbar, .powered-by, .no-print { display: none !important; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-box">C</div>
+                <div>
+                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform:uppercase;">Club De Stars</h5>
+                    <small class="opacity-75" style="font-size:0.75rem;">ADMIN PANEL</small>
+                </div>
+            </div>
+            <div class="admin-badge"><i class="fas fa-shield-alt"></i><span>SUPER ADMIN</span></div>
+        </div>
+        <div class="sidebar-menu">
+            <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
+            <a href="/admin/kiddies-accounts" class="active"><i class="fas fa-baby"></i> Kiddies Accounts</a>
+            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
+            <a href="/admin/kiddies-deposits" class="active"><i class="fas fa-piggy-bank"></i> Kiddies Deposits</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
+            <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
+            <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
+            <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.5rem;" onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+        <div class="flex-grow-1 d-none d-lg-block">
+            <h5 class="mb-0 fw-bold" style="color:var(--kiddies)">Kiddies Deposit Management</h5>
+            <small class="text-muted">Review and approve kiddies account deposits</small>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div class="badge bg-light text-dark">
+                <i class="fas fa-calendar me-1"></i>
+                <span id="currentDate"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <!-- Page Header -->
+        <div class="page-header position-relative">
+            <div class="row align-items-center position-relative" style="z-index:1;">
+                <div class="col-md-8">
+                    <h2 class="mb-2 fw-bold"><i class="fas fa-piggy-bank me-3"></i>Kiddies Deposit Management</h2>
+                    <p class="mb-0 opacity-90">Monitor, review and approve deposits into kiddies savings accounts</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-light" onclick="refreshData()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:white;">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="stats-value" style="color:var(--success);font-size:14px;">
+                        ₦<%= stats.totalDeposited.toLocaleString() %>
+                    </div>
+                    <div class="stats-label" style="font-size:12px;">Total Deposited</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stats-value" style="color:var(--warning);font-size:14px;">
+                        <%= stats.pendingCount %>
+                    </div>
+                    <div class="stats-label" style="font-size:12px;">Pending Deposits</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:white;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stats-value" style="color:var(--kiddies);font-size:14px;">
+                        <%= stats.approvedToday %>
+                    </div>
+                    <div class="stats-label" style="font-size:12px;">Approved Today</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;">
+                        <i class="fas fa-baby"></i>
+                    </div>
+                    <div class="stats-value" style="color:var(--primary);font-size:14px;">
+                        <%= stats.activeKiddiesAccounts %>
+                    </div>
+                    <div class="stats-label" style="font-size:12px;">Active Kiddies Accounts</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="filter-btn active" onclick="filterDeposits('all', event)">
+                            <i class="fas fa-list me-1"></i> All Deposits
+                        </button>
+                        <button class="filter-btn" onclick="filterDeposits('pending', event)">
+                            <i class="fas fa-clock me-1"></i> Pending
+                        </button>
+                        <button class="filter-btn" onclick="filterDeposits('success', event)">
+                            <i class="fas fa-check me-1"></i> Approved
+                        </button>
+                        <button class="filter-btn" onclick="filterDeposits('failed', event)">
+                            <i class="fas fa-times me-1"></i> Rejected
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-4 mt-3 mt-lg-0">
+                    <input type="text" class="form-control" id="searchDeposit"
+                        placeholder="Search by child name, parent, account ID or reference..."
+                        onkeyup="searchDeposits()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Deposits Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-list me-2" style="color:var(--kiddies);"></i>
+                    Kiddies Deposit Requests
+                </h5>
+                <button class="btn btn-sm btn-outline-secondary" onclick="exportDeposits()">
+                    <i class="fas fa-download me-1"></i>Export
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date / Time</th>
+                                <th>Child</th>
+                                <th>Parent</th>
+                                <th>Amount</th>
+                                <th>Payer</th>
+                                <th>Reference</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="depositsTableBody">
+                            <% if (deposits && deposits.length > 0) { %>
+                                <% deposits.forEach(deposit => { %>
+                                    <tr data-status="<%= deposit.status %>">
+                                        <td data-label="Date/Time">
+                                            <small class="fw-semibold"><%= deposit.date %></small><br>
+                                            <small class="text-muted"><%= deposit.time %></small>
+                                        </td>
+
+                                        <td data-label="Child">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="child-avatar">
+                                                    <%= deposit.childName.charAt(0).toUpperCase() %>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold"><%= deposit.childName %></div>
+                                                    <small class="text-muted"><%= deposit.accountID %></small>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td data-label="Parent">
+                                            <div class="fw-semibold"><%= deposit.parentName %></div>
+                                            <small class="text-muted"><%= deposit.parentEmail %></small>
+                                        </td>
+
+                                        <td data-label="Amount" class="fw-bold" style="color:var(--success);">
+                                            ₦<%= deposit.amount.toLocaleString() %>
+                                        </td>
+
+                                        <td data-label="Payer">
+                                            <small><%= deposit.payeeName || '—' %></small>
+                                        </td>
+
+                                        <td data-label="Reference">
+                                            <small class="text-muted"><%= deposit.reference %></small>
+                                        </td>
+
+                                        <td data-label="Status">
+                                            <span class="status-badge status-<%= deposit.status %>">
+                                                <%= deposit.status === 'success' ? 'Approved' : deposit.status.charAt(0).toUpperCase() + deposit.status.slice(1) %>
+                                            </span>
+                                        </td>
+
+                                        <td data-label="Actions">
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <% if (deposit.status === 'pending') { %>
+                                                    <button class="action-btn btn-approve" onclick="approveDeposit('<%= deposit.id %>')">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button class="action-btn btn-reject" onclick="rejectDeposit('<%= deposit.id %>')">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                <% } %>
+                                                <button class="action-btn btn-view" onclick="viewDepositDetails('<%= deposit.id %>')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <% if (deposit.status === 'success') { %>
+                                                    <button class="action-btn btn-view" onclick="printReceipt('<%= deposit.id %>')">
+                                                        <i class="fas fa-print"></i>
+                                                    </button>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">
+                                        <i class="fas fa-piggy-bank fa-2x mb-2 d-block opacity-25"></i>
+                                        No kiddies deposit requests found
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Powered By -->
+    <div class="powered-by">
+        <strong style="color:var(--primary);">Cloudbaam</strong> Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong>
+    </div>
+
+    <!-- ── Custom Alert Modal ── -->
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+            <div class="modal-content">
+                <div class="modal-header" id="alertModalHeader">
+                    <h5 class="modal-title fw-bold" id="alertModalLabel"></h5>
+                    <button type="button" class="btn-close" id="alertModalCloseBtn" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert-icon-wrapper" id="alertModalIconWrapper">
+                        <i id="alertModalIcon"></i>
+                    </div>
+                    <p class="mb-0 text-center" id="alertModalMessage" style="font-size:1rem;"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn px-4 fw-semibold" id="alertModalOkBtn" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Deposit Details Modal ── -->
+    <div class="modal fade" id="depositDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background:linear-gradient(135deg,#4c1d95,#8b5cf6);color:white;">
+                    <h5 class="modal-title"><i class="fas fa-file-invoice me-2"></i>Kiddies Deposit Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Deposit Info -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100" style="background:linear-gradient(135deg,rgba(139,92,246,0.03),rgba(167,139,250,0.03));border:2px solid rgba(139,92,246,0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color:var(--kiddies);"><i class="fas fa-info-circle me-2"></i>Deposit Information</h6>
+                                    <div class="mb-3"><small class="text-muted d-block mb-1">Reference Number</small><strong id="detailReference">—</strong></div>
+                                    <div class="mb-3"><small class="text-muted d-block mb-1">Date & Time</small><strong id="detailDateTime">—</strong></div>
+                                    <div class="mb-3"><small class="text-muted d-block mb-1">Payment Type</small><strong id="detailPaymentType">—</strong></div>
+                                    <div class="mb-0"><small class="text-muted d-block mb-1">Status</small><span id="detailStatus" class="status-badge status-pending">Pending</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Child & Parent Info -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100" style="background:linear-gradient(135deg,rgba(16,185,129,0.03),rgba(5,150,105,0.03));border:2px solid rgba(16,185,129,0.1);">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3" style="color:var(--success);"><i class="fas fa-baby me-2"></i>Child & Parent</h6>
+                                    <div class="mb-3"><small class="text-muted d-block mb-1">Child Name</small><strong id="detailChildName">—</strong></div>
+                                    <div class="mb-3"><small class="text-muted d-block mb-1">Account ID</small><strong id="detailAccountID">—</strong></div>
+                                    <div class="mb-3"><small class="text-muted d-block mb-1">Parent Name</small><strong id="detailParentName">—</strong></div>
+                                    <div class="mb-3"><small class="text-muted d-block mb-1">Parent Email</small><strong id="detailEmail">—</strong></div>
+                                    <div class="mb-0"><small class="text-muted d-block mb-1">Payer Name</small><strong id="detailPayeeName">—</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Amount -->
+                        <div class="col-12 mb-4">
+                            <div class="card" style="background:linear-gradient(135deg,rgba(245,158,11,0.03),rgba(217,119,6,0.03));border:2px solid rgba(245,158,11,0.1);">
+                                <div class="card-body text-center">
+                                    <h6 class="fw-bold mb-3" style="color:var(--warning);"><i class="fas fa-money-bill-wave me-2"></i>Deposit Amount</h6>
+                                    <h2 class="mb-3 fw-bold" style="color:var(--kiddies);" id="detailAmount">₦0.00</h2>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block mb-1">Current Balance</small>
+                                            <strong id="detailCurrentBalance" style="color:var(--success);">—</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block mb-1">Balance After Approval</small>
+                                            <strong id="detailBalanceAfter" style="color:var(--kiddies);">—</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="approveBtn" onclick="approveFromModal()">
+                        <i class="fas fa-check me-2"></i>Approve Deposit
+                    </button>
+                    <button type="button" class="btn btn-danger" id="rejectBtn" onclick="rejectFromModal()">
+                        <i class="fas fa-times me-2"></i>Reject Deposit
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Approval Confirmation Modal ── -->
+    <div class="modal fade" id="approvalModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Approve Kiddies Deposit</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-info-circle me-2"></i>
+                        You are about to approve this deposit. The amount will be credited to the child's savings account.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Admin Notes (Optional)</label>
+                        <textarea class="form-control" id="approvalNotes" rows="3" placeholder="Add any notes about this approval..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="confirmApproval()">
+                        <i class="fas fa-check me-2"></i>Confirm Approval
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Rejection Modal ── -->
+    <div class="modal fade" id="rejectionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-times-circle me-2"></i>Reject Kiddies Deposit</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        You are about to reject this deposit. Please provide a reason.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Reason for Rejection <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="rejectionReason" rows="3" placeholder="Enter reason for rejection..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmRejection()">
+                        <i class="fas fa-times me-2"></i>Confirm Rejection
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Success Modal ── -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Success</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="fas fa-check-circle fa-5x text-success mb-3"></i>
+                    <h4 class="mb-3" id="successMessage">Deposit Approved Successfully!</h4>
+                    <p class="text-muted mb-0">The child's savings account has been updated.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="generateReceipt()" id="generateReceiptBtn">
+                        <i class="fas fa-receipt me-2"></i>Generate Receipt
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Printable Receipt ── -->
+    <div id="printReceipt" style="display:none;">
+        <div class="receipt-container">
+            <div class="receipt-header">
+                <div class="receipt-logo">🧒</div>
+                <div class="receipt-title">CLUB DE STARS</div>
+                <div class="receipt-subtitle">Kiddies Account — Official Deposit Receipt</div>
+                <div class="receipt-subtitle mt-2">
+                    <i class="fas fa-map-marker-alt me-1"></i>123 Business Avenue, Port Harcourt, Rivers State, Nigeria<br>
+                    <i class="fas fa-phone me-1"></i>+234 800 123 4567 |
+                    <i class="fas fa-envelope me-1"></i>info@clubdestars.com
+                </div>
+            </div>
+            <div class="receipt-section">
+                <div class="receipt-section-title">DEPOSIT INFORMATION</div>
+                <div class="receipt-row"><span>Reference Number:</span><span id="printReference">—</span></div>
+                <div class="receipt-row"><span>Date & Time:</span><span id="printDateTime">—</span></div>
+                <div class="receipt-row"><span>Payment Type:</span><span id="printPaymentType">—</span></div>
+                <div class="receipt-row"><span>Status:</span><span id="printStatus">Approved</span></div>
+            </div>
+            <div class="receipt-section">
+                <div class="receipt-section-title">CHILD ACCOUNT INFORMATION</div>
+                <div class="receipt-row"><span>Child Name:</span><span id="printChildName">—</span></div>
+                <div class="receipt-row"><span>Account ID:</span><span id="printAccountID">—</span></div>
+                <div class="receipt-row"><span>Parent Name:</span><span id="printParentName">—</span></div>
+                <div class="receipt-row"><span>Parent Email:</span><span id="printEmail">—</span></div>
+                <div class="receipt-row"><span>Payer Name:</span><span id="printPayeeName">—</span></div>
+            </div>
+            <div class="receipt-amount">
+                <div style="font-size:0.85rem;color:#6b7280;margin-bottom:4px;">DEPOSIT AMOUNT</div>
+                <div class="receipt-amount-value" id="printAmount">₦0.00</div>
+            </div>
+            <div class="receipt-section">
+                <div class="receipt-section-title">ACCOUNT SUMMARY</div>
+                <div class="receipt-row"><span>Previous Balance:</span><span id="printPrevBalance">—</span></div>
+                <div class="receipt-row"><span>Deposit Amount:</span><span id="printDepositAmount">—</span></div>
+                <div class="receipt-row"><span>New Balance:</span><span style="color:var(--kiddies);font-size:1.1rem;font-weight:bold;" id="printNewBalance">—</span></div>
+            </div>
+            <div class="receipt-footer">
+                <div class="receipt-stamp">VERIFIED & APPROVED</div>
+                <p style="font-size:0.8rem;color:var(--secondary);margin-top:1rem;">
+                    This is a computer-generated receipt and does not require a signature.<br>
+                    For inquiries, please contact us at support@clubdestars.com
+                </p>
+                <p style="font-size:0.7rem;color:var(--secondary);margin-top:1rem;">
+                    Generated on: <span id="printGeneratedDate"></span><br>
+                    Powered by <strong>JESZ LIMITED</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentDepositId = null;
+        const deposits = <%- JSON.stringify(deposits) %>;
+
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+        });
+
+        // ── Modal Helpers ──
+        function switchModal(fromId, toFn) {
+            const fromEl = document.getElementById(fromId);
+            const instance = bootstrap.Modal.getInstance(fromEl);
+            if (instance) {
+                fromEl.addEventListener('hidden.bs.modal', function handler() {
+                    fromEl.removeEventListener('hidden.bs.modal', handler);
+                    toFn();
+                });
+                instance.hide();
+            } else {
+                toFn();
+            }
+        }
+
+        function showAlert(message, type = 'info', title = null) {
+            const config = {
+                success: { headerBg:'bg-success', iconBg:'rgba(16,185,129,0.12)', iconColor:'#10b981', iconClass:'fas fa-check-circle',    btnClass:'btn-success', defaultTitle:'Success'     },
+                danger:  { headerBg:'bg-danger',  iconBg:'rgba(239,68,68,0.12)',  iconColor:'#ef4444', iconClass:'fas fa-times-circle',    btnClass:'btn-danger',  defaultTitle:'Error'       },
+                warning: { headerBg:'bg-warning', iconBg:'rgba(245,158,11,0.12)', iconColor:'#f59e0b', iconClass:'fas fa-exclamation-triangle', btnClass:'btn-warning', defaultTitle:'Warning' },
+                info:    { headerBg:'bg-primary', iconBg:'rgba(139,92,246,0.12)', iconColor:'#8b5cf6', iconClass:'fas fa-info-circle',      btnClass:'btn-primary', defaultTitle:'Information' }
+            };
+            const c = config[type] || config.info;
+            document.getElementById('alertModalHeader').className = `modal-header ${c.headerBg} text-white border-0`;
+            document.getElementById('alertModalCloseBtn').className = 'btn-close btn-close-white';
+            document.getElementById('alertModalLabel').textContent = title || c.defaultTitle;
+            const iconWrapper = document.getElementById('alertModalIconWrapper');
+            iconWrapper.style.background = c.iconBg;
+            const icon = document.getElementById('alertModalIcon');
+            icon.className = `${c.iconClass} fa-2x`;
+            icon.style.color = c.iconColor;
+            document.getElementById('alertModalMessage').textContent = message;
+            const okBtn = document.getElementById('alertModalOkBtn');
+            okBtn.className = `btn px-4 fw-semibold ${c.btnClass}`;
+            const openModal = document.querySelector('.modal.show');
+            if (openModal && openModal.id !== 'alertModal') {
+                switchModal(openModal.id, () => new bootstrap.Modal(document.getElementById('alertModal')).show());
+            } else {
+                new bootstrap.Modal(document.getElementById('alertModal')).show();
+            }
+        }
+
+        // ── Filter & Search ──
+        function filterDeposits(status, event) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            if (event) event.target.classList.add('active');
+            document.querySelectorAll('#depositsTableBody tr').forEach(row => {
+                if (status === 'all') { row.style.display = ''; return; }
+                row.style.display = row.getAttribute('data-status') === status ? '' : 'none';
+            });
+        }
+
+        function searchDeposits() {
+            const term = document.getElementById('searchDeposit').value.toLowerCase();
+            document.querySelectorAll('#depositsTableBody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+            });
+        }
+
+        // ── View Details ──
+        function viewDepositDetails(depositId) {
+            const deposit = deposits.find(d => d.id === depositId);
+            if (!deposit) return;
+            currentDepositId = depositId;
+
+            document.getElementById('detailReference').textContent   = deposit.reference;
+            document.getElementById('detailDateTime').textContent     = `${deposit.date} at ${deposit.time}`;
+            document.getElementById('detailPaymentType').textContent  = deposit.paymentType || 'Manual Deposit';
+            document.getElementById('detailChildName').textContent    = deposit.childName;
+            document.getElementById('detailAccountID').textContent    = deposit.accountID;
+            document.getElementById('detailParentName').textContent   = deposit.parentName;
+            document.getElementById('detailEmail').textContent        = deposit.parentEmail;
+            document.getElementById('detailPayeeName').textContent    = deposit.payeeName || '—';
+            document.getElementById('detailAmount').textContent       = `₦${deposit.amount.toLocaleString()}.00`;
+            document.getElementById('detailCurrentBalance').textContent = `₦${deposit.currentBalance.toLocaleString()}`;
+            document.getElementById('detailBalanceAfter').textContent  = `₦${(deposit.currentBalance + deposit.amount).toLocaleString()}`;
+
+            const statusBadge = document.getElementById('detailStatus');
+            statusBadge.className = `status-badge status-${deposit.status}`;
+            statusBadge.textContent = deposit.status === 'success' ? 'Approved' : deposit.status.charAt(0).toUpperCase() + deposit.status.slice(1);
+
+            const showActions = deposit.status === 'pending';
+            document.getElementById('approveBtn').style.display = showActions ? 'inline-block' : 'none';
+            document.getElementById('rejectBtn').style.display  = showActions ? 'inline-block' : 'none';
+
+            new bootstrap.Modal(document.getElementById('depositDetailsModal')).show();
+        }
+
+        // ── Approve ──
+        function approveDeposit(depositId) {
+            currentDepositId = depositId;
+            new bootstrap.Modal(document.getElementById('approvalModal')).show();
+        }
+
+        function approveFromModal() {
+            switchModal('depositDetailsModal', () => {
+                new bootstrap.Modal(document.getElementById('approvalModal')).show();
+            });
+        }
+
+        async function confirmApproval() {
+            const notes = document.getElementById('approvalNotes').value;
+            try {
+                const response = await fetch(`/admin/kiddies-deposits/${currentDepositId}/approve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes })
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    showAlert(result.message || 'Approval failed', 'danger', 'Approval Failed');
+                    return;
+                }
+
+                const deposit = deposits.find(d => d.id === currentDepositId);
+                if (deposit) {
+                    deposit.status = 'success';
+                    deposit.currentBalance = result.newBalance;
+                }
+
+                updateTableRow(currentDepositId, 'success');
+                document.getElementById('approvalNotes').value = '';
+                document.getElementById('successMessage').textContent = 'Deposit Approved Successfully!';
+                document.getElementById('generateReceiptBtn').style.display = 'inline-block';
+                switchModal('approvalModal', () => new bootstrap.Modal(document.getElementById('successModal')).show());
+
+            } catch (err) {
+                console.error(err);
+                showAlert('Network error while approving deposit. Please try again.', 'danger', 'Network Error');
+            }
+        }
+
+        // ── Reject ──
+        function rejectDeposit(depositId) {
+            currentDepositId = depositId;
+            new bootstrap.Modal(document.getElementById('rejectionModal')).show();
+        }
+
+        function rejectFromModal() {
+            switchModal('depositDetailsModal', () => {
+                new bootstrap.Modal(document.getElementById('rejectionModal')).show();
+            });
+        }
+
+        async function confirmRejection() {
+            const reason = document.getElementById('rejectionReason').value;
+            if (!reason.trim()) {
+                showAlert('Please provide a reason for rejection before proceeding.', 'warning', 'Reason Required');
+                return;
+            }
+            try {
+                const response = await fetch(`/admin/kiddies-deposits/${currentDepositId}/reject`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason })
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    showAlert(result.message || 'Rejection failed', 'danger', 'Rejection Failed');
+                    return;
+                }
+
+                const deposit = deposits.find(d => d.id === currentDepositId);
+                if (deposit) deposit.status = 'failed';
+
+                updateTableRow(currentDepositId, 'failed');
+                document.getElementById('rejectionReason').value = '';
+                document.getElementById('successMessage').textContent = 'Deposit Rejected Successfully';
+                document.getElementById('generateReceiptBtn').style.display = 'none';
+                switchModal('rejectionModal', () => new bootstrap.Modal(document.getElementById('successModal')).show());
+
+            } catch (err) {
+                console.error(err);
+                showAlert('Network error while rejecting deposit. Please try again.', 'danger', 'Network Error');
+            }
+        }
+
+        // ── Update Table Row ──
+        function updateTableRow(depositId, status) {
+            document.querySelectorAll('#depositsTableBody tr').forEach(row => {
+                const viewBtn = row.querySelector(`button[onclick*="viewDepositDetails('${depositId}')"]`);
+                if (!viewBtn) return;
+
+                row.setAttribute('data-status', status);
+                const statusCell = row.querySelector('[data-label="Status"]');
+                if (statusCell) {
+                    const label = status === 'success' ? 'Approved' : status.charAt(0).toUpperCase() + status.slice(1);
+                    statusCell.innerHTML = `<span class="status-badge status-${status}">${label}</span>`;
+                }
+                const actionsCell = row.querySelector('[data-label="Actions"]');
+                if (actionsCell) {
+                    let btns = `<button class="action-btn btn-view" onclick="viewDepositDetails('${depositId}')"><i class="fas fa-eye"></i></button>`;
+                    if (status === 'success') btns += `<button class="action-btn btn-view" onclick="printReceipt('${depositId}')"><i class="fas fa-print"></i></button>`;
+                    actionsCell.innerHTML = `<div class="d-flex gap-2 flex-wrap">${btns}</div>`;
+                }
+            });
+        }
+
+        // ── Receipt ──
+        function generateReceipt() {
+            const deposit = deposits.find(d => d.id === currentDepositId);
+            if (!deposit) return;
+
+            document.getElementById('printReference').textContent   = deposit.reference;
+            document.getElementById('printDateTime').textContent    = `${deposit.date} at ${deposit.time}`;
+            document.getElementById('printPaymentType').textContent = deposit.paymentType || 'Manual Deposit';
+            document.getElementById('printStatus').textContent      = 'Approved';
+            document.getElementById('printChildName').textContent   = deposit.childName;
+            document.getElementById('printAccountID').textContent   = deposit.accountID;
+            document.getElementById('printParentName').textContent  = deposit.parentName;
+            document.getElementById('printEmail').textContent       = deposit.parentEmail;
+            document.getElementById('printPayeeName').textContent   = deposit.payeeName || '—';
+            document.getElementById('printAmount').textContent      = `₦${deposit.amount.toLocaleString()}.00`;
+            document.getElementById('printDepositAmount').textContent = `₦${deposit.amount.toLocaleString()}.00`;
+            document.getElementById('printPrevBalance').textContent  = `₦${deposit.currentBalance.toLocaleString()}.00`;
+            document.getElementById('printNewBalance').textContent   = `₦${(deposit.currentBalance + deposit.amount).toLocaleString()}.00`;
+            document.getElementById('printGeneratedDate').textContent = new Date().toLocaleString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+
+            const successModalEl = document.getElementById('successModal');
+            const successInstance = bootstrap.Modal.getInstance(successModalEl);
+            const doPrint = () => {
+                const receipt = document.getElementById('printReceipt');
+                receipt.style.display = 'block';
+                window.print();
+                setTimeout(() => { receipt.style.display = 'none'; }, 500);
+            };
+            successInstance ? switchModal('successModal', doPrint) : doPrint();
+        }
+
+        function printReceipt(depositId) {
+            currentDepositId = depositId;
+            generateReceipt();
+        }
+
+        function refreshData() { window.location.reload(); }
+
+        function exportDeposits() {
+            showAlert('Export feature coming soon.', 'info', 'Export');
+        }
+    </script>
+
+    <script>
+        async function loadSidebarPendingCount() {
+            try {
+                const res = await fetch('/admin/pending-approvals-count');
+                const data = await res.json();
+                const badge = document.getElementById('sidebarPendingBadge');
+                if (!badge) return;
+                if (data.count > 0) { badge.style.display = 'inline-block'; badge.textContent = data.count; }
+                else { badge.style.display = 'none'; }
+            } catch (err) { console.error('Sidebar count error:', err); }
+        }
+        document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
+    </script>
+</body>
+</html>

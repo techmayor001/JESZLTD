@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overview | Club De Stars Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary:       #1e3a8a;
+            --primary-mid:   #1e40af;
+            --primary-light: #3b82f6;
+            --success:       #10b981;
+            --danger:        #ef4444;
+            --warning:       #f59e0b;
+            --purple:        #8b5cf6;
+            --cyan:          #06b6d4;
+            --pink:          #ec4899;
+            --sidebar-w:     280px;
+            --nav-h:         70px;
+            --radius-lg:     20px;
+            --radius-md:     14px;
+            --radius-sm:     10px;
+            --shadow-card:   0 4px 20px rgba(30,58,138,.08);
+            --shadow-hover:  0 12px 32px rgba(30,58,138,.16);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f4ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #1e293b;
+        }
+
+        /* ══════════ SIDEBAR ══════════ */
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0;
+            width: var(--sidebar-w);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 55%, #3b82f6 100%);
+            z-index: 1040; overflow-y: auto;
+            transition: transform .3s ease;
+            box-shadow: 4px 0 24px rgba(30,58,138,.18);
+            scrollbar-width: none;
+        }
+        .sidebar::-webkit-scrollbar { display: none; }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            background: rgba(0,0,0,.12);
+        }
+        .logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .logo-box {
+            width: 44px; height: 44px; background: white; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: var(--primary); font-size: 1.4rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,.2); flex-shrink: 0;
+        }
+        .sidebar-brand { font-size: 1rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: .05em; line-height: 1.2; }
+        .sidebar-brand small { font-size: .68rem; font-weight: 500; opacity: .65; display: block; letter-spacing: .08em; }
+        .role-pill {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 5px 11px; background: rgba(239,68,68,.22);
+            border-radius: 20px; border: 1px solid rgba(239,68,68,.35);
+            font-weight: 700; font-size: .73rem; color: #fca5a5;
+        }
+        .sidebar-nav { padding: .75rem 0 2rem; }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 12px;
+            padding: .78rem 1.5rem; color: rgba(255,255,255,.8);
+            text-decoration: none; font-weight: 500; font-size: .88rem;
+            border-left: 3px solid transparent; transition: all .2s;
+        }
+        .sidebar-nav a:hover  { background: rgba(255,255,255,.1); color: white; border-left-color: rgba(255,255,255,.5); }
+        .sidebar-nav a.active { background: rgba(255,255,255,.16); color: white; border-left-color: white; }
+        .sidebar-nav a i { width: 20px; font-size: 1rem; flex-shrink: 0; opacity: .9; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1035; }
+        .sidebar-overlay.show { display: block; }
+
+        /* ══════════ TOP NAVBAR ══════════ */
+        .topbar {
+            position: fixed; top: 0;
+            left: var(--sidebar-w); right: 0;
+            height: var(--nav-h);
+            background: rgba(255,255,255,.97);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(30,58,138,.09);
+            box-shadow: 0 2px 16px rgba(30,58,138,.07);
+            z-index: 1030;
+            display: flex; align-items: center;
+            padding: 0 1.75rem; gap: 1rem;
+        }
+        .topbar-title { font-weight: 800; font-size: 1.05rem; color: var(--primary); }
+        .topbar-sub   { font-size: .75rem; color: #94a3b8; margin-top: 1px; }
+
+        /* ══════════ MAIN CONTENT ══════════ */
+        .main {
+            margin-left: var(--sidebar-w);
+            margin-top: var(--nav-h);
+            padding: 1.75rem;
+            min-height: calc(100vh - var(--nav-h));
+        }
+
+        /* ══════════ HERO BANNER ══════════ */
+        .hero {
+            background: linear-gradient(130deg, #1e3a8a 0%, #1e40af 45%, #3b82f6 100%);
+            border-radius: var(--radius-lg);
+            padding: 1.875rem 2.25rem;
+            color: white;
+            position: relative; overflow: hidden;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 36px rgba(30,58,138,.28);
+        }
+        .hero::before {
+            content: '';
+            position: absolute; top: -70px; right: -50px;
+            width: 260px; height: 260px;
+            background: rgba(255,255,255,.07); border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero::after {
+            content: '';
+            position: absolute; bottom: -90px; right: 160px;
+            width: 180px; height: 180px;
+            background: rgba(255,255,255,.04); border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero-inner { position: relative; z-index: 1; }
+        .hero-date-pill {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 5px 13px; background: rgba(255,255,255,.16);
+            border: 1px solid rgba(255,255,255,.22); border-radius: 20px;
+            font-size: .75rem; font-weight: 600; margin-bottom: .875rem;
+        }
+        .hero h3 { font-weight: 800; font-size: 1.45rem; margin-bottom: .3rem; }
+        .hero p  { font-size: .88rem; opacity: .82; margin: 0; }
+        .hero-stats {
+            display: flex; flex-direction: column; align-items: flex-end; gap: .6rem;
+        }
+        .hero-portfolio {
+            background: rgba(255,255,255,.16);
+            border: 1px solid rgba(255,255,255,.22);
+            border-radius: 12px;
+            padding: .65rem 1.4rem;
+            text-align: center;
+        }
+        .hero-portfolio small { display: block; font-size: .67rem; opacity: .7; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 2px; }
+        .hero-portfolio strong { font-size: 1.4rem; font-weight: 800; }
+        .hero-badges { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: flex-end; }
+        .hero-badge {
+            padding: .35rem .9rem; border-radius: 8px;
+            font-size: .73rem; font-weight: 700;
+        }
+
+        /* ══════════ FILTER BAR ══════════ */
+        .filter-bar {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: .875rem 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-card);
+            display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+        }
+        .filter-label {
+            font-size: .72rem; font-weight: 800; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: .07em; flex-shrink: 0;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .period-btn {
+            padding: .38rem .9rem; border-radius: 7px; font-size: .78rem; font-weight: 600;
+            cursor: pointer; transition: all .18s;
+            background: transparent; border: 1.5px solid rgba(30,58,138,.13); color: #64748b;
+            white-space: nowrap;
+        }
+        .period-btn:hover  { background: rgba(30,58,138,.06); border-color: rgba(30,58,138,.28); color: var(--primary); }
+        .period-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter-divider { width: 1px; height: 22px; background: rgba(30,58,138,.11); flex-shrink: 0; }
+        .custom-range { display: flex; align-items: center; gap: .45rem; flex-wrap: wrap; }
+        .custom-range label { font-size: .72rem; font-weight: 700; color: #94a3b8; flex-shrink: 0; }
+        .date-input {
+            padding: .36rem .7rem; border-radius: 7px; font-size: .78rem; font-weight: 500;
+            border: 1.5px solid rgba(30,58,138,.13); color: #374151; background: white;
+            cursor: pointer; transition: border-color .15s;
+        }
+        .date-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,58,138,.1); }
+        .btn-apply {
+            padding: .38rem .9rem; border-radius: 7px; font-size: .78rem; font-weight: 700;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white; border: none; cursor: pointer; transition: all .18s;
+            white-space: nowrap;
+        }
+        .btn-apply:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30,58,138,.3); }
+        .period-pill {
+            margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 12px; background: rgba(30,58,138,.07);
+            border-radius: 20px; font-size: .75rem; font-weight: 700; color: var(--primary);
+            border: 1px solid rgba(30,58,138,.13); white-space: nowrap;
+        }
+
+        /* ══════════ KPI GRID (8 cards, 4 per row on desktop) ══════════ */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.1rem;
+            margin-bottom: 1.1rem;
+        }
+        .kpi-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 1.35rem 1.4rem;
+            box-shadow: var(--shadow-card);
+            transition: transform .26s, box-shadow .26s;
+            display: flex; flex-direction: column; gap: .3rem;
+        }
+        .kpi-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+        .kpi-icon {
+            width: 44px; height: 44px; border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; margin-bottom: .5rem; flex-shrink: 0;
+        }
+        .kpi-label { font-size: .68rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: .07em; }
+        .kpi-value { font-size: 1.35rem; font-weight: 900; color: #0f172a; line-height: 1.15; }
+        .kpi-sub   { display: inline-flex; align-items: center; gap: 4px; font-size: .7rem; font-weight: 700; padding: 3px 7px; border-radius: 6px; width: fit-content; }
+        .kpi-sub.up      { color: #059669; background: rgba(16,185,129,.1); }
+        .kpi-sub.down    { color: #dc2626; background: rgba(239,68,68,.1); }
+        .kpi-sub.neutral { color: #64748b; background: rgba(100,116,139,.1); }
+
+        /* ══════════ SECTION CARD ══════════ */
+        .s-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+        }
+        .s-head {
+            padding: 1rem 1.4rem;
+            border-bottom: 1px solid rgba(30,58,138,.07);
+            display: flex; align-items: center; justify-content: space-between;
+            gap: .75rem;
+        }
+        .s-head-title {
+            font-size: .88rem; font-weight: 800; color: var(--primary);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .s-head-icon {
+            width: 28px; height: 28px; border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .8rem;
+        }
+        .s-body { padding: 1.25rem 1.4rem; }
+
+        /* ══════════ METRIC ROW ══════════ */
+        .mrow {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: .6rem .4rem; border-radius: 8px; transition: background .15s;
+        }
+        .mrow:hover { background: rgba(30,58,138,.03); }
+        .mrow-left { display: flex; align-items: center; gap: .6rem; }
+        .mdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .mrow-label { font-size: .82rem; font-weight: 600; color: #374151; }
+        .mrow-sub   { font-size: .68rem; color: #9ca3af; }
+        .mrow-val   { font-size: .88rem; font-weight: 800; color: #0f172a; }
+
+        /* ══════════ PROGRESS ══════════ */
+        .prog-track { height: 5px; background: rgba(30,58,138,.08); border-radius: 3px; overflow: hidden; margin-top: .35rem; }
+        .prog-fill  { height: 100%; border-radius: 3px; }
+
+        /* ══════════ REVENUE ITEMS ══════════ */
+        .rev-row {
+            display: flex; align-items: center; gap: .7rem;
+            padding: .55rem 0; border-bottom: 1px solid rgba(30,58,138,.05);
+        }
+        .rev-row:last-child { border-bottom: none; }
+        .rev-dot  { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+        .rev-name { flex: 1; font-size: .8rem; font-weight: 600; color: #475569; }
+        .rev-pct  { font-size: .7rem; font-weight: 700; color: #94a3b8; min-width: 30px; text-align: right; }
+        .rev-amt  { font-size: .82rem; font-weight: 800; min-width: 85px; text-align: right; }
+
+        /* coloured progress bar strip at bottom of revenue card */
+        .rev-strip { display: flex; height: 4px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); overflow: hidden; }
+        .rev-strip-seg { height: 100%; }
+
+        /* ══════════ QUICK LINKS ══════════ */
+        .qlink {
+            display: flex; align-items: center; gap: .875rem;
+            padding: .72rem .75rem; border-radius: 10px;
+            text-decoration: none; color: inherit;
+            transition: all .18s; margin-bottom: .45rem;
+        }
+        .qlink:last-child { margin-bottom: 0; }
+        .qlink:hover { background: rgba(30,58,138,.04); transform: translateX(3px); }
+        .qlink-ico { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; }
+        .qlink-title { font-size: .83rem; font-weight: 700; color: var(--primary); }
+        .qlink-desc  { font-size: .7rem; color: #9ca3af; }
+        .qlink-badge { font-size: .68rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; margin-left: auto; flex-shrink: 0; }
+        .qlink-arrow { font-size: .65rem; color: #cbd5e1; flex-shrink: 0; }
+
+        /* ══════════ ACTIVITY FEED ══════════ */
+        .act-row {
+            display: flex; align-items: center; gap: .875rem;
+            padding: .75rem 0; border-bottom: 1px solid rgba(30,58,138,.05);
+        }
+        .act-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .act-ico { width: 35px; height: 35px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .84rem; flex-shrink: 0; }
+        .act-body { flex: 1; min-width: 0; }
+        .act-name  { font-size: .83rem; font-weight: 700; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .act-meta  { font-size: .7rem; color: #9ca3af; margin-top: 2px; display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
+        .act-status-tag { padding: 1px 6px; border-radius: 4px; font-size: .66rem; font-weight: 700; }
+        .act-amt { font-size: .88rem; font-weight: 800; flex-shrink: 0; }
+
+        /* ══════════ MINI TABLE ══════════ */
+        .mtable { width: 100%; border-collapse: collapse; }
+        .mtable th { font-size: .69rem; font-weight: 800; color: #9ca3af; text-transform: uppercase; letter-spacing: .07em; padding: .45rem .75rem; border: none; }
+        .mtable td { font-size: .82rem; padding: .65rem .75rem; border-bottom: 1px solid rgba(30,58,138,.05); vertical-align: middle; }
+        .mtable tbody tr:last-child td { border-bottom: none; }
+        .mtable tbody tr:hover td { background: rgba(30,58,138,.025); }
+        .m-ava { width: 29px; height: 29px; border-radius: 50%; background: linear-gradient(135deg, #1e3a8a, #3b82f6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: .63rem; flex-shrink: 0; }
+
+        /* ══════════ FINANCE GRID (2×2) ══════════ */
+        .fin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+        .fin-tile {
+            padding: .875rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .fin-tile-label { font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; margin-bottom: .2rem; }
+        .fin-tile-value { font-size: .95rem; font-weight: 900; }
+
+        /* ══════════ MEMBER DONUT ══════════ */
+        .donut-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: .75rem; }
+        .donut-legend { display: flex; flex-wrap: wrap; gap: .4rem .7rem; justify-content: center; margin-top: .5rem; }
+        .dleg { display: flex; align-items: center; gap: 5px; font-size: .7rem; font-weight: 600; color: #475569; }
+        .dleg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+        /* ══════════ LAYOUT SECTIONS ══════════ */
+
+        /* Row A: Member (narrow) + Loan (narrow) + Revenue (wide) + Quick Actions (wide) */
+        .layout-a {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.15fr 1.15fr;
+            gap: 1.1rem;
+            margin-bottom: 1.5rem;
+            align-items: start;
+        }
+
+        /* Row B: Transactions (wide) + [ Finance Grid top + Top Members below ] */
+        .layout-b {
+            display: grid;
+            grid-template-columns: 1.55fr 1fr;
+            gap: 1.1rem;
+            align-items: start;
+        }
+
+        /* ══════════ POWERED BY ══════════ */
+        .powered-by {
+            position: fixed; bottom: 14px; right: 14px;
+            background: white; padding: 8px 15px; border-radius: 22px;
+            box-shadow: 0 4px 14px rgba(30,58,138,.14);
+            font-size: .75rem; font-weight: 700; color: var(--primary); z-index: 999;
+        }
+
+        /* ══════════ ANIMATIONS ══════════ */
+        @keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .r1 { animation: riseIn .42s .00s both; }
+        .r2 { animation: riseIn .42s .07s both; }
+        .r3 { animation: riseIn .42s .14s both; }
+        .r4 { animation: riseIn .42s .21s both; }
+        .r5 { animation: riseIn .42s .28s both; }
+
+        /* ══════════ RESPONSIVE ══════════ */
+        @media (max-width: 1280px) {
+            .layout-a { grid-template-columns: 1fr 1fr; }
+            .layout-b { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .topbar  { left: 0; }
+            .main    { margin-left: 0; padding: 1.1rem; }
+            .kpi-row { grid-template-columns: repeat(2, 1fr); }
+            .layout-a { grid-template-columns: 1fr 1fr; }
+            .layout-b { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            :root { --nav-h: 58px; }
+            .main { padding: .75rem; }
+            .kpi-row { grid-template-columns: repeat(2, 1fr); gap: .65rem; }
+            .kpi-value { font-size: 1.15rem; }
+            .hero { padding: 1.25rem 1.3rem; border-radius: 16px; }
+            .filter-bar { gap: .45rem; }
+            .period-btn { padding: .32rem .7rem; font-size: .74rem; }
+            .layout-a { grid-template-columns: 1fr; }
+            .hero-stats { align-items: flex-start; }
+            .hero-badges { justify-content: flex-start; }
+            .fin-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 400px) {
+            .kpi-row { grid-template-columns: 1fr 1fr; gap: .5rem; }
+            .kpi-card { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ════════════════════════ SIDEBAR ════════════════════════ -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-row">
+            <div class="logo-box">C</div>
+            <div>
+                <div class="sidebar-brand">Club De Stars<small>Admin Panel</small></div>
+            </div>
+        </div>
+        <div class="role-pill"><i class="fas fa-shield-alt" style="font-size:.7rem;"></i><%= admin.role?.name?.toUpperCase() || 'SUPER ADMIN' %></div>
+    </div>
+    <div class="sidebar-nav">
+        <a href="/admin/dashboard" class="active"><i class="fas fa-chart-pie"></i>Overview</a>
+        <a href="/admin-dashboard"><i class="fas fa-users"></i>Members</a>
+        <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i>Kiddies Accounts</a>
+        <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i>Membership Types</a>
+        <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
+        <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarBadge" class="badge bg-danger ms-auto" style="display:none;font-size:.65rem;">0</span></a>
+        <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposit Management</a>
+        <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i> Kiddies Deposits</a>
+        <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
+        <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i>Extra Charges</a>
+        <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i>Loan Management</a>
+        <a href="/admin/loan-payments"><i class="fas fa-file-invoice-dollar"></i>Loan Payments</a>
+        <a href="/admin/loan/settings"><i class="fas fa-cogs"></i>Loan Settings</a>
+        <a href="/admin/external-loans"><i class="fas fa-building"></i>External Loans</a>
+        <a href="/admin/finance"><i class="fas fa-landmark"></i>Company Finance</a>
+        <a href="/admin/operating-earnings"><i class="fas fa-chart-line"></i>Operating Earnings</a>
+        <a href="#"><i class="fas fa-chart-pie"></i>ROI Distribution</a>
+        <a href="/manage-subscriptions"><i class="fas fa-cube"></i>Manage Subscription</a>
+        <a href="/manage-roles"><i class="fas fa-user-shield"></i>Roles &amp; Permissions</a>
+        <a href="/admin/settings"><i class="fas fa-cog"></i>Settings</a>
+        <a href="/admin/reports"><i class="fas fa-file-alt"></i>Reports</a>
+        <a href="/admin/logs"><i class="fas fa-history"></i>Admin Logs</a>
+        <a href="/cds-cooperative/dashboard" style="color:rgba(255,255,255,.5);margin-top:.5rem;"><i class="fas fa-sign-in-alt"></i>Back to Dashboard</a>
+    </div>
+</div>
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ════════════════════════ TOPBAR ════════════════════════ -->
+<div class="topbar">
+    <button class="d-lg-none btn btn-sm" style="border:none;background:transparent;padding:0;" onclick="toggleSidebar()">
+        <i class="fas fa-bars" style="color:var(--primary);font-size:1.3rem;"></i>
+    </button>
+    <div class="d-none d-lg-block">
+        <div class="topbar-title">Overview Dashboard</div>
+        <div class="topbar-sub">Cooperative snapshot &middot; <%= periodLabel %></div>
+    </div>
+    <div class="d-lg-none topbar-title">Overview</div>
+    <button class="btn btn-sm btn-outline-primary ms-auto" onclick="location.reload()" style="border-radius:8px;font-weight:700;font-size:.78rem;">
+        <i class="fas fa-sync-alt me-1"></i><span class="d-none d-sm-inline">Refresh</span>
+    </button>
+</div>
+
+<!-- ════════════════════════ MAIN ════════════════════════ -->
+<div class="main">
+
+    <!-- HERO -->
+    <div class="hero r1">
+        <div class="hero-inner">
+            <div class="row align-items-center g-3">
+                <div class="col-md-7">
+                    <div class="hero-date-pill"><i class="fas fa-calendar-alt" style="font-size:.8rem;"></i><span id="heroDate"></span></div>
+                    <h3>Good <%= timeGreeting %>, <%= admin.firstName %>! 👋</h3>
+                    <p>Financial snapshot for <strong>Club De Stars Cooperative</strong> · <em><%= periodLabel %></em></p>
+                </div>
+                <div class="col-md-5">
+                    <div class="hero-stats">
+                        <div class="hero-portfolio">
+                            <small>Total Portfolio</small>
+                            <strong>₦<%= totalPortfolio.toLocaleString() %></strong>
+                        </div>
+                        <div class="hero-badges">
+                            <div class="hero-badge" style="background:rgba(16,185,129,.28);border:1px solid rgba(16,185,129,.4);"><i class="fas fa-users me-1"></i><%= stats.members.active %> Active</div>
+                            <div class="hero-badge" style="background:rgba(139,92,246,.28);border:1px solid rgba(139,92,246,.4);"><i class="fas fa-chart-line me-1"></i>₦<%= stats.finance.companyRevenue.toLocaleString() %> Revenue</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar r2">
+        <span class="filter-label"><i class="fas fa-filter"></i>Period</span>
+
+        <button class="period-btn <%= (!filterValues.period && !filterValues.from) ? 'active' : '' %>" onclick="applyPeriod('all')">All Time</button>
+        <button class="period-btn <%= filterValues.period === 'today'      ? 'active' : '' %>" onclick="applyPeriod('today')">Today</button>
+        <button class="period-btn <%= filterValues.period === '7d'         ? 'active' : '' %>" onclick="applyPeriod('7d')">7 Days</button>
+        <button class="period-btn <%= filterValues.period === '30d'        ? 'active' : '' %>" onclick="applyPeriod('30d')">30 Days</button>
+        <button class="period-btn <%= filterValues.period === 'this_month' ? 'active' : '' %>" onclick="applyPeriod('this_month')">This Month</button>
+        <button class="period-btn <%= filterValues.period === 'last_month' ? 'active' : '' %>" onclick="applyPeriod('last_month')">Last Month</button>
+        <button class="period-btn <%= filterValues.period === 'this_year'  ? 'active' : '' %>" onclick="applyPeriod('this_year')">This Year</button>
+
+        <div class="filter-divider d-none d-xl-block"></div>
+
+        <div class="custom-range d-none d-xl-flex">
+            <label>Custom:</label>
+            <input type="date" class="date-input" id="fromDate" value="<%= filterValues.from %>">
+            <span style="font-size:.75rem;color:#94a3b8;">–</span>
+            <input type="date" class="date-input" id="toDate" value="<%= filterValues.to %>">
+            <button class="btn-apply" onclick="applyCustom()"><i class="fas fa-check me-1"></i>Apply</button>
+        </div>
+
+        <div class="period-pill">
+            <i class="fas fa-clock" style="font-size:.65rem;"></i>
+            <%= periodLabel %>
+        </div>
+    </div>
+
+    <!-- Mobile custom date (shown below filter bar on small screens) -->
+    <div class="filter-bar d-xl-none r2" style="margin-top:-.75rem;padding:.75rem 1.1rem;">
+        <label class="filter-label" style="flex-shrink:0;">Custom Range:</label>
+        <input type="date" class="date-input" id="fromDateMob" value="<%= filterValues.from %>">
+        <span style="font-size:.75rem;color:#94a3b8;">–</span>
+        <input type="date" class="date-input" id="toDateMob" value="<%= filterValues.to %>">
+        <button class="btn-apply" onclick="applyCustomMob()"><i class="fas fa-check me-1"></i>Apply</button>
+    </div>
+
+    <!-- ═══ KPI ROW 1: Finance ═══ -->
+    <div class="kpi-row r3">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(30,58,138,.1);color:#1e3a8a;"><i class="fas fa-wallet"></i></div>
+            <div class="kpi-label">Member Balances</div>
+            <div class="kpi-value">₦<%= stats.finance.totalMemberBalance.toLocaleString() %></div>
+            <div class="kpi-sub neutral"><i class="fas fa-users"></i> User accounts</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(16,185,129,.1);color:#059669;"><i class="fas fa-arrow-circle-down"></i></div>
+            <div class="kpi-label">Total Deposits</div>
+            <div class="kpi-value">₦<%= stats.finance.totalDeposits.toLocaleString() %></div>
+            <div class="kpi-sub up"><i class="fas fa-arrow-up"></i><%= stats.finance.depositsInPeriod %> transactions</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(239,68,68,.1);color:#dc2626;"><i class="fas fa-arrow-circle-up"></i></div>
+            <div class="kpi-label">Total Withdrawals</div>
+            <div class="kpi-value">₦<%= stats.finance.totalWithdrawals.toLocaleString() %></div>
+            <div class="kpi-sub down"><i class="fas fa-arrow-down"></i><%= stats.finance.withdrawalsInPeriod %> transactions</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(16,185,129,.1);color:#059669;"><i class="fas fa-balance-scale"></i></div>
+            <div class="kpi-label">Net Position</div>
+            <div class="kpi-value" style="color:<%= stats.finance.netPosition >= 0 ? '#059669' : '#dc2626' %>;">₦<%= Math.abs(stats.finance.netPosition).toLocaleString() %></div>
+            <div class="kpi-sub <%= stats.finance.netPosition >= 0 ? 'up' : 'down' %>">
+                <i class="fas fa-<%= stats.finance.netPosition >= 0 ? 'arrow-up' : 'arrow-down' %>"></i>
+                <%= stats.finance.netPosition >= 0 ? 'Positive' : 'Negative' %>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ KPI ROW 2: Loans + Revenue ═══ -->
+    <div class="kpi-row r3" style="margin-bottom:1.5rem;">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(245,158,11,.1);color:#d97706;"><i class="fas fa-hand-holding-usd"></i></div>
+            <div class="kpi-label">Loans Disbursed</div>
+            <div class="kpi-value">₦<%= stats.loans.totalDisbursed.toLocaleString() %></div>
+            <div class="kpi-sub neutral"><i class="fas fa-circle" style="font-size:.5rem;"></i><%= stats.loans.totalCount %> loans</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(239,68,68,.1);color:#dc2626;"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="kpi-label">Outstanding Balance</div>
+            <div class="kpi-value">₦<%= stats.loans.outstandingBalance.toLocaleString() %></div>
+            <div class="kpi-sub <%= stats.loans.overdueCount > 0 ? 'down' : 'neutral' %>">
+                <i class="fas fa-<%= stats.loans.overdueCount > 0 ? 'exclamation-triangle' : 'check-circle' %>"></i>
+                <%= stats.loans.overdueCount %> overdue
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(236,72,153,.1);color:#db2777;"><i class="fas fa-baby"></i></div>
+            <div class="kpi-label">Kiddies Savings</div>
+            <div class="kpi-value">₦<%= stats.kiddies.totalBalance.toLocaleString() %></div>
+            <div class="kpi-sub neutral"><i class="fas fa-circle" style="font-size:.5rem;"></i><%= stats.kiddies.totalAccounts %> accounts</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(139,92,246,.1);color:#7c3aed;"><i class="fas fa-chart-line"></i></div>
+            <div class="kpi-label">Company Revenue</div>
+            <div class="kpi-value" style="color:#7c3aed;">₦<%= stats.finance.companyRevenue.toLocaleString() %></div>
+            <div class="kpi-sub up"><i class="fas fa-arrow-up"></i>All streams</div>
+        </div>
+    </div>
+
+    <!-- ═══ ROW A: Member | Loan | Revenue | Quick Actions ═══ -->
+    <div class="layout-a r4">
+
+        <!-- 1. Member Breakdown -->
+       <div class="s-card">
+    <div class="s-head">
+        <div class="s-head-title">
+            <div class="s-head-icon" style="background:rgba(30,58,138,.1);color:var(--primary);"><i class="fas fa-users"></i></div>
+            Members
+        </div>
+        <a href="/admin-dashboard" class="btn btn-sm btn-outline-primary" style="border-radius:7px;font-size:.73rem;font-weight:700;padding:.28rem .75rem;">View All</a>
+    </div>
+    <div class="s-body">
+        <%
+            const combinedTotal = stats.members.active + stats.kiddies.activeAccounts;
+            const donutBase = stats.members.active + stats.members.pending + stats.kiddies.activeAccounts || 1;
+            const actPx     = Math.round((stats.members.active              / donutBase) * 314);
+            const penPx     = Math.round((stats.members.pending             / donutBase) * 314);
+            const kiddiesPx = Math.round((stats.kiddies.activeAccounts      / donutBase) * 314);
+        %>
+        <div class="donut-wrap">
+            <div style="position:relative;display:inline-flex;align-items:center;justify-content:center;">
+                <svg width="106" height="106" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(30,58,138,.07)" stroke-width="13"/>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#10b981" stroke-width="13"
+                        stroke-dasharray="<%= actPx %> 314" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#f59e0b" stroke-width="13"
+                        stroke-dasharray="<%= penPx %> 314" stroke-dashoffset="-<%= actPx %>" transform="rotate(-90 60 60)"/>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#ec4899" stroke-width="13"
+                        stroke-dasharray="<%= kiddiesPx %> 314" stroke-dashoffset="-<%= actPx + penPx %>" transform="rotate(-90 60 60)"/>
+                </svg>
+                <div style="position:absolute;text-align:center;">
+                    <div style="font-size:1.4rem;font-weight:900;color:#0f172a;line-height:1;"><%= combinedTotal %></div>
+                    <div style="font-size:.58rem;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;">Active</div>
+                </div>
+            </div>
+            <div class="donut-legend">
+                <div class="dleg"><div class="dleg-dot" style="background:#10b981;"></div>Active (<%= stats.members.active %>)</div>
+                <div class="dleg"><div class="dleg-dot" style="background:#f59e0b;"></div>Pending (<%= stats.members.pending %>)</div>
+                <div class="dleg"><div class="dleg-dot" style="background:#ec4899;"></div>Kiddies (<%= stats.kiddies.activeAccounts %>)</div>
+            </div>
+        </div>
+
+        <div class="mrow">
+            <div class="mrow-left"><div class="mdot" style="background:#8b5cf6;"></div><div><div class="mrow-label">New in Period</div><div class="mrow-sub">Registered</div></div></div>
+            <div class="mrow-val" style="color:#7c3aed;"><%= stats.members.newInPeriod %></div>
+        </div>
+        <div class="mrow">
+            <div class="mrow-left"><div class="mdot" style="background:#f59e0b;"></div><div><div class="mrow-label">Pending Members</div><div class="mrow-sub">Awaiting approval</div></div></div>
+            <div class="mrow-val" style="color:#d97706;"><%= stats.members.pending %></div>
+        </div>
+        <div class="mrow">
+            <div class="mrow-left"><div class="mdot" style="background:#ef4444;"></div><div><div class="mrow-label">Rejected Members</div><div class="mrow-sub">Not counted in total</div></div></div>
+            <div class="mrow-val" style="color:#dc2626;"><%= stats.members.rejected %></div>
+        </div>
+        <div class="mrow">
+            <div class="mrow-left"><div class="mdot" style="background:#ec4899;"></div><div><div class="mrow-label">Kiddies Accounts</div><div class="mrow-sub"><%= stats.kiddies.pendingApproval %> awaiting</div></div></div>
+            <div class="mrow-val" style="color:#db2777;"><%= stats.kiddies.totalAccounts %></div>
+        </div>
+    </div>
+</div>
+
+        <!-- 2. Loan Health -->
+        <div class="s-card">
+            <div class="s-head">
+                <div class="s-head-title">
+                    <div class="s-head-icon" style="background:rgba(245,158,11,.1);color:#d97706;"><i class="fas fa-hand-holding-usd"></i></div>
+                    Loan Health
+                </div>
+                <a href="/admin/manage-loan" class="btn btn-sm btn-outline-primary" style="border-radius:7px;font-size:.73rem;font-weight:700;padding:.28rem .75rem;">Manage</a>
+            </div>
+            <div class="s-body">
+                <div style="text-align:center;padding:.875rem;background:rgba(245,158,11,.06);border-radius:11px;margin-bottom:.875rem;">
+                    <div style="font-size:1.9rem;font-weight:900;color:#d97706;line-height:1;"><%= stats.loans.recoveryRate %>%</div>
+                    <div style="font-size:.67rem;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem;">Recovery Rate</div>
+                    <div class="prog-track"><div class="prog-fill" style="width:<%= stats.loans.recoveryRate %>%;background:linear-gradient(90deg,#f59e0b,#d97706);"></div></div>
+                </div>
+                <div class="mrow"><div class="mrow-left"><div class="mdot" style="background:#f59e0b;"></div><div class="mrow-label">Active</div></div><div class="mrow-val" style="color:#d97706;"><%= stats.loans.activeCount %></div></div>
+                <div class="mrow"><div class="mrow-left"><div class="mdot" style="background:#10b981;"></div><div class="mrow-label">Completed</div></div><div class="mrow-val" style="color:#059669;"><%= stats.loans.completedCount %></div></div>
+                <div class="mrow"><div class="mrow-left"><div class="mdot" style="background:#ef4444;"></div><div class="mrow-label">Overdue</div></div><div class="mrow-val" style="color:#dc2626;"><%= stats.loans.overdueCount %></div></div>
+                <div class="mrow"><div class="mrow-left"><div class="mdot" style="background:#06b6d4;"></div><div class="mrow-label">External</div></div><div class="mrow-val" style="color:#0891b2;"><%= stats.loans.externalCount %></div></div>
+                <div class="mrow"><div class="mrow-left"><div class="mdot" style="background:#8b5cf6;"></div><div><div class="mrow-label">Repayments</div><div class="mrow-sub">In period</div></div></div><div class="mrow-val" style="color:#7c3aed;"><%= stats.loans.repaymentsInPeriod %></div></div>
+            </div>
+        </div>
+
+        <!-- 3. Revenue Breakdown -->
+        <div class="s-card" style="position:relative;">
+            <div class="s-head">
+                <div class="s-head-title">
+                    <div class="s-head-icon" style="background:rgba(139,92,246,.1);color:#7c3aed;"><i class="fas fa-chart-pie"></i></div>
+                    Revenue Breakdown
+                </div>
+            </div>
+            <div class="s-body">
+                <div style="text-align:center;margin-bottom:.875rem;">
+                    <div style="font-size:1.4rem;font-weight:900;color:#7c3aed;">₦<%= stats.finance.companyRevenue.toLocaleString() %></div>
+                    <div style="font-size:.65rem;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;">Total Company Revenue</div>
+                </div>
+                <% stats.finance.revenueBreakdown.forEach(r => { %>
+                <div class="rev-row">
+                    <div class="rev-dot" style="background:<%= r.color %>;"></div>
+                    <div class="rev-name"><%= r.label %></div>
+                    <div class="rev-pct"><%= r.pct %>%</div>
+                    <div class="rev-amt" style="color:<%= r.color %>;">₦<%= r.value.toLocaleString() %></div>
+                </div>
+                <% }) %>
+            </div>
+            <div class="rev-strip">
+                <% stats.finance.revenueBreakdown.forEach(r => { %>
+                <div class="rev-strip-seg" style="width:<%= r.pct %>%;background:<%= r.color %>;"></div>
+                <% }) %>
+            </div>
+        </div>
+
+        <!-- 4. Quick Actions -->
+        <div class="s-card">
+            <div class="s-head">
+                <div class="s-head-title">
+                    <div class="s-head-icon" style="background:rgba(245,158,11,.1);color:#d97706;"><i class="fas fa-bolt"></i></div>
+                    Quick Actions
+                </div>
+            </div>
+            <div class="s-body">
+                <a href="/admin/transaction-approvals" class="qlink">
+                    <div class="qlink-ico" style="background:rgba(245,158,11,.1);color:#d97706;"><i class="fas fa-tasks"></i></div>
+                    <div><div class="qlink-title">Transaction Approvals</div><div class="qlink-desc">Review pending requests</div></div>
+                    <% if (stats.pending.approvals > 0) { %><span class="qlink-badge" style="background:rgba(245,158,11,.15);color:#d97706;"><%= stats.pending.approvals %></span><% } %>
+                    <i class="fas fa-chevron-right qlink-arrow"></i>
+                </a>
+                <a href="/admin/manage-withdrawals" class="qlink">
+                    <div class="qlink-ico" style="background:rgba(239,68,68,.1);color:#dc2626;"><i class="fas fa-money-check-alt"></i></div>
+                    <div><div class="qlink-title">Withdrawals</div><div class="qlink-desc">₦<%= stats.finance.pendingWithdrawalsAmount.toLocaleString() %> pending</div></div>
+                    <% if (stats.pending.withdrawals > 0) { %><span class="qlink-badge" style="background:rgba(239,68,68,.15);color:#dc2626;"><%= stats.pending.withdrawals %></span><% } %>
+                    <i class="fas fa-chevron-right qlink-arrow"></i>
+                </a>
+                <a href="/admin-dashboard?status=pending" class="qlink">
+                    <div class="qlink-ico" style="background:rgba(30,58,138,.1);color:#1e3a8a;"><i class="fas fa-user-clock"></i></div>
+                    <div><div class="qlink-title">Member Approvals</div><div class="qlink-desc">New registrations</div></div>
+                    <% if (stats.members.pending > 0) { %><span class="qlink-badge" style="background:rgba(30,58,138,.12);color:#1e3a8a;"><%= stats.members.pending %></span><% } %>
+                    <i class="fas fa-chevron-right qlink-arrow"></i>
+                </a>
+                <a href="/admin/kiddies-accounts" class="qlink">
+                    <div class="qlink-ico" style="background:rgba(236,72,153,.1);color:#db2777;"><i class="fas fa-baby"></i></div>
+                    <div><div class="qlink-title">Kiddies Approvals</div><div class="qlink-desc">Children's accounts</div></div>
+                    <% if (stats.kiddies.pendingApproval > 0) { %><span class="qlink-badge" style="background:rgba(236,72,153,.12);color:#db2777;"><%= stats.kiddies.pendingApproval %></span><% } %>
+                    <i class="fas fa-chevron-right qlink-arrow"></i>
+                </a>
+                <a href="/admin/loan-payments" class="qlink">
+                    <div class="qlink-ico" style="background:rgba(139,92,246,.1);color:#7c3aed;"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div><div class="qlink-title">Loan Payments</div><div class="qlink-desc">Pending repayments</div></div>
+                    <% if (stats.pending.loanPayments > 0) { %><span class="qlink-badge" style="background:rgba(139,92,246,.12);color:#7c3aed;"><%= stats.pending.loanPayments %></span><% } %>
+                    <i class="fas fa-chevron-right qlink-arrow"></i>
+                </a>
+                <a href="/admin/manage-deposits" class="qlink">
+                    <div class="qlink-ico" style="background:rgba(16,185,129,.1);color:#059669;"><i class="fas fa-coins"></i></div>
+                    <div><div class="qlink-title">Deposits</div><div class="qlink-desc">Pending deposits</div></div>
+                    <% if (stats.pending.deposits > 0) { %><span class="qlink-badge" style="background:rgba(16,185,129,.12);color:#059669;"><%= stats.pending.deposits %></span><% } %>
+                    <i class="fas fa-chevron-right qlink-arrow"></i>
+                </a>
+            </div>
+        </div>
+
+    </div><!-- /layout-a -->
+
+    <!-- ═══ ROW B: Transactions | Finance Grid + Top Members ═══ -->
+    <div class="layout-b r5">
+
+        <!-- Recent Transactions -->
+        <div class="s-card">
+            <div class="s-head">
+                <div class="s-head-title">
+                    <div class="s-head-icon" style="background:rgba(30,58,138,.1);color:var(--primary);"><i class="fas fa-history"></i></div>
+                    Recent Transactions
+                </div>
+                <a href="/admin/manage-payment" class="btn btn-sm btn-outline-primary" style="border-radius:7px;font-size:.73rem;font-weight:700;padding:.28rem .75rem;">View All</a>
+            </div>
+            <div class="s-body" style="padding-top:.6rem;padding-bottom:.6rem;">
+                <% if (recentTransactions && recentTransactions.length > 0) { %>
+                    <% recentTransactions.forEach(tx => { %>
+                    <div class="act-row">
+                        <div class="act-ico" style="background:<%= tx.typeColor %>1a;color:<%= tx.typeColor %>;"><i class="fas <%= tx.typeIcon %>"></i></div>
+                        <div class="act-body">
+                            <div class="act-name"><%= tx.memberName %></div>
+                            <div class="act-meta">
+                                <span class="act-status-tag" style="background:<%= tx.statusColor %>1a;color:<%= tx.statusColor %>;"><%= tx.status %></span>
+                                <span><%= tx.typeLabel %></span>
+                                <span style="color:#e2e8f0;">&middot;</span>
+                                <span><%= tx.timeAgo %></span>
+                            </div>
+                        </div>
+                        <div class="act-amt" style="color:<%= tx.typeColor %>;"><%= tx.sign %>₦<%= tx.amount.toLocaleString() %></div>
+                    </div>
+                    <% }) %>
+                <% } else { %>
+                    <div style="text-align:center;padding:2.5rem 1rem;color:#9ca3af;">
+                        <i class="fas fa-inbox fa-2x" style="opacity:.2;display:block;margin-bottom:.75rem;"></i>
+                        <p style="font-size:.83rem;margin:0;">No transactions in selected period</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Right column: Finance Snapshot + Top Members -->
+        <div style="display:flex;flex-direction:column;gap:1.1rem;">
+
+            <!-- Finance Snapshot -->
+            <div class="s-card">
+                <div class="s-head">
+                    <div class="s-head-title">
+                        <div class="s-head-icon" style="background:rgba(16,185,129,.1);color:#059669;"><i class="fas fa-chart-bar"></i></div>
+                        Finance Snapshot
+                    </div>
+                </div>
+                <div class="s-body">
+                    <div class="fin-grid">
+                        <div class="fin-tile" style="background:rgba(16,185,129,.07);">
+                            <div class="fin-tile-label" style="color:#059669;">Loan Interest</div>
+                            <div class="fin-tile-value" style="color:#065f46;">₦<%= stats.loans.interestCollected.toLocaleString() %></div>
+                        </div>
+                        <div class="fin-tile" style="background:rgba(59,130,246,.07);">
+                            <div class="fin-tile-label" style="color:#2563eb;">Reg. Fees</div>
+                            <div class="fin-tile-value" style="color:#1e3a8a;">₦<%= stats.finance.registrationFees.toLocaleString() %></div>
+                        </div>
+                        <div class="fin-tile" style="background:rgba(239,68,68,.07);">
+                            <div class="fin-tile-label" style="color:#dc2626;">WD Penalties</div>
+                            <div class="fin-tile-value" style="color:#7f1d1d;">₦<%= stats.finance.withdrawalPenalties.toLocaleString() %></div>
+                        </div>
+                        <div class="fin-tile" style="background:rgba(245,158,11,.07);">
+                            <div class="fin-tile-label" style="color:#d97706;">Pending W/D</div>
+                            <div class="fin-tile-value" style="color:#78350f;">₦<%= stats.finance.pendingWithdrawalsAmount.toLocaleString() %></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Members -->
+            <div class="s-card" style="flex:1;">
+                <div class="s-head">
+                    <div class="s-head-title">
+                        <div class="s-head-icon" style="background:rgba(245,158,11,.1);color:#d97706;"><i class="fas fa-trophy"></i></div>
+                        Top Members by Balance
+                    </div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="mtable">
+                        <thead>
+                            <tr>
+                                <th style="width:30px;">#</th>
+                                <th>Member</th>
+                                <th style="text-align:right;">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (topMembers && topMembers.length > 0) { %>
+                                <% topMembers.forEach((m, i) => { %>
+                                <tr>
+                                    <td style="font-size:.78rem;font-weight:800;color:<%= i===0?'#d97706':i===1?'#9ca3af':i===2?'#b45309':'#94a3b8' %>;">
+                                        <%= i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1) %>
+                                    </td>
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:.5rem;">
+                                            <div class="m-ava"><%= m.initials %></div>
+                                            <div>
+                                                <div style="font-weight:700;font-size:.8rem;color:#1f2937;"><%= m.name %></div>
+                                                <div style="font-size:.66rem;color:#9ca3af;"><%= m.membershipID %></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align:right;font-weight:800;font-size:.83rem;color:#059669;">₦<%= m.balance.toLocaleString() %></td>
+                                </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr><td colspan="3" style="text-align:center;color:#9ca3af;padding:1.5rem;font-size:.82rem;">No data</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div><!-- /right column -->
+
+    </div><!-- /layout-b -->
+
+</div><!-- /main -->
+
+<div class="powered-by">Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+    /* ── Date ── */
+    document.getElementById('heroDate').textContent = new Date().toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    /* ── Sidebar ── */
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('show');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('overlay').classList.remove('show');
+    }
+
+    /* ── Period filter ── */
+    function applyPeriod(p) {
+        window.location.href = p === 'all' ? '/admin/dashboard' : '/admin/dashboard?period=' + p;
+    }
+    function applyCustom() {
+        const f = document.getElementById('fromDate').value;
+        const t = document.getElementById('toDate').value;
+        if (!f && !t) { alert('Please select at least one date.'); return; }
+        window.location.href = '/admin/dashboard?' + (f ? 'from=' + f + '&' : '') + (t ? 'to=' + t : '');
+    }
+    function applyCustomMob() {
+        const f = document.getElementById('fromDateMob').value;
+        const t = document.getElementById('toDateMob').value;
+        if (!f && !t) { alert('Please select at least one date.'); return; }
+        window.location.href = '/admin/dashboard?' + (f ? 'from=' + f + '&' : '') + (t ? 'to=' + t : '');
+    }
+    ['fromDate','toDate','fromDateMob','toDateMob'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') id.includes('Mob') ? applyCustomMob() : applyCustom(); });
+    });
+
+    /* ── Sidebar pending badge ── */
+    (async () => {
+        try {
+            const data = await (await fetch('/admin/pending-approvals-count')).json();
+            const b = document.getElementById('sidebarBadge');
+            if (b && data.count > 0) { b.style.display = 'inline-block'; b.textContent = data.count; }
+        } catch(_) {}
+    })();
+</script>
+</body>
+</html>

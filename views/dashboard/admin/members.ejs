@@ -184,7 +184,9 @@
             <div class="admin-badge"><i class="fas fa-shield-alt"></i><span>Super Admin</span></div>
         </div>
         <div class="sidebar-menu">
-            <a href="/admin-dashboard" class="active"><i class="fas fa-users"></i> Members</a>
+
+           <a href="/admin/dashboard"><i class="fas fa-chart-pie"></i>Overview</a>
+            <a href="/admin/members" class="active"><i class="fas fa-users"></i> Members</a>
             <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
             <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
             <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
@@ -1112,15 +1114,33 @@
     /* ═══════════════════════════════════════════════════
        REJECT MEMBER
     ═══════════════════════════════════════════════════ */
-    async function rejectMember(id) {
-        const confirmed = await showNotify({type:'warning',title:'Confirm Rejection',message:'Are you sure you want to reject and delete this member? This action cannot be undone.',confirmLabel:'Yes, Reject',cancelLabel:'Cancel'});
-        if (!confirmed) return;
-        const result = await permFetch(`/admin/members/delete/${id}`,{method:'POST',headers:{'Content-Type':'application/json'}});
-        if (!result.ok) return;
-        if (result.data.status) { const i=members.findIndex(m=>m.id===id); if(i!==-1){members.splice(i,1);updateStats();renderMembers();} await showNotify({type:'success',title:'Member Rejected',message:'The member has been successfully removed.'}); }
-        else { await showNotify({type:'error',title:'Rejection Failed',message:`Failed to reject: ${result.data.message}`}); }
-    }
+async function rejectMember(id) {
+    const confirmed = await showNotify({
+        type: 'warning',
+        title: 'Confirm Rejection',
+        message: 'Are you sure you want to reject this member?',
+        confirmLabel: 'Yes, Reject',
+        cancelLabel: 'Cancel'
+    });
+    if (!confirmed) return;
 
+    const result = await permFetch(`/admin/members/reject/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    });
+    if (!result.ok) return;
+
+    if (result.data.status) {
+        // Update local array instead of removing the member
+        const m = members.find(m => m.id === id);
+        if (m) m.status = 'rejected';
+        updateStats();
+        renderMembers();
+        await showNotify({ type: 'success', title: 'Member Rejected', message: 'The member status has been set to rejected.' });
+    } else {
+        await showNotify({ type: 'error', title: 'Rejection Failed', message: result.data.message || 'Failed to reject member.' });
+    }
+}
     /* ═══════════════════════════════════════════════════
        BULK ACTIONS
     ═══════════════════════════════════════════════════ */

@@ -397,7 +397,7 @@ router.get("/payment/verify", async (req, res) => {
 
     // Redirect user accordingly
     if (isPaid) {
-      return res.redirect("/cds-cooperative/dashboard?payment=success");
+      return res.redirect("/login");
     } else {
       return res.redirect("/signup?payment=failed");
     }

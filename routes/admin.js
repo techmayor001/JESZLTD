@@ -2,11 +2,6 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 
-const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
-const bcrypt = require("bcrypt");
-const saltRounds = 10;
-
 const Admin = require("../models/Admin");
 const User = require("../models/User");
 const Settings = require("../models/Settings");
@@ -14,6 +9,9 @@ const MemberType = require("../models/MemberType");
 const Account = require("../models/Account");
 const Payment = require("../models/Payment");
 const Transaction = require("../models/Transaction");
+
+const KiddiesTransaction = require("../models/Kiddies/kiddiesTransaction");
+const KiddiesPayment = require("../models/Kiddies/KiddiesPayment");
 
 
 const AdminPayment = require("../models/AdminPayment");
@@ -30,6 +28,12 @@ const {
   AdminActionLog,
   SubscriptionReport,
 } = require("../models/ReportSchemas");
+
+
+const Loan           = require("../models/Loan");
+const LoanLedger     = require("../models/LoanLedger");
+const KiddiesAccount = require("../models/Kiddies/kiddiesAccount");
+ 
 
 const CompanyLedger = require("../models/CompanyLedger");
 
@@ -111,6 +115,397 @@ function ensureAdmin(requiredPermission = null) {
 }
 
 // ENDS HERE 
+
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function timeAgo(date) {
+    const s = Math.floor((Date.now() - new Date(date)) / 1000);
+    if (s < 60)    return `${s}s ago`;
+    if (s < 3600)  return `${Math.floor(s / 60)}m ago`;
+    if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+    return `${Math.floor(s / 86400)}d ago`;
+}
+ 
+function greeting() {
+    const h = new Date().getHours();
+    if (h < 12) return "morning";
+    if (h < 17) return "afternoon";
+    return "evening";
+}
+ 
+function parseDateRange(query) {
+    const { from, to, period } = query;
+    const now      = new Date();
+    const todayEnd = new Date(now); todayEnd.setHours(23, 59, 59, 999);
+    const fmtLabel = d => d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+ 
+    if (period && period !== "all") {
+        let start;
+        let label;
+        switch (period) {
+            case "today":
+                start = new Date(now); start.setHours(0, 0, 0, 0);
+                label = "Today";
+                break;
+            case "7d":
+                start = new Date(now); start.setDate(start.getDate() - 6); start.setHours(0,0,0,0);
+                label = "Last 7 Days";
+                break;
+            case "30d":
+                start = new Date(now); start.setDate(start.getDate() - 29); start.setHours(0,0,0,0);
+                label = "Last 30 Days";
+                break;
+            case "this_month":
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                label = now.toLocaleString("en-US", { month: "long", year: "numeric" });
+                break;
+            case "last_month": {
+                const s = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                const e = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+                return { dateFilter: { $gte: s, $lte: e }, fromDate: s, toDate: e,
+                         periodLabel: s.toLocaleString("en-US", { month: "long", year: "numeric" }) };
+            }
+            case "this_year":
+                start = new Date(now.getFullYear(), 0, 1);
+                label = `Year ${now.getFullYear()}`;
+                break;
+            default:
+                return { dateFilter: {}, fromDate: null, toDate: null, periodLabel: "All Time" };
+        }
+        return { dateFilter: { $gte: start, $lte: todayEnd }, fromDate: start, toDate: todayEnd, periodLabel: label };
+    }
+ 
+    if (from || to) {
+        const fd = from ? new Date(from + "T00:00:00.000Z") : new Date(0);
+        const td = to   ? new Date(to   + "T23:59:59.999Z") : todayEnd;
+        return {
+            dateFilter: { $gte: fd, $lte: td },
+            fromDate: fd, toDate: td,
+            periodLabel: `${fmtLabel(fd)} – ${fmtLabel(td)}`,
+        };
+    }
+ 
+    return { dateFilter: {}, fromDate: null, toDate: null, periodLabel: "All Time" };
+}
+ 
+// ── Route ────────────────────────────────────────────────────────────────────
+router.get(
+    "/admin/dashboard",
+    ensureAdmin("view_dashboard"),
+    async (req, res) => {
+        try {
+            const { dateFilter, periodLabel } = parseDateRange(req.query);
+            const hasFilter = Object.keys(dateFilter).length > 0;
+            const createdIn = hasFilter ? { createdAt: dateFilter } : {};
+
+            // ── 1. MEMBER STATS ───────────────────────────────────────────────
+            const [totalMembers, activeMembers, pendingMembers, rejectedMembers, newInPeriod] =
+                await Promise.all([
+                    User.countDocuments({}),
+                    User.countDocuments({ status: "active"   }),
+                    User.countDocuments({ status: "pending"  }),
+                    User.countDocuments({ status: "rejected" }),
+                    User.countDocuments({ ...createdIn }),
+                ]);
+
+            // ── 2. ACCOUNT BALANCES (always live — not date-filtered) ─────────
+            const [memberBalAgg, kiddiesBalAgg] = await Promise.all([
+                Account.aggregate([
+                    { $match: { ownerType: "User" } },
+                    { $group: { _id: null, total: { $sum: "$balance" } } },
+                ]),
+                Account.aggregate([
+                    { $match: { ownerType: "KiddiesAccount" } },
+                    { $group: { _id: null, total: { $sum: "$balance" } } },
+                ]),
+            ]);
+            const totalMemberBalance = memberBalAgg[0]?.total  || 0;
+            const kiddiesBalance     = kiddiesBalAgg[0]?.total || 0;
+
+            // ── 3. DEPOSITS ───────────────────────────────────────────────────
+            const depositMatch = {
+                paymentType: { $exists: false },
+                status:      { $in: ["paid", "success"] },
+                amount:      { $gt: 0 },
+                ...createdIn,
+            };
+
+            const [depositAgg, depositCountPeriod] = await Promise.all([
+                Payment.aggregate([
+                    { $match: depositMatch },
+                    { $group: { _id: null, total: { $sum: "$amount" } } },
+                ]),
+                Payment.countDocuments(depositMatch),
+            ]);
+            const totalDeposits    = depositAgg[0]?.total || 0;
+            const depositsInPeriod = depositCountPeriod;
+
+            // ── 4. WITHDRAWALS ────────────────────────────────────────────────
+            const [wdAgg, wdCountPeriod, wdPendingCount, wdPendingAmtAgg, wdPenaltyAgg] =
+                await Promise.all([
+                    Withdrawal.aggregate([
+                        { $match: { status: "success", ...createdIn } },
+                        { $group: { _id: null, total: { $sum: "$amount" } } },
+                    ]),
+                    Withdrawal.countDocuments({ status: "success", ...createdIn }),
+                    Withdrawal.countDocuments({ status: { $in: ["pending", "processing"] } }),
+                    Withdrawal.aggregate([
+                        { $match: { status: { $in: ["pending", "processing"] } } },
+                        { $group: { _id: null, total: { $sum: "$amount" } } },
+                    ]),
+                    Withdrawal.aggregate([
+                        { $match: { status: "success", penaltyAmount: { $gt: 0 }, ...createdIn } },
+                        { $group: { _id: null, total: { $sum: "$penaltyAmount" } } },
+                    ]),
+                ]);
+            const totalWithdrawals         = wdAgg[0]?.total          || 0;
+            const withdrawalsInPeriod      = wdCountPeriod;
+            const pendingWithdrawalCount   = wdPendingCount;
+            const pendingWithdrawalsAmount = wdPendingAmtAgg[0]?.total || 0;
+            const withdrawalPenalties      = wdPenaltyAgg[0]?.total    || 0;
+
+            // ── 5. REGISTRATION FEES ──────────────────────────────────────────
+            const regFeeAgg = await Payment.aggregate([
+                { $match: { paymentType: "registration_fee", status: "success", ...createdIn } },
+                { $group: { _id: null, total: { $sum: "$amount" } } },
+            ]);
+            const registrationFees = regFeeAgg[0]?.total || 0;
+
+            // ── 6. LOANS ──────────────────────────────────────────────────────
+            const loanQuery = hasFilter ? { createdAt: dateFilter } : {};
+            const [loansInPeriod, allLoansLive] = await Promise.all([
+                Loan.find(loanQuery).lean(),
+                Loan.find({}).lean(),
+            ]);
+
+            const totalLoansDisbursed = loansInPeriod.reduce((s, l) => s + (l.amount || 0), 0);
+            const totalLoansRepaid    = allLoansLive.reduce((s, l) => s + (l.paidAmount || 0), 0);
+            const outstandingBalance  = allLoansLive.reduce((s, l) => {
+                const b = (l.totalRepay || l.amount || 0) - (l.paidAmount || 0);
+                return s + Math.max(b, 0);
+            }, 0);
+
+            const today            = new Date();
+            const activeLoansCount = allLoansLive.filter(l =>
+                l.status === "approved" && ((l.totalRepay || 0) - (l.paidAmount || 0)) > 0
+            ).length;
+            const completedCount   = allLoansLive.filter(l =>
+                (l.paidAmount || 0) >= (l.totalRepay || 1) && (l.totalRepay || 0) > 0
+            ).length;
+            const overdueCount     = allLoansLive.filter(l => {
+                const b = (l.totalRepay || 0) - (l.paidAmount || 0);
+                return b > 0 && l.dueDate && new Date(l.dueDate) < today;
+            }).length;
+            const externalCount    = allLoansLive.filter(l => l.external).length;
+            const allTimeDisbursed = allLoansLive.reduce((s, l) => s + (l.amount || 0), 0);
+            const recoveryRate     = allTimeDisbursed > 0
+                ? Math.round((totalLoansRepaid / allTimeDisbursed) * 100)
+                : 0;
+
+            // Loan ledger — interest & penalties
+            const [interestAgg, loanPenaltyAgg, repayCountAgg] = await Promise.all([
+                LoanLedger.aggregate([
+                    { $match: { transactionType: "repayment", ...createdIn } },
+                    { $group: { _id: null, total: { $sum: "$interestPaid" } } },
+                ]),
+                LoanLedger.aggregate([
+                    { $match: { transactionType: { $in: ["repayment", "penalty"] }, ...createdIn } },
+                    { $group: { _id: null, total: { $sum: "$penaltyPaid" } } },
+                ]),
+                LoanLedger.countDocuments({ transactionType: "repayment", ...createdIn }),
+            ]);
+            const interestCollected   = interestAgg[0]?.total    || 0;
+            const loanPenalties       = loanPenaltyAgg[0]?.total || 0;
+            const repaymentsInPeriod  = repayCountAgg;
+            const pendingLoanPayments = await LoanLedger.countDocuments({ status: "pending" }).catch(() => 0);
+
+            // ── 7. EXTRA CHARGES ──────────────────────────────────────────────
+            let finalExtraCharges = 0;
+            if (ExtraCharge) {
+                const ecAgg = await ExtraCharge.aggregate([
+                    { $match: { status: { $in: ["approved", "paid"] }, ...createdIn } },
+                    { $group: { _id: null, total: { $sum: "$amount" } } },
+                ]).catch(() => []);
+                finalExtraCharges = ecAgg[0]?.total || 0;
+            }
+            if (!finalExtraCharges) {
+                const ecPayAgg = await Payment.aggregate([
+                    { $match: { paymentType: "extra_charge", status: "success", ...createdIn } },
+                    { $group: { _id: null, total: { $sum: "$amount" } } },
+                ]).catch(() => []);
+                finalExtraCharges = ecPayAgg[0]?.total || 0;
+            }
+
+            // ── 8. COMPANY REVENUE ────────────────────────────────────────────
+            const companyRevenue   = interestCollected + registrationFees + withdrawalPenalties + loanPenalties + finalExtraCharges;
+            const revenueBreakdown = [
+                { label: "Loan Interest",        value: interestCollected,   color: "#f59e0b", pct: 0 },
+                { label: "Registration Fees",    value: registrationFees,    color: "#3b82f6", pct: 0 },
+                { label: "Withdrawal Penalties", value: withdrawalPenalties, color: "#ef4444", pct: 0 },
+                { label: "Loan Penalties",       value: loanPenalties,       color: "#8b5cf6", pct: 0 },
+                { label: "Extra Charges",        value: finalExtraCharges,   color: "#06b6d4", pct: 0 },
+            ];
+            if (companyRevenue > 0) {
+                revenueBreakdown.forEach(r => { r.pct = Math.round((r.value / companyRevenue) * 100); });
+            }
+
+            // ── 9. KIDDIES STATS ──────────────────────────────────────────────
+            const [kiddiesTotal, kiddiesPendingApproval, kiddiesActive] = await Promise.all([
+                KiddiesAccount.countDocuments({}),
+                KiddiesAccount.countDocuments({ status: "locked", registrationStatus: "paid" }),
+                KiddiesAccount.countDocuments({ status: "active" }),
+            ]);
+
+            // ── 10. PENDING APPROVALS ─────────────────────────────────────────
+            const [pendingApprovals, pendingDeposits] = await Promise.all([
+                Payment.countDocuments({ status: "pending" }).catch(() => 0),
+                Payment.countDocuments({
+                    paymentType: { $exists: false },
+                    status:      "pending",
+                    amount:      { $gt: 0 },
+                }).catch(() => 0),
+            ]);
+
+            // ── 11. RECENT TRANSACTIONS FEED ─────────────────────────────────
+            const rawRecent = await Payment.find({ ...createdIn })
+                .sort({ createdAt: -1 })
+                .limit(10)
+                .populate({ path: "user", select: "firstName lastName membershipID" })
+                .lean()
+                .catch(() => []);
+
+            const txTypeMap = {
+                deposit:          { icon: "fa-arrow-down",       color: "#10b981", label: "Deposit",        sign: "+" },
+                loan_repayment:   { icon: "fa-hand-holding-usd", color: "#f59e0b", label: "Loan Repayment", sign: ""  },
+                registration_fee: { icon: "fa-id-card",          color: "#3b82f6", label: "Registration",   sign: "+" },
+                penalty_payment:  { icon: "fa-bolt",             color: "#ef4444", label: "Penalty",        sign: ""  },
+                extra_charge:     { icon: "fa-minus-circle",     color: "#8b5cf6", label: "Extra Charge",   sign: "-" },
+                external_payment: { icon: "fa-building",         color: "#06b6d4", label: "External",       sign: ""  },
+            };
+            const statusColorMap = {
+                success: "#10b981",
+                paid:    "#10b981",
+                pending: "#f59e0b",
+                failed:  "#ef4444",
+            };
+
+            const resolveType = (tx) => {
+                if (tx.paymentType) return tx.paymentType;
+                if (tx.paystackResponse?.metadata?.type === "deposit") return "deposit";
+                if (tx.paystackResponse?.adminNote)                    return "deposit";
+                return null;
+            };
+
+            const recentTransactions = rawRecent.map(tx => {
+                const typeKey = resolveType(tx);
+                const t = txTypeMap[typeKey] || { icon: "fa-circle", color: "#64748b", label: "Payment", sign: "" };
+                return {
+                    memberName:   tx.user
+                        ? `${tx.user.firstName} ${tx.user.lastName}`
+                        : (tx.payeeName || "Unknown"),
+                    membershipID: tx.user?.membershipID || "",
+                    amount:       tx.amount || 0,
+                    typeLabel:    t.label,
+                    typeIcon:     t.icon,
+                    typeColor:    t.color,
+                    sign:         t.sign,
+                    status:       (tx.status || "").charAt(0).toUpperCase() + (tx.status || "").slice(1),
+                    statusColor:  statusColorMap[tx.status] || "#64748b",
+                    timeAgo:      timeAgo(tx.createdAt),
+                };
+            });
+
+            // ── 12. TOP MEMBERS BY BALANCE ────────────────────────────────────
+            const topAccountDocs = await Account.find({ ownerType: "User" })
+                .sort({ balance: -1 })
+                .limit(7)
+                .populate({ path: "ownerId", select: "firstName lastName membershipID", model: "User" })
+                .lean()
+                .catch(() => []);
+
+            const topMembers = topAccountDocs
+                .filter(a => a.ownerId)
+                .map(a => ({
+                    name:         `${a.ownerId.firstName} ${a.ownerId.lastName}`,
+                    membershipID: a.ownerId.membershipID || "N/A",
+                    balance:      a.balance || 0,
+                    initials:     (
+                        (a.ownerId.firstName?.[0] || "") +
+                        (a.ownerId.lastName?.[0]  || "")
+                    ).toUpperCase(),
+                }));
+
+            // ── RENDER ────────────────────────────────────────────────────────
+            res.render("dashboard/admin/overview", {
+                admin:          req.user,
+                timeGreeting:   greeting(),
+                totalPortfolio: totalMemberBalance + kiddiesBalance + outstandingBalance,
+                periodLabel,
+                filterValues: {
+                    period: req.query.period || "",
+                    from:   req.query.from   || "",
+                    to:     req.query.to     || "",
+                },
+                stats: {
+                    members: {
+                        total:       totalMembers,
+                        active:      activeMembers,
+                        pending:     pendingMembers,
+                        rejected:    rejectedMembers,
+                        newInPeriod,
+                    },
+                    finance: {
+                        totalMemberBalance,
+                        kiddiesBalance,
+                        totalDeposits,
+                        depositsInPeriod,
+                        totalWithdrawals,
+                        withdrawalsInPeriod,
+                        netPosition:             totalDeposits - totalWithdrawals,
+                        pendingWithdrawalsAmount,
+                        companyRevenue,
+                        revenueBreakdown,
+                        registrationFees,
+                        withdrawalPenalties,
+                        finalExtraCharges,
+                    },
+                    loans: {
+                        totalCount:        loansInPeriod.length,
+                        totalDisbursed:    totalLoansDisbursed,
+                        totalRepaid:       totalLoansRepaid,
+                        outstandingBalance,
+                        activeCount:       activeLoansCount,
+                        completedCount,
+                        overdueCount,
+                        externalCount,
+                        recoveryRate,
+                        interestCollected,
+                        loanPenalties,
+                        repaymentsInPeriod,
+                    },
+                    kiddies: {
+                        totalBalance:    kiddiesBalance,
+                        totalAccounts:   kiddiesTotal,
+                        pendingApproval: kiddiesPendingApproval,
+                        activeAccounts:  kiddiesActive,
+                    },
+                    pending: {
+                        approvals:    pendingApprovals,
+                        withdrawals:  pendingWithdrawalCount,
+                        loanPayments: pendingLoanPayments,
+                        deposits:     pendingDeposits,
+                    },
+                },
+                recentTransactions,
+                topMembers,
+            });
+
+        } catch (err) {
+            console.error("[Admin] Overview dashboard error:", err);
+            res.status(500).send("Internal Server Error");
+        }
+    }
+);
 
 
 
@@ -407,6 +802,41 @@ router.post(
     } catch (err) {
       console.error("Edit member error:", err);
       return res.status(500).json({ status: false, message: "Internal server error" });
+    }
+  }
+);
+
+
+router.post(
+  "/admin/members/reject/:id",
+  ensureAdmin("approve_members"), // reuse approve permission, or create "reject_members"
+  async (req, res) => {
+    try {
+      const memberId = req.params.id;
+
+      const user = await User.findById(memberId);
+      if (!user) {
+        return res.status(404).json({ status: false, message: "Member not found" });
+      }
+
+      if (user.status !== "pending") {
+        return res.status(400).json({ 
+          status: false, 
+          message: "Only pending members can be rejected" 
+        });
+      }
+
+      user.status = "rejected";
+      await user.save();
+
+      return res.json({ 
+        status: true, 
+        message: "Member has been rejected successfully" 
+      });
+
+    } catch (err) {
+      console.error("Error rejecting member:", err);
+      res.status(500).json({ status: false, message: "Error rejecting member" });
     }
   }
 );
@@ -1828,65 +2258,435 @@ router.post(
 
 
 
+
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GET  /admin/kiddies-deposits          — render the management page
+// POST /admin/kiddies-deposits/:id/approve
+// POST /admin/kiddies-deposits/:id/reject
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ─── GET: Render page ─────────────────────────────────────────────────────────
+router.get(
+  "/admin/kiddies-deposits",
+  ensureAdmin("process_deposits"),
+  async (req, res) => {
+    try {
+      // ── Fetch all KiddiesPayments (manual deposits only, paymentType: "deposit") ──
+      const payments = await KiddiesPayment.find({ paymentType: { $in: ["deposit", "registration"] } })
+        .populate({
+          path: "kiddiesAccount",
+          populate: { path: "account" },
+        })
+        .populate("parent", "firstName lastName email")
+        .sort({ createdAt: -1 });
+
+      // ── Shape data for the template ──
+      const deposits = payments.map((p) => {
+        const kiddies = p.kiddiesAccount;
+        const parent  = p.parent;
+        const acct    = kiddies?.account;
+        const createdAt = new Date(p.createdAt);
+
+        return {
+          id:             p._id.toString(),
+          reference:      p.reference,
+          date:           createdAt.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" }),
+          time:           createdAt.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" }),
+          childName:      kiddies ? `${kiddies.childFirstName} ${kiddies.childLastName}` : "—",
+          accountID:      kiddies?.accountID || "—",
+          parentName:     parent ? `${parent.firstName} ${parent.lastName}` : "—",
+          parentEmail:    parent?.email || p.email,
+          payeeName:      p.payeeName || null,
+          paymentType:    p.paymentType,
+          amount:         p.amount,
+          currentBalance: Number(acct?.balance || 0),
+          status:         p.status,                      // "pending" | "success" | "failed"
+          verifiedAt:     p.verifiedAt || null,
+        };
+      });
+
+      // ── Stats ──
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const stats = {
+        totalDeposited: payments
+          .filter((p) => p.status === "success")
+          .reduce((sum, p) => sum + p.amount, 0),
+
+        pendingCount: payments.filter((p) => p.status === "pending").length,
+
+        approvedToday: payments.filter(
+          (p) => p.status === "success" && p.verifiedAt && new Date(p.verifiedAt) >= today
+        ).length,
+
+        activeKiddiesAccounts: await KiddiesAccount.countDocuments({ status: "active" }),
+      };
+
+      return res.render("dashboard/admin/kiddies-deposits", { deposits, stats });
+
+    } catch (err) {
+      console.error("Kiddies deposits page error:", err);
+      return res.redirect("/admin-dashboard");
+    }
+  }
+);
+
+
+// ─── POST: Approve ─────────────────────────────────────────────────────────────
+router.post(
+  "/admin/kiddies-deposits/:id/approve",
+  ensureAdmin("process_deposits"),
+  async (req, res) => {
+    try {
+      const { id }    = req.params;
+      const { notes } = req.body;
+
+      // ── 1. Atomically mark payment as success ──
+      const payment = await KiddiesPayment.findOneAndUpdate(
+        { _id: id, status: "pending" },
+        { $set: { status: "success", verifiedAt: new Date() } },
+        { new: true }
+      ).populate({
+        path: "kiddiesAccount",
+        populate: { path: "account" },
+      });
+
+      if (!payment) {
+        return res.status(400).json({
+          status:  false,
+          message: "Deposit already processed or not found.",
+        });
+      }
+
+      const kiddiesAccount = payment.kiddiesAccount;
+      const linkedAccount  = kiddiesAccount?.account;
+
+      if (!linkedAccount) {
+        await KiddiesPayment.findByIdAndUpdate(id, { $set: { status: "pending", verifiedAt: null } });
+        return res.status(400).json({
+          status:  false,
+          message: "Linked savings account not found. Please contact support.",
+        });
+      }
+
+      const isRegistration = payment.paymentType === "registration";
+
+      // ── 2. Determine credit amount and registration fee ──
+      let creditAmount    = payment.amount;
+      let registrationFee = 0;
+
+      if (isRegistration) {
+        const settings  = await Settings.getSettings();
+        registrationFee = Number(settings.registrationFees.kiddiesRegistrationFee || 0);
+        creditAmount    = payment.amount - registrationFee;
+
+        if (creditAmount <= 0) {
+          await KiddiesPayment.findByIdAndUpdate(id, { $set: { status: "pending", verifiedAt: null } });
+          return res.status(400).json({
+            status:  false,
+            message: `Invalid amounts: total ₦${payment.amount} is not greater than the registration fee ₦${registrationFee}.`,
+          });
+        }
+      }
+
+      // ── 3. Credit the child's savings account ──
+      const updatedAccount = await Account.findByIdAndUpdate(
+        linkedAccount._id,
+        { $inc: { balance: creditAmount } },
+        { new: true }
+      );
+
+      if (!updatedAccount) {
+        await KiddiesPayment.findByIdAndUpdate(id, { $set: { status: "pending", verifiedAt: null } });
+        return res.status(500).json({
+          status:  false,
+          message: "Failed to update account balance. Please try again.",
+        });
+      }
+
+      // ── 4. Mark registrationStatus as paid on the kiddies account ──
+      if (isRegistration) {
+        await KiddiesAccount.findByIdAndUpdate(kiddiesAccount._id, {
+          $set: { registrationStatus: "paid" },
+        });
+      }
+
+      // ── 5. KiddiesTransaction — deposit only (credit amount) ──
+      await KiddiesTransaction.create({
+        kiddiesAccount: kiddiesAccount._id,
+        parent:         payment.parent,
+        type:           "deposit",
+        amount:         creditAmount,
+        balanceAfter:   updatedAccount.balance,
+        description:    isRegistration
+          ? `Initial Deposit — Registration Approved by Admin (${kiddiesAccount.accountID})${payment.payeeName ? ` | Payer: ${payment.payeeName}` : ""}`
+          : `Manual Deposit — Approved by Admin (${kiddiesAccount.accountID})${payment.payeeName ? ` | Payer: ${payment.payeeName}` : ""}`,
+        reference:      payment.reference,
+        status:         "completed",
+        paymentMethod:  "cooperative",
+      });
+
+      // ── 6. Separate Payment record for registration fee ──
+      if (isRegistration && registrationFee > 0) {
+        await Payment.create({
+          user:        payment.parent,
+          email:       payment.email,
+          amount:      registrationFee,
+          reference:   `${payment.reference}-REG-FEE`,
+          payeeName:   payment.payeeName || null,
+          paymentType: "registration_fee",
+          status:      "success",
+          paystackResponse: {
+            method:     "Manual Transfer",
+            note:       "Registration fee extracted on admin approval",
+            accountID:  kiddiesAccount.accountID,
+            approvedBy: req.user._id,
+            approvedAt: new Date(),
+          },
+        });
+      }
+
+      // ── 7. Company Ledger: IN — initial deposit / top-up into kiddies account ──
+      await CompanyLedger.create({
+        type:        "kiddies_deposit_approve",
+        direction:   "in",
+        amount:      creditAmount,
+        relatedUser: payment.parent || null,
+        description: isRegistration
+          ? `Kiddies initial deposit — ${kiddiesAccount.accountID} (${payment.reference})${payment.payeeName ? ` | Payer: ${payment.payeeName}` : ""}`
+          : `Kiddies deposit received — ${kiddiesAccount.accountID} (${payment.reference})${payment.payeeName ? ` | Payer: ${payment.payeeName}` : ""}`,
+        recordedBy:  req.user._id,
+        meta: {
+          reference:    payment.reference,
+          accountID:    kiddiesAccount.accountID,
+          payeeName:    payment.payeeName || null,
+          notes:        notes || "Approved by admin",
+          balanceAfter: updatedAccount.balance,
+          paymentType:  payment.paymentType,
+        },
+      });
+
+      // ── 8. Company Ledger: IN — registration fee as separate income entry ──
+      if (isRegistration && registrationFee > 0) {
+        await CompanyLedger.create({
+          type:        "registration_fee",
+          direction:   "in",
+          amount:      registrationFee,
+          relatedUser: payment.parent || null,
+          description: `Kiddies registration fee — ${kiddiesAccount.accountID} (${payment.reference})`,
+          recordedBy:  req.user._id,
+          meta: {
+            reference:  payment.reference,
+            accountID:  kiddiesAccount.accountID,
+            payeeName:  payment.payeeName || null,
+          },
+        });
+      }
+
+      // ── 9. Admin action log ──
+      await AdminActionLog.create({
+        admin:       req.user._id,
+        adminRole:   req.user.role?.name || "admin",
+        actionType:  "kiddies_deposit_approve",
+        targetUser:  payment.parent || null,
+        targetModel: "KiddiesPayment",
+        targetId:    payment._id,
+        description: `Approved kiddies ${isRegistration ? "registration" : "deposit"} ${payment.reference} — ₦${creditAmount.toLocaleString()} credited → ${kiddiesAccount.accountID}${isRegistration ? ` | Fee: ₦${registrationFee.toLocaleString()}` : ""}`,
+        ipAddress:   req.ip,
+        userAgent:   req.headers["user-agent"],
+        status:      "success",
+        meta: {
+          notes:          notes || "Approved by admin",
+          paymentType:    payment.paymentType,
+          creditAmount,
+          registrationFee,
+        },
+      });
+
+      console.log(
+        `✅ Kiddies ${isRegistration ? "registration" : "deposit"} approved: ₦${creditAmount} credited → ${kiddiesAccount.accountID}${isRegistration ? ` | Fee: ₦${registrationFee}` : ""} | Ref: ${payment.reference} | Admin: ${req.user.email}`
+      );
+
+      return res.json({
+        status:     true,
+        message:    `Kiddies ${isRegistration ? "registration" : "deposit"} approved successfully.`,
+        newBalance: updatedAccount.balance,
+      });
+
+    } catch (err) {
+      console.error("Kiddies deposit approve error:", err);
+      return res.status(500).json({ status: false, message: "Server error. Please try again." });
+    }
+  }
+);
+
+
+// ─── POST: Reject ──────────────────────────────────────────────────────────────
+router.post(
+  "/admin/kiddies-deposits/:id/reject",
+  ensureAdmin("process_deposits"),
+  async (req, res) => {
+    try {
+      const { id }     = req.params;
+      const { reason } = req.body;
+
+      if (!reason?.trim()) {
+        return res.status(400).json({
+          status:  false,
+          message: "A rejection reason is required.",
+        });
+      }
+
+      // ── 1. Atomically mark payment as failed ──
+      const payment = await KiddiesPayment.findOneAndUpdate(
+        { _id: id, status: "pending" },
+        {
+          $set: {
+            status:     "failed",
+            verifiedAt: new Date(),
+            "paystackResponse.rejectionReason": reason,
+            "paystackResponse.rejectedAt":      new Date(),
+            "paystackResponse.rejectedBy":      req.user._id,
+          },
+        },
+        { new: true }
+      ).populate({
+        path: "kiddiesAccount",
+        populate: { path: "account" },
+      });
+
+      if (!payment) {
+        return res.status(400).json({
+          status:  false,
+          message: "Deposit already processed or not found.",
+        });
+      }
+
+      const kiddiesAccount = payment.kiddiesAccount;
+
+      // ── 2. Mark any pending KiddiesTransaction for this reference as failed ──
+      await KiddiesTransaction.findOneAndUpdate(
+        {
+          kiddiesAccount: kiddiesAccount._id,
+          reference:      payment.reference,
+          status:         "pending",
+        },
+        {
+          $set: {
+            status:      "failed",
+            description: `${payment.paymentType === "registration" ? "Registration deposit" : "Deposit"} rejected by admin — ${reason}`,
+          },
+        }
+      );
+
+      // ── 3. Admin action log ──
+      await AdminActionLog.create({
+        admin:       req.user._id,
+        adminRole:   req.user.role?.name || "admin",
+        actionType:  "kiddies_deposit_reject",
+        targetUser:  payment.parent || null,
+        targetModel: "KiddiesPayment",
+        targetId:    payment._id,
+        description: `Rejected kiddies ${payment.paymentType} ${payment.reference} — Reason: ${reason}`,
+        ipAddress:   req.ip,
+        userAgent:   req.headers["user-agent"],
+        status:      "success",
+        meta:        { reason, paymentType: payment.paymentType },
+      });
+
+      console.log(
+        `❌ Kiddies ${payment.paymentType} rejected: ${payment.reference} | Reason: ${reason} | Admin: ${req.user.email}`
+      );
+
+      return res.json({
+        status:  true,
+        message: "Kiddies deposit rejected successfully.",
+      });
+
+    } catch (err) {
+      console.error("Kiddies deposit reject error:", err);
+      return res.status(500).json({ status: false, message: "Server error. Please try again." });
+    }
+  }
+);
 // ADMIN WITHDRWALS MANAGEMENT 
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ADMIN — WITHDRAWAL MANAGEMENT ROUTES
+   GET  /admin/manage-withdrawals   — render the management page
+   POST /admin/withdrawals/:id/approve — approve + ledger + log
+   POST /admin/withdrawals/:id/reject  — reject + log
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── GET: render withdrawal management page ──────────────────────────── */
 router.get("/admin/manage-withdrawals", ensureAdmin("view_withdrawals"), async (req, res) => {
   try {
-    // Fetch only withdrawals that are NOT approved
+    /* Fetch all non-success withdrawals (pending, processing, failed) */
     const withdrawals = await Withdrawal.find({ status: { $ne: "success" } })
       .populate({
         path: "user",
         select: "firstName lastName membershipID email phone account status",
-        populate: {
-          path: "account",
-          select: "balance",
-        },
+        populate: { path: "account", select: "balance" },
       })
       .sort({ createdAt: -1 });
 
-    // Transform data for frontend
-    const withdrawalData = withdrawals.map((withdrawal) => {
-      const dateObj = new Date(withdrawal.createdAt);
-
-      const memberFullName = withdrawal.user
-        ? `${withdrawal.user.firstName} ${withdrawal.user.lastName}`
+    const withdrawalData = withdrawals.map((w) => {
+      const dateObj = new Date(w.createdAt);
+      const memberName = w.user
+        ? `${w.user.firstName} ${w.user.lastName}`
         : "N/A";
 
+      /* Map DB status to display status */
+      const displayStatus =
+        w.status === "success"    ? "approved"   :
+        w.status === "failed"     ? "rejected"   :
+        w.status === "processing" ? "processing" : "pending";
+
+      /* Withdrawal type label */
+      const typeLabel =
+        w.type === "ondemand" ? "On-demand" :
+        w.type === "regular"  ? "Regular"   : w.type;
+
       return {
-        id: withdrawal._id,
-        reference: withdrawal.reference,
-        date: dateObj.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }),
-        time: dateObj.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        memberName: memberFullName,
-        memberId: withdrawal.user?.membershipID || "N/A",
-        memberEmail: withdrawal.user?.email || "N/A",
-        memberPhone: withdrawal.user?.phone || "N/A",
-        amount: withdrawal.amount,
-        bankName: withdrawal.bankName,
-        accountName: withdrawal.accountName,
-        accountNumber: withdrawal.accountNumber,
-        method: "Bank Transfer",
-        type: withdrawal.type || "normal",
-        status:
-          withdrawal.status === "success"
-            ? "approved"
-            : withdrawal.status === "failed"
-            ? "rejected"
-            : withdrawal.status === "processing"
-            ? "processing"
-            : "pending",
-        balance: withdrawal.user?.account?.balance || 0,
-        notes: withdrawal.providerResponse?.message || "Withdrawal request",
+        id:              w._id,
+        reference:       w.reference,
+        date:            dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        time:            dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+        memberName,
+        memberId:        w.user?.membershipID || "N/A",
+        memberEmail:     w.user?.email        || "N/A",
+        memberPhone:     w.user?.phone        || "N/A",
+
+        /* ── Financial fields ── */
+        amount:          w.amount,          // gross requested
+        penaltyRate:     w.penaltyRate  || 0,
+        penaltyAmount:   w.penaltyAmount || 0,
+        netAmount:       w.netAmount    || w.amount, // what admin actually pays out
+        phase1Amount:    w.phase1Amount || w.netAmount || w.amount,
+        phase2Amount:    w.phase2Amount || 0,
+        payoutType:      w.payoutType   || "immediate",
+
+        /* ── Bank & account ── */
+        bankName:        w.bankName,
+        accountName:     w.accountName,
+        accountNumber:   w.accountNumber,
+        method:          "Bank Transfer",
+        type:            w.type     || "normal",
+        typeLabel,
+        status:          displayStatus,
+        balance:         w.user?.account?.balance || 0,
+
+        /* ── Flags ── */
+        triggeredDeactivation: w.triggeredDeactivation || false,
+        notes:           w.notes || "",
       };
     });
 
-    // Stats (optional: you can keep stats for all withdrawals)
+    /* ── Stats ── */
     const pendingRequests = withdrawals.filter(
       (w) => w.status === "pending" || w.status === "processing"
     ).length;
@@ -1894,19 +2694,13 @@ router.get("/admin/manage-withdrawals", ensureAdmin("view_withdrawals"), async (
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const approvedToday = await Withdrawal.countDocuments({
-      status: "success",
-      createdAt: { $gte: today },
-    });
-
-    const rejectedToday = await Withdrawal.countDocuments({
-      status: "failed",
-      createdAt: { $gte: today },
-    });
-
-    const totalAmount = await Withdrawal.aggregate([
-      { $match: { status: "success" } },
-      { $group: { _id: null, total: { $sum: "$amount" } } },
+    const [approvedToday, rejectedToday, totalAmountAgg] = await Promise.all([
+      Withdrawal.countDocuments({ status: "success",  createdAt: { $gte: today } }),
+      Withdrawal.countDocuments({ status: "failed",   createdAt: { $gte: today } }),
+      Withdrawal.aggregate([
+        { $match: { status: "success" } },
+        { $group: { _id: null, total: { $sum: "$amount" } } },
+      ]),
     ]);
 
     res.render("dashboard/admin/withdrawal", {
@@ -1916,15 +2710,562 @@ router.get("/admin/manage-withdrawals", ensureAdmin("view_withdrawals"), async (
         pendingRequests,
         approvedToday,
         rejectedToday,
-        totalAmount: totalAmount[0]?.total || 0,
+        totalAmount: totalAmountAgg[0]?.total || 0,
       },
     });
-  } catch (error) {
-    console.error("Error fetching withdrawals:", error);
+  } catch (err) {
+    console.error("[Admin] Withdrawal fetch error:", err);
     res.status(500).send("Internal Server Error");
   }
 });
 
+/* ─── POST: approve a withdrawal ─────────────────────────────────────── */
+router.post(
+  "/admin/withdrawals/:id/approve",
+  ensureAdmin("manage_withdrawals"),
+  async (req, res) => {
+    try {
+      const { notes = "" } = req.body;
+      const adminUser = req.user;
+
+      /* ── 1. ATOMIC STATUS TRANSITION ────────────────────────────────────
+         findOneAndUpdate with a status filter as the condition.
+         If two admins click Approve simultaneously only one will match
+         { status: $in ["pending","processing"] } — the second gets null
+         and is rejected before any side-effects run.
+      ──────────────────────────────────────────────────────────────────── */
+      const withdrawal = await Withdrawal.findOneAndUpdate(
+        {
+          _id:    req.params.id,
+          status: { $in: ["pending", "processing"] },  // only claim if still actionable
+        },
+        {
+          status:      "success",
+          processedAt: new Date(),
+          ...(notes && { notes }),
+        },
+        { new: true }                                   // return the updated doc
+      ).populate({
+        path: "user",
+        select: "firstName lastName membershipID email account status",
+        populate: { path: "account", select: "balance" },
+      });
+
+      if (!withdrawal) {
+        /* Either not found or already approved/rejected by another admin */
+        return res.status(400).json({
+          success: false,
+          message: "Withdrawal not found or has already been processed",
+        });
+      }
+
+      const isOnDemand    = withdrawal.type === "ondemand";
+      const grossAmount   = Number(withdrawal.amount);
+      const penaltyRate   = Number(withdrawal.penaltyRate   || 0);
+      const penaltyAmount = Number(withdrawal.penaltyAmount || 0);
+      const netAmount     = Number(withdrawal.netAmount     || grossAmount);
+      const phase1Amount  = Number(withdrawal.phase1Amount  || netAmount);
+      const phase2Amount  = Number(withdrawal.phase2Amount  || 0);
+      const payoutType    = withdrawal.payoutType || "immediate";
+      const memberName    = withdrawal.user
+        ? `${withdrawal.user.firstName} ${withdrawal.user.lastName}`
+        : "Unknown";
+      const currentBalance = Number(withdrawal.user?.account?.balance || 0);
+      /* The gross amount was already deducted from the member's account at request time.
+         currentBalance = balance AFTER deduction.
+         balanceBefore  = what the member had BEFORE the withdrawal request.
+         balanceAfter   = currentBalance (unchanged by this approval — money left at request). */
+      const balanceBefore = currentBalance + grossAmount;
+      const balanceAfter  = currentBalance;
+
+      /* ── 2. Update related transaction to success (idempotent guard) ── */
+      await Transaction.updateOne(
+        { reference: withdrawal.reference, status: { $ne: "success" } },
+        { status: "success" }
+      );
+
+      /* ── 3. DEACTIVATE MEMBER ACCOUNT IF FLAGGED ────────────────────────
+         Deactivation is deferred to here — account stays active while
+         pending so the member can still log in. Locked on admin approval.
+      ──────────────────────────────────────────────────────────────────── */
+      if (withdrawal.triggeredDeactivation) {
+        await User.findByIdAndUpdate(withdrawal.user._id, { status: "deactivated" });
+        console.log(
+          `[Admin] Deactivated user ${withdrawal.user._id} on withdrawal approval | ` +
+          `ref=${withdrawal.reference} | approvedBy=${adminUser.firstName} ${adminUser.lastName}`
+        );
+      }
+
+      /* ── 4. CACHE TRANSACTION (single DB hit for both ledger entries) ───
+         Both CompanyLedger entries need the transaction _id.
+         Fetching once here avoids two extra round-trips to MongoDB.
+      ──────────────────────────────────────────────────────────────────── */
+      const relatedTxn = await Transaction.findOne({ reference: withdrawal.reference });
+
+      /* ── 5. COMPANY LEDGER ENTRIES ──────────────────────────────────────
+         5a — outgoing net payout (money leaving cooperative to member)
+         5b — fee income (on-demand only, money earned by cooperative)
+         Recorded at APPROVAL time. Balance was already debited at request.
+      ──────────────────────────────────────────────────────────────────── */
+
+      // 5a — outgoing payout
+      await CompanyLedger.create({
+        type:               isOnDemand ? "forced_withdrawal" : "withdrawal",
+        amount:             phase1Amount,
+        direction:          "out",
+        relatedUser:        withdrawal.user._id,
+        relatedTransaction: relatedTxn?._id,
+        description:        isOnDemand
+          ? `On-demand withdrawal approved for ${memberName} — ` +
+            `net ₦${phase1Amount.toLocaleString()} after ${penaltyRate}% fee on ₦${grossAmount.toLocaleString()} gross`
+          : `Regular withdrawal approved for ${memberName} — ₦${grossAmount.toLocaleString()}`,
+        recordedBy: adminUser._id,
+        meta: {
+          grossAmount,
+          penaltyRate,
+          penaltyAmount,
+          netAmount,
+          payoutType,
+          phase1Amount,
+          phase2Amount,
+          approvedBy:     adminUser._id,
+          approvedByName: `${adminUser.firstName} ${adminUser.lastName}`,
+          withdrawalRef:  withdrawal.reference,
+        },
+      });
+
+      // 5b — fee income (on-demand only)
+      if (isOnDemand && penaltyAmount > 0) {
+        await CompanyLedger.create({
+          type:               "penalty_income",
+          amount:             penaltyAmount,
+          direction:          "in",
+          relatedUser:        withdrawal.user._id,
+          relatedTransaction: relatedTxn?._id,
+          description:
+            `On-demand withdrawal fee (${penaltyRate}%) from ${memberName} — ` +
+            `₦${penaltyAmount.toLocaleString()} on ₦${grossAmount.toLocaleString()} gross`,
+          recordedBy: adminUser._id,
+          meta: {
+            grossAmount,
+            penaltyRate,
+            penaltyAmount,
+            netAmount,
+            withdrawalRef: withdrawal.reference,
+            approvedBy:    adminUser._id,
+          },
+        });
+
+        /* 5c — ExtraCharge record (on-demand fee audit trail per member) */
+        await ExtraCharge.create({
+          member:     withdrawal.user._id,
+          chargeType: "forceful-withdrawal",
+          amount:     penaltyAmount,
+          reason:
+            `On-demand withdrawal fee ${penaltyRate}% on ₦${grossAmount.toLocaleString()} — ` +
+            `net ₦${netAmount.toLocaleString()} | ref: ${withdrawal.reference}`,
+          status: "paid",
+          paidAt: new Date(),
+        });
+      }
+
+      /* ── 6. WITHDRAWAL REPORT ── */
+      await WithdrawalReport.create({
+        member:         withdrawal.user._id,
+        account:        withdrawal.user.account?._id,
+        amount:         grossAmount,
+        fee:            penaltyAmount,
+        netAmount,
+        type:           "bank_transfer",
+        reference:      withdrawal.reference,
+        description:    isOnDemand
+          ? `On-demand withdrawal — gross ₦${grossAmount.toLocaleString()} | fee ${penaltyRate}% = ₦${penaltyAmount.toLocaleString()} | net ₦${netAmount.toLocaleString()}`
+          : `Regular withdrawal — ₦${grossAmount.toLocaleString()}`,
+        bankDetails: {
+          bankName:      withdrawal.bankName,
+          accountNumber: withdrawal.accountNumber,
+          accountName:   withdrawal.accountName,
+        },
+        status:          "approved",
+        balanceBefore,   // currentBalance + grossAmount — true pre-request balance
+        balanceAfter,
+        requestedBy:     withdrawal.user._id,
+        approvedBy:      adminUser._id,
+        approvedAt:      new Date(),
+        approvedByRole:  adminUser.role?.name || "admin",
+        notes,
+      });
+
+      /* ── 7. ADMIN ACTION LOG ── */
+      await AdminActionLog.create({
+        admin:       adminUser._id,
+        adminRole:   adminUser.role?.name || "admin",
+        actionType:  "withdrawal_approve",
+        targetUser:  withdrawal.user._id,
+        targetModel: "Withdrawal",
+        targetId:    withdrawal._id,
+        description:
+          `Admin ${adminUser.firstName} ${adminUser.lastName} approved withdrawal ` +
+          `₦${grossAmount.toLocaleString()} (ref: ${withdrawal.reference}) ` +
+          `for member ${memberName} (${withdrawal.user.membershipID}) — ` +
+          `type: ${withdrawal.type} | net payout: ₦${netAmount.toLocaleString()}` +
+          (penaltyAmount > 0 ? ` | fee: ₦${penaltyAmount.toLocaleString()} (${penaltyRate}%)` : "") +
+          (withdrawal.triggeredDeactivation ? " | account deactivated (balance below ₦10,000)" : ""),
+        changes: {
+          before: { status: "pending" },
+          after: {
+            status:          "success",
+            processedAt:     withdrawal.processedAt,
+            userDeactivated: withdrawal.triggeredDeactivation || false,
+          },
+          financial: {
+            grossAmount, penaltyRate, penaltyAmount, netAmount, payoutType,
+            phase1Amount, phase2Amount,
+          },
+        },
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"],
+        status: "success",
+      });
+
+      console.log(
+        `[Admin] Withdrawal approved: ref=${withdrawal.reference} | ` +
+        `member=${memberName} | gross=₦${grossAmount} | fee=₦${penaltyAmount} | net=₦${netAmount}` +
+        (withdrawal.triggeredDeactivation ? " | account deactivated" : "") +
+        ` | approvedBy=${adminUser.firstName} ${adminUser.lastName}`
+      );
+
+      return res.json({
+        success:     true,
+        deactivated: withdrawal.triggeredDeactivation || false,
+        message:     withdrawal.triggeredDeactivation
+          ? "Withdrawal approved. Member account has been deactivated (balance below ₦10,000)."
+          : "Withdrawal approved successfully",
+        status:      "approved",
+        newBalance:  balanceAfter,
+      });
+
+    } catch (err) {
+      console.error("[Admin] Withdrawal approval error:", err);
+      return res.status(500).json({ success: false, message: "Failed to approve withdrawal" });
+    }
+  }
+);
+
+/* ─── POST: reject a withdrawal ──────────────────────────────────────── */
+router.post(
+  "/admin/withdrawals/:id/reject",
+  ensureAdmin("manage_withdrawals"),
+  async (req, res) => {
+    try {
+      const { reason = "", notes = "" } = req.body;
+      const adminUser = req.user;
+
+      if (!reason) {
+        return res.status(400).json({ success: false, message: "Rejection reason is required" });
+      }
+
+      /* ── 1. Load withdrawal with user + account ── */
+      const withdrawal = await Withdrawal.findById(req.params.id).populate({
+        path: "user",
+        select: "firstName lastName membershipID email account status",
+        populate: { path: "account", select: "balance" },
+      });
+
+      if (!withdrawal) {
+        return res.status(404).json({ success: false, message: "Withdrawal not found" });
+      }
+
+      if (withdrawal.status === "success") {
+        return res.status(400).json({ success: false, message: "Cannot reject an already approved withdrawal" });
+      }
+
+      /* ── Build rejection note early — used in the atomic update below ── */
+      const rejectionNote = `${reason}${notes ? " — " + notes : ""}`;
+
+      /* ── ATOMIC STATUS GUARD ─────────────────────────────────────────────
+         Claim the withdrawal atomically before touching money.
+         Two admins clicking Reject simultaneously: only one gets a non-null
+         result — the second hits "already processed" and stops here,
+         preventing a double refund.
+      ──────────────────────────────────────────────────────────────────── */
+      const claimed = await Withdrawal.findOneAndUpdate(
+        {
+          _id:    withdrawal._id,
+          status: { $in: ["pending", "processing"] },  // only claim if still actionable
+        },
+        {
+          status:      "failed",
+          processedAt: new Date(),
+          notes:       rejectionNote,
+        },
+        { new: true }
+      );
+
+      if (!claimed) {
+        return res.status(400).json({
+          success: false,
+          message: "Withdrawal has already been processed",
+        });
+      }
+
+      const isOnDemand    = withdrawal.type === "ondemand";
+      const grossAmount   = Number(withdrawal.amount);
+      const penaltyAmount = Number(withdrawal.penaltyAmount || 0);
+      const penaltyRate   = Number(withdrawal.penaltyRate   || 0);
+      const netAmount     = Number(withdrawal.netAmount     || grossAmount);
+      const memberName    = withdrawal.user
+        ? `${withdrawal.user.firstName} ${withdrawal.user.lastName}`
+        : "Unknown";
+
+      /*
+       * BALANCE ACCURACY FIX
+       * ─────────────────────
+       * The full gross amount was deducted from the account at request time.
+       * So right now: account.balance = balance AFTER the deduction.
+       *
+       * balanceBefore = what the member had BEFORE they requested the withdrawal
+       *               = current balance + grossAmount
+       * balanceAfter  = what they will have AFTER refund
+       *               = current balance + grossAmount   (same — we're restoring them)
+       */
+      const currentBalance = Number(withdrawal.user?.account?.balance || 0);
+      const balanceBefore  = currentBalance + grossAmount;  // true original balance
+      const balanceAfter   = balanceBefore;                 // restored to original after refund
+
+      /* ── 2. Refund gross amount back to member's account ── */
+      if (!withdrawal.user?.account?._id) {
+        throw new Error(`User account not found for withdrawal ${withdrawal._id} — cannot refund`);
+      }
+
+      await Account.findByIdAndUpdate(
+        withdrawal.user.account._id,
+        { $inc: { balance: grossAmount } }
+      );
+
+      /* ── 3. Reactivate user if this withdrawal triggered deactivation ──
+              (balance is now restored, so the below-10k rule no longer applies)
+      ── */
+      if (withdrawal.triggeredDeactivation) {
+        await User.findByIdAndUpdate(withdrawal.user._id, { status: "active" });
+        console.log(`[Admin] User ${withdrawal.user._id} reactivated after withdrawal rejection`);
+      }
+
+      /* ── 5. Update related transaction ── */
+      await Transaction.findOneAndUpdate(
+        { reference: withdrawal.reference },
+        { status: "failed" }
+      );
+
+      /* ═══════════════════════════════════════════════════════════════════
+         6. REVERSE COMPANY LEDGER ENTRIES (on-demand only)
+            The ledger entries for this withdrawal may already exist if
+            they were created at request time. Whether they exist or not,
+            we create explicit reversal/correction entries so the ledger
+            remains a complete, accurate audit trail.
+
+            6a — Reverse the outgoing payout entry:
+                 Create an "in" entry to cancel the money-out record.
+            6b — Reverse the fee income entry:
+                 Create an "out" entry to cancel the fee earned.
+
+            We also soft-delete any existing pending ledger entries tied
+            to this withdrawal reference by marking them reversed in meta.
+      ═══════════════════════════════════════════════════════════════════ */
+      if (isOnDemand) {
+
+        /* Find existing ledger entries linked to this withdrawal reference */
+        const existingEntries = await CompanyLedger.find({
+          relatedUser: withdrawal.user._id,
+          "meta.withdrawalRef": withdrawal.reference,
+        });
+
+        /* Soft-mark each existing entry as reversed */
+        if (existingEntries.length > 0) {
+          await CompanyLedger.updateMany(
+            {
+              relatedUser: withdrawal.user._id,
+              "meta.withdrawalRef": withdrawal.reference,
+            },
+            {
+              $set: {
+                "meta.reversed":     true,
+                "meta.reversedAt":   new Date(),
+                "meta.reversedBy":   adminUser._id,
+                "meta.reversalNote": `Withdrawal rejected by admin: ${rejectionNote}`,
+              },
+            }
+          );
+        }
+
+        /* 6a — Reversal entry for the outgoing net payout */
+        await CompanyLedger.create({
+          type:        "forced_withdrawal",    // opposite direction = reversal
+          amount:      netAmount,
+          direction:   "in",                  // money coming BACK in (payout never happened)
+          relatedUser: withdrawal.user._id,
+          description:
+            `REVERSAL — On-demand withdrawal payout reversed for ${memberName}. ` +
+            `₦${netAmount.toLocaleString()} net payout cancelled (ref: ${withdrawal.reference}). ` +
+            `Reason: ${rejectionNote}`,
+          recordedBy: adminUser._id,
+          meta: {
+            grossAmount,
+            penaltyRate,
+            penaltyAmount,
+            netAmount,
+            withdrawalRef:  withdrawal.reference,
+            reversalOf:     "payout",
+            rejectedBy:     adminUser._id,
+            rejectionReason: rejectionNote,
+          },
+        });
+
+        /* 6b — Reversal entry for the fee income (cooperative gives fee back) */
+        if (penaltyAmount > 0) {
+          await CompanyLedger.create({
+            type:        "penalty_income",     // same type, opposite direction = reversal
+            amount:      penaltyAmount,
+            direction:   "out",               // fee income is reversed / returned
+            relatedUser: withdrawal.user._id,
+            description:
+              `REVERSAL — On-demand withdrawal fee income reversed for ${memberName}. ` +
+              `₦${penaltyAmount.toLocaleString()} fee (${penaltyRate}%) cancelled ` +
+              `(ref: ${withdrawal.reference}). Reason: ${rejectionNote}`,
+            recordedBy: adminUser._id,
+            meta: {
+              grossAmount,
+              penaltyRate,
+              penaltyAmount,
+              withdrawalRef:   withdrawal.reference,
+              reversalOf:      "fee_income",
+              rejectedBy:      adminUser._id,
+              rejectionReason: rejectionNote,
+            },
+          });
+        }
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════
+         7. REVERSE EXTRA CHARGE RECORD (on-demand only)
+            The ExtraCharge was recorded as "paid" at approval time.
+            On rejection, the fee is cancelled — mark it "reversed" using
+            the new enum value added to the ExtraCharge model.
+      ═══════════════════════════════════════════════════════════════════ */
+      if (isOnDemand && penaltyAmount > 0) {
+        await ExtraCharge.findOneAndUpdate(
+          {
+            member:     withdrawal.user._id,
+            chargeType: "forceful-withdrawal",
+            status:     "paid",
+            reason:     { $regex: withdrawal.reference },
+          },
+          {
+            $set: {
+              status:         "reversed",
+              reversedAt:     new Date(),
+              reversedBy:     adminUser._id,
+              reversalReason:
+                `Withdrawal rejected by admin ${adminUser.firstName} ${adminUser.lastName}. ` +
+                `Ref: ${withdrawal.reference}. Reason: ${rejectionNote}`,
+              paidAt:         null,
+            },
+          }
+        );
+      }
+
+      /* ── 8. Withdrawal Report ── */
+      await WithdrawalReport.create({
+        member:         withdrawal.user._id,
+        account:        withdrawal.user.account?._id,
+        amount:         grossAmount,
+        fee:            0,           // fee not collected — reversed
+        netAmount:      0,           // nothing paid out
+        type:           "bank_transfer",
+        reference:      withdrawal.reference,
+        description:
+          `Rejected withdrawal — ₦${grossAmount.toLocaleString()} refunded to member.` +
+          (isOnDemand && penaltyAmount > 0
+            ? ` Fee of ₦${penaltyAmount.toLocaleString()} (${penaltyRate}%) reversed.`
+            : ""),
+        bankDetails: {
+          bankName:      withdrawal.bankName,
+          accountNumber: withdrawal.accountNumber,
+          accountName:   withdrawal.accountName,
+        },
+        status:          "rejected",
+        balanceBefore,   // ✅ true original balance (before the withdrawal request)
+        balanceAfter,    // ✅ balance after refund (= balanceBefore — fully restored)
+        requestedBy:     withdrawal.user._id,
+        rejectedBy:      adminUser._id,
+        rejectedAt:      new Date(),
+        rejectionReason: rejectionNote,
+        notes,
+      });
+
+      /* ── 9. Admin Action Log ── */
+      await AdminActionLog.create({
+        admin:       adminUser._id,
+        adminRole:   adminUser.role?.name || "admin",
+        actionType:  "withdrawal_reject",
+        targetUser:  withdrawal.user._id,
+        targetModel: "Withdrawal",
+        targetId:    withdrawal._id,
+        description:
+          `Admin ${adminUser.firstName} ${adminUser.lastName} rejected withdrawal ` +
+          `₦${grossAmount.toLocaleString()} (ref: ${withdrawal.reference}) ` +
+          `for member ${memberName} (${withdrawal.user.membershipID}). ` +
+          `Reason: ${reason}. ` +
+          `₦${grossAmount.toLocaleString()} refunded to account.` +
+          (isOnDemand && penaltyAmount > 0
+            ? ` ₦${penaltyAmount.toLocaleString()} fee income reversed.`
+            : "") +
+          (withdrawal.triggeredDeactivation ? " Account reactivated." : ""),
+        changes: {
+          before: {
+            status:  "pending",
+            balance: currentBalance,
+          },
+          after: {
+            status:         "failed",
+            processedAt:    claimed.processedAt,
+            balance:        balanceAfter,
+          },
+          refunded:        grossAmount,
+          feeReversed:     isOnDemand ? penaltyAmount : 0,
+          ledgerReversed:  isOnDemand,
+          userReactivated: withdrawal.triggeredDeactivation || false,
+          reason,
+        },
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"],
+        status: "success",
+      });
+
+      console.log(
+        `[Admin] Withdrawal rejected: ref=${withdrawal.reference} | ` +
+        `member=${memberName} | ₦${grossAmount} refunded` +
+        (isOnDemand && penaltyAmount > 0 ? ` | ₦${penaltyAmount} fee reversed` : "") +
+        (withdrawal.triggeredDeactivation ? " | account reactivated" : "") +
+        ` | rejectedBy=${adminUser.firstName} ${adminUser.lastName} | reason=${reason}`
+      );
+
+      return res.json({
+        success:    true,
+        message:    "Withdrawal rejected, balance refunded" +
+                    (isOnDemand && penaltyAmount > 0 ? " and fee income reversed" : "") +
+                    (withdrawal.triggeredDeactivation ? ". Member account reactivated." : "."),
+        status:     "rejected",
+        newBalance: balanceAfter,
+        reactivated: withdrawal.triggeredDeactivation || false,
+      });
+
+    } catch (err) {
+      console.error("[Admin] Withdrawal rejection error:", err);
+      return res.status(500).json({ success: false, message: "Failed to reject withdrawal" });
+    }
+  }
+);
 
 // ENDS HERE 
 

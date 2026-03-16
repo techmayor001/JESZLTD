@@ -12,6 +12,9 @@ const Withdrawal = require("../models/Withdrawal");
 const Role = require("../models/Role");
 const Permission = require("../models/Permission");
 const CompanyLedger = require("../models/CompanyLedger");
+const ExtraCharge = require("../models/ExtraCharge");
+const crypto = require("crypto");
+
 
 
 
@@ -131,9 +134,9 @@ router.get("/cds-cooperative/dashboard", async (req, res) => {
     const companyCharge          = Number(latestROI?.companyCharge          || 0);
     const netInterestForRoi      = Number(latestROI?.netInterestForRoi      || 0);
 
-    console.log("Total Interest Collected:", totalInterestCollected);
-    console.log("Company Charge (ROI):",     companyCharge);
-    console.log("Net Interest for ROI:",     netInterestForRoi);
+    // console.log("Total Interest Collected:", totalInterestCollected);
+    // console.log("Company Charge (ROI):",     companyCharge);
+    // console.log("Net Interest for ROI:",     netInterestForRoi);
 
     // Load settings dynamically
     const settings           = await Settings.getSettings();
@@ -181,27 +184,28 @@ router.get("/cds-cooperative/dashboard", async (req, res) => {
     );
     const loanPenaltyRate  = Number(activeLoan?.penaltyPercentage || 0);
 
-    console.log("Active Loan:",        activeLoan?._id || "none");
-    console.log("Loan Is Overdue:",    loanIsOverdue);
-    console.log("Loan Outstanding:",   loanOutstanding);
-    console.log("Loan Total Penalty:", loanTotalPenalty);
-    console.log("Loan Penalty Rate:",  loanPenaltyRate);
+    // console.log("Active Loan:",        activeLoan?._id || "none");
+    // console.log("Loan Is Overdue:",    loanIsOverdue);
+    // console.log("Loan Outstanding:",   loanOutstanding);
+    // console.log("Loan Total Penalty:", loanTotalPenalty);
+    // console.log("Loan Penalty Rate:",  loanPenaltyRate);
 
     const interestRate = user.account?.accountType?.interestRate || 0;
 
     const currentYear = new Date().getFullYear();
     const forcefulWithdrawalCount = await Withdrawal.countDocuments({
       user: req.user._id,
-      type: "forceful",
+      type: "ondemand",
+      status: "success",
       createdAt: {
         $gte: new Date(`${currentYear}-01-01`),
         $lte: new Date(`${currentYear}-12-31`)
       }
     });
 
-    console.log("Forceful Withdrawal Count:", forcefulWithdrawalCount);
-    console.log("User Role:",                user.role?.name);
-    console.log("User Permissions Count:",   user.role?.permissions?.length || 0);
+    // console.log("Forceful Withdrawal Count:", forcefulWithdrawalCount);
+    // console.log("User Role:",                user.role?.name);
+    // console.log("User Permissions Count:",   user.role?.permissions?.length || 0);
 
     res.render("dashboard/user/user-dashboard", {
       user,
@@ -249,137 +253,261 @@ router.get("/cds-cooperative/dashboard", async (req, res) => {
 });
 
 
-// HANDLING WITHDRAWAL REQUESTS 
+
+
+const MIN_BALANCE = 10_000; // ₦10,000 floor
+
 router.post("/withdraw", async (req, res) => {
   try {
     const userId = req.user._id;
-    const { type, amount } = req.body;
+    const { type, amount: rawAmount } = req.body;
+    const amount = Number(rawAmount);
 
-    /* ❌ BASIC VALIDATION */
-    if (!type || !amount || Number(amount) <= 0) {
-      return res.status(400).json({
-        message: "Invalid withdrawal data"
-      });
+    /* ═══════════════════════════════════════════════════════════════════════
+       1. BASIC VALIDATION
+    ═══════════════════════════════════════════════════════════════════════ */
+    if (!type || !rawAmount || amount <= 0) {
+      return res.status(400).json({ message: "Invalid withdrawal data" });
     }
 
-    /* 🔍 FETCH USER + ACCOUNT + LOANS */
+    if (!["regular", "ondemand"].includes(type)) {
+      return res.status(400).json({ message: "Invalid withdrawal type" });
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       2. FETCH USER + ACCOUNT (with memberType) + ACTIVE LOANS
+    ═══════════════════════════════════════════════════════════════════════ */
     const user = await User.findById(userId)
-      .populate("account")
+      .populate({
+        path: "account",
+        populate: { path: "accountType", model: "MemberType" },
+      })
       .populate({
         path: "loans",
-        match: { status: { $in: ["pending", "approved"] } } // ✅ FIXED
+        match: { status: { $in: ["pending", "approved", "overdue"] } },
       });
 
     if (!user || !user.account) {
-      return res.status(404).json({
-        message: "User account not found"
-      });
+      return res.status(404).json({ message: "User account not found" });
     }
 
-    /* ❌ ACTIVE LOAN CHECK */
+    const account    = user.account;
+    const memberType = account.accountType;
+    const balance    = Number(account.balance || 0);
+    const halfBalance = parseFloat((balance / 2).toFixed(2));
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       3. ACTIVE LOAN CHECK — blocks ALL withdrawal types
+    ═══════════════════════════════════════════════════════════════════════ */
     if (user.loans && user.loans.length > 0) {
       return res.status(403).json({
-        message: "You cannot withdraw while you have an active loan"
+        message: "You cannot withdraw while you have an active loan",
       });
     }
 
-    /* ❌ GUARANTOR ACTIVE LOAN CHECK */
+    /* ═══════════════════════════════════════════════════════════════════════
+       4. GUARANTOR ACTIVE LOAN CHECK
+    ═══════════════════════════════════════════════════════════════════════ */
     const activeGuaranteedLoan = await Loan.findOne({
-      guarantors: {
-        $elemMatch: {
-          guarantor: userId,
-          status: "accepted"
-        }
-      },
-      status: { $in: ["pending", "approved"] }
+      guarantors: { $elemMatch: { guarantor: userId, status: "accepted" } },
+      status: { $in: ["pending", "approved", "overdue"] },
     });
 
-    if (activeGuaranteedLoan && Number(amount) >= user.account.balance) {
+    if (activeGuaranteedLoan && amount >= balance) {
       return res.status(403).json({
-        message:
-          "You cannot withdraw your full balance while you are a guarantor on an active loan"
+        message: "You cannot withdraw your full balance while you are a guarantor on an active loan",
       });
     }
 
-    /* ❌ BANK DETAILS CHECK */
+    /* ═══════════════════════════════════════════════════════════════════════
+       5. BANK DETAILS CHECK
+    ═══════════════════════════════════════════════════════════════════════ */
     if (
-      !user.bankDetails ||
-      !user.bankDetails.bankName ||
-      !user.bankDetails.accountNumber ||
-      !user.bankDetails.accountName
+      !user.bankDetails?.bankName ||
+      !user.bankDetails?.accountNumber ||
+      !user.bankDetails?.accountName
     ) {
       return res.status(400).json({
-        message: "Please update your bank details before requesting withdrawal"
+        message: "Please update your bank details before requesting withdrawal",
       });
     }
 
-    /* ❌ REGULAR WITHDRAWAL WINDOW */
+    if (amount > balance) {
+      return res.status(400).json({ message: "Insufficient balance" });
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       7. REGULAR WITHDRAWAL — WINDOW CHECK
+    ═══════════════════════════════════════════════════════════════════════ */
     if (type === "regular") {
       const today = new Date();
-      const day = today.getDate();
-      const month = today.getMonth(); // December = 11
-
-      if (month !== 11 || day < 1 || day > 10) {
+      if (today.getMonth() !== 11 || today.getDate() < 1 || today.getDate() > 10) {
         return res.status(403).json({
-          message:
-            "Regular withdrawals are only allowed between December 1st and 10th"
+          message: "Regular withdrawals are only allowed between December 1st and 10th",
         });
       }
     }
 
-    /* ❌ BALANCE CHECK */
-    if (Number(amount) > user.account.balance) {
+    /* ═══════════════════════════════════════════════════════════════════════
+       8. ON-DEMAND WITHDRAWAL — RULES
+    ═══════════════════════════════════════════════════════════════════════ */
+    const isOnDemand = type === "ondemand";
+
+    if (isOnDemand) {
+
+      /* 8a. memberType permission check */
+      if (memberType && memberType.allowForcedWithdrawal === false) {
+        return res.status(403).json({
+          message: "On-demand withdrawals are not permitted for your membership type",
+        });
+      }
+
+      const currentYear = new Date().getFullYear();
+
+      /* 8b. Fetch this year's on-demand withdrawals oldest-first */
+      const yearOnDemands = await Withdrawal.find({
+        user: userId,
+        type: "ondemand",
+        status: "success",        
+        createdAt: {
+          $gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
+          $lte: new Date(`${currentYear}-12-31T23:59:59.999Z`),
+        },
+      }).sort({ createdAt: 1 });
+
+      const onDemandCount = yearOnDemands.length;
+
+      /* 8c. Hard cap: max 2 per year */
+      if (onDemandCount >= 2) {
+        return res.status(403).json({
+          message: "You have reached the maximum of 2 on-demand withdrawals for this year",
+        });
+      }
+
+      /* 8d. Amount cap: strictly ≤ 50% of current balance */
+      if (amount > halfBalance) {
+        return res.status(400).json({
+          message: `On-demand withdrawals cannot exceed 50% of your balance. Maximum allowed: ₦${halfBalance.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`,
+        });
+      }
+
+      /* 8e. 2nd on-demand: must be at least 1 calendar month after the 1st */
+      if (onDemandCount === 1) {
+        const firstDate   = new Date(yearOnDemands[0].createdAt);
+        const earliestNext = new Date(firstDate);
+        earliestNext.setMonth(earliestNext.getMonth() + 1);
+
+        if (new Date() < earliestNext) {
+          const availableFrom = earliestNext.toLocaleDateString("en-NG", {
+            day: "numeric", month: "long", year: "numeric",
+          });
+          return res.status(403).json({
+            message: `Your second on-demand withdrawal is available from ${availableFrom} (at least 1 month after your first)`,
+          });
+        }
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       9. DEACTIVATION — balance after < ₦10,000 (both types)
+    ═══════════════════════════════════════════════════════════════════════ */
+    const balanceAfter   = parseFloat((balance - amount).toFixed(2));
+    const willDeactivate = balanceAfter < MIN_BALANCE;
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       10. FEE + PAYOUT CALCULATION (on-demand only, always single payout)
+    ═══════════════════════════════════════════════════════════════════════ */
+    const penaltyRate   = isOnDemand ? Number(memberType?.forceWithdrawalPenalty ?? 2.5) : 0;
+    const rate          = penaltyRate / 100;
+    const penaltyAmount = isOnDemand ? parseFloat((amount * rate).toFixed(2)) : 0;
+    const netAmount     = parseFloat((amount - penaltyAmount).toFixed(2));
+
+    // On-demand is always ≤ 50% so payout is always single/immediate
+    const payoutType   = "immediate";
+    const phase1Amount = isOnDemand ? netAmount : amount;
+    const phase2Amount = 0;
+
+
+    const withdrawalType = type;                          // "regular" | "ondemand"
+    const reference      = `WD-${crypto.randomUUID()}`;  // e.g. WD-550e8400-e29b-41d4-a716-446655440000
+    const description    = isOnDemand
+      ? `On-demand withdrawal — gross ₦${amount.toLocaleString()} | ` +
+        `fee ${penaltyRate}% = ₦${penaltyAmount.toLocaleString()} | ` +
+        `net ₦${netAmount.toLocaleString()} (immediate)`
+      : `Regular withdrawal — ₦${amount.toLocaleString()}`;
+    const updatedAccount = await Account.findOneAndUpdate(
+      { _id: account._id, balance: { $gte: amount } },  // condition: balance must still cover amount
+      { $inc: { balance: -amount } },
+      { new: true }
+    );
+
+    if (!updatedAccount) {
+      /* Either the balance changed between our check and now (race condition),
+         or the account simply doesn't exist. Either way, abort cleanly. */
       return res.status(400).json({
-        message: "Insufficient balance"
+        message: "Insufficient balance. A concurrent request may have already processed this withdrawal.",
       });
     }
 
-    /* 🏷 MAP FRONTEND TYPE → DB TYPE */
-    const withdrawalType = type === "force" ? "forceful" : "normal";
-
-    const description =
-      withdrawalType === "forceful"
-        ? "Forceful withdrawal request"
-        : "Regular withdrawal request";
-
-    /* 🔐 GENERATE REFERENCE */
-    const reference = `WD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-
-    /* 🧾 CREATE WITHDRAWAL */
+    /* ═══════════════════════════════════════════════════════════════════════
+       13. CREATE WITHDRAWAL RECORD
+    ═══════════════════════════════════════════════════════════════════════ */
     const withdrawal = await Withdrawal.create({
-      user: userId,
-      amount: Number(amount),
+      user:                  userId,
+      amount,                     // gross — full amount debited from account
       reference,
-      bankName: user.bankDetails.bankName,
-      accountName: user.bankDetails.accountName,
-      accountNumber: user.bankDetails.accountNumber,
-      type: withdrawalType,
-      status: "pending"
+      bankName:              user.bankDetails.bankName,
+      accountName:           user.bankDetails.accountName,
+      accountNumber:         user.bankDetails.accountNumber,
+      type:                  withdrawalType,
+      penaltyRate,            // 0 for regular
+      penaltyAmount,          // 0 for regular
+      netAmount,              // = amount for regular, = amount - fee for on-demand
+      payoutType,             // always "immediate"
+      phase1Amount,           // net disbursed to member
+      phase2Amount,           // always 0
+      triggeredDeactivation: willDeactivate,
+      status:                "pending",
     });
 
-    /* 🧾 RECORD TRANSACTION */
+    /* ═══════════════════════════════════════════════════════════════════════
+       14. CREATE TRANSACTION RECORD
+    ═══════════════════════════════════════════════════════════════════════ */
     const transaction = await Transaction.create({
-      user: userId,
-      type: "withdrawal",
-      amount: Number(amount),
-      status: "pending",
-      method: "manual",
+      user:        userId,
+      type:        "withdrawal",
+      amount,
+      status:      "pending",
+      method:      "manual",
       reference,
-      description
+      description,
     });
 
     return res.status(201).json({
-      message: "Withdrawal request submitted successfully",
-      withdrawalId: withdrawal._id,
-      transactionId: transaction._id
+      success:       true,
+      deactivated:   false,
+      willDeactivate,      
+      message:       willDeactivate
+        ? "Withdrawal submitted. Your account will be deactivated once the admin processes this request."
+        : "Withdrawal request submitted successfully",
+      withdrawalId:  withdrawal._id,
+      transactionId: transaction._id,
+      summary: {
+        grossAmount:   amount,
+        penaltyRate,
+        penaltyAmount,
+        netAmount,
+        payoutType,
+        phase1Amount,
+        phase2Amount,
+        balanceAfter,
+      },
     });
 
   } catch (err) {
-    /* 🔥 FULL DEBUG */
     console.error("Withdrawal Error:", err);
-
     return res.status(500).json({
-      message: err.message || "Unable to process withdrawal"
+      message: err.message || "Unable to process withdrawal",
     });
   }
 });

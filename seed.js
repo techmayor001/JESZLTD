@@ -10,6 +10,7 @@ const seedSubscriptionServices = require('./seedSubscriptions');
 ============================================================ */
 const defaultPermissions = [
   // Member Management
+  { name: "view_dashboard", description: "View dashboard", isSystemPermission: true },
   { name: "view_members", description: "View member list and details", isSystemPermission: true },
   { name: "create_members", description: "Add new members", isSystemPermission: true },
   { name: "edit_members", description: "Modify member information", isSystemPermission: true },
@@ -46,6 +47,8 @@ const defaultPermissions = [
   { name: "issue_external_loans", description: "Issue external loans", isSystemPermission: true },
   { name: "create_loan_settings", description: "Create new loan settings", isSystemPermission: true },
   { name: "delete_loan_settings", description: "Delete loan settings", isSystemPermission: true },
+  { name: "manage_withdrawals", description: "Manage withdrawal requests", isSystemPermission: true },
+
 
 
   // Reports & Analytics
