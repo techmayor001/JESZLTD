@@ -2190,7 +2190,7 @@ router.post(
 
 router.post(
   "/admin/deposits/:id/reject",
-  ensureAdmin,
+  ensureAdmin("process_deposits"),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -2202,60 +2202,78 @@ router.post(
         });
       }
 
-      const payment = await Payment.findById(id).populate("user");
+      const payment = await Payment.findById(id).populate({
+        path: "user",
+        populate: { path: "account" },
+      });
 
       if (!payment) {
         return res.status(404).json({ message: "Deposit not found" });
       }
 
-      // ❌ Prevent rejecting an already approved deposit
+      // Prevent rejecting an already processed deposit
       if (payment.status === "success" || payment.status === "paid") {
         return res.status(400).json({
           message: "Approved deposits cannot be rejected",
         });
       }
 
-      // ✅ Update payment
+      if (payment.status === "failed") {
+        return res.status(400).json({
+          message: "This deposit has already been rejected",
+        });
+      }
+
+      // Update payment status
       payment.status = "failed";
       payment.paystackResponse = {
         ...(payment.paystackResponse || {}),
-        adminNote: reason,
+        adminNote:  reason,
         rejectedAt: new Date(),
+        rejectedBy: req.user._id,
       };
+      await payment.save();
 
-      // ✅ Update linked transaction
+      // Update linked transaction if exists
       const transaction = await Transaction.findOne({
-        user: payment.user?._id,
+        user:      payment.user?._id,
         reference: payment.reference,
-        type: "deposit",
+        type:      "deposit",
       });
 
       if (transaction) {
-        transaction.status = "failed";
-        transaction.method =
-          payment.paystackResponse?.channel || "Bank Transfer";
-
-        transaction.description =
-          transaction.description ||
-          `Deposit rejected by admin (${payment.reference})`;
-
+        transaction.status      = "failed";
+        transaction.method      = payment.paystackResponse?.channel || "Bank Transfer";
+        transaction.description = transaction.description
+          || `Deposit rejected by admin (${payment.reference})`;
         await transaction.save();
       }
 
-      await payment.save();
+      // Admin action log
+      await AdminActionLog.create({
+        admin:       req.user._id,
+        adminRole:   req.user.role?.name || "admin",
+        actionType:  "deposit_reject",
+        targetUser:  payment.user?._id || null,
+        targetModel: "Payment",
+        targetId:    payment._id,
+        description: `Rejected deposit ${payment.reference} — Reason: ${reason}`,
+        ipAddress:   req.ip,
+        userAgent:   req.headers["user-agent"],
+        status:      "success",
+      });
 
-      res.json({
+      return res.json({
         success: true,
-        message: "Deposit rejected and transaction updated",
+        message: "Deposit rejected successfully",
       });
 
     } catch (error) {
       console.error("Reject deposit error:", error);
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: "Internal server error", error: error.message });
     }
   }
 );
-
 
 
 
