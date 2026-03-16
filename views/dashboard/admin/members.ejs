@@ -87,8 +87,11 @@
         .table thead th { border: none; padding: 1rem; font-weight: 600; color: var(--primary); white-space: nowrap; }
         .table tbody td { padding: 1rem; vertical-align: middle; }
         .table tbody tr:hover { background: rgba(59,130,246,.03); }
+        .table tbody tr.kiddies-row { background: rgba(236,72,153,.02); }
+        .table tbody tr.kiddies-row:hover { background: rgba(236,72,153,.05); }
         .badge { padding: .5rem .875rem; border-radius: 8px; font-weight: 600; font-size: .75rem; white-space: nowrap; }
         .member-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(30,58,138,.1); flex-shrink: 0; }
+        .kiddies-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg,#ec4899,#db2777); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: .85rem; flex-shrink: 0; }
         .action-btn { padding: .4rem .75rem; border-radius: 8px; font-size: .85rem; border: none; transition: all .3s; }
         .btn-group { display: flex; flex-wrap: nowrap; gap: 3px; }
         .btn-primary { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border: none; border-radius: 10px; padding: .6rem 1.5rem; font-weight: 600; transition: all .3s; }
@@ -116,13 +119,21 @@
         .section-title { color: var(--primary); }
         .powered-by { position: fixed; bottom: 15px; right: 15px; background: white; padding: 10px 16px; border-radius: 25px; box-shadow: 0 4px 15px rgba(30,58,138,.15); font-size: .8rem; font-weight: 600; color: var(--primary); z-index: 1000; }
 
-        /* FINANCIAL SNAPSHOT TILES in view modal */
+        /* FINANCIAL SNAPSHOT */
         .fin-snap { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; margin-bottom: 1.25rem; }
-        .fin-snap-tile {
-            padding: .875rem 1rem; border-radius: 12px; text-align: center;
-        }
+        .fin-snap-tile { padding: .875rem 1rem; border-radius: 12px; text-align: center; }
         .fin-snap-tile .fst-label { font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; margin-bottom: .2rem; }
         .fin-snap-tile .fst-value { font-size: 1.05rem; font-weight: 900; }
+
+        /* KIDDIES INFO BANNER in view modal */
+        .kiddies-info-banner {
+            background: rgba(236,72,153,.06); border: 1px solid rgba(236,72,153,.2);
+            border-radius: 12px; padding: 1rem; margin-bottom: 1rem;
+        }
+        .kiddies-info-banner .kb-title {
+            font-size: .7rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .07em; color: #db2777; margin-bottom: .6rem;
+        }
 
         /* NOTIFY */
         #notifyModal .modal-content { border-radius: 20px; border: none; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,.18); }
@@ -231,7 +242,7 @@
                             <i class="fas fa-download me-2"></i><span class="d-none d-sm-inline">Export</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-lg" style="border-radius:12px;border:none;min-width:190px;">
-                            <li><h6 class="dropdown-header text-muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;">Export All Members</h6></li>
+                            <li><h6 class="dropdown-header text-muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;">Export All</h6></li>
                             <li><a class="dropdown-item py-2" href="#" onclick="exportToExcel(false); return false;"><i class="fas fa-file-excel me-2" style="color:#10b981;"></i>Excel (All)</a></li>
                             <li><a class="dropdown-item py-2" href="#" onclick="exportToPDF(false); return false;"><i class="fas fa-file-pdf me-2" style="color:#ef4444;"></i>PDF (All)</a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -245,11 +256,13 @@
             </div>
         </div>
 
+        <!-- Stats: 4 for regular members + 1 for kiddies -->
         <div class="row g-3 mb-4 stats-row">
-            <div class="col-lg-3 col-md-6"><div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;"><i class="fas fa-users"></i></div><div><p class="text-muted mb-1 fw-semibold">Total Members</p><h3 class="mb-0 fw-bold" id="totalMembers">0</h3></div></div></div>
-            <div class="col-lg-3 col-md-6"><div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);color:white;"><i class="fas fa-user-check"></i></div><div><p class="text-muted mb-1 fw-semibold">Active Members</p><h3 class="mb-0 fw-bold text-primary" id="activeMembers">0</h3></div></div></div>
-            <div class="col-lg-3 col-md-6"><div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:white;"><i class="fas fa-user-clock"></i></div><div><p class="text-muted mb-1 fw-semibold">Pending Approval</p><h3 class="mb-0 fw-bold text-warning" id="pendingMembers">0</h3></div></div></div>
-            <div class="col-lg-3 col-md-6"><div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:white;"><i class="fas fa-user-times"></i></div><div><p class="text-muted mb-1 fw-semibold">Rejected</p><h3 class="mb-0 fw-bold text-danger" id="rejectedMembers">0</h3></div></div></div>
+            <div class="col-lg col-md-4 col-6"><div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;"><i class="fas fa-users"></i></div><div><p class="text-muted mb-1 fw-semibold" style="font-size:.82rem;">Total</p><h3 class="mb-0 fw-bold" id="totalMembers">0</h3></div></div></div>
+            <div class="col-lg col-md-4 col-6"><div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);color:white;"><i class="fas fa-user-check"></i></div><div><p class="text-muted mb-1 fw-semibold" style="font-size:.82rem;">Active</p><h3 class="mb-0 fw-bold text-primary" id="activeMembers">0</h3></div></div></div>
+            <div class="col-lg col-md-4 col-6"><div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:white;"><i class="fas fa-user-clock"></i></div><div><p class="text-muted mb-1 fw-semibold" style="font-size:.82rem;">Pending</p><h3 class="mb-0 fw-bold text-warning" id="pendingMembers">0</h3></div></div></div>
+            <div class="col-lg col-md-4 col-6"><div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:white;"><i class="fas fa-user-times"></i></div><div><p class="text-muted mb-1 fw-semibold" style="font-size:.82rem;">Rejected</p><h3 class="mb-0 fw-bold text-danger" id="rejectedMembers">0</h3></div></div></div>
+            <div class="col-lg col-md-4 col-6"><div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#ec4899 0%,#db2777 100%);color:white;"><i class="fas fa-baby"></i></div><div><p class="text-muted mb-1 fw-semibold" style="font-size:.82rem;">Kiddies</p><h3 class="mb-0 fw-bold" style="color:#db2777;" id="kiddiesCount">0</h3></div></div></div>
         </div>
 
         <div class="filter-section">
@@ -258,8 +271,24 @@
                     <label class="form-label">Search Members</label>
                     <div class="search-box"><i class="fas fa-search"></i><input type="text" class="form-control" id="searchInput" placeholder="Search by name, email, or ID..."></div>
                 </div>
-                <div class="col-lg-2 col-md-6"><label class="form-label">Status</label><select class="form-select" id="statusFilter"><option value="">All Status</option><option value="active">Active</option><option value="pending">Pending</option><option value="rejected">Rejected</option></select></div>
-                <div class="col-lg-2 col-md-6"><label class="form-label">Member Type</label><select class="form-select" id="typeFilter"><option value="">All Types</option><% memberTypes.forEach(type => { %><option value="<%= type.shortCode %>"><%= type.name %> (<%= type.shortCode %>)</option><% }) %></select></div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="pending">Pending</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="locked">Locked (Kiddies)</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label">Member Type</label>
+                    <select class="form-select" id="typeFilter">
+                        <option value="">All Types</option>
+                        <option value="KIDDIES">Kiddies Accounts</option>
+                        <% memberTypes.forEach(type => { %><option value="<%= type.shortCode %>"><%= type.name %> (<%= type.shortCode %>)</option><% }) %>
+                    </select>
+                </div>
                 <div class="col-lg-2 col-md-6"><label class="form-label">Sort By</label><select class="form-select" id="sortFilter"><option value="newest">Newest First</option><option value="oldest">Oldest First</option><option value="name">Name (A-Z)</option></select></div>
                 <div class="col-lg-2 col-md-6"><button class="btn btn-outline-primary w-100" onclick="resetFilters()"><i class="fas fa-redo me-2"></i>Reset</button></div>
             </div>
@@ -280,12 +309,8 @@
             </div>
             <div class="p-3 border-top">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pagination-wrap">
-                    <div class="text-muted">Showing <strong>1-10</strong> of <strong id="memberCountDisplay">0</strong> members</div>
-                    <nav><ul class="pagination mb-0">
-                        <li class="page-item disabled"><a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a></li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a></li>
-                    </ul></nav>
+                    <div class="text-muted">Showing <strong id="showingFrom">1</strong>–<strong id="showingTo">0</strong> of <strong id="memberCountDisplay">0</strong> records</div>
+                    <nav><ul class="pagination mb-0" id="paginationEl"></ul></nav>
                 </div>
             </div>
         </div>
@@ -318,9 +343,7 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════
-         VIEW MEMBER MODAL — with Financial Snapshot
-    ══════════════════════════════════════════════════════ -->
+    <!-- VIEW MEMBER MODAL -->
     <div class="modal fade" id="viewMemberModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
@@ -332,7 +355,23 @@
                             <h5 class="fw-bold" id="view_fullname"></h5>
                             <p class="text-muted mb-1" id="view_membershipId"></p>
                             <span class="badge mb-1" id="view_status_badge"></span>
-                            <div id="view_type_badge_wrap" class="mb-3 mt-1"></div>
+                            <div id="view_type_badge_wrap" class="mb-2 mt-1"></div>
+
+                            <!-- ★ KIDDIES BANNER — shown only for kiddies accounts -->
+                            <div id="view_kiddies_banner" class="kiddies-info-banner" style="display:none;text-align:left;">
+                                <div class="kb-title"><i class="fas fa-baby me-1"></i> Kiddies Account</div>
+                                <div class="row g-2" style="font-size:.8rem;">
+                                    <div class="col-6"><span class="text-muted d-block" style="font-size:.7rem;">Parent</span><strong id="view_kiddies_parent">—</strong></div>
+                                    <div class="col-6"><span class="text-muted d-block" style="font-size:.7rem;">Parent ID</span><strong id="view_kiddies_parentID">—</strong></div>
+                                    <div class="col-6"><span class="text-muted d-block" style="font-size:.7rem;">Lock Period</span><strong id="view_kiddies_lock">—</strong></div>
+                                    <div class="col-6"><span class="text-muted d-block" style="font-size:.7rem;">Unlock Date</span><strong id="view_kiddies_unlock">—</strong></div>
+                                    <div class="col-6"><span class="text-muted d-block" style="font-size:.7rem;">Beneficiary</span><strong id="view_kiddies_beneficiary">—</strong></div>
+                                    <div class="col-6"><span class="text-muted d-block" style="font-size:.7rem;">Child DOB</span><strong id="view_kiddies_dob">—</strong></div>
+                                </div>
+                                <a href="/admin/kiddies-accounts" class="btn btn-sm mt-2 w-100" style="background:linear-gradient(135deg,#ec4899,#db2777);color:white;border:none;font-size:.78rem;">
+                                    <i class="fas fa-external-link-alt me-1"></i>Manage in Kiddies Panel
+                                </a>
+                            </div>
 
                             <!-- ★ FINANCIAL SNAPSHOT -->
                             <div class="fin-snap mt-2 mb-3">
@@ -362,7 +401,8 @@
                                 </div>
                             </div>
 
-                            <div class="d-grid gap-2 mt-2">
+                            <!-- Buttons — hidden for kiddies -->
+                            <div class="d-grid gap-2 mt-2" id="view_member_actions">
                                 <button class="btn btn-primary btn-sm" id="editMemberBtn"><i class="fas fa-edit me-2"></i>Edit Member</button>
                                 <button class="btn btn-sm fw-semibold text-white" id="changeTypeBtnView"
                                     style="background:linear-gradient(135deg,#312e81 0%,#6366f1 100%);border:none;">
@@ -380,11 +420,13 @@
                                 <div class="col-md-6"><small class="text-muted">State / LGA</small><br><strong id="view_state_lga"></strong></div>
                                 <div class="col-12"><small class="text-muted">Address</small><br><strong id="view_address"></strong></div>
                             </div>
-                            <h6 class="fw-bold mb-3 section-title">Bank Details</h6>
-                            <div class="row g-3 mb-4">
-                                <div class="col-md-6"><small class="text-muted">Bank Name</small><br><strong id="view_bankName"></strong></div>
-                                <div class="col-md-6"><small class="text-muted">Account Number</small><br><strong id="view_accountNumber"></strong></div>
-                                <div class="col-md-12"><small class="text-muted">Account Name</small><br><strong id="view_accountName"></strong></div>
+                            <div id="view_bank_section">
+                                <h6 class="fw-bold mb-3 section-title">Bank Details</h6>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6"><small class="text-muted">Bank Name</small><br><strong id="view_bankName"></strong></div>
+                                    <div class="col-md-6"><small class="text-muted">Account Number</small><br><strong id="view_accountNumber"></strong></div>
+                                    <div class="col-md-12"><small class="text-muted">Account Name</small><br><strong id="view_accountName"></strong></div>
+                                </div>
                             </div>
                             <h6 class="fw-bold mb-3 section-title">KYC Documents</h6>
                             <div id="view_documents" class="doc-grid mb-4"></div>
@@ -442,7 +484,7 @@
                     </div>
                     <div class="alert alert-warning py-2 mb-0" style="font-size:.85rem;">
                         <i class="fas fa-exclamation-triangle me-1"></i>
-                        The member's current Membership ID will be <strong>replaced</strong> with a new sequential ID for the selected type. This takes effect immediately.
+                        The member's current Membership ID will be <strong>replaced</strong> with a new sequential ID for the selected type.
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -658,50 +700,107 @@
     }
 
     /* ═══════════════════════════════════════════════════
-       PAGE DATA
+       PAGE DATA — regular members + kiddies merged
     ═══════════════════════════════════════════════════ */
-    let members = <%- JSON.stringify(users.map(u => {
-        const account = u.account || null;
-        const stats   = u._memberStats || {};
-        return {
-            id: String(u._id),
-            firstName: u.firstName||'', lastName: u.lastName||'', email: u.email||'',
-            phone: u.phone||'', dob: u.dob||null,
-            memberID: u.membershipID||(account?.memberID||'N/A'),
-            type: account?.accountType?.shortCode||'N/A',
-            status: u.status||'pending',
-            registrationStatus: u.registrationStatus||'pending',
-            balance: account?.balance||0,
-            state: u.state||'', lga: u.lga||'', address: u.address||'',
-            idType: u.idType||'', idNumber: u.idNumber||'',
-            joinDate: u.createdAt||new Date(),
-            displayPicture: u.displayPicture||null,
-            passportPhoto:  u.passportPhoto||null,
-            idFile:         u.idFile||null,
-            addressProof:   u.addressProof||null,
-            signature:      u.signature||null,
-            bankDetails: u.bankDetails||{}, nextOfKin: u.nextOfKin||{},
-            // ★ financial stats from backend
-            memberStats: {
-                memberSavings:       stats.memberSavings       || 0,
-                accumulativeROI:     stats.accumulativeROI     || 0,
-                totalBalance:        stats.totalBalance        || 0,
-                sharePercentage:     stats.sharePercentage     || 0,
-                userShare:           stats.userShare           || 0,
-                companyChargeOnUser: stats.companyChargeOnUser || 0,
-                ROI:                 stats.ROI                 || 0,
-            },
-            account: account ? {
-                memberID: account.memberID||'N/A', balance: account.balance||0,
-                accountType: account.accountType ? {
-                    id: String(account.accountType._id),
-                    name: account.accountType.name,
-                    shortCode: account.accountType.shortCode,
-                    interestRate: account.accountType.interestRate
-                } : null
-            } : null
-        };
-    })) %>;
+    let members = <%- JSON.stringify([
+        // ── Regular members ──────────────────────────────
+        ...users.map(u => {
+            const account = u.account || null;
+            const stats   = u._memberStats || {};
+            return {
+                id:           String(u._id),
+                entityType:   'member',
+                firstName:    u.firstName||'',
+                lastName:     u.lastName||'',
+                email:        u.email||'',
+                phone:        u.phone||'',
+                dob:          u.dob||null,
+                memberID:     u.membershipID||(account?.memberID||'N/A'),
+                type:         account?.accountType?.shortCode||'N/A',
+                typeName:     account?.accountType?.name||'No Membership',
+                status:       u.status||'pending',
+                registrationStatus: u.registrationStatus||'pending',
+                balance:      account?.balance||0,
+                state:        u.state||'', lga: u.lga||'', address: u.address||'',
+                idType:       u.idType||'', idNumber: u.idNumber||'',
+                joinDate:     u.createdAt||new Date(),
+                displayPicture: u.displayPicture||null,
+                passportPhoto:  u.passportPhoto||null,
+                idFile:         u.idFile||null,
+                addressProof:   u.addressProof||null,
+                signature:      u.signature||null,
+                bankDetails:  u.bankDetails||{},
+                nextOfKin:    u.nextOfKin||{},
+                memberStats: {
+                    memberSavings:       stats.memberSavings       || 0,
+                    accumulativeROI:     stats.accumulativeROI     || 0,
+                    totalBalance:        stats.totalBalance        || 0,
+                    sharePercentage:     stats.sharePercentage     || 0,
+                    userShare:           stats.userShare           || 0,
+                    companyChargeOnUser: stats.companyChargeOnUser || 0,
+                    ROI:                 stats.ROI                 || 0,
+                },
+                account: account ? {
+                    memberID: account.memberID||'N/A',
+                    balance:  account.balance||0,
+                    accountType: account.accountType ? {
+                        id:           String(account.accountType._id),
+                        name:         account.accountType.name,
+                        shortCode:    account.accountType.shortCode,
+                        interestRate: account.accountType.interestRate
+                    } : null
+                } : null,
+                // kiddies-only fields (empty for regular members)
+                parentName: '', parentMemberID: '',
+                lockPeriodYears: null, unlockDate: null, beneficiaryType: null,
+                childDOB: null,
+            };
+        }),
+        // ── Kiddies accounts ─────────────────────────────
+        ...kiddiesAccounts.map(k => {
+            const d     = k._display || {};
+            const stats = k._memberStats || {};
+            return {
+                id:           String(k._id),
+                entityType:   'kiddies',
+                firstName:    k.childFirstName||'',
+                lastName:     k.childLastName||'',
+                email:        d.email||'',
+                phone:        d.phone||'',
+                dob:          k.childDOB||null,
+                memberID:     k.accountID||'N/A',
+                type:         'KIDDIES',
+                typeName:     'Kiddies Account',
+                status:       k.status||'locked',
+                registrationStatus: k.registrationStatus||'pending',
+                balance:      d.balance||0,
+                state: '', lga: '', address: '',
+                idType: '', idNumber: '',
+                joinDate:     k.createdAt||new Date(),
+                displayPicture: d.displayPicture||null,
+                passportPhoto: null, idFile: null, addressProof: null, signature: null,
+                bankDetails:  {},
+                nextOfKin:    k.nextOfKin||{},
+                memberStats: {
+                    memberSavings:       stats.memberSavings       || 0,
+                    accumulativeROI:     stats.accumulativeROI     || 0,
+                    totalBalance:        stats.totalBalance        || 0,
+                    sharePercentage:     stats.sharePercentage     || 0,
+                    userShare:           stats.userShare           || 0,
+                    companyChargeOnUser: stats.companyChargeOnUser || 0,
+                    ROI:                 stats.ROI                 || 0,
+                },
+                account: k.account ? { balance: k.account.balance||0, accountType: null } : null,
+                // kiddies-specific fields
+                parentName:      d.parentName||'',
+                parentMemberID:  d.parentMemberID||'',
+                lockPeriodYears: k.lockPeriodYears||5,
+                unlockDate:      k.unlockDate||null,
+                beneficiaryType: k.beneficiaryType||'family',
+                childDOB:        k.childDOB||null,
+            };
+        })
+    ]) %>;
 
     let memberTypes = <%- JSON.stringify(memberTypes.map(m => ({
         id: String(m._id), name: m.name, shortCode: m.shortCode, interestRate: m.interestRate
@@ -709,7 +808,11 @@
 
     let currentMemberId = null;
     let selectedMembers = [];
-    let _currentFilteredMembers = members; // track current filtered view for export
+    let _currentFilteredMembers = members;
+
+    // Pagination
+    const PER_PAGE = 20;
+    let currentPage = 1;
 
     /* ═══════════════════════════════════════════════════
        INIT
@@ -722,47 +825,104 @@
        STATS
     ═══════════════════════════════════════════════════ */
     function updateStats() {
+        const regularMembers = members.filter(m => m.entityType === 'member');
+        const kiddiesMembers = members.filter(m => m.entityType === 'kiddies');
         document.getElementById('totalMembers').textContent    = members.length;
-        document.getElementById('activeMembers').textContent   = members.filter(m=>m.status==='active').length;
-        document.getElementById('pendingMembers').textContent  = members.filter(m=>m.status==='pending').length;
-        document.getElementById('rejectedMembers').textContent = members.filter(m=>m.status==='rejected').length;
-        document.getElementById('memberCountDisplay').textContent = members.length;
+        document.getElementById('activeMembers').textContent   = regularMembers.filter(m=>m.status==='active').length;
+        document.getElementById('pendingMembers').textContent  = regularMembers.filter(m=>m.status==='pending').length;
+        document.getElementById('rejectedMembers').textContent = regularMembers.filter(m=>m.status==='rejected').length;
+        document.getElementById('kiddiesCount').textContent    = kiddiesMembers.length;
+        document.getElementById('memberCountDisplay').textContent = _currentFilteredMembers.length;
     }
 
     /* ═══════════════════════════════════════════════════
-       RENDER TABLE
+       TYPE BADGE
     ═══════════════════════════════════════════════════ */
     function getMemberTypeBadge(member) {
+        if (member.entityType === 'kiddies') {
+            return `<span class="badge" style="background:linear-gradient(135deg,#ec4899,#db2777);color:white;"><i class="fas fa-baby me-1"></i>Kiddies</span>`;
+        }
         const type = member.account?.accountType;
         if (!type) return `<span class="badge" style="background:#6b7280;color:white;">No Membership</span>`;
-        const colors = {CDS:'#10b981',NCDS:'#f59e0b'};
+        const colors = { CDS:'#10b981', NCDS:'#f59e0b' };
         return `<span class="badge" style="background:${colors[type.shortCode]||'#6366f1'};color:white;">${type.name}</span>`;
     }
 
-    function renderMembers(filteredMembers=members) {
+    /* ═══════════════════════════════════════════════════
+       RENDER TABLE (paginated)
+    ═══════════════════════════════════════════════════ */
+    function renderMembers(filteredMembers = members, page = 1) {
+        currentPage = page;
         _currentFilteredMembers = filteredMembers;
+        document.getElementById('memberCountDisplay').textContent = filteredMembers.length;
+
+        const start    = (page - 1) * PER_PAGE;
+        const end      = Math.min(start + PER_PAGE, filteredMembers.length);
+        const pageData = filteredMembers.slice(start, end);
+
+        document.getElementById('showingFrom').textContent = filteredMembers.length ? start + 1 : 0;
+        document.getElementById('showingTo').textContent   = end;
+
         const tbody = document.getElementById('membersTableBody');
         tbody.innerHTML = '';
-        if (!filteredMembers.length) {
+
+        if (!pageData.length) {
             tbody.innerHTML = `<tr><td colspan="9" class="text-center py-5"><i class="fas fa-users fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No members found</p></td></tr>`;
+            renderPagination(filteredMembers.length, page);
             return;
         }
-        filteredMembers.forEach(member => {
+
+        pageData.forEach(member => {
             const row = document.createElement('tr');
-            const statusBadge = {active:'<span class="badge bg-success">Active</span>',pending:'<span class="badge bg-warning">Pending</span>',rejected:'<span class="badge bg-danger">Rejected</span>'}[member.status]||'<span class="badge bg-secondary">Unknown</span>';
-            const actionButtons = member.status === 'pending'
-                ? `<button class="action-btn btn btn-sm btn-success" onclick="showApprovalModal('${member.id}')" title="Approve"><i class="fas fa-check"></i></button>
-                   <button class="action-btn btn btn-sm btn-danger" onclick="rejectMember('${member.id}')" title="Reject"><i class="fas fa-times"></i></button>
-                   <button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button>
-                   <button class="action-btn btn btn-sm text-white" onclick="openChangeTypeModal('${member.id}')" title="Change Type" style="background:linear-gradient(135deg,#312e81,#6366f1);"><i class="fas fa-exchange-alt"></i></button>`
-                : `<button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button>
-                   <button class="action-btn btn btn-sm btn-warning" onclick="editMember('${member.id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                   <button class="action-btn btn btn-sm text-white" onclick="openChangeTypeModal('${member.id}')" title="Change Type" style="background:linear-gradient(135deg,#312e81,#6366f1);"><i class="fas fa-exchange-alt"></i></button>
-                   <button class="action-btn btn btn-sm btn-danger" onclick="deleteMember('${member.id}')" title="Delete"><i class="fas fa-trash"></i></button>`;
-            const avatar = member.displayPicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.firstName+' '+member.lastName)}&background=1e3a8a&color=fff&size=80`;
+            if (member.entityType === 'kiddies') row.classList.add('kiddies-row');
+
+            const statusColors = {
+                active:   '<span class="badge bg-success">Active</span>',
+                pending:  '<span class="badge bg-warning">Pending</span>',
+                rejected: '<span class="badge bg-danger">Rejected</span>',
+                locked:   '<span class="badge" style="background:rgba(236,72,153,.15);color:#db2777;border:1px solid rgba(236,72,153,.3);">Locked</span>',
+                closed:   '<span class="badge bg-secondary">Closed</span>',
+            };
+            const statusBadge = statusColors[member.status] || '<span class="badge bg-secondary">Unknown</span>';
+
+            // Action buttons
+            let actionButtons;
+            if (member.entityType === 'kiddies') {
+                actionButtons = `
+                    <button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button>
+                    <a class="action-btn btn btn-sm" href="/admin/kiddies-accounts" title="Manage Kiddies" style="background:linear-gradient(135deg,#ec4899,#db2777);color:white;"><i class="fas fa-baby"></i></a>`;
+            } else if (member.status === 'pending') {
+                actionButtons = `
+                    <button class="action-btn btn btn-sm btn-success" onclick="showApprovalModal('${member.id}')" title="Approve"><i class="fas fa-check"></i></button>
+                    <button class="action-btn btn btn-sm btn-danger" onclick="rejectMember('${member.id}')" title="Reject"><i class="fas fa-times"></i></button>
+                    <button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button>
+                    <button class="action-btn btn btn-sm text-white" onclick="openChangeTypeModal('${member.id}')" title="Change Type" style="background:linear-gradient(135deg,#312e81,#6366f1);"><i class="fas fa-exchange-alt"></i></button>`;
+            } else {
+                actionButtons = `
+                    <button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button>
+                    <button class="action-btn btn btn-sm btn-warning" onclick="editMember('${member.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn btn btn-sm text-white" onclick="openChangeTypeModal('${member.id}')" title="Change Type" style="background:linear-gradient(135deg,#312e81,#6366f1);"><i class="fas fa-exchange-alt"></i></button>
+                    <button class="action-btn btn btn-sm btn-danger" onclick="deleteMember('${member.id}')" title="Delete"><i class="fas fa-trash"></i></button>`;
+            }
+
+            // Avatar — kiddies get initials avatar, members get photo
+            let avatarHtml;
+            if (member.entityType === 'kiddies') {
+                const initials = (member.firstName[0]||'?') + (member.lastName[0]||'?');
+                avatarHtml = `<div class="kiddies-avatar">${initials.toUpperCase()}</div>`;
+            } else {
+                const src = member.displayPicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.firstName+' '+member.lastName)}&background=1e3a8a&color=fff&size=80`;
+                avatarHtml = `<img src="${src}" alt="Avatar" class="member-avatar">`;
+            }
+
+            // Sub-label under name
+            const subLabel = member.entityType === 'kiddies'
+                ? `<small class="text-muted" style="color:#ec4899!important;">Parent: ${member.parentName||'—'}</small>`
+                : `<small class="text-muted">${member.email}</small>`;
+
             row.innerHTML = `
                 <td><input type="checkbox" class="member-checkbox" data-id="${member.id}" onchange="updateSelection()"></td>
-                <td><div class="d-flex align-items-center gap-2"><img src="${avatar}" alt="Avatar" class="member-avatar"><div><div class="fw-semibold">${member.firstName} ${member.lastName}</div><small class="text-muted">${member.email}</small></div></div></td>
+                <td><div class="d-flex align-items-center gap-2">${avatarHtml}<div><div class="fw-semibold">${member.firstName} ${member.lastName}</div>${subLabel}</div></div></td>
                 <td><span class="badge bg-primary-subtle text-primary">${member.memberID||'-'}</span></td>
                 <td>${getMemberTypeBadge(member)}</td>
                 <td>${member.phone||'-'}</td>
@@ -772,6 +932,29 @@
                 <td><div class="btn-group">${actionButtons}</div></td>`;
             tbody.appendChild(row);
         });
+
+        renderPagination(filteredMembers.length, page);
+    }
+
+    function renderPagination(total, current) {
+        const totalPages = Math.ceil(total / PER_PAGE);
+        const el = document.getElementById('paginationEl');
+        if (totalPages <= 1) { el.innerHTML = ''; return; }
+        let html = `<li class="page-item ${current===1?'disabled':''}"><a class="page-link" href="#" onclick="goPage(${current-1});return false;"><i class="fas fa-chevron-left"></i></a></li>`;
+        const start = Math.max(1, current - 2);
+        const end   = Math.min(totalPages, current + 2);
+        if (start > 1) html += `<li class="page-item"><a class="page-link" href="#" onclick="goPage(1);return false;">1</a></li>${start > 2 ? '<li class="page-item disabled"><a class="page-link">…</a></li>' : ''}`;
+        for (let i = start; i <= end; i++) {
+            html += `<li class="page-item ${i===current?'active':''}"><a class="page-link" href="#" onclick="goPage(${i});return false;">${i}</a></li>`;
+        }
+        if (end < totalPages) html += `${end < totalPages - 1 ? '<li class="page-item disabled"><a class="page-link">…</a></li>' : ''}<li class="page-item"><a class="page-link" href="#" onclick="goPage(${totalPages});return false;">${totalPages}</a></li>`;
+        html += `<li class="page-item ${current===totalPages?'disabled':''}"><a class="page-link" href="#" onclick="goPage(${current+1});return false;"><i class="fas fa-chevron-right"></i></a></li>`;
+        el.innerHTML = html;
+    }
+
+    function goPage(p) {
+        renderMembers(_currentFilteredMembers, p);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     /* ═══════════════════════════════════════════════════
@@ -787,18 +970,21 @@
     function applyFilters() {
         let f = [...members];
         const s = document.getElementById('searchInput').value.toLowerCase();
-        if (s) f = f.filter(m=>(m.firstName+m.lastName+m.email+m.memberID).toLowerCase().includes(s));
-        const st = document.getElementById('statusFilter').value; if(st) f=f.filter(m=>m.status===st);
-        const ty = document.getElementById('typeFilter').value;   if(ty) f=f.filter(m=>m.type===ty);
+        if (s) f = f.filter(m => (m.firstName + m.lastName + m.email + m.memberID + m.parentName).toLowerCase().includes(s));
+        const st = document.getElementById('statusFilter').value;
+        if (st) f = f.filter(m => m.status === st);
+        const ty = document.getElementById('typeFilter').value;
+        if (ty) f = f.filter(m => m.type === ty);
         const so = document.getElementById('sortFilter').value;
-        if(so==='newest') f.sort((a,b)=>new Date(b.joinDate)-new Date(a.joinDate));
-        else if(so==='oldest') f.sort((a,b)=>new Date(a.joinDate)-new Date(b.joinDate));
-        else if(so==='name')   f.sort((a,b)=>a.firstName.localeCompare(b.firstName));
-        renderMembers(f);
+        if      (so==='newest') f.sort((a,b)=>new Date(b.joinDate)-new Date(a.joinDate));
+        else if (so==='oldest') f.sort((a,b)=>new Date(a.joinDate)-new Date(b.joinDate));
+        else if (so==='name')   f.sort((a,b)=>a.firstName.localeCompare(b.firstName));
+        renderMembers(f, 1);
     }
     function resetFilters() {
         ['searchInput','statusFilter','typeFilter'].forEach(id=>document.getElementById(id).value='');
-        document.getElementById('sortFilter').value='newest'; renderMembers();
+        document.getElementById('sortFilter').value='newest';
+        renderMembers(members, 1);
     }
 
     /* ═══════════════════════════════════════════════════
@@ -814,8 +1000,8 @@
     function normPath(p) {
         if (!p) return null;
         p = p.replace(/\\/g,'/');
-        if (p.startsWith('public/')) p=p.replace('public/','/')
-        if (!p.startsWith('/')) p='/'+p;
+        if (p.startsWith('public/')) p = p.replace('public/','/')
+        if (!p.startsWith('/')) p = '/' + p;
         return p;
     }
     function renderFilePreview(wrapId, filePath, label) {
@@ -835,7 +1021,6 @@
         }
     }
     const fmt  = n => '₦' + Number(n||0).toLocaleString('en-NG', {minimumFractionDigits:2, maximumFractionDigits:2});
-    const fmtN = n => Number(n||0).toLocaleString('en-NG', {minimumFractionDigits:2, maximumFractionDigits:2});
 
     /* ═══════════════════════════════════════════════════
        ADD MEMBER
@@ -856,6 +1041,7 @@
     function editMember(id) {
         currentMemberId = id;
         const m = members.find(m=>m.id==id); if(!m) return;
+        if (m.entityType === 'kiddies') { showNotify({type:'info',title:'Kiddies Account',message:'Kiddies accounts are managed via the Kiddies Accounts panel.'}); return; }
         document.getElementById('edit_firstName').value = m.firstName||'';
         document.getElementById('edit_lastName').value  = m.lastName ||'';
         document.getElementById('edit_email').value     = m.email    ||'';
@@ -914,7 +1100,7 @@
                     if (result.data.files.signature)      m.signature      = result.data.files.signature;
                 }
             }
-            updateStats(); renderMembers();
+            updateStats(); renderMembers(_currentFilteredMembers, currentPage);
             bootstrap.Modal.getInstance(modalEl).hide();
             await showNotify({type:'success',title:'Member Updated',message:'Member details have been successfully updated.'});
         } else {
@@ -923,50 +1109,116 @@
     }
 
     /* ═══════════════════════════════════════════════════
-       VIEW MEMBER — with financial snapshot
+       VIEW MEMBER — handles both regular + kiddies
     ═══════════════════════════════════════════════════ */
     function viewMember(id) {
         const m = members.find(m=>m.id==id); if(!m) return;
-        const avatar = m.displayPicture||m.passportPhoto||`https://ui-avatars.com/api/?name=${encodeURIComponent(m.firstName+' '+m.lastName)}&background=1e3a8a&color=fff&size=150`;
-        document.getElementById('view_avatar').src            = avatar;
-        document.getElementById('view_fullname').innerText    = `${m.firstName} ${m.lastName}`.trim()||'No name';
-        document.getElementById('view_membershipId').innerText= m.memberID||'No ID';
-        const sb=document.getElementById('view_status_badge');
-        sb.className='badge '+(m.status==='active'?'bg-success':m.status==='pending'?'bg-warning':'bg-danger');
-        sb.innerText=m.status?m.status.charAt(0).toUpperCase()+m.status.slice(1):'Unknown';
+        const isKiddies = m.entityType === 'kiddies';
+
+        // Avatar
+        let avatarSrc;
+        if (isKiddies) {
+            // Use parent's display picture or initials avatar for kiddies
+            avatarSrc = m.displayPicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.firstName+' '+m.lastName)}&background=ec4899&color=fff&size=150`;
+        } else {
+            avatarSrc = m.displayPicture || m.passportPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.firstName+' '+m.lastName)}&background=1e3a8a&color=fff&size=150`;
+        }
+        document.getElementById('view_avatar').src = avatarSrc;
+        document.getElementById('view_fullname').innerText     = `${m.firstName} ${m.lastName}`.trim()||'No name';
+        document.getElementById('view_membershipId').innerText = m.memberID||'No ID';
+
+        // Status badge
+        const sb = document.getElementById('view_status_badge');
+        const statusMap = {
+            active:   ['bg-success',  'Active'],
+            pending:  ['bg-warning',  'Pending'],
+            rejected: ['bg-danger',   'Rejected'],
+            locked:   ['',            'Locked'],
+            closed:   ['bg-secondary','Closed'],
+        };
+        const [cls, lbl] = statusMap[m.status] || ['bg-secondary', m.status||'Unknown'];
+        sb.className = 'badge ' + cls;
+        if (m.status === 'locked') sb.style.cssText = 'background:rgba(236,72,153,.15);color:#db2777;border:1px solid rgba(236,72,153,.3);';
+        else sb.style.cssText = '';
+        sb.innerText = lbl;
+
         document.getElementById('view_type_badge_wrap').innerHTML = getMemberTypeBadge(m);
 
-        // ★ Financial snapshot
+        // ★ Kiddies banner
+        const banner = document.getElementById('view_kiddies_banner');
+        const actions = document.getElementById('view_member_actions');
+        const bankSection = document.getElementById('view_bank_section');
+        if (isKiddies) {
+            banner.style.display = 'block';
+            actions.style.display = 'none';
+            bankSection.style.display = 'none';
+            document.getElementById('view_kiddies_parent').textContent      = m.parentName || '—';
+            document.getElementById('view_kiddies_parentID').textContent    = m.parentMemberID || '—';
+            document.getElementById('view_kiddies_lock').textContent        = m.lockPeriodYears ? `${m.lockPeriodYears} years` : '—';
+            document.getElementById('view_kiddies_unlock').textContent      = m.unlockDate
+                ? new Date(m.unlockDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+                : '—';
+            document.getElementById('view_kiddies_beneficiary').textContent = m.beneficiaryType
+                ? m.beneficiaryType.charAt(0).toUpperCase() + m.beneficiaryType.slice(1)
+                : '—';
+            document.getElementById('view_kiddies_dob').textContent         = m.childDOB
+                ? new Date(m.childDOB).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+                : '—';
+        } else {
+            banner.style.display  = 'none';
+            actions.style.display = 'grid';
+            bankSection.style.display = 'block';
+        }
+
+        // ★ Financial snapshot (same for both)
         const s = m.memberStats;
         document.getElementById('view_savings').innerText       = fmt(s.memberSavings);
         document.getElementById('view_accumROI').innerText      = fmt(s.accumulativeROI);
         document.getElementById('view_totalBalance').innerText  = fmt(s.totalBalance);
-        document.getElementById('view_sharePercent').innerText  = (s.sharePercentage||0).toFixed(4) + '%';
+        document.getElementById('view_sharePercent').innerText  = Number(s.sharePercentage||0).toFixed(4) + '%';
         document.getElementById('view_roiEarning').innerText    = fmt(s.ROI);
         document.getElementById('view_companyCharge').innerText = fmt(s.companyChargeOnUser);
 
+        // Personal info
         document.getElementById('view_email').innerText           = m.email   ||'---';
         document.getElementById('view_phone').innerText           = m.phone   ||'---';
-        document.getElementById('view_dob').innerText             = m.dob?new Date(m.dob).toLocaleDateString():'---';
-        document.getElementById('view_state_lga').innerText       = (m.state||'---')+(m.lga?', '+m.lga:'');
-        document.getElementById('view_address').innerText         = m.address ||'---';
+        document.getElementById('view_dob').innerText             = m.dob ? new Date(m.dob).toLocaleDateString() : '---';
+        document.getElementById('view_state_lga').innerText       = (m.state||'---') + (m.lga?', '+m.lga:'');
+        document.getElementById('view_address').innerText         = m.address||'---';
+
+        // Bank (regular members only — already hidden for kiddies)
         document.getElementById('view_bankName').innerText        = m.bankDetails?.bankName     ||'---';
         document.getElementById('view_accountNumber').innerText   = m.bankDetails?.accountNumber||'---';
         document.getElementById('view_accountName').innerText     = m.bankDetails?.accountName  ||'---';
+
+        // NOK
         document.getElementById('view_nok_name').innerText        = m.nextOfKin?.fullName    ||'---';
         document.getElementById('view_nok_relationship').innerText= m.nextOfKin?.relationship||'---';
         document.getElementById('view_nok_phone').innerText       = m.nextOfKin?.phone       ||'---';
         document.getElementById('view_nok_address').innerText     = m.nextOfKin?.address     ||'---';
 
-        const docs=[{label:'Passport Photo',src:normPath(m.passportPhoto)},{label:'ID Document',src:normPath(m.idFile)},{label:'Address Proof',src:normPath(m.addressProof)},{label:'Signature',src:normPath(m.signature)}];
-        const dc=document.getElementById('view_documents'); dc.innerHTML='';
-        docs.forEach(doc=>{ if(!doc.src) return; const w=document.createElement('div'); w.innerHTML=`<small class="text-muted d-block mb-2">${doc.label}</small><div style="cursor:pointer"><img src="${doc.src}" class="document-preview" alt="${doc.label}"></div>`; w.querySelector('div').addEventListener('click',()=>viewDocument(doc.src,doc.label)); dc.appendChild(w); });
+        // KYC docs (only for regular members)
+        const dc = document.getElementById('view_documents'); dc.innerHTML='';
+        if (!isKiddies) {
+            const docs = [
+                {label:'Passport Photo', src:normPath(m.passportPhoto)},
+                {label:'ID Document',    src:normPath(m.idFile)},
+                {label:'Address Proof',  src:normPath(m.addressProof)},
+                {label:'Signature',      src:normPath(m.signature)}
+            ];
+            docs.forEach(doc=>{ if(!doc.src) return; const w=document.createElement('div'); w.innerHTML=`<small class="text-muted d-block mb-2">${doc.label}</small><div style="cursor:pointer"><img src="${doc.src}" class="document-preview" alt="${doc.label}"></div>`; w.querySelector('div').addEventListener('click',()=>viewDocument(doc.src,doc.label)); dc.appendChild(w); });
+        }
 
-        document.getElementById('editMemberBtn').onclick      = () => editMember(id);
-        document.getElementById('changeTypeBtnView').onclick  = () => openChangeTypeModal(id);
-        document.getElementById('deleteMemberBtn').onclick    = () => deleteMember(id);
+        // Action buttons for regular members
+        if (!isKiddies) {
+            document.getElementById('editMemberBtn').onclick     = () => editMember(id);
+            document.getElementById('changeTypeBtnView').onclick = () => openChangeTypeModal(id);
+            document.getElementById('deleteMemberBtn').onclick   = () => deleteMember(id);
+        }
+
         new bootstrap.Modal(document.getElementById('viewMemberModal')).show();
     }
+
     function viewDocument(url, title) {
         document.getElementById('doc_title').innerText = title||'Document Preview';
         document.getElementById('doc_frame').src = url;
@@ -980,6 +1232,7 @@
     function openChangeTypeModal(id) {
         currentMemberId = id;
         const m = members.find(m=>m.id==id); if(!m) return;
+        if (m.entityType === 'kiddies') { showNotify({type:'info',title:'Not Applicable',message:'Member type cannot be changed for kiddies accounts.'}); return; }
         const avatar = m.displayPicture||m.passportPhoto||`https://ui-avatars.com/api/?name=${encodeURIComponent(m.firstName+' '+m.lastName)}&background=312e81&color=fff&size=80`;
         document.getElementById('ct_avatar').src        = avatar;
         document.getElementById('ct_name').textContent  = `${m.firstName} ${m.lastName}`;
@@ -1026,7 +1279,7 @@
                     m.account.accountType = {id:typeObj.id, name:typeObj.name, shortCode:typeObj.shortCode, interestRate:typeObj.interestRate};
                 }
             }
-            updateStats(); renderMembers();
+            updateStats(); renderMembers(_currentFilteredMembers, currentPage);
             bootstrap.Modal.getInstance(modalEl).hide();
             await showNotify({type:'success',title:'Type Changed',message:`Membership type updated!\n\nNew Type: ${result.data.newMemberTypeName}\nNew Membership ID: ${result.data.newMembershipID}`});
         } else {
@@ -1037,13 +1290,24 @@
     /* ═══════════════════════════════════════════════════
        DELETE MEMBER
     ═══════════════════════════════════════════════════ */
-    function deleteMember(id) { currentMemberId=id; openModal('deleteConfirmModal'); }
+    function deleteMember(id) {
+        const m = members.find(m=>m.id==id);
+        if (m?.entityType === 'kiddies') { showNotify({type:'info',title:'Kiddies Account',message:'Kiddies accounts are deleted via the Kiddies Accounts panel.'}); return; }
+        currentMemberId=id; openModal('deleteConfirmModal');
+    }
     async function confirmDelete() {
         const modalEl = document.getElementById('deleteConfirmModal');
         const result  = await permFetch(`/members/delete/${currentMemberId}`,{method:'POST'},modalEl);
         if (!result.ok) return;
-        if (result.data.status) { members=members.filter(m=>m.id!==currentMemberId); updateStats(); renderMembers(); bootstrap.Modal.getInstance(modalEl).hide(); await showNotify({type:'success',title:'Member Deleted',message:'The member has been successfully deleted.'}); }
-        else { await showNotify({type:'error',title:'Delete Failed',message:result.data.message||'Failed to delete member.'}); }
+        if (result.data.status) {
+            members = members.filter(m=>m.id!==currentMemberId);
+            _currentFilteredMembers = _currentFilteredMembers.filter(m=>m.id!==currentMemberId);
+            updateStats(); renderMembers(_currentFilteredMembers, currentPage);
+            bootstrap.Modal.getInstance(modalEl).hide();
+            await showNotify({type:'success',title:'Member Deleted',message:'The member has been successfully deleted.'});
+        } else {
+            await showNotify({type:'error',title:'Delete Failed',message:result.data.message||'Failed to delete member.'});
+        }
     }
 
     /* ═══════════════════════════════════════════════════
@@ -1087,7 +1351,7 @@
         if (result.data.status) {
             const m = members.find(m => m.id === id);
             if (m) m.status = 'rejected';
-            updateStats(); renderMembers();
+            updateStats(); renderMembers(_currentFilteredMembers, currentPage);
             await showNotify({ type:'success', title:'Member Rejected', message:'The member status has been set to rejected.' });
         } else {
             await showNotify({ type:'error', title:'Rejection Failed', message:result.data.message||'Failed to reject member.' });
@@ -1102,7 +1366,7 @@
         const ok = await showNotify({type:'info',title:'Approve Members',message:`Approve ${selectedMembers.length} member(s)?`,confirmLabel:'Yes, Approve',cancelLabel:'Cancel'});
         if (!ok) return;
         for (const id of selectedMembers) { const r=await permFetch(`/admin/members/approve/${id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}); if(!r.ok) return; }
-        selectedMembers.forEach(id=>{const m=members.find(m=>m.id==id);if(m)m.status='active';}); updateStats(); renderMembers();
+        selectedMembers.forEach(id=>{const m=members.find(m=>m.id==id);if(m)m.status='active';}); updateStats(); renderMembers(_currentFilteredMembers, currentPage);
         await showNotify({type:'success',title:'Members Approved',message:`${selectedMembers.length} member(s) approved.`});
     }
     async function bulkChangeType() { if(!selectedMembers.length){await showNotify({type:'warning',title:'No Selection',message:'Please select at least one member.'});return;} await showNotify({type:'info',title:'Coming Soon',message:'Bulk member type change feature coming soon.'}); }
@@ -1111,8 +1375,11 @@
         const ok = await showNotify({type:'warning',title:'Delete Members',message:`Delete ${selectedMembers.length} member(s)? This cannot be undone.`,confirmLabel:'Yes, Delete All',cancelLabel:'Cancel'});
         if (!ok) return;
         for (const id of selectedMembers) { const r=await permFetch(`/members/delete/${id}`,{method:'POST'}); if(!r.ok) return; }
-        members=members.filter(m=>!selectedMembers.includes(m.id)); selectedMembers=[];
-        updateStats(); renderMembers(); await showNotify({type:'success',title:'Members Deleted',message:'Selected members have been permanently deleted.'});
+        members = members.filter(m=>!selectedMembers.includes(m.id));
+        _currentFilteredMembers = _currentFilteredMembers.filter(m=>!selectedMembers.includes(m.id));
+        selectedMembers=[];
+        updateStats(); renderMembers(_currentFilteredMembers, currentPage);
+        await showNotify({type:'success',title:'Members Deleted',message:'Selected members have been permanently deleted.'});
     }
 
     /* ═══════════════════════════════════════════════════
@@ -1122,18 +1389,19 @@
     function closeSidebar() { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); }
 
     /* ═══════════════════════════════════════════════════
-       ★ EXPORT — EXCEL
+       EXPORT — build rows (handles both types)
     ═══════════════════════════════════════════════════ */
     function buildExportRows(data) {
         return data.map((m, i) => ({
             '#':                    i + 1,
-            'Member ID':            m.memberID || 'N/A',
+            'Entity Type':          m.entityType === 'kiddies' ? 'Kiddies Account' : 'Member',
+            'Member / Account ID':  m.memberID || 'N/A',
             'First Name':           m.firstName,
             'Last Name':            m.lastName,
-            'Email':                m.email,
+            'Email':                m.email || '---',
             'Phone':                m.phone || '---',
             'Status':               m.status.charAt(0).toUpperCase() + m.status.slice(1),
-            'Member Type':          m.account?.accountType?.name || 'No Membership',
+            'Type':                 m.entityType === 'kiddies' ? 'Kiddies Account' : (m.account?.accountType?.name || 'No Membership'),
             'Savings (₦)':          m.memberStats.memberSavings,
             'Accum. ROI (₦)':       m.memberStats.accumulativeROI,
             'Total Balance (₦)':    m.memberStats.totalBalance,
@@ -1143,7 +1411,9 @@
             'State':                m.state || '---',
             'LGA':                  m.lga   || '---',
             'Date Joined':          new Date(m.joinDate).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'}),
-            'ID Type':              m.idType || '---',
+            'Parent Name':          m.entityType === 'kiddies' ? (m.parentName||'---') : '---',
+            'Parent Member ID':     m.entityType === 'kiddies' ? (m.parentMemberID||'---') : '---',
+            'Unlock Date':          m.entityType === 'kiddies' && m.unlockDate ? new Date(m.unlockDate).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '---',
             'Bank Name':            m.bankDetails?.bankName      || '---',
             'Account Number':       m.bankDetails?.accountNumber || '---',
             'Account Name':         m.bankDetails?.accountName   || '---',
@@ -1161,10 +1431,10 @@
         const ws   = XLSX.utils.json_to_sheet(rows);
 
         ws['!cols'] = [
-            {wch:4},{wch:12},{wch:16},{wch:16},{wch:28},{wch:16},
+            {wch:4},{wch:14},{wch:14},{wch:16},{wch:16},{wch:28},{wch:16},
             {wch:10},{wch:18},{wch:16},{wch:16},{wch:16},{wch:10},
             {wch:18},{wch:18},{wch:14},{wch:14},{wch:16},
-            {wch:12},{wch:16},{wch:16},{wch:20},{wch:20},{wch:16},{wch:16}
+            {wch:16},{wch:14},{wch:14},{wch:16},{wch:16},{wch:20},{wch:20},{wch:16},{wch:16}
         ];
 
         const range = XLSX.utils.decode_range(ws['!ref']);
@@ -1183,7 +1453,10 @@
 
         // Data rows
         for (let R = 1; R <= range.e.r; R++) {
-            const fillColor = R % 2 === 0 ? 'EEF2FF' : 'FFFFFF';
+            // Pink tint for kiddies rows
+            const isKiddiesRow = rows[R-1]?.['Entity Type'] === 'Kiddies Account';
+            const fillColor    = isKiddiesRow ? 'FFF0F9' : (R % 2 === 0 ? 'EEF2FF' : 'FFFFFF');
+
             for (let C = range.s.c; C <= range.e.c; C++) {
                 const addr = XLSX.utils.encode_cell({ r:R, c:C });
                 if (!ws[addr]) ws[addr] = { v:'', t:'s' };
@@ -1193,85 +1466,100 @@
                     border:    { bottom:{style:'thin',color:{rgb:'E0E7FF'}}, right:{style:'thin',color:{rgb:'E0E7FF'}} }
                 };
             }
-            // Format numeric columns: savings(8), accumROI(9), totalBal(10), share(11), ROI(12), coCharge(13)
-            [8,9,10,12,13].forEach(c => {
+            // Numeric columns: savings(9), accumROI(10), totalBal(11), share(12), ROI(13), coCharge(14)
+            [9,10,11,13,14].forEach(c => {
                 const addr = XLSX.utils.encode_cell({ r:R, c });
                 if (ws[addr]) { ws[addr].t = 'n'; ws[addr].z = '#,##0.00'; }
             });
-            // Share % (col 11)
-            const shareAddr = XLSX.utils.encode_cell({ r:R, c:11 });
+            const shareAddr = XLSX.utils.encode_cell({ r:R, c:12 });
             if (ws[shareAddr]) { ws[shareAddr].t = 'n'; ws[shareAddr].z = '0.0000"%"'; }
-            // Status colour (col 6)
-            const stAddr = XLSX.utils.encode_cell({ r:R, c:6 });
+            // Status colour (col 7)
+            const stAddr = XLSX.utils.encode_cell({ r:R, c:7 });
             if (ws[stAddr]) {
                 const v  = ws[stAddr].v;
-                const fc = v==='Active'?'065F46':v==='Pending'?'92400E':'7F1D1D';
+                const fc = v==='Active'?'065F46':v==='Pending'?'92400E':v==='Locked'?'831843':'7F1D1D';
                 ws[stAddr].s = { ...ws[stAddr].s, font:{ bold:true, color:{ rgb:fc } } };
             }
         }
 
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Members');
+        XLSX.utils.book_append_sheet(wb, ws, 'All Members');
 
         // Summary sheet
-        const totSavings    = data.reduce((s,m)=>s+m.memberStats.memberSavings,0);
-        const totROI        = data.reduce((s,m)=>s+m.memberStats.ROI,0);
-        const totAccumROI   = data.reduce((s,m)=>s+m.memberStats.accumulativeROI,0);
-        const totBalance    = data.reduce((s,m)=>s+m.memberStats.totalBalance,0);
+        const regularData = data.filter(m=>m.entityType==='member');
+        const kiddiesData = data.filter(m=>m.entityType==='kiddies');
+        const totSavings  = data.reduce((s,m)=>s+m.memberStats.memberSavings,0);
+        const totROI      = data.reduce((s,m)=>s+m.memberStats.ROI,0);
+        const totAccumROI = data.reduce((s,m)=>s+m.memberStats.accumulativeROI,0);
+        const totBalance  = data.reduce((s,m)=>s+m.memberStats.totalBalance,0);
+
         const summaryData = [
             ['Club De Stars Cooperative — Member Export', ''],
             ['Generated', new Date().toLocaleString()],
             ['', ''],
             ['MEMBER COUNTS', ''],
-            ['Total Members',    members.length],
-            ['Active Members',   members.filter(m=>m.status==='active').length],
-            ['Pending Members',  members.filter(m=>m.status==='pending').length],
-            ['Rejected Members', members.filter(m=>m.status==='rejected').length],
-            ['Exported Records', data.length],
+            ['Total Records Exported',  data.length],
+            ['Regular Members',         regularData.length],
+            ['  — Active',              regularData.filter(m=>m.status==='active').length],
+            ['  — Pending',             regularData.filter(m=>m.status==='pending').length],
+            ['  — Rejected',            regularData.filter(m=>m.status==='rejected').length],
+            ['Kiddies Accounts',        kiddiesData.length],
+            ['  — Active Kiddies',      kiddiesData.filter(m=>m.status==='active').length],
+            ['  — Locked Kiddies',      kiddiesData.filter(m=>m.status==='locked').length],
             ['', ''],
             ['FINANCIAL TOTALS (Exported Set)', ''],
-            ['Total Savings',        totSavings],
-            ['Total Accum. ROI',     totAccumROI],
-            ['Total Balance',        totBalance],
-            ['Total Est. ROI Earn',  totROI],
+            ['Total Savings',            totSavings],
+            ['Total Accum. ROI',         totAccumROI],
+            ['Total Balance',            totBalance],
+            ['Total Est. ROI Earnings',  totROI],
         ];
         const ws2 = XLSX.utils.aoa_to_sheet(summaryData);
-        ws2['!cols'] = [{wch:30},{wch:20}];
+        ws2['!cols'] = [{wch:32},{wch:20}];
         XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
 
         const filename = `CDS_Members_${new Date().toISOString().split('T')[0]}${useFiltered?'_filtered':''}.xlsx`;
         XLSX.writeFile(wb, filename);
-        showNotify({ type:'success', title:'Excel Exported', message:`${data.length} member(s) exported to ${filename}` });
+        showNotify({ type:'success', title:'Excel Exported', message:`${data.length} record(s) exported to ${filename}` });
     }
 
     /* ═══════════════════════════════════════════════════
-       ★ EXPORT — PDF
+       EXPORT — PDF
     ═══════════════════════════════════════════════════ */
     function exportToPDF(useFiltered = false) {
         const data = useFiltered ? _currentFilteredMembers : members;
         if (!data.length) { showNotify({ type:'warning', title:'No Data', message:'No members to export.' }); return; }
 
-        const now      = new Date().toLocaleString('en-US', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
-        const active   = data.filter(m=>m.status==='active').length;
-        const pending  = data.filter(m=>m.status==='pending').length;
-        const rejected = data.filter(m=>m.status==='rejected').length;
+        const now         = new Date().toLocaleString('en-US', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        const regular     = data.filter(m=>m.entityType==='member');
+        const kiddies     = data.filter(m=>m.entityType==='kiddies');
+        const active      = regular.filter(m=>m.status==='active').length;
+        const pending     = regular.filter(m=>m.status==='pending').length;
+        const rejected    = regular.filter(m=>m.status==='rejected').length;
         const totSavings  = data.reduce((s,m)=>s+m.memberStats.memberSavings,0);
         const totROI      = data.reduce((s,m)=>s+m.memberStats.ROI,0);
         const totBalance  = data.reduce((s,m)=>s+m.memberStats.totalBalance,0);
 
         const rows = data.map((m, i) => {
-            const statusColor = m.status==='active'?'#065f46':m.status==='pending'?'#92400e':'#7f1d1d';
-            const statusBg    = m.status==='active'?'#d1fae5':m.status==='pending'?'#fef3c7':'#fee2e2';
+            const isKiddies   = m.entityType === 'kiddies';
+            const statusColor = m.status==='active'?'#065f46':m.status==='pending'?'#92400e':m.status==='locked'?'#831843':'#7f1d1d';
+            const statusBg    = m.status==='active'?'#d1fae5':m.status==='pending'?'#fef3c7':m.status==='locked'?'#fce7f3':'#fee2e2';
+            const rowBg       = isKiddies ? (i%2===0?'#fff8fc':'#fdf2f8') : (i%2===0?'#fff':'#f8fafc');
             const s = m.memberStats;
+            const typeLabel = isKiddies
+                ? `<span style="background:#fce7f3;color:#db2777;padding:1px 6px;border-radius:6px;font-size:9px;font-weight:700;">👶 Kiddies</span>`
+                : `<span style="font-size:10px;">${m.account?.accountType?.name||'—'}</span>`;
+            const subLine = isKiddies
+                ? `<span style="color:#ec4899;font-size:9px;">Parent: ${m.parentName||'—'} · ${m.parentMemberID||'—'}</span>`
+                : `<span style="color:#9ca3af;font-size:10px;">${m.email}</span>`;
             return `
-            <tr style="background:${i%2===0?'#fff':'#f8fafc'};">
+            <tr style="background:${rowBg};">
                 <td style="text-align:center;color:#9ca3af;font-size:11px;">${i+1}</td>
                 <td>
                     <strong style="font-size:12px;">${m.firstName} ${m.lastName}</strong><br>
-                    <span style="color:#9ca3af;font-size:10px;">${m.email}</span><br>
+                    ${subLine}<br>
                     <span style="font-family:monospace;font-size:10px;color:#6366f1;">${m.memberID||'N/A'}</span>
                 </td>
-                <td style="font-size:11px;">${m.account?.accountType?.name||'—'}</td>
+                <td>${typeLabel}</td>
                 <td style="text-align:center;">
                     <span style="background:${statusBg};color:${statusColor};padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;">${m.status}</span>
                 </td>
@@ -1294,7 +1582,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Club De Stars — Member Export</title>
+<title>Club De Stars — Member Report</title>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:#1e293b; background:#fff; }
@@ -1305,20 +1593,18 @@
   .meta-item { display:flex; flex-direction:column; }
   .meta-item span:first-child { font-size:9px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.07em; }
   .meta-item span:last-child  { font-size:14px; font-weight:800; color:#1e3a8a; }
-  .meta-item.green span:last-child { color:#059669; }
-  .meta-item.amber span:last-child { color:#d97706; }
-  .meta-item.red   span:last-child { color:#dc2626; }
-  .meta-item.purple span:last-child{ color:#7c3aed; }
+  .meta-item.green  span:last-child { color:#059669; }
+  .meta-item.amber  span:last-child { color:#d97706; }
+  .meta-item.red    span:last-child { color:#dc2626; }
+  .meta-item.purple span:last-child { color:#7c3aed; }
+  .meta-item.pink   span:last-child { color:#db2777; }
   table { width:100%; border-collapse:collapse; font-size:12px; }
   thead tr { background:#1e3a8a; color:white; }
   thead th { padding:9px 10px; text-align:left; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; }
   thead th:first-child { text-align:center; width:30px; }
   tbody td { padding:8px 10px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
   .footer { padding:16px 28px; font-size:10px; color:#9ca3af; border-top:2px solid #e2e8f0; display:flex; justify-content:space-between; margin-top:8px; }
-  @media print {
-    @page { size:A4 landscape; margin:8mm; }
-    .no-print { display:none; }
-  }
+  @media print { @page { size:A4 landscape; margin:8mm; } .no-print { display:none; } }
 </style>
 </head>
 <body>
@@ -1327,10 +1613,11 @@
   <p>Generated: ${now}${useFiltered?' · Filtered export':' · Full export'}</p>
 </div>
 <div class="meta">
-  <div class="meta-item"><span>Exported</span><span>${data.length}</span></div>
-  <div class="meta-item green"><span>Active</span><span>${active}</span></div>
+  <div class="meta-item"><span>Total Records</span><span>${data.length}</span></div>
+  <div class="meta-item green"><span>Active Members</span><span>${active}</span></div>
   <div class="meta-item amber"><span>Pending</span><span>${pending}</span></div>
   <div class="meta-item red"><span>Rejected</span><span>${rejected}</span></div>
+  <div class="meta-item pink"><span>Kiddies</span><span>${kiddies.length}</span></div>
   <div class="meta-item"><span>Total Savings</span><span>₦${totSavings.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
   <div class="meta-item green"><span>Total Balance</span><span>₦${totBalance.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
   <div class="meta-item purple"><span>Total Est. ROI</span><span>₦${totROI.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
@@ -1339,10 +1626,7 @@
 <table>
   <thead>
     <tr>
-      <th>#</th>
-      <th>Member</th>
-      <th>Type</th>
-      <th>Status</th>
+      <th>#</th><th>Member / Child</th><th>Type</th><th>Status</th>
       <th style="text-align:right;">Savings / Accum.</th>
       <th style="text-align:right;">Total Balance</th>
       <th style="text-align:right;">Share % / ROI</th>
@@ -1354,7 +1638,7 @@
 </div>
 <div class="footer">
   <span>Club De Stars Cooperative &nbsp;·&nbsp; Powered by JESZ LIMITED</span>
-  <span>${data.length} records</span>
+  <span>${data.length} records · Members: ${regular.length} · Kiddies: ${kiddies.length}</span>
 </div>
 <div style="text-align:center;padding:14px;" class="no-print">
   <button onclick="window.print()" style="padding:10px 28px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;margin-right:8px;">

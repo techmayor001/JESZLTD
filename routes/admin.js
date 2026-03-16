@@ -526,25 +526,46 @@ router.get(
 
       const memberTypes = await MemberType.find();
 
-      // ── 2. Total savings across ALL accounts (same as user dashboard) ──
+      // ── 2. Fetch kiddies accounts ──────────────────────────────────────
+      const kiddiesAccounts = await KiddiesAccount.find()
+        .populate('parent', 'firstName lastName email phone membershipID displayPicture')
+        .populate('account')
+        .sort({ createdAt: -1 })
+        .lean();
+
+      // ── 3. Total savings across ALL accounts ───────────────────────────
+      // Must match user dashboard exactly: Account.find({}) — includes both
+      // User accounts (ownerType:"User") and Kiddies accounts (ownerType:"KiddiesAccount")
       const allAccounts = await Account.find({});
       const totalSavingsAllMembers = allAccounts.reduce(
         (sum, acc) => sum + Number(acc.balance || 0), 0
       );
 
-      // ── 3. Latest ROI data ─────────────────────────────────────────────
+      // ── 4. Latest ROI data ─────────────────────────────────────────────
       const latestROI              = await CompanyROI.findOne().sort({ createdAt: -1 });
       const totalInterestCollected = Number(latestROI?.totalInterestCollected || 0);
 
-      // ── 4. ROI operating charge from settings ──────────────────────────
+      // ── 5. ROI operating charge from settings ──────────────────────────
       const settings           = await Settings.getSettings();
       const roiOperatingCharge = Number(settings?.otherFees?.roiOperatingCharge || 0);
 
-      // ── 5. Calculate per-member shares + ROI ──────────────────────────
-      // Mirror exact logic from user dashboard
-      const usersWithStats = users.map(u => {
-        const memberSavings = Number(u.account?.balance || 0);
-        const accumulativeROI = Number(u.account?.accumulativeROI || 0);
+      // ── 6. Per-member shares + ROI — EXACT mirror of user dashboard ────
+      //
+      // User dashboard logic (cds-cooperative/dashboard):
+      //
+      //   sharePercentageDisplay:
+      //     rawShare         = (memberSavings / totalSavingsAllMembers) * 100
+      //     shareAfterCharge = rawShare - roiOperatingCharge          ← flat subtract
+      //     sharePercentageDisplay = Math.max(0, shareAfterCharge)
+      //
+      //   ROI:
+      //     userShare           = (memberSavings / totalSavingsAllMembers) * totalInterestCollected
+      //     companyChargeOnUser = userShare * (roiOperatingCharge / 100)  ← % of userShare
+      //     ROI                 = userShare - companyChargeOnUser
+      //
+      const calcStats = (balance, accumROI) => {
+        const memberSavings = Number(balance || 0);
+        const accumulativeROI = Number(accumROI || 0);
 
         let sharePercentage    = 0;
         let userShare          = 0;
@@ -552,12 +573,12 @@ router.get(
         let ROI                = 0;
 
         if (totalSavingsAllMembers > 0 && memberSavings > 0) {
-          // Share %
+          // Share % — subtract roiOperatingCharge as flat points (matches user dashboard)
           const rawShare         = (memberSavings / totalSavingsAllMembers) * 100;
           const shareAfterCharge = rawShare - roiOperatingCharge;
           sharePercentage        = Math.max(0, Number(shareAfterCharge.toFixed(4)));
 
-          // ROI
+          // ROI — roiOperatingCharge applied as % of userShare (matches user dashboard)
           if (totalInterestCollected > 0) {
             userShare           = (memberSavings / totalSavingsAllMembers) * totalInterestCollected;
             companyChargeOnUser = userShare * (roiOperatingCharge / 100);
@@ -566,22 +587,50 @@ router.get(
         }
 
         return {
-          ...u.toObject(),
-          _memberStats: {
-            memberSavings,
-            accumulativeROI,
-            totalBalance:        memberSavings + accumulativeROI,
-            sharePercentage:     Number(sharePercentage.toFixed(4)),
-            userShare:           Number(userShare.toFixed(2)),
-            companyChargeOnUser: Number(companyChargeOnUser.toFixed(2)),
-            ROI:                 Number(ROI.toFixed(2)),
-          }
+          memberSavings,
+          accumulativeROI,
+          totalBalance:        Number((memberSavings + accumulativeROI).toFixed(2)),
+          sharePercentage:     Number(sharePercentage.toFixed(4)),
+          userShare:           Number(userShare.toFixed(2)),
+          companyChargeOnUser: Number(companyChargeOnUser.toFixed(2)),
+          ROI:                 Number(ROI.toFixed(2)),
         };
-      });
+      };
+
+      // Map users with stats
+      const usersWithStats = users.map(u => ({
+        ...u.toObject(),
+        _memberStats: calcStats(u.account?.balance, u.account?.accumulativeROI),
+        _entityType: 'member',
+      }));
+
+      // Map kiddies accounts with stats
+      // Kiddies accounts also have an Account doc (ownerType: "KiddiesAccount")
+      // so they participate in totalSavingsAllMembers and ROI distribution
+      const kiddiesWithStats = kiddiesAccounts.map(k => ({
+        ...k,
+        _memberStats: calcStats(k.account?.balance, k.account?.accumulativeROI),
+        _entityType: 'kiddies',
+        // Normalise fields so the EJS template can treat them uniformly
+        _display: {
+          fullName:    `${k.childFirstName} ${k.childLastName}`,
+          email:       k.parent?.email    || '—',
+          phone:       k.parent?.phone    || '—',
+          memberID:    k.accountID        || 'N/A',
+          status:      k.status,          // active | locked | closed
+          joinDate:    k.createdAt,
+          parentName:  k.parent ? `${k.parent.firstName} ${k.parent.lastName}` : '—',
+          parentMemberID: k.parent?.membershipID || '—',
+          balance:     k.account?.balance || 0,
+          type:        'Kiddies',
+          displayPicture: k.parent?.displayPicture || null,
+        }
+      }));
 
       res.render('dashboard/admin/members', {
         admin: req.user,
         users: usersWithStats,
+        kiddiesAccounts: kiddiesWithStats,
         memberTypes,
         totalSavingsAllMembers,
         totalInterestCollected,
