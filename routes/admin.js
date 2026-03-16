@@ -9,6 +9,8 @@ const MemberType = require("../models/MemberType");
 const Account = require("../models/Account");
 const Payment = require("../models/Payment");
 const Transaction = require("../models/Transaction");
+const CompanyROI = require("../models/companyRoiSchema");
+
 
 const KiddiesTransaction = require("../models/Kiddies/kiddiesTransaction");
 const KiddiesPayment = require("../models/Kiddies/KiddiesPayment");
@@ -515,20 +517,75 @@ router.get(
   ensureAdmin("view_members"),
   async (req, res) => {
     try {
+      // ── 1. Fetch all users with account + accountType ──────────────────
       const users = await User.find()
         .populate({
           path: "account",
-          populate: {
-            path: "accountType",
-          }
+          populate: { path: "accountType" }
         });
 
       const memberTypes = await MemberType.find();
 
+      // ── 2. Total savings across ALL accounts (same as user dashboard) ──
+      const allAccounts = await Account.find({});
+      const totalSavingsAllMembers = allAccounts.reduce(
+        (sum, acc) => sum + Number(acc.balance || 0), 0
+      );
+
+      // ── 3. Latest ROI data ─────────────────────────────────────────────
+      const latestROI              = await CompanyROI.findOne().sort({ createdAt: -1 });
+      const totalInterestCollected = Number(latestROI?.totalInterestCollected || 0);
+
+      // ── 4. ROI operating charge from settings ──────────────────────────
+      const settings           = await Settings.getSettings();
+      const roiOperatingCharge = Number(settings?.otherFees?.roiOperatingCharge || 0);
+
+      // ── 5. Calculate per-member shares + ROI ──────────────────────────
+      // Mirror exact logic from user dashboard
+      const usersWithStats = users.map(u => {
+        const memberSavings = Number(u.account?.balance || 0);
+        const accumulativeROI = Number(u.account?.accumulativeROI || 0);
+
+        let sharePercentage    = 0;
+        let userShare          = 0;
+        let companyChargeOnUser = 0;
+        let ROI                = 0;
+
+        if (totalSavingsAllMembers > 0 && memberSavings > 0) {
+          // Share %
+          const rawShare         = (memberSavings / totalSavingsAllMembers) * 100;
+          const shareAfterCharge = rawShare - roiOperatingCharge;
+          sharePercentage        = Math.max(0, Number(shareAfterCharge.toFixed(4)));
+
+          // ROI
+          if (totalInterestCollected > 0) {
+            userShare           = (memberSavings / totalSavingsAllMembers) * totalInterestCollected;
+            companyChargeOnUser = userShare * (roiOperatingCharge / 100);
+            ROI                 = userShare - companyChargeOnUser;
+          }
+        }
+
+        return {
+          ...u.toObject(),
+          _memberStats: {
+            memberSavings,
+            accumulativeROI,
+            totalBalance:        memberSavings + accumulativeROI,
+            sharePercentage:     Number(sharePercentage.toFixed(4)),
+            userShare:           Number(userShare.toFixed(2)),
+            companyChargeOnUser: Number(companyChargeOnUser.toFixed(2)),
+            ROI:                 Number(ROI.toFixed(2)),
+          }
+        };
+      });
+
       res.render('dashboard/admin/members', {
         admin: req.user,
-        users,
-        memberTypes
+        users: usersWithStats,
+        memberTypes,
+        totalSavingsAllMembers,
+        totalInterestCollected,
+        roiOperatingCharge,
       });
 
     } catch (err) {
