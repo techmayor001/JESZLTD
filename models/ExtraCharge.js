@@ -12,6 +12,7 @@ const extraChargeSchema = new mongoose.Schema(
       enum: [
         "registration",
         "loan-penalty",
+        "penalty",
         "forceful-withdrawal",
         "late-payment",
         "service",

@@ -590,6 +590,9 @@ const adminActionLogSchema = new mongoose.Schema(
       enum: ["success", "failed", "partial"],
       default: "success",
     },
+    meta: {
+      type: mongoose.Schema.Types.Mixed,
+    },
 
     errorMessage: {
       type: String,

@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ══ THEME TOKENS ══ */
 :root{
   --sidebar-w:230px;--nav-h:62px;
   --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
@@ -36,8 +35,6 @@
   --bar-bg:rgba(0,0,0,.07);--meta-bg:rgba(0,0,0,.025);
   --tog-bg:rgba(0,0,0,.07);
 }
-
-/* ══ BASE ══ */
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{
   height:100%;font-family:'DM Sans',sans-serif;
@@ -46,8 +43,6 @@ html,body{
 }
 a{text-decoration:none;color:inherit;}
 button,input,select,textarea{font-family:inherit;}
-
-/* ══ LOADER ══ */
 #loader{
   position:fixed;inset:0;background:var(--bg);z-index:9999;
   display:flex;align-items:center;justify-content:center;
@@ -60,8 +55,6 @@ button,input,select,textarea{font-family:inherit;}
 }
 .loader-label{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* ══ SIDEBAR ══ */
 .sidebar{
   position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
   background:var(--bg-card);border-right:1px solid var(--border);
@@ -118,8 +111,6 @@ button,input,select,textarea{font-family:inherit;}
   font-size:10px;font-weight:600;background:rgba(34,199,138,.12);
   color:var(--green);border:1px solid rgba(34,199,138,.2);margin-bottom:8px;
 }
-
-/* ══ TOP NAV ══ */
 .topnav{
   position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--nav-h);
   background:var(--nav-bg);backdrop-filter:blur(16px);
@@ -160,15 +151,11 @@ button,input,select,textarea{font-family:inherit;}
   font-size:9px;color:#fff;pointer-events:none;
 }
 [data-theme="light"] .tog-thumb{transform:translateX(18px);background:var(--accent);}
-
-/* ══ MAIN ══ */
 .main{
   margin-left:var(--sidebar-w);margin-top:var(--nav-h);
   padding:22px;min-height:calc(100vh - var(--nav-h));
   transition:margin-left .3s;
 }
-
-/* ══ LOAN HERO ══ */
 .loan-hero{
   background:var(--hero-bg);border:1px solid var(--border2);
   border-radius:var(--r-xl);padding:22px;margin-bottom:14px;
@@ -210,8 +197,6 @@ button,input,select,textarea{font-family:inherit;}
 .hero-stat-label{font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;}
 .hero-stat-value{font-size:clamp(13px,2.5vw,17px);font-weight:500;letter-spacing:-.3px;word-break:break-word;}
 .hero-stat-sub{font-size:11px;color:var(--muted);margin-top:2px;}
-
-/* ══ STATS ROW ══ */
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
 .stat-mini{
   background:var(--bg-card);border:1px solid var(--border);
@@ -226,11 +211,7 @@ button,input,select,textarea{font-family:inherit;}
 }
 .stat-mini-label{font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em;}
 .stat-mini-value{font-size:clamp(14px,2.5vw,18px);font-weight:500;word-break:break-word;}
-
-/* ══ MAIN GRID ══ */
 .page-grid{display:grid;grid-template-columns:1fr 340px;gap:14px;}
-
-/* ══ CARD BASE ══ */
 .card{
   background:var(--bg-card);border:1px solid var(--border);
   border-radius:var(--r-lg);
@@ -242,13 +223,8 @@ button,input,select,textarea{font-family:inherit;}
 }
 .card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
 .card-body{padding:18px;}
-
-/* ══ LOAN CARD ══ */
 .active-loan-wrap{margin-bottom:14px;}
-.loan-block{
-  border:1px solid var(--border);border-radius:var(--r-lg);
-  overflow:hidden;
-}
+.loan-block{border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;}
 .loan-block.overdue{border-color:rgba(240,82,82,.3);}
 .loan-block-header{
   display:flex;align-items:center;justify-content:space-between;
@@ -284,8 +260,6 @@ button,input,select,textarea{font-family:inherit;}
 .btn-pay:hover{background:rgba(79,142,247,.18);}
 .btn-rollover{background:var(--bg-card2);border:1px solid var(--border2);color:var(--muted);}
 .btn-rollover:hover{color:var(--text);}
-
-/* ══ CALCULATOR CARD ══ */
 .calc-form-group{margin-bottom:12px;}
 .calc-label{
   font-size:11px;font-weight:600;text-transform:uppercase;
@@ -307,8 +281,6 @@ button,input,select,textarea{font-family:inherit;}
 .calc-result-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;}
 .calc-result-label{color:var(--muted);}
 .calc-result-divider{border:none;border-top:1px solid var(--border);margin:5px 0;}
-
-/* ══ EMPTY STATE ══ */
 .empty-state{
   display:flex;flex-direction:column;align-items:center;
   justify-content:center;text-align:center;gap:12px;padding:48px 20px;
@@ -326,12 +298,8 @@ button,input,select,textarea{font-family:inherit;}
   cursor:pointer;border:none;transition:var(--tr);
 }
 .empty-cta:hover{background:rgba(79,142,247,.18);}
-
-/* ══ SIDEBAR OVERLAY ══ */
 .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190;}
 .sb-overlay.show{display:block;}
-
-/* ══ MODALS ══ */
 .modal-backdrop{
   display:none;position:fixed;inset:0;z-index:1000;
   background:rgba(0,0,0,.55);backdrop-filter:blur(5px);
@@ -396,28 +364,20 @@ button,input,select,textarea{font-family:inherit;}
 .btn-primary:disabled{opacity:.5;pointer-events:none;}
 .btn-success{background:rgba(34,199,138,.12);border:1px solid rgba(34,199,138,.25);color:var(--green);flex:2;}
 .btn-amber{background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25);color:var(--amber);flex:2;}
-
-/* Summary box */
 .summary-box{background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px;}
 .summary-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;}
 .summary-label{color:var(--muted);}
 .summary-divider{border:none;border-top:1px solid var(--border);margin:6px 0;}
 .summary-total{font-weight:500;}
-
-/* result modal */
 .result-modal{text-align:center;padding:28px 20px;}
 .result-icon{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:24px;}
 .result-icon.success{background:rgba(34,199,138,.12);color:var(--green);}
 .result-icon.error{background:rgba(240,82,82,.12);color:var(--red);}
 .result-title{font-size:17px;font-weight:500;margin-bottom:7px;}
 .result-msg{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
-
-/* checkbox */
 .check-group{display:flex;align-items:flex-start;gap:10px;padding:12px 0;}
 .check-group input[type=checkbox]{width:16px;height:16px;flex-shrink:0;margin-top:1px;accent-color:var(--accent);}
 .check-group label{font-size:12px;color:var(--muted);line-height:1.5;}
-
-/* bank detail box */
 .bank-box{
   background:var(--bg-card2);border:1px solid var(--border);
   border-radius:10px;padding:12px;margin-bottom:12px;
@@ -425,23 +385,25 @@ button,input,select,textarea{font-family:inherit;}
 .bank-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;}
 .bank-label{color:var(--muted);}
 .bank-value{font-weight:500;font-family:'DM Mono',monospace;}
-
-/* rollover summary */
 .rollover-summary{
   background:var(--bg-card2);border:1px solid var(--border);
   border-radius:10px;padding:14px;margin-bottom:14px;
 }
 .rs-amount{font-size:clamp(22px,4vw,28px);font-weight:300;letter-spacing:-.3px;color:var(--accent);margin-bottom:2px;}
 .rs-label{font-size:11px;color:var(--muted);}
-
-/* Powered by */
+.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.method-card{
+  border:1px solid var(--border2);border-radius:10px;padding:12px 10px;
+  cursor:pointer;transition:var(--tr);text-align:center;background:var(--bg-card2);
+}
+.method-card:hover{border-color:var(--accent);}
+.method-card.selected{border-color:var(--accent);background:rgba(79,142,247,.08);}
+.method-card i{font-size:18px;margin-bottom:6px;display:block;}
+.method-card-label{font-size:12px;font-weight:500;}
+.method-card-sub{font-size:10px;color:var(--muted);margin-top:2px;}
 .powered-by{position:fixed;bottom:12px;right:14px;font-size:11px;color:var(--muted);z-index:50;}
 .powered-by strong{color:var(--accent);}
-
-/* ══ RESPONSIVE ══ */
-@media(max-width:1100px){
-  .page-grid{grid-template-columns:1fr;}
-}
+@media(max-width:1100px){.page-grid{grid-template-columns:1fr;}}
 @media(max-width:900px){
   .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
   .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3);}
@@ -479,7 +441,6 @@ button,input,select,textarea{font-family:inherit;}
 </head>
 <body>
 
-<!-- LOADER -->
 <div id="loader">
   <div class="loader-ring"></div>
   <div class="loader-label">Club De Stars</div>
@@ -511,6 +472,7 @@ button,input,select,textarea{font-family:inherit;}
   const bankName      = (companyAccount && companyAccount.bankName)      || "—";
   const accountName   = (companyAccount && companyAccount.accountName)   || "—";
   const accountNumber = (companyAccount && companyAccount.accountNumber) || "—";
+  const accountConfigured = bankName !== "—" && accountNumber !== "—";
 %>
 
 <div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
@@ -606,7 +568,6 @@ button,input,select,textarea{font-family:inherit;}
 <!-- ════ MAIN ════ -->
 <main class="main">
 
-  <!-- Hero -->
   <div class="loan-hero">
     <div class="hero-top">
       <div>
@@ -653,7 +614,6 @@ button,input,select,textarea{font-family:inherit;}
     </div>
   </div>
 
-  <!-- Quick stats -->
   <div class="stats-row">
     <div class="stat-mini">
       <div class="stat-mini-icon" style="background:rgba(34,199,138,.1);color:var(--green);">
@@ -680,10 +640,7 @@ button,input,select,textarea{font-family:inherit;}
     </div>
   </div>
 
-  <!-- Main page grid -->
   <div class="page-grid">
-
-    <!-- Left: active loan -->
     <div>
       <div class="active-loan-wrap">
         <% if (loan) { %>
@@ -721,7 +678,7 @@ button,input,select,textarea{font-family:inherit;}
               </div>
               <div class="loan-detail-item">
                 <div class="ld-label">Interest</div>
-                <div class="ld-value">₦<%= (loan.amount * (interestRate / 100)).toLocaleString(undefined,{maximumFractionDigits:0}) %></div>
+                <div class="ld-value">₦<%= (loan.interestAmount || Math.round(loan.amount * (interestRate / 100))).toLocaleString() %></div>
               </div>
               <div class="loan-detail-item">
                 <div class="ld-label">Rate</div>
@@ -748,8 +705,13 @@ button,input,select,textarea{font-family:inherit;}
               <button class="loan-action-btn btn-pay" onclick="openModal('paymentModal')">
                 <i class="fas fa-credit-card" style="margin-right:6px;font-size:11px;"></i>Make Payment
               </button>
-              <button class="loan-action-btn btn-rollover" onclick="openRolloverFlow()">
-                <i class="fas fa-sync-alt" style="margin-right:6px;font-size:11px;"></i>Rollover
+              <button
+                class="loan-action-btn btn-rollover"
+                onclick="openRolloverFlow()"
+                <%= rolloverPending ? 'disabled title="Rollover pending admin approval"' : '' %>
+                style="<%= rolloverPending ? 'opacity:.5;cursor:not-allowed;' : '' %>">
+                <i class="fas fa-<%= rolloverPending ? 'clock' : 'sync-alt' %>" style="margin-right:6px;font-size:11px;"></i>
+                <%= rolloverPending ? 'Rollover Pending' : 'Rollover' %>
               </button>
             </div>
           </div>
@@ -769,7 +731,6 @@ button,input,select,textarea{font-family:inherit;}
       </div>
     </div>
 
-    <!-- Right: calculator -->
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div class="card">
         <div class="card-header">
@@ -920,7 +881,7 @@ button,input,select,textarea{font-family:inherit;}
   </div>
 </div>
 
-<!-- ════ ROLLOVER MODAL (single step) ════ -->
+<!-- ════ ROLLOVER MODAL ════ -->
 <div class="modal-backdrop" id="rolloverModal">
   <div class="modal-box"><div class="modal-handle"></div>
     <div class="modal-header">
@@ -932,76 +893,135 @@ button,input,select,textarea{font-family:inherit;}
     </div>
     <div class="modal-body">
 
-      <div class="modal-info">
-        <i class="fas fa-info-circle" style="margin-right:6px;"></i>
-        Transfer the amount shown below to the account, enter your name, then submit.
-        Admin will complete your rollover once payment is confirmed.
-      </div>
-
-      <!-- Bank details (static from EJS) -->
-      <div class="bank-box">
-        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Transfer to</div>
-        <div class="bank-row"><span class="bank-label">Bank</span><span class="bank-value"><%= bankName %></span></div>
-        <div class="bank-row"><span class="bank-label">Account No.</span><span class="bank-value"><%= accountNumber %></span></div>
-        <div class="bank-row"><span class="bank-label">Account Name</span><span class="bank-value"><%= accountName %></span></div>
-      </div>
-
-      <!-- Payment breakdown -->
+      <!-- Loan breakdown -->
       <div class="rollover-summary">
-        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">What to Pay</div>
-
-        <!-- Interest — always required -->
-        <div class="summary-row" style="padding:6px 0;align-items:center;">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Your Loan Breakdown</div>
+        <div class="summary-row" style="padding:5px 0;">
+          <span class="summary-label">Principal (borrowed)</span>
+          <span id="rv_principalAmt" style="font-weight:500;">₦0</span>
+        </div>
+        <div class="summary-row" style="padding:5px 0;">
           <span class="summary-label">
-            <i class="fas fa-check-circle" style="color:var(--accent);margin-right:5px;font-size:10px;"></i>
-            Interest (required)
+            <i class="fas fa-check-circle" style="color:var(--accent);font-size:10px;margin-right:4px;"></i>
+            Interest <span style="color:var(--accent);font-size:10px;">(must pay to rollover)</span>
           </span>
-          <span id="rv_interestAmount" style="font-weight:500;color:var(--accent);">₦0</span>
+          <span id="rv_interestAmt" style="font-weight:600;color:var(--accent);">₦0</span>
+        </div>
+        <div class="summary-row" id="rv_penaltyBreakRow" style="padding:5px 0;display:none;">
+          <span class="summary-label">Penalty accrued</span>
+          <span id="rv_penaltyBreakAmt" style="font-weight:500;color:var(--red);">₦0</span>
         </div>
 
-        <!-- Penalty — optional checkbox, hidden if no penalty -->
-        <div class="summary-row" id="rv_penaltyRow" style="padding:6px 0;align-items:center;display:none;">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--muted);font-size:12px;">
-            <input type="checkbox" id="rv_payPenalty" onchange="updateRolloverSummary()"
-                   style="width:15px;height:15px;accent-color:var(--amber);">
-            Also pay penalty now (optional)
-          </label>
-          <span id="rv_penaltyAmount" style="font-weight:500;color:var(--red);">₦0</span>
-        </div>
-        <div id="rv_penaltyHint" style="font-size:11px;color:var(--muted);padding:2px 0 4px 23px;display:none;">
-          Paying penalty now reduces your new loan balance.
+        <!-- Interest rate change row -->
+        <div class="summary-row" style="padding:5px 0;align-items:center;">
+          <span class="summary-label" style="font-size:11px;">Interest rate after rollover</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:12px;">
+            <span id="rv_currentRateDisplay" style="color:var(--muted);">0%</span>
+            <i class="fas fa-arrow-right" style="font-size:9px;color:var(--muted);"></i>
+            <span id="rv_rolloverRateDisplay" style="color:var(--amber);font-size:11px;">+0%</span>
+            <i class="fas fa-arrow-right" style="font-size:9px;color:var(--muted);"></i>
+            <span id="rv_newRateDisplay" style="font-weight:700;color:var(--accent);">0%</span>
+          </span>
         </div>
 
         <hr style="border:none;border-top:1px solid var(--border);margin:8px 0;">
-
-        <div class="summary-row" style="padding:4px 0;">
-          <span style="font-weight:600;">Total to Transfer</span>
-          <span id="rv_totalToPay" style="font-weight:700;font-size:15px;color:var(--text);">₦0</span>
+        <div class="summary-row" style="padding:3px 0;">
+          <span style="font-weight:500;font-size:13px;">Total outstanding</span>
+          <span id="rv_outstandingAmt" style="font-weight:600;font-size:13px;">₦0</span>
         </div>
       </div>
 
-      <!-- New loan preview -->
-      <div style="background:var(--bg-card3);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:14px;">
-        <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">After Rollover (preview)</div>
-        <div class="summary-row">
-          <span class="summary-label">Current outstanding</span>
-          <span id="rv_outstanding">₦0</span>
-        </div>
-        <div class="summary-row">
-          <span class="summary-label">Rollover fee</span>
-          <span id="rv_rolloverFee" style="color:var(--amber);">₦0</span>
-        </div>
-        <div class="summary-row" style="margin-top:4px;">
-          <span style="font-weight:500;">New loan total</span>
-          <span id="rv_newTotal" style="font-weight:600;color:var(--accent);">₦0</span>
+      <!-- Optional: pay penalty -->
+      <div id="rv_penaltyOptionWrap" style="display:none;margin-bottom:14px;">
+        <div style="background:rgba(240,82,82,.06);border:1px solid rgba(240,82,82,.18);border-radius:10px;padding:12px 14px;">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+            <input type="checkbox" id="rv_payPenalty" onchange="updateRolloverSummary()"
+                   style="width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-color:var(--amber);">
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;">
+                Also pay penalty — <span id="rv_penaltyCheckAmt" style="color:var(--red);">₦0</span>
+              </div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.5;">
+                Optional. Paying the penalty now clears it from your loan and reduces your new rollover balance.
+                If you skip it, the penalty carries forward and your new balance will be higher.
+              </div>
+            </div>
+          </label>
         </div>
       </div>
 
-      <!-- Payer name -->
-      <div class="form-group" style="margin-bottom:8px;">
-        <label class="form-label">Your Name on Receipt</label>
-        <input type="text" class="form-control" id="rv_payerName" placeholder="Name shown on bank transfer">
-        <div class="form-hint">Helps admin match your payment faster.</div>
+      <!-- Payment method -->
+      <div class="form-group">
+        <label class="form-label">Payment Method</label>
+        <div class="method-grid">
+          <div class="method-card" id="rv_methodManual" onclick="selectRolloverMethod('manual')">
+            <i class="fas fa-university" style="color:var(--amber);"></i>
+            <div class="method-card-label">Manual Transfer</div>
+            <div class="method-card-sub">Bank transfer proof</div>
+          </div>
+          <div class="method-card" id="rv_methodPaystack" onclick="selectRolloverMethod('paystack')">
+            <i class="fas fa-bolt" style="color:var(--green);"></i>
+            <div class="method-card-label">Paystack</div>
+            <div class="method-card-sub">Pay instantly online</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual bank details -->
+      <div id="rv_manualSection" style="display:none;">
+        <div class="bank-box">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Transfer to</div>
+          <div class="bank-row"><span class="bank-label">Bank</span><span class="bank-value"><%= bankName %></span></div>
+          <div class="bank-row"><span class="bank-label">Account No.</span><span class="bank-value"><%= accountNumber %></span></div>
+          <div class="bank-row"><span class="bank-label">Account Name</span><span class="bank-value"><%= accountName %></span></div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Your Name on Receipt</label>
+          <input type="text" class="form-control" id="rv_payerName" placeholder="Name shown on bank transfer">
+          <div class="form-hint">Helps admin match your payment faster.</div>
+        </div>
+      </div>
+
+      <!-- Payment summary + after rollover preview -->
+      <div id="rv_summaryWrap" style="display:none;margin-top:14px;">
+        <div style="background:var(--bg-card3);border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:14px;">
+          <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Payment Summary</div>
+          <div class="summary-row" style="padding:4px 0;">
+            <span class="summary-label">Interest (required)</span>
+            <span id="rv_payInterestLine" style="color:var(--accent);font-weight:500;">₦0</span>
+          </div>
+          <div class="summary-row" id="rv_payPenaltyLine" style="padding:4px 0;display:none;">
+            <span class="summary-label">Penalty (opted in)</span>
+            <span id="rv_payPenaltyAmt" style="color:var(--amber);font-weight:500;">₦0</span>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:6px 0;">
+          <div class="summary-row" style="padding:4px 0;">
+            <span style="font-weight:600;">Total to Pay</span>
+            <span id="rv_totalToPay" style="font-weight:700;font-size:15px;color:var(--text);">₦0</span>
+          </div>
+        </div>
+
+        <!-- After rollover preview -->
+        <div style="background:var(--bg-card3);border:1px solid var(--border);border-radius:9px;padding:12px;">
+          <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">After Rollover (preview)</div>
+          <div class="summary-row">
+            <span class="summary-label">New loan base</span>
+            <span id="rv_newBase">₦0</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Interest at new rate (<span id="rv_rolloverPctLabel">0</span>%)</span>
+            <span id="rv_rolloverFeeAmt" style="color:var(--amber);">₦0</span>
+          </div>
+          <div class="summary-row" style="margin-top:4px;">
+            <span style="font-weight:500;">New loan total</span>
+            <span id="rv_newTotal" style="font-weight:600;color:var(--accent);">₦0</span>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:8px 0;">
+          <div class="summary-row" style="padding:3px 0;">
+            <span class="summary-label">New interest rate</span>
+            <span id="rv_previewNewRate" style="font-weight:700;color:var(--amber);">0%</span>
+          </div>
+        </div>
       </div>
 
       <!-- Hidden fields -->
@@ -1009,13 +1029,17 @@ button,input,select,textarea{font-family:inherit;}
       <input type="hidden" id="rv_hiddenInterest">
       <input type="hidden" id="rv_hiddenPenalty">
       <input type="hidden" id="rv_hiddenRolloverPct">
+      <input type="hidden" id="rv_hiddenPrincipal">
+      <input type="hidden" id="rv_hiddenMemberRate">
+      <input type="hidden" id="rv_hiddenNewInterestRate">
+      <input type="hidden" id="rv_selectedMethod" value="">
 
-      <div id="rv_error" class="modal-danger" style="display:none;margin-bottom:0;"></div>
+      <div id="rv_error" class="modal-danger" style="display:none;margin-top:14px;margin-bottom:0;"></div>
     </div>
 
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('rolloverModal')">Cancel</button>
-      <button class="btn btn-primary" id="rv_submitBtn" onclick="submitRolloverRequest()">
+      <button class="btn btn-primary" id="rv_submitBtn" onclick="submitRolloverRequest()" disabled>
         <i class="fas fa-paper-plane" style="margin-right:5px;font-size:11px;"></i>Submit Rollover Request
       </button>
     </div>
@@ -1040,10 +1064,7 @@ button,input,select,textarea{font-family:inherit;}
     <div class="result-modal">
       <div class="result-icon success"><i class="fas fa-sync-alt"></i></div>
       <div class="result-title">Rollover Request Submitted</div>
-      <div class="result-msg">
-        You paid: <strong id="rvs_totalPaid">₦0</strong><br>
-        Rollover fee: <strong id="rvs_rolloverFee">₦0</strong><br>
-        New loan total: <strong id="rvs_newTotal">₦0</strong><br><br>
+      <div class="result-msg" id="rvs_msg">
         Admin will confirm your payment and complete the rollover shortly.
       </div>
       <button class="btn btn-primary" onclick="location.reload()" style="max-width:200px;margin:0 auto;">Done</button>
@@ -1172,7 +1193,9 @@ async function submitLoanPayment(){
   } catch(e){ showError('Payment Failed', e.message); }
 }
 
-/* ══ ROLLOVER FLOW ══ */
+/* ══════════════════════════════════
+   ROLLOVER FLOW
+══════════════════════════════════ */
 let rolloverState = null;
 
 async function openRolloverFlow(){
@@ -1183,7 +1206,6 @@ async function openRolloverFlow(){
     const data = await res.json();
     if(!res.ok){ showError('Rollover Unavailable', data.message || 'No active loan found.'); return; }
 
-    // Block if already submitted
     if(data.rolloverPending){
       showError('Already Submitted', 'A rollover request is already pending admin approval.');
       return;
@@ -1200,70 +1222,162 @@ async function openRolloverFlow(){
 }
 
 function populateRolloverModal(data){
-  const interest    = Number(data.interestOwed  || 0);
-  const penalty     = Number(data.totalPenalty  || 0);
-  const rolloverPct = Number(data.rolloverPct   || 1);
-  const outstanding = Number(data.outstandingBalance || 0);
+  const principal       = Number(data.principalAmount    || 0);
+  const interest        = Number(data.interestOwed       || 0);
+  const penalty         = Number(data.totalPenalty       || 0);
+  const outstanding     = Number(data.outstandingBalance || 0);
+  // ⭐ rolloverPct is strictly from LoanSettings (e.g. 1%)
+  // this is both the fee rate AND the rate added to memberInterest
+  const rolloverPct     = Number(data.rolloverPct        || 0);
+  const memberInterest  = Number(data.memberInterestRate || 0); // e.g. 5%
+  const newInterestRate = Number(data.newInterestRate    || 0); // e.g. 5 + 1 = 6%
 
   // Store into hidden fields
-  document.getElementById('rv_hiddenLoanId').value      = data.loanId;
-  document.getElementById('rv_hiddenInterest').value    = interest;
-  document.getElementById('rv_hiddenPenalty').value     = penalty;
-  document.getElementById('rv_hiddenRolloverPct').value = rolloverPct;
+  document.getElementById('rv_hiddenLoanId').value          = data.loanId;
+  document.getElementById('rv_hiddenInterest').value        = interest;
+  document.getElementById('rv_hiddenPenalty').value         = penalty;
+  document.getElementById('rv_hiddenRolloverPct').value     = rolloverPct;
+  document.getElementById('rv_hiddenPrincipal').value       = principal;
+  document.getElementById('rv_hiddenMemberRate').value      = memberInterest;
+  document.getElementById('rv_hiddenNewInterestRate').value = newInterestRate;
 
-  // Fill static displays
-  document.getElementById('rv_interestAmount').textContent = '₦' + interest.toLocaleString();
-  document.getElementById('rv_penaltyAmount').textContent  = '₦' + penalty.toLocaleString();
-  document.getElementById('rv_outstanding').textContent    = '₦' + outstanding.toLocaleString();
+  // Breakdown display
+  document.getElementById('rv_principalAmt').textContent    = '₦' + principal.toLocaleString();
+  document.getElementById('rv_interestAmt').textContent     = '₦' + interest.toLocaleString();
+  document.getElementById('rv_outstandingAmt').textContent  = '₦' + outstanding.toLocaleString();
+  document.getElementById('rv_rolloverPctLabel').textContent = newInterestRate;
 
-  // Show/hide penalty row
+  // ⭐ Rate display: e.g. "5% → +1% → 6%"
+  // rolloverPct (from LoanSettings) is the increment added to memberInterest
+  document.getElementById('rv_currentRateDisplay').textContent  = memberInterest + '%';
+  document.getElementById('rv_rolloverRateDisplay').textContent = '+' + rolloverPct + '%';
+  document.getElementById('rv_newRateDisplay').textContent      = newInterestRate + '%';
+
+  // Penalty rows
   const hasPenalty = penalty > 0;
-  document.getElementById('rv_penaltyRow').style.display  = hasPenalty ? 'flex' : 'none';
-  document.getElementById('rv_penaltyHint').style.display = hasPenalty ? 'block' : 'none';
-  document.getElementById('rv_payPenalty').checked        = false;
+  document.getElementById('rv_penaltyBreakRow').style.display   = hasPenalty ? 'flex' : 'none';
+  document.getElementById('rv_penaltyBreakAmt').textContent     = '₦' + penalty.toLocaleString();
+  document.getElementById('rv_penaltyOptionWrap').style.display = hasPenalty ? 'block' : 'none';
+  document.getElementById('rv_penaltyCheckAmt').textContent     = '₦' + penalty.toLocaleString();
+  document.getElementById('rv_payPenalty').checked              = false;
 
-  // Reset form
-  document.getElementById('rv_payerName').value    = '';
-  document.getElementById('rv_error').style.display = 'none';
+  // Reset method + form state
+  selectRolloverMethod(null);
+  document.getElementById('rv_payerName').value           = '';
+  document.getElementById('rv_error').style.display       = 'none';
+  document.getElementById('rv_summaryWrap').style.display = 'none';
+  document.getElementById('rv_submitBtn').disabled        = true;
+}
 
-  updateRolloverSummary();
+function selectRolloverMethod(method){
+  document.getElementById('rv_selectedMethod').value = method || '';
+  document.getElementById('rv_methodManual').classList.toggle('selected', method === 'manual');
+  document.getElementById('rv_methodPaystack').classList.toggle('selected', method === 'paystack');
+  document.getElementById('rv_manualSection').style.display = method === 'manual' ? 'block' : 'none';
+  document.getElementById('rv_submitBtn').disabled = !method;
+  if(method){
+    document.getElementById('rv_summaryWrap').style.display = 'block';
+    updateRolloverSummary();
+  }
 }
 
 function updateRolloverSummary(){
-  const interest    = parseFloat(document.getElementById('rv_hiddenInterest').value)    || 0;
-  const penalty     = parseFloat(document.getElementById('rv_hiddenPenalty').value)     || 0;
-  const rolloverPct = parseFloat(document.getElementById('rv_hiddenRolloverPct').value) || 1;
-  const outstanding = rolloverState ? Number(rolloverState.outstandingBalance || 0) : 0;
-  const payPenalty  = document.getElementById('rv_payPenalty').checked;
+  const interest        = parseFloat(document.getElementById('rv_hiddenInterest').value)        || 0;
+  const penalty         = parseFloat(document.getElementById('rv_hiddenPenalty').value)         || 0;
+  const rolloverPct     = parseFloat(document.getElementById('rv_hiddenRolloverPct').value)     || 0;
+  const principal       = parseFloat(document.getElementById('rv_hiddenPrincipal').value)       || 0;
+  const newInterestRate = parseFloat(document.getElementById('rv_hiddenNewInterestRate').value) || 0;
+  const payPenalty      = document.getElementById('rv_payPenalty').checked;
 
-  const totalToPay      = interest + (payPenalty ? penalty : 0);
-  const baseAfterPenalty = payPenalty ? (outstanding - penalty) : outstanding;
-  const rolloverFee     = Math.round(baseAfterPenalty * (rolloverPct / 100));
-  const newTotal        = baseAfterPenalty + rolloverFee;
+  // What member pays now
+  const totalToPay = interest + (payPenalty ? penalty : 0);
 
-  document.getElementById('rv_totalToPay').textContent  = '₦' + totalToPay.toLocaleString();
-  document.getElementById('rv_rolloverFee').textContent = '₦' + rolloverFee.toLocaleString();
-  document.getElementById('rv_newTotal').textContent    = '₦' + newTotal.toLocaleString();
+  // New loan base after rollover:
+  // penalty paid → cleared → base = principal only
+  // penalty skipped → carries forward → base = principal + penalty
+  const newBase = payPenalty ? principal : (principal + penalty);
+
+  // ⭐ New total = newBase + (newBase × newInterestRate%)
+  // e.g. base=1000, rate=6% → interest=60 → total=1060
+  const newInterestAmt = parseFloat((newBase * (newInterestRate / 100)).toFixed(2));
+  const newTotal       = parseFloat((newBase + newInterestAmt).toFixed(2));
+
+  // Payment summary lines
+  document.getElementById('rv_payInterestLine').textContent = '₦' + interest.toLocaleString();
+
+  const penaltyPayLine = document.getElementById('rv_payPenaltyLine');
+  if(payPenalty && penalty > 0){
+    penaltyPayLine.style.display = 'flex';
+    document.getElementById('rv_payPenaltyAmt').textContent = '₦' + penalty.toLocaleString();
+  } else {
+    penaltyPayLine.style.display = 'none';
+  }
+
+  document.getElementById('rv_totalToPay').textContent     = '₦' + totalToPay.toLocaleString();
+  document.getElementById('rv_newBase').textContent        = '₦' + newBase.toLocaleString();
+  // ⭐ Label shows "New interest (6%)" instead of "Rollover fee (1%)"
+  document.getElementById('rv_rolloverFeeAmt').textContent = '₦' + newInterestAmt.toLocaleString();
+  document.getElementById('rv_newTotal').textContent       = '₦' + newTotal.toLocaleString();
+  document.getElementById('rv_previewNewRate').textContent = newInterestRate + '%';
 }
 
 async function submitRolloverRequest(){
-  const btn      = document.getElementById('rv_submitBtn');
-  const errDiv   = document.getElementById('rv_error');
-  const loanId   = document.getElementById('rv_hiddenLoanId').value;
-  const interest = parseFloat(document.getElementById('rv_hiddenInterest').value);
-  const penalty  = parseFloat(document.getElementById('rv_hiddenPenalty').value);
+  const btn        = document.getElementById('rv_submitBtn');
+  const errDiv     = document.getElementById('rv_error');
+  const loanId     = document.getElementById('rv_hiddenLoanId').value;
+  const interest   = parseFloat(document.getElementById('rv_hiddenInterest').value);
+  const penalty    = parseFloat(document.getElementById('rv_hiddenPenalty').value);
   const payPenalty = document.getElementById('rv_payPenalty').checked;
   const payerName  = document.getElementById('rv_payerName').value.trim();
+  const method     = document.getElementById('rv_selectedMethod').value;
 
   errDiv.style.display = 'none';
 
-  if(!loanId){ errDiv.textContent = 'Invalid session. Please close and try again.'; errDiv.style.display = 'block'; return; }
-  if(!interest || interest <= 0){ errDiv.textContent = 'Interest amount is missing. Please close and try again.'; errDiv.style.display = 'block'; return; }
+  if(!loanId){
+    errDiv.textContent = 'Invalid session. Please close and try again.';
+    errDiv.style.display = 'block'; return;
+  }
+  if(!interest || interest <= 0){
+    errDiv.textContent = 'Interest amount is missing. Please close and try again.';
+    errDiv.style.display = 'block'; return;
+  }
+  if(!method){
+    errDiv.textContent = 'Please select a payment method.';
+    errDiv.style.display = 'block'; return;
+  }
+  if(method === 'manual' && !payerName){
+    errDiv.textContent = 'Please enter your name as it appears on the bank receipt.';
+    errDiv.style.display = 'block'; return;
+  }
+
+  const totalToPay = interest + (payPenalty ? penalty : 0);
 
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Submitting…';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Processing…';
 
   try{
+    if(method === 'paystack'){
+      const initRes  = await fetch('/club-de-star-cooperative/rollover-paystack-init',{
+        method:  'POST',
+        headers: {'Content-Type':'application/json'},
+        body:    JSON.stringify({ amount: totalToPay, loanId })
+      });
+      const initData = await initRes.json();
+      if(!initRes.ok || !initData.authorization_url){
+        throw new Error(initData.message || 'Could not initiate Paystack payment.');
+      }
+      sessionStorage.setItem('pendingRollover', JSON.stringify({
+        loanId,
+        interestAmount: interest,
+        penaltyAmount:  payPenalty ? penalty : 0,
+        payPenalty,
+        payerName,
+        paystackRef: initData.reference,
+      }));
+      window.location.href = initData.authorization_url;
+      return;
+    }
+
     const res  = await fetch('/club-de-star-cooperative/rollover-request',{
       method:  'POST',
       headers: {'Content-Type':'application/json'},
@@ -1273,14 +1387,20 @@ async function submitRolloverRequest(){
         penaltyAmount:  payPenalty ? penalty : 0,
         payPenalty,
         payerName,
+        paymentMethod: 'manual',
       })
     });
     const data = await res.json();
 
     if(res.ok && data.status){
-      document.getElementById('rvs_totalPaid').textContent  = '₦' + Number(data.summary.totalPaid).toLocaleString();
-      document.getElementById('rvs_rolloverFee').textContent = '₦' + Number(data.summary.rolloverFee).toLocaleString();
-      document.getElementById('rvs_newTotal').textContent   = '₦' + Number(data.summary.newTotalRepay).toLocaleString();
+      const s = data.summary;
+      document.getElementById('rvs_msg').innerHTML =
+        `Paid: <strong>₦${Number(s.totalPaid).toLocaleString()}</strong> ` +
+        `(interest: ₦${Number(s.interestPaid).toLocaleString()}` +
+        `${s.penaltyPaid > 0 ? ` + penalty: ₦${Number(s.penaltyPaid).toLocaleString()}` : ''})` +
+        `<br>New loan total: <strong>₦${Number(s.newTotalRepay).toLocaleString()}</strong>` +
+        `<br>New interest rate: <strong>${Number(s.newInterestRate)}%</strong>` +
+        `<br><br>Admin will confirm your bank transfer and complete the rollover.`;
       closeModal('rolloverModal');
       setTimeout(() => openModal('rolloverSuccessModal'), 300);
     } else {
@@ -1288,13 +1408,39 @@ async function submitRolloverRequest(){
       errDiv.style.display = 'block';
     }
   } catch(e){
-    errDiv.textContent   = 'Network error. Please try again.';
+    errDiv.textContent   = e.message || 'Network error. Please try again.';
     errDiv.style.display = 'block';
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:5px;font-size:11px;"></i>Submit Rollover Request';
   }
 }
+
+/* ── Handle Paystack return ── */
+(function checkPaystackReturn(){
+  const pending = sessionStorage.getItem('pendingRollover');
+  if(!pending) return;
+  const params = new URLSearchParams(window.location.search);
+  const ref    = params.get('reference') || params.get('ref') || params.get('trxref');
+  if(!ref) return;
+  sessionStorage.removeItem('pendingRollover');
+  const data = JSON.parse(pending);
+  fetch('/club-de-star-cooperative/rollover-request',{
+    method:  'POST',
+    headers: {'Content-Type':'application/json'},
+    body:    JSON.stringify({ ...data, paymentMethod: 'paystack', paystackRef: ref })
+  }).then(r => r.json()).then(d => {
+    if(d.status){
+      const s = d.summary;
+      document.getElementById('rvs_msg').innerHTML =
+        `Paid via Paystack: <strong>₦${Number(s.totalPaid).toLocaleString()}</strong>` +
+        `<br>New loan total: <strong>₦${Number(s.newTotalRepay).toLocaleString()}</strong>` +
+        `<br>New interest rate: <strong>${Number(s.newInterestRate)}%</strong>` +
+        `<br><br>Admin will complete your rollover shortly.`;
+      openModal('rolloverSuccessModal');
+    }
+  }).catch(() => {});
+})();
 
 /* ── Loader ── */
 window.addEventListener('load', () => {

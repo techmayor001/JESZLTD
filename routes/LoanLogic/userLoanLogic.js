@@ -9,6 +9,7 @@ const Settings = require("../../models/Settings");
 const Payment = require("../../models/Payment");
 const Transaction = require("../../models/Transaction");
 const CompanyLedger = require("../../models/CompanyLedger");
+const CompanyAccount = require("../../models/companyRoiSchema");
 
 
 
@@ -17,7 +18,6 @@ router.get("/cds-cooperative/loan", async (req, res) => {
   if (!req.isAuthenticated()) return res.redirect("/login");
 
   try {
-    // Fetch logged-in user
     const user = await User.findById(req.user._id)
       .populate({
         path: "account",
@@ -27,23 +27,17 @@ router.get("/cds-cooperative/loan", async (req, res) => {
 
     if (!user) return res.redirect("/login");
 
-    // Fetch all users
     const users = await User.find({});
 
-    // Fetch active loan settings
     const loanSettings = await LoanSettings.find({ status: "active" })
       .sort({ loanName: 1 })
       .lean();
 
-    // Fetch user's current loan
     const activeLoan = await Loan.findOne({
       user: user._id,
       status: { $in: ["pending", "approved", "overdue"] }
     })
-      .populate({
-        path: "duration",
-        model: "LoanSettings"
-      })
+      .populate({ path: "duration", model: "LoanSettings" })
       .populate({
         path: "guarantors.guarantor",
         model: "User",
@@ -51,22 +45,19 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       })
       .lean();
 
-    // Due date based on duration.months
-    let dueDate = null;
+    let dueDate      = null;
     let daysUntilDue = null;
 
     if (activeLoan && activeLoan.duration) {
-      const createdAt = new Date(activeLoan.createdAt);
+      const createdAt   = new Date(activeLoan.createdAt);
       const monthsToAdd = activeLoan.duration.duration;
 
       dueDate = new Date(createdAt);
       dueDate.setMonth(dueDate.getMonth() + monthsToAdd);
 
-      const today = new Date();
+      const today  = new Date();
       const msDiff = dueDate - today;
-      daysUntilDue = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
-
-      if (daysUntilDue < 0) daysUntilDue = 0;
+      daysUntilDue = Math.max(0, Math.ceil(msDiff / (1000 * 60 * 60 * 24)));
     }
 
     const interestRate = user.account?.accountType?.interestRate || 0;
@@ -76,14 +67,24 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       (today - user.createdAt) / (1000 * 60 * 60 * 24 * 30)
     );
 
-    // Settings
-    const settings = await Settings.getSettings();
+    const settings       = await Settings.getSettings();
     const companyAccount = settings.companyAccount || {};
 
-    // Pending guarantor requests
     const pendingGuarantorCount = user.guarantorRequests
       ? user.guarantorRequests.filter(r => r.status === "pending").length
       : 0;
+
+    // ── Check if a rollover request is already pending ──────────────────────
+    let rolloverPending = false;
+    if (activeLoan) {
+      const pendingRollover = await Payment.findOne({
+        loanId: activeLoan._id,
+        type:   "rollover_request",
+        status: { $in: ["pending", "approved", "success"] }
+      }).lean();
+      rolloverPending = !!pendingRollover;
+    }
+    // ────────────────────────────────────────────────────────────────────────
 
     res.render("dashboard/user/loan", {
       user,
@@ -96,6 +97,7 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       daysUntilDue,
       companyAccount,
       pendingGuarantorCount,
+      rolloverPending,        // ← new
     });
 
   } catch (err) {
@@ -209,9 +211,7 @@ router.post("/club-de-star-cooperative/apply-loan", async (req, res) => {
 // ═════════════════════════════════════════════════════════════════════════════
 // GET /club-de-star-cooperative/rollover-status
 router.get("/club-de-star-cooperative/rollover-status", async (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
+  if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
 
   try {
     const loan = await Loan.findOne({
@@ -219,56 +219,52 @@ router.get("/club-de-star-cooperative/rollover-status", async (req, res) => {
       status: { $in: ["approved", "overdue"] }
     }).populate("duration");
 
-    if (!loan) {
-      return res.status(404).json({ message: "No active loan found." });
-    }
+    if (!loan) return res.status(404).json({ message: "No active loan found." });
 
-    const durationMonths = loan.duration?.duration ?? loan.externalDuration ?? 1;
-    const interestOwed = parseFloat(
-      (loan.amount * (loan.interestRate / 100) * durationMonths).toFixed(2)
-    );
-
-    const interestPaymentRecord = await Payment.findOne({
-      loanId: loan._id,
-      type:   "interest",
-      status: { $in: ["paid", "success"] }
+    const user = await User.findById(req.user._id).populate({
+      path:     "account",
+      populate: { path: "accountType", model: "MemberType" }
     });
 
-    const paidAmountCoversInterest =
-      typeof loan.paidAmount === "number" &&
-      loan.paidAmount >= interestOwed;
+    const memberType     = user?.account?.accountType;
+    const memberInterest = memberType?.interestRate || 0; // e.g. 5%
 
-    const interestPaid = !!(interestPaymentRecord || paidAmountCoversInterest);
+    const companyAccount = await CompanyAccount.findOne({ status: "active" });
 
-    const pendingInterest = !interestPaid
-      ? await Payment.findOne({
-          loanId: loan._id,
-          type:   "interest",
-          status: "pending"
-        })
-      : null;
+    const existingRollover = await Payment.findOne({
+      loanId: loan._id,
+      type:   "rollover_request",
+      status: { $in: ["pending", "approved", "success"] }
+    });
 
-    const outstandingBalance = parseFloat(
-      (loan.outstandingBalance || loan.totalRepay).toFixed(2)
-    );
-    const rolloverPct   = loan.duration?.rolloverPercentage ?? loan.rolloverPercentage ?? 0;
-    const rolloverFee   = parseFloat((outstandingBalance * (rolloverPct / 100)).toFixed(2));
-    const newTotalRepay = parseFloat((outstandingBalance + rolloverFee).toFixed(2));
+    const rolloverPct     = loan.duration?.rolloverPercentage ?? loan.rolloverPercentage ?? 0; // e.g. 1%
+    const newInterestRate = parseFloat((memberInterest + rolloverPct).toFixed(4));              // e.g. 6%
 
-    const settings = await Settings.getSettings();
+    const principal   = loan.amount;
+    const interest    = loan.interestAmount
+                        || Math.round(loan.amount * (memberInterest / 100));
+    const penalty     = loan.totalPenalty || 0;
+    const outstanding = loan.outstandingBalance || loan.totalRepay;
 
-    return res.status(200).json({
-      loanId:          loan._id,
-      loanName:        loan.duration?.loanName || null,  // CHANGED: added for locked duration display
-      interestPaid,
-      interestOwed,
-      paidAmount:      loan.paidAmount ?? 0,
-      pendingInterest: !!pendingInterest,
-      outstandingBalance,
-      rolloverPct,
-      rolloverFee,
-      newTotalRepay,
-      companyAccount:  settings.companyAccount
+    // ⭐ New total = principal + (principal × newInterestRate%)
+    // e.g. 1000 + (1000 × 6%) = 1000 + 60 = 1060
+    const newInterestAmount = parseFloat((principal * (newInterestRate / 100)).toFixed(2));
+    const newTotalRepay     = parseFloat((principal + newInterestAmount).toFixed(2));
+
+    return res.json({
+      loanId:             loan._id,
+      rolloverPending:    !!existingRollover,
+      principalAmount:    principal,
+      interestOwed:       interest,
+      totalPenalty:       penalty,
+      outstandingBalance: outstanding,
+      memberInterestRate: memberInterest,  // 5%
+      rolloverPct,                         // 1%
+      newInterestRate,                     // 6%
+      newInterestAmount,                   // ₦60 — interest at new rate
+      newTotalRepay,                       // ₦1,060
+      loanName:           loan.duration?.loanName || "Current Loan",
+      companyAccount,
     });
 
   } catch (err) {
@@ -276,82 +272,138 @@ router.get("/club-de-star-cooperative/rollover-status", async (req, res) => {
     return res.status(500).json({ message: "Server error." });
   }
 });
-
-
 // ═════════════════════════════════════════════════════════════════════════════
 // POST /club-de-star-cooperative/rollover-interest-payment
-router.post("/club-de-star-cooperative/rollover-interest-payment", async (req, res) => {
+router.post("/club-de-star-cooperative/rollover-request", async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   try {
-    const { loanId, amount, payerName } = req.body;
+    const {
+      loanId, interestAmount, penaltyAmount,
+      payerName, payPenalty, paymentMethod, paystackRef
+    } = req.body;
 
-    if (!loanId || !amount) {
-      return res.status(400).json({ message: "Loan ID and amount are required." });
-    }
-
-    const paymentAmount = Math.round(Number(amount));
-    if (isNaN(paymentAmount) || paymentAmount <= 0) {
-      return res.status(400).json({ message: "Invalid amount." });
+    if (!loanId || !interestAmount) {
+      return res.status(400).json({ message: "Loan ID and interest amount are required." });
     }
 
     const loan = await Loan.findOne({
       _id:    loanId,
       user:   req.user._id,
       status: { $in: ["approved", "overdue"] }
-    });
+    }).populate("duration");
 
     if (!loan) {
       return res.status(404).json({ message: "Loan not found or not active." });
     }
 
-    const existing = await Payment.findOne({
+    // Block if a rollover request already exists
+    const existingRollover = await Payment.findOne({
       loanId: loan._id,
-      type:   "interest",
-      status: { $in: ["pending", "success", "paid", "approved"] }
+      type:   "rollover_request",
+      status: { $in: ["pending", "approved", "success"] }
     });
 
-    if (existing) {
+    if (existingRollover) {
       return res.status(400).json({
-        message: existing.status === "pending"
-          ? "An interest payment is already pending admin approval. Please wait."
-          : "Interest has already been paid for this loan."
+        message: existingRollover.status === "pending"
+          ? "A rollover request is already pending admin approval."
+          : "This loan has already been rolled over."
       });
     }
 
-    const reference = `LOAN-INT-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+    // Fetch member type for rate calculation
+    const user = await User.findById(req.user._id).populate({
+      path:     "account",
+      populate: { path: "accountType", model: "MemberType" }
+    });
+
+    const memberType      = user?.account?.accountType;
+    const memberInterest  = memberType?.interestRate || 0;
+    const rolloverPct     = loan.duration?.rolloverPercentage ?? loan.rolloverPercentage ?? 0;
+    const newInterestRate = parseFloat((memberInterest + rolloverPct).toFixed(4));
+
+    const parsedInterest = Math.round(Number(interestAmount));
+    const parsedPenalty  = payPenalty ? Math.round(Number(penaltyAmount || 0)) : 0;
+    const totalPaid      = parsedInterest + parsedPenalty;
+
+    if (isNaN(parsedInterest) || parsedInterest <= 0) {
+      return res.status(400).json({ message: "Invalid interest amount." });
+    }
+
+    const principal = loan.amount;
+
+    // New base: penalty cleared if paid now, otherwise carries forward
+    const newBase = payPenalty
+      ? principal
+      : parseFloat((principal + (loan.totalPenalty || 0)).toFixed(2));
+
+    // New total = newBase + (newBase × newInterestRate%)
+    const newInterestAmt = parseFloat((newBase * (newInterestRate / 100)).toFixed(2));
+    const newTotalRepay  = parseFloat((newBase + newInterestAmt).toFixed(2));
+
+    const reference = paymentMethod === "paystack" && paystackRef
+      ? paystackRef
+      : `ROLLOVER-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
     await Payment.create({
-      user:      req.user._id,
-      email:     req.user.email,
-      loan:      loan._id,
-      loanId:    loan._id,
-      amount:    paymentAmount,
+      user:        req.user._id,
+      email:       req.user.email,
+      loan:        loan._id,
+      loanId:      loan._id,
+      amount:      totalPaid,
       reference,
-      type:      "interest",
-      payeeName: payerName?.trim() || null,
-      status:    "pending"
+      type:        "rollover_request",       // ← primary field
+      paymentType: "rollover_request",       // ← backwards compat
+      payeeName:   payerName?.trim() || null,
+      status:      paymentMethod === "paystack" ? "success" : "pending",
+      meta: {
+        interestPaid:         parsedInterest,
+        penaltyPaid:          parsedPenalty,
+        payPenalty:           !!payPenalty,
+        paymentMethod:        paymentMethod || "manual",
+        newInterestRate,
+        newTotalRepay,
+        newBase,
+        newInterestAmt,
+        principalAtRequest:   principal,
+        outstandingAtRequest: loan.outstandingBalance || loan.totalRepay,
+      }
     });
 
     await Transaction.create({
       user:        req.user._id,
       type:        "loan_payment",
-      amount:      paymentAmount,
-      description: "Loan interest payment for rollover (Pending admin approval)",
+      amount:      totalPaid,
+      description: `Loan rollover payment — interest: ₦${parsedInterest.toLocaleString()}` +
+                   `${parsedPenalty > 0 ? `, penalty: ₦${parsedPenalty.toLocaleString()}` : ""}` +
+                   ` (${paymentMethod === "paystack" ? "Paystack" : "Pending admin approval"})`,
       reference,
-      method:      "Manual",
-      status:      "pending"
+      method:      paymentMethod === "paystack" ? "Paystack" : "Manual",
+      status:      paymentMethod === "paystack" ? "successful" : "pending"
     });
 
     return res.status(200).json({
       status:  true,
-      message: "Interest payment submitted for approval. You will be notified once confirmed."
+      message: paymentMethod === "paystack"
+        ? "Rollover payment confirmed. Admin will complete your rollover shortly."
+        : "Rollover request submitted. Admin will complete your rollover once payment is confirmed.",
+      reference,
+      summary: {
+        interestPaid:    parsedInterest,
+        penaltyPaid:     parsedPenalty,
+        totalPaid,
+        newInterestAmt,
+        newTotalRepay,
+        newBase,
+        newInterestRate,
+      }
     });
 
   } catch (err) {
-    console.error("Rollover interest payment error:", err);
+    console.error("Rollover request error:", err);
     return res.status(500).json({ message: "Server error." });
   }
 });

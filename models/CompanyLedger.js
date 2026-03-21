@@ -8,12 +8,13 @@ const companyLedgerSchema = new mongoose.Schema({
       "deposit",
       "kiddies_deposit_approve",
       "withdrawal",
-      "foreced_withdrawal",   // legacy — kept so old records still validate
-      "forced_withdrawal",    // correct spelling — used by all new code
+      "foreced_withdrawal",    // legacy — kept so old records still validate
+      "forced_withdrawal",     // correct spelling — used by all new code
       "loan_disbursement",
       "loan_repayment",
       "registration_fee",
       "penalty_income",
+      "interest_income",       // ← added: rollover interest payment income
       "rollover_income",
       "manual_credit",
       "manual_debit",
@@ -53,7 +54,7 @@ const companyLedgerSchema = new mongoose.Schema({
 
   recordedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",   // was "Admin" — changed to "User" since admins are Users in this system
+    ref: "User",
   },
 
   meta: {

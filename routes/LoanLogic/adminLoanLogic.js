@@ -545,6 +545,7 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
     return res.status(500).json({ message: "Server error while approving loan." });
   }
 });
+
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/loans/reject
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1412,12 +1413,440 @@ router.post(
         return res.status(400).json({ message: "This payment is not a loan payment. Use the deposit approval route." });
       }
 
+      // ═══════════════════════════════════════════════════════════════════════
+      // 2. ROLLOVER REQUEST — creates a new loan, exact mirror of /api/loans/approve
+      // ═══════════════════════════════════════════════════════════════════════
+      if (payment.type === "rollover_request" || payment.paymentType === "rollover_request") {
+
+        const oldLoan = await Loan.findOne({
+          _id:    payment.loanId,
+          status: { $in: ["approved", "overdue"] }
+        })
+          .populate("duration")
+          .populate("user")
+          .populate({ path: "initiatedBy", model: "User", select: "_id email firstName lastName" })
+          .populate("guarantors.guarantor");
+
+        if (!oldLoan) {
+          return res.status(404).json({ message: "Original loan not found or inactive." });
+        }
+
+        const meta            = payment.meta || {};
+        const penaltyPaid     = Number(meta.penaltyPaid  || 0);
+        const interestPaid    = Number(meta.interestPaid || 0);
+        const payPenalty      = !!meta.payPenalty;
+        const newInterestRate = Number(meta.newInterestRate || oldLoan.interestRate);
+        const principal       = oldLoan.amount;
+
+        // ── New base ─────────────────────────────────────────────────────────
+        // penalty paid → base = principal only
+        // penalty skipped → base = principal + carried-forward penalty
+        const newBase = payPenalty
+          ? principal
+          : parseFloat((principal + (oldLoan.totalPenalty || 0)).toFixed(2));
+
+        // ── New interest = newBase × newInterestRate% ─────────────────────────
+        const newInterestAmt = parseFloat((newBase * (newInterestRate / 100)).toFixed(2));
+        const newTotalRepay  = parseFloat((newBase + newInterestAmt).toFixed(2));
+
+        // ── Duration — same as original loan ─────────────────────────────────
+        const durationValue = oldLoan.duration?.duration ?? oldLoan.externalDuration;
+        const durationUnit  = oldLoan.duration?.durationUnit ?? "months";
+
+        if (!durationValue) {
+          return res.status(400).json({ message: "Loan duration missing on original loan." });
+        }
+
+        const penaltyPct  = oldLoan.duration?.penaltyPercentage  ?? oldLoan.penaltyPercentage  ?? 0;
+        const rolloverPct = oldLoan.duration?.rolloverPercentage ?? oldLoan.rolloverPercentage ?? 0;
+
+        const newDisbDate = new Date();
+        const newDueDate  = computeDueDate(newDisbDate, durationValue, durationUnit);
+
+        const borrowerName = oldLoan.user
+          ? `${oldLoan.user.firstName} ${oldLoan.user.lastName}`
+          : oldLoan.external?.borrowerName || "Member";
+
+        // mirrors approval route: user._id ?? initiatedBy._id ?? approvedBy
+        const ledgerUser = oldLoan.user?._id ?? oldLoan.initiatedBy?._id ?? req.user._id;
+
+        // ── Mark old loan as rolled_over ──────────────────────────────────────
+        const balanceBeforeRollover = oldLoan.outstandingBalance || oldLoan.totalRepay;
+
+        oldLoan.status        = "rolled_over";
+        oldLoan.rolloverCount = (oldLoan.rolloverCount || 0) + 1;
+        oldLoan.rolloverHistory.push({
+          rolledOverAt:  new Date(),
+          rolloverFee:   newInterestAmt,
+          balanceBefore: balanceBeforeRollover,
+          balanceAfter:  0,
+          newDueDate,
+          processedBy:   req.user._id,
+        });
+
+        if (payPenalty) {
+          oldLoan.totalPenalty         = 0;
+          oldLoan.penaltyHistory       = [];
+          oldLoan.lastPenaltyAppliedAt = null;
+        }
+
+        await oldLoan.save();
+
+        // ── Remove other pending/approved loans for this user ─────────────────
+        // mirrors approval route exactly
+        if (oldLoan.user) {
+          const conflicting = await Loan.findOne({
+            user:   oldLoan.user._id,
+            _id:    { $ne: oldLoan._id },
+            status: { $in: ["pending", "approved"] }
+          });
+          if (conflicting) await Loan.deleteOne({ _id: conflicting._id });
+        }
+
+        // ── Create new loan ───────────────────────────────────────────────────
+        const newLoan = await Loan.create({
+          user:               oldLoan.user?._id || oldLoan.user,
+          initiatedBy:        oldLoan.initiatedBy?._id || oldLoan.initiatedBy || req.user._id,
+          amount:             newBase,
+          interestAmount:     newInterestAmt,
+          interestRate:       newInterestRate,
+          totalRepay:         newTotalRepay,
+          outstandingBalance: newTotalRepay,
+          paidAmount:         0,
+          duration:           oldLoan.duration?._id || oldLoan.duration,
+          dueDate:            newDueDate,
+          disbursementDate:   newDisbDate,
+          disbursementMethod: oldLoan.disbursementMethod || "bank",
+          penaltyPercentage:  penaltyPct,
+          rolloverPercentage: rolloverPct,
+          totalPenalty:       0,
+          penaltyHistory:     [],
+          rolloverHistory:    [],
+          rolloverCount:      0,
+          guarantors: oldLoan.guarantors.map(g => ({
+            guarantor:   g.guarantor?._id || g.guarantor,
+            status:      "accepted",
+            respondedAt: new Date(),
+          })),
+          status:     "approved",
+          approvedAt: new Date(),
+          updatedAt:  new Date(),
+        });
+
+        // Link old → new
+        await Loan.updateOne(
+          { _id: oldLoan._id },
+          { $set: { rolledIntoLoan: newLoan._id } }
+        );
+
+        // Store new loan ID on payment
+        await Payment.updateOne(
+          { _id: payment._id },
+          { $set: { "meta.newLoanId": newLoan._id } }
+        );
+
+        // Update linked transaction to successful
+        await Transaction.findOneAndUpdate(
+          { reference: payment.reference },
+          { status: "successful" }
+        );
+
+        // ── Loan Ledger — mirrors approval route exactly ───────────────────────
+        const ledgerEntry = await LoanLedger.create({
+          loan:             newLoan._id,
+          processedBy:      req.user._id,
+          transactionType:  "disbursement",
+          amount:           newBase,
+          balanceBefore:    0,
+          balanceAfter:     newTotalRepay,
+          paymentMethod:    (oldLoan.disbursementMethod || "bank").toLowerCase(),
+          member:           oldLoan.user?._id,
+          externalBorrower: oldLoan.user ? undefined : oldLoan.external,
+          notes:            `Rolled-over loan disbursed to ${borrowerName} on ${newDisbDate.toISOString()} (original loan: ${oldLoan._id})`
+        });
+
+        // ── Company Ledger: new loan disbursement out ─────────────────────────
+        await CompanyLedger.create({
+          type:        "loan_disbursement",
+          direction:   "out",
+          amount:      newBase,
+          relatedUser: ledgerUser,
+          relatedLoan: newLoan._id,
+          description: `Rolled-over loan disbursed to ${borrowerName} via ${oldLoan.disbursementMethod || "bank"}`,
+          recordedBy:  req.user._id,
+          meta: {
+            disbursementMethod:  oldLoan.disbursementMethod || "bank",
+            disbursementDate:    newDisbDate,
+            dueDate:             newDueDate,
+            interestRate:        newInterestRate,
+            totalRepay:          newTotalRepay,
+            penaltyPercentage:   penaltyPct,
+            rolloverPercentage:  rolloverPct,
+            originalLoanId:      oldLoan._id,
+            reference:           payment.reference,
+            loanLedgerId:        ledgerEntry._id,
+          },
+        });
+
+        // ── Company Ledger: interest income ───────────────────────────────────
+        await CompanyLedger.create({
+          type:        "interest_income",
+          direction:   "in",
+          amount:      interestPaid,
+          relatedUser: ledgerUser,
+          relatedLoan: oldLoan._id,
+          description: `Rollover interest payment from ${borrowerName} (${payment.reference})`,
+          recordedBy:  req.user._id,
+          meta: { reference: payment.reference, notes: notes || "Rollover approved by admin" },
+        });
+
+        // ── Company Ledger: penalty income (if penalty was paid) ──────────────
+        if (penaltyPaid > 0) {
+          await ExtraCharge.create({
+            member:      ledgerUser,
+            chargeType:  "penalty",
+            description: "Penalty cleared via rollover",
+            amount:      penaltyPaid,
+            relatedLoan: oldLoan._id,
+            chargedBy:   req.user._id,
+            status:      "paid",
+            paidAt:      new Date(),
+          });
+
+          await CompanyLedger.create({
+            type:        "penalty_income",
+            direction:   "in",
+            amount:      penaltyPaid,
+            relatedUser: ledgerUser,
+            relatedLoan: oldLoan._id,
+            description: `Penalty cleared via rollover by ${borrowerName} (${payment.reference})`,
+            recordedBy:  req.user._id,
+            meta: { reference: payment.reference },
+          });
+        }
+
+        // ── Borrower transaction — mirrors approval route ─────────────────────
+        if (oldLoan.user) {
+          await Transaction.create({
+            user:        oldLoan.user._id,
+            type:        "loan_payment",
+            amount:      newBase,
+            status:      "successful",
+            method:      oldLoan.disbursementMethod || "bank",
+            description: `Loan rolled over and new loan disbursed (original loan: ${oldLoan._id})`
+          });
+        }
+
+        // ── Admin action log ──────────────────────────────────────────────────
+        // placed here before ROI to mirror approval route ordering
+        await AdminActionLog.create({
+          admin:       req.user._id,
+          adminRole:   req.user.role?.name || "admin",
+          actionType:  "loan_approve",
+          targetUser:  ledgerUser,
+          targetModel: "Loan",
+          targetId:    newLoan._id,
+          description: `Approved loan rollover for ${borrowerName} — new loan ₦${newTotalRepay.toLocaleString()} at ${newInterestRate}% (ref: ${payment.reference})`,
+          ipAddress:   req.ip,
+          userAgent:   req.headers["user-agent"],
+          status:      "success",
+          meta: {
+            loanId:            newLoan._id,
+            originalLoanId:    oldLoan._id,
+            amount:            newBase,
+            totalRepay:        newTotalRepay,
+            interestRate:      newInterestRate,
+            disbursementMethod: oldLoan.disbursementMethod || "bank",
+            disbursementDate:  newDisbDate,
+            dueDate:           newDueDate,
+            penaltyCleared:    penaltyPaid,
+            reference:         payment.reference,
+          }
+        });
+
+        // ═════════════════════════════════════════════════════════════════════
+        // ROI DISTRIBUTION — exact mirror of /api/loans/approve
+        // ═════════════════════════════════════════════════════════════════════
+        const settings           = await Settings.getSettings();
+        const roiOperatingCharge = Number(settings.otherFees?.roiOperatingCharge || 10);
+        const now                = new Date();
+        const currentMonth       = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+        // exact same formula as approval route
+        const interestForLoan          = newLoan.interestAmount ?? (newLoan.amount * (newLoan.interestRate / 100) * durationValue);
+        const companyChargeForThisLoan = interestForLoan * (roiOperatingCharge / 100);
+        const netInterestForThisLoan   = interestForLoan - companyChargeForThisLoan;
+
+        console.log("[ROI] newLoan.interestAmount:", newLoan.interestAmount);
+        console.log("[ROI] interestForLoan:", interestForLoan);
+        console.log("[ROI] companyChargeForThisLoan:", companyChargeForThisLoan);
+        console.log("[ROI] netInterestForThisLoan:", netInterestForThisLoan);
+        console.log("[ROI] currentMonth:", currentMonth);
+
+        let companyRoi = await CompanyROI.findOne({ month: currentMonth });
+
+        if (!companyRoi) {
+          companyRoi = await CompanyROI.create({
+            month:                  currentMonth,
+            totalInterestCollected: interestForLoan,
+            companyCharge:          companyChargeForThisLoan,
+            netInterestForRoi:      netInterestForThisLoan,
+            totalRoiDistributed:    0,
+            status:                 "open",
+            loanRoiHistory: [{
+              loan:                 newLoan._id,
+              interestForLoan,
+              companyChargeForLoan: companyChargeForThisLoan,
+              netInterestForLoan:   netInterestForThisLoan
+            }]
+          });
+          console.log("[ROI] created new CompanyROI for month:", currentMonth);
+        } else {
+          companyRoi.totalInterestCollected += interestForLoan;
+          companyRoi.companyCharge          += companyChargeForThisLoan;
+          companyRoi.netInterestForRoi      += netInterestForThisLoan;
+          companyRoi.loanRoiHistory.push({
+            loan:                 newLoan._id,
+            interestForLoan,
+            companyChargeForLoan: companyChargeForThisLoan,
+            netInterestForLoan:   netInterestForThisLoan
+          });
+          console.log("[ROI] updated existing CompanyROI for month:", currentMonth);
+        }
+
+        // ── Regular member accounts ───────────────────────────────────────────
+        const memberAccounts = await Account.find({ ownerType: "User" })
+          .populate({ path: "ownerId", model: "User", select: "_id firstName lastName" });
+
+        console.log("[ROI] memberAccounts found:", memberAccounts.length);
+        memberAccounts.forEach(acc => {
+          console.log(
+            `  [MEMBER ACC] _id=${acc._id} ownerType=${acc.ownerType}`,
+            `ownerId=${acc.ownerId?._id} balance=${acc.balance}`
+          );
+        });
+
+        // ── Active kiddies accounts ───────────────────────────────────────────
+        const activeKiddies = await KiddiesAccount.find({ status: "active" })
+          .populate({ path: "parent", select: "_id firstName lastName" })
+          .populate({ path: "account" });
+
+        console.log("[ROI] activeKiddies found:", activeKiddies.length);
+        activeKiddies.forEach(ka => {
+          console.log(
+            `  [KIDDIES] _id=${ka._id} parent=${ka.parent?._id}`,
+            `account=${ka.account?._id} balance=${ka.account?.balance}`
+          );
+        });
+
+        // ── Unified pool ──────────────────────────────────────────────────────
+        const pool = [
+          ...memberAccounts.map(acc => ({
+            accountDoc:  acc,
+            ownerUserId: acc.ownerId?._id,
+            description: `ROI from loan ${newLoan._id} (${currentMonth})`
+          })),
+          ...activeKiddies
+            .filter(ka => !!ka.account && !!ka.parent)
+            .map(ka => ({
+              accountDoc:  ka.account,
+              ownerUserId: ka.parent._id,
+              description: `ROI from loan ${newLoan._id} (${currentMonth}) — kiddies account (${ka.childFirstName} ${ka.childLastName})`
+            }))
+        ];
+
+        console.log("[ROI] pool size:", pool.length);
+
+        // ── Total savings across the whole pool ───────────────────────────────
+        const totalCumulativeSavings = pool.reduce(
+          (sum, entry) => sum + Number(entry.accountDoc?.balance || 0), 0
+        );
+
+        console.log("[ROI] totalCumulativeSavings:", totalCumulativeSavings);
+
+        const safeMoney        = n => Math.round(n * 100) / 100;
+        let   totalDistributed = 0;
+
+        // ── Distribute proportionally and persist ─────────────────────────────
+        for (const entry of pool) {
+          const { accountDoc, ownerUserId, description } = entry;
+          const balance = Number(accountDoc?.balance || 0);
+
+          console.log(
+            `[ROI ENTRY] _id=${accountDoc?._id} ownerType=${accountDoc?.ownerType}`,
+            `ownerUserId=${ownerUserId} balance=${balance}`
+          );
+
+          if (balance <= 0 || totalCumulativeSavings <= 0 || !ownerUserId) {
+            console.log(
+              `  [SKIP] reason: balance=${balance}`,
+              `totalCumulativeSavings=${totalCumulativeSavings}`,
+              `ownerUserId=${ownerUserId}`
+            );
+            continue;
+          }
+
+          const roundedROI = safeMoney((balance / totalCumulativeSavings) * netInterestForThisLoan);
+          console.log(`  [DISTRIBUTE] ₦${roundedROI} → userId=${ownerUserId}`);
+
+          accountDoc.monthlyRoiHistory.push({ month: currentMonth, roi: roundedROI });
+          accountDoc.accumulativeROI = safeMoney((accountDoc.accumulativeROI || 0) + roundedROI);
+          accountDoc.lastRoiPayout   = new Date();
+          await accountDoc.save();
+
+          totalDistributed += roundedROI;
+
+          await Transaction.create({
+            user:        ownerUserId,
+            type:        "roi",
+            amount:      roundedROI,
+            status:      "successful",
+            method:      "System Distribution",
+            description
+          });
+        }
+
+        console.log("[ROI] totalDistributed:", totalDistributed);
+
+        companyRoi.totalRoiDistributed += safeMoney(totalDistributed);
+        await companyRoi.save();
+
+        if (companyChargeForThisLoan > 0) {
+          await CompanyLedger.create({
+            type:        "external_income",
+            direction:   "in",
+            amount:      companyChargeForThisLoan,
+            relatedUser: ledgerUser,
+            relatedLoan: newLoan._id,
+            description: `ROI operating charge (${roiOperatingCharge}%) on loan for ${borrowerName}`,
+            recordedBy:  req.user._id
+          });
+        }
+
+        return res.status(200).json({
+          message:        `Loan for ${borrowerName} rolled over successfully.`,
+          roiDistributed: totalDistributed,
+          oldLoanId:      oldLoan._id,
+          newLoanId:      newLoan._id,
+          newBase,
+          newInterestAmt,
+          newTotalRepay,
+          newInterestRate,
+          newDueDate,
+          ledger:         ledgerEntry,
+          companyRoi,
+        });
+      }
+      // ═══════════════════════════════════════════════════════════════════════
+      // END ROLLOVER BRANCH — regular loan payment continues below
+      // ═══════════════════════════════════════════════════════════════════════
+
       const amount = Number(payment.amount);
       let overpayment    = 0;
       let isExternalLoan = false;
 
       // ═══════════════════════════════════════════════════════════════════════
-      // 2. LOAN LOOKUP — member first, then external
+      // 3. LOAN LOOKUP — member first, then external
       // ═══════════════════════════════════════════════════════════════════════
       let loan = null;
 
@@ -1443,13 +1872,13 @@ router.post(
       }
 
       // ═══════════════════════════════════════════════════════════════════════
-      // 3. PRINCIPAL / PENALTY SPLIT
+      // 4. PRINCIPAL / PENALTY SPLIT
       // ═══════════════════════════════════════════════════════════════════════
       const loanPortion    = Math.min(amount, loan.totalRepay);
       const penaltyPortion = parseFloat((amount - loanPortion).toFixed(2));
 
       // ═══════════════════════════════════════════════════════════════════════
-      // 4. OVERPAYMENT DETECTION
+      // 5. OVERPAYMENT DETECTION
       // ═══════════════════════════════════════════════════════════════════════
       overpayment = parseFloat((amount - loan.totalRepay).toFixed(2));
 
@@ -1460,7 +1889,7 @@ router.post(
       const hasOverpayment = overpayment > 0 && !isExternalLoan && !!memberAccount;
 
       // ═══════════════════════════════════════════════════════════════════════
-      // 5. UPDATE LOAN BALANCES
+      // 6. UPDATE LOAN BALANCES
       // ═══════════════════════════════════════════════════════════════════════
       loan.totalRepay = parseFloat((loan.totalRepay - loanPortion).toFixed(2));
       loan.outstandingBalance = parseFloat(
@@ -1469,7 +1898,7 @@ router.post(
       loan.paidAmount = parseFloat(((loan.paidAmount || 0) + loanPortion).toFixed(2));
 
       // ═══════════════════════════════════════════════════════════════════════
-      // 6. TRANSACTION RECORD
+      // 7. TRANSACTION RECORD
       // ═══════════════════════════════════════════════════════════════════════
       const txDescription = isExternalLoan
         ? `External loan repayment approved (${payment.reference}) – ${loan.external.borrowerName}`
@@ -1486,7 +1915,7 @@ router.post(
       });
 
       // ═══════════════════════════════════════════════════════════════════════
-      // 7. COMPANY LEDGER — PRINCIPAL REPAYMENT
+      // 8. COMPANY LEDGER — PRINCIPAL REPAYMENT
       // ═══════════════════════════════════════════════════════════════════════
       const existingLedger = await CompanyLedger.findOne({
         "meta.reference": payment.reference,
@@ -1513,7 +1942,7 @@ router.post(
       }
 
       // ═══════════════════════════════════════════════════════════════════════
-      // 8. PENALTY INCOME LEDGER
+      // 9. PENALTY INCOME LEDGER
       // ═══════════════════════════════════════════════════════════════════════
       const penaltyProfit = penaltyPortion > 0
         ? penaltyPortion
@@ -1528,10 +1957,11 @@ router.post(
         if (!existingPenaltyLedger) {
           const extraCharge = await ExtraCharge.create({
             member:      payment.user._id,
-            chargeType:  "loan-penalty",
+            chargeType:  "penalty",
+            description: "Overdue penalty settlement",
             amount:      penaltyProfit,
             relatedLoan: loan._id,
-            reason:      "Overdue penalty settlement",
+            chargedBy:   req.user._id,
             status:      "paid",
             paidAt:      new Date(),
           });
@@ -1555,7 +1985,7 @@ router.post(
       }
 
       // ═══════════════════════════════════════════════════════════════════════
-      // 9. FULLY SETTLED
+      // 10. FULLY SETTLED
       // ═══════════════════════════════════════════════════════════════════════
       if (loan.totalRepay === 0) {
         loan.status = "paid";
@@ -1576,7 +2006,7 @@ router.post(
       await loan.save();
 
       // ═══════════════════════════════════════════════════════════════════════
-      // 10. OVERPAYMENT — CREDIT SURPLUS TO MEMBER'S SAVINGS ACCOUNT
+      // 11. OVERPAYMENT — CREDIT SURPLUS TO MEMBER'S SAVINGS ACCOUNT
       // ═══════════════════════════════════════════════════════════════════════
       if (hasOverpayment && memberAccount) {
         const balanceBefore = memberAccount.balance;
@@ -1630,7 +2060,7 @@ router.post(
       }
 
       // ═══════════════════════════════════════════════════════════════════════
-      // 11. ADMIN ACTION LOG
+      // 12. ADMIN ACTION LOG
       // ═══════════════════════════════════════════════════════════════════════
       await AdminActionLog.create({
         admin:       req.user._id,

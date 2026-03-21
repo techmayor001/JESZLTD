@@ -1,40 +1,57 @@
 const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema({
-  user: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "User", 
-    required: true 
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
   },
 
-  email: { 
-    type: String, 
-    required: true 
+  email: {
+    type: String,
+    required: true
   },
 
-  loanId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "Loan" 
+  loanId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Loan"
   },
 
-  amount: { 
-    type: Number, 
-    required: true 
+  amount: {
+    type: Number,
+    required: true
   },
 
-  reference: { 
-    type: String, 
-    required: true, 
-    unique: true 
+  reference: {
+    type: String,
+    required: true,
+    unique: true
   },
 
-  /* 👇 NEW FIELD */
-  payeeName: { 
+  payeeName: {
     type: String,
     trim: true,
     default: null
   },
 
+  // ── Unified type field (replaces paymentType) ──────────────────────────────
+  type: {
+    type: String,
+    enum: [
+      "registration_fee",
+      "loan_repayment",
+      "deposit",
+      "penalty_payment",
+      "extra_charge",
+      "external_payment",
+      "rollover_request",
+      "interest",
+      "loan_payment"
+    ],
+    default: null
+  },
+
+  // ── Kept for backwards compatibility with existing documents ───────────────
   paymentType: {
     type: String,
     enum: [
@@ -43,8 +60,12 @@ const paymentSchema = new mongoose.Schema({
       "deposit",
       "penalty_payment",
       "extra_charge",
-      "external_payment"
-    ]
+      "external_payment",
+      "rollover_request",
+      "interest",
+      "loan_payment"
+    ],
+    default: null
   },
 
   status: {
@@ -53,13 +74,19 @@ const paymentSchema = new mongoose.Schema({
     default: "pending",
   },
 
-  paystackResponse: { 
-    type: Object 
+  paystackResponse: {
+    type: Object
   },
 
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
+  // ── Stores rollover calculation details, used by admin approval route ──────
+  meta: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now
   },
 });
 
