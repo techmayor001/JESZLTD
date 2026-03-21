@@ -40,11 +40,29 @@ const transactionApprovalSchema = new mongoose.Schema(
       required: true,
     },
 
-    /* ── The member whose account will be affected ── */
+    /* ── The member whose account will be affected ──
+       Only one of `member` or `kiddiesMember` will be set,
+       depending on `memberType`. Both are optional at the
+       schema level so kiddies transactions don't need a User ref
+       and regular transactions don't need a KiddiesAccount ref. */
     member: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      default: null,
+    },
+
+    /* ── Kiddies account (set when memberType === 'kiddies') ── */
+    kiddiesMember: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "KiddiesAccount",
+      default: null,
+    },
+
+    /* ── Discriminator so routes know which ref to load ── */
+    memberType: {
+      type: String,
+      enum: ["member", "kiddies"],
+      default: "member",
     },
 
     paymentType: {
@@ -75,10 +93,12 @@ const transactionApprovalSchema = new mongoose.Schema(
 
     reference: {
       type: String,
+      default: null,
     },
 
     notes: {
       type: String,
+      default: null,
     },
 
     loan: {
@@ -151,5 +171,7 @@ transactionApprovalSchema.index({ status: 1, createdAt: -1 });
 transactionApprovalSchema.index({ initiatedBy: 1 });
 transactionApprovalSchema.index({ selectedApprovers: 1 });
 transactionApprovalSchema.index({ member: 1 });
+transactionApprovalSchema.index({ kiddiesMember: 1 });
+transactionApprovalSchema.index({ memberType: 1 });
 
 module.exports = mongoose.model("TransactionApproval", transactionApprovalSchema);

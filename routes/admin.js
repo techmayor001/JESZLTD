@@ -517,7 +517,6 @@ router.get(
   ensureAdmin("view_members"),
   async (req, res) => {
     try {
-      // ── 1. Fetch all users with account + accountType ──────────────────
       const users = await User.find()
         .populate({
           path: "account",
@@ -526,107 +525,145 @@ router.get(
 
       const memberTypes = await MemberType.find();
 
-      // ── 2. Fetch kiddies accounts ──────────────────────────────────────
       const kiddiesAccounts = await KiddiesAccount.find()
         .populate('parent', 'firstName lastName email phone membershipID displayPicture')
         .populate('account')
         .sort({ createdAt: -1 })
         .lean();
 
-      // ── 3. Total savings across ALL accounts ───────────────────────────
-      // Must match user dashboard exactly: Account.find({}) — includes both
-      // User accounts (ownerType:"User") and Kiddies accounts (ownerType:"KiddiesAccount")
+      // ── TOTAL SAVINGS ────────────────────────────────────────────────
       const allAccounts = await Account.find({});
       const totalSavingsAllMembers = allAccounts.reduce(
         (sum, acc) => sum + Number(acc.balance || 0), 0
       );
 
-      // ── 4. Latest ROI data ─────────────────────────────────────────────
-      const latestROI              = await CompanyROI.findOne().sort({ createdAt: -1 });
+      const latestROI = await CompanyROI.findOne().sort({ createdAt: -1 });
       const totalInterestCollected = Number(latestROI?.totalInterestCollected || 0);
 
-      // ── 5. ROI operating charge from settings ──────────────────────────
-      const settings           = await Settings.getSettings();
+      const settings = await Settings.getSettings();
       const roiOperatingCharge = Number(settings?.otherFees?.roiOperatingCharge || 0);
 
-      // ── 6. Per-member shares + ROI — EXACT mirror of user dashboard ────
-      //
-      // User dashboard logic (cds-cooperative/dashboard):
-      //
-      //   sharePercentageDisplay:
-      //     rawShare         = (memberSavings / totalSavingsAllMembers) * 100
-      //     shareAfterCharge = rawShare - roiOperatingCharge          ← flat subtract
-      //     sharePercentageDisplay = Math.max(0, shareAfterCharge)
-      //
-      //   ROI:
-      //     userShare           = (memberSavings / totalSavingsAllMembers) * totalInterestCollected
-      //     companyChargeOnUser = userShare * (roiOperatingCharge / 100)  ← % of userShare
-      //     ROI                 = userShare - companyChargeOnUser
-      //
-      const calcStats = (balance, accumROI) => {
-        const memberSavings = Number(balance || 0);
-        const accumulativeROI = Number(accumROI || 0);
+      // ── STEP 1: COLLECT ALL ENTITIES ─────────────────────────────────
+      const allEntities = [
+        ...users.map(u => ({
+          type: 'member',
+          ref: u,
+          balance: Number(u.account?.balance || 0),
+          accumulativeROI: Number(u.account?.accumulativeROI || 0)
+        })),
+        ...kiddiesAccounts.map(k => ({
+          type: 'kiddies',
+          ref: k,
+          balance: Number(k.account?.balance || 0),
+          accumulativeROI: Number(k.account?.accumulativeROI || 0)
+        }))
+      ];
 
-        let sharePercentage    = 0;
-        let userShare          = 0;
+      // ── STEP 2: CALCULATE RAW SHARES ────────────────────────────────
+      let computed = allEntities.map(e => {
+        const share = totalSavingsAllMembers > 0
+          ? e.balance / totalSavingsAllMembers
+          : 0;
+
+        const exactPercentage = share * 100;
+
+        return {
+          ...e,
+          share,
+          exactPercentage,
+          roundedPercentage: Math.floor(exactPercentage * 100) / 100, // truncate to 2dp
+          remainder: exactPercentage % 0.01
+        };
+      });
+
+      // ── STEP 3: FIX ROUNDING TO MAKE TOTAL = 100% ───────────────────
+      let totalRounded = computed.reduce((sum, e) => sum + e.roundedPercentage, 0);
+      let difference = Number((100 - totalRounded).toFixed(2));
+
+      // Sort by highest remainder (who deserves the extra 0.01)
+      computed.sort((a, b) => b.remainder - a.remainder);
+
+      let i = 0;
+      while (difference > 0 && i < computed.length) {
+        computed[i].roundedPercentage += 0.01;
+        difference -= 0.01;
+        i++;
+      }
+
+      // ── STEP 4: FINAL CALCULATION ───────────────────────────────────
+      const finalEntities = computed.map(e => {
+        let userShare = 0;
         let companyChargeOnUser = 0;
-        let ROI                = 0;
+        let ROI = 0;
 
-        if (totalSavingsAllMembers > 0 && memberSavings > 0) {
-          // Share % — subtract roiOperatingCharge as flat points (matches user dashboard)
-          const rawShare         = (memberSavings / totalSavingsAllMembers) * 100;
-          const shareAfterCharge = rawShare - roiOperatingCharge;
-          sharePercentage        = Math.max(0, Number(shareAfterCharge.toFixed(4)));
-
-          // ROI — roiOperatingCharge applied as % of userShare (matches user dashboard)
-          if (totalInterestCollected > 0) {
-            userShare           = (memberSavings / totalSavingsAllMembers) * totalInterestCollected;
-            companyChargeOnUser = userShare * (roiOperatingCharge / 100);
-            ROI                 = userShare - companyChargeOnUser;
-          }
+        if (totalInterestCollected > 0 && e.balance > 0) {
+          userShare = e.share * totalInterestCollected;
+          companyChargeOnUser = userShare * (roiOperatingCharge / 100);
+          ROI = userShare - companyChargeOnUser;
         }
 
         return {
-          memberSavings,
-          accumulativeROI,
-          totalBalance:        Number((memberSavings + accumulativeROI).toFixed(2)),
-          sharePercentage:     Number(sharePercentage.toFixed(4)),
-          userShare:           Number(userShare.toFixed(2)),
+          ...e,
+          finalPercentage: Number(e.roundedPercentage.toFixed(2)),
+          userShare: Number(userShare.toFixed(2)),
           companyChargeOnUser: Number(companyChargeOnUser.toFixed(2)),
-          ROI:                 Number(ROI.toFixed(2)),
+          ROI: Number(ROI.toFixed(2)),
+          totalBalance: Number((e.balance + e.accumulativeROI).toFixed(2))
         };
-      };
+      });
 
-      // Map users with stats
-      const usersWithStats = users.map(u => ({
-        ...u.toObject(),
-        _memberStats: calcStats(u.account?.balance, u.account?.accumulativeROI),
-        _entityType: 'member',
-      }));
+      // ── STEP 5: MAP BACK TO USERS & KIDDIES ─────────────────────────
+      const usersWithStats = finalEntities
+        .filter(e => e.type === 'member')
+        .map(e => ({
+          ...e.ref.toObject(),
+          _memberStats: {
+            memberSavings: e.balance,
+            accumulativeROI: e.accumulativeROI,
+            totalBalance: e.totalBalance,
+            share: Number(e.share.toFixed(6)),
+            sharePercentage: e.finalPercentage,
+            userShare: e.userShare,
+            companyChargeOnUser: e.companyChargeOnUser,
+            ROI: e.ROI,
+          },
+          _entityType: 'member',
+        }));
 
-      // Map kiddies accounts with stats
-      // Kiddies accounts also have an Account doc (ownerType: "KiddiesAccount")
-      // so they participate in totalSavingsAllMembers and ROI distribution
-      const kiddiesWithStats = kiddiesAccounts.map(k => ({
-        ...k,
-        _memberStats: calcStats(k.account?.balance, k.account?.accumulativeROI),
-        _entityType: 'kiddies',
-        // Normalise fields so the EJS template can treat them uniformly
-        _display: {
-          fullName:    `${k.childFirstName} ${k.childLastName}`,
-          email:       k.parent?.email    || '—',
-          phone:       k.parent?.phone    || '—',
-          memberID:    k.accountID        || 'N/A',
-          status:      k.status,          // active | locked | closed
-          joinDate:    k.createdAt,
-          parentName:  k.parent ? `${k.parent.firstName} ${k.parent.lastName}` : '—',
-          parentMemberID: k.parent?.membershipID || '—',
-          balance:     k.account?.balance || 0,
-          type:        'Kiddies',
-          displayPicture: k.parent?.displayPicture || null,
-        }
-      }));
+      const kiddiesWithStats = finalEntities
+        .filter(e => e.type === 'kiddies')
+        .map(e => ({
+          ...e.ref,
+          _memberStats: {
+            memberSavings: e.balance,
+            accumulativeROI: e.accumulativeROI,
+            totalBalance: e.totalBalance,
+            share: Number(e.share.toFixed(6)),
+            sharePercentage: e.finalPercentage,
+            userShare: e.userShare,
+            companyChargeOnUser: e.companyChargeOnUser,
+            ROI: e.ROI,
+          },
+          _entityType: 'kiddies',
 
+          _display: {
+            fullName: `${e.ref.childFirstName} ${e.ref.childLastName}`,
+            email: e.ref.parent?.email || '—',
+            phone: e.ref.parent?.phone || '—',
+            memberID: e.ref.accountID || 'N/A',
+            status: e.ref.status,
+            joinDate: e.ref.createdAt,
+            parentName: e.ref.parent
+              ? `${e.ref.parent.firstName} ${e.ref.parent.lastName}`
+              : '—',
+            parentMemberID: e.ref.parent?.membershipID || '—',
+            balance: e.ref.account?.balance || 0,
+            type: 'Kiddies',
+            displayPicture: e.ref.parent?.displayPicture || null,
+          }
+        }));
+
+      // ── FINAL RENDER ────────────────────────────────────────────────
       res.render('dashboard/admin/members', {
         admin: req.user,
         users: usersWithStats,
@@ -1316,6 +1353,7 @@ router.get("/api/memberType/byCode/:shortCode", async (req, res) => {
 
 
 // ADMIN PAYMENT ROUTES 
+
 router.get(
   "/admin/manage-payment",
   ensureAdmin("view_transactions"),
@@ -1337,24 +1375,67 @@ router.get(
           },
         })
         .populate({
+          path: "kiddiesMember",
+          select: "childFirstName childLastName accountID account status",
+          populate: [
+            { path: "account", select: "balance" },
+            { path: "parent", select: "firstName lastName email phone membershipID" },
+          ],
+        })
+        .populate({
           path: "loan",
           select: "amount balance duration",
           populate: { path: "duration", model: "LoanSettings" },
         })
         .sort({ createdAt: -1 });
+
+      // ── Pull approval data from TransactionApproval using adminPayment ref ──
+      const adminPaymentIds = adminPayments.map(p => p._id);
+
+      const approvalRecords = await TransactionApproval.find({
+        adminPayment: { $in: adminPaymentIds },
+      })
+        .populate({ path: "selectedApprovers", select: "firstName lastName email" })
+        .populate({ path: "approvals.user",    select: "firstName lastName" })
+        .select("adminPayment selectedApprovers approvals finalizedAt");
+
+      // Build a map: adminPaymentId → approvalRecord
+      const approvalMap = {};
+      approvalRecords.forEach(rec => {
+        if (rec.adminPayment) {
+          approvalMap[rec.adminPayment.toString()] = rec;
+        }
+      });
+
+      // Attach approval data to each adminPayment as a plain property
+      const paymentsWithApprovers = adminPayments.map(payment => {
+        const plain    = payment.toObject();
+        const approval = approvalMap[payment._id.toString()];
+        if (approval) {
+          plain.selectedApprovers = approval.selectedApprovers || [];
+          plain.approvals         = approval.approvals         || [];
+          plain.finalizedAt       = approval.finalizedAt       || null;
+        } else {
+          plain.selectedApprovers = [];
+          plain.approvals         = [];
+          plain.finalizedAt       = null;
+        }
+        return plain;
+      });
+
       const memberRole = await Role.findOne({ name: /^member$/i }).select("_id");
 
       const availableApprovers = await User.find({
-        role: { $ne: memberRole?._id },   // not the member role
+        role:   { $ne: memberRole?._id },
         status: "active",
-        _id: { $ne: req.user._id },       // exclude self
+        _id:    { $ne: req.user._id },
       })
         .populate("role", "name")
         .select("firstName lastName email membershipID role");
 
       res.render("dashboard/admin/payment", {
-        admin: req.user,
-        adminPayments,
+        admin:        req.user,
+        adminPayments: paymentsWithApprovers,  // now includes selectedApprovers + approvals
         availableApprovers,
       });
     } catch (error) {
@@ -1363,27 +1444,27 @@ router.get(
     }
   }
 );
-
-/* ============================================================
-   GET: Search Member (autocomplete)
-============================================================ */
+// ═══════════════════════════════════════════════════════════════
+//  MEMBER SEARCH — returns both regular users AND kiddies accounts
+// ═══════════════════════════════════════════════════════════════
 router.get("/admin/search-member", async (req, res) => {
   try {
     const { q } = req.query;
     if (!q) return res.json([]);
 
+    // ── Regular members ──
     const users = await User.find({
       $or: [
         { membershipID: { $regex: q, $options: "i" } },
-        { email: { $regex: q, $options: "i" } },
-        { firstName: { $regex: q, $options: "i" } },
-        { lastName: { $regex: q, $options: "i" } },
+        { email:        { $regex: q, $options: "i" } },
+        { firstName:    { $regex: q, $options: "i" } },
+        { lastName:     { $regex: q, $options: "i" } },
       ],
     })
       .populate("account")
       .limit(5);
 
-    const results = await Promise.all(
+    const userResults = await Promise.all(
       users.map(async (u) => {
         const loans = await Loan.find({
           user: u._id,
@@ -1393,36 +1474,63 @@ router.get("/admin/search-member", async (req, res) => {
           .populate({ path: "duration", select: "name months" });
 
         return {
-          id: u._id,
-          name: `${u.firstName} ${u.lastName}`,
+          id:           u._id,
+          entityType:   "member",
+          name:         `${u.firstName} ${u.lastName}`,
           membershipID: u.membershipID,
-          email: u.email,
-          balance: u.account?.balance || 0,
+          email:        u.email,
+          balance:      u.account?.balance || 0,
           loans: loans.map((loan) => ({
-            id: loan._id,
-            originalAmount: loan.amount,
-            totalRepay: loan.totalRepay,
+            id:               loan._id,
+            originalAmount:   loan.amount,
+            totalRepay:       loan.totalRepay,
             balanceRemaining: loan.totalRepay,
-            dueDate: loan.dueDate,
-            duration: loan.duration?.name || "N/A",
-            months: loan.duration?.months || 0,
+            dueDate:          loan.dueDate,
+            duration:         loan.duration?.name || "N/A",
+            months:           loan.duration?.months || 0,
           })),
         };
       })
     );
 
-    res.json(results);
+    // ── Kiddies accounts ──
+    const kiddies = await KiddiesAccount.find({
+      $or: [
+        { accountID:      { $regex: q, $options: "i" } },
+        { childFirstName: { $regex: q, $options: "i" } },
+        { childLastName:  { $regex: q, $options: "i" } },
+      ],
+      status: { $in: ["active", "locked"] }, // include both; admin can still transact
+    })
+      .populate("account")
+      .populate("parent", "firstName lastName email phone membershipID")
+      .limit(5);
+
+    const kiddiesResults = kiddies.map((k) => ({
+      id:           k._id,
+      entityType:   "kiddies",
+      name:         `${k.childFirstName} ${k.childLastName}`,
+      membershipID: k.accountID || "N/A",
+      email:        k.parent?.email || "N/A",
+      balance:      k.account?.balance || 0,
+      parentName:   k.parent ? `${k.parent.firstName} ${k.parent.lastName}` : "—",
+      parentID:     k.parent?.membershipID || "—",
+      lockStatus:   k.status,
+      loans:        [], // kiddies accounts do not have loans
+    }));
+
+    // Merge and return up to 8 results total
+    res.json([...userResults, ...kiddiesResults].slice(0, 8));
   } catch (err) {
     console.error("Search member error:", err);
     res.status(500).json([]);
   }
 });
 
-/* ============================================================
-   POST: Submit Transaction for Approval
-   - Creates a TransactionApproval record (status: "pending")
-   - Does NOT touch member balance yet
-============================================================ */
+
+// ═══════════════════════════════════════════════════════════════
+//  SUBMIT PAYMENT FOR APPROVAL — handles regular + kiddies
+// ═══════════════════════════════════════════════════════════════
 router.post(
   "/admin/submit-payment-for-approval",
   ensureAdmin("authorize_transactions"),
@@ -1435,6 +1543,7 @@ router.post(
     try {
       const {
         memberId,
+        memberType = "member",   // "member" | "kiddies"
         paymentType,
         amount,
         chargeAmount = 0,
@@ -1451,7 +1560,21 @@ router.post(
         console.log("❌ Missing required fields");
         return res.status(400).json({
           success: false,
-          message: "Missing required fields",
+          message: "Missing required fields: member, payment type, amount and payment method are all required.",
+        });
+      }
+
+      /* ── Reference is mandatory ──────────────────────────────────────
+         Without a reference the transaction cannot be traced for audit
+         purposes and downstream records (DepositReport / WithdrawalReport)
+         with unique indexes on reference will fail.
+         Reject early so no approval record is created and no balance is
+         ever touched.                                                   */
+      if (!reference || !String(reference).trim()) {
+        console.log("❌ Missing reference number");
+        return res.status(400).json({
+          success: false,
+          message: "A transaction reference number is required. Please enter the bank receipt or transfer reference before submitting.",
         });
       }
 
@@ -1471,7 +1594,15 @@ router.post(
 
       console.log("✔ Approvers received:", selectedApprovers);
 
-      /* ── Validate roles ── */
+      /* ── Kiddies accounts do not support loan repayment ── */
+      if (memberType === "kiddies" && paymentType === "loan-repayment") {
+        return res.status(400).json({
+          success: false,
+          message: "Kiddies accounts do not support loan repayment.",
+        });
+      }
+
+      /* ── Validate approver roles ── */
       const memberRole = await Role.findOne({ name: /^member$/i }).select("_id");
       console.log("Member role:", memberRole?._id);
 
@@ -1489,40 +1620,60 @@ router.post(
         const names = invalidApprovers
           .map((u) => `${u.firstName} ${u.lastName}`)
           .join(", ");
-
         console.log("❌ Invalid approvers:", names);
-
         return res.status(400).json({
           success: false,
-          message:
-            `These approvers have member role: ${names}`,
+          message: `These approvers have member role: ${names}`,
         });
       }
 
       console.log("✔ Approvers validated");
 
-      /* ── Verify member ── */
-      const member = await User.findById(memberId).populate("account");
+      /* ── Resolve the account (regular or kiddies) ── */
+      let resolvedAccount  = null;
+      let resolvedMemberId = null;
+      let kiddiesId        = null;
 
-      console.log("Member found:", !!member);
-      console.log("Member account:", member?.account);
+      if (memberType === "kiddies") {
+        const kiddiesDoc = await KiddiesAccount.findById(memberId).populate("account");
+        console.log("Kiddies doc found:", !!kiddiesDoc);
 
-      if (!member || !member.account) {
-        console.log("❌ Member account missing");
-        return res.status(404).json({
-          success: false,
-          message: "Member account not found",
-        });
+        if (!kiddiesDoc || !kiddiesDoc.account) {
+          console.log("❌ Kiddies account missing");
+          return res.status(404).json({
+            success: false,
+            message: "Kiddies account not found",
+          });
+        }
+
+        resolvedAccount  = kiddiesDoc.account;
+        kiddiesId        = kiddiesDoc._id;
+        resolvedMemberId = null;
+      } else {
+        const member = await User.findById(memberId).populate("account");
+        console.log("Member found:", !!member);
+        console.log("Member account:", member?.account);
+
+        if (!member || !member.account) {
+          console.log("❌ Member account missing");
+          return res.status(404).json({
+            success: false,
+            message: "Member account not found",
+          });
+        }
+
+        resolvedAccount  = member.account;
+        resolvedMemberId = member._id;
       }
 
       const totalAmount = Number(amount) + Number(chargeAmount);
       console.log("Total amount:", totalAmount);
-      console.log("Current balance:", member.account.balance);
+      console.log("Current balance:", resolvedAccount.balance);
 
-      /* ── Balance validation ── */
+      /* ── Balance check for debit types ── */
       if (
         ["withdrawal", "direct-debit"].includes(paymentType) &&
-        member.account.balance < totalAmount
+        resolvedAccount.balance < totalAmount
       ) {
         console.log("❌ Insufficient balance");
         return res.status(400).json({
@@ -1533,32 +1684,33 @@ router.post(
 
       console.log("✔ Balance validated");
 
-      /* ── Create approval ── */
+      /* ── Create approval record ── */
       const approval = await TransactionApproval.create({
-        initiatedBy: req.user._id,
-        member: member._id,
+        initiatedBy:       req.user._id,
+        member:            resolvedMemberId || undefined,
+        kiddiesMember:     kiddiesId        || undefined,
+        memberType,
         paymentType,
-        amount: Number(amount),
-        chargeAmount: Number(chargeAmount),
+        amount:            Number(amount),
+        chargeAmount:      Number(chargeAmount),
         totalAmount,
         paymentMethod,
-        reference: reference || null,
-        notes: notes || null,
-        loan: loanId || null,
-        chargeType: chargeType || null,
+        reference:         String(reference).trim(),   // trimmed, guaranteed non-empty
+        notes:             notes      || null,
+        loan:              loanId     || null,
+        chargeType:        chargeType || null,
         selectedApprovers,
-        status: "pending",
+        status:            "pending",
         approvalsRequired: 3,
-        approvalCount: 0,
+        approvalCount:     0,
       });
 
       console.log("✅ Approval created:", approval._id);
       console.log("========== SUBMIT PAYMENT END ==========");
 
       res.json({
-        success: true,
-        message:
-          "Transaction submitted for approval.",
+        success:    true,
+        message:    "Transaction submitted for approval.",
         approvalId: approval._id,
       });
 
@@ -1570,18 +1722,13 @@ router.post(
       res.status(500).json({
         success: false,
         message: "Failed to submit transaction for approval",
-        error: err.message,
+        error:   err.message,
       });
     }
   }
 );
 
 
-/* ============================================================
-   GET: Approvals Inbox
-   Shows pending transactions where req.user is a selected approver
-   and has not yet voted.
-============================================================ */
 router.get(
   "/admin/transaction-approvals",
   ensureAdmin("view_transactions"),
@@ -1589,32 +1736,40 @@ router.get(
     try {
       const userId = req.user._id;
 
-      /* Transactions this user needs to act on */
       const pendingApprovals = await TransactionApproval.find({
-        status: "pending",
-        selectedApprovers: userId,
-        "approvals.user": { $ne: userId },
+        status:                "pending",
+        selectedApprovers:     userId,
+        "approvals.user":      { $ne: userId },
       })
         .populate("initiatedBy", "firstName lastName email")
         .populate({
-          path: "member",
+          path:   "member",
           select: "firstName lastName membershipID email phone account",
           populate: { path: "account", select: "balance" },
         })
+        // ── Populate kiddies member for display in approvals panel ──
         .populate({
-          path: "selectedApprovers",
+          path:   "kiddiesMember",
+          select: "childFirstName childLastName accountID account status",
+          populate: [
+            { path: "account", select: "balance" },
+            { path: "parent",  select: "firstName lastName email membershipID" },
+          ],
+        })
+        .populate({
+          path:   "selectedApprovers",
           select: "firstName lastName",
         })
         .populate("loan", "amount totalRepay")
         .sort({ createdAt: -1 });
 
-      /* Transactions this user has already acted on (last 20) */
       const actedApprovals = await TransactionApproval.find({
         selectedApprovers: userId,
-        "approvals.user": userId,
+        "approvals.user":  userId,
       })
         .populate("initiatedBy", "firstName lastName email")
-        .populate("member", "firstName lastName membershipID")
+        .populate("member",        "firstName lastName membershipID")
+        .populate("kiddiesMember", "childFirstName childLastName accountID")
         .sort({ updatedAt: -1 })
         .limit(20);
 
@@ -1630,17 +1785,14 @@ router.get(
   }
 );
 
-/* ============================================================
-   POST: Approve a Transaction
-============================================================ */
 router.post(
   "/admin/approve-transaction/:approvalId",
   ensureAdmin("authorize_transactions"),
   async (req, res) => {
     try {
       const { approvalId } = req.params;
-      const { comment } = req.body;
-      const userId = req.user._id;
+      const { comment }    = req.body;
+      const userId         = req.user._id;
 
       const approval = await TransactionApproval.findById(approvalId);
 
@@ -1649,38 +1801,29 @@ router.post(
       }
 
       if (approval.status !== "pending") {
-        return res
-          .status(400)
-          .json({ message: `Transaction is already ${approval.status}` });
+        return res.status(400).json({ message: `Transaction is already ${approval.status}` });
       }
 
-      /* Must be a selected approver */
       const isSelected = approval.selectedApprovers
         .map((id) => id.toString())
         .includes(userId.toString());
 
       if (!isSelected) {
-        return res
-          .status(403)
-          .json({ message: "You are not authorised to approve this transaction" });
+        return res.status(403).json({ message: "You are not authorised to approve this transaction" });
       }
 
-      /* Cannot vote twice */
       const alreadyVoted = approval.approvals.some(
         (a) => a.user.toString() === userId.toString()
       );
 
       if (alreadyVoted) {
-        return res
-          .status(400)
-          .json({ message: "You have already responded to this transaction" });
+        return res.status(400).json({ message: "You have already responded to this transaction" });
       }
 
-      /* Record vote */
       approval.approvals.push({
-        user: userId,
-        action: "approved",
-        comment: comment || "",
+        user:        userId,
+        action:      "approved",
+        comment:     comment || "",
         respondedAt: new Date(),
       });
 
@@ -1688,7 +1831,6 @@ router.post(
         (a) => a.action === "approved"
       ).length;
 
-      /* Check if threshold reached */
       if (approval.approvalCount >= approval.approvalsRequired) {
         approval.status = "approved";
         await approval.save();
@@ -1696,16 +1838,15 @@ router.post(
         const result = await finalizeTransaction(approval, req.user);
 
         if (!result.success) {
-          /* Roll back status so it remains actionable */
           approval.status = "pending";
           await approval.save();
           return res.status(400).json({ message: result.message });
         }
 
         return res.json({
-          success: true,
-          message: "Transaction approved and processed successfully!",
-          finalized: true,
+          success:     true,
+          message:     "Transaction approved and processed successfully!",
+          finalized:   true,
           transaction: result.transaction,
         });
       }
@@ -1715,10 +1856,10 @@ router.post(
       const remaining = approval.approvalsRequired - approval.approvalCount;
 
       return res.json({
-        success: true,
-        message: `Approval recorded. ${remaining} more approval(s) needed.`,
-        finalized: false,
-        approvalCount: approval.approvalCount,
+        success:           true,
+        message:           `Approval recorded. ${remaining} more approval(s) needed.`,
+        finalized:         false,
+        approvalCount:     approval.approvalCount,
         approvalsRequired: approval.approvalsRequired,
       });
     } catch (err) {
@@ -1728,18 +1869,15 @@ router.post(
   }
 );
 
-/* ============================================================
-   POST: Decline a Transaction
-   One decline immediately kills the transaction.
-============================================================ */
+
 router.post(
   "/admin/decline-transaction/:approvalId",
   ensureAdmin("authorize_transactions"),
   async (req, res) => {
     try {
       const { approvalId } = req.params;
-      const { comment } = req.body;
-      const userId = req.user._id;
+      const { comment }    = req.body;
+      const userId         = req.user._id;
 
       const approval = await TransactionApproval.findById(approvalId);
 
@@ -1748,9 +1886,7 @@ router.post(
       }
 
       if (approval.status !== "pending") {
-        return res
-          .status(400)
-          .json({ message: `Transaction is already ${approval.status}` });
+        return res.status(400).json({ message: `Transaction is already ${approval.status}` });
       }
 
       const isSelected = approval.selectedApprovers
@@ -1758,9 +1894,7 @@ router.post(
         .includes(userId.toString());
 
       if (!isSelected) {
-        return res
-          .status(403)
-          .json({ message: "You are not authorised to decline this transaction" });
+        return res.status(403).json({ message: "You are not authorised to decline this transaction" });
       }
 
       const alreadyVoted = approval.approvals.some(
@@ -1768,29 +1902,27 @@ router.post(
       );
 
       if (alreadyVoted) {
-        return res
-          .status(400)
-          .json({ message: "You have already responded to this transaction" });
+        return res.status(400).json({ message: "You have already responded to this transaction" });
       }
 
       approval.approvals.push({
-        user: userId,
-        action: "declined",
-        comment: comment || "",
+        user:        userId,
+        action:      "declined",
+        comment:     comment || "",
         respondedAt: new Date(),
       });
 
-      approval.status = "declined";
+      approval.status         = "declined";
       approval.declinedReason = comment || "Declined by approver";
-      approval.finalizedAt = new Date();
+      approval.finalizedAt    = new Date();
 
       await approval.save();
 
       return res.json({
-        success: true,
-        message: "Transaction has been declined.",
+        success:   true,
+        message:   "Transaction has been declined.",
         finalized: true,
-        status: "declined",
+        status:    "declined",
       });
     } catch (err) {
       console.error("Decline transaction error:", err);
@@ -1799,19 +1931,16 @@ router.post(
   }
 );
 
-/* ============================================================
-   GET: Pending approvals count (navbar badge)
-============================================================ */
 router.get(
   "/admin/pending-approvals-count",
   ensureAdmin("view_transactions"),
   async (req, res) => {
     try {
       const userId = req.user._id;
-      const count = await TransactionApproval.countDocuments({
-        status: "pending",
+      const count  = await TransactionApproval.countDocuments({
+        status:            "pending",
         selectedApprovers: userId,
-        "approvals.user": { $ne: userId },
+        "approvals.user":  { $ne: userId },
       });
       res.json({ count });
     } catch (err) {
@@ -1820,28 +1949,69 @@ router.get(
   }
 );
 
-/* ============================================================
-   HELPER: Finalize the transaction once 3 approvals are reached.
-   - Updates account balance
-   - Creates AdminPayment record
-   - Creates Transaction record
-   - Marks approval as 'processed'
-============================================================ */
+
+// ═══════════════════════════════════════════════════════════════
+//  FINALIZE TRANSACTION — handles regular members + kiddies
+// ═══════════════════════════════════════════════════════════════
 async function finalizeTransaction(approval, processingUser) {
   try {
-    const member = await User.findById(approval.member).populate("account");
-
-    if (!member || !member.account) {
-      return { success: false, message: "Member account not found" };
+    if (!approval.reference || !approval.reference.trim()) {
+      return {
+        success: false,
+        message: "Transaction reference is required. The admin must provide a reference number before this transaction can be processed.",
+      };
     }
 
-    const balanceBefore = member.account.balance;
-    let balanceAfter = balanceBefore;
-    const totalAmount = approval.totalAmount;
+    const reference = approval.reference.trim();
 
-    /* ======================================================
-       BALANCE CALCULATION
-    ====================================================== */
+    /* ── Resolve the correct account owner ── */
+    const isKiddies = approval.memberType === "kiddies" || !!approval.kiddiesMember;
+
+    let account       = null;
+    let memberRef     = null;
+    let memberDisplay = {};
+
+    if (isKiddies) {
+      const kiddiesDoc = await KiddiesAccount.findById(approval.kiddiesMember)
+        .populate("account")
+        .populate("parent", "firstName lastName email phone membershipID");
+
+      if (!kiddiesDoc || !kiddiesDoc.account) {
+        return { success: false, message: "Kiddies account not found" };
+      }
+
+      account   = kiddiesDoc.account;
+      memberRef = kiddiesDoc;
+
+      memberDisplay = {
+        name:         `${kiddiesDoc.childFirstName} ${kiddiesDoc.childLastName}`,
+        membershipID: kiddiesDoc.accountID || "N/A",
+        email:        kiddiesDoc.parent?.email || "N/A",
+        phone:        kiddiesDoc.parent?.phone || "N/A",
+      };
+    } else {
+      const member = await User.findById(approval.member).populate("account");
+
+      if (!member || !member.account) {
+        return { success: false, message: "Member account not found" };
+      }
+
+      account   = member.account;
+      memberRef = member;
+
+      memberDisplay = {
+        name:         `${member.firstName} ${member.lastName}`,
+        membershipID: member.membershipID,
+        email:        member.email,
+        phone:        member.phone,
+      };
+    }
+
+    const balanceBefore = account.balance;
+    let   balanceAfter  = balanceBefore;
+    const totalAmount   = approval.totalAmount;
+
+    /* ── Balance calculation ── */
     switch (approval.paymentType) {
       case "deposit":
         balanceAfter += totalAmount;
@@ -1856,168 +2026,232 @@ async function finalizeTransaction(approval, processingUser) {
         break;
 
       case "loan-repayment":
-        // handled separately
         break;
 
       default:
         return { success: false, message: "Invalid payment type" };
     }
 
-    member.account.balance = balanceAfter;
-    await member.account.save();
+    account.balance = balanceAfter;
+    await account.save();
 
-    /* ======================================================
-       CREATE ADMIN PAYMENT
-    ====================================================== */
+    /* ── Create AdminPayment record ── */
     const adminPayment = await AdminPayment.create({
-      admin: approval.initiatedBy,
-      member: member._id,
-      paymentType: approval.paymentType,
-      amount: approval.amount,
-      chargeAmount: approval.chargeAmount,
-      totalAmount: approval.totalAmount,
-      loan: approval.loan || null,
-      chargeType: approval.chargeType || null,
+      admin:         approval.initiatedBy,
+      member:        isKiddies ? undefined : memberRef._id,
+      kiddiesMember: isKiddies ? memberRef._id : undefined,
+      memberType:    isKiddies ? "kiddies" : "member",
+      paymentType:   approval.paymentType,
+      amount:        approval.amount,
+      chargeAmount:  approval.chargeAmount,
+      totalAmount:   approval.totalAmount,
+      loan:          approval.loan       || null,
+      chargeType:    approval.chargeType || null,
       paymentMethod: approval.paymentMethod,
-      reference: approval.reference,
-      notes: approval.notes,
+      reference,
+      notes:         approval.notes,
       balanceBefore,
       balanceAfter,
-      status: "successful",
+      status:        "successful",
     });
 
-    /* ======================================================
-       MEMBER TRANSACTION LEDGER
-    ====================================================== */
-    let transactionType = approval.paymentType;
-    if (approval.paymentType === "loan-repayment")
-      transactionType = "loan_payment";
-    if (approval.paymentType === "direct-debit")
-      transactionType = "withdrawal";
+    /* ── Member transaction ledger ── */
+    let memberTransaction = null;
 
-    await Transaction.create({
-      user: member._id,
-      type: transactionType,
-      amount: totalAmount,
-      status: "successful",
-      description:
-        approval.notes ||
-        `Admin ${approval.paymentType.replace("-", " ")}`,
-      reference: approval.reference || adminPayment._id.toString(),
-      method: approval.paymentMethod,
+    if (!isKiddies) {
+      // Map paymentType to the regular Transaction type enum
+      const regularTypeMap = {
+        "deposit":        "deposit",
+        "withdrawal":     "withdrawal",
+        "direct-debit":   "withdrawal",
+        "loan-repayment": "loan_payment",
+      };
+
+      memberTransaction = await Transaction.create({
+        user:        memberRef._id,
+        type:        regularTypeMap[approval.paymentType] || "deposit",
+        amount:      totalAmount,
+        status:      "successful",
+        description: approval.notes || `Admin ${approval.paymentType.replace(/-/g, " ")}`,
+        reference,
+        method:      approval.paymentMethod,
+      });
+    } else {
+      /* ── KiddiesTransaction schema constraints:
+           type          enum: "deposit" | "interest" | "fee" | "withdrawal"
+           status        enum: "pending" | "completed" | "failed"   ← NOT "successful"
+           paymentMethod enum: "paystack" | "cooperative" | "interest" | "system"
+           parent        ObjectId → User  (required)
+           balanceAfter  Number           (required)
+      ── */
+      const kiddiesTypeMap = {
+        "deposit":      "deposit",
+        "withdrawal":   "withdrawal",
+        "direct-debit": "fee",        // direct debit = a charge/fee on the account
+      };
+
+      // All admin-processed methods map to "cooperative"
+      const kiddiesMethodMap = {
+        "cash":          "cooperative",
+        "bank-transfer": "cooperative",
+        "pos":           "cooperative",
+        "online":        "cooperative",
+        "cheque":        "cooperative",
+      };
+
+      await KiddiesTransaction.create({
+        kiddiesAccount: memberRef._id,
+        parent:         memberRef.parent?._id || memberRef.parent,  // required by schema
+        type:           kiddiesTypeMap[approval.paymentType] || "deposit",
+        amount:         totalAmount,
+        balanceAfter,                                               // required by schema
+        description:    approval.notes || `Admin ${approval.paymentType.replace(/-/g, " ")}`,
+        reference,
+        status:         "completed",                                // valid enum value
+        paymentMethod:  kiddiesMethodMap[approval.paymentMethod] || "cooperative",
+      });
+    }
+
+    /* ── Payment record ── */
+    const paymentTypeMap = {
+      "deposit":        "deposit",
+      "withdrawal":     "extra_charge",
+      "direct-debit":   "extra_charge",
+      "loan-repayment": "loan_repayment",
+    };
+
+    await Payment.create({
+      user:        isKiddies ? (memberRef.parent?._id || memberRef.parent) : memberRef._id,
+      email:       memberDisplay.email,
+      amount:      totalAmount,
+      reference:   `APPR-${reference}`,
+      payeeName:   memberDisplay.name,
+      paymentType: paymentTypeMap[approval.paymentType] || "deposit",
+      status:      "success",
     });
 
-    /* ======================================================
-       ✅ FINANCIAL REPORT RECORDING
-    ====================================================== */
+    /* ── Company ledger ── */
+    const ledgerTypeMap = {
+      "deposit":        isKiddies ? "kiddies_deposit_approve" : "deposit",
+      "withdrawal":     "withdrawal",
+      "direct-debit":   "forced_withdrawal",
+      "loan-repayment": "loan_repayment",
+    };
 
-    // -------- DEPOSIT REPORT --------
+    const ledgerDirectionMap = {
+      "deposit":        "in",
+      "withdrawal":     "out",
+      "direct-debit":   "out",
+      "loan-repayment": "in",
+    };
+
+    await CompanyLedger.create({
+      type:      ledgerTypeMap[approval.paymentType]      || "deposit",
+      direction: ledgerDirectionMap[approval.paymentType] || "in",
+      amount:    totalAmount,
+      relatedUser: isKiddies
+        ? (memberRef.parent?._id || memberRef.parent || undefined)
+        : memberRef._id,
+      relatedTransaction: memberTransaction?._id || undefined,
+      description: `${approval.paymentType.replace(/-/g, " ")} — ${memberDisplay.name}${isKiddies ? " [Kiddies]" : ""} via admin approval`,
+      recordedBy:  processingUser?._id,
+      meta: {
+        adminPaymentId: adminPayment._id,
+        approvalId:     approval._id,
+        memberType:     isKiddies ? "kiddies" : "member",
+        membershipID:   memberDisplay.membershipID,
+        balanceBefore,
+        balanceAfter,
+        paymentMethod:  approval.paymentMethod,
+        reference,
+      },
+    });
+
+    /* ── Financial report recording ── */
     if (approval.paymentType === "deposit") {
       await DepositReport.create({
-        member: member._id,
-        account: member.account._id,
-        amount: totalAmount,
-        type: approval.paymentMethod || "bank_transfer",
-        reference: approval.reference,
-        description:
-          approval.notes || "Admin approved deposit",
-        status: "approved",
-
+        member:          isKiddies ? undefined : memberRef._id,
+        kiddiesMember:   isKiddies ? memberRef._id : undefined,
+        account:         account._id,
+        amount:          totalAmount,
+        type:            approval.paymentMethod || "bank_transfer",
+        reference:       `DEP-${reference}`,
+        description:     approval.notes || "Admin approved deposit",
+        status:          "approved",
         balanceBefore,
         balanceAfter,
-
-        processedBy: processingUser?._id,
-        processedByRole:
-          processingUser?.role?.name || "admin",
-        processedAt: new Date(),
-
-        notes: approval.notes,
+        processedBy:     processingUser?._id,
+        processedByRole: processingUser?.role?.name || "admin",
+        processedAt:     new Date(),
+        notes:           approval.notes,
       });
     }
 
-    // -------- WITHDRAWAL REPORT --------
-    if (
-      approval.paymentType === "withdrawal" ||
-      approval.paymentType === "direct-debit"
-    ) {
+    if (approval.paymentType === "withdrawal" || approval.paymentType === "direct-debit") {
       await WithdrawalReport.create({
-        member: member._id,
-        account: member.account._id,
-        amount: totalAmount,
-        netAmount: totalAmount,
-        type: approval.paymentMethod || "bank_transfer",
-        reference: approval.reference,
-        description:
-          approval.notes || "Admin processed withdrawal",
-
-        status: "approved",
-
+        member:          isKiddies ? undefined : memberRef._id,
+        kiddiesMember:   isKiddies ? memberRef._id : undefined,
+        account:         account._id,
+        amount:          totalAmount,
+        netAmount:       totalAmount,
+        type:            approval.paymentMethod || "bank_transfer",
+        reference:       `WDR-${reference}`,
+        description:     approval.notes || "Admin processed withdrawal",
+        status:          "approved",
         balanceBefore,
         balanceAfter,
-
-        approvedBy: processingUser?._id,
-        approvedByRole:
-          processingUser?.role?.name || "admin",
-        approvedAt: new Date(),
-
-        notes: approval.notes,
+        approvedBy:      processingUser?._id,
+        approvedByRole:  processingUser?.role?.name || "admin",
+        approvedAt:      new Date(),
+        notes:           approval.notes,
       });
     }
 
-    /* ======================================================
-       ✅ ADMIN ACTION LOG (AUDIT TRAIL)
-    ====================================================== */
+    /* ── Audit log ── */
     await AdminActionLog.create({
-      admin: processingUser?._id,
-      adminRole: processingUser?.role?.name || "admin",
-      actionType:
-        approval.paymentType === "deposit"
-          ? "deposit_approve"
-          : "withdrawal_approve",
-
-      targetUser: member._id,
+      admin:       processingUser?._id,
+      adminRole:   processingUser?.role?.name || "admin",
+      actionType:  approval.paymentType === "deposit" ? "deposit_approve" : "withdrawal_approve",
+      targetUser:  isKiddies ? undefined : memberRef._id,
       targetModel: "AdminPayment",
-      targetId: adminPayment._id,
-
-      description: `Processed ${approval.paymentType} for ${member.email}`,
-
+      targetId:    adminPayment._id,
+      description: `Processed ${approval.paymentType} for ${memberDisplay.email}${isKiddies ? " [Kiddies Account]" : ""}`,
       changes: {
-        amount: totalAmount,
+        amount:        totalAmount,
         balanceBefore,
         balanceAfter,
-        reference: approval.reference,
+        reference,
+        memberType:    isKiddies ? "kiddies" : "member",
       },
-
       status: "success",
     });
 
-    /* ======================================================
-       FINALIZE APPROVAL
-    ====================================================== */
+    /* ── Finalise approval ── */
     approval.adminPayment = adminPayment._id;
-    approval.status = "processed";
-    approval.finalizedAt = new Date();
+    approval.status       = "processed";
+    approval.finalizedAt  = new Date();
     await approval.save();
 
     return {
       success: true,
       transaction: {
-        id: adminPayment._id,
-        reference: approval.reference || adminPayment._id,
-        date: adminPayment.createdAt,
-        type: approval.paymentType,
-        amount: approval.amount,
-        chargeAmount: approval.chargeAmount,
-        totalAmount: approval.totalAmount,
+        id:            adminPayment._id,
+        reference,
+        date:          adminPayment.createdAt,
+        type:          approval.paymentType,
+        amount:        approval.amount,
+        chargeAmount:  approval.chargeAmount,
+        totalAmount:   approval.totalAmount,
         balanceBefore,
         balanceAfter,
         paymentMethod: approval.paymentMethod,
-        notes: approval.notes,
+        notes:         approval.notes,
+        memberType:    isKiddies ? "kiddies" : "member",
         member: {
-          name: `${member.firstName} ${member.lastName}`,
-          membershipID: member.membershipID,
-          email: member.email,
-          phone: member.phone,
+          name:         memberDisplay.name,
+          membershipID: memberDisplay.membershipID,
+          email:        memberDisplay.email,
+          phone:        memberDisplay.phone,
         },
         processedBy: processingUser
           ? `${processingUser.firstName} ${processingUser.lastName}`
@@ -2029,7 +2263,6 @@ async function finalizeTransaction(approval, processingUser) {
     return { success: false, message: "Transaction finalization failed" };
   }
 }
-
 
 // DEPOSITS ROUTE STARTS HERE 
 router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, res) => {
@@ -2203,65 +2436,82 @@ router.post(
       }
 
       const amount = Number(payment.amount);
+      const isRegistrationFee = payment.paymentType === "registration_fee";
 
       // ═══════════════════════════════════════════════════════════════════════
       // 2. HANDLE NORMAL DEPOSIT
       // ═══════════════════════════════════════════════════════════════════════
       if (payment.user) {
-        const account = await Account.findOneAndUpdate(
-          { ownerType: "User", ownerId: payment.user._id },
-          { $inc: { balance: amount } },
-          { new: true }
-        );
+        if (!isRegistrationFee) {
+          const account = await Account.findOneAndUpdate(
+            { ownerType: "User", ownerId: payment.user._id },
+            { $inc: { balance: amount } },
+            { new: true }
+          );
 
-        if (!account) {
-          return res.status(404).json({ message: "Member account not found." });
-        }
+          if (!account) {
+            return res.status(404).json({ message: "Member account not found." });
+          }
 
-        const balanceBefore = account.balance - amount;
-        const balanceAfter  = account.balance;
+          const balanceBefore = account.balance - amount;
+          const balanceAfter  = account.balance;
 
-        await DepositReport.create({
-          member:          payment.user._id,
-          account:         account._id,
-          amount,
-          type:            "bank_transfer",
-          reference:       payment.reference,
-          description:     `Manual deposit approved (${payment.reference})`,
-          status:          "approved",
-          balanceBefore,
-          balanceAfter,
-          processedBy:     req.user._id,
-          processedByRole: req.user.role?.name || "admin",
-          processedAt:     new Date(),
-          notes:           notes || "Approved by admin",
-        });
+          await DepositReport.create({
+            member:          payment.user._id,
+            account:         account._id,
+            amount,
+            type:            "bank_transfer",
+            reference:       payment.reference,
+            description:     `Manual deposit approved (${payment.reference})`,
+            status:          "approved",
+            balanceBefore,
+            balanceAfter,
+            processedBy:     req.user._id,
+            processedByRole: req.user.role?.name || "admin",
+            processedAt:     new Date(),
+            notes:           notes || "Approved by admin",
+          });
 
-        await CompanyLedger.create({
-          type:        "deposit",
-          direction:   "in",
-          amount,
-          relatedUser: payment.user._id,
-          description: `Deposit received (${payment.reference})`,
-          recordedBy:  req.user._id,
-          meta: {
+          await CompanyLedger.create({
+            type:        "deposit",
+            direction:   "in",
+            amount,
+            relatedUser: payment.user._id,
+            description: `Deposit received (${payment.reference})`,
+            recordedBy:  req.user._id,
+            meta: {
+              reference: payment.reference,
+              notes:     notes || "Approved by admin",
+            },
+          });
+
+          const transaction = await Transaction.findOne({
+            user:      payment.user._id,
             reference: payment.reference,
-            notes:     notes || "Approved by admin",
-          },
-        });
+            type:      "deposit",
+          });
 
-        const transaction = await Transaction.findOne({
-          user:      payment.user._id,
-          reference: payment.reference,
-          type:      "deposit",
-        });
-
-        if (transaction) {
-          transaction.status      = "successful";
-          transaction.method      = "Bank Transfer";
-          transaction.description = transaction.description
-            || `Deposit approved by admin (${payment.reference})`;
-          await transaction.save();
+          if (transaction) {
+            transaction.status      = "successful";
+            transaction.method      = "Bank Transfer";
+            transaction.description = transaction.description
+              || `Deposit approved by admin (${payment.reference})`;
+            await transaction.save();
+          }
+        } else {
+          // Registration fee — log to company ledger only, no balance credit
+          await CompanyLedger.create({
+            type:        "registration_fee",
+            direction:   "in",
+            amount,
+            relatedUser: payment.user._id,
+            description: `Registration fee received (${payment.reference})`,
+            recordedBy:  req.user._id,
+            meta: {
+              reference: payment.reference,
+              notes:     notes || "Approved by admin",
+            },
+          });
         }
       }
 
@@ -2275,7 +2525,7 @@ router.post(
         targetUser:  payment.user?._id || null,
         targetModel: "Payment",
         targetId:    payment._id,
-        description: `Approved deposit ${payment.reference}`,
+        description: `Approved ${isRegistrationFee ? "registration fee" : "deposit"} ${payment.reference}`,
         ipAddress:   req.ip,
         userAgent:   req.headers["user-agent"],
         status:      "success",
@@ -2283,8 +2533,10 @@ router.post(
 
       return res.json({
         success:    true,
-        message:    "Deposit approved successfully",
-        newBalance: payment.user?.account?.balance || 0,
+        message:    isRegistrationFee
+          ? "Registration fee approved successfully"
+          : "Deposit approved successfully",
+        newBalance: isRegistrationFee ? null : (payment.user?.account?.balance || 0),
       });
 
     } catch (error) {
@@ -3655,6 +3907,70 @@ router.post("/admin/settings/maintenance-mode", ensureAdmin("manage_settings"), 
 });
 
 
+// ══════════════════════════════════════════════════════════════════
+// POST /admin/settings/clear-database
+//
+// DANGER: Wipes every collection in the database.
+// Requires:
+//   1. Admin must have manage_settings permission (enforced by ensureAdmin)
+//   2. A secret admin code sent in the request body must match the
+//      value in process.env.ADMIN_CLEAR_CODE
+//
+// The Settings document is preserved and reset to defaults so the
+// application keeps working after the wipe.
+// ══════════════════════════════════════════════════════════════════
+router.post("/admin/settings/clear-database", ensureAdmin("manage_settings"), async (req, res) => {
+  try {
+    const { adminCode } = req.body;
+ 
+    /* ── Validate admin code ── */
+    const EXPECTED_CODE = process.env.ADMIN_CLEAR_CODE;
+ 
+    if (!EXPECTED_CODE) {
+      console.error("ADMIN_CLEAR_CODE env variable is not set.");
+      return res.status(500).json({
+        success: false,
+        message: "Clear-database feature is not configured on this server. Set ADMIN_CLEAR_CODE in your environment variables.",
+      });
+    }
+ 
+    if (!adminCode || adminCode.trim() !== EXPECTED_CODE) {
+      return res.status(403).json({
+        success: false,
+        message: "Incorrect admin code. Database was NOT cleared.",
+      });
+    }
+ 
+    /* ── Log this destructive action before wiping ── */
+    console.warn(`⚠️  DATABASE CLEAR initiated by admin ${req.user._id} (${req.user.email}) at ${new Date().toISOString()}`);
+ 
+    /* ── Get all collection names and drop each one ── */
+    const db          = mongoose.connection.db;
+    const collections = await db.listCollections().toArray();
+ 
+    for (const col of collections) {
+      await db.collection(col.name).deleteMany({});
+    }
+ 
+    console.warn(`✅  DATABASE CLEAR complete. All ${collections.length} collection(s) wiped.`);
+ 
+    /* ── Re-seed the Settings document so the app stays functional ── */
+    await Settings.create({});
+ 
+    res.json({
+      success:    true,
+      message:    `Database cleared successfully. All ${collections.length} collection(s) have been wiped. The system settings have been reset to defaults.`,
+      collections: collections.length,
+    });
+  } catch (err) {
+    console.error("Clear database error:", err);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while clearing the database.",
+    });
+  }
+});
+ 
 
 
 

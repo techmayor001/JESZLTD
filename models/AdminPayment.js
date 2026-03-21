@@ -5,15 +5,29 @@ const adminPaymentSchema = new mongoose.Schema(
     // Admin who processed the payment
     admin: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Admin",
+      ref: "User",   // admins are Users in this system
       required: true,
     },
 
-    // Member affected
+    // Regular member affected — null for kiddies transactions
     member: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      default: null,
+    },
+
+    // Kiddies account affected — null for regular member transactions
+    kiddiesMember: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "KiddiesAccount",
+      default: null,
+    },
+
+    // Discriminator — tells the UI and reports which ref is populated
+    memberType: {
+      type: String,
+      enum: ["member", "kiddies"],
+      default: "member",
     },
 
     // Payment type from UI
@@ -56,7 +70,7 @@ const adminPaymentSchema = new mongoose.Schema(
     // Charge type (ONLY for direct debit)
     chargeType: {
       type: String,
-      enum: ["admin", "penalty", "service", "other"],
+      enum: ["admin-fee", "penalty", "service", "other"],
       default: null,
     },
 
@@ -70,14 +84,16 @@ const adminPaymentSchema = new mongoose.Schema(
     // Optional transaction reference
     reference: {
       type: String,
+      default: null,
     },
 
     // Admin notes
     notes: {
       type: String,
+      default: null,
     },
 
-    // Status (future-proofing)
+    // Status
     status: {
       type: String,
       enum: ["successful", "pending", "failed"],
@@ -97,5 +113,13 @@ const adminPaymentSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Indexes for common query patterns
+adminPaymentSchema.index({ member: 1, createdAt: -1 });
+adminPaymentSchema.index({ kiddiesMember: 1, createdAt: -1 });
+adminPaymentSchema.index({ memberType: 1 });
+adminPaymentSchema.index({ paymentType: 1 });
+adminPaymentSchema.index({ status: 1 });
+adminPaymentSchema.index({ admin: 1 });
 
 module.exports = mongoose.model("AdminPayment", adminPaymentSchema);

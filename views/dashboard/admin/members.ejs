@@ -1118,7 +1118,6 @@
         // Avatar
         let avatarSrc;
         if (isKiddies) {
-            // Use parent's display picture or initials avatar for kiddies
             avatarSrc = m.displayPicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.firstName+' '+m.lastName)}&background=ec4899&color=fff&size=150`;
         } else {
             avatarSrc = m.displayPicture || m.passportPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.firstName+' '+m.lastName)}&background=1e3a8a&color=fff&size=150`;
@@ -1170,12 +1169,12 @@
             bankSection.style.display = 'block';
         }
 
-        // ★ Financial snapshot (same for both)
+        // ★ Financial snapshot — Share % now 2 decimal places (CHANGED: was toFixed(4))
         const s = m.memberStats;
         document.getElementById('view_savings').innerText       = fmt(s.memberSavings);
         document.getElementById('view_accumROI').innerText      = fmt(s.accumulativeROI);
         document.getElementById('view_totalBalance').innerText  = fmt(s.totalBalance);
-        document.getElementById('view_sharePercent').innerText  = Number(s.sharePercentage||0).toFixed(4) + '%';
+        document.getElementById('view_sharePercent').innerText  = Number(s.sharePercentage||0).toFixed(2) + '%';
         document.getElementById('view_roiEarning').innerText    = fmt(s.ROI);
         document.getElementById('view_companyCharge').innerText = fmt(s.companyChargeOnUser);
 
@@ -1390,6 +1389,7 @@
 
     /* ═══════════════════════════════════════════════════
        EXPORT — build rows (handles both types)
+       Share % uses toFixed(2) throughout (CHANGED: was toFixed(4))
     ═══════════════════════════════════════════════════ */
     function buildExportRows(data) {
         return data.map((m, i) => ({
@@ -1405,7 +1405,7 @@
             'Savings (₦)':          m.memberStats.memberSavings,
             'Accum. ROI (₦)':       m.memberStats.accumulativeROI,
             'Total Balance (₦)':    m.memberStats.totalBalance,
-            'Share (%)':            m.memberStats.sharePercentage,
+            'Share (%)':            Number(m.memberStats.sharePercentage || 0).toFixed(2),  // CHANGED: was raw number formatted to 4dp in Excel
             'Est. ROI Earning (₦)': m.memberStats.ROI,
             'Company Charge (₦)':   m.memberStats.companyChargeOnUser,
             'State':                m.state || '---',
@@ -1453,7 +1453,6 @@
 
         // Data rows
         for (let R = 1; R <= range.e.r; R++) {
-            // Pink tint for kiddies rows
             const isKiddiesRow = rows[R-1]?.['Entity Type'] === 'Kiddies Account';
             const fillColor    = isKiddiesRow ? 'FFF0F9' : (R % 2 === 0 ? 'EEF2FF' : 'FFFFFF');
 
@@ -1466,13 +1465,18 @@
                     border:    { bottom:{style:'thin',color:{rgb:'E0E7FF'}}, right:{style:'thin',color:{rgb:'E0E7FF'}} }
                 };
             }
-            // Numeric columns: savings(9), accumROI(10), totalBal(11), share(12), ROI(13), coCharge(14)
+            // Numeric columns: savings(9), accumROI(10), totalBal(11), ROI(13), coCharge(14)
             [9,10,11,13,14].forEach(c => {
                 const addr = XLSX.utils.encode_cell({ r:R, c });
                 if (ws[addr]) { ws[addr].t = 'n'; ws[addr].z = '#,##0.00'; }
             });
+            // Share % column (col 12) — stored as string with 2dp, display as-is
+            // CHANGED: was number type with '0.0000"%"' format, now plain text "2.62%"
             const shareAddr = XLSX.utils.encode_cell({ r:R, c:12 });
-            if (ws[shareAddr]) { ws[shareAddr].t = 'n'; ws[shareAddr].z = '0.0000"%"'; }
+            if (ws[shareAddr]) {
+                ws[shareAddr].t = 's';
+                ws[shareAddr].v = ws[shareAddr].v + '%';
+            }
             // Status colour (col 7)
             const stAddr = XLSX.utils.encode_cell({ r:R, c:7 });
             if (ws[stAddr]) {
@@ -1524,6 +1528,7 @@
 
     /* ═══════════════════════════════════════════════════
        EXPORT — PDF
+       Share % uses toFixed(2) (CHANGED: was toFixed(4))
     ═══════════════════════════════════════════════════ */
     function exportToPDF(useFiltered = false) {
         const data = useFiltered ? _currentFilteredMembers : members;
@@ -1571,7 +1576,7 @@
                     <strong style="color:#059669;">₦${Number(s.totalBalance).toLocaleString('en-NG',{minimumFractionDigits:2})}</strong>
                 </td>
                 <td style="text-align:right;font-size:11px;">
-                    <span style="color:#d97706;font-weight:700;">${Number(s.sharePercentage).toFixed(4)}%</span><br>
+                    <span style="color:#d97706;font-weight:700;">${Number(s.sharePercentage).toFixed(2)}%</span><br>
                     <span style="color:#059669;font-size:10px;">ROI: ₦${Number(s.ROI).toLocaleString('en-NG',{minimumFractionDigits:2})}</span>
                 </td>
                 <td style="font-size:10px;color:#6b7280;">${new Date(m.joinDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>

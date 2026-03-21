@@ -6,11 +6,19 @@ const mongoose = require("mongoose");
 ============================================================ */
 const depositReportSchema = new mongoose.Schema(
   {
+    // Regular member — null for kiddies deposits
     member: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      default: null,   // was required: true — removed so kiddies deposits don't fail
       index: true,
+    },
+
+    // Kiddies account — null for regular member deposits
+    kiddiesMember: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "KiddiesAccount",
+      default: null,
     },
 
     account: {
@@ -59,7 +67,6 @@ const depositReportSchema = new mongoose.Schema(
       default: 0,
     },
 
-    // Who approved / rejected this deposit
     processedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -70,10 +77,9 @@ const depositReportSchema = new mongoose.Schema(
     },
 
     processedByRole: {
-      type: String, // snapshot of role name at time of action
+      type: String,
     },
 
-    // Optional reversal info
     reversedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -87,7 +93,6 @@ const depositReportSchema = new mongoose.Schema(
       type: String,
     },
 
-    // Supporting document (proof of payment)
     proofOfPayment: {
       type: String,
     },
@@ -100,6 +105,7 @@ const depositReportSchema = new mongoose.Schema(
 );
 
 depositReportSchema.index({ member: 1, createdAt: -1 });
+depositReportSchema.index({ kiddiesMember: 1, createdAt: -1 });
 depositReportSchema.index({ status: 1, createdAt: -1 });
 
 /* ============================================================
@@ -108,11 +114,19 @@ depositReportSchema.index({ status: 1, createdAt: -1 });
 ============================================================ */
 const withdrawalReportSchema = new mongoose.Schema(
   {
+    // Regular member — null for kiddies withdrawals
     member: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      default: null,   // was required: true — removed so kiddies withdrawals don't fail
       index: true,
+    },
+
+    // Kiddies account — null for regular member withdrawals
+    kiddiesMember: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "KiddiesAccount",
+      default: null,
     },
 
     account: {
@@ -132,7 +146,7 @@ const withdrawalReportSchema = new mongoose.Schema(
     },
 
     netAmount: {
-      type: Number, // amount - fee
+      type: Number,
       default: 0,
     },
 
@@ -179,7 +193,6 @@ const withdrawalReportSchema = new mongoose.Schema(
     requestedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      // could be member themselves or an admin acting on behalf
     },
 
     approvedBy: {
@@ -216,6 +229,7 @@ const withdrawalReportSchema = new mongoose.Schema(
 );
 
 withdrawalReportSchema.index({ member: 1, createdAt: -1 });
+withdrawalReportSchema.index({ kiddiesMember: 1, createdAt: -1 });
 withdrawalReportSchema.index({ status: 1, createdAt: -1 });
 
 /* ============================================================
@@ -288,7 +302,6 @@ const loanReportSchema = new mongoose.Schema(
     interestRate: {
       type: Number,
       required: true,
-      comment: "Annual percentage rate",
     },
 
     interestAmount: {
@@ -353,7 +366,6 @@ const loanReportSchema = new mongoose.Schema(
 
     repayments: [loanRepaymentSchema],
 
-    // The admin who finally approved/rejected the loan
     reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -384,7 +396,6 @@ loanReportSchema.index({ loanRef: 1 }, { unique: true, sparse: true });
 
 /* ============================================================
    EXTRA CHARGES SCHEMA
-   Fines, penalties, admin fees, etc.
 ============================================================ */
 const extraChargeSchema = new mongoose.Schema(
   {
@@ -493,7 +504,6 @@ extraChargeSchema.index({ chargeType: 1, status: 1 });
 
 /* ============================================================
    ADMIN ACTION LOG SCHEMA
-   Complete audit log of all admin actions across the system
 ============================================================ */
 const adminActionLogSchema = new mongoose.Schema(
   {
@@ -507,21 +517,18 @@ const adminActionLogSchema = new mongoose.Schema(
     adminRole: {
       type: String,
       required: true,
-      comment: "Snapshot of role name at time of action",
     },
 
     actionType: {
       type: String,
       required: true,
       enum: [
-        // Member management
         "member_approve",
         "member_reject",
         "member_delete",
         "member_edit",
         "member_create",
         "member_status_change",
-        // Financial
         "deposit_approve",
         "deposit_reject",
         "deposit_reverse",
@@ -534,14 +541,12 @@ const adminActionLogSchema = new mongoose.Schema(
         "extra_charge_add",
         "extra_charge_waive",
         "kiddies_deposit_approve",
-        // System
         "role_create",
         "role_edit",
         "role_delete",
         "permission_update",
         "settings_update",
         "subscription_update",
-        // Auth
         "admin_login",
         "admin_logout",
         "password_reset",
@@ -553,17 +558,14 @@ const adminActionLogSchema = new mongoose.Schema(
     targetUser: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      comment: "The member/user this action was performed on",
     },
 
     targetModel: {
       type: String,
-      comment: "e.g. Loan, Deposit, Withdrawal, User",
     },
 
     targetId: {
       type: mongoose.Schema.Types.ObjectId,
-      comment: "ID of the document that was affected",
     },
 
     description: {
@@ -573,7 +575,6 @@ const adminActionLogSchema = new mongoose.Schema(
 
     changes: {
       type: mongoose.Schema.Types.Mixed,
-      comment: "before/after snapshot of changed fields",
     },
 
     ipAddress: {
@@ -603,7 +604,6 @@ adminActionLogSchema.index({ targetUser: 1, createdAt: -1 });
 
 /* ============================================================
    SUBSCRIPTION REPORT SCHEMA
-   Tracks site maintenance / subscription payments
 ============================================================ */
 const subscriptionReportSchema = new mongoose.Schema(
   {
@@ -622,7 +622,6 @@ const subscriptionReportSchema = new mongoose.Schema(
     subscriptionPlan: {
       type: String,
       required: true,
-      comment: "Plan name e.g. Basic, Premium",
     },
 
     amount: {
@@ -632,7 +631,6 @@ const subscriptionReportSchema = new mongoose.Schema(
 
     period: {
       type: String,
-      comment: "e.g. '2024-01' for monthly billing period",
     },
 
     dueDate: {
@@ -687,10 +685,10 @@ subscriptionReportSchema.index({ status: 1, dueDate: 1 });
    EXPORTS
 ============================================================ */
 module.exports = {
-  DepositReport: mongoose.model("DepositReport", depositReportSchema),
-  WithdrawalReport: mongoose.model("WithdrawalReport", withdrawalReportSchema),
-  LoanReport: mongoose.model("LoanReport", loanReportSchema),
-  ExtraCharge: mongoose.model("ExtraChargeReport", extraChargeSchema),
-  AdminActionLog: mongoose.model("AdminActionLog", adminActionLogSchema),
-  SubscriptionReport: mongoose.model("SubscriptionReport", subscriptionReportSchema),
+  DepositReport:        mongoose.model("DepositReport",        depositReportSchema),
+  WithdrawalReport:     mongoose.model("WithdrawalReport",     withdrawalReportSchema),
+  LoanReport:           mongoose.model("LoanReport",           loanReportSchema),
+  ExtraCharge:          mongoose.model("ExtraChargeReport",    extraChargeSchema),
+  AdminActionLog:       mongoose.model("AdminActionLog",       adminActionLogSchema),
+  SubscriptionReport:   mongoose.model("SubscriptionReport",   subscriptionReportSchema),
 };

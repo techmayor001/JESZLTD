@@ -28,7 +28,6 @@
             overflow-x: hidden;
         }
 
-        /* ── Sidebar ──────────────────────────────────────────────────── */
         .sidebar {
             position: fixed; left: 0; top: 0; bottom: 0;
             width: var(--sidebar-width);
@@ -48,10 +47,8 @@
         .sidebar-menu a.active { background: rgba(255,255,255,0.15); color: white; border-left-color: white; }
         .sidebar-menu a i { width: 24px; margin-right: 12px; font-size: 1.1rem; flex-shrink: 0; }
 
-        /* ── Top Navbar ───────────────────────────────────────────────── */
         .top-navbar { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 70px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(30,58,138,0.08); z-index: 1030; display: flex; align-items: center; padding: 0 2rem; transition: all 0.3s; border-bottom: 1px solid rgba(30,58,138,0.1); }
 
-        /* ── Main Content ─────────────────────────────────────────────── */
         .main-content { margin-left: var(--sidebar-width); margin-top: 70px; padding: 2rem; transition: all 0.3s; min-height: calc(100vh - 70px); }
         .settings-container { max-width: 1600px; margin: 0 auto; }
 
@@ -59,7 +56,6 @@
         .page-header h2 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
         .page-header p { font-size: 1rem; opacity: 0.95; margin: 0; }
 
-        /* ── Sections ─────────────────────────────────────────────────── */
         .settings-section { margin-bottom: 2.5rem; }
         .section-title { color: var(--primary); font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 12px; }
         .section-title .icon-badge { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: white; }
@@ -70,7 +66,6 @@
         .card-header-custom p { color: var(--secondary); font-size: 0.95rem; margin: 0; }
         .icon-box { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
 
-        /* ── Form Controls ────────────────────────────────────────────── */
         .form-group { margin-bottom: 1.75rem; }
         .form-label { font-weight: 600; color: var(--primary); margin-bottom: 0.75rem; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
         .form-label i { color: var(--primary-light); font-size: 0.9rem; }
@@ -79,7 +74,6 @@
         .input-group-text { background: linear-gradient(135deg,rgba(30,58,138,0.08) 0%,rgba(59,130,246,0.08) 100%); border: 2px solid rgba(30,58,138,0.12); border-right: none; color: var(--primary); font-weight: 700; border-radius: 12px 0 0 12px; padding: 0.875rem 1rem; }
         .input-group .form-control { border-left: none; border-radius: 0 12px 12px 0; }
 
-        /* ── Buttons ──────────────────────────────────────────────────── */
         .btn-primary { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border: none; padding: 0.875rem 2.5rem; border-radius: 12px; font-weight: 600; font-size: 1rem; transition: all 0.3s; box-shadow: 0 4px 15px rgba(30,58,138,0.2); }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(30,58,138,0.35); }
         .btn-secondary { background: var(--secondary); border: none; padding: 0.875rem 2rem; border-radius: 12px; font-weight: 600; font-size: 1rem; transition: all 0.3s; }
@@ -89,7 +83,6 @@
         .btn-success-custom { background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; padding: 0.875rem 2rem; border-radius: 12px; font-weight: 600; font-size: 1rem; color: white; transition: all 0.3s; box-shadow: 0 4px 15px rgba(5,150,105,0.25); cursor: pointer; }
         .btn-success-custom:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(5,150,105,0.4); }
 
-        /* ── Value Displays ───────────────────────────────────────────── */
         .current-value { background: linear-gradient(135deg,rgba(16,185,129,0.08) 0%,rgba(5,150,105,0.08) 100%); border: 2px solid rgba(16,185,129,0.2); border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
         .current-value-label { font-size: 0.85rem; color: var(--secondary); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .current-value-amount { font-size: 1.75rem; font-weight: 700; color: var(--success); display: flex; align-items: center; gap: 8px; }
@@ -100,7 +93,6 @@
         .alert-info-custom { background: linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%); border: 2px solid #3b82f6; border-radius: 14px; padding: 1.25rem 1.5rem; color: #1e40af; margin-bottom: 2rem; display: flex; align-items: start; gap: 12px; }
         .alert-info-custom i { font-size: 1.25rem; margin-top: 2px; }
 
-        /* ── Maintenance ──────────────────────────────────────────────── */
         .maintenance-status-card { border-radius: 18px; padding: 2rem; margin-bottom: 1.5rem; transition: all 0.4s; border: 2px solid; }
         .maintenance-status-card.offline { background: linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%); border-color: rgba(239,68,68,0.3); }
         .maintenance-status-card.online { background: linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%); border-color: rgba(16,185,129,0.3); }
@@ -115,14 +107,12 @@
         .maintenance-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.4rem; }
         .maintenance-meta { font-size: 0.9rem; color: var(--secondary); }
 
-        /* ── Company Account Display ──────────────────────────────────── */
         .account-display { background: linear-gradient(135deg,rgba(30,58,138,0.04) 0%,rgba(59,130,246,0.06) 100%); border: 2px solid rgba(30,58,138,0.1); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
         .account-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(30,58,138,0.06); }
         .account-row:last-child { border-bottom: none; }
         .account-row .label { font-size: 0.85rem; color: var(--secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .account-row .value { font-size: 1rem; font-weight: 700; color: var(--primary); }
 
-        /* ── Bank Verification States ─────────────────────────────────── */
         .verify-spinner-wrap { display: flex; align-items: center; justify-content: center; min-width: 38px; }
         .account-name-verified { border-color: #10b981 !important; background: rgba(16,185,129,0.04) !important; }
         .account-name-error { border-color: #ef4444 !important; background: rgba(239,68,68,0.04) !important; }
@@ -131,7 +121,33 @@
         .verify-badge.v-error   { background: rgba(239,68,68,0.10); color: #dc2626; border: 1px solid rgba(239,68,68,0.2); }
         .verify-badge.v-loading { background: rgba(59,130,246,0.10); color: #1d4ed8; border: 1px solid rgba(59,130,246,0.2); }
 
-        /* ── Toast System ─────────────────────────────────────────────── */
+        /* ── DANGER ZONE ─────────────────────────────────────────── */
+        .danger-zone-card {
+            background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 100%);
+            border: 2px solid rgba(220,38,38,0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px rgba(220,38,38,0.08);
+        }
+        .danger-zone-card:hover {
+            box-shadow: 0 12px 35px rgba(220,38,38,0.15);
+            transform: translateY(-2px);
+        }
+        .danger-zone-header { display: flex; align-items: center; gap: 14px; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 2px solid rgba(220,38,38,0.12); }
+        .danger-zone-header h5 { color: #dc2626; font-weight: 700; font-size: 1.2rem; margin: 0; }
+        .danger-zone-header p { color: #64748b; font-size: 0.9rem; margin: 4px 0 0; }
+        .danger-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; background: rgba(220,38,38,0.12); color: #dc2626; border: 1px solid rgba(220,38,38,0.25); letter-spacing: 0.04em; text-transform: uppercase; margin-left: 10px; }
+        .danger-action-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; padding: 1.5rem; background: rgba(255,255,255,0.7); border: 1.5px solid rgba(220,38,38,0.15); border-radius: 14px; }
+        .danger-action-info h6 { font-weight: 700; color: #991b1b; margin-bottom: 4px; font-size: 1rem; }
+        .danger-action-info p { color: #64748b; font-size: 0.88rem; margin: 0; line-height: 1.5; }
+        .btn-clear-db { background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%); border: none; padding: 0.8rem 2rem; border-radius: 12px; font-weight: 700; font-size: 0.95rem; color: white; transition: all 0.3s; box-shadow: 0 4px 15px rgba(127,29,29,0.3); cursor: pointer; white-space: nowrap; }
+        .btn-clear-db:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(127,29,29,0.45); }
+
+        /* Admin code input */
+        .admin-code-input { letter-spacing: 4px; font-size: 1.2rem; font-weight: 700; text-align: center; font-family: monospace; border: 2px solid rgba(220,38,38,0.25) !important; border-radius: 12px; }
+        .admin-code-input:focus { border-color: #dc2626 !important; box-shadow: 0 0 0 0.25rem rgba(220,38,38,0.15) !important; }
+
+        /* ── Toast ─────────────────────────────────────────────── */
         .toast-container-custom { position: fixed; top: 85px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; min-width: 300px; }
         .toast-item { pointer-events: all; display: flex; align-items: center; gap: 12px; padding: 1.1rem 1.4rem; border-radius: 14px; color: white; font-weight: 600; font-size: 0.93rem; box-shadow: 0 10px 35px rgba(0,0,0,0.18); transform: translateX(380px); opacity: 0; transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease; }
         .toast-item.show { transform: translateX(0); opacity: 1; }
@@ -141,7 +157,6 @@
         .toast-item .t-close { margin-left: auto; cursor: pointer; opacity: 0.75; }
         .toast-item .t-close:hover { opacity: 1; }
 
-        /* ── Confirm Modals ───────────────────────────────────────────── */
         .modal-content { border: none; border-radius: 20px; box-shadow: 0 25px 60px rgba(0,0,0,0.15); }
         .modal-header { border-radius: 20px 20px 0 0; border-bottom: 2px solid rgba(30,58,138,0.07); padding: 1.5rem 1.75rem; }
         .modal-footer { border-top: 2px solid rgba(30,58,138,0.06); border-radius: 0 0 20px 20px; padding: 1.25rem 1.75rem; }
@@ -152,13 +167,11 @@
         .confirm-title { font-size: 1.3rem; font-weight: 700; color: var(--primary); text-align: center; margin-bottom: 0.5rem; }
         .confirm-body-text { color: var(--secondary); text-align: center; font-size: 0.96rem; line-height: 1.65; }
 
-        /* ── Action Buttons ───────────────────────────────────────────── */
         .action-buttons { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; margin-top: 2rem; }
         .powered-by { position: fixed; bottom: 20px; right: 20px; background: white; padding: 12px 20px; border-radius: 30px; box-shadow: 0 4px 20px rgba(30,58,138,0.15); font-size: 0.85rem; font-weight: 600; color: var(--primary); z-index: 1000; }
         .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1035; }
         .overlay.active { display: block; }
 
-        /* ── Responsive ───────────────────────────────────────────────── */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.active { transform: translateX(0); }
@@ -174,6 +187,8 @@
             .btn-primary, .btn-secondary, .btn-danger-custom, .btn-success-custom { width: 100%; }
             .action-buttons { flex-direction: column-reverse; }
             .toast-container-custom { right: 12px; left: 12px; min-width: auto; }
+            .danger-action-row { flex-direction: column; align-items: flex-start; }
+            .btn-clear-db { width: 100%; }
         }
         @media (max-width: 576px) {
             .top-navbar { height: 60px; padding: 0 1rem; }
@@ -187,15 +202,11 @@
 <body>
 
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- TOAST CONTAINER                                                    -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <div class="toast-container-custom" id="toastContainer"></div>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- MODAL: Reset Registration Fees                                     -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL: Reset Registration Fees
+    ═══════════════════════════════════════════════════════════ -->
     <div class="modal fade" id="resetRegFeesModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
@@ -212,9 +223,9 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- MODAL: Reset Kiddies Settings                                      -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL: Reset Kiddies Settings
+    ═══════════════════════════════════════════════════════════ -->
     <div class="modal fade" id="resetKiddiesModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
@@ -231,9 +242,9 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- MODAL: Reset Other Fees                                            -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL: Reset Other Fees
+    ═══════════════════════════════════════════════════════════ -->
     <div class="modal fade" id="resetOtherFeesModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
@@ -250,9 +261,9 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- MODAL: Enable Maintenance Mode Confirm                             -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL: Enable Maintenance Mode
+    ═══════════════════════════════════════════════════════════ -->
     <div class="modal fade" id="maintenanceEnableModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -284,9 +295,9 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- MODAL: Disable Maintenance Mode Confirm                            -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL: Disable Maintenance Mode
+    ═══════════════════════════════════════════════════════════ -->
     <div class="modal fade" id="maintenanceDisableModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
@@ -305,9 +316,99 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- SIDEBAR                                                            -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL STEP 1: Clear Database — Initial Warning
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="clearDbWarningModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border: 2px solid rgba(220,38,38,0.3);">
+                <div class="modal-header" style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%);border-radius:18px 18px 0 0;border:none;">
+                    <h5 class="modal-title text-white fw-bold">
+                        <i class="fas fa-skull-crossbones me-2"></i>DANGER — Clear Entire Database
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4 py-4">
+                    <div class="confirm-icon-circle ci-danger" style="font-size:2.4rem;">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="confirm-title" style="color:#7f1d1d;">This Will Erase Everything</div>
+                    <p class="confirm-body-text mb-3">
+                        Clicking <strong>Continue</strong> will permanently delete <strong>all data</strong> from the database — including all members, accounts, transactions, loans, reports, and settings.
+                    </p>
+                    <!-- Checklist of what gets deleted -->
+                    <div style="background:rgba(220,38,38,0.06);border:1.5px solid rgba(220,38,38,0.2);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;">
+                        <div style="font-size:0.82rem;font-weight:700;color:#7f1d1d;margin-bottom:0.6rem;text-transform:uppercase;letter-spacing:0.05em;">What will be erased:</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:0.85rem;color:#374151;">
+                            <span><i class="fas fa-times-circle text-danger me-1" style="font-size:0.75rem;"></i>All member accounts</span>
+                            <span><i class="fas fa-times-circle text-danger me-1" style="font-size:0.75rem;"></i>All transactions</span>
+                            <span><i class="fas fa-times-circle text-danger me-1" style="font-size:0.75rem;"></i>All kiddies accounts</span>
+                            <span><i class="fas fa-times-circle text-danger me-1" style="font-size:0.75rem;"></i>All loan records</span>
+                            <span><i class="fas fa-times-circle text-danger me-1" style="font-size:0.75rem;"></i>All deposit reports</span>
+                            <span><i class="fas fa-times-circle text-danger me-1" style="font-size:0.75rem;"></i>All withdrawal records</span>
+                            <span><i class="fas fa-times-circle text-danger me-1" style="font-size:0.75rem;"></i>All admin logs</span>
+                            <span><i class="fas fa-times-circle text-danger me-1" style="font-size:0.75rem;"></i>All company ledger entries</span>
+                        </div>
+                    </div>
+                    <div style="background:rgba(245,158,11,0.1);border:1.5px solid rgba(245,158,11,0.3);border-radius:10px;padding:0.875rem 1rem;font-size:0.85rem;color:#92400e;">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>This action is irreversible.</strong> There is no undo. Make sure you have a backup before proceeding.
+                    </div>
+                </div>
+                <div class="modal-footer gap-2 justify-content-end" style="border-top:2px solid rgba(220,38,38,0.1);">
+                    <button class="btn btn-light px-4 fw-semibold" style="border-radius:12px;" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button class="btn fw-bold px-4 text-white" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);border:none;border-radius:12px;" onclick="proceedToClearDbCode()">
+                        <i class="fas fa-arrow-right me-2"></i>Continue — Enter Admin Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL STEP 2: Clear Database — Admin Code Entry
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="clearDbCodeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content" style="border: 2px solid rgba(220,38,38,0.3);">
+                <div class="modal-header" style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%);border-radius:18px 18px 0 0;border:none;">
+                    <h5 class="modal-title text-white fw-bold">
+                        <i class="fas fa-key me-2"></i>Enter Admin Code
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4 py-4 text-center">
+                    <div class="confirm-icon-circle ci-danger"><i class="fas fa-lock"></i></div>
+                    <div class="confirm-title" style="color:#7f1d1d;font-size:1.1rem;">Final Confirmation</div>
+                    <p class="confirm-body-text mb-3" style="font-size:0.9rem;">
+                        Enter the secret admin code to authorise this irreversible action.
+                    </p>
+                    <input
+                        type="password"
+                        id="adminClearCode"
+                        class="form-control admin-code-input"
+                        placeholder="••••••••"
+                        autocomplete="off"
+                        maxlength="32">
+                    <div id="clearCodeError" class="mt-2" style="display:none;color:#dc2626;font-size:0.85rem;font-weight:600;">
+                        <i class="fas fa-exclamation-circle me-1"></i><span id="clearCodeErrorText"></span>
+                    </div>
+                </div>
+                <div class="modal-footer gap-2 justify-content-center" style="border-top:2px solid rgba(220,38,38,0.1);">
+                    <button class="btn btn-light px-4 fw-semibold" style="border-radius:12px;" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn fw-bold px-4 text-white" style="background:linear-gradient(135deg,#7f1d1d,#dc2626);border:none;border-radius:12px;min-width:140px;" id="clearDbSubmitBtn" onclick="submitClearDatabase()">
+                        <i class="fas fa-trash-alt me-2"></i>Clear Database
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SIDEBAR
+    ══════════════════════════════════════════════════════════ -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo-container">
@@ -342,9 +443,9 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- TOP NAVBAR                                                         -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════════════════════
+         TOP NAVBAR
+    ══════════════════════════════════════════════════════════ -->
     <div class="top-navbar">
         <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.5rem;" onclick="toggleSidebar()"></i>
         <div class="flex-grow-1">
@@ -355,14 +456,13 @@
         <div class="d-flex align-items-center gap-3">
             <div class="position-relative">
                 <i class="fas fa-bell" style="color:var(--primary);font-size:1.25rem;cursor:pointer;"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.65rem;">5</span>
             </div>
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- MAIN CONTENT                                                       -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════════════════════
+         MAIN CONTENT
+    ══════════════════════════════════════════════════════════ -->
     <div class="main-content">
         <div class="settings-container">
 
@@ -379,9 +479,7 @@
                 </div>
             </div>
 
-            <!-- ──────────────────────────────────────────────────────── -->
-            <!-- MAINTENANCE MODE                                          -->
-            <!-- ──────────────────────────────────────────────────────── -->
+            <!-- ── MAINTENANCE MODE ──────────────────────────────────── -->
             <div class="settings-section">
                 <div class="section-title">
                     <div class="icon-badge" style="background:linear-gradient(135deg,#dc2626 0%,#ef4444 100%);">
@@ -445,9 +543,7 @@
                 </div>
             </div>
 
-            <!-- ──────────────────────────────────────────────────────── -->
-            <!-- SYSTEM CONFIGURATION / REGISTRATION FEES                 -->
-            <!-- ──────────────────────────────────────────────────────── -->
+            <!-- ── REGISTRATION FEES ─────────────────────────────────── -->
             <div class="settings-section">
                 <div class="section-title">
                     <div class="icon-badge" style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);">
@@ -508,9 +604,7 @@
                 </div>
             </div>
 
-            <!-- ──────────────────────────────────────────────────────── -->
-            <!-- KIDDIES ACCOUNT CONFIGURATION                            -->
-            <!-- ──────────────────────────────────────────────────────── -->
+            <!-- ── KIDDIES ACCOUNT CONFIGURATION ───────────────────────── -->
             <div class="settings-section">
                 <div class="section-title">
                     <div class="icon-badge" style="background:linear-gradient(135deg,#ec4899 0%,#db2777 100%);">
@@ -611,20 +705,18 @@
                 </div>
             </div>
 
-            <!-- ──────────────────────────────────────────────────────── -->
-            <!-- ADDITIONAL FEES                                           -->
-            <!-- ──────────────────────────────────────────────────────── -->
+            <!-- ── ADDITIONAL FEES ───────────────────────────────────── -->
             <div class="settings-section">
                 <div class="section-title">
                     <div class="icon-badge" style="background:linear-gradient(135deg,#06b6d4 0%,#0891b2 100%);">
                         <i class="fas fa-file-invoice-dollar"></i>
                     </div>
-                    Additional Fees & Charges
+                    Additional Fees &amp; Charges
                 </div>
 
                 <div class="settings-card">
                     <div class="card-header-custom">
-                        <h5><i class="fas fa-money-bill-wave"></i> Service Fees & Transaction Charges</h5>
+                        <h5><i class="fas fa-money-bill-wave"></i> Service Fees &amp; Transaction Charges</h5>
                         <p>Configure ROI operating charges and other service fees</p>
                     </div>
 
@@ -652,9 +744,7 @@
                 </div>
             </div>
 
-            <!-- ──────────────────────────────────────────────────────── -->
-            <!-- COMPANY BANK ACCOUNT (with live verification)            -->
-            <!-- ──────────────────────────────────────────────────────── -->
+            <!-- ── COMPANY BANK ACCOUNT ──────────────────────────────── -->
             <div class="settings-section">
                 <div class="section-title">
                     <div class="icon-badge" style="background:linear-gradient(135deg,#7c3aed 0%,#6d28d9 100%);">
@@ -669,10 +759,9 @@
                             <div class="icon-box" style="background:linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%);color:white;"><i class="fas fa-piggy-bank"></i></div>
                             Payment Receiving Account Details
                         </h5>
-                        <p>Set the cooperative's official bank account where members send deposits. Account name is verified live — just like on the member profile.</p>
+                        <p>Set the cooperative's official bank account where members send deposits. Account name is verified live.</p>
                     </div>
 
-                    <!-- Current account snapshot -->
                     <% if (settings.companyAccount && settings.companyAccount.accountNumber) { %>
                     <div class="account-display">
                         <div class="account-row">
@@ -696,16 +785,11 @@
                     <% } %>
 
                     <div class="settings-grid">
-                        <!-- Bank Name -->
                         <div class="form-group">
                             <label class="form-label"><i class="fas fa-university"></i>Bank Name</label>
-                            <input
-                                list="adminBanksList"
-                                id="companyBankName"
-                                class="form-control"
-                                value="<%= settings.companyAccount ? settings.companyAccount.bankName : '' %>"
-                                placeholder="e.g. First Bank of Nigeria"
-                                autocomplete="off">
+                            <input list="adminBanksList" id="companyBankName" class="form-control"
+                                   value="<%= settings.companyAccount ? settings.companyAccount.bankName : '' %>"
+                                   placeholder="e.g. First Bank of Nigeria" autocomplete="off">
                             <datalist id="adminBanksList">
                                 <% if (typeof nigeriaBanks !== 'undefined') { nigeriaBanks.forEach(function(bank){ %>
                                     <option value="<%= bank %>">
@@ -714,19 +798,12 @@
                             <div class="help-text"><i class="fas fa-info-circle"></i><span>Select or type the full bank name</span></div>
                         </div>
 
-                        <!-- Account Number -->
                         <div class="form-group">
                             <label class="form-label"><i class="fas fa-hashtag"></i>Account Number</label>
                             <div class="input-group">
-                                <input
-                                    type="text"
-                                    id="companyAccountNumber"
-                                    class="form-control"
-                                    value="<%= settings.companyAccount ? settings.companyAccount.accountNumber : '' %>"
-                                    placeholder="10-digit NUBAN"
-                                    maxlength="10"
-                                    inputmode="numeric">
-                                <!-- Live verification indicator -->
+                                <input type="text" id="companyAccountNumber" class="form-control"
+                                       value="<%= settings.companyAccount ? settings.companyAccount.accountNumber : '' %>"
+                                       placeholder="10-digit NUBAN" maxlength="10" inputmode="numeric">
                                 <span class="input-group-text verify-spinner-wrap" id="verifyIndicatorWrap"
                                       style="background:white;border:2px solid rgba(30,58,138,0.12);border-left:none;border-radius:0 12px 12px 0;min-width:46px;">
                                     <span id="verifySpinner" style="display:none;">
@@ -739,16 +816,11 @@
                             <div class="help-text"><i class="fas fa-info-circle"></i><span>Account name will be fetched automatically when you enter all 10 digits</span></div>
                         </div>
 
-                        <!-- Account Name (read-only, auto-filled) -->
                         <div class="form-group">
                             <label class="form-label"><i class="fas fa-user-tie"></i>Account Name</label>
-                            <input
-                                type="text"
-                                id="companyAccountName"
-                                class="form-control"
-                                value="<%= settings.companyAccount ? settings.companyAccount.accountName : '' %>"
-                                placeholder="Auto-filled after verification"
-                                readonly>
+                            <input type="text" id="companyAccountName" class="form-control"
+                                   value="<%= settings.companyAccount ? settings.companyAccount.accountName : '' %>"
+                                   placeholder="Auto-filled after verification" readonly>
                             <div id="verifyStatusBadge"></div>
                             <div class="help-text"><i class="fas fa-info-circle"></i><span>Verified automatically from your bank record — read-only</span></div>
                         </div>
@@ -767,6 +839,50 @@
                 </div>
             </div>
 
+            <!-- ══════════════════════════════════════════════════════════
+                 DANGER ZONE — CLEAR DATABASE
+            ══════════════════════════════════════════════════════════ -->
+            <div class="settings-section">
+                <div class="section-title" style="color:#dc2626;">
+                    <div class="icon-badge" style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%);">
+                        <i class="fas fa-skull-crossbones"></i>
+                    </div>
+                    Danger Zone
+                </div>
+
+                <div class="danger-zone-card">
+                    <div class="danger-zone-header">
+                        <div class="icon-box" style="background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%);color:white;flex-shrink:0;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <h5 style="color:#7f1d1d;">
+                                Destructive Actions
+                                <span class="danger-badge"><i class="fas fa-biohazard me-1"></i>Irreversible</span>
+                            </h5>
+                            <p style="color:#64748b;font-size:0.9rem;margin:0;">
+                                Actions in this section permanently modify or delete data. They cannot be undone.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Clear Database action row -->
+                    <div class="danger-action-row">
+                        <div class="danger-action-info">
+                            <h6><i class="fas fa-database me-2"></i>Clear Entire Database</h6>
+                            <p>
+                                Permanently deletes <strong>all data</strong> from every collection — members, accounts,
+                                transactions, loans, kiddies accounts, admin logs, company ledger and more.
+                                Settings will be reset to factory defaults. This action cannot be reversed.
+                            </p>
+                        </div>
+                        <button class="btn-clear-db" onclick="openClearDbWarning()">
+                            <i class="fas fa-trash-alt me-2"></i>Clear Database
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </div><!-- /settings-container -->
     </div><!-- /main-content -->
 
@@ -774,9 +890,9 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
-    // ══════════════════════════════════════════════════════════════════
-    // TOAST SYSTEM
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
+    // TOAST
+    // ══════════════════════════════════════════════════════════════
     function showToast(message, type = 'success') {
         const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
         const container = document.getElementById('toastContainer');
@@ -790,20 +906,19 @@
         setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 420); }, 4500);
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     // MODAL HELPERS
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     function showModal(id) { new bootstrap.Modal(document.getElementById(id)).show(); }
     function hideModal(id) { const m = bootstrap.Modal.getInstance(document.getElementById(id)); if (m) m.hide(); }
-
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('overlay').classList.toggle('active');
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     // REGISTRATION FEES
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     async function updateRegFees() {
         try {
             const res    = await fetch('/admin/settings/registration-fees', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adultFee: document.getElementById('adultRegFee').value, kiddiesFee: document.getElementById('kiddiesRegFee').value }) });
@@ -819,17 +934,14 @@
         showToast('Registration fees reset to default values.', 'warning');
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     // KIDDIES SETTINGS
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     async function updateKiddiesSettings() {
         const payload = {
-            minAge:           document.getElementById('minAge').value,
-            maxAge:           document.getElementById('maxAge').value,
-            upgradeAge:       document.getElementById('upgradeAge').value,
-            monthlyFee:       document.getElementById('kiddiesMonthlyFee').value,
-            upgradeFee:       document.getElementById('upgradeFee').value,
-            interestRate:     document.getElementById('kiddiesInterest').value,
+            minAge: document.getElementById('minAge').value, maxAge: document.getElementById('maxAge').value,
+            upgradeAge: document.getElementById('upgradeAge').value, monthlyFee: document.getElementById('kiddiesMonthlyFee').value,
+            upgradeFee: document.getElementById('upgradeFee').value, interestRate: document.getElementById('kiddiesInterest').value,
             notificationDays: document.getElementById('autoUpgradeNotif').value
         };
         try {
@@ -851,9 +963,9 @@
         showToast('Kiddies settings reset to defaults.', 'warning');
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     // OTHER FEES
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     async function updateOtherFees() {
         try {
             const res    = await fetch('/admin/settings/other-fees', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ roiOperating: document.getElementById('roiOperatingCharge').value }) });
@@ -868,19 +980,16 @@
         showToast('Additional fees reset to defaults.', 'warning');
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     // MAINTENANCE MODE
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     function confirmMaintenanceEnable() {
         const msg = document.getElementById('maintenanceMessage').value.trim()
                   || 'The system is currently undergoing scheduled maintenance. Please check back shortly.';
         document.getElementById('maintenancePreviewText').textContent = msg;
         showModal('maintenanceEnableModal');
     }
-
-    function confirmMaintenanceDisable() {
-        showModal('maintenanceDisableModal');
-    }
+    function confirmMaintenanceDisable() { showModal('maintenanceDisableModal'); }
 
     async function doToggleMaintenance(enable) {
         hideModal(enable ? 'maintenanceEnableModal' : 'maintenanceDisableModal');
@@ -897,27 +1006,22 @@
         } catch { showToast('Error toggling maintenance mode.', 'error'); }
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     // COMPANY BANK ACCOUNT — LIVE VERIFICATION
-    // Mirrors the exact pattern from profile.ejs verifyAccount()
-    // Uses the same endpoint: /club-de-star-cooperative/verifyBankAccount
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     let _verifyTimer = null;
 
     function _setVerifyState(state, label = '') {
-        const spinner  = document.getElementById('verifySpinner');
-        const okIcon   = document.getElementById('verifyOkIcon');
-        const failIcon = document.getElementById('verifyFailIcon');
+        const spinner   = document.getElementById('verifySpinner');
+        const okIcon    = document.getElementById('verifyOkIcon');
+        const failIcon  = document.getElementById('verifyFailIcon');
         const nameInput = document.getElementById('companyAccountName');
-        const badge    = document.getElementById('verifyStatusBadge');
-
-        // Reset icons
+        const badge     = document.getElementById('verifyStatusBadge');
         spinner.style.display  = 'none';
         okIcon.style.display   = 'none';
         failIcon.style.display = 'none';
         nameInput.classList.remove('account-name-verified', 'account-name-error');
         badge.innerHTML = '';
-
         if (state === 'loading') {
             spinner.style.display = 'inline-block';
             badge.innerHTML = `<span class="verify-badge v-loading"><i class="fas fa-circle-notch fa-spin me-1"></i>Verifying account…</span>`;
@@ -931,27 +1035,17 @@
             nameInput.value = '';
             badge.innerHTML = `<span class="verify-badge v-error"><i class="fas fa-exclamation-circle me-1"></i>${label || 'Verification failed. Check account number and bank.'}</span>`;
         }
-        // 'idle' → everything hidden
     }
 
     async function _doVerifyCompanyAccount() {
         const bank   = document.getElementById('companyBankName').value.trim();
         const accNum = document.getElementById('companyAccountNumber').value.trim();
         const nameEl = document.getElementById('companyAccountName');
-
-        if (!bank || accNum.length !== 10) {
-            _setVerifyState('idle');
-            nameEl.value = '';
-            return;
-        }
-
+        if (!bank || accNum.length !== 10) { _setVerifyState('idle'); nameEl.value = ''; return; }
         _setVerifyState('loading');
-
         try {
-            // Same endpoint used in member profile.ejs
             const res  = await fetch(`/club-de-star-cooperative/verifyBankAccount?bank=${encodeURIComponent(bank)}&accountNumber=${accNum}`);
             const data = await res.json();
-
             if (data.success && data.accountName) {
                 nameEl.value = data.accountName;
                 _setVerifyState('success', data.accountName);
@@ -967,54 +1061,34 @@
     document.addEventListener('DOMContentLoaded', function () {
         const accInput  = document.getElementById('companyAccountNumber');
         const bankInput = document.getElementById('companyBankName');
-
-        // Strip non-digits + enforce 10-char limit; trigger verify when complete
         accInput.addEventListener('input', function () {
             this.value = this.value.replace(/\D/g, '').slice(0, 10);
             clearTimeout(_verifyTimer);
-            if (this.value.length === 10) {
-                _verifyTimer = setTimeout(_doVerifyCompanyAccount, 600);
-            } else {
-                _setVerifyState('idle');
-                document.getElementById('companyAccountName').value = '';
-            }
+            if (this.value.length === 10) { _verifyTimer = setTimeout(_doVerifyCompanyAccount, 600); }
+            else { _setVerifyState('idle'); document.getElementById('companyAccountName').value = ''; }
         });
-
-        // Re-verify if bank selection changes and account number is already full
         bankInput.addEventListener('change', function () {
             clearTimeout(_verifyTimer);
-            if (accInput.value.length === 10) {
-                _verifyTimer = setTimeout(_doVerifyCompanyAccount, 400);
-            }
+            if (accInput.value.length === 10) { _verifyTimer = setTimeout(_doVerifyCompanyAccount, 400); }
         });
+        loadSidebarPendingCount();
     });
 
     async function updateCompanyAccount() {
         const bankName      = document.getElementById('companyBankName').value.trim();
         const accountNumber = document.getElementById('companyAccountNumber').value.trim();
         const accountName   = document.getElementById('companyAccountName').value.trim();
-
-        if (!bankName || !accountNumber || !accountName) {
-            showToast('Please fill all fields. Account name must be verified first.', 'error');
-            return;
-        }
-
-        // Guard: ensure the name field has been verified (has the green class)
+        if (!bankName || !accountNumber || !accountName) { showToast('Please fill all fields. Account name must be verified first.', 'error'); return; }
         const nameEl = document.getElementById('companyAccountName');
         if (accountNumber.length === 10 && !nameEl.classList.contains('account-name-verified')) {
             showToast('Please wait for the account verification to complete before saving.', 'warning');
             return;
         }
-
         try {
             const res    = await fetch('/admin/settings/company-account', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bankName, accountNumber, accountName }) });
             const result = await res.json();
-            if (result.success) {
-                showToast('Company account details saved successfully!');
-                setTimeout(() => location.reload(), 1600);
-            } else {
-                showToast(result.message || 'Failed to save account details.', 'error');
-            }
+            if (result.success) { showToast('Company account details saved successfully!'); setTimeout(() => location.reload(), 1600); }
+            else { showToast(result.message || 'Failed to save account details.', 'error'); }
         } catch { showToast('Error saving company account details.', 'error'); }
     }
 
@@ -1025,20 +1099,85 @@
         _setVerifyState('idle');
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
+    // DANGER ZONE — CLEAR DATABASE
+    // Two-step flow:
+    //   Step 1: openClearDbWarning()  → shows full warning modal
+    //   Step 2: proceedToClearDbCode() → closes step 1, opens code modal
+    //   Step 3: submitClearDatabase() → posts to server with the code
+    // ══════════════════════════════════════════════════════════════
+    function openClearDbWarning() {
+        showModal('clearDbWarningModal');
+    }
+
+    function proceedToClearDbCode() {
+        hideModal('clearDbWarningModal');
+        // Small delay so bootstrap doesn't fight over two modals
+        setTimeout(() => {
+            document.getElementById('adminClearCode').value = '';
+            document.getElementById('clearCodeError').style.display = 'none';
+            showModal('clearDbCodeModal');
+        }, 350);
+    }
+
+    async function submitClearDatabase() {
+        const adminCode = document.getElementById('adminClearCode').value.trim();
+        const errorEl   = document.getElementById('clearCodeError');
+        const errorText = document.getElementById('clearCodeErrorText');
+
+        if (!adminCode) {
+            errorEl.style.display = 'block';
+            errorText.textContent = 'Please enter the admin code.';
+            return;
+        }
+
+        const btn = document.getElementById('clearDbSubmitBtn');
+        const originalHTML = btn.innerHTML;
+        btn.disabled  = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Clearing…';
+        errorEl.style.display = 'none';
+
+        try {
+            const res    = await fetch('/admin/settings/clear-database', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ adminCode }),
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                hideModal('clearDbCodeModal');
+                showToast(`✅ ${result.message}`, 'success');
+                // Redirect to login after a short pause — session is now invalid
+                setTimeout(() => { window.location.href = '/login'; }, 2500);
+            } else {
+                errorEl.style.display = 'block';
+                errorText.textContent = result.message || 'Incorrect code. Try again.';
+                btn.disabled  = false;
+                btn.innerHTML = originalHTML;
+            }
+        } catch {
+            errorEl.style.display = 'block';
+            errorText.textContent = 'Network error. Please try again.';
+            btn.disabled  = false;
+            btn.innerHTML = originalHTML;
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════
     // SIDEBAR PENDING BADGE
-    // ══════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════
     async function loadSidebarPendingCount() {
         try {
             const res  = await fetch('/admin/pending-approvals-count');
             const data = await res.json();
             const badge = document.getElementById('sidebarPendingBadge');
             if (!badge) return;
-            data.count > 0 ? (badge.style.display = 'inline-block', badge.textContent = data.count) : (badge.style.display = 'none');
+            data.count > 0
+                ? (badge.style.display = 'inline-block', badge.textContent = data.count)
+                : (badge.style.display = 'none');
         } catch (e) { console.error('Sidebar badge error:', e); }
     }
-
-    document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
     </script>
 </body>
 </html>

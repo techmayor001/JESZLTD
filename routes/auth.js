@@ -224,16 +224,6 @@ router.post(
         newUser.Payment = payment._id;
         await newUser.save();
 
-        await ExtraCharge.create({
-          member:     newUser._id,
-          chargeType: "registration",
-          amount:     0,
-          reason:     "Superadmin registration (system bypass)",
-          status:     "paid",
-          appliedAt:  new Date(),
-          paidAt:     new Date(),
-        });
-
         return res.json({
           status:   true,
           message:  "Superadmin registered successfully",
@@ -370,29 +360,6 @@ router.get("/payment/verify", async (req, res) => {
     if (payment.user) {
       payment.user.registrationStatus = isPaid ? "paid" : "failed";
       await payment.user.save();
-    }
-
-    // ✅ Record ExtraCharge if payment is verified
-    if (isPaid && payment.user) {
-      const existingCharge = await ExtraCharge.findOne({
-        member: payment.user._id,
-        chargeType: "registration",
-        amount: payment.amount,
-      });
-
-      // Avoid duplicates
-      if (!existingCharge) {
-        const extraCharge = new ExtraCharge({
-          member: payment.user._id,
-          chargeType: "registration",
-          amount: payment.amount,
-          reason: "Registration fee",
-          status: "paid",
-          appliedAt: new Date(),
-          paidAt: new Date(),
-        });
-        await extraCharge.save();
-      }
     }
 
     // Redirect user accordingly

@@ -285,19 +285,6 @@ button,input,select,textarea{font-family:inherit;}
 .btn-rollover{background:var(--bg-card2);border:1px solid var(--border2);color:var(--muted);}
 .btn-rollover:hover{color:var(--text);}
 
-/* ══ RULES CARD ══ */
-.rule-item{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;
-}
-.rule-item:last-child{border-bottom:none;}
-.rule-dot{
-  width:6px;height:6px;border-radius:50%;background:var(--accent);
-  flex-shrink:0;margin-top:5px;
-}
-.rule-text{color:var(--muted);line-height:1.5;}
-.rule-text strong{color:var(--text);}
-
 /* ══ CALCULATOR CARD ══ */
 .calc-form-group{margin-bottom:12px;}
 .calc-label{
@@ -439,25 +426,13 @@ button,input,select,textarea{font-family:inherit;}
 .bank-label{color:var(--muted);}
 .bank-value{font-weight:500;font-family:'DM Mono',monospace;}
 
-/* rollover confirm box */
+/* rollover summary */
 .rollover-summary{
   background:var(--bg-card2);border:1px solid var(--border);
   border-radius:10px;padding:14px;margin-bottom:14px;
 }
 .rs-amount{font-size:clamp(22px,4vw,28px);font-weight:300;letter-spacing:-.3px;color:var(--accent);margin-bottom:2px;}
 .rs-label{font-size:11px;color:var(--muted);}
-
-/* pending notice */
-.pending-notice{
-  background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.18);
-  border-radius:10px;padding:12px;font-size:12px;color:var(--accent);line-height:1.6;
-}
-.pending-notice button{
-  margin-top:8px;padding:6px 14px;background:rgba(79,142,247,.12);
-  border:1px solid rgba(79,142,247,.2);border-radius:7px;
-  color:var(--accent);font-size:12px;font-weight:500;cursor:pointer;transition:var(--tr);
-}
-.pending-notice button:hover{background:rgba(79,142,247,.2);}
 
 /* Powered by */
 .powered-by{position:fixed;bottom:12px;right:14px;font-size:11px;color:var(--muted);z-index:50;}
@@ -708,9 +683,8 @@ button,input,select,textarea{font-family:inherit;}
   <!-- Main page grid -->
   <div class="page-grid">
 
-    <!-- Left: active loan + rules -->
+    <!-- Left: active loan -->
     <div>
-      <!-- Active Loan -->
       <div class="active-loan-wrap">
         <% if (loan) { %>
         <div class="loan-block <%= loanIsOverdue ? 'overdue' : '' %>">
@@ -793,14 +767,10 @@ button,input,select,textarea{font-family:inherit;}
         </div>
         <% } %>
       </div>
-
-     
     </div>
 
-    <!-- Right: calculator + notes -->
+    <!-- Right: calculator -->
     <div style="display:flex;flex-direction:column;gap:14px;">
-
-      <!-- Calculator -->
       <div class="card">
         <div class="card-header">
           <span class="card-title">Loan Calculator</span>
@@ -833,9 +803,6 @@ button,input,select,textarea{font-family:inherit;}
           </div>
         </div>
       </div>
-
-  
-
     </div>
   </div>
 
@@ -953,89 +920,109 @@ button,input,select,textarea{font-family:inherit;}
   </div>
 </div>
 
-<!-- Rollover: Pay Interest First -->
-<div class="modal-backdrop" id="rolloverInterestModal">
+<!-- ════ ROLLOVER MODAL (single step) ════ -->
+<div class="modal-backdrop" id="rolloverModal">
   <div class="modal-box"><div class="modal-handle"></div>
     <div class="modal-header">
-      <span class="modal-title"><i class="fas fa-exclamation-circle" style="color:var(--amber);margin-right:8px;font-size:14px;"></i>Interest Payment Required</span>
-      <button class="modal-close" onclick="closeModal('rolloverInterestModal')"><i class="fas fa-times"></i></button>
+      <span class="modal-title">
+        <i class="fas fa-sync-alt" style="color:var(--accent);margin-right:8px;font-size:14px;"></i>
+        Loan Rollover
+      </span>
+      <button class="modal-close" onclick="closeModal('rolloverModal')"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body">
-      <div class="modal-warn"><i class="fas fa-info-circle" style="margin-right:6px;"></i>Pay your loan interest before rolling over. Transfer the exact amount below, then submit proof here.</div>
-      <div class="rollover-summary">
-        <div class="rs-label">Interest Amount Due</div>
-        <div class="rs-amount" style="color:var(--amber);" id="ri_interestOwed">₦0</div>
+
+      <div class="modal-info">
+        <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+        Transfer the amount shown below to the account, enter your name, then submit.
+        Admin will complete your rollover once payment is confirmed.
       </div>
+
+      <!-- Bank details (static from EJS) -->
       <div class="bank-box">
         <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Transfer to</div>
-        <div class="bank-row"><span class="bank-label">Bank</span><span class="bank-value" id="ri_bankName">—</span></div>
-        <div class="bank-row"><span class="bank-label">Account No.</span><span class="bank-value" id="ri_accountNumber">—</span></div>
-        <div class="bank-row"><span class="bank-label">Account Name</span><span class="bank-value" id="ri_accountName">—</span></div>
+        <div class="bank-row"><span class="bank-label">Bank</span><span class="bank-value"><%= bankName %></span></div>
+        <div class="bank-row"><span class="bank-label">Account No.</span><span class="bank-value"><%= accountNumber %></span></div>
+        <div class="bank-row"><span class="bank-label">Account Name</span><span class="bank-value"><%= accountName %></span></div>
       </div>
-      <div id="ri_pendingNotice" class="pending-notice" style="display:none;">
-        <i class="fas fa-clock" style="margin-right:5px;"></i>
-        Interest payment is <strong>pending admin approval</strong>. Once confirmed you can proceed.
-        <br>
-        <button onclick="checkRolloverStatus()"><i class="fas fa-sync-alt" style="margin-right:4px;"></i>Check Status</button>
-      </div>
-      <div id="ri_form">
-        <div class="form-group">
-          <label class="form-label">Amount Paid (₦)</label>
-          <input type="number" class="form-control" id="ri_amount" placeholder="Enter exact amount transferred">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Payer Name <span style="text-transform:none;color:var(--muted);font-weight:400;">(optional)</span></label>
-          <input type="text" class="form-control" id="ri_payerName" placeholder="Name on bank receipt">
-        </div>
-        <div id="ri_error" class="modal-danger" style="display:none;margin-bottom:0;"></div>
-      </div>
-    </div>
-    <div class="modal-footer" id="ri_footer">
-      <button class="btn btn-ghost" onclick="closeModal('rolloverInterestModal')">Cancel</button>
-      <button class="btn btn-amber" id="ri_submitBtn" onclick="submitInterestPayment()">
-        <i class="fas fa-paper-plane" style="margin-right:5px;font-size:11px;"></i>Submit Proof
-      </button>
-    </div>
-  </div>
-</div>
 
-<!-- Rollover: Confirm -->
-<div class="modal-backdrop" id="rolloverConfirmModal">
-  <div class="modal-box"><div class="modal-handle"></div>
-    <div class="modal-header">
-      <span class="modal-title"><i class="fas fa-sync-alt" style="color:var(--accent);margin-right:8px;font-size:14px;"></i>Confirm Rollover</span>
-      <button class="modal-close" onclick="closeModal('rolloverConfirmModal')"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-info"><i class="fas fa-check-circle" style="margin-right:6px;color:var(--green);"></i>Interest confirmed. Outstanding balance carries forward with rollover fee. Guarantors are retained automatically.</div>
+      <!-- Payment breakdown -->
       <div class="rollover-summary">
-        <div class="rs-label">New Total to Repay</div>
-        <div class="rs-amount" id="rc_newTotal">₦0</div>
-        <div class="summary-row" style="margin-top:8px;">
-          <span class="summary-label">Outstanding balance</span><span id="rc_outstanding">₦0</span>
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">What to Pay</div>
+
+        <!-- Interest — always required -->
+        <div class="summary-row" style="padding:6px 0;align-items:center;">
+          <span class="summary-label">
+            <i class="fas fa-check-circle" style="color:var(--accent);margin-right:5px;font-size:10px;"></i>
+            Interest (required)
+          </span>
+          <span id="rv_interestAmount" style="font-weight:500;color:var(--accent);">₦0</span>
+        </div>
+
+        <!-- Penalty — optional checkbox, hidden if no penalty -->
+        <div class="summary-row" id="rv_penaltyRow" style="padding:6px 0;align-items:center;display:none;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--muted);font-size:12px;">
+            <input type="checkbox" id="rv_payPenalty" onchange="updateRolloverSummary()"
+                   style="width:15px;height:15px;accent-color:var(--amber);">
+            Also pay penalty now (optional)
+          </label>
+          <span id="rv_penaltyAmount" style="font-weight:500;color:var(--red);">₦0</span>
+        </div>
+        <div id="rv_penaltyHint" style="font-size:11px;color:var(--muted);padding:2px 0 4px 23px;display:none;">
+          Paying penalty now reduces your new loan balance.
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--border);margin:8px 0;">
+
+        <div class="summary-row" style="padding:4px 0;">
+          <span style="font-weight:600;">Total to Transfer</span>
+          <span id="rv_totalToPay" style="font-weight:700;font-size:15px;color:var(--text);">₦0</span>
+        </div>
+      </div>
+
+      <!-- New loan preview -->
+      <div style="background:var(--bg-card3);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">After Rollover (preview)</div>
+        <div class="summary-row">
+          <span class="summary-label">Current outstanding</span>
+          <span id="rv_outstanding">₦0</span>
         </div>
         <div class="summary-row">
-          <span class="summary-label">Rollover fee (<span id="rc_rolloverPct">0</span>%)</span>
-          <span id="rc_rolloverFee" style="color:var(--red);">₦0</span>
+          <span class="summary-label">Rollover fee</span>
+          <span id="rv_rolloverFee" style="color:var(--amber);">₦0</span>
+        </div>
+        <div class="summary-row" style="margin-top:4px;">
+          <span style="font-weight:500;">New loan total</span>
+          <span id="rv_newTotal" style="font-weight:600;color:var(--accent);">₦0</span>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Loan Duration</label>
-        <div class="form-control" id="rc_durationLabel" style="opacity:.6;cursor:not-allowed;pointer-events:none;">—</div>
-        <div class="form-hint"><i class="fas fa-lock" style="margin-right:3px;"></i>Rollovers retain your current loan type.</div>
+
+      <!-- Payer name -->
+      <div class="form-group" style="margin-bottom:8px;">
+        <label class="form-label">Your Name on Receipt</label>
+        <input type="text" class="form-control" id="rv_payerName" placeholder="Name shown on bank transfer">
+        <div class="form-hint">Helps admin match your payment faster.</div>
       </div>
-      <div id="rc_error" class="modal-danger" style="display:none;margin-bottom:0;"></div>
+
+      <!-- Hidden fields -->
+      <input type="hidden" id="rv_hiddenLoanId">
+      <input type="hidden" id="rv_hiddenInterest">
+      <input type="hidden" id="rv_hiddenPenalty">
+      <input type="hidden" id="rv_hiddenRolloverPct">
+
+      <div id="rv_error" class="modal-danger" style="display:none;margin-bottom:0;"></div>
     </div>
+
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('rolloverConfirmModal')">Cancel</button>
-      <button class="btn btn-primary" id="rc_submitBtn" onclick="submitRollover()">
-        <i class="fas fa-sync-alt" style="margin-right:5px;font-size:11px;"></i>Submit Rollover
+      <button class="btn btn-ghost" onclick="closeModal('rolloverModal')">Cancel</button>
+      <button class="btn btn-primary" id="rv_submitBtn" onclick="submitRolloverRequest()">
+        <i class="fas fa-paper-plane" style="margin-right:5px;font-size:11px;"></i>Submit Rollover Request
       </button>
     </div>
   </div>
 </div>
 
-<!-- Success Modals -->
+<!-- Loan Application Success -->
 <div class="modal-backdrop" id="loanSuccessModal">
   <div class="modal-box"><div class="modal-handle"></div>
     <div class="result-modal">
@@ -1046,16 +1033,25 @@ button,input,select,textarea{font-family:inherit;}
     </div>
   </div>
 </div>
+
+<!-- Rollover Success -->
 <div class="modal-backdrop" id="rolloverSuccessModal">
   <div class="modal-box"><div class="modal-handle"></div>
     <div class="result-modal">
       <div class="result-icon success"><i class="fas fa-sync-alt"></i></div>
-      <div class="result-title">Rollover Submitted</div>
-      <div class="result-msg">New total: <strong id="rs_newTotal">₦0</strong> · Fee: <strong id="rs_rolloverFee">₦0</strong>. Awaiting admin approval.</div>
+      <div class="result-title">Rollover Request Submitted</div>
+      <div class="result-msg">
+        You paid: <strong id="rvs_totalPaid">₦0</strong><br>
+        Rollover fee: <strong id="rvs_rolloverFee">₦0</strong><br>
+        New loan total: <strong id="rvs_newTotal">₦0</strong><br><br>
+        Admin will confirm your payment and complete the rollover shortly.
+      </div>
       <button class="btn btn-primary" onclick="location.reload()" style="max-width:200px;margin:0 auto;">Done</button>
     </div>
   </div>
 </div>
+
+<!-- Error Modal -->
 <div class="modal-backdrop" id="errorModal">
   <div class="modal-box"><div class="modal-handle"></div>
     <div class="result-modal">
@@ -1109,15 +1105,18 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); d
 document.querySelectorAll('.modal-backdrop').forEach(el => {
   el.addEventListener('click', e => { if(e.target === el){ el.classList.remove('open'); document.body.style.overflow = ''; }});
 });
-
-function showError(title, msg){ document.getElementById('errorModalTitle').textContent = title; document.getElementById('errorModalMsg').textContent = msg; openModal('errorModal'); }
+function showError(title, msg){
+  document.getElementById('errorModalTitle').textContent = title;
+  document.getElementById('errorModalMsg').textContent   = msg;
+  openModal('errorModal');
+}
 
 /* ── Calculator ── */
 function calculateLoan(){
   const amount   = parseFloat(document.getElementById('calcAmount').value) || 0;
   const duration = parseInt(document.getElementById('calcDuration').value) || 1;
   const rate     = parseFloat(document.getElementById('calcRate').value) || 0;
-  const max      = <%= maxLoan %>;
+  const max      = <%- maxLoan %>;
   const res      = document.getElementById('calcResult');
   if(amount <= 0){ res.style.display = 'none'; return; }
   if(amount > max){ document.getElementById('calcAmount').value = max; return calculateLoan(); }
@@ -1135,7 +1134,7 @@ document.querySelectorAll('.guarantorSelect').forEach(sel => {
   sel.addEventListener('change', () => {
     const g1 = document.getElementById('guarantor1').value;
     const g2 = document.getElementById('guarantor2').value;
-    if(g1 && g2 && g1 === g2){ sel.value = ''; showError('Invalid Selection', 'You cannot select the same guarantor twice.'); }
+    if(g1 && g2 && g1 === g2){ sel.value = ''; showError('Invalid Selection','You cannot select the same guarantor twice.'); }
   });
 });
 
@@ -1145,8 +1144,8 @@ async function submitLoanApplication(){
   const btn  = document.getElementById('loanSubmitBtn');
   const g1   = document.getElementById('guarantor1').value;
   const g2   = document.getElementById('guarantor2').value;
-  if(!document.getElementById('agreeTerms').checked){ showError('Agreement Required', 'You must agree to the loan terms.'); return; }
-  if(g1 === g2){ showError('Invalid Guarantors', 'You cannot select the same guarantor twice.'); return; }
+  if(!document.getElementById('agreeTerms').checked){ showError('Agreement Required','You must agree to the loan terms.'); return; }
+  if(g1 === g2){ showError('Invalid Guarantors','You cannot select the same guarantor twice.'); return; }
   btn.disabled = true; btn.textContent = 'Submitting…';
   try{
     const res    = await fetch('/club-de-star-cooperative/apply-loan',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ amount: form.amount.value, duration: form.duration.value, guarantor1: g1, guarantor2: g2, agreeTerms: true })});
@@ -1163,7 +1162,7 @@ async function submitLoanApplication(){
 async function submitLoanPayment(){
   const amount = parseFloat(document.getElementById('paymentAmount').value);
   const loanId = document.querySelector('#loanPaymentForm input[name="loanId"]').value;
-  if(!amount || amount <= 0){ showError('Invalid Amount', 'Enter a valid payment amount.'); return; }
+  if(!amount || amount <= 0){ showError('Invalid Amount','Enter a valid payment amount.'); return; }
   try{
     const res    = await fetch('/loan/payment',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ amount, loanId })});
     const result = await res.json();
@@ -1173,96 +1172,128 @@ async function submitLoanPayment(){
   } catch(e){ showError('Payment Failed', e.message); }
 }
 
-/* ── Rollover flow ── */
+/* ══ ROLLOVER FLOW ══ */
 let rolloverState = null;
 
 async function openRolloverFlow(){
   const btn = document.querySelector('[onclick="openRolloverFlow()"]');
-  if(btn){ btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;font-size:11px;"></i>Checking…'; }
+  if(btn){ btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;font-size:11px;"></i>Loading…'; }
   try{
     const res  = await fetch('/club-de-star-cooperative/rollover-status');
     const data = await res.json();
     if(!res.ok){ showError('Rollover Unavailable', data.message || 'No active loan found.'); return; }
+
+    // Block if already submitted
+    if(data.rolloverPending){
+      showError('Already Submitted', 'A rollover request is already pending admin approval.');
+      return;
+    }
+
     rolloverState = data;
-    data.interestPaid ? openRolloverConfirmModal(data) : openRolloverInterestModal(data);
-  } catch(e){ showError('Error', 'Could not check rollover status. Please try again.'); }
-  finally{ if(btn){ btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt" style="margin-right:6px;font-size:11px;"></i>Rollover'; }}
+    populateRolloverModal(data);
+    openModal('rolloverModal');
+  } catch(e){
+    showError('Error','Could not load rollover info. Please try again.');
+  } finally {
+    if(btn){ btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt" style="margin-right:6px;font-size:11px;"></i>Rollover'; }
+  }
 }
 
-async function checkRolloverStatus(){
-  try{
-    const res  = await fetch('/club-de-star-cooperative/rollover-status');
-    const data = await res.json();
-    if(!res.ok) return;
-    rolloverState = data;
-    if(data.interestPaid){ closeModal('rolloverInterestModal'); setTimeout(() => openRolloverConfirmModal(data), 300); }
-    else showError('Still Pending', 'Interest payment awaiting admin approval. Check back shortly.');
-  } catch(e){ showError('Error', 'Could not check status.'); }
+function populateRolloverModal(data){
+  const interest    = Number(data.interestOwed  || 0);
+  const penalty     = Number(data.totalPenalty  || 0);
+  const rolloverPct = Number(data.rolloverPct   || 1);
+  const outstanding = Number(data.outstandingBalance || 0);
+
+  // Store into hidden fields
+  document.getElementById('rv_hiddenLoanId').value      = data.loanId;
+  document.getElementById('rv_hiddenInterest').value    = interest;
+  document.getElementById('rv_hiddenPenalty').value     = penalty;
+  document.getElementById('rv_hiddenRolloverPct').value = rolloverPct;
+
+  // Fill static displays
+  document.getElementById('rv_interestAmount').textContent = '₦' + interest.toLocaleString();
+  document.getElementById('rv_penaltyAmount').textContent  = '₦' + penalty.toLocaleString();
+  document.getElementById('rv_outstanding').textContent    = '₦' + outstanding.toLocaleString();
+
+  // Show/hide penalty row
+  const hasPenalty = penalty > 0;
+  document.getElementById('rv_penaltyRow').style.display  = hasPenalty ? 'flex' : 'none';
+  document.getElementById('rv_penaltyHint').style.display = hasPenalty ? 'block' : 'none';
+  document.getElementById('rv_payPenalty').checked        = false;
+
+  // Reset form
+  document.getElementById('rv_payerName').value    = '';
+  document.getElementById('rv_error').style.display = 'none';
+
+  updateRolloverSummary();
 }
 
-function openRolloverInterestModal(data){
-  document.getElementById('ri_interestOwed').textContent  = '₦' + Number(data.interestOwed).toLocaleString();
-  document.getElementById('ri_bankName').textContent      = data.companyAccount?.bankName      || '—';
-  document.getElementById('ri_accountNumber').textContent = data.companyAccount?.accountNumber || '—';
-  document.getElementById('ri_accountName').textContent   = data.companyAccount?.accountName   || '—';
-  document.getElementById('ri_amount').value              = data.interestOwed || '';
-  document.getElementById('ri_error').style.display      = 'none';
-  document.getElementById('ri_pendingNotice').style.display = 'none';
-  document.getElementById('ri_form').style.display       = 'block';
-  document.getElementById('ri_footer').style.display     = 'flex';
-  openModal('rolloverInterestModal');
+function updateRolloverSummary(){
+  const interest    = parseFloat(document.getElementById('rv_hiddenInterest').value)    || 0;
+  const penalty     = parseFloat(document.getElementById('rv_hiddenPenalty').value)     || 0;
+  const rolloverPct = parseFloat(document.getElementById('rv_hiddenRolloverPct').value) || 1;
+  const outstanding = rolloverState ? Number(rolloverState.outstandingBalance || 0) : 0;
+  const payPenalty  = document.getElementById('rv_payPenalty').checked;
+
+  const totalToPay      = interest + (payPenalty ? penalty : 0);
+  const baseAfterPenalty = payPenalty ? (outstanding - penalty) : outstanding;
+  const rolloverFee     = Math.round(baseAfterPenalty * (rolloverPct / 100));
+  const newTotal        = baseAfterPenalty + rolloverFee;
+
+  document.getElementById('rv_totalToPay').textContent  = '₦' + totalToPay.toLocaleString();
+  document.getElementById('rv_rolloverFee').textContent = '₦' + rolloverFee.toLocaleString();
+  document.getElementById('rv_newTotal').textContent    = '₦' + newTotal.toLocaleString();
 }
 
-function openRolloverConfirmModal(data){
-  document.getElementById('rc_outstanding').textContent  = '₦' + Number(data.outstandingBalance).toLocaleString();
-  document.getElementById('rc_rolloverPct').textContent  = data.rolloverPct;
-  document.getElementById('rc_rolloverFee').textContent  = '₦' + Number(data.rolloverFee).toLocaleString();
-  document.getElementById('rc_newTotal').textContent     = '₦' + Number(data.newTotalRepay).toLocaleString();
-  document.getElementById('rc_durationLabel').textContent = data.loanName || 'Same as current loan';
-  document.getElementById('rc_error').style.display     = 'none';
-  openModal('rolloverConfirmModal');
-}
+async function submitRolloverRequest(){
+  const btn      = document.getElementById('rv_submitBtn');
+  const errDiv   = document.getElementById('rv_error');
+  const loanId   = document.getElementById('rv_hiddenLoanId').value;
+  const interest = parseFloat(document.getElementById('rv_hiddenInterest').value);
+  const penalty  = parseFloat(document.getElementById('rv_hiddenPenalty').value);
+  const payPenalty = document.getElementById('rv_payPenalty').checked;
+  const payerName  = document.getElementById('rv_payerName').value.trim();
 
-async function submitInterestPayment(){
-  const btn    = document.getElementById('ri_submitBtn');
-  const errDiv = document.getElementById('ri_error');
-  const amount = parseFloat(document.getElementById('ri_amount').value);
-  const payer  = document.getElementById('ri_payerName').value.trim();
   errDiv.style.display = 'none';
-  if(!amount || amount <= 0){ errDiv.textContent = 'Please enter the amount you transferred.'; errDiv.style.display = 'block'; return; }
-  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Submitting…';
+
+  if(!loanId){ errDiv.textContent = 'Invalid session. Please close and try again.'; errDiv.style.display = 'block'; return; }
+  if(!interest || interest <= 0){ errDiv.textContent = 'Interest amount is missing. Please close and try again.'; errDiv.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Submitting…';
+
   try{
-    const res  = await fetch('/club-de-star-cooperative/rollover-interest-payment',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ loanId: rolloverState.loanId, amount, payerName: payer })});
+    const res  = await fetch('/club-de-star-cooperative/rollover-request',{
+      method:  'POST',
+      headers: {'Content-Type':'application/json'},
+      body:    JSON.stringify({
+        loanId,
+        interestAmount: interest,
+        penaltyAmount:  payPenalty ? penalty : 0,
+        payPenalty,
+        payerName,
+      })
+    });
     const data = await res.json();
+
     if(res.ok && data.status){
-      document.getElementById('ri_form').style.display    = 'none';
-      document.getElementById('ri_footer').style.display  = 'none';
-      document.getElementById('ri_pendingNotice').style.display = 'block';
-    } else { errDiv.textContent = data.message || 'Failed to submit.'; errDiv.style.display = 'block'; }
-  } catch(e){ errDiv.textContent = 'Network error. Please try again.'; errDiv.style.display = 'block'; }
-  finally{ btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:5px;font-size:11px;"></i>Submit Proof'; }
-}
-
-async function submitRollover(){
-  const btn    = document.getElementById('rc_submitBtn');
-  const errDiv = document.getElementById('rc_error');
-  errDiv.style.display = 'none';
-  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Submitting…';
-  try{
-    const res  = await fetch('/club-de-star-cooperative/rollover-loan',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({})});
-    const data = await res.json();
-    if(res.ok){
-      document.getElementById('rs_newTotal').textContent    = '₦' + Number(data.newTotalRepay).toLocaleString();
-      document.getElementById('rs_rolloverFee').textContent = '₦' + Number(data.rolloverFee).toLocaleString();
-      closeModal('rolloverConfirmModal');
+      document.getElementById('rvs_totalPaid').textContent  = '₦' + Number(data.summary.totalPaid).toLocaleString();
+      document.getElementById('rvs_rolloverFee').textContent = '₦' + Number(data.summary.rolloverFee).toLocaleString();
+      document.getElementById('rvs_newTotal').textContent   = '₦' + Number(data.summary.newTotalRepay).toLocaleString();
+      closeModal('rolloverModal');
       setTimeout(() => openModal('rolloverSuccessModal'), 300);
-    } else if(data.code === 'INTEREST_UNPAID'){
-      rolloverState = { ...rolloverState, ...data };
-      closeModal('rolloverConfirmModal');
-      setTimeout(() => openRolloverInterestModal(rolloverState), 300);
-    } else { errDiv.textContent = data.message || 'Rollover failed.'; errDiv.style.display = 'block'; }
-  } catch(e){ errDiv.textContent = 'Network error. Please try again.'; errDiv.style.display = 'block'; }
-  finally{ btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt" style="margin-right:5px;font-size:11px;"></i>Submit Rollover'; }
+    } else {
+      errDiv.textContent   = data.message || 'Submission failed. Please try again.';
+      errDiv.style.display = 'block';
+    }
+  } catch(e){
+    errDiv.textContent   = 'Network error. Please try again.';
+    errDiv.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:5px;font-size:11px;"></i>Submit Rollover Request';
+  }
 }
 
 /* ── Loader ── */

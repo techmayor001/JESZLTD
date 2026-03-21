@@ -24,11 +24,11 @@ router.get('/', (req,res)=>{
 })
 
 router.get('/gallery', (req,res)=>{
-    res.render("gallery")
+    res.render("static/gallery")
 })
 
 router.get('/about-us', (req,res)=>{
-    res.render("about")
+    res.render("static/about")
 })
 
 
