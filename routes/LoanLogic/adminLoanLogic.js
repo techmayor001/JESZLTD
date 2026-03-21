@@ -1245,8 +1245,6 @@ router.get(
 
       // ═══════════════════════════════════════════════════════════════════════
       // 1. FETCH — query Payment, not LoanLedger
-      //    LoanLedger is written only AFTER approval, so it will never contain
-      //    pending entries. Payment is the source of truth for the queue.
       // ═══════════════════════════════════════════════════════════════════════
       const loanPayments = await Payment.find({
         loanId: { $exists: true, $ne: null },
@@ -1264,19 +1262,37 @@ router.get(
       // ═══════════════════════════════════════════════════════════════════════
       // 2. SHAPE
       // ═══════════════════════════════════════════════════════════════════════
-      const MANUAL_PREFIXES = ["COOP-", "LOAN-MANUAL-", "LOAN-INT-", "EXT-LOAN-"];
+
+      /* ── All reference prefixes that mean the amount is stored in naira,
+            not kobo. Paystack stores amounts in kobo and requires /100;
+            every manual / cooperative / rollover path stores naira directly.
+      ── */
+      const MANUAL_PREFIXES = [
+        "COOP-",
+        "LOAN-MANUAL-",
+        "LOAN-INT-",
+        "EXT-LOAN-",
+        "ROLLOVER-",    // ← was missing — caused 5000 to show as 50
+        "PENALTY-",
+        "APPR-",        // admin payment approval flow
+      ];
+
+      /* ── Payment methods that are always manual (naira) ── */
+      const MANUAL_METHODS = ["Manual", "Cash", "Bank Transfer", "manual", "cooperative"];
 
       const payments = loanPayments.map((payment) => {
         const dateObj = new Date(payment.createdAt);
-        const loan    = payment.loanId; // populated loan doc
+        const loan    = payment.loanId;
 
-        // ── Manual vs Paystack amount normalisation ──────────────────────
+        // ── Determine if this is a manual (naira) or Paystack (kobo) payment ──
         const isManual =
-          payment.method === "Manual"        ||
-          payment.method === "Cash"          ||
-          payment.method === "Bank Transfer" ||
-          MANUAL_PREFIXES.some((prefix) => payment.reference.startsWith(prefix));
+          MANUAL_METHODS.includes(payment.method) ||
+          MANUAL_METHODS.includes(payment.paymentType) ||
+          MANUAL_PREFIXES.some((prefix) => (payment.reference || "").startsWith(prefix)) ||
+          payment.type === "rollover_request" ||       // explicit guard for rollover type
+          payment.paymentType === "rollover_request";
 
+        // Amount is in naira for manual, kobo for Paystack
         const amount = isManual ? payment.amount : payment.amount / 100;
 
         // ── Borrower identity ────────────────────────────────────────────
@@ -1287,17 +1303,43 @@ router.get(
             ? `${payment.user.firstName} ${payment.user.lastName}`
             : "Unknown";
 
-        // ── Transaction type — derive from payment.type or ref prefix ────
+        // ── Transaction type ─────────────────────────────────────────────
         let transactionType = "repayment";
-        if      (payment.type === "loan_rollover"  || payment.reference.startsWith("ROLLOVER-")) transactionType = "rollover";
-        else if (payment.type === "loan_interest"  || payment.reference.startsWith("LOAN-INT-")) transactionType = "interest";
-        else if (payment.type === "loan_penalty"   || payment.reference.startsWith("PENALTY-"))  transactionType = "penalty";
+        const ref  = payment.reference || "";
+        const ptype = payment.type || payment.paymentType || "";
+
+        if      (ptype === "rollover_request" || ptype === "loan_rollover" || ref.startsWith("ROLLOVER-")) transactionType = "rollover";
+        else if (ptype === "loan_interest"    || ref.startsWith("LOAN-INT-"))                              transactionType = "interest";
+        else if (ptype === "loan_penalty"     || ref.startsWith("PENALTY-"))                              transactionType = "penalty";
 
         // ── Status normalisation ─────────────────────────────────────────
         const status =
           payment.status === "paid" || payment.status === "success" ? "approved"
           : payment.status === "failed"                             ? "rejected"
           : "pending";
+
+        // ── Breakdown — prefer top-level fields, fall back to meta ────────
+        // Some payment types (e.g. rollover_request) store breakdown inside
+        // payment.meta rather than at the top level.
+        const meta          = payment.meta || {};
+        const principalPaid = payment.principalPaid ?? meta.principalPaid ?? 0;
+        const interestPaid  = payment.interestPaid  ?? meta.interestPaid  ?? 0;
+        const penaltyPaid   = payment.penaltyPaid   ?? meta.penaltyPaid   ?? 0;
+
+        // ── Loan balance snapshot ────────────────────────────────────────
+        // For rollover types the outstanding is captured in meta; for others
+        // use the live loan doc.
+        const outstandingAtRequest = meta.outstandingAtRequest ?? loan?.outstandingBalance ?? null;
+        const balanceBefore = outstandingAtRequest != null ? outstandingAtRequest : null;
+        const balanceAfter  = balanceBefore != null ? Math.max(0, balanceBefore - amount) : null;
+
+        // ── Payment method label ─────────────────────────────────────────
+        const paymentMethodLabel =
+          meta.paymentMethod
+            ? meta.paymentMethod.charAt(0).toUpperCase() + meta.paymentMethod.slice(1)
+            : isManual
+              ? "Manual Transfer"
+              : "Paystack";
 
         return {
           id:           payment._id.toString(),
@@ -1310,29 +1352,27 @@ router.get(
           borrowerName,
           borrowerType:  isExternal ? "external" : "member",
           memberId:      payment.user?.membershipID || "—",
-          email:         isExternal
-                           ? loan?.external?.email || "—"
-                           : payment.user?.email || payment.email || "—",
+          email: isExternal
+            ? loan?.external?.email || "—"
+            : payment.user?.email || payment.email || "—",
 
           transactionType,
-          paymentMethod: isManual ? "Manual Transfer" : "Paystack",
+          paymentMethod: paymentMethodLabel,
 
           amount,
 
-          // Breakdown — use stored fields if present, otherwise 0
-          principalPaid: payment.principalPaid || 0,
-          interestPaid:  payment.interestPaid  || 0,
-          penaltyPaid:   payment.penaltyPaid   || 0,
+          principalPaid,
+          interestPaid,
+          penaltyPaid,
 
-          // Estimate balance snapshot from live loan doc
-          balanceBefore: loan ? (loan.outstandingBalance + amount) : null,
-          balanceAfter:  loan ?  loan.outstandingBalance            : null,
+          balanceBefore,
+          balanceAfter,
 
           status,
           notes:
             payment.paystackResponse?.adminNote ||
             payment.paystackResponse?.message   ||
-            payment.notes ||
+            payment.notes                       ||
             "Loan payment",
         };
       });
@@ -1356,7 +1396,7 @@ router.get(
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const rolloversCount = loanPayments.filter(
         (p) =>
-          (p.type === "loan_rollover" || p.reference.startsWith("ROLLOVER-")) &&
+          (p.type === "loan_rollover" || p.type === "rollover_request" || (p.reference || "").startsWith("ROLLOVER-")) &&
           new Date(p.createdAt) >= monthStart
       ).length;
 
