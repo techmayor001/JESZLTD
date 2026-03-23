@@ -3,156 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Loan Management - Club De Stars | Powered by JESZ LIMITED</title>
+    <title>External Loan Management - Club De Stars Admin</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
-            --primary: #1e3a8a;
-            --primary-dark: #1e40af;
-            --primary-light: #3b82f6;
-            --secondary: #64748b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #06b6d4;
-            --sidebar-width: 280px;
+            --primary: #1e3a8a; --primary-dark: #1e40af; --primary-light: #3b82f6;
+            --secondary: #64748b; --success: #10b981; --danger: #ef4444;
+            --warning: #f59e0b; --info: #06b6d4; --purple: #8b5cf6;
+            --sidebar-width: 280px; --navbar-h: 70px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%); min-height: 100vh; overflow-x: hidden; }
+
+        /* ══════════ SIDEBAR ══════════ */
         .sidebar {
             position: fixed; left: 0; top: 0; bottom: 0;
             width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white; z-index: 1040;
-            transition: all 0.3s; overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30,58,138,0.15);
-            transform: translateX(0);
+            background: linear-gradient(180deg, #0f2357 0%, #1e3a8a 40%, #1e40af 100%);
+            z-index: 1040; overflow-y: auto;
+            transition: transform .3s ease;
+            box-shadow: 4px 0 24px rgba(30,58,138,.25);
+            scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.15) transparent;
         }
-        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.1); }
-        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+        .sidebar-header {
+            padding: 1.4rem 1.25rem 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            background: rgba(0,0,0,.18); position: sticky; top: 0; z-index: 2;
+        }
+        .logo-row { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
         .logo-box {
-            width: 45px; height: 45px; background: white; border-radius: 10px;
+            width: 42px; height: 42px; background: white; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: var(--primary); font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0;
+            font-weight: 800; color: var(--primary); font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,.25); flex-shrink: 0;
         }
-        .sidebar-title { font-size: 1.1rem; line-height: 1.2; }
-        .admin-badge {
-            display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
-            background: rgba(239,68,68,0.2); backdrop-filter: blur(10px);
-            border-radius: 20px; border: 1px solid rgba(239,68,68,0.3);
-            font-weight: 600; font-size: 0.8rem; margin-top: 8px;
+        .sidebar-brand { font-size: .95rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: .05em; line-height: 1.2; }
+        .sidebar-brand small { font-size: .65rem; font-weight: 500; opacity: .55; display: block; letter-spacing: .08em; }
+        .role-pill {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 4px 10px; background: rgba(239,68,68,.2);
+            border-radius: 20px; border: 1px solid rgba(239,68,68,.3);
+            font-weight: 700; font-size: .7rem; color: #fca5a5;
         }
-        .sidebar-menu { padding: 1rem 0; }
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85); text-decoration: none;
-            padding: 0.875rem 1.5rem; display: flex; align-items: center;
-            transition: all 0.3s; border-left: 3px solid transparent;
-            font-weight: 500; font-size: 0.95rem;
+        .nav-group { padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .nav-group:last-child { border-bottom: none; }
+        .nav-category {
+            display: flex; align-items: center; gap: 7px;
+            padding: .55rem 1.25rem .3rem; font-size: .62rem; font-weight: 800;
+            color: rgba(255,255,255,.38); text-transform: uppercase; letter-spacing: .1em; user-select: none;
         }
-        .sidebar-menu a:hover { background: rgba(255,255,255,0.1); color: white; border-left-color: white; }
-        .sidebar-menu a.active { background: rgba(255,255,255,0.15); color: white; border-left-color: white; }
-        .sidebar-menu a i { width: 24px; margin-right: 12px; font-size: 1.1rem; flex-shrink: 0; }
+        .nav-category::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.08); margin-left: 4px; }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 11px;
+            padding: .62rem 1.25rem; color: rgba(255,255,255,.72);
+            text-decoration: none; font-weight: 500; font-size: .84rem;
+            border-left: 3px solid transparent; transition: all .18s;
+        }
+        .sidebar-nav a:hover  { background: rgba(255,255,255,.09); color: white; border-left-color: rgba(255,255,255,.4); }
+        .sidebar-nav a.active { background: rgba(255,255,255,.15); color: white; border-left-color: white; }
+        .sidebar-nav a i { width: 18px; font-size: .9rem; flex-shrink: 0; opacity: .8; text-align: center; }
+        .sidebar-nav a.active i { opacity: 1; }
+        .nav-badge {
+            margin-left: auto; font-size: .63rem; font-weight: 800;
+            padding: 2px 7px; border-radius: 10px;
+            background: rgba(239,68,68,.9); color: white; flex-shrink: 0; line-height: 1.4;
+        }
+        .nav-back {
+            display: flex; align-items: center; gap: 10px;
+            padding: .7rem 1.25rem .9rem; font-size: .8rem; font-weight: 600;
+            color: rgba(255,255,255,.42); text-decoration: none; transition: color .18s;
+            border-top: 1px solid rgba(255,255,255,.07); margin-top: .25rem;
+        }
+        .nav-back:hover { color: rgba(255,255,255,.7); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1035; }
+        .sidebar-overlay.active { display: block; }
+
+        /* ══════════ NAVBAR ══════════ */
         .top-navbar {
-            position: fixed; top: 0; left: var(--sidebar-width); right: 0;
-            height: 70px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30,58,138,0.08); z-index: 1030;
+            position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: var(--navbar-h);
+            background: rgba(255,255,255,.97); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30,58,138,.08); z-index: 1030;
             display: flex; align-items: center; padding: 0 1.5rem;
-            transition: all 0.3s; border-bottom: 1px solid rgba(30,58,138,0.1);
+            border-bottom: 1px solid rgba(30,58,138,.1);
         }
-        .main-content {
-            margin-left: var(--sidebar-width); margin-top: 70px;
-            padding: 1.5rem; min-height: calc(100vh - 70px); transition: all 0.3s;
-        }
-        .welcome-card {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+        .main-content { margin-left: var(--sidebar-width); margin-top: var(--navbar-h); padding: 1.5rem; min-height: calc(100vh - var(--navbar-h)); }
+
+        /* ══════════ PAGE HEADER ══════════ */
+        .page-header {
+            background: linear-gradient(130deg, #1e3a8a 0%, #1e40af 45%, #3b82f6 100%);
             color: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem;
-            box-shadow: 0 15px 40px rgba(30,58,138,0.25); position: relative; overflow: hidden;
+            box-shadow: 0 10px 36px rgba(30,58,138,.28); position: relative;
+            /* NO overflow:hidden — keeps export dropdown visible */
         }
-        .welcome-card::before {
+        .page-header::before {
             content: ''; position: absolute; top: -50%; right: -20%;
-            width: 400px; height: 400px; background: rgba(255,255,255,0.05); border-radius: 50%;
+            width: 400px; height: 400px; background: rgba(255,255,255,.05); border-radius: 50%; pointer-events: none;
         }
+
+        /* ══════════ EXPORT DROPDOWN ══════════ */
+        .export-wrapper { position: relative; z-index: 200; display: inline-block; }
+        .btn-export {
+            background: white; color: var(--primary); border: none;
+            font-weight: 700; border-radius: 10px; padding: .55rem 1.1rem;
+            font-size: .88rem; display: inline-flex; align-items: center; gap: .5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,.12); transition: all .2s; cursor: pointer;
+        }
+        .btn-export:hover { background: rgba(255,255,255,.92); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.15); }
+        .btn-export .caret { font-size: .7rem; transition: transform .2s; }
+        .btn-export.open .caret { transform: rotate(180deg); }
+        .export-dropdown-menu {
+            position: absolute; top: calc(100% + 6px); right: 0;
+            min-width: 230px; background: white; border-radius: 14px;
+            box-shadow: 0 20px 50px rgba(30,58,138,.22), 0 4px 16px rgba(0,0,0,.1);
+            padding: .5rem; z-index: 99999;
+        }
+        .export-dropdown-menu .drop-header { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #94a3b8; padding: .5rem .75rem .25rem; }
+        .export-dropdown-menu .drop-item { border-radius: 9px; padding: .6rem .875rem; font-weight: 600; font-size: .85rem; color: #1e293b; display: flex; align-items: center; gap: .6rem; transition: background .15s; text-decoration: none; cursor: pointer; }
+        .export-dropdown-menu .drop-item:hover { background: rgba(30,58,138,.06); }
+        .export-dropdown-menu .drop-divider { margin: .35rem .5rem; border-top: 1px solid rgba(30,58,138,.1); }
+
+        /* ══════════ STATS ══════════ */
         .stat-card {
             background: white; border-radius: 16px; padding: 1.5rem;
-            box-shadow: 0 8px 20px rgba(30,58,138,0.08); transition: transform 0.3s, box-shadow 0.3s;
-            height: 100%; border: 1px solid rgba(30,58,138,0.05);
+            box-shadow: 0 8px 20px rgba(30,58,138,.08); transition: all .3s;
+            border: 2px solid transparent; height: 100%; position: relative; overflow: hidden;
         }
-        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(30,58,138,0.15); }
-        .stat-icon {
-            width: 60px; height: 60px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.6rem; margin-bottom: 1rem;
-        }
-        .card {
-            border: none; border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(30,58,138,0.08);
-            background: white; border: 1px solid rgba(30,58,138,0.05);
-        }
-        .card-header {
-            background: linear-gradient(135deg, rgba(30,58,138,0.03) 0%, rgba(59,130,246,0.03) 100%);
-            border-bottom: 2px solid rgba(30,58,138,0.1);
-            padding: 1.25rem; border-radius: 16px 16px 0 0 !important;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none; padding: 0.6rem 1.5rem;
-            border-radius: 10px; font-weight: 600; transition: all 0.3s;
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(30,58,138,0.3); }
-        .table { font-size: 0.9rem; }
-        .table th { font-weight: 600; color: var(--primary); border-bottom: 2px solid rgba(30,58,138,0.1); white-space: nowrap; }
-        .badge { padding: 0.4rem 0.8rem; border-radius: 8px; font-weight: 600; font-size: 0.75rem; }
-        .powered-by {
-            position: fixed; bottom: 15px; right: 15px; background: white;
-            padding: 10px 16px; border-radius: 25px;
-            box-shadow: 0 4px 15px rgba(30,58,138,0.15);
-            font-size: 0.8rem; font-weight: 600; color: var(--primary); z-index: 1000;
-        }
-        .alert-info-custom {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border: 2px solid #3b82f6; border-radius: 12px; padding: 1rem; color: #1e40af;
-        }
-        .modal-content { border-radius: 16px; }
-        .modal-header { border-radius: 16px 16px 0 0; }
-        .form-label { font-weight: 600; color: var(--primary); margin-bottom: 0.5rem; }
-        .form-control, .form-select {
-            border: 2px solid rgba(30,58,138,0.1); border-radius: 10px; padding: 0.75rem; transition: all 0.3s;
-        }
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(30,58,138,0.1);
-        }
-        .link-display {
-            background: #f0f9ff; border: 2px solid #3b82f6; border-radius: 10px;
-            padding: 1rem; font-family: monospace; font-size: 0.85rem;
-            word-break: break-all; color: #1e40af;
-        }
-        /* Invite status badges */
-        .inv-active   { background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.3); }
-        .inv-used     { background: rgba(59,130,246,0.1); color: #2563eb; border: 1px solid rgba(59,130,246,0.3); }
-        .inv-expired  { background: rgba(100,116,139,0.1); color: #475569; border: 1px solid rgba(100,116,139,0.3); }
-        .inv-revoked  { background: rgba(239,68,68,0.1);  color: #dc2626; border: 1px solid rgba(239,68,68,0.3); }
-        /* Custom alert modal */
-        #alertModal .modal-content { border: none; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(30,58,138,0.2); }
+        .stat-card::before { content: ''; position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: rgba(30,58,138,.03); border-radius: 0 16px 0 100%; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(30,58,138,.15); border-color: var(--primary); }
+        .stat-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1rem; }
+
+        /* ══════════ CARDS ══════════ */
+        .card { border: none; border-radius: 16px; box-shadow: 0 8px 20px rgba(30,58,138,.08); background: white; border: 1px solid rgba(30,58,138,.05); }
+        .card-header { background: linear-gradient(135deg, rgba(30,58,138,.03) 0%, rgba(59,130,246,.03) 100%); border-bottom: 2px solid rgba(30,58,138,.1); padding: 1.25rem; border-radius: 16px 16px 0 0 !important; }
+
+        /* ══════════ FORM CONTROLS ══════════ */
+        .form-label { font-weight: 600; color: var(--primary); margin-bottom: .5rem; }
+        .form-control, .form-select { border: 2px solid rgba(30,58,138,.1); border-radius: 10px; padding: .75rem; transition: all .3s; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 .2rem rgba(30,58,138,.1); }
+
+        /* ══════════ BUTTONS ══════════ */
+        .btn-primary { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border: none; padding: .6rem 1.5rem; border-radius: 10px; font-weight: 600; transition: all .3s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(30,58,138,.3); }
+
+        /* ══════════ TABLE ══════════ */
+        .table-responsive { border-radius: 0 0 16px 16px; overflow: hidden; }
+        .table { margin: 0; font-size: .9rem; }
+        .table thead { background: linear-gradient(135deg, rgba(30,58,138,.05) 0%, rgba(59,130,246,.05) 100%); }
+        .table thead th { border: none; padding: 1rem; font-weight: 600; color: var(--primary); white-space: nowrap; }
+        .table tbody td { padding: .85rem 1rem; vertical-align: middle; border-bottom: 1px solid rgba(30,58,138,.05); }
+        .table tbody tr:last-child td { border-bottom: none; }
+        .table tbody tr:hover { background: rgba(30,58,138,.02); }
+
+        /* ══════════ INVITE STATUS ══════════ */
+        .inv-active  { background: rgba(16,185,129,.1);  color: #059669; border: 1px solid rgba(16,185,129,.3); }
+        .inv-used    { background: rgba(59,130,246,.1);  color: #2563eb; border: 1px solid rgba(59,130,246,.3); }
+        .inv-expired { background: rgba(100,116,139,.1); color: #475569; border: 1px solid rgba(100,116,139,.3); }
+        .inv-revoked { background: rgba(239,68,68,.1);   color: #dc2626; border: 1px solid rgba(239,68,68,.3); }
+
+        /* ══════════ INVITE ACTIONS ══════════ */
+        .invite-actions { display: flex; gap: 4px; }
+        .invite-actions .btn { padding: 4px 8px; font-size: .75rem; border-radius: 6px; }
+
+        /* ══════════ LINK DISPLAY ══════════ */
+        .link-display { background: #f0f9ff; border: 2px solid #3b82f6; border-radius: 10px; padding: 1rem; font-family: monospace; font-size: .85rem; word-break: break-all; color: #1e40af; }
+
+        /* ══════════ ALERT INFO CUSTOM ══════════ */
+        .alert-info-custom { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 2px solid #3b82f6; border-radius: 12px; padding: 1rem; color: #1e40af; }
+
+        /* ══════════ CUSTOM ALERT MODAL ══════════ */
+        #alertModal .modal-content { border: none; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(30,58,138,.2); }
         #alertModal .modal-header  { padding: 1.25rem 1.5rem; border-bottom: none; }
         #alertModal .modal-body    { padding: 1.5rem; text-align: center; }
-        #alertModal .alert-icon-wrapper {
-            width: 72px; height: 72px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 1rem; font-size: 2rem;
-        }
-        #alertModal .modal-footer { border-top: none; padding: 0 1.5rem 1.5rem; justify-content: center; }
-        /* Invite action buttons */
-        .invite-actions { display: flex; gap: 4px; }
-        .invite-actions .btn { padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; }
-        /* Payment status */
-        .payment-submitting { opacity: 0.7; pointer-events: none; }
+        #alertModal .alert-icon-wrapper { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; }
+        #alertModal .modal-footer  { border-top: none; padding: 0 1.5rem 1.5rem; justify-content: center; }
+
+        /* ══════════ POWERED BY ══════════ */
+        .powered-by { position: fixed; bottom: 15px; right: 15px; background: white; padding: 10px 16px; border-radius: 25px; box-shadow: 0 4px 15px rgba(30,58,138,.15); font-size: .8rem; font-weight: 600; color: var(--primary); z-index: 1000; }
+
+        /* ══════════ RESPONSIVE ══════════ */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.active { transform: translateX(0); }
@@ -160,1107 +193,1247 @@
             .main-content { margin-left: 0; padding: 1rem; }
         }
         @media (max-width: 576px) {
-            .top-navbar { height: 60px; }
-            .main-content { margin-top: 60px; padding: 0.75rem; }
+            :root { --navbar-h: 60px; }
+            .main-content { padding: .75rem; }
+            .export-dropdown-menu { right: auto; left: 0; }
         }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+        .fade-in { animation: fadeIn .5s ease; }
     </style>
 </head>
 <body>
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <div class="logo-box">C</div>
-                <div>
-                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
-                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
-                </div>
+
+<!-- ════════════════════════ SIDEBAR ════════════════════════ -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-row">
+            <div class="logo-box">C</div>
+            <div><div class="sidebar-brand">Club De Stars<small>Admin Panel</small></div></div>
+        </div>
+        <div class="role-pill">
+            <i class="fas fa-shield-alt" style="font-size:.65rem;"></i>&nbsp;<%= admin.role?.name?.toUpperCase() || 'SUPER ADMIN' %>
+        </div>
+    </div>
+
+    <div class="sidebar-nav">
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-home" style="font-size:.6rem;"></i>Main</div>
+            <a href="/admin/dashboard"><i class="fas fa-chart-pie"></i>Overview</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-users" style="font-size:.6rem;"></i>Members</div>
+            <a href="/admin/manage-members"><i class="fas fa-users"></i>Manage Members</a>
+            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i>Kiddies Accounts</a>
+            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i>Membership Types</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-hand-holding-usd" style="font-size:.6rem;"></i>Loans</div>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i>Loan Management</a>
+            <a href="/admin/loan-payments"><i class="fas fa-file-invoice-dollar"></i>Loan Payments</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i>Loan Settings</a>
+            <a href="/admin/external-loans" class="active"><i class="fas fa-building"></i>External Loans</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-landmark" style="font-size:.6rem;"></i>Finance</div>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i>Company Finance</a>
+            <a href="/admin/operating-earnings"><i class="fas fa-chart-line"></i>Operating Earnings</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-chart-bar"></i>Company Revenue</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-cog" style="font-size:.6rem;"></i>System</div>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i>Manage Subscriptions</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i>Roles &amp; Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i>Settings</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-file-alt" style="font-size:.6rem;"></i>Reporting</div>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i>Reports</a>
+            <a href="/admin/logs"><i class="fas fa-history"></i>Admin Logs</a>
+        </div>
+    </div>
+
+    <a href="/cds-cooperative/dashboard" class="nav-back"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Top Navbar -->
+<div class="top-navbar">
+    <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.5rem;" onclick="toggleSidebar(event)"></i>
+    <div class="flex-grow-1 d-none d-lg-block">
+        <h5 class="mb-0 fw-bold" style="color:var(--primary)">External Loan Management</h5>
+        <small class="text-muted">Issue loans and track interest payments</small>
+    </div>
+    <div class="d-lg-none fw-bold" style="color:var(--primary);font-size:.95rem;">External Loans</div>
+    <div class="ms-auto d-flex align-items-center gap-3">
+        <div class="badge bg-light text-dark"><i class="fas fa-calendar me-1"></i><span id="currentDate"></span></div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header position-relative">
+        <div class="row align-items-center position-relative" style="z-index:1;">
+            <div class="col-md-7">
+                <h2 class="mb-2 fw-bold"><i class="fas fa-building me-3"></i>External Loan Portfolio</h2>
+                <p class="mb-0 opacity-90">Manage loans issued to external parties and track interest payments</p>
             </div>
-            <div class="admin-badge"><i class="fas fa-shield-alt"></i><span>SUPER ADMIN</span></div>
-        </div>
-       <div class="sidebar-menu">
-            <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
-            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
-            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
-            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
-            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
-            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
-            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
-            <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
-            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
-            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
-            <a href="/admin/external-loans" class="active"><i class="fas fa-building"></i> External Loans</a>
-            <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
-            <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
-            <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
-            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
-            <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
-            <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-            <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
-            <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
-        </div>
-    </div>
-
-    <div class="top-navbar">
-        <i class="fas fa-bars d-lg-none me-3"
-           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-           onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
-        <div class="flex-grow-1 d-none d-lg-block">
-            <h5 class="mb-0 fw-bold" style="color: var(--primary)">External Loan Management</h5>
-            <small class="text-muted">Issue loans and track interest payments</small>
-        </div>
-    </div>
-
-    <div class="main-content">
-        <!-- Page Header -->
-        <div class="welcome-card position-relative">
-            <div class="row align-items-center position-relative" style="z-index: 1;">
-                <div class="col-md-7">
-                    <h2 class="mb-2 fw-bold">External Loan Portfolio</h2>
-                    <p class="mb-3 opacity-90">Manage loans issued to external parties and track interest payments</p>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <div class="badge bg-light text-dark">
-                            <i class="fas fa-calendar me-1"></i>
-                            <span id="currentDate"></span>
-                        </div>
+            <div class="col-md-5 text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end flex-wrap align-items-center">
+                <!-- Export dropdown -->
+                <div class="export-wrapper">
+                    <button class="btn-export" id="exportBtn" onclick="toggleExportMenu(event)">
+                        <i class="fas fa-download"></i>Export
+                        <i class="fas fa-chevron-down caret" id="exportCaret"></i>
+                    </button>
+                    <div class="export-dropdown-menu" id="exportMenu" style="display:none;">
+                        <div class="drop-header">Export Loans</div>
+                        <a class="drop-item" onclick="exportLoansExcel();closeExportMenu();return false;">
+                            <i class="fas fa-file-excel" style="color:#10b981;font-size:1rem;"></i>Excel — Active Loans
+                        </a>
+                        <a class="drop-item" onclick="exportLoansPDF();closeExportMenu();return false;">
+                            <i class="fas fa-file-pdf" style="color:#ef4444;font-size:1rem;"></i>PDF — Active Loans
+                        </a>
+                        <div class="drop-divider"></div>
+                        <div class="drop-header">Export Payments</div>
+                        <a class="drop-item" onclick="exportPaymentsExcel();closeExportMenu();return false;">
+                            <i class="fas fa-file-excel" style="color:#059669;font-size:1rem;"></i>Excel — Recent Payments
+                        </a>
                     </div>
                 </div>
-                <div class="col-md-5 text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end flex-wrap">
-                    <button class="btn btn-light fw-semibold" data-bs-toggle="modal" data-bs-target="#generateLinkModal">
-                        <i class="fas fa-link me-2"></i>Generate Application Link
-                    </button>
-                    <button class="btn btn-light fw-semibold" data-bs-toggle="modal" data-bs-target="#issueLoanModal">
-                        <i class="fas fa-plus me-2"></i>Issue Directly
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats -->
-        <%
-            const externalLoans = loans.filter(l => l.external);
-            const totalLoansIssued = externalLoans.reduce((sum, l) => sum + l.amount, 0);
-            const expectedInterest = externalLoans.reduce((sum, l) => sum + (l.amount * (l.interestRate/100)), 0);
-            const interestCollected = externalLoans.reduce((sum, l) => sum + (l.paidInterest || 0), 0);
-            const today = new Date();
-            const overduePayments = externalLoans.reduce((sum, l) => {
-                const balance = (l.totalRepay - (l.paidAmount || 0));
-                if (balance > 0 && new Date(l.dueDate) < today) return sum + balance;
-                return sum;
-            }, 0);
-            const activeLoansCount = externalLoans.filter(l => l.status === "approved").length;
-            const avgRate = externalLoans.length ? (externalLoans.reduce((sum, l) => sum + l.interestRate, 0) / externalLoans.length).toFixed(2) : 0;
-            const percentCollected = expectedInterest ? ((interestCollected / expectedInterest) * 100).toFixed(0) : 0;
-            const overdueCount = externalLoans.filter(l => { const b = l.totalRepay - (l.paidAmount || 0); return b > 0 && new Date(l.dueDate) < today; }).length;
-        %>
-        <div class="row g-3 mb-4">
-            <div class="col-lg-3 col-md-6 col-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;"><i class="fas fa-hand-holding-usd"></i></div>
-                    <p class="text-muted mb-1 fw-semibold small">Total Loans Issued</p>
-                    <h3 class="mb-1 fw-bold">₦<%= totalLoansIssued.toLocaleString() %></h3>
-                    <small class="text-success fw-semibold"><i class="fas fa-arrow-up me-1"></i><%= activeLoansCount %> active loans</small>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;"><i class="fas fa-money-bill-wave"></i></div>
-                    <p class="text-muted mb-1 fw-semibold small">Expected Interest</p>
-                    <h3 class="mb-1 fw-bold">₦<%= expectedInterest.toLocaleString() %></h3>
-                    <small class="text-success fw-semibold"><i class="fas fa-percentage me-1"></i><%= avgRate %>% avg rate</small>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;"><i class="fas fa-coins"></i></div>
-                    <p class="text-muted mb-1 fw-semibold small">Interest Collected</p>
-                    <h3 class="mb-1 fw-bold">₦<%= interestCollected.toLocaleString() %></h3>
-                    <small class="text-warning fw-semibold"><i class="fas fa-clock me-1"></i><%= percentCollected %>% collected</small>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-6">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;"><i class="fas fa-exclamation-triangle"></i></div>
-                    <p class="text-muted mb-1 fw-semibold small">Overdue Payments</p>
-                    <h3 class="mb-1 fw-bold">₦<%= overduePayments.toLocaleString() %></h3>
-                    <small class="text-danger fw-semibold"><%= overdueCount %> overdue</small>
-                </div>
-            </div>
-        </div>
-
-        <!-- ── Application Links Table ─────────────────────────────────────── -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold" style="color: var(--primary);">
-                    <i class="fas fa-link me-2"></i>Application Links
-                </h5>
-                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#generateLinkModal">
-                    <i class="fas fa-plus me-1"></i>New Link
+                <button class="btn btn-light fw-semibold" data-bs-toggle="modal" data-bs-target="#generateLinkModal">
+                    <i class="fas fa-link me-2"></i>Generate Link
+                </button>
+                <button class="btn btn-light fw-semibold" data-bs-toggle="modal" data-bs-target="#issueLoanModal">
+                    <i class="fas fa-plus me-2"></i>Issue Directly
                 </button>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="invitesTable">
-                        <thead>
-                            <tr>
-                                <th>Label</th>
-                                <th>Generated By</th>
-                                <th>Preset Amount</th>
-                                <th>Penalty %</th>
-                                <th>Rollover %</th>
-                                <th>Expires</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="invitesTableBody">
-                            <tr>
-                                <td colspan="8" class="text-center text-muted py-4">
-                                    <i class="fas fa-spinner fa-spin me-2"></i>Loading links...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <%
+        const externalLoans = loans.filter(l => l.external);
+        const totalLoansIssued  = externalLoans.reduce((sum, l) => sum + l.amount, 0);
+        const expectedInterest  = externalLoans.reduce((sum, l) => sum + (l.amount * (l.interestRate/100)), 0);
+        const interestCollected = externalLoans.reduce((sum, l) => sum + (l.paidInterest || 0), 0);
+        const today = new Date();
+        const overduePayments = externalLoans.reduce((sum, l) => {
+            const balance = (l.totalRepay - (l.paidAmount || 0));
+            if (balance > 0 && new Date(l.dueDate) < today) return sum + balance;
+            return sum;
+        }, 0);
+        const activeLoansCount = externalLoans.filter(l => l.status === "approved").length;
+        const avgRate = externalLoans.length ? (externalLoans.reduce((sum, l) => sum + l.interestRate, 0) / externalLoans.length).toFixed(2) : 0;
+        const percentCollected = expectedInterest ? ((interestCollected / expectedInterest) * 100).toFixed(0) : 0;
+        const overdueCount = externalLoans.filter(l => { const b = l.totalRepay - (l.paidAmount || 0); return b > 0 && new Date(l.dueDate) < today; }).length;
+    %>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-6 col-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;"><i class="fas fa-hand-holding-usd"></i></div>
+                <p class="text-muted mb-1 fw-semibold small">Total Loans Issued</p>
+                <h3 class="mb-1 fw-bold">₦<%= totalLoansIssued.toLocaleString() %></h3>
+                <small class="text-success fw-semibold"><i class="fas fa-arrow-up me-1"></i><%= activeLoansCount %> active loans</small>
             </div>
         </div>
-
-        <!-- ── Active Loans Table ─────────────────────────────────────────── -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-list me-2"></i>Active External Loans</h5>
-                <div class="d-flex gap-2 flex-wrap">
-                    <select class="form-select form-select-sm" style="max-width: 150px;" onchange="filterLoans(this.value)">
-                        <option>All Status</option>
-                        <option>Active</option>
-                        <option>Completed</option>
-                        <option>Overdue</option>
-                    </select>
-                    <button class="btn btn-sm btn-outline-primary" onclick="exportToCSV()">
-                        <i class="fas fa-download me-1"></i>Export
-                    </button>
-                </div>
+        <div class="col-lg-3 col-md-6 col-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:white;"><i class="fas fa-money-bill-wave"></i></div>
+                <p class="text-muted mb-1 fw-semibold small">Expected Interest</p>
+                <h3 class="mb-1 fw-bold">₦<%= expectedInterest.toLocaleString() %></h3>
+                <small class="text-success fw-semibold"><i class="fas fa-percentage me-1"></i><%= avgRate %>% avg rate</small>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Loan ID</th><th>Borrower</th><th>Principal</th><th>Interest Rate</th>
-                                <th>Total Due</th><th>Paid</th><th>Balance</th><th>Due Date</th>
-                                <th>Status</th><th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="loansTableBody">
-                            <% loans.forEach((loan, index) => { %>
-                                <% if (loan.external) { %>
-                                    <%
-                                        const borrower = loan.external;
-                                        const paidAmount = loan.paidAmount || 0;
-                                        const balance = loan.totalRepay - paidAmount;
-                                        const loanIdDisplay = "EXT-" + (index + 1).toString().padStart(3, '0');
-                                        const statusBadge = loan.status === "approved" ? "bg-success" :
-                                                            loan.status === "pending"  ? "bg-warning"  :
-                                                            loan.status === "rejected" ? "bg-danger"   : "bg-secondary";
-                                    %>
-                                    <tr>
-                                        <td class="fw-semibold"><%= loanIdDisplay %></td>
-                                        <td>
-                                            <div class="fw-semibold"><%= borrower.borrowerName %></div>
-                                            <small class="text-muted"><%= borrower.phone || 'N/A' %></small>
-                                        </td>
-                                        <td class="fw-bold">₦<%= loan.amount.toLocaleString() %></td>
-                                        <td><%= loan.interestRate %>% p.m.</td>
-                                        <td class="fw-bold text-primary">₦<%= loan.totalRepay.toLocaleString() %></td>
-                                        <td class="text-success">₦<%= paidAmount.toLocaleString() %></td>
-                                        <td class="<%= balance <= 0 ? 'text-success fw-bold' : 'text-warning fw-bold' %>">₦<%= balance.toLocaleString() %></td>
-                                        <td><%= new Date(loan.dueDate).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) %></td>
-                                        <td><span class="badge <%= statusBadge %>"><%= loan.status.charAt(0).toUpperCase() + loan.status.slice(1) %></span></td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <button class="btn btn-primary"
-                                                    onclick="openRecordPaymentModal('<%= loan._id %>', '<%= loanIdDisplay %>', '<%= borrower.borrowerName %>', <%= loan.totalRepay %>, <%= balance %>)"
-                                                    title="Record Payment">
-                                                    <i class="fas fa-money-bill"></i>
-                                                </button>
-                                                <button class="btn btn-info" onclick="openLoanDetailsModal('<%= loan._id %>')" title="View Details">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <% } %>
+        </div>
+        <div class="col-lg-3 col-md-6 col-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;"><i class="fas fa-coins"></i></div>
+                <p class="text-muted mb-1 fw-semibold small">Interest Collected</p>
+                <h3 class="mb-1 fw-bold">₦<%= interestCollected.toLocaleString() %></h3>
+                <small class="text-warning fw-semibold"><i class="fas fa-clock me-1"></i><%= percentCollected %>% collected</small>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:white;"><i class="fas fa-exclamation-triangle"></i></div>
+                <p class="text-muted mb-1 fw-semibold small">Overdue Payments</p>
+                <h3 class="mb-1 fw-bold">₦<%= overduePayments.toLocaleString() %></h3>
+                <small class="text-danger fw-semibold"><%= overdueCount %> overdue</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION LINKS TABLE -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold" style="color:var(--primary);"><i class="fas fa-link me-2"></i>Application Links</h5>
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#generateLinkModal">
+                <i class="fas fa-plus me-1"></i>New Link
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="invitesTable">
+                    <thead>
+                        <tr>
+                            <th>Label</th><th>Generated By</th><th>Preset Amount</th>
+                            <th>Penalty %</th><th>Rollover %</th><th>Expires</th>
+                            <th>Status</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invitesTableBody">
+                        <tr><td colspan="8" class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-2"></i>Loading links...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTIVE LOANS TABLE -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0 fw-bold" style="color:var(--primary);"><i class="fas fa-list me-2"></i>Active External Loans</h5>
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+                <select class="form-select form-select-sm" style="max-width:150px;" onchange="filterLoans(this.value)">
+                    <option>All Status</option>
+                    <option>Active</option>
+                    <option>Completed</option>
+                    <option>Overdue</option>
+                </select>
+                <input type="text" class="form-control form-control-sm" style="max-width:200px;" id="loanSearch" placeholder="Search borrower…" oninput="searchLoans()">
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="loansTable">
+                    <thead>
+                        <tr>
+                            <th>Loan ID</th><th>Borrower</th><th>Principal</th><th>Rate</th>
+                            <th>Total Due</th><th>Paid</th><th>Balance</th><th>Due Date</th>
+                            <th>Status</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="loansTableBody">
+                        <% loans.forEach((loan, index) => { %>
+                            <% if (loan.external) { %>
+                                <%
+                                    const borrower = loan.external;
+                                    const paidAmount = loan.paidAmount || 0;
+                                    const balance = loan.totalRepay - paidAmount;
+                                    const loanIdDisplay = "EXT-" + (index + 1).toString().padStart(3, '0');
+                                    const statusBadge = loan.status === "approved" ? "bg-success" :
+                                                        loan.status === "pending"  ? "bg-warning"  :
+                                                        loan.status === "rejected" ? "bg-danger"   : "bg-secondary";
+                                    const isOverdue = balance > 0 && new Date(loan.dueDate) < today;
+                                %>
+                                <tr data-borrower="<%= borrower.borrowerName?.toLowerCase() %>">
+                                    <td class="fw-semibold"><%= loanIdDisplay %></td>
+                                    <td>
+                                        <div class="fw-semibold"><%= borrower.borrowerName %></div>
+                                        <small class="text-muted"><%= borrower.phone || 'N/A' %></small>
+                                    </td>
+                                    <td class="fw-bold">₦<%= loan.amount.toLocaleString() %></td>
+                                    <td><%= loan.interestRate %>% p.m.</td>
+                                    <td class="fw-bold text-primary">₦<%= loan.totalRepay.toLocaleString() %></td>
+                                    <td class="text-success">₦<%= paidAmount.toLocaleString() %></td>
+                                    <td class="<%= balance <= 0 ? 'text-success fw-bold' : isOverdue ? 'text-danger fw-bold' : 'text-warning fw-bold' %>">
+                                        ₦<%= balance.toLocaleString() %>
+                                        <% if (isOverdue && balance > 0) { %><span class="badge bg-danger ms-1" style="font-size:.6rem;">OVERDUE</span><% } %>
+                                    </td>
+                                    <td><%= new Date(loan.dueDate).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) %></td>
+                                    <td><span class="badge <%= statusBadge %>"><%= loan.status.charAt(0).toUpperCase() + loan.status.slice(1) %></span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-primary"
+                                                onclick="openRecordPaymentModal('<%= loan._id %>', '<%= loanIdDisplay %>', '<%= borrower.borrowerName %>', <%= loan.totalRepay %>, <%= balance %>)"
+                                                title="Record Payment"><i class="fas fa-money-bill"></i></button>
+                                            <button class="btn btn-info text-white" onclick="openLoanDetailsModal('<%= loan._id %>')" title="View Details"><i class="fas fa-eye"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% } %>
+                        <% }) %>
+                        <% if (!loans.some(l => l.external)) { %>
+                            <tr><td colspan="10" class="text-center text-muted py-5"><i class="fas fa-inbox fa-2x d-block mb-2 opacity-25"></i>No external loans available</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECENT PAYMENTS -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold" style="color:var(--primary);"><i class="fas fa-history me-2"></i>Recent Interest Payments</h5>
+            <small class="text-muted" id="paymentsInfo"></small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr><th>Date</th><th>Loan ID</th><th>Borrower</th><th>Amount Paid</th><th>Type</th><th>Recorded By</th></tr>
+                    </thead>
+                    <tbody id="paymentsTableBody">
+                        <% if (payments && payments.length > 0) { %>
+                            <% payments.forEach(payment => { %>
+                                <tr>
+                                    <td><%= new Date(payment.createdAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) %></td>
+                                    <td class="fw-semibold"><%= payment.loan.external ? 'EXT-' + payment.loan._id.toString().slice(-3).toUpperCase() : payment.loan.user.membershipID %></td>
+                                    <td><%= payment.loan.external ? payment.loan.external.borrowerName : payment.loan.user.firstName + ' ' + payment.loan.user.lastName %></td>
+                                    <td class="fw-bold text-success">₦<%= payment.amount.toLocaleString() %></td>
+                                    <td><span class="badge <%= payment.type === 'interest' ? 'bg-info' : 'bg-success' %>"><%= payment.type.charAt(0).toUpperCase() + payment.type.slice(1) %></span></td>
+                                    <td><%= payment.paidBy ? (payment.paidBy.fullName || [payment.paidBy.firstName, payment.paidBy.lastName].filter(Boolean).join(' ') || 'Admin') : 'Admin' %></td>
+                                </tr>
                             <% }) %>
-                            <% if (!loans.some(l => l.external)) { %>
-                                <tr><td colspan="10" class="text-center text-muted">No external loans available</td></tr>
-                            <% } %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Payments -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-history me-2"></i>Recent Interest Payments</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr><th>Date</th><th>Loan ID</th><th>Borrower</th><th>Amount Paid</th><th>Payment Type</th><th>Recorded By</th></tr>
-                        </thead>
-                        <tbody>
-                            <% if (payments && payments.length > 0) { %>
-                                <% payments.forEach(payment => { %>
-                                    <tr>
-                                        <td><%= new Date(payment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
-                                        <td class="fw-semibold"><%= payment.loan.external ? 'EXT-' + payment.loan._id.toString().slice(-3).toUpperCase() : payment.loan.user.membershipID %></td>
-                                        <td><%= payment.loan.external ? payment.loan.external.borrowerName : payment.loan.user.firstName + ' ' + payment.loan.user.lastName %></td>
-                                        <td class="fw-bold text-success">₦<%= payment.amount.toLocaleString() %></td>
-                                        <td><span class="badge <%= payment.type === 'interest' ? 'bg-info' : 'bg-success' %>"><%= payment.type.charAt(0).toUpperCase() + payment.type.slice(1) %></span></td>
-                                        <td><%= payment.paidBy ? (payment.paidBy.firstName + ' ' + payment.paidBy.lastName) : 'Admin' %></td>
-                                    </tr>
-                                <% }) %>
-                            <% } else { %>
-                                <tr><td colspan="6" class="text-center text-muted">No recent payments</td></tr>
-                            <% } %>
-                        </tbody>
-                    </table>
-                </div>
+                        <% } else { %>
+                            <tr><td colspan="6" class="text-center text-muted py-5"><i class="fas fa-inbox fa-2x d-block mb-2 opacity-25"></i>No recent payments</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <div class="powered-by">
-        <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
-    </div>
+</div><!-- /main-content -->
 
-    <!-- ══════════════════════════════════════════
-         CUSTOM ALERT MODAL
-         ══════════════════════════════════════════ -->
-    <div class="modal fade" id="alertModal" tabindex="-1" aria-modal="true" role="dialog">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-            <div class="modal-content">
-                <div class="modal-header" id="alertModalHeader">
-                    <h5 class="modal-title fw-bold" id="alertModalLabel"></h5>
-                    <button type="button" class="btn-close" id="alertModalCloseBtn" data-bs-dismiss="modal"></button>
+<div class="powered-by">Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong></div>
+
+<!-- ══ CUSTOM ALERT MODAL ══ -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+        <div class="modal-content">
+            <div class="modal-header" id="alertModalHeader">
+                <h5 class="modal-title fw-bold" id="alertModalLabel"></h5>
+                <button type="button" class="btn-close" id="alertModalCloseBtn" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-icon-wrapper" id="alertModalIconWrapper"><i id="alertModalIcon"></i></div>
+                <p class="mb-0 text-center" id="alertModalMessage" style="font-size:1rem;"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn px-4 fw-semibold" id="alertModalOkBtn" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ GENERATE APPLICATION LINK MODAL ══ -->
+<div class="modal fade" id="generateLinkModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;">
+                <h5 class="modal-title fw-bold"><i class="fas fa-link me-2"></i>Generate Application Link</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-info-custom mb-4">
+                    <small><i class="fas fa-info-circle me-2"></i>A secure link will be shared with the applicant. It expires in <strong>7 days</strong> and can only be used once.</small>
                 </div>
-                <div class="modal-body">
-                    <div class="alert-icon-wrapper" id="alertModalIconWrapper">
-                        <i id="alertModalIcon"></i>
+                <div id="linkFormStep">
+                    <div class="mb-3">
+                        <label class="form-label">Label / Note <small class="text-muted fw-normal">(for your reference)</small></label>
+                        <input type="text" class="form-control" id="inviteLabel" placeholder="e.g. Loan for Mr. Emeka – Jan 2026">
                     </div>
-                    <p class="mb-0 text-center" id="alertModalMessage"></p>
+                    <p class="fw-semibold small mb-2" style="color:var(--primary);"><i class="fas fa-lock me-1"></i>Pre-set loan terms <span class="text-muted fw-normal">(optional)</span></p>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4"><label class="form-label">Amount (₦)</label><input type="number" class="form-control" id="inviteAmount" placeholder="Leave blank for open"></div>
+                        <div class="col-md-4"><label class="form-label">Interest Rate (%)</label><input type="number" class="form-control" id="inviteRate" step="0.01" placeholder="e.g. 5"></div>
+                        <div class="col-md-4"><label class="form-label">Duration (months)</label><input type="number" class="form-control" id="inviteDuration" placeholder="e.g. 6"></div>
+                    </div>
+                    <hr class="my-3">
+                    <p class="fw-semibold small mb-2" style="color:var(--primary);"><i class="fas fa-exclamation-circle me-1"></i>Penalty &amp; Rollover Settings <span class="text-muted fw-normal">(optional)</span></p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Penalty % (per day)</label>
+                            <div class="input-group"><input type="number" class="form-control" id="invitePenalty" step="0.01" min="0" placeholder="e.g. 2"><span class="input-group-text">%</span></div>
+                            <small class="text-muted">Applied daily once overdue</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Rollover % (of balance)</label>
+                            <div class="input-group"><input type="number" class="form-control" id="inviteRollover" step="0.01" min="0" placeholder="e.g. 5"><span class="input-group-text">%</span></div>
+                            <small class="text-muted">Charged on balance at rollover</small>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn px-4 fw-semibold" id="alertModalOkBtn" data-bs-dismiss="modal">OK</button>
+                <div id="linkResultStep" style="display:none;">
+                    <p class="fw-semibold mb-2">Share this link with the applicant:</p>
+                    <div class="link-display mb-3" id="generatedLinkDisplay"></div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary flex-grow-1" onclick="copyLink()"><i class="fas fa-copy me-1"></i>Copy Link</button>
+                        <button class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="resetLinkForm()"><i class="fas fa-plus me-1"></i>Generate Another</button>
+                    </div>
+                    <div id="copiedNotice" class="text-success text-center mt-2 small" style="display:none;"><i class="fas fa-check me-1"></i>Copied to clipboard!</div>
                 </div>
+            </div>
+            <div class="modal-footer" id="linkModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="generateLinkBtn" onclick="generateLink()"><i class="fas fa-link me-2"></i>Generate Link</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- ══════════════════════════════════════════
-         GENERATE APPLICATION LINK MODAL
-         ══════════════════════════════════════════ -->
-    <div class="modal fade" id="generateLinkModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-link me-2"></i>Generate Application Link</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert-info-custom mb-4">
-                        <small><i class="fas fa-info-circle me-2"></i>
-                            A secure link will be generated and shared with the applicant. They fill in their own details and submit.
-                            The link expires in <strong>7 days</strong> and can only be used once.
-                        </small>
+<!-- ══ ISSUE LOAN DIRECTLY MODAL ══ -->
+<div class="modal fade" id="issueLoanModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle me-2" style="color:var(--primary);"></i>Issue New External Loan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-info-custom mb-4"><small><i class="fas fa-info-circle me-2"></i>Fill in all borrower and loan details carefully</small></div>
+                <form id="issueLoanForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label fw-semibold">Borrower Name *</label><input type="text" class="form-control" name="borrowerName" required></div>
+                        <div class="col-md-6 mb-3"><label class="form-label fw-semibold">Phone Number *</label><input type="tel" class="form-control" name="borrowerPhone" required></div>
                     </div>
-
-                    <!-- Step 1: configure -->
-                    <div id="linkFormStep">
-                        <div class="mb-3">
-                            <label class="form-label">Label / Note <small class="text-muted fw-normal">(for your reference)</small></label>
-                            <input type="text" class="form-control" id="inviteLabel" placeholder="e.g. Loan for Mr. Emeka – Jan 2026">
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label fw-semibold">Email (Optional)</label><input type="email" class="form-control" name="borrowerEmail"></div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Borrower Type *</label>
+                            <select class="form-select" name="borrowerType" required>
+                                <option value="">Select type...</option>
+                                <option value="individual">Individual</option>
+                                <option value="company">Company</option>
+                            </select>
                         </div>
-
-                        <p class="fw-semibold small mb-2" style="color: var(--primary);">
-                            <i class="fas fa-lock me-1"></i>Pre-set loan terms
-                            <span class="text-muted fw-normal">(optional — applicant cannot override what you set here)</span>
-                        </p>
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-4">
-                                <label class="form-label">Amount (₦)</label>
-                                <input type="number" class="form-control" id="inviteAmount" placeholder="Leave blank for open">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Interest Rate (%)</label>
-                                <input type="number" class="form-control" id="inviteRate" step="0.01" placeholder="e.g. 5">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Duration (months)</label>
-                                <input type="number" class="form-control" id="inviteDuration" placeholder="e.g. 6">
-                            </div>
-                        </div>
-
-                        <!-- ── NEW: Penalty & Rollover ─────────────────────── -->
-                        <hr class="my-3">
-                        <p class="fw-semibold small mb-2" style="color: var(--primary);">
-                            <i class="fas fa-exclamation-circle me-1"></i>Penalty & Rollover Settings
-                            <span class="text-muted fw-normal">(optional — applied to the resulting loan)</span>
-                        </p>
-                        <div class="row g-3">
+                    </div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Address</label><textarea class="form-control" name="borrowerAddress" rows="2"></textarea></div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label fw-semibold">Loan Amount (₦) *</label><input type="number" class="form-control" name="loanAmount" required></div>
+                        <div class="col-md-6 mb-3"><label class="form-label fw-semibold">Interest Rate (% p.m.) *</label><input type="number" class="form-control" name="interestRate" step="0.01" required></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label fw-semibold">Loan Duration (Months) *</label><input type="number" class="form-control" name="loanDuration" required></div>
+                        <div class="col-md-6 mb-3"><label class="form-label fw-semibold">Due Date *</label><input type="date" class="form-control" name="dueDate" required></div>
+                    </div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Loan Purpose</label><textarea class="form-control" name="loanPurpose" rows="2" placeholder="E.g., Business expansion, Equipment purchase"></textarea></div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Guarantors</label>
+                        <div class="row g-2">
                             <div class="col-md-6">
-                                <label class="form-label">
-                                    Penalty Percentage (% per day)
-                                    <i class="fas fa-info-circle text-muted ms-1" style="font-size:0.8rem;"
-                                       title="Daily penalty applied when loan becomes overdue"></i>
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" id="invitePenalty" step="0.01" min="0" placeholder="e.g. 2">
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                <small class="text-muted">Applied daily once loan is overdue</small>
+                                <select class="form-select" name="guarantor1" id="guarantor1" required>
+                                    <option value="">Select first guarantor...</option>
+                                    <% users.forEach(user => { %><option value="<%= user._id %>"><%= user.firstName %> <%= user.lastName %> (ID: <%= user.membershipID %>)</option><% }) %>
+                                </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">
-                                    Rollover Percentage (% of balance)
-                                    <i class="fas fa-info-circle text-muted ms-1" style="font-size:0.8rem;"
-                                       title="Fee charged when extending the loan term"></i>
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" id="inviteRollover" step="0.01" min="0" placeholder="e.g. 5">
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                <small class="text-muted">Charged on loan balance at rollover</small>
-                            </div>
-                        </div>
-                        <!-- ── END Penalty & Rollover ──────────────────────── -->
-                    </div>
-
-                    <!-- Step 2: link generated -->
-                    <div id="linkResultStep" style="display:none;">
-                        <p class="fw-semibold mb-2">Share this link with the applicant:</p>
-                        <div class="link-display mb-3" id="generatedLinkDisplay"></div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-primary flex-grow-1" onclick="copyLink()">
-                                <i class="fas fa-copy me-1"></i>Copy Link
-                            </button>
-                            <button class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="resetLinkForm()">
-                                <i class="fas fa-plus me-1"></i>Generate Another
-                            </button>
-                        </div>
-                        <div id="copiedNotice" class="text-success text-center mt-2 small" style="display:none;">
-                            <i class="fas fa-check me-1"></i>Copied to clipboard!
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer" id="linkModalFooter">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="generateLinkBtn" onclick="generateLink()">
-                        <i class="fas fa-link me-2"></i>Generate Link
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Issue Loan Directly Modal -->
-    <div class="modal fade" id="issueLoanModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle me-2" style="color: var(--primary);"></i>Issue New External Loan</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert-info-custom mb-4">
-                        <small><i class="fas fa-info-circle me-2"></i>Fill in all borrower and loan details carefully</small>
-                    </div>
-                    <form id="issueLoanForm">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Borrower Name *</label>
-                                <input type="text" class="form-control" name="borrowerName" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Phone Number *</label>
-                                <input type="tel" class="form-control" name="borrowerPhone" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Email (Optional)</label>
-                                <input type="email" class="form-control" name="borrowerEmail">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Borrower Type *</label>
-                                <select class="form-select" name="borrowerType" required>
-                                    <option value="">Select type...</option>
-                                    <option value="individual">Individual</option>
-                                    <option value="company">Company</option>
+                                <select class="form-select" name="guarantor2" id="guarantor2" required>
+                                    <option value="">Select second guarantor...</option>
+                                    <% users.forEach(user => { %><option value="<%= user._id %>"><%= user.firstName %> <%= user.lastName %> (ID: <%= user.membershipID %>)</option><% }) %>
                                 </select>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Address</label>
-                            <textarea class="form-control" name="borrowerAddress" rows="2"></textarea>
-                        </div>
-                        <hr>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Loan Amount (₦) *</label>
-                                <input type="number" class="form-control" name="loanAmount" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Interest Rate (% p.m.) *</label>
-                                <input type="number" class="form-control" name="interestRate" step="0.01" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Loan Duration (Months) *</label>
-                                <input type="number" class="form-control" name="loanDuration" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Due Date *</label>
-                                <input type="date" class="form-control" name="dueDate" required>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Loan Purpose</label>
-                            <textarea class="form-control" name="loanPurpose" rows="2" placeholder="E.g., Business expansion, Equipment purchase"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Guarantors</label>
-                            <div class="row g-2">
-                                <div class="col-md-6">
-                                    <select class="form-select" name="guarantor1" id="guarantor1" required>
-                                        <option value="">Select first guarantor...</option>
-                                        <% users.forEach(user => { %>
-                                            <option value="<%= user._id %>"><%= user.firstName %> <%= user.lastName %> (ID: <%= user.membershipID %>)</option>
-                                        <% }) %>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <select class="form-select" name="guarantor2" id="guarantor2" required>
-                                        <option value="">Select second guarantor...</option>
-                                        <% users.forEach(user => { %>
-                                            <option value="<%= user._id %>"><%= user.firstName %> <%= user.lastName %> (ID: <%= user.membershipID %>)</option>
-                                        <% }) %>
-                                    </select>
-                                </div>
-                            </div>
-                            <small class="form-text text-muted">Two guarantors are required. You cannot select the same person twice.</small>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="submitLoanForm()">
-                        <i class="fas fa-check me-2"></i>Issue Loan
-                    </button>
-                </div>
+                        <small class="form-text text-muted">Two guarantors are required. You cannot select the same person twice.</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitLoanForm()"><i class="fas fa-check me-2"></i>Issue Loan</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- ══════════════════════════════════════════
-         RECORD PAYMENT MODAL
-         ══════════════════════════════════════════ -->
-    <div class="modal fade" id="recordPaymentModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-money-bill me-2"></i>Record Payment</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Loan summary (read-only) -->
-                    <div class="p-3 rounded mb-3" style="background: rgba(30,58,138,0.04); border: 1px solid rgba(30,58,138,0.1);">
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <small class="text-muted d-block">Loan ID</small>
-                                <strong id="paymentLoanId">—</strong>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted d-block">Borrower</small>
-                                <strong id="paymentBorrower">—</strong>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted d-block">Total Due</small>
-                                <strong id="paymentTotalDue" class="text-primary">—</strong>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted d-block">Outstanding Balance</small>
-                                <strong id="paymentBalance" class="text-warning">—</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Hidden real loan ID for API -->
-                    <input type="hidden" id="paymentRealLoanId">
-
-                    <hr>
-
-                    <!-- Payment error banner -->
-                    <div id="paymentError" class="alert alert-danger d-none mb-3" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <span id="paymentErrorMsg"></span>
-                    </div>
-
-                    <form id="recordPaymentForm">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Payment Amount (₦) *</label>
-                            <input type="number" class="form-control" name="paymentAmount" id="paymentAmountInput" min="1" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Payment Type *</label>
-                            <select class="form-select" name="paymentType" required>
-                                <option value="principal">Principal Payment</option>
-                                <option value="interest">Interest Payment</option>
-                                <option value="both">Principal + Interest</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Payment Method *</label>
-                            <select class="form-select" name="paymentMethod" required>
-                                <option value="cash">Cash</option>
-                                <option value="bank-transfer">Bank Transfer</option>
-                                <option value="cheque">Cheque</option>
-                                <option value="pos">POS</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Payer Name <small class="text-muted fw-normal">(if different from borrower)</small></label>
-                            <input type="text" class="form-control" name="payerName" id="payerNameInput" placeholder="Leave blank to use borrower name">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Reference / Transaction ID</label>
-                            <input type="text" class="form-control" name="referenceId">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Notes</label>
-                            <textarea class="form-control" name="paymentNotes" rows="2"></textarea>
-                        </div>
-                    </form>
-
-                    <div class="alert alert-info mb-0" style="font-size: 0.82rem;">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Payment will be submitted for <strong>admin approval</strong> before being applied to the loan balance.
+<!-- ══ RECORD PAYMENT MODAL ══ -->
+<div class="modal fade" id="recordPaymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold"><i class="fas fa-money-bill me-2"></i>Record Payment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="p-3 rounded mb-3" style="background:rgba(30,58,138,.04);border:1px solid rgba(30,58,138,.1);">
+                    <div class="row g-2">
+                        <div class="col-6"><small class="text-muted d-block">Loan ID</small><strong id="paymentLoanId">—</strong></div>
+                        <div class="col-6"><small class="text-muted d-block">Borrower</small><strong id="paymentBorrower">—</strong></div>
+                        <div class="col-6"><small class="text-muted d-block">Total Due</small><strong id="paymentTotalDue" class="text-primary">—</strong></div>
+                        <div class="col-6"><small class="text-muted d-block">Outstanding Balance</small><strong id="paymentBalance" class="text-warning">—</strong></div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-success" id="submitPaymentBtn" onclick="submitPaymentRecord()">
-                        <i class="fas fa-check me-2"></i>Submit for Approval
-                    </button>
+                <input type="hidden" id="paymentRealLoanId">
+                <div id="paymentError" class="alert alert-danger d-none mb-3" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i><span id="paymentErrorMsg"></span>
                 </div>
+                <form id="recordPaymentForm">
+                    <div class="mb-3"><label class="form-label fw-semibold">Payment Amount (₦) *</label><input type="number" class="form-control" name="paymentAmount" id="paymentAmountInput" min="1" required></div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Payment Type *</label>
+                        <select class="form-select" name="paymentType" required>
+                            <option value="principal">Principal Payment</option>
+                            <option value="interest">Interest Payment</option>
+                            <option value="both">Principal + Interest</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Payment Method *</label>
+                        <select class="form-select" name="paymentMethod" required>
+                            <option value="cash">Cash</option>
+                            <option value="bank-transfer">Bank Transfer</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="pos">POS</option>
+                        </select>
+                    </div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Payer Name <small class="text-muted fw-normal">(if different from borrower)</small></label><input type="text" class="form-control" name="payerName" id="payerNameInput" placeholder="Leave blank to use borrower name"></div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Reference / Transaction ID</label><input type="text" class="form-control" name="referenceId"></div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Notes</label><textarea class="form-control" name="paymentNotes" rows="2"></textarea></div>
+                </form>
+                <div class="alert alert-info mb-0" style="font-size:.82rem;"><i class="fas fa-info-circle me-2"></i>Payment will be submitted for <strong>admin approval</strong> before being applied to the loan balance.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="submitPaymentBtn" onclick="submitPaymentRecord()"><i class="fas fa-check me-2"></i>Submit for Approval</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Loan Details Modal -->
-    <div class="modal fade" id="loanDetailsModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-file-invoice me-2"></i>Loan Details</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="loanDetailsBody">
-                    <div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-primary" onclick="printLoanStatement()">
-                        <i class="fas fa-print me-2"></i>Print Statement
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+<!-- ══ LOAN DETAILS MODAL ══ -->
+<div class="modal fade" id="loanDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;">
+                <h5 class="modal-title fw-bold"><i class="fas fa-file-invoice me-2"></i>Loan Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="loanDetailsBody">
+                <div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" onclick="printLoanStatement()"><i class="fas fa-print me-2"></i>Print Statement</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // ══════════════════════════════════════════
-        // MODAL SEQUENCING HELPER
-        // ══════════════════════════════════════════
-        function switchModal(fromId, toFn) {
-            const fromEl = document.getElementById(fromId);
-            const instance = bootstrap.Modal.getInstance(fromEl);
-            if (instance) {
-                fromEl.addEventListener('hidden.bs.modal', function handler() {
-                    fromEl.removeEventListener('hidden.bs.modal', handler);
-                    toFn();
-                });
-                instance.hide();
-            } else {
-                toFn();
-            }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+function toggleSidebar(e) {
+    e.stopPropagation();
+    document.getElementById('sidebar').classList.toggle('active');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('active');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+}
+document.addEventListener('click', e => {
+    const sb = document.getElementById('sidebar');
+    if (window.innerWidth <= 992 && !sb.contains(e.target) && !e.target.closest('.fa-bars') && sb.classList.contains('active'))
+        closeSidebar();
+    if (!e.target.closest('.export-wrapper')) closeExportMenu();
+});
+
+async function loadSidebarPendingCount() {
+    try {
+        const res  = await fetch('/admin/pending-approvals-count');
+        const data = await res.json();
+        const badge = document.getElementById('sidebarPendingBadge'); if (!badge) return;
+        badge.style.display = data.count > 0 ? 'inline-block' : 'none';
+        if (data.count > 0) badge.textContent = data.count;
+    } catch {}
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+    weekday:'short', year:'numeric', month:'short', day:'numeric'
+});
+
+/* ══════════════════════════════════════
+   MODAL SWITCH HELPER
+══════════════════════════════════════ */
+function switchModal(fromId, toFn) {
+    const el = document.getElementById(fromId);
+    const inst = bootstrap.Modal.getInstance(el);
+    if (inst) {
+        el.addEventListener('hidden.bs.modal', function h() { el.removeEventListener('hidden.bs.modal', h); toFn(); });
+        inst.hide();
+    } else { toFn(); }
+}
+
+/* ══════════════════════════════════════
+   CUSTOM ALERT
+══════════════════════════════════════ */
+function showAlert(message, type = 'info', title = null) {
+    const cfg = {
+        success: { hdr:'bg-success', ibg:'rgba(16,185,129,0.12)', ic:'#10b981', icls:'fas fa-check-circle',        btn:'btn-success', t:'Success' },
+        danger:  { hdr:'bg-danger',  ibg:'rgba(239,68,68,0.12)',  ic:'#ef4444', icls:'fas fa-times-circle',         btn:'btn-danger',  t:'Error'   },
+        warning: { hdr:'bg-warning', ibg:'rgba(245,158,11,0.12)', ic:'#f59e0b', icls:'fas fa-exclamation-triangle', btn:'btn-warning', t:'Warning' },
+        info:    { hdr:'bg-primary', ibg:'rgba(59,130,246,0.12)', ic:'#3b82f6', icls:'fas fa-info-circle',          btn:'btn-primary', t:'Info'    },
+    };
+    const c = cfg[type] || cfg.info;
+    document.getElementById('alertModalHeader').className   = `modal-header ${c.hdr} text-white border-0`;
+    document.getElementById('alertModalCloseBtn').className = 'btn-close btn-close-white';
+    document.getElementById('alertModalLabel').textContent  = title || c.t;
+    const iw = document.getElementById('alertModalIconWrapper'); iw.style.background = c.ibg;
+    const ic = document.getElementById('alertModalIcon'); ic.className = `${c.icls} fa-2x`; ic.style.color = c.ic;
+    document.getElementById('alertModalMessage').textContent = message;
+    document.getElementById('alertModalOkBtn').className    = `btn px-4 fw-semibold ${c.btn}`;
+    const open = document.querySelector('.modal.show');
+    if (open && open.id !== 'alertModal') switchModal(open.id, () => new bootstrap.Modal(document.getElementById('alertModal')).show());
+    else new bootstrap.Modal(document.getElementById('alertModal')).show();
+}
+
+/* ══════════════════════════════════════
+   EXPORT DROPDOWN
+══════════════════════════════════════ */
+function toggleExportMenu(e) {
+    e.stopPropagation();
+    const menu = document.getElementById('exportMenu');
+    const btn  = document.getElementById('exportBtn');
+    const isOpen = menu.style.display !== 'none';
+    menu.style.display = isOpen ? 'none' : 'block';
+    btn.classList.toggle('open', !isOpen);
+}
+function closeExportMenu() {
+    document.getElementById('exportMenu').style.display = 'none';
+    document.getElementById('exportBtn').classList.remove('open');
+}
+
+/* ══════════════════════════════════════
+   SERVER LOAN DATA (injected by EJS)
+   Used by export functions for full schema coverage
+══════════════════════════════════════ */
+const _serverLoans    = <%- JSON.stringify(loans.filter(l => l.external).map(l => ({
+    _id:               l._id.toString(),
+    // ── Borrower ──────────────────────────────────────────────
+    borrowerName:      l.external?.borrowerName     || '—',
+    borrowerType:      l.external?.borrowerType     || '—',
+    borrowerEmail:     l.external?.email            || '—',
+    borrowerPhone:     l.external?.phone            || '—',
+    borrowerAddress:   l.external?.address          || '—',
+    // ── Initiator ─────────────────────────────────────────────
+    // initiatedBy may be Admin (fullName) or User (firstName + lastName) — try both
+    initiatedBy: l.initiatedBy ? (l.initiatedBy.fullName || [l.initiatedBy.firstName, l.initiatedBy.lastName].filter(Boolean).join(' ') || '—') : '—',
+    initiatedByEmail:  l.initiatedBy?.email         || '—',
+    // ── Financials ────────────────────────────────────────────
+    amount:            l.amount,
+    // interestAmount is optional in schema — guard null/undefined
+    interestAmount:    (l.interestAmount != null && l.interestAmount !== '') ? Number(l.interestAmount) : null,
+    interestRate:      l.interestRate,
+    totalRepay:        l.totalRepay,
+    paidAmount:        l.paidAmount                 || 0,
+    outstandingBalance:l.outstandingBalance         || 0,
+    balance:           l.totalRepay - (l.paidAmount || 0),
+    // ── Duration / Dates ──────────────────────────────────────
+    externalDuration:  l.externalDuration           || '—',
+    dueDate:           l.dueDate ? new Date(l.dueDate).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—',
+    dueDateRaw:        l.dueDate                    || null,
+    approvedAt:        l.approvedAt ? new Date(l.approvedAt).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—',
+    disbursementMethod:l.disbursementMethod         || '—',
+    disbursementDate:  l.disbursementDate ? new Date(l.disbursementDate).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—',
+    createdAt:         new Date(l.createdAt).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}),
+    paidAt:            l.paidAt ? new Date(l.paidAt).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—',
+    overdueAt:         l.overdueAt ? new Date(l.overdueAt).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '—',
+    // ── Status ────────────────────────────────────────────────
+    status:            l.status,
+    rejectionReason:   l.rejectionReason            || '—',
+    // ── Penalty ───────────────────────────────────────────────
+    penaltyPercentage: l.penaltyPercentage          || 0,
+    totalPenalty:      l.totalPenalty               || 0,
+    penaltyHistoryCount: (l.penaltyHistory || []).length,
+    // ── Rollover ──────────────────────────────────────────────
+    rolloverPercentage:l.rolloverPercentage         || 0,
+    rolloverCount:     l.rolloverCount              || 0,
+    // ── Guarantors ────────────────────────────────────────────
+    guarantor1Name:    l.guarantors?.[0]?.guarantor ? (l.guarantors[0].guarantor.firstName + ' ' + l.guarantors[0].guarantor.lastName) : '—',
+    guarantor1ID:      l.guarantors?.[0]?.guarantor?.membershipID || '—',
+    guarantor1Status:  l.guarantors?.[0]?.status    || '—',
+    guarantor2Name:    l.guarantors?.[1]?.guarantor ? (l.guarantors[1].guarantor.firstName + ' ' + l.guarantors[1].guarantor.lastName) : '—',
+    guarantor2ID:      l.guarantors?.[1]?.guarantor?.membershipID || '—',
+    guarantor2Status:  l.guarantors?.[1]?.status    || '—',
+}))) %>;
+
+const _serverPayments = <%- JSON.stringify((payments || []).map(p => ({
+    date:        new Date(p.createdAt).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}),
+    loanId:      p.loan.external ? 'EXT-' + p.loan._id.toString().slice(-3).toUpperCase() : (p.loan.user?.membershipID || '—'),
+    borrower:    p.loan.external ? p.loan.external.borrowerName : ((p.loan.user?.firstName || '') + ' ' + (p.loan.user?.lastName || '')),
+    amount:      p.amount,
+    type:        p.type,
+    recordedBy:  p.paidBy ? (p.paidBy.firstName + ' ' + p.paidBy.lastName) : 'Admin',
+    isExternal:  !!p.loan.external,
+}))) %>;
+
+/* ── helpers ── */
+function _fmt(n) { return '₦' + Number(n||0).toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function _cap(s) { return s ? s.charAt(0).toUpperCase()+s.slice(1) : '—'; }
+
+/* ══════════════════════════════════════
+   EXCEL EXPORT — LOANS (full schema)
+══════════════════════════════════════ */
+function exportLoansExcel() {
+    if (!_serverLoans.length) { showAlert('No loan records to export.', 'warning', 'Nothing to Export'); return; }
+    const now = new Date().toLocaleString('en-US',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const today = new Date();
+
+    /* ── Main sheet ── */
+    const mainRows = _serverLoans.map((l, i) => {
+        const isOverdue = l.dueDateRaw && l.balance > 0 && new Date(l.dueDateRaw) < today;
+        return {
+            '#':                      i + 1,
+            'Loan ID (Display)':      'EXT-' + String(i+1).padStart(3,'0'),
+            'MongoDB ID':             l._id,
+            // Borrower
+            'Borrower Name':          l.borrowerName,
+            'Borrower Type':          _cap(l.borrowerType),
+            'Borrower Email':         l.borrowerEmail,
+            'Borrower Phone':         l.borrowerPhone,
+            'Borrower Address':       l.borrowerAddress,
+            // Initiator
+            'Initiated By':           l.initiatedBy,
+            'Initiator Email':        l.initiatedByEmail,
+            // Financials
+            'Principal (₦)':          l.amount,
+            'Interest Amount (₦)':    l.interestAmount != null ? l.interestAmount : '—',
+            'Interest Rate (% p.m.)': l.interestRate,
+            'Total Repayable (₦)':    l.totalRepay,
+            'Amount Paid (₦)':        l.paidAmount,
+            'Outstanding Balance (₦)':l.outstandingBalance,
+            'Remaining Balance (₦)':  l.balance,
+            // Penalty
+            'Penalty Rate (% /day)':  l.penaltyPercentage,
+            'Total Penalty (₦)':      l.totalPenalty,
+            'Penalty Events':         l.penaltyHistoryCount,
+            // Rollover
+            'Rollover Rate (%)':      l.rolloverPercentage,
+            'Rollover Count':         l.rolloverCount,
+            // Duration / Dates
+            'Duration (months)':      l.externalDuration,
+            'Due Date':               l.dueDate,
+            'Overdue?':               isOverdue ? 'YES' : 'No',
+            'Disbursement Method':    l.disbursementMethod,
+            'Disbursement Date':      l.disbursementDate,
+            'Approved At':            l.approvedAt,
+            'Paid Off At':            l.paidAt,
+            'Overdue Since':          l.overdueAt,
+            'Created At':             l.createdAt,
+            // Status
+            'Status':                 _cap(l.status),
+            'Rejection Reason':       l.rejectionReason,
+            // Guarantors
+            'Guarantor 1 Name':       l.guarantor1Name,
+            'Guarantor 1 ID':         l.guarantor1ID,
+            'Guarantor 1 Status':     _cap(l.guarantor1Status),
+            'Guarantor 2 Name':       l.guarantor2Name,
+            'Guarantor 2 ID':         l.guarantor2ID,
+            'Guarantor 2 Status':     _cap(l.guarantor2Status),
+        };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(mainRows);
+
+    /* Column widths */
+    ws['!cols'] = [
+        {wch:4},{wch:16},{wch:28},           // # / display id / mongo id
+        {wch:22},{wch:14},{wch:26},{wch:16},{wch:28}, // borrower
+        {wch:22},{wch:26},                    // initiator
+        {wch:16},{wch:18},{wch:18},{wch:18},{wch:16},{wch:20},{wch:18}, // financials
+        {wch:18},{wch:16},{wch:14},           // penalty
+        {wch:16},{wch:14},                    // rollover
+        {wch:14},{wch:14},{wch:10},{wch:18},{wch:16},{wch:14},{wch:14},{wch:14},{wch:14}, // dates
+        {wch:14},{wch:22},                    // status
+        {wch:22},{wch:14},{wch:16},{wch:22},{wch:14},{wch:16}, // guarantors
+    ];
+
+    /* Header styling */
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let C = range.s.c; C <= range.e.c; C++) {
+        const addr = XLSX.utils.encode_cell({r:0,c:C});
+        if (!ws[addr]) continue;
+        ws[addr].s = { fill:{fgColor:{rgb:'1E3A8A'}}, font:{bold:true,color:{rgb:'FFFFFF'},sz:9}, alignment:{horizontal:'center',vertical:'center',wrapText:true} };
+    }
+    /* Row striping */
+    for (let R = 1; R <= range.e.r; R++) {
+        const fill = R%2===0 ? 'EEF2FF' : 'FFFFFF';
+        for (let C = range.s.c; C <= range.e.c; C++) {
+            const addr = XLSX.utils.encode_cell({r:R,c:C});
+            if (!ws[addr]) ws[addr]={v:'',t:'s'};
+            ws[addr].s = { fill:{fgColor:{rgb:fill}}, alignment:{vertical:'center'}, border:{bottom:{style:'thin',color:{rgb:'E0E7FF'}}} };
         }
+    }
 
-        // ══════════════════════════════════════════
-        // CUSTOM ALERT HELPER
-        // ══════════════════════════════════════════
-        function showAlert(message, type = 'info', title = null) {
-            const config = {
-                success: { headerBg: 'bg-success', iconBg: 'rgba(16,185,129,0.12)', iconColor: '#10b981', iconClass: 'fas fa-check-circle', btnClass: 'btn-success', defaultTitle: 'Success' },
-                danger:  { headerBg: 'bg-danger',  iconBg: 'rgba(239,68,68,0.12)',  iconColor: '#ef4444', iconClass: 'fas fa-times-circle', btnClass: 'btn-danger',  defaultTitle: 'Error' },
-                warning: { headerBg: 'bg-warning', iconBg: 'rgba(245,158,11,0.12)', iconColor: '#f59e0b', iconClass: 'fas fa-exclamation-triangle', btnClass: 'btn-warning', defaultTitle: 'Warning' },
-                info:    { headerBg: 'bg-primary', iconBg: 'rgba(59,130,246,0.12)',  iconColor: '#3b82f6', iconClass: 'fas fa-info-circle', btnClass: 'btn-primary', defaultTitle: 'Information' }
-            };
-            const c = config[type] || config.info;
-            document.getElementById('alertModalHeader').className = `modal-header ${c.headerBg} text-white border-0`;
-            document.getElementById('alertModalCloseBtn').className = 'btn-close btn-close-white';
-            document.getElementById('alertModalLabel').textContent = title || c.defaultTitle;
-            const wrapper = document.getElementById('alertModalIconWrapper');
-            wrapper.style.background = c.iconBg;
-            const icon = document.getElementById('alertModalIcon');
-            icon.className = `${c.iconClass} fa-2x`;
-            icon.style.color = c.iconColor;
-            document.getElementById('alertModalMessage').textContent = message;
-            const okBtn = document.getElementById('alertModalOkBtn');
-            okBtn.className = `btn px-4 fw-semibold ${c.btnClass}`;
+    /* ── Summary sheet ── */
+    const totalIssued = _serverLoans.reduce((s,l)=>s+l.amount,0);
+    const totalPaid   = _serverLoans.reduce((s,l)=>s+l.paidAmount,0);
+    const totalBal    = _serverLoans.reduce((s,l)=>s+l.balance,0);
+    const totalPen    = _serverLoans.reduce((s,l)=>s+l.totalPenalty,0);
+    const overdueLoans= _serverLoans.filter(l=>l.dueDateRaw&&l.balance>0&&new Date(l.dueDateRaw)<today);
 
-            const openModal = document.querySelector('.modal.show');
-            if (openModal && openModal.id !== 'alertModal') {
-                switchModal(openModal.id, () => new bootstrap.Modal(document.getElementById('alertModal')).show());
-            } else {
-                new bootstrap.Modal(document.getElementById('alertModal')).show();
-            }
-        }
+    const summaryData = [
+        ['Club De Stars — External Loan Portfolio Export',''],
+        ['Generated',          now],
+        ['Total Records',      _serverLoans.length],
+        ['',''],
+        ['STATUS BREAKDOWN',''],
+        ['Approved / Active',  _serverLoans.filter(l=>l.status==='approved').length],
+        ['Pending',            _serverLoans.filter(l=>l.status==='pending').length],
+        ['Paid Off',           _serverLoans.filter(l=>l.status==='paid').length],
+        ['Overdue',            _serverLoans.filter(l=>l.status==='overdue').length],
+        ['Rolled Over',        _serverLoans.filter(l=>l.status==='rolled_over').length],
+        ['Rejected',           _serverLoans.filter(l=>l.status==='rejected').length],
+        ['',''],
+        ['FINANCIAL SUMMARY (₦)',''],
+        ['Total Principal Issued',   totalIssued],
+        ['Total Amount Paid',        totalPaid],
+        ['Total Outstanding Balance',totalBal],
+        ['Total Penalties Applied',  totalPen],
+        ['Total Rollovers',          _serverLoans.reduce((s,l)=>s+l.rolloverCount,0)],
+        ['',''],
+        ['OVERDUE SUMMARY',''],
+        ['Overdue Loans',            overdueLoans.length],
+        ['Total Overdue Amount (₦)', overdueLoans.reduce((s,l)=>s+l.balance,0)],
+    ];
+    const ws2 = XLSX.utils.aoa_to_sheet(summaryData);
+    ws2['!cols'] = [{wch:30},{wch:22}];
 
-        // ── Init ──────────────────────────────────────────────────────────────
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
-            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
-        });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws,  'External Loans');
+    XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
+    XLSX.writeFile(wb, `CDS_ExternalLoans_${new Date().toISOString().split('T')[0]}.xlsx`);
+    showAlert(`${_serverLoans.length} loan record${_serverLoans.length!==1?'s':''} exported successfully.`, 'success', 'Export Complete');
+}
 
-        // ── Guarantor duplicate prevention ────────────────────────────────────
-        const g1 = document.getElementById('guarantor1');
-        const g2 = document.getElementById('guarantor2');
-        function syncGuarantors() {
-            Array.from(g2.options).forEach(o => { o.disabled = o.value && o.value === g1.value; });
-            Array.from(g1.options).forEach(o => { o.disabled = o.value && o.value === g2.value; });
-        }
-        g1.addEventListener('change', syncGuarantors);
-        g2.addEventListener('change', syncGuarantors);
+/* ══════════════════════════════════════
+   PDF EXPORT — LOANS (full schema)
+══════════════════════════════════════ */
+function exportLoansPDF() {
+    if (!_serverLoans.length) { showAlert('No records to export.', 'warning', 'Nothing to Export'); return; }
+    const now   = new Date().toLocaleString('en-US',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const today = new Date();
 
-        // ══════════════════════════════════════════
-        // GENERATE LINK
-        // ══════════════════════════════════════════
-        let generatedLink = '';
+    const tableRows = _serverLoans.map((l, i) => {
+        const isOverdue = l.dueDateRaw && l.balance > 0 && new Date(l.dueDateRaw) < today;
+        const sc = l.status==='approved'?'#d1fae5':l.status==='pending'?'#fef3c7':l.status==='paid'?'#ede9fe':l.status==='overdue'?'#fee2e2':'#f1f5f9';
+        const st = l.status==='approved'?'#059669':l.status==='pending'?'#d97706':l.status==='paid'?'#7c3aed':l.status==='overdue'?'#dc2626':'#475569';
+        const rowBg = i%2===0?'#fff':'#f8fafc';
+        const g1 = l.guarantor1Name !== '—' ? `${l.guarantor1Name}<br><small style="color:#9ca3af;">${l.guarantor1ID} · ${l.guarantor1Status}</small>` : '—';
+        const g2 = l.guarantor2Name !== '—' ? `${l.guarantor2Name}<br><small style="color:#9ca3af;">${l.guarantor2ID} · ${l.guarantor2Status}</small>` : '—';
+        return `<tr style="background:${rowBg}">
+            <td style="font-size:10px;color:#9ca3af;text-align:center;">${i+1}</td>
+            <td><strong style="font-size:11px;">${l.borrowerName}</strong><br>
+                <small style="color:#9ca3af;">${l.borrowerPhone} &nbsp;·&nbsp; ${_cap(l.borrowerType)}</small><br>
+                <small style="color:#6b7280;">${l.borrowerEmail}</small></td>
+            <td style="font-size:10px;color:#6b7280;">
+                ${l.initiatedBy !== '—' ? `<strong>${l.initiatedBy}</strong><br><small>${l.initiatedByEmail}</small>` : '—'}</td>
+            <td style="text-align:right;font-weight:800;font-size:11px;">₦${l.amount.toLocaleString()}</td>
+            <td style="text-align:center;font-size:10px;">${l.interestRate}% p.m.</td>
+            <td style="text-align:right;font-weight:800;font-size:11px;color:#1e3a8a;">₦${l.totalRepay.toLocaleString()}</td>
+            <td style="text-align:right;font-size:10px;color:#10b981;">₦${l.paidAmount.toLocaleString()}</td>
+            <td style="text-align:right;font-weight:800;font-size:11px;color:${isOverdue?'#dc2626':'#d97706'};">
+                ₦${l.balance.toLocaleString()}${isOverdue?'<br><small style="background:#fee2e2;color:#dc2626;padding:1px 4px;border-radius:4px;font-size:8px;">OVERDUE</small>':''}</td>
+            <td style="font-size:10px;">${l.dueDate}
+                ${l.penaltyPercentage > 0 ? `<br><small style="color:#dc2626;">Pen: ${l.penaltyPercentage}%/day · ₦${l.totalPenalty.toLocaleString()} applied</small>` : ''}
+                ${l.rolloverCount > 0    ? `<br><small style="color:#7c3aed;">Rollovers: ${l.rolloverCount}</small>` : ''}</td>
+            <td><span style="background:${sc};color:${st};padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;text-transform:uppercase;">${_cap(l.status)}</span></td>
+            <td style="font-size:10px;">${g1}</td>
+            <td style="font-size:10px;">${g2}</td>
+        </tr>`;
+    }).join('');
 
-        async function generateLink() {
-            const btn = document.getElementById('generateLinkBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+    const totalIssued = _serverLoans.reduce((s,l)=>s+l.amount,0);
+    const totalBal    = _serverLoans.reduce((s,l)=>s+l.balance,0);
+    const totalPen    = _serverLoans.reduce((s,l)=>s+l.totalPenalty,0);
+    const overdueCount= _serverLoans.filter(l=>l.dueDateRaw&&l.balance>0&&new Date(l.dueDateRaw)<today).length;
 
-            const payload = {
-                label:              document.getElementById('inviteLabel').value.trim()            || null,
-                presetAmount:       parseFloat(document.getElementById('inviteAmount').value)      || null,
-                presetInterestRate: parseFloat(document.getElementById('inviteRate').value)        || null,
-                presetDuration:     parseInt(document.getElementById('inviteDuration').value, 10)  || null,
-                penaltyPercentage:  parseFloat(document.getElementById('invitePenalty').value)     || null,
-                rolloverPercentage: parseFloat(document.getElementById('inviteRollover').value)    || null
-            };
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>External Loans — Club De Stars</title>
+    <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:sans-serif;color:#1e293b;background:#fff;}
+    .hdr{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;padding:20px 26px;}
+    .hdr h1{font-size:17px;font-weight:800;margin-bottom:3px;}.hdr p{font-size:10px;opacity:.8;}
+    .meta{display:flex;gap:10px;padding:8px 26px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-wrap:wrap;}
+    .mi{display:flex;flex-direction:column;min-width:80px;}
+    .mi span:first-child{font-size:8px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;}
+    .mi span:last-child{font-size:12px;font-weight:800;color:#1e3a8a;}
+    .mi.g span:last-child{color:#059669;}.mi.r span:last-child{color:#dc2626;}.mi.w span:last-child{color:#d97706;}
+    table{width:100%;border-collapse:collapse;}
+    thead tr{background:#1e3a8a;color:white;}
+    thead th{padding:7px 6px;text-align:left;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+    .ra{text-align:right;}
+    tbody td{padding:6px 6px;border-bottom:1px solid #f1f5f9;vertical-align:top;}
+    .ftr{padding:10px 26px;font-size:9px;color:#9ca3af;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;}
+    @media print{@page{size:A3 landscape;margin:7mm;}.np{display:none;}}</style></head><body>
+    <div class="hdr"><h1>Club De Stars — External Loan Portfolio</h1><p>Generated: ${now} &nbsp;·&nbsp; ${_serverLoans.length} records &nbsp;·&nbsp; Full schema export</p></div>
+    <div class="meta">
+        <div class="mi"><span>Total</span><span>${_serverLoans.length}</span></div>
+        <div class="mi g"><span>Active</span><span>${_serverLoans.filter(l=>l.status==='approved').length}</span></div>
+        <div class="mi w"><span>Pending</span><span>${_serverLoans.filter(l=>l.status==='pending').length}</span></div>
+        <div class="mi g"><span>Paid Off</span><span>${_serverLoans.filter(l=>l.status==='paid').length}</span></div>
+        <div class="mi r"><span>Overdue</span><span>${overdueCount}</span></div>
+        <div class="mi"><span>Rolled Over</span><span>${_serverLoans.filter(l=>l.status==='rolled_over').length}</span></div>
+        <div class="mi g"><span>Total Issued</span><span>₦${totalIssued.toLocaleString()}</span></div>
+        <div class="mi w"><span>Outstanding</span><span>₦${totalBal.toLocaleString()}</span></div>
+        <div class="mi r"><span>Penalties</span><span>₦${totalPen.toLocaleString()}</span></div>
+    </div>
+    <div style="padding:0;overflow-x:auto;">
+    <table>
+    <thead><tr>
+        <th>#</th><th>Borrower</th><th>Initiated By</th>
+        <th class="ra">Principal</th><th style="text-align:center;">Rate</th>
+        <th class="ra">Total Due</th><th class="ra">Paid</th><th class="ra">Balance</th>
+        <th>Due Date / Penalties</th><th>Status</th>
+        <th>Guarantor 1</th><th>Guarantor 2</th>
+    </tr></thead>
+    <tbody>${tableRows}</tbody>
+    </table>
+    </div>
+    <div class="ftr"><span>Club De Stars Cooperative &nbsp;·&nbsp; Powered by JESZ LIMITED</span><span>${_serverLoans.length} external loan records</span></div>
+    <div style="text-align:center;padding:14px;" class="np">
+        <button onclick="window.print()" style="padding:10px 28px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-right:8px;">🖨 Print / Save PDF (use A3 Landscape)</button>
+        <button onclick="window.close()" style="padding:10px 20px;background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;border-radius:8px;font-weight:600;cursor:pointer;">Close</button>
+    </div>
+    </body></html>`;
+    const win = window.open('','_blank','width=1400,height=900'); win.document.write(html); win.document.close();
+}
 
-            try {
-                const res = await fetch('/admin/external-loans/invite', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
+/* ══════════════════════════════════════
+   EXCEL EXPORT — PAYMENTS (full)
+══════════════════════════════════════ */
+function exportPaymentsExcel() {
+    if (!_serverPayments.length) { showAlert('No payment records to export.', 'warning', 'Nothing to Export'); return; }
+    const rows = _serverPayments.map((p, i) => ({
+        '#':            i + 1,
+        'Date':         p.date,
+        'Loan ID':      p.loanId,
+        'Borrower':     p.borrower,
+        'Account Type': p.isExternal ? 'External' : 'Member',
+        'Amount Paid (₦)': p.amount,
+        'Payment Type': _cap(p.type),
+        'Recorded By':  p.recordedBy,
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{wch:4},{wch:14},{wch:12},{wch:24},{wch:12},{wch:18},{wch:14},{wch:22}];
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let C = range.s.c; C <= range.e.c; C++) {
+        const addr = XLSX.utils.encode_cell({r:0,c:C});
+        if (!ws[addr]) continue;
+        ws[addr].s = { fill:{fgColor:{rgb:'1E3A8A'}}, font:{bold:true,color:{rgb:'FFFFFF'},sz:9}, alignment:{horizontal:'center'} };
+    }
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Recent Payments');
+    XLSX.writeFile(wb, `CDS_ExtLoanPayments_${new Date().toISOString().split('T')[0]}.xlsx`);
+    showAlert(`${_serverPayments.length} payment record${_serverPayments.length!==1?'s':''} exported.`, 'success', 'Export Complete');
+}
 
-                if (res.ok) {
-                    generatedLink = data.link;
-                    document.getElementById('generatedLinkDisplay').textContent = data.link;
-                    document.getElementById('linkFormStep').style.display = 'none';
-                    document.getElementById('linkResultStep').style.display = 'block';
-                    document.getElementById('linkModalFooter').style.display = 'none';
-                    loadInvites();
-                } else {
-                    showAlert(data.error || 'Failed to generate link.', 'danger', 'Error');
-                }
-            } catch (err) {
-                showAlert('Network error. Please try again.', 'danger', 'Error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-link me-2"></i>Generate Link';
-            }
-        }
+/* ══════════════════════════════════════
+   SEARCH / FILTER LOANS TABLE
+══════════════════════════════════════ */
+function searchLoans() {
+    const term = document.getElementById('loanSearch').value.toLowerCase();
+    document.querySelectorAll('#loansTableBody tr[data-borrower]').forEach(row => {
+        row.style.display = (row.dataset.borrower || '').includes(term) ? '' : 'none';
+    });
+}
 
-        function copyLink(link) {
-            // Called either from result step or from table button
-            const linkToCopy = link || generatedLink;
-            navigator.clipboard.writeText(linkToCopy).then(() => {
-                const notice = document.getElementById('copiedNotice');
-                if (notice) { notice.style.display = 'block'; setTimeout(() => { notice.style.display = 'none'; }, 2500); }
-                else { showAlert('Link copied to clipboard!', 'success', 'Copied'); }
-            }).catch(() => {
-                showAlert('Could not copy. Please copy manually:\n' + linkToCopy, 'info', 'Copy Link');
-            });
-        }
+function filterLoans(status) {
+    // placeholder for future server-side filter
+    console.log('Filter by status:', status);
+}
 
-        function resetLinkForm() {
-            document.getElementById('linkFormStep').style.display = 'block';
-            document.getElementById('linkResultStep').style.display = 'none';
-            document.getElementById('linkModalFooter').style.display = 'flex';
-            ['inviteLabel','inviteAmount','inviteRate','inviteDuration','invitePenalty','inviteRollover'].forEach(id => {
-                document.getElementById(id).value = '';
-            });
-            const notice = document.getElementById('copiedNotice');
-            if (notice) notice.style.display = 'none';
-        }
+/* ══════════════════════════════════════
+   GUARANTOR DUPLICATE PREVENTION
+══════════════════════════════════════ */
+const g1 = document.getElementById('guarantor1');
+const g2 = document.getElementById('guarantor2');
+function syncGuarantors() {
+    Array.from(g2.options).forEach(o => { o.disabled = o.value && o.value === g1.value; });
+    Array.from(g1.options).forEach(o => { o.disabled = o.value && o.value === g2.value; });
+}
+if (g1 && g2) { g1.addEventListener('change', syncGuarantors); g2.addEventListener('change', syncGuarantors); }
 
-        document.getElementById('generateLinkModal').addEventListener('hidden.bs.modal', resetLinkForm);
+/* ══════════════════════════════════════
+   GENERATE LINK
+══════════════════════════════════════ */
+let generatedLink = '';
 
-        // ══════════════════════════════════════════
-        // LOAD & RENDER INVITES TABLE
-        // ══════════════════════════════════════════
-        async function loadInvites() {
-            try {
-                const res = await fetch('/admin/external-loans/invites');
-                const data = await res.json();
-                const tbody = document.getElementById('invitesTableBody');
-
-                if (!data.invites || data.invites.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">
-                        No application links generated yet.
-                    </td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = data.invites.map(inv => {
-                    const statusClass = {
-                        active: 'inv-active', used: 'inv-used',
-                        expired: 'inv-expired', revoked: 'inv-revoked'
-                    }[inv.computedStatus] || 'inv-expired';
-                    const statusLabel = inv.computedStatus.charAt(0).toUpperCase() + inv.computedStatus.slice(1);
-                    const expiry = new Date(inv.expiresAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                    const isActive = inv.computedStatus === 'active';
-                    const linkUrl  = inv.link || `${window.location.origin}/apply/external-loan/${inv.token}`;
-
-                    // ── Action buttons ──────────────────────────────────────────
-                    // Copy: always available (useful even for used/expired for reference)
-                    // Revoke: only if active
-                    // Delete: only if not active (already used/expired/revoked)
-                    const copyBtn = `
-                        <button class="btn btn-outline-primary btn-sm" title="Copy link"
-                            onclick="copyLink('${linkUrl}')">
-                            <i class="fas fa-copy"></i>
-                        </button>`;
-                    const revokeBtn = isActive ? `
-                        <button class="btn btn-outline-warning btn-sm" title="Revoke link"
-                            onclick="revokeInvite('${inv.token}')">
-                            <i class="fas fa-ban"></i>
-                        </button>` : '';
-                    const deleteBtn = !isActive ? `
-                        <button class="btn btn-outline-danger btn-sm" title="Delete record"
-                            onclick="deleteInvite('${inv.token}')">
-                            <i class="fas fa-trash"></i>
-                        </button>` : '';
-
-                    return `<tr>
-                        <td>${inv.label || '<span class="text-muted">—</span>'}</td>
-                        <td>${inv.generatedBy?.fullName || 'Admin'}</td>
-                        <td>${inv.presetAmount ? '₦' + Number(inv.presetAmount).toLocaleString() : '<span class="text-muted">Open</span>'}</td>
-                        <td>${inv.penaltyPercentage != null ? inv.penaltyPercentage + '%' : '<span class="text-muted">—</span>'}</td>
-                        <td>${inv.rolloverPercentage != null ? inv.rolloverPercentage + '%' : '<span class="text-muted">—</span>'}</td>
-                        <td>${expiry}</td>
-                        <td><span class="badge ${statusClass}">${statusLabel}</span></td>
-                        <td>
-                            <div class="invite-actions">
-                                ${copyBtn}
-                                ${revokeBtn}
-                                ${deleteBtn}
-                            </div>
-                        </td>
-                    </tr>`;
-                }).join('');
-            } catch (err) {
-                console.error('Failed to load invites:', err);
-            }
-        }
-
-        async function revokeInvite(token) {
-            if (!confirm('Revoke this link? The applicant will no longer be able to use it.')) return;
-            try {
-                const res = await fetch(`/admin/external-loans/invite/${token}`, { method: 'DELETE' });
-                const data = await res.json();
-                if (res.ok) {
-                    showAlert('Link revoked successfully.', 'success', 'Revoked');
-                    loadInvites();
-                } else {
-                    showAlert(data.error || 'Failed to revoke.', 'danger', 'Error');
-                }
-            } catch (err) {
-                showAlert('Network error. Please try again.', 'danger', 'Error');
-            }
-        }
-
-        async function deleteInvite(token) {
-            if (!confirm('Permanently delete this link record? This cannot be undone.')) return;
-            try {
-                const res = await fetch(`/admin/external-loans/invite/${token}?permanent=true`, { method: 'DELETE' });
-                const data = await res.json();
-                if (res.ok) {
-                    showAlert('Link record deleted.', 'success', 'Deleted');
-                    loadInvites();
-                } else {
-                    showAlert(data.error || 'Failed to delete.', 'danger', 'Error');
-                }
-            } catch (err) {
-                showAlert('Network error. Please try again.', 'danger', 'Error');
-            }
-        }
-
-        // ══════════════════════════════════════════
-        // ISSUE LOAN DIRECTLY
-        // ══════════════════════════════════════════
-        async function submitLoanForm() {
-            const form = document.getElementById('issueLoanForm');
-            if (!form.checkValidity()) { form.reportValidity(); return; }
-
-            const formData = new FormData(form);
-            const loanData = {};
-            formData.forEach((value, key) => { loanData[key] = value; });
-
-            try {
-                const res = await fetch('/admin/external-loans', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(loanData)
-                });
-                const result = await res.json();
-                if (res.ok) {
-                    switchModal('issueLoanModal', () => {
-                        showAlert(result.message, 'success', 'Loan Issued');
-                        form.reset();
-                        setTimeout(() => location.reload(), 1800);
-                    });
-                } else {
-                    showAlert(result.error || 'Failed to issue loan.', 'danger', 'Error');
-                }
-            } catch (err) {
-                showAlert('Network error. Please try again.', 'danger', 'Error');
-            }
-        }
-
-        // ══════════════════════════════════════════
-        // RECORD PAYMENT  ←  hits /loan/payment/manual
-        // ══════════════════════════════════════════
-        // Opens the modal. realLoanId = MongoDB _id, displayId = "EXT-001"
-        function openRecordPaymentModal(realLoanId, displayId, borrower, totalDue, balance) {
-            // Populate summary
-            document.getElementById('paymentRealLoanId').value = realLoanId;
-            document.getElementById('paymentLoanId').textContent = displayId;
-            document.getElementById('paymentBorrower').textContent = borrower;
-            document.getElementById('paymentTotalDue').textContent = '₦' + Number(totalDue).toLocaleString();
-            document.getElementById('paymentBalance').textContent  = '₦' + Number(balance).toLocaleString();
-
-            // Reset form & error
-            document.getElementById('recordPaymentForm').reset();
-            const errDiv = document.getElementById('paymentError');
-            errDiv.classList.add('d-none');
-
-            // Reset button
-            const btn = document.getElementById('submitPaymentBtn');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check me-2"></i>Submit for Approval';
-
-            new bootstrap.Modal(document.getElementById('recordPaymentModal')).show();
-        }
-
-        async function submitPaymentRecord() {
-            const form   = document.getElementById('recordPaymentForm');
-            const errDiv = document.getElementById('paymentError');
-            const btn    = document.getElementById('submitPaymentBtn');
-
-            errDiv.classList.add('d-none');
-
-            if (!form.checkValidity()) { form.reportValidity(); return; }
-
-            const loanId    = document.getElementById('paymentRealLoanId').value;
-            const amount    = document.getElementById('paymentAmountInput').value;
-            const payerName = document.getElementById('payerNameInput').value.trim();
-
-            if (!loanId) {
-                document.getElementById('paymentErrorMsg').textContent = 'Loan ID is missing. Please close and reopen.';
-                errDiv.classList.remove('d-none');
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
-
-            try {
-                const res = await fetch('/loan/payment/manual', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        loanId,
-                        amount:    parseFloat(amount),
-                        payerName: payerName || null
-                    })
-                });
-
-                const data = await res.json();
-
-                if (res.ok && data.status) {
-                    switchModal('recordPaymentModal', () => {
-                        showAlert(
-                            data.message || 'Payment submitted for admin approval.',
-                            'success',
-                            'Payment Submitted'
-                        );
-                        setTimeout(() => location.reload(), 2000);
-                    });
-                } else {
-                    document.getElementById('paymentErrorMsg').textContent = data.message || 'Failed to submit payment. Please try again.';
-                    errDiv.classList.remove('d-none');
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-check me-2"></i>Submit for Approval';
-                }
-            } catch (err) {
-                console.error('Payment error:', err);
-                document.getElementById('paymentErrorMsg').textContent = 'Network error. Check your connection and try again.';
-                errDiv.classList.remove('d-none');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check me-2"></i>Submit for Approval';
-            }
-        }
-
-        // ══════════════════════════════════════════
-        // LOAN DETAILS MODAL
-        // ══════════════════════════════════════════
-        async function openLoanDetailsModal(loanId) {
-            const modal = new bootstrap.Modal(document.getElementById('loanDetailsModal'));
-            document.getElementById('loanDetailsBody').innerHTML =
-                '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i></div>';
-            modal.show();
-
-            try {
-                const res  = await fetch(`/admin/external-loans/${loanId}/details`);
-                const loan = await res.json();
-
-                if (!res.ok) throw new Error(loan.error || 'Failed to load');
-
-                const paidAmount = loan.paidAmount || 0;
-                const balance    = loan.totalRepay - paidAmount;
-
-                document.getElementById('loanDetailsBody').innerHTML = `
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <div class="card h-100" style="background:rgba(30,58,138,0.03);border:2px solid rgba(30,58,138,0.1);">
-                            <div class="card-body">
-                                <h6 class="fw-bold mb-3" style="color:var(--primary);">Borrower Information</h6>
-                                <div class="mb-2"><small class="text-muted">Name:</small><div class="fw-bold">${loan.external?.borrowerName || '—'}</div></div>
-                                <div class="mb-2"><small class="text-muted">Phone:</small><div class="fw-bold">${loan.external?.phone || '—'}</div></div>
-                                <div class="mb-2"><small class="text-muted">Email:</small><div class="fw-bold">${loan.external?.email || '—'}</div></div>
-                                <div class="mb-0"><small class="text-muted">Type:</small><div class="fw-bold">${loan.external?.borrowerType || '—'}</div></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="card h-100" style="background:rgba(16,185,129,0.03);border:2px solid rgba(16,185,129,0.1);">
-                            <div class="card-body">
-                                <h6 class="fw-bold mb-3" style="color:var(--success);">Loan Information</h6>
-                                <div class="mb-2"><small class="text-muted">Status:</small><div class="fw-bold">${loan.status}</div></div>
-                                <div class="mb-2"><small class="text-muted">Due Date:</small><div class="fw-bold">${loan.dueDate ? new Date(loan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'}</div></div>
-                                <div class="mb-2"><small class="text-muted">Duration:</small><div class="fw-bold">${loan.externalDuration || '—'} months</div></div>
-                                <div class="mb-0"><small class="text-muted">Purpose:</small><div class="fw-bold">${loan.purpose || '—'}</div></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 mb-4">
-                        <div class="card" style="background:rgba(245,158,11,0.03);border:2px solid rgba(245,158,11,0.1);">
-                            <div class="card-body">
-                                <h6 class="fw-bold mb-3" style="color:var(--warning);">Financial Details</h6>
-                                <div class="row">
-                                    <div class="col-md-3 mb-2"><small class="text-muted d-block">Principal</small><h5 class="mb-0 fw-bold">₦${loan.amount.toLocaleString()}</h5></div>
-                                    <div class="col-md-3 mb-2"><small class="text-muted d-block">Interest Rate</small><h5 class="mb-0 fw-bold">${loan.interestRate}% p.m.</h5></div>
-                                    <div class="col-md-3 mb-2"><small class="text-muted d-block">Total Due</small><h5 class="mb-0 fw-bold text-primary">₦${loan.totalRepay.toLocaleString()}</h5></div>
-                                    <div class="col-md-3 mb-2"><small class="text-muted d-block">Outstanding</small><h5 class="mb-0 fw-bold text-warning">₦${balance.toLocaleString()}</h5></div>
-                                </div>
-                                ${loan.penaltyPercentage || loan.rolloverPercentage ? `
-                                <hr class="my-2">
-                                <div class="row">
-                                    <div class="col-md-4"><small class="text-muted d-block">Penalty Rate</small><strong>${loan.penaltyPercentage || 0}% / day</strong></div>
-                                    <div class="col-md-4"><small class="text-muted d-block">Total Penalty Applied</small><strong>₦${(loan.totalPenalty||0).toLocaleString()}</strong></div>
-                                    <div class="col-md-4"><small class="text-muted d-block">Rollover Rate</small><strong>${loan.rolloverPercentage || 0}%</strong></div>
-                                </div>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header"><h6 class="mb-0 fw-bold">Payment History</h6></div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-sm mb-0">
-                                        <thead><tr><th>Date</th><th>Amount</th><th>Status</th><th>Reference</th></tr></thead>
-                                        <tbody>
-                                            ${(loan.paymentHistory || []).length > 0
-                                                ? (loan.paymentHistory || []).map(p => `
-                                                    <tr>
-                                                        <td>${new Date(p.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
-                                                        <td class="fw-bold text-success">₦${p.amount.toLocaleString()}</td>
-                                                        <td><span class="badge ${p.status === 'approved' ? 'bg-success' : p.status === 'pending' ? 'bg-warning' : 'bg-danger'}">${p.status}</span></td>
-                                                        <td><small class="text-muted">${p.reference || '—'}</small></td>
-                                                    </tr>`).join('')
-                                                : '<tr><td colspan="4" class="text-center text-muted py-3">No payments recorded yet</td></tr>'
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            } catch (err) {
-                document.getElementById('loanDetailsBody').innerHTML =
-                    `<div class="text-center text-danger py-4"><i class="fas fa-exclamation-circle me-2"></i>${err.message}</div>`;
-            }
-        }
-
-        function filterLoans(status) { console.log('Filtering by:', status); }
-
-        function exportToCSV() {
-            showAlert('CSV export is being prepared...', 'info', 'Exporting');
-        }
-
-        function printLoanStatement() {
-            bootstrap.Modal.getInstance(document.getElementById('loanDetailsModal')).hide();
-            setTimeout(() => window.print(), 400);
-        }
-
-        // Close sidebar on mobile when clicking outside
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            if (window.innerWidth <= 992 && !sidebar.contains(event.target) &&
-                !event.target.closest('.fa-bars') && sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-            }
-        });
-
-        // ── Sidebar pending count ────────────────────────────────────────────
-        async function loadSidebarPendingCount() {
-            try {
-                const res = await fetch('/admin/pending-approvals-count');
-                const data = await res.json();
-                const badge = document.getElementById('sidebarPendingBadge');
-                if (!badge) return;
-                badge.style.display = data.count > 0 ? 'inline-block' : 'none';
-                badge.textContent = data.count;
-            } catch (err) { console.error('Sidebar count error:', err); }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSidebarPendingCount();
+async function generateLink() {
+    const btn = document.getElementById('generateLinkBtn');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+    const payload = {
+        label:              document.getElementById('inviteLabel').value.trim()           || null,
+        presetAmount:       parseFloat(document.getElementById('inviteAmount').value)     || null,
+        presetInterestRate: parseFloat(document.getElementById('inviteRate').value)       || null,
+        presetDuration:     parseInt(document.getElementById('inviteDuration').value, 10) || null,
+        penaltyPercentage:  parseFloat(document.getElementById('invitePenalty').value)    || null,
+        rolloverPercentage: parseFloat(document.getElementById('inviteRollover').value)   || null,
+    };
+    try {
+        const res  = await fetch('/admin/external-loans/invite', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (res.ok) {
+            generatedLink = data.link;
+            document.getElementById('generatedLinkDisplay').textContent = data.link;
+            document.getElementById('linkFormStep').style.display   = 'none';
+            document.getElementById('linkResultStep').style.display  = 'block';
+            document.getElementById('linkModalFooter').style.display = 'none';
             loadInvites();
-        });
-    </script>
+        } else { showAlert(data.error || 'Failed to generate link.', 'danger', 'Error'); }
+    } catch { showAlert('Network error. Please try again.', 'danger', 'Error'); }
+    finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-link me-2"></i>Generate Link'; }
+}
+
+function copyLink(link) {
+    const toCopy = link || generatedLink;
+    navigator.clipboard.writeText(toCopy).then(() => {
+        const notice = document.getElementById('copiedNotice');
+        if (notice) { notice.style.display='block'; setTimeout(()=>notice.style.display='none', 2500); }
+        else showAlert('Link copied to clipboard!', 'success', 'Copied');
+    }).catch(() => showAlert('Could not copy. Please copy manually:\n' + toCopy, 'info', 'Copy Link'));
+}
+
+function resetLinkForm() {
+    document.getElementById('linkFormStep').style.display   = 'block';
+    document.getElementById('linkResultStep').style.display  = 'none';
+    document.getElementById('linkModalFooter').style.display = 'flex';
+    ['inviteLabel','inviteAmount','inviteRate','inviteDuration','invitePenalty','inviteRollover'].forEach(id => { document.getElementById(id).value = ''; });
+    const n = document.getElementById('copiedNotice'); if (n) n.style.display = 'none';
+}
+document.getElementById('generateLinkModal').addEventListener('hidden.bs.modal', resetLinkForm);
+
+/* ══════════════════════════════════════
+   LOAD INVITES TABLE
+══════════════════════════════════════ */
+async function loadInvites() {
+    try {
+        const res  = await fetch('/admin/external-loans/invites');
+        const data = await res.json();
+        const tbody = document.getElementById('invitesTableBody');
+        if (!data.invites || !data.invites.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No application links generated yet.</td></tr>'; return;
+        }
+        tbody.innerHTML = data.invites.map(inv => {
+            const sc = { active:'inv-active', used:'inv-used', expired:'inv-expired', revoked:'inv-revoked' }[inv.computedStatus] || 'inv-expired';
+            const sl = inv.computedStatus.charAt(0).toUpperCase() + inv.computedStatus.slice(1);
+            const expiry = new Date(inv.expiresAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+            const isActive = inv.computedStatus === 'active';
+            const linkUrl  = inv.link || `${window.location.origin}/apply/external-loan/${inv.token}`;
+            const copyBtn  = `<button class="btn btn-outline-primary btn-sm" title="Copy link" onclick="copyLink('${linkUrl}')"><i class="fas fa-copy"></i></button>`;
+            const revokeBtn= isActive ? `<button class="btn btn-outline-warning btn-sm" title="Revoke" onclick="revokeInvite('${inv.token}')"><i class="fas fa-ban"></i></button>` : '';
+            const deleteBtn= !isActive ? `<button class="btn btn-outline-danger btn-sm" title="Delete" onclick="deleteInvite('${inv.token}')"><i class="fas fa-trash"></i></button>` : '';
+            return `<tr>
+                <td>${inv.label||'<span class="text-muted">—</span>'}</td>
+                <td>${inv.generatedBy?.fullName||'Admin'}</td>
+                <td>${inv.presetAmount?'₦'+Number(inv.presetAmount).toLocaleString():'<span class="text-muted">Open</span>'}</td>
+                <td>${inv.penaltyPercentage!=null?inv.penaltyPercentage+'%':'<span class="text-muted">—</span>'}</td>
+                <td>${inv.rolloverPercentage!=null?inv.rolloverPercentage+'%':'<span class="text-muted">—</span>'}</td>
+                <td>${expiry}</td>
+                <td><span class="badge ${sc}">${sl}</span></td>
+                <td><div class="invite-actions">${copyBtn}${revokeBtn}${deleteBtn}</div></td>
+            </tr>`;
+        }).join('');
+    } catch(err) { console.error('Failed to load invites:', err); }
+}
+
+async function revokeInvite(token) {
+    if (!confirm('Revoke this link?')) return;
+    try {
+        const res = await fetch(`/admin/external-loans/invite/${token}`, { method:'DELETE' });
+        const data = await res.json();
+        if (res.ok) { showAlert('Link revoked successfully.', 'success', 'Revoked'); loadInvites(); }
+        else showAlert(data.error || 'Failed to revoke.', 'danger', 'Error');
+    } catch { showAlert('Network error.', 'danger', 'Error'); }
+}
+
+async function deleteInvite(token) {
+    if (!confirm('Permanently delete this link record?')) return;
+    try {
+        const res = await fetch(`/admin/external-loans/invite/${token}?permanent=true`, { method:'DELETE' });
+        const data = await res.json();
+        if (res.ok) { showAlert('Link record deleted.', 'success', 'Deleted'); loadInvites(); }
+        else showAlert(data.error || 'Failed to delete.', 'danger', 'Error');
+    } catch { showAlert('Network error.', 'danger', 'Error'); }
+}
+
+/* ══════════════════════════════════════
+   ISSUE LOAN
+══════════════════════════════════════ */
+async function submitLoanForm() {
+    const form = document.getElementById('issueLoanForm');
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    const loanData = {};
+    new FormData(form).forEach((v, k) => { loanData[k] = v; });
+    try {
+        const res    = await fetch('/admin/external-loans', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(loanData) });
+        const result = await res.json();
+        if (res.ok) {
+            switchModal('issueLoanModal', () => {
+                showAlert(result.message, 'success', 'Loan Issued');
+                form.reset();
+                setTimeout(() => location.reload(), 1800);
+            });
+        } else showAlert(result.error || 'Failed to issue loan.', 'danger', 'Error');
+    } catch { showAlert('Network error.', 'danger', 'Error'); }
+}
+
+/* ══════════════════════════════════════
+   RECORD PAYMENT
+══════════════════════════════════════ */
+function openRecordPaymentModal(realLoanId, displayId, borrower, totalDue, balance) {
+    document.getElementById('paymentRealLoanId').value = realLoanId;
+    document.getElementById('paymentLoanId').textContent     = displayId;
+    document.getElementById('paymentBorrower').textContent   = borrower;
+    document.getElementById('paymentTotalDue').textContent   = '₦' + Number(totalDue).toLocaleString();
+    document.getElementById('paymentBalance').textContent    = '₦' + Number(balance).toLocaleString();
+    document.getElementById('recordPaymentForm').reset();
+    document.getElementById('paymentError').classList.add('d-none');
+    const btn = document.getElementById('submitPaymentBtn');
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-check me-2"></i>Submit for Approval';
+    new bootstrap.Modal(document.getElementById('recordPaymentModal')).show();
+}
+
+async function submitPaymentRecord() {
+    const form   = document.getElementById('recordPaymentForm');
+    const errDiv = document.getElementById('paymentError');
+    const btn    = document.getElementById('submitPaymentBtn');
+    errDiv.classList.add('d-none');
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    const loanId    = document.getElementById('paymentRealLoanId').value;
+    const amount    = document.getElementById('paymentAmountInput').value;
+    const payerName = document.getElementById('payerNameInput').value.trim();
+    if (!loanId) {
+        document.getElementById('paymentErrorMsg').textContent = 'Loan ID is missing. Please close and reopen.';
+        errDiv.classList.remove('d-none'); return;
+    }
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+    try {
+        const res  = await fetch('/loan/payment/manual', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ loanId, amount: parseFloat(amount), payerName: payerName || null }) });
+        const data = await res.json();
+        if (res.ok && data.status) {
+            switchModal('recordPaymentModal', () => { showAlert(data.message || 'Payment submitted for approval.', 'success', 'Payment Submitted'); setTimeout(() => location.reload(), 2000); });
+        } else {
+            document.getElementById('paymentErrorMsg').textContent = data.message || 'Failed to submit payment.';
+            errDiv.classList.remove('d-none'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-check me-2"></i>Submit for Approval';
+        }
+    } catch {
+        document.getElementById('paymentErrorMsg').textContent = 'Network error. Check your connection.';
+        errDiv.classList.remove('d-none'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-check me-2"></i>Submit for Approval';
+    }
+}
+
+/* ══════════════════════════════════════
+   LOAN DETAILS MODAL
+══════════════════════════════════════ */
+async function openLoanDetailsModal(loanId) {
+    const modal = new bootstrap.Modal(document.getElementById('loanDetailsModal'));
+    document.getElementById('loanDetailsBody').innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i></div>';
+    modal.show();
+    try {
+        const res  = await fetch(`/admin/external-loans/${loanId}/details`);
+        const loan = await res.json();
+        if (!res.ok) throw new Error(loan.error || 'Failed to load');
+        const paidAmount = loan.paidAmount || 0;
+        const balance    = loan.totalRepay - paidAmount;
+        const isOverdue  = balance > 0 && new Date(loan.dueDate) < new Date();
+        document.getElementById('loanDetailsBody').innerHTML = `
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100" style="background:rgba(30,58,138,.03);border:2px solid rgba(30,58,138,.1);">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3" style="color:var(--primary);">Borrower Information</h6>
+                        <div class="mb-2"><small class="text-muted">Name</small><div class="fw-bold">${loan.external?.borrowerName||'—'}</div></div>
+                        <div class="mb-2"><small class="text-muted">Phone</small><div class="fw-bold">${loan.external?.phone||'—'}</div></div>
+                        <div class="mb-2"><small class="text-muted">Email</small><div class="fw-bold">${loan.external?.email||'—'}</div></div>
+                        <div class="mb-0"><small class="text-muted">Type</small><div class="fw-bold">${loan.external?.borrowerType||'—'}</div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100" style="background:rgba(16,185,129,.03);border:2px solid rgba(16,185,129,.1);">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3" style="color:var(--success);">Loan Information</h6>
+                        <div class="mb-2"><small class="text-muted">Status</small><div class="fw-bold">${loan.status}</div></div>
+                        <div class="mb-2"><small class="text-muted">Due Date</small><div class="fw-bold ${isOverdue?'text-danger':''}">${loan.dueDate ? new Date(loan.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'} ${isOverdue?'<span class="badge bg-danger ms-1" style="font-size:.6rem;">OVERDUE</span>':''}</div></div>
+                        <div class="mb-2"><small class="text-muted">Duration</small><div class="fw-bold">${loan.externalDuration||'—'} months</div></div>
+                        <div class="mb-0"><small class="text-muted">Purpose</small><div class="fw-bold">${loan.purpose||'—'}</div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mb-4">
+                <div class="card" style="background:rgba(245,158,11,.03);border:2px solid rgba(245,158,11,.1);">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3" style="color:var(--warning);">Financial Details</h6>
+                        <div class="row">
+                            <div class="col-md-3 mb-2"><small class="text-muted d-block">Principal</small><h5 class="mb-0 fw-bold">₦${loan.amount.toLocaleString()}</h5></div>
+                            <div class="col-md-3 mb-2"><small class="text-muted d-block">Interest Rate</small><h5 class="mb-0 fw-bold">${loan.interestRate}% p.m.</h5></div>
+                            <div class="col-md-3 mb-2"><small class="text-muted d-block">Total Due</small><h5 class="mb-0 fw-bold text-primary">₦${loan.totalRepay.toLocaleString()}</h5></div>
+                            <div class="col-md-3 mb-2"><small class="text-muted d-block">Outstanding</small><h5 class="mb-0 fw-bold ${balance<=0?'text-success':'text-warning'}">₦${balance.toLocaleString()}</h5></div>
+                        </div>
+                        ${loan.penaltyPercentage || loan.rolloverPercentage ? `
+                        <hr class="my-2">
+                        <div class="row">
+                            <div class="col-md-4"><small class="text-muted d-block">Penalty Rate</small><strong>${loan.penaltyPercentage||0}% / day</strong></div>
+                            <div class="col-md-4"><small class="text-muted d-block">Total Penalty Applied</small><strong>₦${(loan.totalPenalty||0).toLocaleString()}</strong></div>
+                            <div class="col-md-4"><small class="text-muted d-block">Rollover Rate</small><strong>${loan.rolloverPercentage||0}%</strong></div>
+                        </div>` : ''}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header"><h6 class="mb-0 fw-bold">Payment History</h6></div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0">
+                                <thead><tr><th>Date</th><th>Amount</th><th>Type</th><th>Status</th><th>Reference</th></tr></thead>
+                                <tbody>
+                                    ${(loan.paymentHistory||[]).length > 0
+                                        ? (loan.paymentHistory||[]).map(p=>`<tr>
+                                            <td>${new Date(p.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
+                                            <td class="fw-bold text-success">₦${p.amount.toLocaleString()}</td>
+                                            <td><span class="badge bg-info">${p.type||'—'}</span></td>
+                                            <td><span class="badge ${p.status==='approved'?'bg-success':p.status==='pending'?'bg-warning':'bg-danger'}">${p.status}</span></td>
+                                            <td><small class="text-muted">${p.reference||'—'}</small></td>
+                                        </tr>`).join('')
+                                        : '<tr><td colspan="5" class="text-center text-muted py-3">No payments recorded yet</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    } catch(err) {
+        document.getElementById('loanDetailsBody').innerHTML = `<div class="text-center text-danger py-4"><i class="fas fa-exclamation-circle me-2"></i>${err.message}</div>`;
+    }
+}
+
+function printLoanStatement() {
+    bootstrap.Modal.getInstance(document.getElementById('loanDetailsModal')).hide();
+    setTimeout(() => window.print(), 400);
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+    loadSidebarPendingCount();
+    loadInvites();
+    document.getElementById('paymentsInfo').textContent = `${document.querySelectorAll('#paymentsTableBody tr').length} records`;
+});
+</script>
 </body>
 </html>

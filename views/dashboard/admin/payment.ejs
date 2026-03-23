@@ -17,6 +17,7 @@
             --warning:       #f59e0b;
             --info:          #06b6d4;
             --sidebar-width: 280px;
+            --navbar-h:      70px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,107 +29,146 @@
             overflow-x: hidden;
         }
 
+        /* ══════════ SIDEBAR ══════════ */
         .sidebar {
             position: fixed; left: 0; top: 0; bottom: 0;
             width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white; z-index: 1040; transition: transform 0.3s;
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30,58,138,0.15);
+            background: linear-gradient(180deg, #0f2357 0%, #1e3a8a 40%, #1e40af 100%);
+            z-index: 1040; overflow-y: auto;
+            transition: transform .3s ease;
+            box-shadow: 4px 0 24px rgba(30,58,138,.25);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,.15) transparent;
         }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+
         .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
+            padding: 1.4rem 1.25rem 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            background: rgba(0,0,0,.18);
+            position: sticky; top: 0; z-index: 2;
         }
-        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .logo-row { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
         .logo-box {
-            width: 45px; height: 45px; background: white; border-radius: 10px;
+            width: 42px; height: 42px; background: white; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: var(--primary); font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0;
+            font-weight: 800; color: var(--primary); font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,.25); flex-shrink: 0;
         }
-        .sidebar-title { font-size: 1.1rem; line-height: 1.2; }
-        .admin-badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 6px 12px; background: rgba(239,68,68,0.2);
-            backdrop-filter: blur(10px); border-radius: 20px;
-            border: 1px solid rgba(239,68,68,0.3);
-            font-weight: 600; font-size: 0.8rem; margin-top: 8px;
+        .sidebar-brand { font-size: .95rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: .05em; line-height: 1.2; }
+        .sidebar-brand small { font-size: .65rem; font-weight: 500; opacity: .55; display: block; letter-spacing: .08em; }
+        .role-pill {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 4px 10px; background: rgba(239,68,68,.2);
+            border-radius: 20px; border: 1px solid rgba(239,68,68,.3);
+            font-weight: 700; font-size: .7rem; color: #fca5a5;
         }
-        .sidebar-menu { padding: 1rem 0; }
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85); text-decoration: none;
-            padding: 0.875rem 1.5rem; display: flex; align-items: center;
-            transition: all 0.3s; border-left: 3px solid transparent;
-            font-weight: 500; font-size: 0.95rem;
-        }
-        .sidebar-menu a:hover  { background: rgba(255,255,255,0.1); color: white; border-left-color: white; }
-        .sidebar-menu a.active { background: rgba(255,255,255,0.15); color: white; border-left-color: white; }
-        .sidebar-menu a i { width: 24px; margin-right: 12px; font-size: 1.1rem; flex-shrink: 0; }
 
+        .nav-group { padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .nav-group:last-child { border-bottom: none; }
+        .nav-category {
+            display: flex; align-items: center; gap: 7px;
+            padding: .55rem 1.25rem .3rem;
+            font-size: .62rem; font-weight: 800;
+            color: rgba(255,255,255,.38);
+            text-transform: uppercase; letter-spacing: .1em;
+            user-select: none;
+        }
+        .nav-category::after {
+            content: ''; flex: 1; height: 1px;
+            background: rgba(255,255,255,.08); margin-left: 4px;
+        }
+
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 11px;
+            padding: .62rem 1.25rem; color: rgba(255,255,255,.72);
+            text-decoration: none; font-weight: 500; font-size: .84rem;
+            border-left: 3px solid transparent; transition: all .18s;
+        }
+        .sidebar-nav a:hover  { background: rgba(255,255,255,.09); color: white; border-left-color: rgba(255,255,255,.4); }
+        .sidebar-nav a.active { background: rgba(255,255,255,.15); color: white; border-left-color: white; }
+        .sidebar-nav a i { width: 18px; font-size: .9rem; flex-shrink: 0; opacity: .8; text-align: center; }
+        .sidebar-nav a.active i { opacity: 1; }
+        .nav-badge {
+            margin-left: auto; font-size: .63rem; font-weight: 800;
+            padding: 2px 7px; border-radius: 10px;
+            background: rgba(239,68,68,.9); color: white; flex-shrink: 0; line-height: 1.4;
+        }
+        .nav-back {
+            display: flex; align-items: center; gap: 10px;
+            padding: .7rem 1.25rem .9rem; font-size: .8rem; font-weight: 600;
+            color: rgba(255,255,255,.42); text-decoration: none;
+            transition: color .18s; border-top: 1px solid rgba(255,255,255,.07); margin-top: .25rem;
+        }
+        .nav-back:hover { color: rgba(255,255,255,.7); }
+
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1035; }
+        .sidebar-overlay.active { display: block; }
+
+        /* ══════════ NAVBAR ══════════ */
         .top-navbar {
-            position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 70px;
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30,58,138,0.08); z-index: 1030;
+            position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: var(--navbar-h);
+            background: rgba(255,255,255,.97); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30,58,138,.08); z-index: 1030;
             display: flex; align-items: center; padding: 0 1.5rem;
-            transition: left 0.3s; border-bottom: 1px solid rgba(30,58,138,0.1);
+            border-bottom: 1px solid rgba(30,58,138,.1);
         }
 
+        /* ══════════ MAIN ══════════ */
         .main-content {
-            margin-left: var(--sidebar-width); margin-top: 70px;
-            padding: 1.5rem; min-height: calc(100vh - 70px); transition: margin 0.3s;
+            margin-left: var(--sidebar-width); margin-top: var(--navbar-h);
+            padding: 1.5rem; min-height: calc(100vh - var(--navbar-h));
         }
 
+        /* ══════════ PAGE HEADER ══════════ */
         .page-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            background: linear-gradient(130deg, #1e3a8a 0%, #1e40af 45%, #3b82f6 100%);
             color: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem;
-            box-shadow: 0 15px 40px rgba(30,58,138,0.25); position: relative; overflow: hidden;
+            box-shadow: 0 10px 36px rgba(30,58,138,.28); position: relative; overflow: hidden;
         }
         .page-header::before {
             content: ''; position: absolute; top: -50%; right: -20%;
-            width: 400px; height: 400px; background: rgba(255,255,255,0.05); border-radius: 50%;
+            width: 400px; height: 400px; background: rgba(255,255,255,.05); border-radius: 50%; pointer-events: none;
         }
 
+        /* ══════════ CARDS ══════════ */
         .card {
-            border: 1px solid rgba(30,58,138,0.05); border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(30,58,138,0.08); background: white;
+            border: 1px solid rgba(30,58,138,.05); border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(30,58,138,.08); background: white;
         }
         .card-header {
-            background: linear-gradient(135deg, rgba(30,58,138,0.03) 0%, rgba(59,130,246,0.03) 100%);
-            border-bottom: 2px solid rgba(30,58,138,0.1);
+            background: linear-gradient(135deg, rgba(30,58,138,.03) 0%, rgba(59,130,246,.03) 100%);
+            border-bottom: 2px solid rgba(30,58,138,.1);
             padding: 1.25rem; border-radius: 16px 16px 0 0 !important;
         }
 
+        /* ══════════ PAYMENT TYPE CARDS ══════════ */
         .payment-type-card {
             background: white; border-radius: 16px; padding: 1.5rem;
-            box-shadow: 0 8px 20px rgba(30,58,138,0.08); transition: all 0.3s;
-            cursor: pointer; border: 2px solid transparent; height: 100%;
-            position: relative;
+            box-shadow: 0 8px 20px rgba(30,58,138,.08); transition: all .3s;
+            cursor: pointer; border: 2px solid transparent; height: 100%; position: relative;
         }
         .payment-type-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(30,58,138,0.15);
+            transform: translateY(-5px); box-shadow: 0 15px 35px rgba(30,58,138,.15);
             border-color: var(--primary);
         }
         .payment-type-card.active {
             border-color: var(--primary);
-            background: linear-gradient(135deg, rgba(30,58,138,0.03) 0%, rgba(59,130,246,0.03) 100%);
+            background: linear-gradient(135deg, rgba(30,58,138,.03) 0%, rgba(59,130,246,.03) 100%);
         }
-        .payment-type-card.locked { cursor: not-allowed; opacity: 0.6; }
+        .payment-type-card.locked { cursor: not-allowed; opacity: .6; }
         .payment-type-card.locked:hover {
-            transform: none;
-            box-shadow: 0 8px 20px rgba(30,58,138,0.08);
-            border-color: transparent;
+            transform: none; box-shadow: 0 8px 20px rgba(30,58,138,.08); border-color: transparent;
         }
         .lock-overlay {
-            position: absolute; inset: 0;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 6px; border-radius: 14px;
-            background: rgba(255,255,255,0.6); backdrop-filter: blur(2px);
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 6px; border-radius: 14px;
+            background: rgba(255,255,255,.6); backdrop-filter: blur(2px);
         }
         .lock-overlay i   { font-size: 1.8rem; color: var(--danger); }
-        .lock-overlay span { font-size: 0.7rem; font-weight: 700; color: var(--danger); letter-spacing: 0.03em; }
+        .lock-overlay span { font-size: .7rem; font-weight: 700; color: var(--danger); letter-spacing: .03em; }
 
         .payment-icon {
             width: 60px; height: 60px; border-radius: 14px;
@@ -136,93 +176,91 @@
             font-size: 1.8rem; margin-bottom: 1rem;
         }
 
-        .form-label { font-weight: 600; color: var(--primary); margin-bottom: 0.5rem; }
+        /* ══════════ FORM CONTROLS ══════════ */
+        .form-label { font-weight: 600; color: var(--primary); margin-bottom: .5rem; }
         .form-control, .form-select {
-            border: 2px solid rgba(30,58,138,0.1); border-radius: 10px;
-            padding: 0.75rem; transition: all 0.3s;
+            border: 2px solid rgba(30,58,138,.1); border-radius: 10px;
+            padding: .75rem; transition: all .3s;
         }
         .form-control:focus, .form-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.2rem rgba(30,58,138,0.1);
+            border-color: var(--primary); box-shadow: 0 0 0 .2rem rgba(30,58,138,.1);
         }
-        /* Reference field required state styling */
         .form-control.is-invalid { border-color: var(--danger) !important; }
         .form-control.is-valid   { border-color: var(--success) !important; }
 
+        /* ══════════ BUTTONS ══════════ */
         .btn-primary {
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none; padding: 0.75rem 1.5rem; border-radius: 10px;
-            font-weight: 600; transition: all 0.3s;
+            border: none; padding: .75rem 1.5rem; border-radius: 10px;
+            font-weight: 600; transition: all .3s;
         }
         .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(30,58,138,0.3);
+            transform: translateY(-2px); box-shadow: 0 8px 25px rgba(30,58,138,.3);
         }
 
+        /* ══════════ AUTOCOMPLETE ══════════ */
         .autocomplete-wrapper { position: relative; }
         .autocomplete-dropdown {
             position: absolute; top: 100%; left: 0; right: 0;
             background: white; border: 2px solid var(--primary); border-top: none;
             border-radius: 0 0 10px 10px; max-height: 340px; overflow-y: auto;
-            z-index: 1050; box-shadow: 0 8px 20px rgba(30,58,138,0.15); display: none;
+            z-index: 1050; box-shadow: 0 8px 20px rgba(30,58,138,.15); display: none;
         }
         .autocomplete-dropdown.show { display: block; }
         .autocomplete-item {
             padding: 1rem; cursor: pointer;
-            border-bottom: 1px solid rgba(30,58,138,0.1); transition: all 0.2s;
+            border-bottom: 1px solid rgba(30,58,138,.1); transition: all .2s;
         }
         .autocomplete-item:last-child { border-bottom: none; }
         .autocomplete-item:hover {
-            background: linear-gradient(135deg, rgba(30,58,138,0.05) 0%, rgba(59,130,246,0.05) 100%);
+            background: linear-gradient(135deg, rgba(30,58,138,.05) 0%, rgba(59,130,246,.05) 100%);
         }
         .autocomplete-item.kiddies-item:hover {
-            background: linear-gradient(135deg, rgba(236,72,153,0.05) 0%, rgba(219,39,119,0.05) 100%);
+            background: linear-gradient(135deg, rgba(236,72,153,.05) 0%, rgba(219,39,119,.05) 100%);
         }
-        .autocomplete-item-name    { font-weight: 600; color: var(--primary); margin-bottom: 0.25rem; }
+        .autocomplete-item-name    { font-weight: 600; color: var(--primary); margin-bottom: .25rem; }
         .autocomplete-item.kiddies-item .autocomplete-item-name { color: #db2777; }
-        .autocomplete-item-details { font-size: 0.85rem; color: var(--secondary); }
+        .autocomplete-item-details { font-size: .85rem; color: var(--secondary); }
         .autocomplete-item-balance {
-            display: inline-block; margin-top: 0.25rem; padding: 0.2rem 0.5rem;
-            background: rgba(16,185,129,0.1); color: var(--success);
-            border-radius: 6px; font-size: 0.8rem; font-weight: 600;
+            display: inline-block; margin-top: .25rem; padding: .2rem .5rem;
+            background: rgba(16,185,129,.1); color: var(--success);
+            border-radius: 6px; font-size: .8rem; font-weight: 600;
         }
         .kiddies-tag {
             display: inline-flex; align-items: center; gap: 4px;
-            padding: 2px 8px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
-            background: rgba(236,72,153,0.12); color: #db2777;
-            border: 1px solid rgba(236,72,153,0.25); margin-bottom: 2px;
+            padding: 2px 8px; border-radius: 20px; font-size: .72rem; font-weight: 700;
+            background: rgba(236,72,153,.12); color: #db2777;
+            border: 1px solid rgba(236,72,153,.25); margin-bottom: 2px;
         }
 
+        /* ══════════ MEMBER RESULT CARD ══════════ */
         .member-search-result {
-            padding: 1rem; border: 2px solid rgba(30,58,138,0.1);
-            border-radius: 10px; margin-bottom: 1rem; background: rgba(30,58,138,0.02);
+            padding: 1rem; border: 2px solid rgba(30,58,138,.1);
+            border-radius: 10px; margin-bottom: 1rem; background: rgba(30,58,138,.02);
         }
         .member-search-result.kiddies-result {
-            border-color: rgba(236,72,153,0.25);
-            background: rgba(236,72,153,0.03);
+            border-color: rgba(236,72,153,.25); background: rgba(236,72,153,.03);
         }
-
         .kiddies-info-panel {
             display: flex; align-items: center; gap: 8px;
             padding: 6px 10px; margin-top: 8px;
-            background: rgba(236,72,153,0.07); border: 1px solid rgba(236,72,153,0.2);
-            border-radius: 8px; font-size: 0.82rem;
+            background: rgba(236,72,153,.07); border: 1px solid rgba(236,72,153,.2);
+            border-radius: 8px; font-size: .82rem;
         }
         .kiddies-info-panel i { color: #db2777; flex-shrink: 0; }
-
-        /* Reference required notice */
         .ref-required-notice {
             display: flex; align-items: flex-start; gap: 8px;
             padding: 8px 12px; margin-top: 8px;
-            background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3);
-            border-radius: 8px; font-size: 0.82rem; color: #92400e;
+            background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.3);
+            border-radius: 8px; font-size: .82rem; color: #92400e;
         }
         .ref-required-notice i { flex-shrink: 0; margin-top: 1px; }
 
+        /* ══════════ TABLE ══════════ */
         .table-responsive { border-radius: 0 0 16px 16px; overflow: hidden; }
         .table { margin: 0; }
         .table thead {
-            background: linear-gradient(135deg, rgba(30,58,138,0.05) 0%, rgba(59,130,246,0.05) 100%);
+            background: linear-gradient(135deg, rgba(30,58,138,.05) 0%, rgba(59,130,246,.05) 100%);
         }
         .table thead th {
             border: none; padding: 1rem; font-weight: 600;
@@ -230,179 +268,170 @@
         }
         .table tbody td {
             padding: 1rem; vertical-align: middle;
-            border-bottom: 1px solid rgba(30,58,138,0.05);
+            border-bottom: 1px solid rgba(30,58,138,.05);
         }
         .table tbody tr:last-child td { border-bottom: none; }
-        .table tbody tr:hover { background: rgba(30,58,138,0.02); }
-        .table tbody tr.kiddies-row { background: rgba(236,72,153,0.02); }
-        .table tbody tr.kiddies-row:hover { background: rgba(236,72,153,0.04); }
+        .table tbody tr:hover { background: rgba(30,58,138,.02); }
+        .table tbody tr.kiddies-row { background: rgba(236,72,153,.02); }
+        .table tbody tr.kiddies-row:hover { background: rgba(236,72,153,.04); }
 
+        /* ══════════ PAYMENT SUMMARY ══════════ */
         .payment-summary {
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
             border: 2px solid #10b981; border-radius: 12px; padding: 1.5rem; margin-top: 1rem;
         }
         .summary-row {
             display: flex; justify-content: space-between;
-            padding: 0.5rem 0; border-bottom: 1px solid rgba(16,185,129,0.2);
+            padding: .5rem 0; border-bottom: 1px solid rgba(16,185,129,.2);
         }
         .summary-row:last-child {
             border-bottom: none; font-weight: bold; font-size: 1.1rem; padding-top: 1rem;
         }
 
+        /* ══════════ APPROVER SELECTOR ══════════ */
         .approver-selector {
-            border: 2px solid rgba(30,58,138,0.1); border-radius: 12px;
+            border: 2px solid rgba(30,58,138,.1); border-radius: 12px;
             padding: 1rem; background: #fafbff; max-height: 300px; overflow-y: auto;
-            transition: opacity 0.2s;
+            transition: opacity .2s;
         }
-        .approver-selector.locked { pointer-events: none; opacity: 0.45; }
+        .approver-selector.locked { pointer-events: none; opacity: .45; }
         .approver-item {
-            display: flex; align-items: center; gap: 10px; padding: 0.75rem;
+            display: flex; align-items: center; gap: 10px; padding: .75rem;
             border-radius: 10px; border: 2px solid transparent; cursor: pointer;
-            transition: all 0.2s; background: white; margin-bottom: 0.5rem;
-            box-shadow: 0 2px 6px rgba(30,58,138,0.06);
+            transition: all .2s; background: white; margin-bottom: .5rem;
+            box-shadow: 0 2px 6px rgba(30,58,138,.06);
         }
         .approver-item:last-child { margin-bottom: 0; }
-        .approver-item:hover { border-color: rgba(30,58,138,0.3); background: rgba(30,58,138,0.02); }
+        .approver-item:hover { border-color: rgba(30,58,138,.3); background: rgba(30,58,138,.02); }
         .approver-item.selected {
             border-color: var(--primary);
-            background: linear-gradient(135deg, rgba(30,58,138,0.05) 0%, rgba(59,130,246,0.05) 100%);
+            background: linear-gradient(135deg, rgba(30,58,138,.05) 0%, rgba(59,130,246,.05) 100%);
         }
         .approver-item input[type="checkbox"] {
-            width: 18px; height: 18px; accent-color: var(--primary);
-            flex-shrink: 0; cursor: pointer;
+            width: 18px; height: 18px; accent-color: var(--primary); flex-shrink: 0; cursor: pointer;
         }
         .approver-avatar {
             width: 38px; height: 38px; border-radius: 50%;
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
             color: white; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 0.9rem; flex-shrink: 0;
+            font-weight: bold; font-size: .9rem; flex-shrink: 0;
         }
         .approver-info { flex: 1; min-width: 0; }
-        .approver-name {
-            font-weight: 600; font-size: 0.9rem; color: #1f2937;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .approver-role { font-size: 0.75rem; color: var(--secondary); }
+        .approver-name { font-weight: 600; font-size: .9rem; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .approver-role { font-size: .75rem; color: var(--secondary); }
         .approver-check { color: var(--primary); display: none; flex-shrink: 0; }
         .approver-item.selected .approver-check { display: block; }
 
         .approval-count-badge {
             display: inline-flex; align-items: center; gap: 6px;
-            padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 0.8rem;
+            padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: .8rem;
         }
         .approval-count-badge.insufficient {
-            background: rgba(239,68,68,0.1); color: var(--danger);
-            border: 1px solid rgba(239,68,68,0.3);
+            background: rgba(239,68,68,.1); color: var(--danger); border: 1px solid rgba(239,68,68,.3);
         }
         .approval-count-badge.sufficient {
-            background: rgba(16,185,129,0.1); color: var(--success);
-            border: 1px solid rgba(16,185,129,0.3);
+            background: rgba(16,185,129,.1); color: var(--success); border: 1px solid rgba(16,185,129,.3);
         }
-
         .approver-locked-notice {
             display: flex; align-items: flex-start; gap: 10px;
-            padding: 0.875rem 1rem;
-            background: rgba(239,68,68,0.06); border: 2px solid rgba(239,68,68,0.2);
-            border-radius: 12px; margin-bottom: 0.75rem; font-size: 0.875rem;
+            padding: .875rem 1rem;
+            background: rgba(239,68,68,.06); border: 2px solid rgba(239,68,68,.2);
+            border-radius: 12px; margin-bottom: .75rem; font-size: .875rem;
         }
         .approver-locked-notice i { color: var(--danger); flex-shrink: 0; margin-top: 2px; }
-
         .approval-notice {
-            background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(217,119,6,0.08) 100%);
-            border: 2px solid rgba(245,158,11,0.3); border-radius: 12px;
+            background: linear-gradient(135deg, rgba(245,158,11,.08) 0%, rgba(217,119,6,.08) 100%);
+            border: 2px solid rgba(245,158,11,.3); border-radius: 12px;
             padding: 1rem 1.25rem; margin-bottom: 1.5rem;
         }
 
+        /* ══════════ NOTIFICATION MODAL ══════════ */
         #notifyModal .modal-content {
-            border-radius: 20px; border: none; overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.18);
+            border-radius: 20px; border: none; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,.18);
         }
         #notifyModal .modal-body { padding: 2rem; text-align: center; }
         .notify-icon-wrap {
             width: 80px; height: 80px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             margin: 0 auto 1.25rem; font-size: 2.2rem;
-            animation: notifyPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            animation: notifyPop .4s cubic-bezier(.34,1.56,.64,1) both;
         }
-        @keyframes notifyPop {
-            from { transform: scale(0.4); opacity: 0; }
-            to   { transform: scale(1);   opacity: 1; }
-        }
+        @keyframes notifyPop { from{transform:scale(.4);opacity:0;} to{transform:scale(1);opacity:1;} }
         .notify-icon-wrap.success { background: linear-gradient(135deg,#d1fae5,#6ee7b7); color: #059669; }
         .notify-icon-wrap.error   { background: linear-gradient(135deg,#fee2e2,#fca5a5); color: #dc2626; }
         .notify-icon-wrap.warning { background: linear-gradient(135deg,#fef3c7,#fcd34d); color: #d97706; }
         .notify-icon-wrap.info    { background: linear-gradient(135deg,#dbeafe,#93c5fd); color: #2563eb; }
-        .notify-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .notify-title.success { color: #065f46; }
-        .notify-title.error   { color: #7f1d1d; }
-        .notify-title.warning { color: #78350f; }
-        .notify-title.info    { color: #1e3a8a; }
-        .notify-message { color: #475569; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; white-space: pre-line; }
-        .notify-footer { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+        .notify-title { font-size: 1.25rem; font-weight: 700; margin-bottom: .5rem; }
+        .notify-title.success{color:#065f46;} .notify-title.error{color:#7f1d1d;}
+        .notify-title.warning{color:#78350f;} .notify-title.info{color:#1e3a8a;}
+        .notify-message { color: #475569; font-size: .95rem; line-height: 1.6; margin-bottom: 1.5rem; white-space: pre-line; }
+        .notify-footer { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
         .notify-btn-ok {
-            padding: 0.6rem 2rem; border-radius: 10px; border: none;
-            font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.25s; color: white;
+            padding: .6rem 2rem; border-radius: 10px; border: none;
+            font-weight: 600; font-size: .95rem; cursor: pointer; transition: all .25s; color: white;
         }
-        .notify-btn-ok.success { background: linear-gradient(135deg,#10b981,#059669); }
-        .notify-btn-ok.error   { background: linear-gradient(135deg,#ef4444,#dc2626); }
-        .notify-btn-ok.warning { background: linear-gradient(135deg,#f59e0b,#d97706); }
-        .notify-btn-ok.info    { background: linear-gradient(135deg,#1e3a8a,#3b82f6); }
-        .notify-btn-ok:hover   { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.18); }
+        .notify-btn-ok.success{background:linear-gradient(135deg,#10b981,#059669);}
+        .notify-btn-ok.error  {background:linear-gradient(135deg,#ef4444,#dc2626);}
+        .notify-btn-ok.warning{background:linear-gradient(135deg,#f59e0b,#d97706);}
+        .notify-btn-ok.info   {background:linear-gradient(135deg,#1e3a8a,#3b82f6);}
+        .notify-btn-ok:hover  {transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.18);}
         .notify-btn-cancel {
-            padding: 0.6rem 1.5rem; border-radius: 10px;
+            padding: .6rem 1.5rem; border-radius: 10px;
             border: 2px solid #e2e8f0; background: white; color: #64748b;
-            font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.25s;
+            font-weight: 600; font-size: .95rem; cursor: pointer; transition: all .25s;
         }
         .notify-btn-cancel:hover { background: #f1f5f9; border-color: #cbd5e1; }
 
+        /* ══════════ MODALS ══════════ */
         #unauthorizedModal .modal-content { border: none; border-radius: 16px; overflow: hidden; }
         #unauthorizedModal .modal-header { background: linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%); }
 
-        .powered-by {
-            position: fixed; bottom: 15px; right: 15px; background: white;
-            padding: 10px 16px; border-radius: 25px;
-            box-shadow: 0 4px 15px rgba(30,58,138,0.15);
-            font-size: 0.8rem; font-weight: 600; color: var(--primary); z-index: 1000;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in { animation: fadeIn 0.4s ease; }
-
+        /* ══════════ RECEIPT ══════════ */
         .receipt-container { max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border: 2px solid #e5e7eb; }
         .receipt-header { text-align: center; border-bottom: 3px solid var(--primary); padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
-        .receipt-logo { width: 80px; height: 80px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; margin: 0 auto 1rem; }
-        .receipt-title    { font-size: 1.8rem; font-weight: bold; color: var(--primary); margin-bottom: 0.5rem; }
-        .receipt-subtitle { color: var(--secondary); font-size: 0.9rem; }
+        .receipt-logo { width: 80px; height: 80px; background: linear-gradient(135deg,#1e3a8a,#3b82f6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; margin: 0 auto 1rem; }
+        .receipt-title    { font-size: 1.8rem; font-weight: bold; color: var(--primary); margin-bottom: .5rem; }
+        .receipt-subtitle { color: var(--secondary); font-size: .9rem; }
         .receipt-section  { margin-bottom: 1.5rem; }
-        .receipt-section-title { font-weight: bold; color: var(--primary); border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1rem; }
-        .receipt-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed #e5e7eb; }
+        .receipt-section-title { font-weight: bold; color: var(--primary); border-bottom: 2px solid #e5e7eb; padding-bottom: .5rem; margin-bottom: 1rem; }
+        .receipt-row { display: flex; justify-content: space-between; padding: .5rem 0; border-bottom: 1px dashed #e5e7eb; }
         .receipt-row:last-child { border-bottom: none; }
         .receipt-label { color: var(--secondary); font-weight: 500; }
         .receipt-value { font-weight: 600; color: #1f2937; }
-        .receipt-amount { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 2px solid var(--success); border-radius: 10px; padding: 1rem; text-align: center; margin: 1.5rem 0; }
-        .receipt-amount-label { color: var(--secondary); font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .receipt-amount { background: linear-gradient(135deg,#f0fdf4,#dcfce7); border: 2px solid var(--success); border-radius: 10px; padding: 1rem; text-align: center; margin: 1.5rem 0; }
+        .receipt-amount-label { color: var(--secondary); font-size: .9rem; margin-bottom: .5rem; }
         .receipt-amount-value { font-size: 2.5rem; font-weight: bold; color: var(--success); }
         .receipt-footer { text-align: center; border-top: 3px solid var(--primary); padding-top: 1.5rem; margin-top: 2rem; }
-        .receipt-stamp { display: inline-block; border: 3px solid var(--success); color: var(--success); padding: 0.5rem 1.5rem; border-radius: 10px; font-weight: bold; transform: rotate(-5deg); margin: 1rem 0; }
+        .receipt-stamp { display: inline-block; border: 3px solid var(--success); color: var(--success); padding: .5rem 1.5rem; border-radius: 10px; font-weight: bold; transform: rotate(-5deg); margin: 1rem 0; }
 
+        /* ══════════ POWERED BY ══════════ */
+        .powered-by {
+            position: fixed; bottom: 15px; right: 15px; background: white;
+            padding: 10px 16px; border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(30,58,138,.15);
+            font-size: .8rem; font-weight: 600; color: var(--primary); z-index: 1000;
+        }
+
+        /* ══════════ ANIMATIONS ══════════ */
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+        .fade-in { animation: fadeIn .4s ease; }
+
+        /* ══════════ RESPONSIVE ══════════ */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.active { transform: translateX(0); }
             .top-navbar { left: 0; }
             .main-content { margin-left: 0; padding: 1rem; }
             .table thead { display: none; }
-            .table tbody tr { display: block; margin-bottom: 1rem; border: 2px solid rgba(30,58,138,0.1); border-radius: 12px; overflow: hidden; background: white; }
-            .table tbody td { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid rgba(30,58,138,0.05); }
+            .table tbody tr { display: block; margin-bottom: 1rem; border: 2px solid rgba(30,58,138,.1); border-radius: 12px; overflow: hidden; background: white; }
+            .table tbody td { display: flex; justify-content: space-between; align-items: center; padding: .75rem 1rem; border-bottom: 1px solid rgba(30,58,138,.05); }
             .table tbody td::before { content: attr(data-label); font-weight: 600; color: var(--primary); margin-right: 1rem; flex-shrink: 0; }
         }
         @media (max-width: 576px) {
-            .top-navbar { height: 60px; padding: 0 1rem; }
-            .main-content { margin-top: 60px; padding: 0.75rem; }
+            :root { --navbar-h: 60px; }
+            .main-content { padding: .75rem; }
             .page-header { padding: 1.25rem; border-radius: 16px; }
-            .powered-by { bottom: 10px; right: 10px; font-size: 0.7rem; padding: 8px 12px; }
+            .powered-by { bottom: 10px; right: 10px; font-size: .7rem; padding: 8px 12px; }
         }
         @media print {
             body * { visibility: hidden; }
@@ -414,45 +443,75 @@
 </head>
 <body>
 
+<!-- ════════════════════════ SIDEBAR ════════════════════════ -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <div class="logo-container">
+        <div class="logo-row">
             <div class="logo-box">C</div>
             <div>
-                <h5 class="mb-0 fw-bold sidebar-title" style="text-transform:uppercase;">Club De Stars</h5>
-                <small class="opacity-75" style="font-size:0.75rem;">ADMIN PANEL</small>
+                <div class="sidebar-brand">Club De Stars<small>Admin Panel</small></div>
             </div>
         </div>
-        <div class="admin-badge">
-            <i class="fas fa-shield-alt"></i>
-            <span><%= admin.role?.name?.toUpperCase() || 'ADMIN' %></span>
+        <div class="role-pill">
+            <i class="fas fa-shield-alt" style="font-size:.65rem;"></i>&nbsp;<%= admin.role?.name?.toUpperCase() || 'ADMIN' %>
         </div>
     </div>
-    <div class="sidebar-menu">
-        <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
-        <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
-        <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
-        <a href="/admin/manage-payment" class="active"><i class="fas fa-credit-card"></i> Payments</a>
-        <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
-        <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
-        <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
-        <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
-        <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
-        <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
-        <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
-        <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
-        <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
-        <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
-        <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
-        <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
-        <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-        <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
-        <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);">
-            <i class="fas fa-sign-in-alt"></i> Back to Dashboard
-        </a>
+
+    <div class="sidebar-nav">
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-home" style="font-size:.6rem;"></i>Main</div>
+            <a href="/admin/dashboard"><i class="fas fa-chart-pie"></i>Overview</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-users" style="font-size:.6rem;"></i>Members</div>
+            <a href="/admin/manage-members"><i class="fas fa-users"></i>Manage Members</a>
+            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i>Kiddies Accounts</a>
+            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i>Membership Types</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
+            <a href="/admin/manage-payment" class='active'><i class="fas fa-credit-card"></i>Payments</a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-hand-holding-usd" style="font-size:.6rem;"></i>Loans</div>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i>Loan Management</a>
+            <a href="/admin/loan-payments"><i class="fas fa-file-invoice-dollar"></i>Loan Payments</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i>Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i>External Loans</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-landmark" style="font-size:.6rem;"></i>Finance</div>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i>Company Finance</a>
+            <a href="/admin/operating-earnings"><i class="fas fa-chart-line"></i>Operating Earnings</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-chart-bar"></i>Company Revenue</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-cog" style="font-size:.6rem;"></i>System</div>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i>Manage Subscriptions</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i>Roles &amp; Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i>Settings</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-file-alt" style="font-size:.6rem;"></i>Reporting</div>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i>Reports</a>
+            <a href="/admin/logs"><i class="fas fa-history"></i>Admin Logs</a>
+        </div>
     </div>
+
+    <a href="/cds-cooperative/dashboard" class="nav-back"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
 </div>
 
+<!-- Top Navbar -->
 <div class="top-navbar">
     <i class="fas fa-bars d-lg-none me-3"
        style="cursor:pointer;color:var(--primary);font-size:1.5rem;"
@@ -461,6 +520,7 @@
         <h5 class="mb-0 fw-bold" style="color:var(--primary)">Payment Management</h5>
         <small class="text-muted">Process member &amp; kiddies account payments — requires 3 approvals</small>
     </div>
+    <div class="d-lg-none"><span class="fw-bold" style="color:var(--primary);font-size:.95rem;">Payments</span></div>
     <a href="/admin/transaction-approvals" class="btn btn-outline-primary btn-sm ms-auto position-relative">
         <i class="fas fa-tasks me-1"></i>My Approvals
         <span id="navbarPendingBadge"
@@ -469,6 +529,9 @@
     </a>
 </div>
 
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- ════════════════════════ MAIN CONTENT ════════════════════════ -->
 <div class="main-content">
 
     <!-- Page Header -->
@@ -491,7 +554,7 @@
         <i class="fas fa-info-circle mt-1" style="color:var(--warning);font-size:1.2rem;flex-shrink:0;"></i>
         <div>
             <strong style="color:#92400e;">Transaction Approval Required</strong>
-            <p class="mb-0 mt-1 text-muted" style="font-size:0.9rem;">
+            <p class="mb-0 mt-1 text-muted" style="font-size:.9rem;">
                 Every transaction submitted here will be placed in a <strong>pending</strong> state.
                 You must select 3 non-member officers who will each review and approve the transaction
                 before it is processed. A single decline will reject the transaction immediately.
@@ -511,7 +574,7 @@
             <div class="row g-3">
                 <div class="col-lg-3 col-md-6 col-6">
                     <div class="payment-type-card" id="card-deposit" onclick="handlePaymentTypeClick('deposit', this)">
-                        <div class="payment-icon" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;">
+                        <div class="payment-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:white;">
                             <i class="fas fa-plus-circle"></i>
                         </div>
                         <h6 class="fw-bold mb-1">Member Deposit</h6>
@@ -520,7 +583,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 col-6">
                     <div class="payment-type-card" id="card-withdrawal" onclick="handlePaymentTypeClick('withdrawal', this)">
-                        <div class="payment-icon" style="background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:white;">
+                        <div class="payment-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:white;">
                             <i class="fas fa-minus-circle"></i>
                         </div>
                         <h6 class="fw-bold mb-1">Process Withdrawal</h6>
@@ -529,7 +592,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 col-6">
                     <div class="payment-type-card" id="card-loan-repayment" onclick="handlePaymentTypeClick('loan-repayment', this)">
-                        <div class="payment-icon" style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:white;">
+                        <div class="payment-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;">
                             <i class="fas fa-hand-holding-usd"></i>
                         </div>
                         <h6 class="fw-bold mb-1">Loan Repayment</h6>
@@ -538,7 +601,7 @@
                 </div>
                 <div class="col-lg-3 col-md-6 col-6">
                     <div class="payment-type-card" id="card-direct-debit" onclick="handlePaymentTypeClick('direct-debit', this)">
-                        <div class="payment-icon" style="background:linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%);color:white;">
+                        <div class="payment-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:white;">
                             <i class="fas fa-university"></i>
                         </div>
                         <h6 class="fw-bold mb-1">Direct Debit</h6>
@@ -621,7 +684,7 @@
                         <!-- Kiddies + loan-repayment warning -->
                         <div id="kiddiesLoanWarning"
                              class="alert alert-warning d-flex align-items-center gap-2 mb-3"
-                             style="display:none!important;font-size:0.88rem;">
+                             style="display:none!important;font-size:.88rem;">
                             <i class="fas fa-exclamation-triangle flex-shrink-0"></i>
                             Kiddies accounts do not support loan repayment. Please select a different payment type.
                         </div>
@@ -647,7 +710,7 @@
                                 <option value="">— Select a loan —</option>
                             </select>
                             <div id="loanDetailsBox" class="mt-2 p-3 rounded-3 d-none"
-                                 style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.3);">
+                                 style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.3);">
                                 <div class="row g-2 text-sm">
                                     <div class="col-6">
                                         <small class="text-muted d-block">Total Repayable</small>
@@ -690,12 +753,7 @@
                             </select>
                         </div>
 
-                        <!-- ═══════════════════════════════════════════════
-                             REFERENCE — NOW REQUIRED
-                             Visual: red asterisk, amber helper notice,
-                             is-invalid / is-valid border feedback,
-                             live oninput handler calls updateSubmitButton.
-                        ═══════════════════════════════════════════════ -->
+                        <!-- Reference Number -->
                         <div class="mb-3">
                             <label class="form-label">
                                 <i class="fas fa-hashtag me-2"></i>Reference Number
@@ -737,7 +795,7 @@
                                     <span id="approverCountText">0 / 3 selected</span>
                                 </span>
                             </label>
-                            <p class="text-muted mb-2" style="font-size:0.85rem;">
+                            <p class="text-muted mb-2" style="font-size:.85rem;">
                                 Choose exactly 3 officers with non-member roles to approve this transaction.
                             </p>
 
@@ -822,7 +880,7 @@
                                 </div>
 
                                 <div class="mt-3 p-3 rounded-3"
-                                     style="background:rgba(30,58,138,0.03);border:1px solid rgba(30,58,138,0.1);">
+                                     style="background:rgba(30,58,138,.03);border:1px solid rgba(30,58,138,.1);">
                                     <div class="d-flex justify-content-between mb-2">
                                         <small class="text-muted">Current Balance</small>
                                         <strong>₦<span id="summaryCurrentBalance">0</span></strong>
@@ -833,19 +891,18 @@
                                     </div>
                                 </div>
 
-                                <!-- Reference status indicator in summary panel -->
                                 <div class="mt-3 p-3 rounded-3" id="summaryRefPanel"
-                                     style="background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);">
+                                     style="background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);">
                                     <small class="d-block mb-1 fw-semibold" style="color:#dc2626;">
                                         <i class="fas fa-hashtag me-1"></i>Reference
                                     </small>
-                                    <div id="summaryRefValue" class="fst-italic" style="color:#94a3b8;font-size:0.85rem;">
+                                    <div id="summaryRefValue" class="fst-italic" style="color:#94a3b8;font-size:.85rem;">
                                         Not entered yet
                                     </div>
                                 </div>
 
                                 <div class="mt-3 p-3 rounded-3"
-                                     style="background:rgba(30,58,138,0.03);border:1px solid rgba(30,58,138,0.1);">
+                                     style="background:rgba(30,58,138,.03);border:1px solid rgba(30,58,138,.1);">
                                     <small class="text-muted d-block mb-2 fw-semibold">
                                         <i class="fas fa-user-check me-1"></i>Selected Approvers
                                     </small>
@@ -889,12 +946,12 @@
                         <i class="fas fa-download me-1"></i>Export
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm"
-                        style="border:2px solid rgba(30,58,138,0.1);border-radius:12px;min-width:220px;">
+                        style="border:2px solid rgba(30,58,138,.1);border-radius:12px;min-width:220px;">
                         <li>
                             <a class="dropdown-item py-2" href="#" onclick="exportTransactions(); return false;">
                                 <i class="fas fa-file-csv me-2 text-success"></i>
                                 <span class="fw-semibold">Export as CSV</span>
-                                <small class="d-block text-muted ps-4" style="font-size:0.72rem;">Excel-compatible spreadsheet</small>
+                                <small class="d-block text-muted ps-4" style="font-size:.72rem;">Excel-compatible spreadsheet</small>
                             </a>
                         </li>
                         <li><hr class="dropdown-divider my-1"></li>
@@ -902,7 +959,7 @@
                             <a class="dropdown-item py-2" href="#" onclick="exportTransactionsPDF(); return false;">
                                 <i class="fas fa-file-pdf me-2 text-danger"></i>
                                 <span class="fw-semibold">Export as PDF</span>
-                                <small class="d-block text-muted ps-4" style="font-size:0.72rem;">Printable branded report</small>
+                                <small class="d-block text-muted ps-4" style="font-size:.72rem;">Printable branded report</small>
                             </a>
                         </li>
                     </ul>
@@ -938,11 +995,7 @@
                                 'loan-repayment': { label: 'Loan Repayment', cls: 'warning', sign: ''  },
                                 'direct-debit':   { label: 'Direct Debit',   cls: 'info',    sign: '-' }
                             };
-                            const statusMap = {
-                                successful: 'success',
-                                pending:    'warning',
-                                rejected:   'danger',
-                            };
+                            const statusMap = { successful: 'success', pending: 'warning', rejected: 'danger' };
                             adminPayments.forEach(function(txn) {
                                 const d          = new Date(txn.createdAt);
                                 const type       = typesMap[txn.paymentType] || { label: txn.paymentType, cls: 'secondary', sign: '' };
@@ -956,12 +1009,10 @@
                                 const processedBy = txn.admin ? (txn.admin.firstName + ' ' + txn.admin.lastName) : 'System';
                                 const txnStatus    = txn.status || 'successful';
                                 const txnStatusCls = statusMap[txnStatus] || 'secondary';
-
                                 const approverNames = (txn.selectedApprovers || [])
                                     .filter(function(a) { return a && a.firstName; })
                                     .map(function(a) { return a.firstName + ' ' + a.lastName; })
                                     .join(' | ');
-
                                 const approvalDetail = (txn.approvals || [])
                                     .map(function(ap) {
                                         const approver = (txn.selectedApprovers || []).find(function(u) {
@@ -970,14 +1021,10 @@
                                         const name = approver
                                             ? (approver.firstName + ' ' + approver.lastName)
                                             : (ap.user?.firstName ? ap.user.firstName + ' ' + ap.user.lastName : 'Unknown');
-                                        const when = new Date(ap.respondedAt).toLocaleString('en-US', {
-                                            month: 'short', day: 'numeric', year: 'numeric',
-                                            hour: '2-digit', minute: '2-digit'
-                                        });
+                                        const when = new Date(ap.respondedAt).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
                                         return name + ' (' + ap.action + ' — ' + when + ')';
                                     })
                                     .join(' | ');
-
                                 const txnData = {
                                     id:             txn._id.toString(),
                                     date:           d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }),
@@ -1019,7 +1066,7 @@
                                 <div class="fw-semibold d-flex align-items-center gap-1">
                                     <%= memberName %>
                                     <% if (isKiddies) { %>
-                                    <span class="badge" style="background:rgba(236,72,153,0.15);color:#db2777;font-size:0.65rem;border:1px solid rgba(236,72,153,0.3);">
+                                    <span class="badge" style="background:rgba(236,72,153,.15);color:#db2777;font-size:.65rem;border:1px solid rgba(236,72,153,.3);">
                                         <i class="fas fa-baby me-1"></i>Kiddies
                                     </span>
                                     <% } %>
@@ -1103,7 +1150,7 @@
                 <p class="text-muted mb-3">Your transaction has been submitted and is now pending review. All selected approvers have been notified.</p>
                 <div class="p-3 rounded-3" style="background:#fffbeb;border:1px solid #fde68a;">
                     <small class="fw-semibold d-block mb-1" style="color:#92400e;">Approval Reference</small>
-                    <strong id="approvalIdDisplay" style="font-family:monospace;font-size:0.95rem;color:#92400e;word-break:break-all;"></strong>
+                    <strong id="approvalIdDisplay" style="font-family:monospace;font-size:.95rem;color:#92400e;word-break:break-all;"></strong>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1129,7 +1176,7 @@
             <div class="modal-body">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <div class="card h-100" style="background:rgba(30,58,138,0.02);border:2px solid rgba(30,58,138,0.1);">
+                        <div class="card h-100" style="background:rgba(30,58,138,.02);border:2px solid rgba(30,58,138,.1);">
                             <div class="card-body">
                                 <h6 class="fw-bold mb-3" style="color:var(--primary);"><i class="fas fa-info-circle me-2"></i>Transaction Information</h6>
                                 <div class="mb-2"><small class="text-muted d-block">Transaction ID</small><strong id="detailTxnId" class="text-break">—</strong></div>
@@ -1141,12 +1188,12 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="card h-100" style="background:rgba(16,185,129,0.02);border:2px solid rgba(16,185,129,0.1);">
+                        <div class="card h-100" style="background:rgba(16,185,129,.02);border:2px solid rgba(16,185,129,.1);">
                             <div class="card-body">
                                 <h6 class="fw-bold mb-3" style="color:var(--success);">
                                     <i class="fas fa-user me-2"></i>Member Information
                                     <span id="detailKiddiesBadge" class="badge ms-1"
-                                          style="background:rgba(236,72,153,0.15);color:#db2777;border:1px solid rgba(236,72,153,0.3);font-size:0.65rem;display:none;">
+                                          style="background:rgba(236,72,153,.15);color:#db2777;border:1px solid rgba(236,72,153,.3);font-size:.65rem;display:none;">
                                         <i class="fas fa-baby me-1"></i>Kiddies
                                     </span>
                                 </h6>
@@ -1158,7 +1205,7 @@
                         </div>
                     </div>
                     <div class="col-12">
-                        <div class="card" style="background:rgba(245,158,11,0.02);border:2px solid rgba(245,158,11,0.1);">
+                        <div class="card" style="background:rgba(245,158,11,.02);border:2px solid rgba(245,158,11,.1);">
                             <div class="card-body">
                                 <h6 class="fw-bold mb-3" style="color:var(--warning);"><i class="fas fa-money-bill-wave me-2"></i>Payment Details</h6>
                                 <div class="row g-3">
@@ -1175,7 +1222,7 @@
                         </div>
                     </div>
                     <div class="col-12">
-                        <div class="card" style="border:2px solid rgba(30,58,138,0.08);">
+                        <div class="card" style="border:2px solid rgba(30,58,138,.08);">
                             <div class="card-body">
                                 <h6 class="fw-bold mb-3" style="color:var(--primary);"><i class="fas fa-comment-alt me-2"></i>Additional Information</h6>
                                 <div class="mb-2"><small class="text-muted d-block">Processed By</small><strong id="detailProcessedBy">—</strong></div>
@@ -1249,11 +1296,11 @@
         </div>
         <div class="receipt-footer">
             <div class="receipt-stamp">VERIFIED &amp; COMPLETED</div>
-            <p style="font-size:0.8rem;color:#64748b;margin-top:1rem;">
+            <p style="font-size:.8rem;color:#64748b;margin-top:1rem;">
                 This is a computer-generated receipt and does not require a signature.<br>
                 For inquiries contact: support@clubdestars.com
             </p>
-            <p style="font-size:0.7rem;color:#94a3b8;margin-top:0.5rem;">
+            <p style="font-size:.7rem;color:#94a3b8;margin-top:.5rem;">
                 Generated on: <span id="printGeneratedDate">—</span><br>
                 Powered by <strong>JESZ LIMITED</strong>
             </p>
@@ -1265,54 +1312,39 @@
 <script>
 'use strict';
 
-/* ════════════════════════════════════════════════════════════
-   PERMISSIONS
-════════════════════════════════════════════════════════════ */
+/* ════ PERMISSIONS ════ */
 const PERMISSIONS = {
     processDeposits:       <%- JSON.stringify(!!admin.role?.permissions?.some(p => p.name === 'process_deposits'))      %>,
     authorizeTransactions: <%- JSON.stringify(!!admin.role?.permissions?.some(p => p.name === 'authorize_transactions')) %>,
 };
 
-/* ════════════════════════════════════════════════════════════
-   NOTIFICATION MODAL
-════════════════════════════════════════════════════════════ */
+/* ════ NOTIFICATION MODAL ════ */
 let _notifyResolve = null;
-
-function showNotify({ type = 'info', title = '', message = '', confirmLabel = 'OK', cancelLabel = null } = {}) {
+function showNotify({ type='info', title='', message='', confirmLabel='OK', cancelLabel=null } = {}) {
     return new Promise(resolve => {
         _notifyResolve = resolve;
-        const iconMap = {
-            success: { icon: 'fa-check-circle',        label: title || 'Success' },
-            error:   { icon: 'fa-times-circle',         label: title || 'Error'   },
-            warning: { icon: 'fa-exclamation-triangle', label: title || 'Warning' },
-            info:    { icon: 'fa-info-circle',           label: title || 'Info'   },
-        };
+        const iconMap = { success:{icon:'fa-check-circle',label:title||'Success'}, error:{icon:'fa-times-circle',label:title||'Error'}, warning:{icon:'fa-exclamation-triangle',label:title||'Warning'}, info:{icon:'fa-info-circle',label:title||'Info'} };
         const cfg = iconMap[type] ?? iconMap.info;
         document.getElementById('notifyIconWrap').className = `notify-icon-wrap ${type}`;
         document.getElementById('notifyIconEl').className   = `fas ${cfg.icon}`;
         const titleEl = document.getElementById('notifyTitle');
-        titleEl.className   = `notify-title ${type}`;
-        titleEl.textContent = cfg.label;
-        document.getElementById('notifyMessage').textContent = message;
-        const okBtn = document.getElementById('notifyOkBtn');
-        okBtn.className   = `notify-btn-ok ${type}`;
-        okBtn.textContent = confirmLabel;
+        titleEl.className=`notify-title ${type}`; titleEl.textContent=cfg.label;
+        document.getElementById('notifyMessage').textContent=message;
+        const okBtn=document.getElementById('notifyOkBtn');
+        okBtn.className=`notify-btn-ok ${type}`; okBtn.textContent=confirmLabel;
         document.getElementById('notifyCancelBtn')?.remove();
         if (cancelLabel) {
-            const cb = document.createElement('button');
-            cb.className = 'notify-btn-cancel'; cb.id = 'notifyCancelBtn';
-            cb.textContent = cancelLabel; cb.onclick = notifyCancel;
-            document.getElementById('notifyFooter').insertBefore(cb, okBtn);
+            const cb=document.createElement('button'); cb.className='notify-btn-cancel'; cb.id='notifyCancelBtn';
+            cb.textContent=cancelLabel; cb.onclick=notifyCancel;
+            document.getElementById('notifyFooter').insertBefore(cb,okBtn);
         }
-        new bootstrap.Modal(document.getElementById('notifyModal'), { backdrop: 'static', keyboard: false }).show();
+        new bootstrap.Modal(document.getElementById('notifyModal'),{backdrop:'static',keyboard:false}).show();
     });
 }
-function notifyClose()  { bootstrap.Modal.getInstance(document.getElementById('notifyModal'))?.hide(); if (_notifyResolve) { _notifyResolve(true);  _notifyResolve = null; } }
-function notifyCancel() { bootstrap.Modal.getInstance(document.getElementById('notifyModal'))?.hide(); if (_notifyResolve) { _notifyResolve(false); _notifyResolve = null; } }
+function notifyClose()  { bootstrap.Modal.getInstance(document.getElementById('notifyModal'))?.hide(); if(_notifyResolve){_notifyResolve(true);_notifyResolve=null;} }
+function notifyCancel() { bootstrap.Modal.getInstance(document.getElementById('notifyModal'))?.hide(); if(_notifyResolve){_notifyResolve(false);_notifyResolve=null;} }
 
-/* ════════════════════════════════════════════════════════════
-   UNAUTHORIZED MODAL
-════════════════════════════════════════════════════════════ */
+/* ════ UNAUTHORIZED MODAL ════ */
 const UNAUTH_MESSAGES = {
     auth:                   'Your session has expired. Please log in again.',
     permission:             "You don't have permission to perform this action.",
@@ -1322,47 +1354,38 @@ const UNAUTH_MESSAGES = {
     process_deposits:       "You don't have the permission to Authorize transaction\nand cannot assign approvers or submit transactions.",
     authorize_transactions: 'You need the authorize_transactions permission to assign approvers.',
 };
-function showUnauthorized(reason = 'permission', onClose = null) {
+function showUnauthorized(reason='permission', onClose=null) {
     document.getElementById('unauthorizedMessage').textContent = UNAUTH_MESSAGES[reason] ?? UNAUTH_MESSAGES.permission;
     const modalEl = document.getElementById('unauthorizedModal');
-    if (onClose) modalEl.addEventListener('hidden.bs.modal', function h() { modalEl.removeEventListener('hidden.bs.modal', h); onClose(); });
+    if (onClose) modalEl.addEventListener('hidden.bs.modal', function h(){ modalEl.removeEventListener('hidden.bs.modal',h); onClose(); });
     new bootstrap.Modal(modalEl).show();
 }
 
-/* ════════════════════════════════════════════════════════════
-   PERMISSION-AWARE FETCH
-════════════════════════════════════════════════════════════ */
-async function permFetch(url, options = {}, sourceModalEl = null) {
-    const headers = { 'X-Requested-With': 'XMLHttpRequest', ...(options.headers || {}) };
+/* ════ PERMISSION-AWARE FETCH ════ */
+async function permFetch(url, options={}, sourceModalEl=null) {
+    const headers={'X-Requested-With':'XMLHttpRequest',...(options.headers||{})};
     let res;
-    try { res = await fetch(url, { ...options, headers }); }
-    catch (networkErr) {
-        await showNotify({ type: 'error', title: 'Network Error', message: 'Could not reach the server. Check your connection and try again.' });
-        return { ok: false };
-    }
-    const hideSource = () => { if (sourceModalEl) bootstrap.Modal.getInstance(sourceModalEl)?.hide(); };
-    if (res.status === 401) {
+    try { res=await fetch(url,{...options,headers}); }
+    catch(networkErr) { await showNotify({type:'error',title:'Network Error',message:'Could not reach the server. Check your connection and try again.'}); return {ok:false}; }
+    const hideSource=()=>{ if(sourceModalEl) bootstrap.Modal.getInstance(sourceModalEl)?.hide(); };
+    if (res.status===401) {
         hideSource();
-        const doRedirect = () => showUnauthorized('auth', () => setTimeout(() => { window.location.href = '/login'; }, 800));
-        if (sourceModalEl) sourceModalEl.addEventListener('hidden.bs.modal', function h() { sourceModalEl.removeEventListener('hidden.bs.modal', h); doRedirect(); });
-        else doRedirect();
-        return { ok: false };
+        const doRedirect=()=>showUnauthorized('auth',()=>setTimeout(()=>{window.location.href='/login';},800));
+        if(sourceModalEl) sourceModalEl.addEventListener('hidden.bs.modal',function h(){sourceModalEl.removeEventListener('hidden.bs.modal',h);doRedirect();}); else doRedirect();
+        return {ok:false};
     }
-    if (res.status === 403) {
-        let errorData = {}; try { errorData = await res.json(); } catch (_) {}
+    if (res.status===403) {
+        let errorData={}; try{errorData=await res.json();}catch(_){}
         hideSource();
-        const doShow = () => showUnauthorized(errorData.reason || 'permission');
-        if (sourceModalEl) sourceModalEl.addEventListener('hidden.bs.modal', function h() { sourceModalEl.removeEventListener('hidden.bs.modal', h); doShow(); });
-        else doShow();
-        return { ok: false };
+        const doShow=()=>showUnauthorized(errorData.reason||'permission');
+        if(sourceModalEl) sourceModalEl.addEventListener('hidden.bs.modal',function h(){sourceModalEl.removeEventListener('hidden.bs.modal',h);doShow();}); else doShow();
+        return {ok:false};
     }
-    let data; try { data = await res.json(); } catch (_) { data = {}; }
-    return { ok: res.ok, status: res.status, data };
+    let data; try{data=await res.json();}catch(_){data={};}
+    return {ok:res.ok, status:res.status, data};
 }
 
-/* ════════════════════════════════════════════════════════════
-   APPLICATION STATE
-════════════════════════════════════════════════════════════ */
+/* ════ APP STATE ════ */
 let currentPaymentType    = '';
 let selectedMember        = null;
 let searchTimeout         = null;
@@ -1370,773 +1393,446 @@ let selectedApproverIds   = [];
 let selectedApproverNames = {};
 let currentTransaction    = null;
 
-/* ════════════════════════════════════════════════════════════
-   INIT
-════════════════════════════════════════════════════════════ */
+/* ════ INIT ════ */
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
-        weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
-    });
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
     loadPendingCount();
     applyPermissionUI();
 });
 
 function applyPermissionUI() {
     if (!PERMISSIONS.processDeposits) {
-        document.querySelectorAll('.payment-type-card').forEach(card => {
+        document.querySelectorAll('.payment-type-card').forEach(card=>{
             card.classList.add('locked');
             if (!card.querySelector('.lock-overlay')) {
-                const overlay = document.createElement('div');
-                overlay.className = 'lock-overlay';
-                overlay.innerHTML = '<i class="fas fa-lock"></i><span>NO PERMISSION</span>';
-                card.appendChild(overlay);
+                const overlay=document.createElement('div'); overlay.className='lock-overlay';
+                overlay.innerHTML='<i class="fas fa-lock"></i><span>NO PERMISSION</span>'; card.appendChild(overlay);
             }
         });
     }
     if (!PERMISSIONS.authorizeTransactions) {
         document.getElementById('approverList')?.classList.add('locked');
-        const notice = document.getElementById('approverLockedNotice');
-        if (notice) notice.style.display = 'flex';
+        const notice=document.getElementById('approverLockedNotice'); if(notice) notice.style.display='flex';
     }
 }
 
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+function closeSidebar()  { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); }
 
 async function loadPendingCount() {
     try {
-        const res  = await fetch('/admin/pending-approvals-count');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.count > 0) {
-            ['navbarPendingBadge', 'sidebarPendingBadge'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) { el.style.display = 'inline'; el.textContent = data.count; }
+        const res=await fetch('/admin/pending-approvals-count'); if(!res.ok) return;
+        const data=await res.json();
+        if (data.count>0) {
+            ['navbarPendingBadge','sidebarBadge'].forEach(id=>{
+                const el=document.getElementById(id);
+                if(el){el.style.display='inline';el.textContent=data.count;}
             });
         }
-    } catch (_) {}
+    } catch(_){}
 }
 
-/* ════════════════════════════════════════════════════════════
-   PAYMENT TYPE HANDLER
-════════════════════════════════════════════════════════════ */
+/* ════ PAYMENT TYPE HANDLER ════ */
 function handlePaymentTypeClick(type, el) {
     if (!PERMISSIONS.processDeposits) { showUnauthorized('process_deposits'); return; }
     selectPaymentType(type, el);
 }
 
 function selectPaymentType(type, el) {
-    currentPaymentType = type;
-    document.querySelectorAll('.payment-type-card').forEach(c => c.classList.remove('active'));
+    currentPaymentType=type;
+    document.querySelectorAll('.payment-type-card').forEach(c=>c.classList.remove('active'));
     el.classList.add('active');
-    const titles = {
+    const titles={
         'deposit':        '<i class="fas fa-plus-circle me-2" style="color:var(--success);"></i>Member / Kiddies Deposit',
         'withdrawal':     '<i class="fas fa-minus-circle me-2" style="color:var(--danger);"></i>Process Withdrawal',
         'loan-repayment': '<i class="fas fa-hand-holding-usd me-2" style="color:var(--warning);"></i>Loan Repayment',
         'direct-debit':   '<i class="fas fa-university me-2" style="color:#8b5cf6;"></i>Direct Debit',
     };
-    document.getElementById('formTitle').innerHTML = titles[type] || 'Payment Details';
-    document.getElementById('loanSelection').style.display  = type === 'loan-repayment' ? 'block' : 'none';
-    document.getElementById('chargeTypeDiv').style.display  = type === 'direct-debit'   ? 'block' : 'none';
-    document.getElementById('loanBadge').style.display      = type === 'loan-repayment' ? 'inline-flex' : 'none';
-    if (selectedMember?.entityType === 'kiddies') refreshKiddiesUI();
-    const formEl = document.getElementById('paymentForm');
-    formEl.style.display = 'block';
-    setTimeout(() => formEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    document.getElementById('formTitle').innerHTML=titles[type]||'Payment Details';
+    document.getElementById('loanSelection').style.display  = type==='loan-repayment'?'block':'none';
+    document.getElementById('chargeTypeDiv').style.display  = type==='direct-debit'  ?'block':'none';
+    document.getElementById('loanBadge').style.display      = type==='loan-repayment'?'inline-flex':'none';
+    if (selectedMember?.entityType==='kiddies') refreshKiddiesUI();
+    const formEl=document.getElementById('paymentForm');
+    formEl.style.display='block';
+    setTimeout(()=>formEl.scrollIntoView({behavior:'smooth',block:'start'}),50);
     clearMember();
 }
 
-/* ════════════════════════════════════════════════════════════
-   MEMBER SEARCH AUTOCOMPLETE
-════════════════════════════════════════════════════════════ */
+/* ════ MEMBER SEARCH ════ */
 function handleMemberSearch() {
-    const q        = document.getElementById('memberSearch').value.trim();
-    const dropdown = document.getElementById('autocompleteDropdown');
-    if (searchTimeout) clearTimeout(searchTimeout);
-    if (!q) { dropdown.classList.remove('show'); dropdown.innerHTML = ''; return; }
-    searchTimeout = setTimeout(async () => {
+    const q=document.getElementById('memberSearch').value.trim();
+    const dropdown=document.getElementById('autocompleteDropdown');
+    if(searchTimeout) clearTimeout(searchTimeout);
+    if(!q){dropdown.classList.remove('show');dropdown.innerHTML='';return;}
+    searchTimeout=setTimeout(async()=>{
         try {
-            const res = await fetch(`/admin/search-member?q=${encodeURIComponent(q)}`);
-            if (!res.ok) return;
-            const results = await res.json();
-            if (!Array.isArray(results) || results.length === 0) {
-                dropdown.innerHTML = `
-                    <div class="autocomplete-item text-center text-muted py-3">
-                        <i class="fas fa-search fa-lg d-block mb-2 opacity-50"></i>
-                        No members found for "<strong>${escHtml(q)}</strong>"
-                    </div>`;
-                dropdown.classList.add('show');
-                return;
+            const res=await fetch(`/admin/search-member?q=${encodeURIComponent(q)}`);
+            if(!res.ok) return;
+            const results=await res.json();
+            if(!Array.isArray(results)||!results.length){
+                dropdown.innerHTML=`<div class="autocomplete-item text-center text-muted py-3"><i class="fas fa-search fa-lg d-block mb-2 opacity-50"></i>No members found for "<strong>${escHtml(q)}</strong>"</div>`;
+                dropdown.classList.add('show'); return;
             }
-            dropdown.innerHTML = results.map(m => {
-                const isKiddies = m.entityType === 'kiddies';
-                const badgeHtml = isKiddies ? `<span class="kiddies-tag"><i class="fas fa-baby"></i> Kiddies</span><br>` : '';
-                const subDetail = isKiddies
-                    ? `${escHtml(m.membershipID)} &bull; Parent: ${escHtml(m.parentName || '—')}`
-                    : `${escHtml(m.membershipID)} &bull; ${escHtml(m.email)}`;
-                return `
-                <div class="autocomplete-item ${isKiddies ? 'kiddies-item' : ''}"
-                     onclick='selectMember(${JSON.stringify(m).replace(/'/g, "&#39;")})'>
-                    ${badgeHtml}
-                    <div class="autocomplete-item-name">${escHtml(m.name)}</div>
+            dropdown.innerHTML=results.map(m=>{
+                const isKiddies=m.entityType==='kiddies';
+                const badgeHtml=isKiddies?`<span class="kiddies-tag"><i class="fas fa-baby"></i> Kiddies</span><br>`:'';
+                const subDetail=isKiddies?`${escHtml(m.membershipID)} &bull; Parent: ${escHtml(m.parentName||'—')}`:`${escHtml(m.membershipID)} &bull; ${escHtml(m.email)}`;
+                return `<div class="autocomplete-item ${isKiddies?'kiddies-item':''}" onclick='selectMember(${JSON.stringify(m).replace(/'/g,"&#39;")})'>
+                    ${badgeHtml}<div class="autocomplete-item-name">${escHtml(m.name)}</div>
                     <div class="autocomplete-item-details">${subDetail}</div>
                     <span class="autocomplete-item-balance">Balance: ₦${Number(m.balance).toLocaleString()}</span>
                 </div>`;
             }).join('');
             dropdown.classList.add('show');
-        } catch (e) { console.error('Member search error:', e); }
-    }, 300);
+        } catch(e){console.error('Member search error:',e);}
+    },300);
 }
 
 function selectMember(member) {
-    selectedMember = member;
-    const isKiddies = member.entityType === 'kiddies';
-    document.getElementById('memberSearch').value = member.name;
+    selectedMember=member;
+    const isKiddies=member.entityType==='kiddies';
+    document.getElementById('memberSearch').value=member.name;
     document.getElementById('autocompleteDropdown').classList.remove('show');
-    document.getElementById('memberName').textContent    = member.name;
-    document.getElementById('memberID').textContent      = member.membershipID;
-    document.getElementById('memberEmail').textContent   = isKiddies ? (member.email || 'N/A') : member.email;
-    document.getElementById('memberBalance').textContent = Number(member.balance).toLocaleString();
-    document.getElementById('summaryCurrentBalance').textContent = Number(member.balance).toLocaleString();
-    document.getElementById('kiddiesAccountBadge').style.display = isKiddies ? '' : 'none';
-    const parentInfoEl = document.getElementById('kiddiesParentInfo');
-    if (isKiddies && (member.parentName || member.parentID)) {
-        parentInfoEl.style.display = 'flex';
-        document.getElementById('kiddiesParentName').textContent = member.parentName || '—';
-        document.getElementById('kiddiesParentID').textContent   = member.parentID   || '—';
-    } else {
-        parentInfoEl.style.display = 'none';
-    }
-    const resultCard = document.getElementById('memberResultCard');
-    if (isKiddies) resultCard.classList.add('kiddies-result');
-    else           resultCard.classList.remove('kiddies-result');
-    const loanSelect = document.getElementById('loanSelect');
-    loanSelect.innerHTML = '<option value="">— Select a loan —</option>';
-    if (!isKiddies && member.loans && member.loans.length > 0) {
-        member.loans.forEach(loan => {
-            const opt = document.createElement('option');
-            opt.value            = loan.id;
-            opt.dataset.total    = loan.totalRepay;
-            opt.dataset.balance  = loan.balanceRemaining;
-            opt.dataset.original = loan.originalAmount;
-            opt.textContent = `₦${Number(loan.originalAmount).toLocaleString()} — ${loan.duration}`;
+    document.getElementById('memberName').textContent=member.name;
+    document.getElementById('memberID').textContent=member.membershipID;
+    document.getElementById('memberEmail').textContent=isKiddies?(member.email||'N/A'):member.email;
+    document.getElementById('memberBalance').textContent=Number(member.balance).toLocaleString();
+    document.getElementById('summaryCurrentBalance').textContent=Number(member.balance).toLocaleString();
+    document.getElementById('kiddiesAccountBadge').style.display=isKiddies?'':'none';
+    const parentInfoEl=document.getElementById('kiddiesParentInfo');
+    if(isKiddies&&(member.parentName||member.parentID)){
+        parentInfoEl.style.display='flex';
+        document.getElementById('kiddiesParentName').textContent=member.parentName||'—';
+        document.getElementById('kiddiesParentID').textContent=member.parentID||'—';
+    } else { parentInfoEl.style.display='none'; }
+    const resultCard=document.getElementById('memberResultCard');
+    if(isKiddies) resultCard.classList.add('kiddies-result'); else resultCard.classList.remove('kiddies-result');
+    const loanSelect=document.getElementById('loanSelect');
+    loanSelect.innerHTML='<option value="">— Select a loan —</option>';
+    if(!isKiddies&&member.loans&&member.loans.length>0){
+        member.loans.forEach(loan=>{
+            const opt=document.createElement('option'); opt.value=loan.id;
+            opt.dataset.total=loan.totalRepay; opt.dataset.balance=loan.balanceRemaining; opt.dataset.original=loan.originalAmount;
+            opt.textContent=`₦${Number(loan.originalAmount).toLocaleString()} — ${loan.duration}`;
             loanSelect.appendChild(opt);
         });
     } else {
-        const opt = document.createElement('option');
-        opt.disabled    = true;
-        opt.textContent = isKiddies ? 'Not applicable for kiddies accounts' : 'No active loans found';
-        loanSelect.appendChild(opt);
+        const opt=document.createElement('option'); opt.disabled=true;
+        opt.textContent=isKiddies?'Not applicable for kiddies accounts':'No active loans found'; loanSelect.appendChild(opt);
     }
-    document.getElementById('loanBadge').style.display =
-        (!isKiddies && currentPaymentType === 'loan-repayment' && member.loans?.length > 0) ? 'inline-flex' : 'none';
-    document.getElementById('memberDetails').style.display = 'block';
-    refreshKiddiesUI();
-    calculateTotal();
+    document.getElementById('loanBadge').style.display=(!isKiddies&&currentPaymentType==='loan-repayment'&&member.loans?.length>0)?'inline-flex':'none';
+    document.getElementById('memberDetails').style.display='block';
+    refreshKiddiesUI(); calculateTotal();
 }
 
 function refreshKiddiesUI() {
-    if (!selectedMember) return;
-    const isKiddies   = selectedMember.entityType === 'kiddies';
-    const warnEl      = document.getElementById('kiddiesLoanWarning');
-    const amountInput = document.getElementById('paymentAmount');
-    const loanSel     = document.getElementById('loanSelection');
-    if (isKiddies && currentPaymentType === 'loan-repayment') {
-        warnEl.style.setProperty('display', 'flex', 'important');
-        amountInput.disabled  = true;
-        loanSel.style.display = 'none';
+    if(!selectedMember) return;
+    const isKiddies=selectedMember.entityType==='kiddies';
+    const warnEl=document.getElementById('kiddiesLoanWarning');
+    const amountInput=document.getElementById('paymentAmount');
+    const loanSel=document.getElementById('loanSelection');
+    if(isKiddies&&currentPaymentType==='loan-repayment'){
+        warnEl.style.setProperty('display','flex','important'); amountInput.disabled=true; loanSel.style.display='none';
     } else {
-        warnEl.style.setProperty('display', 'none', 'important');
-        amountInput.disabled  = false;
-        loanSel.style.display = (currentPaymentType === 'loan-repayment') ? 'block' : 'none';
+        warnEl.style.setProperty('display','none','important'); amountInput.disabled=false;
+        loanSel.style.display=(currentPaymentType==='loan-repayment')?'block':'none';
     }
     updateSubmitButton();
 }
 
 function clearMember() {
-    selectedMember = null;
-    document.getElementById('memberSearch').value             = '';
-    document.getElementById('memberDetails').style.display    = 'none';
-    document.getElementById('paymentAmount').value            = '';
-    document.getElementById('paymentAmount').disabled         = false;
-    document.getElementById('loanSelect').value               = '';
-    document.getElementById('chargeSelect').value             = '';
-    document.getElementById('referenceNumber').value          = '';
-    document.getElementById('referenceNumber').classList.remove('is-invalid', 'is-valid');
-    document.getElementById('paymentNotes').value             = '';
+    selectedMember=null;
+    document.getElementById('memberSearch').value='';
+    document.getElementById('memberDetails').style.display='none';
+    document.getElementById('paymentAmount').value='';
+    document.getElementById('paymentAmount').disabled=false;
+    document.getElementById('loanSelect').value='';
+    document.getElementById('chargeSelect').value='';
+    document.getElementById('referenceNumber').value='';
+    document.getElementById('referenceNumber').classList.remove('is-invalid','is-valid');
+    document.getElementById('paymentNotes').value='';
     document.getElementById('loanDetailsBox').classList.add('d-none');
     document.getElementById('autocompleteDropdown').classList.remove('show');
-    document.getElementById('kiddiesLoanWarning').style.setProperty('display', 'none', 'important');
-    document.getElementById('kiddiesParentInfo').style.display    = 'none';
-    document.getElementById('kiddiesAccountBadge').style.display  = 'none';
+    document.getElementById('kiddiesLoanWarning').style.setProperty('display','none','important');
+    document.getElementById('kiddiesParentInfo').style.display='none';
+    document.getElementById('kiddiesAccountBadge').style.display='none';
     document.getElementById('memberResultCard').classList.remove('kiddies-result');
-    document.getElementById('summaryDetails').style.display       = 'none';
-    document.getElementById('summaryPlaceholder').style.display   = 'block';
+    document.getElementById('summaryDetails').style.display='none';
+    document.getElementById('summaryPlaceholder').style.display='block';
     updateSubmitButton();
 }
 
-/* ════════════════════════════════════════════════════════════
-   AMOUNT & TOTAL CALCULATION
-════════════════════════════════════════════════════════════ */
+/* ════ AMOUNT & TOTAL CALCULATION ════ */
 async function calculateTotal() {
-    const amount = parseFloat(document.getElementById('paymentAmount').value) || 0;
-    if (!selectedMember || amount <= 0) {
-        document.getElementById('summaryDetails').style.display    = 'none';
-        document.getElementById('summaryPlaceholder').style.display = 'block';
-        updateSubmitButton(); return;
+    const amount=parseFloat(document.getElementById('paymentAmount').value)||0;
+    if(!selectedMember||amount<=0){ document.getElementById('summaryDetails').style.display='none'; document.getElementById('summaryPlaceholder').style.display='block'; updateSubmitButton(); return; }
+    if((currentPaymentType==='withdrawal'||currentPaymentType==='direct-debit')&&amount>Number(selectedMember.balance)){
+        await showNotify({type:'error',title:'Insufficient Balance',message:`This amount (₦${amount.toLocaleString()}) exceeds the account's\ncurrent balance of ₦${Number(selectedMember.balance).toLocaleString()}.`});
+        document.getElementById('paymentAmount').value=''; updateSubmitButton(); return;
     }
-    if ((currentPaymentType === 'withdrawal' || currentPaymentType === 'direct-debit')
-        && amount > Number(selectedMember.balance)) {
-        await showNotify({
-            type:    'error',
-            title:   'Insufficient Balance',
-            message: `This amount (₦${amount.toLocaleString()}) exceeds the account's\ncurrent balance of ₦${Number(selectedMember.balance).toLocaleString()}.`,
-        });
-        document.getElementById('paymentAmount').value = '';
-        updateSubmitButton(); return;
-    }
-    let newBalance = Number(selectedMember.balance);
-    if      (currentPaymentType === 'deposit')                                              newBalance += amount;
-    else if (currentPaymentType === 'withdrawal' || currentPaymentType === 'direct-debit') newBalance -= amount;
-    const typeLabels = { 'deposit':'Deposit', 'withdrawal':'Withdrawal', 'loan-repayment':'Loan Repayment', 'direct-debit':'Direct Debit' };
-    const isKiddies = selectedMember.entityType === 'kiddies';
-    document.getElementById('summaryType').textContent           = typeLabels[currentPaymentType] || '—';
-    document.getElementById('summaryAmount').textContent         = amount.toLocaleString();
-    document.getElementById('summaryCharge').textContent         = '0';
-    document.getElementById('summaryTotal').textContent          = amount.toLocaleString();
-    document.getElementById('summaryCurrentBalance').textContent = Number(selectedMember.balance).toLocaleString();
-    document.getElementById('summaryNewBalance').textContent     = newBalance.toLocaleString();
-    document.getElementById('summaryMemberTypeRow').style.display = isKiddies ? '' : 'none';
-    document.getElementById('chargeRow').style.display           = 'none';
-    document.getElementById('summaryPlaceholder').style.display  = 'none';
-    document.getElementById('summaryDetails').style.display      = 'block';
+    let newBalance=Number(selectedMember.balance);
+    if(currentPaymentType==='deposit') newBalance+=amount;
+    else if(currentPaymentType==='withdrawal'||currentPaymentType==='direct-debit') newBalance-=amount;
+    const typeLabels={'deposit':'Deposit','withdrawal':'Withdrawal','loan-repayment':'Loan Repayment','direct-debit':'Direct Debit'};
+    const isKiddies=selectedMember.entityType==='kiddies';
+    document.getElementById('summaryType').textContent=typeLabels[currentPaymentType]||'—';
+    document.getElementById('summaryAmount').textContent=amount.toLocaleString();
+    document.getElementById('summaryCharge').textContent='0';
+    document.getElementById('summaryTotal').textContent=amount.toLocaleString();
+    document.getElementById('summaryCurrentBalance').textContent=Number(selectedMember.balance).toLocaleString();
+    document.getElementById('summaryNewBalance').textContent=newBalance.toLocaleString();
+    document.getElementById('summaryMemberTypeRow').style.display=isKiddies?'':'none';
+    document.getElementById('chargeRow').style.display='none';
+    document.getElementById('summaryPlaceholder').style.display='none';
+    document.getElementById('summaryDetails').style.display='block';
     updateSubmitButton();
 }
 
 function updateLoanDetails() {
-    const sel = document.getElementById('loanSelect');
-    const opt = sel.options[sel.selectedIndex];
-    const box = document.getElementById('loanDetailsBox');
-    if (!opt || !opt.value) { document.getElementById('paymentAmount').value = ''; box.classList.add('d-none'); calculateTotal(); return; }
-    const balRem = Number(opt.dataset.balance || 0);
-    const total  = Number(opt.dataset.total   || 0);
-    document.getElementById('loanTotalRepay').textContent       = total.toLocaleString();
-    document.getElementById('loanBalanceRemaining').textContent = balRem.toLocaleString();
+    const sel=document.getElementById('loanSelect'); const opt=sel.options[sel.selectedIndex];
+    const box=document.getElementById('loanDetailsBox');
+    if(!opt||!opt.value){document.getElementById('paymentAmount').value='';box.classList.add('d-none');calculateTotal();return;}
+    document.getElementById('loanTotalRepay').textContent=Number(opt.dataset.total||0).toLocaleString();
+    document.getElementById('loanBalanceRemaining').textContent=Number(opt.dataset.balance||0).toLocaleString();
     box.classList.remove('d-none');
-    document.getElementById('paymentAmount').value = balRem;
+    document.getElementById('paymentAmount').value=Number(opt.dataset.balance||0);
     calculateTotal();
 }
 
-/* ════════════════════════════════════════════════════════════
-   APPROVER SELECTION
-════════════════════════════════════════════════════════════ */
+/* ════ APPROVER SELECTION ════ */
 function handleApproverToggle(checkbox) {
-    if (!PERMISSIONS.authorizeTransactions) { checkbox.checked = false; showUnauthorized('authorize_transactions'); return; }
-    const item = checkbox.closest('.approver-item');
-    const id   = checkbox.value;
-    const name = checkbox.dataset.name;
-    if (checkbox.checked) {
-        if (selectedApproverIds.length >= 3) {
-            checkbox.checked = false;
-            showNotify({ type: 'warning', title: 'Selection Limit', message: 'You can only select up to 3 approvers.\nDeselect one before choosing another.' });
-            return;
-        }
-        selectedApproverIds.push(id);
-        selectedApproverNames[id] = name;
-        item.classList.add('selected');
-    } else {
-        selectedApproverIds = selectedApproverIds.filter(a => a !== id);
-        delete selectedApproverNames[id];
-        item.classList.remove('selected');
-    }
+    if(!PERMISSIONS.authorizeTransactions){checkbox.checked=false;showUnauthorized('authorize_transactions');return;}
+    const item=checkbox.closest('.approver-item'); const id=checkbox.value; const name=checkbox.dataset.name;
+    if(checkbox.checked){
+        if(selectedApproverIds.length>=3){checkbox.checked=false;showNotify({type:'warning',title:'Selection Limit',message:'You can only select up to 3 approvers.\nDeselect one before choosing another.'});return;}
+        selectedApproverIds.push(id); selectedApproverNames[id]=name; item.classList.add('selected');
+    } else { selectedApproverIds=selectedApproverIds.filter(a=>a!==id); delete selectedApproverNames[id]; item.classList.remove('selected'); }
     updateApproverUI();
 }
 
 function updateApproverUI() {
-    const count = selectedApproverIds.length;
-    const badge = document.getElementById('approverCountBadge');
-    const text  = document.getElementById('approverCountText');
-    const icon  = document.getElementById('approverCountIcon');
-    text.textContent = `${count} / 3 selected`;
-    if (count >= 3) { badge.className = 'approval-count-badge sufficient';   icon.className = 'fas fa-check-circle'; }
-    else            { badge.className = 'approval-count-badge insufficient'; icon.className = 'fas fa-exclamation-circle'; }
-    const listEl = document.getElementById('sidebarApproverList');
-    if (count === 0) {
-        listEl.innerHTML = '<small class="text-muted fst-italic">None selected yet</small>';
-    } else {
-        listEl.innerHTML = Object.entries(selectedApproverNames).map(([, name]) => `
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <i class="fas fa-check-circle text-success" style="font-size:0.75rem;flex-shrink:0;"></i>
-                <small class="fw-semibold">${escHtml(name)}</small>
-            </div>`).join('');
-    }
+    const count=selectedApproverIds.length;
+    const badge=document.getElementById('approverCountBadge');
+    document.getElementById('approverCountText').textContent=`${count} / 3 selected`;
+    if(count>=3){badge.className='approval-count-badge sufficient';document.getElementById('approverCountIcon').className='fas fa-check-circle';}
+    else{badge.className='approval-count-badge insufficient';document.getElementById('approverCountIcon').className='fas fa-exclamation-circle';}
+    const listEl=document.getElementById('sidebarApproverList');
+    if(!count){listEl.innerHTML='<small class="text-muted fst-italic">None selected yet</small>';}
+    else{listEl.innerHTML=Object.entries(selectedApproverNames).map(([,name])=>`<div class="d-flex align-items-center gap-2 mb-1"><i class="fas fa-check-circle text-success" style="font-size:.75rem;flex-shrink:0;"></i><small class="fw-semibold">${escHtml(name)}</small></div>`).join('');}
     updateSubmitButton();
 }
 
-/* ════════════════════════════════════════════════════════════
-   SUBMIT BUTTON STATE
-   Reference is now a hard requirement alongside member,
-   amount, approvers, and permissions.
-════════════════════════════════════════════════════════════ */
+/* ════ SUBMIT BUTTON STATE ════ */
 function updateSubmitButton() {
-    const amount    = parseFloat(document.getElementById('paymentAmount')?.value) || 0;
-    const reference = document.getElementById('referenceNumber')?.value?.trim()   || '';
-    const isKiddies   = selectedMember?.entityType === 'kiddies';
-    const typeBlocked = isKiddies && currentPaymentType === 'loan-repayment';
-
-    const canSubmit = selectedMember
-                   && amount > 0
-                   && reference.length > 0          // ← reference is required
-                   && selectedApproverIds.length >= 3
-                   && PERMISSIONS.processDeposits
-                   && PERMISSIONS.authorizeTransactions
-                   && !typeBlocked;
-
-    const btn = document.getElementById('submitBtn');
-    if (btn) btn.disabled = !canSubmit;
-
-    // Live border feedback on the reference input
-    const refInput = document.getElementById('referenceNumber');
-    if (refInput && selectedMember) {
-        if (reference.length > 0) {
-            refInput.classList.remove('is-invalid');
-            refInput.classList.add('is-valid');
-        } else {
-            refInput.classList.remove('is-valid');
-            refInput.classList.add('is-invalid');
-        }
+    const amount=parseFloat(document.getElementById('paymentAmount')?.value)||0;
+    const reference=document.getElementById('referenceNumber')?.value?.trim()||'';
+    const isKiddies=selectedMember?.entityType==='kiddies';
+    const typeBlocked=isKiddies&&currentPaymentType==='loan-repayment';
+    const canSubmit=selectedMember&&amount>0&&reference.length>0&&selectedApproverIds.length>=3&&PERMISSIONS.processDeposits&&PERMISSIONS.authorizeTransactions&&!typeBlocked;
+    const btn=document.getElementById('submitBtn'); if(btn) btn.disabled=!canSubmit;
+    const refInput=document.getElementById('referenceNumber');
+    if(refInput&&selectedMember){
+        if(reference.length>0){refInput.classList.remove('is-invalid');refInput.classList.add('is-valid');}
+        else{refInput.classList.remove('is-valid');refInput.classList.add('is-invalid');}
     }
-
-    // Mirror reference value into the summary panel
-    const summaryRefPanel = document.getElementById('summaryRefPanel');
-    const summaryRefValue = document.getElementById('summaryRefValue');
-    if (summaryRefPanel && summaryRefValue) {
-        if (reference.length > 0) {
-            summaryRefPanel.style.background = 'rgba(16,185,129,0.05)';
-            summaryRefPanel.style.border     = '1px solid rgba(16,185,129,0.3)';
-            summaryRefValue.style.color      = '#065f46';
-            summaryRefValue.style.fontStyle  = 'normal';
-            summaryRefValue.style.fontWeight = '600';
-            summaryRefValue.textContent      = reference;
-        } else {
-            summaryRefPanel.style.background = 'rgba(239,68,68,0.05)';
-            summaryRefPanel.style.border     = '1px solid rgba(239,68,68,0.2)';
-            summaryRefValue.style.color      = '#94a3b8';
-            summaryRefValue.style.fontStyle  = 'italic';
-            summaryRefValue.style.fontWeight = 'normal';
-            summaryRefValue.textContent      = 'Not entered yet';
-        }
+    const summaryRefPanel=document.getElementById('summaryRefPanel');
+    const summaryRefValue=document.getElementById('summaryRefValue');
+    if(summaryRefPanel&&summaryRefValue){
+        if(reference.length>0){summaryRefPanel.style.background='rgba(16,185,129,.05)';summaryRefPanel.style.border='1px solid rgba(16,185,129,.3)';summaryRefValue.style.color='#065f46';summaryRefValue.style.fontStyle='normal';summaryRefValue.style.fontWeight='600';summaryRefValue.textContent=reference;}
+        else{summaryRefPanel.style.background='rgba(239,68,68,.05)';summaryRefPanel.style.border='1px solid rgba(239,68,68,.2)';summaryRefValue.style.color='#94a3b8';summaryRefValue.style.fontStyle='italic';summaryRefValue.style.fontWeight='normal';summaryRefValue.textContent='Not entered yet';}
     }
 }
 
-/* ════════════════════════════════════════════════════════════
-   SUBMIT FOR APPROVAL
-   Reference validated client-side before anything is sent.
-════════════════════════════════════════════════════════════ */
+/* ════ SUBMIT FOR APPROVAL ════ */
 async function submitForApproval() {
-    if (!PERMISSIONS.processDeposits)       { showUnauthorized('process_deposits');       return; }
-    if (!PERMISSIONS.authorizeTransactions) { showUnauthorized('authorize_transactions'); return; }
-
-    const amount     = parseFloat(document.getElementById('paymentAmount').value);
-    const method     = document.getElementById('paymentMethod').value;
-    const notes      = document.getElementById('paymentNotes').value.trim();
-    const reference  = document.getElementById('referenceNumber').value.trim();
-    const loanId     = document.getElementById('loanSelect')?.value  || null;
-    const chargeType = document.getElementById('chargeSelect')?.value || null;
-
-    if (!selectedMember) {
-        await showNotify({ type: 'warning', title: 'No Member Selected', message: 'Please search and select a member or kiddies account first.' }); return;
-    }
-    if (!amount || amount <= 0) {
-        await showNotify({ type: 'warning', title: 'Invalid Amount', message: 'Please enter a valid amount greater than zero.' }); return;
-    }
-
-    // ── Reference is mandatory ────────────────────────────────────
-    if (!reference) {
-        const refInput = document.getElementById('referenceNumber');
-        refInput.classList.add('is-invalid');
-        refInput.focus();
-        await showNotify({
-            type:    'error',
-            title:   'Reference Required',
-            message: 'A transaction reference number is required.\n\nPlease enter the bank receipt or transfer reference number before submitting. This is needed to trace and audit the transaction.',
-        });
-        return;
-    }
-
-    if (selectedApproverIds.length < 3) {
-        await showNotify({ type: 'warning', title: 'Approvers Required', message: `You have selected ${selectedApproverIds.length} approver(s).\nPlease select exactly 3 approvers.` }); return;
-    }
-    if (selectedMember.entityType === 'kiddies' && currentPaymentType === 'loan-repayment') {
-        await showNotify({ type: 'error', title: 'Not Supported', message: 'Kiddies accounts do not support loan repayment.' }); return;
-    }
-    if (currentPaymentType === 'loan-repayment' && !loanId) {
-        await showNotify({ type: 'warning', title: 'Loan Not Selected', message: 'Please select the loan you are repaying.' }); return;
-    }
-    if (currentPaymentType === 'direct-debit' && !chargeType) {
-        await showNotify({ type: 'warning', title: 'Charge Type Required', message: 'Please select a charge type for the direct debit.' }); return;
-    }
-
-    const isKiddies   = selectedMember.entityType === 'kiddies';
-    const memberLabel = isKiddies ? `${selectedMember.name} (Kiddies Account)` : selectedMember.name;
-
-    const confirmed = await showNotify({
-        type:         'info',
-        title:        'Confirm Submission',
-        message:      `Submit a ₦${amount.toLocaleString()} ${currentPaymentType.replace(/-/g, ' ')} for ${memberLabel}?\n\nReference: ${reference}\n\nThis will notify all 3 selected approvers.`,
-        confirmLabel: 'Yes, Submit',
-        cancelLabel:  'Cancel',
-    });
-    if (!confirmed) return;
-
-    const btn             = document.getElementById('submitBtn');
-    const originalBtnHTML = btn.innerHTML;
-    btn.disabled  = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Submitting…';
-
-    const result = await permFetch('/admin/submit-payment-for-approval', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-            memberId:          selectedMember.id,
-            memberType:        selectedMember.entityType,
-            paymentType:       currentPaymentType,
-            amount,
-            chargeAmount:      0,
-            paymentMethod:     method,
-            reference,                             // always non-empty at this point
-            notes:             notes      || undefined,
-            loanId:            loanId     || undefined,
-            chargeType:        chargeType || undefined,
-            selectedApprovers: selectedApproverIds,
-        }),
-    });
-
-    if (!result.ok) { btn.disabled = false; btn.innerHTML = originalBtnHTML; return; }
-
-    if (!result.data?.success) {
-        await showNotify({ type: 'error', title: 'Submission Failed', message: result.data?.message || 'The server rejected the submission. Please try again.' });
-        btn.disabled = false; btn.innerHTML = originalBtnHTML; return;
-    }
-
-    document.getElementById('approvalIdDisplay').textContent = result.data.approvalId || '—';
+    if(!PERMISSIONS.processDeposits){showUnauthorized('process_deposits');return;}
+    if(!PERMISSIONS.authorizeTransactions){showUnauthorized('authorize_transactions');return;}
+    const amount=parseFloat(document.getElementById('paymentAmount').value);
+    const method=document.getElementById('paymentMethod').value;
+    const notes=document.getElementById('paymentNotes').value.trim();
+    const reference=document.getElementById('referenceNumber').value.trim();
+    const loanId=document.getElementById('loanSelect')?.value||null;
+    const chargeType=document.getElementById('chargeSelect')?.value||null;
+    if(!selectedMember){await showNotify({type:'warning',title:'No Member Selected',message:'Please search and select a member or kiddies account first.'});return;}
+    if(!amount||amount<=0){await showNotify({type:'warning',title:'Invalid Amount',message:'Please enter a valid amount greater than zero.'});return;}
+    if(!reference){const refInput=document.getElementById('referenceNumber');refInput.classList.add('is-invalid');refInput.focus();await showNotify({type:'error',title:'Reference Required',message:'A transaction reference number is required.\n\nPlease enter the bank receipt or transfer reference number before submitting. This is needed to trace and audit the transaction.'});return;}
+    if(selectedApproverIds.length<3){await showNotify({type:'warning',title:'Approvers Required',message:`You have selected ${selectedApproverIds.length} approver(s).\nPlease select exactly 3 approvers.`});return;}
+    if(selectedMember.entityType==='kiddies'&&currentPaymentType==='loan-repayment'){await showNotify({type:'error',title:'Not Supported',message:'Kiddies accounts do not support loan repayment.'});return;}
+    if(currentPaymentType==='loan-repayment'&&!loanId){await showNotify({type:'warning',title:'Loan Not Selected',message:'Please select the loan you are repaying.'});return;}
+    if(currentPaymentType==='direct-debit'&&!chargeType){await showNotify({type:'warning',title:'Charge Type Required',message:'Please select a charge type for the direct debit.'});return;}
+    const isKiddies=selectedMember.entityType==='kiddies';
+    const memberLabel=isKiddies?`${selectedMember.name} (Kiddies Account)`:selectedMember.name;
+    const confirmed=await showNotify({type:'info',title:'Confirm Submission',message:`Submit a ₦${amount.toLocaleString()} ${currentPaymentType.replace(/-/g,' ')} for ${memberLabel}?\n\nReference: ${reference}\n\nThis will notify all 3 selected approvers.`,confirmLabel:'Yes, Submit',cancelLabel:'Cancel'});
+    if(!confirmed) return;
+    const btn=document.getElementById('submitBtn'); const originalBtnHTML=btn.innerHTML;
+    btn.disabled=true; btn.innerHTML='<span class="spinner-border spinner-border-sm me-2" role="status"></span>Submitting…';
+    const result=await permFetch('/admin/submit-payment-for-approval',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({memberId:selectedMember.id,memberType:selectedMember.entityType,paymentType:currentPaymentType,amount,chargeAmount:0,paymentMethod:method,reference,notes:notes||undefined,loanId:loanId||undefined,chargeType:chargeType||undefined,selectedApprovers:selectedApproverIds})});
+    if(!result.ok){btn.disabled=false;btn.innerHTML=originalBtnHTML;return;}
+    if(!result.data?.success){await showNotify({type:'error',title:'Submission Failed',message:result.data?.message||'The server rejected the submission. Please try again.'});btn.disabled=false;btn.innerHTML=originalBtnHTML;return;}
+    document.getElementById('approvalIdDisplay').textContent=result.data.approvalId||'—';
     new bootstrap.Modal(document.getElementById('successModal')).show();
 }
 
-/* ════════════════════════════════════════════════════════════
-   RESET FORM
-════════════════════════════════════════════════════════════ */
+/* ════ RESET FORM ════ */
 function resetForm() {
     clearMember();
-    selectedApproverIds   = [];
-    selectedApproverNames = {};
-    document.querySelectorAll('.approver-item').forEach(el => {
-        el.classList.remove('selected');
-        const cb = el.querySelector('input[type="checkbox"]');
-        if (cb) cb.checked = false;
-    });
+    selectedApproverIds=[]; selectedApproverNames={};
+    document.querySelectorAll('.approver-item').forEach(el=>{el.classList.remove('selected');const cb=el.querySelector('input[type="checkbox"]');if(cb)cb.checked=false;});
     updateApproverUI();
-    const btn = document.getElementById('submitBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit for Approval'; }
-    document.querySelectorAll('.payment-type-card').forEach(c => c.classList.remove('active'));
-    document.getElementById('paymentForm').style.display = 'none';
-    currentPaymentType = '';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const btn=document.getElementById('submitBtn'); if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-paper-plane me-2"></i>Submit for Approval';}
+    document.querySelectorAll('.payment-type-card').forEach(c=>c.classList.remove('active'));
+    document.getElementById('paymentForm').style.display='none';
+    currentPaymentType='';
+    window.scrollTo({top:0,behavior:'smooth'});
 }
 
-/* ════════════════════════════════════════════════════════════
-   TABLE FILTER
-════════════════════════════════════════════════════════════ */
+/* ════ TABLE FILTER ════ */
 function filterTable() {
-    const filter  = document.getElementById('filterStatus').value.toLowerCase();
-    const rows    = document.querySelectorAll('#transactionTableBody tr[data-status]');
-    let   visible = 0;
-    rows.forEach(row => {
-        const match = !filter || (row.dataset.status || '').toLowerCase() === filter;
-        row.style.display = match ? '' : 'none';
-        if (match) visible++;
-    });
-    let emptyRow = document.getElementById('filterEmptyRow');
-    if (visible === 0) {
-        if (!emptyRow) {
-            emptyRow = document.createElement('tr');
-            emptyRow.id = 'filterEmptyRow';
-            emptyRow.innerHTML = `<td colspan="7" class="text-center text-muted py-4"><i class="fas fa-filter fa-2x d-block mb-2 opacity-25"></i>No transactions match the selected filter</td>`;
-            document.getElementById('transactionTableBody').appendChild(emptyRow);
-        }
-        emptyRow.style.display = '';
-    } else if (emptyRow) { emptyRow.style.display = 'none'; }
+    const filter=document.getElementById('filterStatus').value.toLowerCase();
+    const rows=document.querySelectorAll('#transactionTableBody tr[data-status]');
+    let visible=0;
+    rows.forEach(row=>{const match=!filter||(row.dataset.status||'').toLowerCase()===filter;row.style.display=match?'':'none';if(match)visible++;});
+    let emptyRow=document.getElementById('filterEmptyRow');
+    if(visible===0){
+        if(!emptyRow){emptyRow=document.createElement('tr');emptyRow.id='filterEmptyRow';emptyRow.innerHTML=`<td colspan="7" class="text-center text-muted py-4"><i class="fas fa-filter fa-2x d-block mb-2 opacity-25"></i>No transactions match the selected filter</td>`;document.getElementById('transactionTableBody').appendChild(emptyRow);}
+        emptyRow.style.display='';
+    } else if(emptyRow){emptyRow.style.display='none';}
 }
 
-/* ════════════════════════════════════════════════════════════
-   SHARED: gather visible export rows
-════════════════════════════════════════════════════════════ */
+/* ════ GATHER EXPORT ROWS ════ */
 function gatherExportRows() {
-    const filter = document.getElementById('filterStatus').value;
-    const rows   = document.querySelectorAll('#transactionTableBody tr[data-txn]');
-    const result = [];
-    rows.forEach(row => {
-        if (filter && (row.dataset.status || '').toLowerCase() !== filter.toLowerCase()) return;
-        if (row.style.display === 'none') return;
-        try { result.push(JSON.parse(row.dataset.txn)); } catch (_) {}
+    const filter=document.getElementById('filterStatus').value;
+    const rows=document.querySelectorAll('#transactionTableBody tr[data-txn]');
+    const result=[];
+    rows.forEach(row=>{
+        if(filter&&(row.dataset.status||'').toLowerCase()!==filter.toLowerCase()) return;
+        if(row.style.display==='none') return;
+        try{result.push(JSON.parse(row.dataset.txn));}catch(_){}
     });
     return result;
 }
 
-/* ════════════════════════════════════════════════════════════
-   EXPORT — CSV
-════════════════════════════════════════════════════════════ */
+/* ════ EXPORT CSV ════ */
 function exportTransactions() {
-    const txns = gatherExportRows();
-    if (!txns.length) { showNotify({ type: 'info', title: 'Nothing to Export', message: 'No transactions match the selected filter.' }); return; }
-
-    const headers = [
-        'Transaction ID','Date','Time','Account Type','Member / Account Name','Member / Account ID',
-        'Email','Phone','Payment Type','Amount (N)','Processing Fee (N)','Total (N)',
-        'Payment Method','Balance Before (N)','Balance After (N)','Reference',
-        'Status','Processed By','Selected Approvers','Approval Detail','Finalized At','Notes',
-    ];
-    const lines = [headers.join(',')];
-
-    txns.forEach(t => {
-        const fee   = Number(t.fee    || 0);
-        const amt   = Number(t.amount || 0);
-        const total = amt + fee;
-        const cols  = [
-            t.id || '—', t.dateRaw || t.date || '—', t.timeRaw || t.time || '—',
-            t.isKiddies ? 'Kiddies Account' : 'Member Account',
-            t.memberName || '—', t.memberId || '—', t.memberEmail || '—', t.memberPhone || '—',
-            t.type || '—', amt, fee, total, t.method || '—',
-            Number(t.balanceBefore || 0), Number(t.balanceAfter || 0),
-            t.reference || '—', t.status || '—', t.processedBy || '—',
-            t.approverNames || '—', t.approvalDetail || '—', t.finalizedAt || '—',
-            (t.notes || 'No additional notes').replace(/\n/g, ' '),
-        ].map(v => `"${String(v).replace(/"/g, '""')}"`);
+    const txns=gatherExportRows();
+    if(!txns.length){showNotify({type:'info',title:'Nothing to Export',message:'No transactions match the selected filter.'});return;}
+    const headers=['Transaction ID','Date','Time','Account Type','Member / Account Name','Member / Account ID','Email','Phone','Payment Type','Amount (N)','Processing Fee (N)','Total (N)','Payment Method','Balance Before (N)','Balance After (N)','Reference','Status','Processed By','Selected Approvers','Approval Detail','Finalized At','Notes'];
+    const lines=[headers.join(',')];
+    txns.forEach(t=>{
+        const fee=Number(t.fee||0),amt=Number(t.amount||0),total=amt+fee;
+        const cols=[t.id||'—',t.dateRaw||t.date||'—',t.timeRaw||t.time||'—',t.isKiddies?'Kiddies Account':'Member Account',t.memberName||'—',t.memberId||'—',t.memberEmail||'—',t.memberPhone||'—',t.type||'—',amt,fee,total,t.method||'—',Number(t.balanceBefore||0),Number(t.balanceAfter||0),t.reference||'—',t.status||'—',t.processedBy||'—',t.approverNames||'—',t.approvalDetail||'—',t.finalizedAt||'—',(t.notes||'No additional notes').replace(/\n/g,' ')].map(v=>`"${String(v).replace(/"/g,'""')}"`);
         lines.push(cols.join(','));
     });
-
-    const bom  = '\uFEFF';
-    const blob = new Blob([bom + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `transactions-${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showNotify({ type: 'success', title: 'CSV Export Complete', message: `${txns.length} transaction${txns.length !== 1 ? 's' : ''} exported successfully.` });
+    const bom='\uFEFF';
+    const blob=new Blob([bom+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=`transactions-${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
+    showNotify({type:'success',title:'CSV Export Complete',message:`${txns.length} transaction${txns.length!==1?'s':''} exported successfully.`});
 }
 
-/* ════════════════════════════════════════════════════════════
-   EXPORT — PDF
-════════════════════════════════════════════════════════════ */
+/* ════ EXPORT PDF ════ */
 function exportTransactionsPDF() {
-    const txns = gatherExportRows();
-    if (!txns.length) { showNotify({ type: 'info', title: 'Nothing to Export', message: 'No transactions match the selected filter.' }); return; }
-
-    const filter      = document.getElementById('filterStatus').value;
-    const generatedAt = new Date().toLocaleString('en-US', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' });
-    const totalAmount = txns.reduce((s,t) => s + Number(t.amount||0), 0);
-    const totalFee    = txns.reduce((s,t) => s + Number(t.fee||0), 0);
-
-    const tableRows = txns.map((t, i) => {
-        const fee   = Number(t.fee    || 0);
-        const amt   = Number(t.amount || 0);
-        const total = amt + fee;
-        const statusColor = t.status==='successful'?'#059669':t.status==='pending'?'#d97706':t.status==='rejected'?'#dc2626':'#64748b';
-        const typeColors  = { 'Deposit':{bg:'#d1fae5',color:'#065f46'}, 'Withdrawal':{bg:'#fee2e2',color:'#7f1d1d'}, 'Loan Repayment':{bg:'#fef3c7',color:'#78350f'}, 'Direct Debit':{bg:'#e0f2fe',color:'#0c4a6e'} };
-        const tc = typeColors[t.type] || { bg:'#f1f5f9', color:'#334155' };
-        const approverLines = (t.approvalDetail && t.approvalDetail !== 'N/A')
-            ? t.approvalDetail.split(' | ').map(line => `<div style="font-size:0.6rem;color:#475569;margin-top:2px;">${escHtml(line)}</div>`).join('')
-            : '<div style="font-size:0.6rem;color:#94a3b8;">None recorded</div>';
-        return `
-        <tr style="background:${i%2===0?'#f8fafc':'#ffffff'};">
-            <td style="padding:7px 5px;font-size:0.7rem;border-bottom:1px solid #e2e8f0;white-space:nowrap;">
-                <strong>${escHtml(t.dateRaw||t.date||'—')}</strong>
-                <div style="color:#64748b;font-size:0.62rem;">${escHtml(t.timeRaw||t.time||'')}</div>
-            </td>
-            <td style="padding:7px 5px;font-size:0.7rem;border-bottom:1px solid #e2e8f0;">
-                <strong>${escHtml(t.memberName||'—')}</strong>
-                <div style="color:#64748b;font-size:0.62rem;">${escHtml(t.memberId||'—')}</div>
-                ${t.isKiddies?'<span style="background:#fce7f3;color:#db2777;padding:1px 5px;border-radius:4px;font-size:0.58rem;font-weight:700;">KIDDIES</span>':''}
-            </td>
-            <td style="padding:7px 5px;font-size:0.68rem;border-bottom:1px solid #e2e8f0;">${escHtml(t.memberEmail||'—')}<div style="color:#64748b;font-size:0.62rem;">${escHtml(t.memberPhone||'—')}</div></td>
-            <td style="padding:7px 5px;font-size:0.7rem;border-bottom:1px solid #e2e8f0;text-align:center;">
-                <span style="background:${tc.bg};color:${tc.color};padding:2px 6px;border-radius:5px;font-size:0.62rem;font-weight:700;white-space:nowrap;">${escHtml(t.type||'—')}</span>
-            </td>
-            <td style="padding:7px 5px;font-size:0.7rem;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">
-                N${amt.toLocaleString()}${fee>0?`<div style="color:#dc2626;font-size:0.6rem;">+N${fee.toLocaleString()} fee</div>`:''}
-                <div style="color:#1e3a8a;font-size:0.62rem;font-weight:800;">Total: N${total.toLocaleString()}</div>
-            </td>
-            <td style="padding:7px 5px;font-size:0.7rem;border-bottom:1px solid #e2e8f0;white-space:nowrap;">${escHtml(t.method||'—')}</td>
-            <td style="padding:7px 5px;font-size:0.7rem;border-bottom:1px solid #e2e8f0;text-align:right;">
-                <div style="color:#64748b;font-size:0.62rem;">Before: N${Number(t.balanceBefore||0).toLocaleString()}</div>
-                <div style="color:#1e3a8a;font-weight:700;">After: N${Number(t.balanceAfter||0).toLocaleString()}</div>
-            </td>
-            <td style="padding:7px 5px;font-size:0.7rem;border-bottom:1px solid #e2e8f0;text-align:center;">
-                <span style="color:${statusColor};font-weight:700;font-size:0.65rem;text-transform:uppercase;">${escHtml(t.status||'—')}</span>
-            </td>
-            <td style="padding:7px 5px;font-size:0.68rem;border-bottom:1px solid #e2e8f0;">
-                <strong style="color:#1e3a8a;display:block;font-size:0.68rem;">${escHtml(t.processedBy||'—')}</strong>${approverLines}
-            </td>
-            <td style="padding:7px 5px;font-size:0.65rem;border-bottom:1px solid #e2e8f0;color:#64748b;max-width:110px;word-break:break-word;">
-                ${escHtml((t.notes||'').slice(0,80))}${(t.notes||'').length>80?'…':''}
-            </td>
-        </tr>`;
+    const txns=gatherExportRows();
+    if(!txns.length){showNotify({type:'info',title:'Nothing to Export',message:'No transactions match the selected filter.'});return;}
+    const filter=document.getElementById('filterStatus').value;
+    const generatedAt=new Date().toLocaleString('en-US',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const totalAmount=txns.reduce((s,t)=>s+Number(t.amount||0),0);
+    const totalFee=txns.reduce((s,t)=>s+Number(t.fee||0),0);
+    const tableRows=txns.map((t,i)=>{
+        const fee=Number(t.fee||0),amt=Number(t.amount||0),total=amt+fee;
+        const statusColor=t.status==='successful'?'#059669':t.status==='pending'?'#d97706':t.status==='rejected'?'#dc2626':'#64748b';
+        const typeColors={'Deposit':{bg:'#d1fae5',color:'#065f46'},'Withdrawal':{bg:'#fee2e2',color:'#7f1d1d'},'Loan Repayment':{bg:'#fef3c7',color:'#78350f'},'Direct Debit':{bg:'#e0f2fe',color:'#0c4a6e'}};
+        const tc=typeColors[t.type]||{bg:'#f1f5f9',color:'#334155'};
+        const approverLines=(t.approvalDetail&&t.approvalDetail!=='N/A')?t.approvalDetail.split(' | ').map(line=>`<div style="font-size:.6rem;color:#475569;margin-top:2px;">${escHtml(line)}</div>`).join(''):'<div style="font-size:.6rem;color:#94a3b8;">None recorded</div>';
+        return `<tr style="background:${i%2===0?'#f8fafc':'#ffffff'};"><td style="padding:7px 5px;font-size:.7rem;border-bottom:1px solid #e2e8f0;white-space:nowrap;"><strong>${escHtml(t.dateRaw||t.date||'—')}</strong><div style="color:#64748b;font-size:.62rem;">${escHtml(t.timeRaw||t.time||'')}</div></td><td style="padding:7px 5px;font-size:.7rem;border-bottom:1px solid #e2e8f0;"><strong>${escHtml(t.memberName||'—')}</strong><div style="color:#64748b;font-size:.62rem;">${escHtml(t.memberId||'—')}</div>${t.isKiddies?'<span style="background:#fce7f3;color:#db2777;padding:1px 5px;border-radius:4px;font-size:.58rem;font-weight:700;">KIDDIES</span>':''}</td><td style="padding:7px 5px;font-size:.68rem;border-bottom:1px solid #e2e8f0;">${escHtml(t.memberEmail||'—')}<div style="color:#64748b;font-size:.62rem;">${escHtml(t.memberPhone||'—')}</div></td><td style="padding:7px 5px;font-size:.7rem;border-bottom:1px solid #e2e8f0;text-align:center;"><span style="background:${tc.bg};color:${tc.color};padding:2px 6px;border-radius:5px;font-size:.62rem;font-weight:700;white-space:nowrap;">${escHtml(t.type||'—')}</span></td><td style="padding:7px 5px;font-size:.7rem;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">N${amt.toLocaleString()}${fee>0?`<div style="color:#dc2626;font-size:.6rem;">+N${fee.toLocaleString()} fee</div>`:''}<div style="color:#1e3a8a;font-size:.62rem;font-weight:800;">Total: N${total.toLocaleString()}</div></td><td style="padding:7px 5px;font-size:.7rem;border-bottom:1px solid #e2e8f0;white-space:nowrap;">${escHtml(t.method||'—')}</td><td style="padding:7px 5px;font-size:.7rem;border-bottom:1px solid #e2e8f0;text-align:right;"><div style="color:#64748b;font-size:.62rem;">Before: N${Number(t.balanceBefore||0).toLocaleString()}</div><div style="color:#1e3a8a;font-weight:700;">After: N${Number(t.balanceAfter||0).toLocaleString()}</div></td><td style="padding:7px 5px;font-size:.7rem;border-bottom:1px solid #e2e8f0;text-align:center;"><span style="color:${statusColor};font-weight:700;font-size:.65rem;text-transform:uppercase;">${escHtml(t.status||'—')}</span></td><td style="padding:7px 5px;font-size:.7rem;border-bottom:1px solid #e2e8f0;"><strong style="color:#1e3a8a;display:block;font-size:.68rem;">${escHtml(t.processedBy||'—')}</strong>${approverLines}</td><td style="padding:7px 5px;font-size:.65rem;border-bottom:1px solid #e2e8f0;color:#64748b;max-width:110px;word-break:break-word;">${escHtml((t.notes||'').slice(0,80))}${(t.notes||'').length>80?'…':''}</td></tr>`;
     }).join('');
-
-    const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Transaction Report — Club De Stars</title>
-<style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,Helvetica,sans-serif;color:#1f2937;background:#fff;}
-@page{size:A4 landscape;margin:12mm 8mm;}
-@media print{.no-print{display:none!important;}body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}table{page-break-inside:auto;}tr{page-break-inside:avoid;page-break-after:auto;}}
-</style></head><body>
-<div class="no-print" style="padding:14px 20px;background:#f1f5f9;border-bottom:2px solid #e2e8f0;display:flex;align-items:center;gap:12px;">
-    <button onclick="window.print()" style="padding:9px 22px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.9rem;">&#128438;&nbsp; Print / Save as PDF</button>
-    <button onclick="window.close()" style="padding:9px 16px;background:white;color:#64748b;border:2px solid #e2e8f0;border-radius:8px;font-weight:600;cursor:pointer;">✕ Close</button>
-    <span style="color:#64748b;font-size:0.82rem;margin-left:6px;">In the print dialog → <strong>Destination: Save as PDF</strong> → <strong>Layout: Landscape</strong></span>
-</div>
-<div style="background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);color:white;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;">
-    <div style="display:flex;align-items:center;gap:14px;">
-        <div style="width:52px;height:52px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:bold;color:#1e3a8a;">C</div>
-        <div><div style="font-size:1.3rem;font-weight:800;letter-spacing:0.05em;">CLUB DE STARS</div><div style="font-size:0.78rem;opacity:0.85;margin-top:2px;">Official Transaction Report</div></div>
-    </div>
-    <div style="text-align:right;font-size:0.78rem;opacity:0.9;line-height:1.6;">
-        <div style="font-size:0.95rem;font-weight:700;">${filter?filter.charAt(0).toUpperCase()+filter.slice(1)+' Transactions':'All Transactions'}</div>
-        <div>Generated: ${generatedAt}</div><div>Total Records: <strong>${txns.length}</strong></div>
-    </div>
-</div>
-<div style="display:flex;border-bottom:3px solid #1e3a8a;">
-    <div style="flex:1;padding:10px 16px;background:#f0fdf4;border-right:1px solid #e2e8f0;text-align:center;"><div style="font-size:0.62rem;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Total Records</div><div style="font-size:1.3rem;font-weight:800;color:#1e3a8a;">${txns.length}</div></div>
-    <div style="flex:1;padding:10px 16px;background:#f0fdf4;border-right:1px solid #e2e8f0;text-align:center;"><div style="font-size:0.62rem;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Total Amount</div><div style="font-size:1.3rem;font-weight:800;color:#059669;">N${totalAmount.toLocaleString()}</div></div>
-    <div style="flex:1;padding:10px 16px;background:#f0fdf4;border-right:1px solid #e2e8f0;text-align:center;"><div style="font-size:0.62rem;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Total Fees</div><div style="font-size:1.3rem;font-weight:800;color:#dc2626;">N${totalFee.toLocaleString()}</div></div>
-    <div style="flex:1;padding:10px 16px;background:#f0fdf4;border-right:1px solid #e2e8f0;text-align:center;"><div style="font-size:0.62rem;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Successful</div><div style="font-size:1.3rem;font-weight:800;color:#059669;">${txns.filter(t=>t.status==='successful').length}</div></div>
-    <div style="flex:1;padding:10px 16px;background:#fefce8;border-right:1px solid #e2e8f0;text-align:center;"><div style="font-size:0.62rem;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Pending</div><div style="font-size:1.3rem;font-weight:800;color:#d97706;">${txns.filter(t=>t.status==='pending').length}</div></div>
-    <div style="flex:1;padding:10px 16px;background:#fef2f2;text-align:center;"><div style="font-size:0.62rem;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Rejected</div><div style="font-size:1.3rem;font-weight:800;color:#dc2626;">${txns.filter(t=>t.status==='rejected').length}</div></div>
-</div>
-<div style="padding:14px 16px;overflow-x:auto;">
-<table style="width:100%;border-collapse:collapse;">
-<thead><tr style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;">
-<th style="padding:9px 5px;text-align:left;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;">Date / Time</th>
-<th style="padding:9px 5px;text-align:left;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.05em;">Member</th>
-<th style="padding:9px 5px;text-align:left;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.05em;">Email / Phone</th>
-<th style="padding:9px 5px;text-align:center;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.05em;">Type</th>
-<th style="padding:9px 5px;text-align:right;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.05em;">Amount / Total</th>
-<th style="padding:9px 5px;text-align:left;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.05em;">Method</th>
-<th style="padding:9px 5px;text-align:right;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.05em;">Balance</th>
-<th style="padding:9px 5px;text-align:center;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.05em;">Status</th>
-<th style="padding:9px 5px;text-align:left;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.05em;">Processed / Approvers</th>
-<th style="padding:9px 5px;text-align:left;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.05em;">Notes</th>
-</tr></thead>
-<tbody>${tableRows}</tbody>
-</table>
-</div>
-<div style="margin:12px 16px;padding:10px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:0.68rem;color:#64748b;">
-    <span>Club De Stars &bull; Official Transaction Report &bull; ${generatedAt}</span>
-    <strong style="color:#1e3a8a;">Powered by JESZ LIMITED</strong>
-</div>
+    const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Transaction Report — Club De Stars</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,Helvetica,sans-serif;color:#1f2937;background:#fff;}@page{size:A4 landscape;margin:12mm 8mm;}@media print{.no-print{display:none!important;}body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}table{page-break-inside:auto;}tr{page-break-inside:avoid;page-break-after:auto;}}</style></head><body>
+<div class="no-print" style="padding:14px 20px;background:#f1f5f9;border-bottom:2px solid #e2e8f0;display:flex;align-items:center;gap:12px;"><button onclick="window.print()" style="padding:9px 22px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:.9rem;">&#128438;&nbsp; Print / Save as PDF</button><button onclick="window.close()" style="padding:9px 16px;background:white;color:#64748b;border:2px solid #e2e8f0;border-radius:8px;font-weight:600;cursor:pointer;">✕ Close</button><span style="color:#64748b;font-size:.82rem;margin-left:6px;">In the print dialog → <strong>Destination: Save as PDF</strong> → <strong>Layout: Landscape</strong></span></div>
+<div style="background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);color:white;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;"><div style="display:flex;align-items:center;gap:14px;"><div style="width:52px;height:52px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:bold;color:#1e3a8a;">C</div><div><div style="font-size:1.3rem;font-weight:800;letter-spacing:.05em;">CLUB DE STARS</div><div style="font-size:.78rem;opacity:.85;margin-top:2px;">Official Transaction Report</div></div></div><div style="text-align:right;font-size:.78rem;opacity:.9;line-height:1.6;"><div style="font-size:.95rem;font-weight:700;">${filter?filter.charAt(0).toUpperCase()+filter.slice(1)+' Transactions':'All Transactions'}</div><div>Generated: ${generatedAt}</div><div>Total Records: <strong>${txns.length}</strong></div></div></div>
+<div style="display:flex;border-bottom:3px solid #1e3a8a;"><div style="flex:1;padding:10px 16px;background:#f0fdf4;border-right:1px solid #e2e8f0;text-align:center;"><div style="font-size:.62rem;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Total Records</div><div style="font-size:1.3rem;font-weight:800;color:#1e3a8a;">${txns.length}</div></div><div style="flex:1;padding:10px 16px;background:#f0fdf4;border-right:1px solid #e2e8f0;text-align:center;"><div style="font-size:.62rem;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Total Amount</div><div style="font-size:1.3rem;font-weight:800;color:#059669;">N${totalAmount.toLocaleString()}</div></div><div style="flex:1;padding:10px 16px;background:#f0fdf4;border-right:1px solid #e2e8f0;text-align:center;"><div style="font-size:.62rem;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Total Fees</div><div style="font-size:1.3rem;font-weight:800;color:#dc2626;">N${totalFee.toLocaleString()}</div></div><div style="flex:1;padding:10px 16px;background:#f0fdf4;border-right:1px solid #e2e8f0;text-align:center;"><div style="font-size:.62rem;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Successful</div><div style="font-size:1.3rem;font-weight:800;color:#059669;">${txns.filter(t=>t.status==='successful').length}</div></div><div style="flex:1;padding:10px 16px;background:#fefce8;border-right:1px solid #e2e8f0;text-align:center;"><div style="font-size:.62rem;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Pending</div><div style="font-size:1.3rem;font-weight:800;color:#d97706;">${txns.filter(t=>t.status==='pending').length}</div></div><div style="flex:1;padding:10px 16px;background:#fef2f2;text-align:center;"><div style="font-size:.62rem;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Rejected</div><div style="font-size:1.3rem;font-weight:800;color:#dc2626;">${txns.filter(t=>t.status==='rejected').length}</div></div></div>
+<div style="padding:14px 16px;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;"><th style="padding:9px 5px;text-align:left;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;">Date / Time</th><th style="padding:9px 5px;text-align:left;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;">Member</th><th style="padding:9px 5px;text-align:left;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;">Email / Phone</th><th style="padding:9px 5px;text-align:center;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;">Type</th><th style="padding:9px 5px;text-align:right;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;">Amount / Total</th><th style="padding:9px 5px;text-align:left;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;">Method</th><th style="padding:9px 5px;text-align:right;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;">Balance</th><th style="padding:9px 5px;text-align:center;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;">Status</th><th style="padding:9px 5px;text-align:left;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;">Processed / Approvers</th><th style="padding:9px 5px;text-align:left;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;">Notes</th></tr></thead><tbody>${tableRows}</tbody></table></div>
+<div style="margin:12px 16px;padding:10px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:.68rem;color:#64748b;"><span>Club De Stars &bull; Official Transaction Report &bull; ${generatedAt}</span><strong style="color:#1e3a8a;">Powered by JESZ LIMITED</strong></div>
 </body></html>`;
-
-    const win = window.open('', '_blank', 'width=1280,height=860');
-    if (!win) { showNotify({ type: 'error', title: 'Popup Blocked', message: 'Please allow popups for this site to generate the PDF report.' }); return; }
-    win.document.write(html);
-    win.document.close();
+    const win=window.open('','_blank','width=1280,height=860');
+    if(!win){showNotify({type:'error',title:'Popup Blocked',message:'Please allow popups for this site to generate the PDF report.'});return;}
+    win.document.write(html); win.document.close();
 }
 
-/* ════════════════════════════════════════════════════════════
-   VIEW TRANSACTION DETAILS
-════════════════════════════════════════════════════════════ */
+/* ════ VIEW TRANSACTION DETAILS ════ */
 function viewTransactionDetails(transaction) {
-    currentTransaction = transaction;
-    const fmt = n => `₦${Number(n || 0).toLocaleString()}`;
-    document.getElementById('detailTxnId').textContent       = transaction.id       || '—';
-    document.getElementById('detailDateTime').textContent    = `${transaction.date} at ${transaction.time}`;
-    document.getElementById('detailReference').textContent   = transaction.reference || '—';
-    const typeEl = document.getElementById('detailType');
-    typeEl.textContent = transaction.type;
-    typeEl.className   = `badge bg-${transaction.typeClass || 'secondary'}`;
-    const statusEl = document.getElementById('detailStatus');
-    statusEl.innerHTML = `<i class="fas fa-circle me-1" style="font-size:0.6em;"></i>${transaction.status}`;
-    statusEl.className = `badge bg-${transaction.statusClass || 'secondary'}`;
-    document.getElementById('detailKiddiesBadge').style.display = transaction.isKiddies ? '' : 'none';
-    document.getElementById('detailMemberName').textContent    = transaction.memberName  || '—';
-    document.getElementById('detailMemberId').textContent      = transaction.memberId    || '—';
-    document.getElementById('detailMemberEmail').textContent   = transaction.memberEmail || '—';
-    document.getElementById('detailMemberPhone').textContent   = transaction.memberPhone || '—';
-    document.getElementById('detailAmount').textContent        = fmt(transaction.amount);
-    document.getElementById('detailMethod').textContent        = transaction.method      || '—';
-    document.getElementById('detailFee').textContent           = fmt(transaction.fee);
-    document.getElementById('detailBalanceBefore').textContent = fmt(transaction.balanceBefore);
-    document.getElementById('detailBalanceAfter').textContent  = fmt(transaction.balanceAfter);
-    document.getElementById('detailProcessedBy').textContent   = transaction.processedBy || '—';
-    const approversEl = document.getElementById('detailApprovers');
-    if (transaction.approvalDetail && transaction.approvalDetail !== 'N/A') {
-        approversEl.innerHTML = transaction.approvalDetail.split(' | ')
-            .map(line => `<span class="d-block" style="font-size:0.85rem;">${escHtml(line)}</span>`).join('');
-    } else {
-        approversEl.textContent = transaction.approverNames || '—';
-    }
-    document.getElementById('detailNotes').textContent = transaction.notes || 'No additional notes.';
+    currentTransaction=transaction;
+    const fmt=n=>`₦${Number(n||0).toLocaleString()}`;
+    document.getElementById('detailTxnId').textContent=transaction.id||'—';
+    document.getElementById('detailDateTime').textContent=`${transaction.date} at ${transaction.time}`;
+    document.getElementById('detailReference').textContent=transaction.reference||'—';
+    const typeEl=document.getElementById('detailType'); typeEl.textContent=transaction.type; typeEl.className=`badge bg-${transaction.typeClass||'secondary'}`;
+    const statusEl=document.getElementById('detailStatus'); statusEl.innerHTML=`<i class="fas fa-circle me-1" style="font-size:.6em;"></i>${transaction.status}`; statusEl.className=`badge bg-${transaction.statusClass||'secondary'}`;
+    document.getElementById('detailKiddiesBadge').style.display=transaction.isKiddies?'':'none';
+    document.getElementById('detailMemberName').textContent=transaction.memberName||'—';
+    document.getElementById('detailMemberId').textContent=transaction.memberId||'—';
+    document.getElementById('detailMemberEmail').textContent=transaction.memberEmail||'—';
+    document.getElementById('detailMemberPhone').textContent=transaction.memberPhone||'—';
+    document.getElementById('detailAmount').textContent=fmt(transaction.amount);
+    document.getElementById('detailMethod').textContent=transaction.method||'—';
+    document.getElementById('detailFee').textContent=fmt(transaction.fee);
+    document.getElementById('detailBalanceBefore').textContent=fmt(transaction.balanceBefore);
+    document.getElementById('detailBalanceAfter').textContent=fmt(transaction.balanceAfter);
+    document.getElementById('detailProcessedBy').textContent=transaction.processedBy||'—';
+    const approversEl=document.getElementById('detailApprovers');
+    if(transaction.approvalDetail&&transaction.approvalDetail!=='N/A'){approversEl.innerHTML=transaction.approvalDetail.split(' | ').map(line=>`<span class="d-block" style="font-size:.85rem;">${escHtml(line)}</span>`).join('');}
+    else{approversEl.textContent=transaction.approverNames||'—';}
+    document.getElementById('detailNotes').textContent=transaction.notes||'No additional notes.';
     populatePrintReceipt(transaction);
     new bootstrap.Modal(document.getElementById('transactionDetailsModal')).show();
 }
 
-/* ════════════════════════════════════════════════════════════
-   RECEIPT
-════════════════════════════════════════════════════════════ */
+/* ════ RECEIPT ════ */
 function populatePrintReceipt(t) {
-    const fmt = n => `₦${Number(n || 0).toLocaleString()}.00`;
-    document.getElementById('printTxnId').textContent         = t.id          || '—';
-    document.getElementById('printDateTime').textContent      = `${t.date} at ${t.time}`;
-    document.getElementById('printType').textContent          = t.type        || '—';
-    document.getElementById('printStatus').textContent        = t.status      || '—';
-    document.getElementById('printReference').textContent     = t.reference   || '—';
-    document.getElementById('printMemberName').textContent    = t.memberName  || '—';
-    document.getElementById('printMemberId').textContent      = t.memberId    || '—';
-    document.getElementById('printAccountType').textContent   = t.isKiddies   ? 'Kiddies Account' : 'Member Account';
-    document.getElementById('printMemberEmail').textContent   = t.memberEmail || '—';
-    document.getElementById('printMemberPhone').textContent   = t.memberPhone || '—';
-    document.getElementById('printAmount').textContent        = fmt(t.amount);
-    document.getElementById('printMethod').textContent        = t.method      || '—';
-    document.getElementById('printFee').textContent           = fmt(t.fee);
-    document.getElementById('printBalanceBefore').textContent = fmt(t.balanceBefore);
-    document.getElementById('printBalanceAfter').textContent  = fmt(t.balanceAfter);
-    document.getElementById('printProcessedBy').textContent   = t.processedBy   || '—';
-    document.getElementById('printApprovers').textContent     = t.approverNames  || '—';
-    document.getElementById('printFinalizedAt').textContent   = t.finalizedAt    || '—';
-    document.getElementById('printNotes').textContent         = t.notes          || 'No additional notes.';
-    document.getElementById('printGeneratedDate').textContent = new Date().toLocaleString('en-US', {
-        year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit',
-    });
+    const fmt=n=>`₦${Number(n||0).toLocaleString()}.00`;
+    document.getElementById('printTxnId').textContent=t.id||'—';
+    document.getElementById('printDateTime').textContent=`${t.date} at ${t.time}`;
+    document.getElementById('printType').textContent=t.type||'—';
+    document.getElementById('printStatus').textContent=t.status||'—';
+    document.getElementById('printReference').textContent=t.reference||'—';
+    document.getElementById('printMemberName').textContent=t.memberName||'—';
+    document.getElementById('printMemberId').textContent=t.memberId||'—';
+    document.getElementById('printAccountType').textContent=t.isKiddies?'Kiddies Account':'Member Account';
+    document.getElementById('printMemberEmail').textContent=t.memberEmail||'—';
+    document.getElementById('printMemberPhone').textContent=t.memberPhone||'—';
+    document.getElementById('printAmount').textContent=fmt(t.amount);
+    document.getElementById('printMethod').textContent=t.method||'—';
+    document.getElementById('printFee').textContent=fmt(t.fee);
+    document.getElementById('printBalanceBefore').textContent=fmt(t.balanceBefore);
+    document.getElementById('printBalanceAfter').textContent=fmt(t.balanceAfter);
+    document.getElementById('printProcessedBy').textContent=t.processedBy||'—';
+    document.getElementById('printApprovers').textContent=t.approverNames||'—';
+    document.getElementById('printFinalizedAt').textContent=t.finalizedAt||'—';
+    document.getElementById('printNotes').textContent=t.notes||'No additional notes.';
+    document.getElementById('printGeneratedDate').textContent=new Date().toLocaleString('en-US',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
 
 async function printReceipt() {
-    if (!currentTransaction) { await showNotify({ type:'warning', title:'No Data', message:'No transaction is currently loaded. Please open a transaction first.' }); return; }
+    if(!currentTransaction){await showNotify({type:'warning',title:'No Data',message:'No transaction is currently loaded. Please open a transaction first.'});return;}
     populatePrintReceipt(currentTransaction);
-    const el = document.getElementById('printReceipt');
-    el.style.display = 'block';
-    setTimeout(() => { window.print(); el.style.display = 'none'; }, 150);
+    const el=document.getElementById('printReceipt'); el.style.display='block';
+    setTimeout(()=>{window.print();el.style.display='none';},150);
 }
 
-/* ════════════════════════════════════════════════════════════
-   UTILITY
-════════════════════════════════════════════════════════════ */
+/* ════ UTILITY ════ */
 function escHtml(str) {
-    return String(str ?? '')
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    return String(str??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-document.addEventListener('click', function (e) {
-    const wrapper  = document.querySelector('.autocomplete-wrapper');
-    const dropdown = document.getElementById('autocompleteDropdown');
-    if (wrapper && dropdown && !wrapper.contains(e.target)) dropdown.classList.remove('show');
-    const sidebar = document.getElementById('sidebar');
-    if (window.innerWidth <= 992 && sidebar.classList.contains('active') && !sidebar.contains(e.target) && !e.target.closest('.fa-bars')) {
-        sidebar.classList.remove('active');
-    }
+document.addEventListener('click', function(e) {
+    const wrapper=document.querySelector('.autocomplete-wrapper');
+    const dropdown=document.getElementById('autocompleteDropdown');
+    if(wrapper&&dropdown&&!wrapper.contains(e.target)) dropdown.classList.remove('show');
+    const sidebar=document.getElementById('sidebar');
+    if(window.innerWidth<=992&&sidebar.classList.contains('active')&&!sidebar.contains(e.target)&&!e.target.closest('.fa-bars')){sidebar.classList.remove('active');document.getElementById('sidebarOverlay').classList.remove('active');}
 });
 
-document.addEventListener('input', function (e) {
-    if (e.target.id === 'paymentAmount' && parseFloat(e.target.value) < 0) e.target.value = '';
-});
+document.addEventListener('input',function(e){if(e.target.id==='paymentAmount'&&parseFloat(e.target.value)<0)e.target.value='';});
 </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extra Charges Management | Club De Stars Admin</title>
+    <title>Company Revenue | Club De Stars Admin</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -16,890 +16,816 @@
             --warning: #f59e0b;
             --sidebar-width: 280px;
         }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
             min-height: 100vh;
+            overflow-x: hidden;
+            color: #1e293b;
         }
 
-        /* Sidebar Styles */
+        /* ══════════ SIDEBAR ══════════ */
         .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
+            position: fixed; left: 0; top: 0; bottom: 0;
             width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            z-index: 1040;
-            transition: all 0.3s;
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+            background: linear-gradient(180deg, #0f2357 0%, #1e3a8a 40%, #1e40af 100%);
+            z-index: 1040; overflow-y: auto;
+            transition: transform .3s ease;
+            box-shadow: 4px 0 24px rgba(30,58,138,.25);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,.15) transparent;
         }
-        
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+
         .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
+            padding: 1.4rem 1.25rem 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            background: rgba(0,0,0,.18);
+            position: sticky; top: 0; z-index: 2;
         }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
+        .logo-row { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
         .logo-box {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
+            width: 42px; height: 42px; background: white; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: var(--primary); font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,.25); flex-shrink: 0;
         }
+        .sidebar-brand { font-size: .95rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: .05em; line-height: 1.2; }
+        .sidebar-brand small { font-size: .65rem; font-weight: 500; opacity: .55; display: block; letter-spacing: .08em; }
+        .role-pill {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 4px 10px; background: rgba(239,68,68,.2);
+            border-radius: 20px; border: 1px solid rgba(239,68,68,.3);
+            font-weight: 700; font-size: .7rem; color: #fca5a5;
+        }
+        .nav-group { padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .nav-group:last-child { border-bottom: none; }
+        .nav-category {
+            display: flex; align-items: center; gap: 7px;
+            padding: .55rem 1.25rem .3rem;
+            font-size: .62rem; font-weight: 800;
+            color: rgba(255,255,255,.38);
+            text-transform: uppercase; letter-spacing: .1em; user-select: none;
+        }
+        .nav-category::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.08); margin-left: 4px; }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 11px;
+            padding: .62rem 1.25rem; color: rgba(255,255,255,.72);
+            text-decoration: none; font-weight: 500; font-size: .84rem;
+            border-left: 3px solid transparent; transition: all .18s;
+        }
+        .sidebar-nav a:hover  { background: rgba(255,255,255,.09); color: white; border-left-color: rgba(255,255,255,.4); }
+        .sidebar-nav a.active { background: rgba(255,255,255,.15); color: white; border-left-color: white; }
+        .sidebar-nav a i { width: 18px; font-size: .9rem; flex-shrink: 0; opacity: .8; text-align: center; }
+        .sidebar-nav a.active i { opacity: 1; }
+        .nav-badge {
+            margin-left: auto; font-size: .63rem; font-weight: 800;
+            padding: 2px 7px; border-radius: 10px;
+            background: rgba(239,68,68,.9); color: white; flex-shrink: 0; line-height: 1.4;
+        }
+        .nav-back {
+            display: flex; align-items: center; gap: 10px;
+            padding: .7rem 1.25rem .9rem; font-size: .8rem; font-weight: 600;
+            color: rgba(255,255,255,.42); text-decoration: none; transition: color .18s;
+            border-top: 1px solid rgba(255,255,255,.07); margin-top: .25rem;
+        }
+        .nav-back:hover { color: rgba(255,255,255,.7); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1035; }
+        .sidebar-overlay.active { display: block; }
 
-        .sidebar-menu {
-            padding: 1rem 0;
-        }
-        
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            padding: 0.875rem 1.5rem;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-            font-weight: 500;
-        }
-        
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-        }
-
-        /* Top Navbar */
+        /* ══════════ TOP NAVBAR ══════════ */
         .top-navbar {
-            position: fixed;
-            top: 0;
-            left: var(--sidebar-width);
-            right: 0;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
-            z-index: 1030;
-            display: flex;
-            align-items: center;
-            padding: 0 1.5rem;
-            transition: all 0.3s;
+            position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 70px;
+            background: rgba(255,255,255,.95); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30,58,138,.08); z-index: 1030;
+            display: flex; align-items: center; padding: 0 1.5rem;
+            border-bottom: 1px solid rgba(30,58,138,.1); transition: all .3s;
         }
-
-        /* Main Content */
         .main-content {
-            margin-left: var(--sidebar-width);
-            margin-top: 70px;
-            padding: 1.5rem;
-            min-height: calc(100vh - 70px);
-            transition: all 0.3s;
+            margin-left: var(--sidebar-width); margin-top: 70px;
+            padding: 1.75rem; min-height: calc(100vh - 70px); transition: all .3s;
         }
 
+        /* ══════════ PAGE HEADER ══════════ */
         .page-header {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+            color: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem;
+            box-shadow: 0 15px 40px rgba(30,58,138,.25); position: relative; overflow: hidden;
+        }
+        .page-header::before {
+            content: ''; position: absolute; top: -50%; right: -15%;
+            width: 380px; height: 380px; background: rgba(255,255,255,.05); border-radius: 50%;
+        }
+        .page-header::after {
+            content: ''; position: absolute; bottom: -60%; left: -5%;
+            width: 240px; height: 240px; background: rgba(255,255,255,.04); border-radius: 50%;
         }
 
-        /* Stat Cards */
-        .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-            height: 100%;
-            border: 1px solid rgba(30, 58, 138, 0.05);
+        /* ══════════ KPI CARDS ══════════ */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.1rem; margin-bottom: 1.5rem; }
+        .kpi-card {
+            background: white; border-radius: 16px; padding: 1.4rem;
+            box-shadow: 0 4px 20px rgba(30,58,138,.08); transition: transform .26s, box-shadow .26s;
+            border: 1px solid rgba(30,58,138,.05);
         }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
-        }
-        
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            margin-bottom: 1rem;
-        }
+        .kpi-card:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(30,58,138,.14); }
+        .kpi-icon { width: 50px; height: 50px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: .875rem; }
+        .kpi-label { font-size: .68rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: .07em; margin-bottom: .25rem; }
+        .kpi-value { font-size: 1.4rem; font-weight: 900; color: #0f172a; line-height: 1.15; margin-bottom: .35rem; }
+        .kpi-sub { display: inline-flex; align-items: center; gap: 4px; font-size: .7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+        .kpi-sub.up      { color: #059669; background: rgba(16,185,129,.1); }
+        .kpi-sub.down    { color: #dc2626; background: rgba(239,68,68,.1); }
+        .kpi-sub.neutral { color: #64748b; background: rgba(100,116,139,.1); }
+        .kpi-sub.blue    { color: var(--primary); background: rgba(30,58,138,.1); }
 
-        .stat-card h3 {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 0.25rem;
+        /* ══════════ SECTION CARDS ══════════ */
+        .s-card { background: white; border-radius: 18px; box-shadow: 0 4px 20px rgba(30,58,138,.08); overflow: hidden; border: 1px solid rgba(30,58,138,.05); }
+        .s-head {
+            padding: 1rem 1.4rem; border-bottom: 1px solid rgba(30,58,138,.07);
+            display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+            background: linear-gradient(135deg, rgba(30,58,138,.03) 0%, rgba(59,130,246,.03) 100%);
         }
+        .s-head-title { font-size: .9rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 9px; }
+        .s-head-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .82rem; }
+        .s-body { padding: 1.25rem 1.4rem; }
 
-        .stat-card p {
-            color: #64748b;
-            margin-bottom: 0;
-            font-size: 0.9rem;
-        }
+        /* ══════════ REVENUE STREAMS ══════════ */
+        .rev-stream { display: flex; align-items: center; gap: .875rem; padding: .875rem 0; border-bottom: 1px solid rgba(30,58,138,.05); }
+        .rev-stream:last-child { border-bottom: none; }
+        .rev-stream-ico { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: .9rem; }
+        .rev-stream-body { flex: 1; min-width: 0; }
+        .rev-stream-name { font-size: .85rem; font-weight: 700; color: #1f2937; }
+        .rev-stream-desc { font-size: .72rem; color: #9ca3af; margin-top: 2px; }
+        .rev-stream-bar  { margin-top: .4rem; height: 4px; background: rgba(30,58,138,.07); border-radius: 3px; }
+        .rev-stream-fill { height: 100%; border-radius: 3px; }
+        .rev-stream-right { text-align: right; flex-shrink: 0; }
+        .rev-stream-amt  { font-size: .95rem; font-weight: 800; }
+        .rev-stream-pct  { font-size: .7rem; font-weight: 700; color: #94a3b8; margin-top: 2px; }
 
-        /* Filter Section */
-        .filter-section {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+        /* ══════════ CHARGE TABLE ══════════ */
+        .charge-table { width: 100%; border-collapse: collapse; }
+        .charge-table th {
+            font-size: .69rem; font-weight: 800; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: .07em; padding: .6rem 1rem; border: none;
+            background: linear-gradient(135deg, rgba(30,58,138,.03) 0%, rgba(59,130,246,.03) 100%);
         }
+        .charge-table td { font-size: .83rem; padding: .85rem 1rem; border-bottom: 1px solid rgba(30,58,138,.05); vertical-align: middle; }
+        .charge-table tbody tr:last-child td { border-bottom: none; }
+        .charge-table tbody tr:hover td { background: rgba(30,58,138,.02); }
 
-        /* Table Card */
-        .table-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-        }
+        /* ══════════ BADGES ══════════ */
+        .badge-pill { padding: .3rem .75rem; border-radius: 20px; font-size: .72rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-paid    { background: rgba(16,185,129,.1);  color: #059669; border: 1px solid rgba(16,185,129,.25); }
+        .badge-pending { background: rgba(245,158,11,.1);  color: #d97706; border: 1px solid rgba(245,158,11,.25); }
+        .badge-waived  { background: rgba(100,116,139,.1); color: #475569; border: 1px solid rgba(100,116,139,.2); }
+        .type-pill { padding: .28rem .7rem; border-radius: 7px; font-size: .71rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; background: rgba(30,58,138,.08); color: var(--primary); border: 1px solid rgba(30,58,138,.15); }
+        .type-pill.danger  { background: rgba(239,68,68,.08);  color: #dc2626; border-color: rgba(239,68,68,.2); }
+        .type-pill.warning { background: rgba(245,158,11,.08); color: #b45309; border-color: rgba(245,158,11,.2); }
+        .type-pill.success { background: rgba(16,185,129,.08); color: #059669; border-color: rgba(16,185,129,.2); }
+        .type-pill.info    { background: rgba(6,182,212,.08);  color: #0891b2; border-color: rgba(6,182,212,.2); }
+        .type-pill.muted   { background: rgba(100,116,139,.08);color: #475569; border-color: rgba(100,116,139,.2); }
 
-        .table {
-            margin-bottom: 0;
+        /* ══════════ FILTER BAR ══════════ */
+        .filter-bar {
+            background: rgba(30,58,138,.02); border-bottom: 1px solid rgba(30,58,138,.07);
+            padding: 1rem 1.4rem; display: flex; align-items: flex-end; gap: .875rem; flex-wrap: wrap;
         }
-        
-        .table thead {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
-        }
-        
-        .table thead th {
-            border: none;
-            padding: 1rem;
-            font-weight: 600;
-            color: var(--primary);
-            white-space: nowrap;
-        }
-        
-        .table tbody td {
-            padding: 1rem;
-            vertical-align: middle;
-        }
+        .filter-bar .form-label { font-weight: 700; color: var(--primary); font-size: .75rem; margin-bottom: .35rem; }
+        .filter-bar .form-control,
+        .filter-bar .form-select { border-radius: 9px; border: 1.5px solid rgba(30,58,138,.12); padding: .5rem .875rem; font-size: .82rem; }
+        .filter-bar .form-control:focus,
+        .filter-bar .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 .2rem rgba(30,58,138,.1); }
 
-        .badge {
-            padding: 0.5rem 0.875rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
+        /* ══════════ LAYOUT ══════════ */
+        .layout-two { display: grid; grid-template-columns: 1.55fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; align-items: start; }
 
-        .action-btn {
-            padding: 0.4rem 0.75rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            border: none;
-            transition: all 0.3s;
-        }
+        /* ══════════ DONUT ══════════ */
+        .donut-legend { display: flex; flex-wrap: wrap; gap: .4rem .875rem; margin-top: .75rem; justify-content: center; }
+        .dleg { display: flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 600; color: #475569; }
+        .dleg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none;
-            border-radius: 10px;
-            padding: 0.6rem 1.5rem;
-            font-weight: 600;
-        }
+        /* ══════════ SUMMARY TILES ══════════ */
+        .summary-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1rem; }
+        .sum-tile { padding: .9rem 1rem; border-radius: 11px; text-align: center; }
+        .sum-tile-label { font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; margin-bottom: .2rem; }
+        .sum-tile-value { font-size: 1rem; font-weight: 900; }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.3);
-        }
+        /* ══════════ MONTH BARS ══════════ */
+        .month-bars { display: flex; align-items: flex-end; gap: .35rem; height: 80px; margin-bottom: .5rem; }
+        .month-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .month-bar { width: 100%; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, #3b82f6, #1e3a8a); opacity: .7; transition: opacity .2s; min-height: 4px; }
+        .month-bar:hover { opacity: 1; }
 
-        .form-label {
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
+        /* ══════════ PAGINATION ══════════ */
+        .page-link { color: var(--primary); border-radius: 8px; margin: 0 .2rem; border: 1.5px solid rgba(30,58,138,.12); font-size: .82rem; }
+        .page-link:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .page-item.active .page-link { background: var(--primary); border-color: var(--primary); }
 
-        .form-control,
-        .form-select {
-            border-radius: 10px;
-            border: 2px solid rgba(30, 58, 138, 0.1);
-            padding: 0.65rem 1rem;
-        }
+        .powered-by { position: fixed; bottom: 15px; right: 15px; background: white; padding: 10px 16px; border-radius: 25px; box-shadow: 0 4px 15px rgba(30,58,138,.15); font-size: .8rem; font-weight: 600; color: var(--primary); z-index: 1000; }
 
-        .form-control:focus,
-        .form-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.1);
-        }
-
-        .modal-content {
-            border-radius: 20px;
-            border: none;
-        }
-
-        .modal-header {
-            border-radius: 20px 20px 0 0;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-            border: none;
-        }
-
-        .modal-header .btn-close {
-            filter: invert(1);
-        }
-
-        /* Withdrawal History Card */
-        .withdrawal-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
-            border-left: 4px solid var(--primary);
-        }
-
-        .withdrawal-card:hover {
-            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.15);
-        }
-
-        /* Alert Boxes */
-        .alert-info-custom {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
-            border: 2px solid rgba(30, 58, 138, 0.1);
-            border-radius: 12px;
-            padding: 1rem;
-        }
-
-        /* Mobile Responsive */
+        @media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .layout-two { grid-template-columns: 1fr; } }
         @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .top-navbar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-
-            .stat-card h3 {
-                font-size: 1.5rem;
-            }
-
-            .table {
-                font-size: 0.85rem;
-            }
-
-            .action-btn {
-                padding: 0.3rem 0.6rem;
-                font-size: 0.8rem;
-            }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .top-navbar { left: 0; }
+            .main-content { margin-left: 0; padding: 1rem; }
         }
-
-        @media (max-width: 576px) {
-            .main-content {
-                padding: 0.75rem;
-            }
-
-            .page-header {
-                padding: 1.25rem;
-            }
-
-            .stat-card {
-                padding: 1rem;
-            }
-
-            .stat-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.4rem;
-            }
-
-            .table thead th,
-            .table tbody td {
-                padding: 0.75rem 0.5rem;
-            }
-        }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background: rgba(0,0,0,0.4);
-            z-index: 1035;
-        }
-
-        .sidebar-overlay.active {
-            display: block;
-        }
-
-        @media (max-width: 992px) {
-            .sidebar-overlay.active {
-                display: block;
-            }
-        }
+        @media (max-width: 640px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: .65rem; } .main-content { padding: .75rem; } .page-header { padding: 1.25rem; border-radius: 16px; } }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <div class="logo-box">C</div>
-                <div>
-                    <h5 class="mb-0 fw-bold" style="text-transform: uppercase;">Club De Stars</h5>
-                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
-                </div>
-            </div>
+
+<!-- ════════════════════════ SIDEBAR ════════════════════════ -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-row">
+            <div class="logo-box">C</div>
+            <div><div class="sidebar-brand">Club De Stars<small>Admin Panel</small></div></div>
         </div>
-        <div class="sidebar-menu">
-            <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
-            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
-            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
-            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
-            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
-            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
-            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
-            <a href="/admin/manage-extra-charges" class="active"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
-            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
-            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
-            <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
-            <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
-            <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
-            <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
-            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
-            <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
-            <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-            <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
-            <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
+        <div class="role-pill">
+            <i class="fas fa-shield-alt" style="font-size:.65rem;"></i>&nbsp;<%= admin.role?.name?.toUpperCase() || 'SUPER ADMIN' %>
         </div>
     </div>
 
-    <!-- Top Navbar -->
-    <div class="top-navbar">
-        <i class="fas fa-bars d-lg-none me-3"
-           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-           onclick="toggleSidebar()"></i>
-        
-        <div class="flex-grow-1 d-none d-lg-block">
-            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Extra Charges Management</h5>
-            <small class="text-muted">Track and manage all extra charges and admin withdrawals</small>
-        </div>
-    </div>
-    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h3 class="mb-1 fw-bold" style="color: var(--primary);">
-                        <i class="fas fa-hand-holding-usd me-2"></i>Extra Charges Management
-                    </h3>
-                    <p class="text-muted mb-0">Monitor all extra charges and manage admin withdrawals</p>
-                </div>
-            </div>
+    <div class="sidebar-nav">
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-home" style="font-size:.6rem;"></i>Main</div>
+            <a href="/admin/dashboard"><i class="fas fa-chart-pie"></i>Overview</a>
         </div>
 
-<!-- Stats Cards -->
-<div class="row g-4 mb-4">
-
-    <!-- Total Collected -->
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card">
-            <div class="stat-icon"
-                style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                <i class="fas fa-coins"></i>
-            </div>
-            <p class="text-muted mb-1 fw-semibold">Total Collected</p>
-            <h3 class="mb-0 fw-bold text-success" id="totalCollected">₦0</h3>
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-users" style="font-size:.6rem;"></i>Members</div>
+            <a href="/admin/manage-members"><i class="fas fa-users"></i>Manage Members</a>
+            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i>Kiddies Accounts</a>
+            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i>Membership Types</a>
         </div>
-    </div>
 
-    <!-- Pending Charges -->
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card">
-            <div class="stat-icon"
-                style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
-                <i class="fas fa-hourglass-half"></i>
-            </div>
-            <p class="text-muted mb-1 fw-semibold">Pending Charges</p>
-            <h3 class="mb-0 fw-bold text-warning" id="pendingAmount">₦0</h3>
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-hand-holding-usd" style="font-size:.6rem;"></i>Loans</div>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i>Loan Management</a>
+            <a href="/admin/loan-payments"><i class="fas fa-file-invoice-dollar"></i>Loan Payments</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i>Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i>External Loans</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-landmark" style="font-size:.6rem;"></i>Finance</div>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i>Company Finance</a>
+            <a href="/admin/operating-earnings"><i class="fas fa-chart-line"></i>Operating Earnings</a>
+            <a href="/admin/manage-extra-charges" class="active"><i class="fas fa-chart-bar"></i>Company Revenue</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-cog" style="font-size:.6rem;"></i>System</div>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i>Manage Subscriptions</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i>Roles &amp; Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i>Settings</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-file-alt" style="font-size:.6rem;"></i>Reporting</div>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i>Reports</a>
+            <a href="/admin/logs"><i class="fas fa-history"></i>Admin Logs</a>
         </div>
     </div>
 
-    <!-- Total Charges Count -->
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card">
-            <div class="stat-icon"
-                style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
-                <i class="fas fa-list-ol"></i>
-            </div>
-            <p class="text-muted mb-1 fw-semibold">Total Charges</p>
-            <h3 class="mb-0 fw-bold text-primary" id="totalChargeCount">0</h3>
-        </div>
-    </div>
-
-    <!-- Last Charge Date -->
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card">
-            <div class="stat-icon"
-                style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white;">
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-            <p class="text-muted mb-1 fw-semibold">Last Charge</p>
-            <h3 class="mb-0 fw-bold text-dark" id="lastChargeDate">—</h3>
-        </div>
-    </div>
-
+    <a href="/cds-cooperative/dashboard" class="nav-back"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
 </div>
 
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-        <!-- Filters -->
-        <div class="filter-section">
-            <div class="row g-3 align-items-end">
-                <div class="col-lg-3 col-md-6">
-                    <label class="form-label">Search</label>
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search by member or reason...">
+<!-- Top Navbar -->
+<div class="top-navbar">
+    <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.5rem;" onclick="toggleSidebar()"></i>
+    <div class="flex-grow-1 d-none d-lg-block">
+        <h5 class="mb-0 fw-bold" style="color:var(--primary)">Company Revenue</h5>
+        <small class="text-muted">All income streams — charges, interest, fees and penalties</small>
+    </div>
+    <div class="d-lg-none fw-bold" style="color:var(--primary);font-size:.95rem;">Company Revenue</div>
+    <button class="btn btn-sm btn-outline-primary ms-auto" onclick="location.reload()" style="border-radius:8px;font-weight:700;font-size:.78rem;">
+        <i class="fas fa-sync-alt me-1"></i><span class="d-none d-sm-inline">Refresh</span>
+    </button>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="row align-items-center position-relative" style="z-index:1;">
+            <div class="col-md-7">
+                <div style="display:inline-flex;align-items:center;gap:8px;padding:5px 13px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);border-radius:20px;font-size:.75rem;font-weight:600;margin-bottom:.875rem;">
+                    <i class="fas fa-calendar-alt" style="font-size:.8rem;"></i><span id="headerDate"></span>
                 </div>
-                <div class="col-lg-2 col-md-6">
-                    <label class="form-label">Status</label>
-                    <select class="form-select" id="statusFilter">
-                        <option value="">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="paid">Paid</option>
-                        <option value="waived">Waived</option>
-                    </select>
+                <h2 class="mb-2 fw-bold"><i class="fas fa-chart-bar me-3"></i>Company Revenue</h2>
+                <p class="mb-0 opacity-90">Total earnings across all revenue streams — interest, penalties, fees &amp; charges</p>
+            </div>
+            <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                <div style="display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:.75rem 1.5rem;text-align:center;">
+                    <div style="font-size:.67rem;font-weight:800;opacity:.7;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">Total Revenue Collected</div>
+                    <div style="font-size:2rem;font-weight:900;" id="heroTotal">₦0</div>
                 </div>
-                <div class="col-lg-2 col-md-6">
-                    <label class="form-label">Charge Type</label>
-                    <select class="form-select" id="typeFilter">
-                        <option value="">All Types</option>
-                        <option value="registration">Registration</option>
-                        <option value="loan-penalty">Loan Penalty</option>
-                        <option value="forceful-withdrawal">Forceful Withdrawal</option>
-                        <option value="late-payment">Late Payment</option>
-                        <option value="service">Service</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <div class="col-lg-2 col-md-6">
-                    <label class="form-label">Date Range</label>
-                    <select class="form-select" id="dateFilter">
-                        <option value="">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                        <option value="year">This Year</option>
-                    </select>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <button class="btn btn-outline-primary w-100" onclick="resetFilters()">
-                        <i class="fas fa-redo me-2"></i>Reset Filters
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI GRID -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(30,58,138,.1);color:var(--primary);"><i class="fas fa-percentage"></i></div>
+            <div class="kpi-label">Loan Interest</div>
+            <div class="kpi-value" id="kpiLoanInterest">₦0</div>
+            <div class="kpi-sub blue"><i class="fas fa-hand-holding-usd"></i><span id="kpiLoanCount">0 loans</span></div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(239,68,68,.1);color:#dc2626;"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="kpi-label">Withdrawal Penalties</div>
+            <div class="kpi-value" id="kpiWdPenalty">₦0</div>
+            <div class="kpi-sub down"><i class="fas fa-money-check-alt"></i><span id="kpiWdCount">0 charges</span></div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(16,185,129,.1);color:#059669;"><i class="fas fa-user-plus"></i></div>
+            <div class="kpi-label">Registration Fees</div>
+            <div class="kpi-value" id="kpiRegFees">₦0</div>
+            <div class="kpi-sub up"><i class="fas fa-users"></i><span id="kpiRegCount">0 members</span></div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(245,158,11,.1);color:#d97706;"><i class="fas fa-coins"></i></div>
+            <div class="kpi-label">Other Charges</div>
+            <div class="kpi-value" id="kpiOther">₦0</div>
+            <div class="kpi-sub neutral"><i class="fas fa-list"></i><span id="kpiOtherCount">0 items</span></div>
+        </div>
+    </div>
+
+    <!-- TWO-COL LAYOUT -->
+    <div class="layout-two">
+
+        <!-- Left column -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+            <!-- Revenue Streams -->
+            <div class="s-card">
+                <div class="s-head">
+                    <div class="s-head-title">
+                        <div class="s-head-icon" style="background:rgba(30,58,138,.1);color:var(--primary);"><i class="fas fa-layer-group"></i></div>
+                        Revenue Streams Breakdown
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="exportRevenue()" style="border-radius:8px;font-size:.73rem;font-weight:700;padding:.28rem .875rem;">
+                        <i class="fas fa-download me-1"></i>Export CSV
                     </button>
                 </div>
+                <div class="s-body" id="streamsList"></div>
             </div>
-        </div>
 
-        <!-- Charges Table -->
-    <div class="table-card">
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Member</th>
-                    <th>Charge Type</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="chargesTableBody">
-                <!-- Table rows are dynamically rendered by JS -->
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <!-- Pagination info -->
-        <div class="text-muted" id="paginationInfo">
-            <!-- e.g., "Showing 1-10 of 25 charges" (populated by JS) -->
-        </div>
-
-        <!-- Pagination controls -->
-        <nav>
-            <ul class="pagination mb-0" id="paginationControls">
-                <!-- Pagination buttons dynamically rendered by JS -->
-            </ul>
-        </nav>
-    </div>
-</div>
-
-    </div>
-
-    <!-- View Charge Details Modal -->
-    <div class="modal fade" id="viewChargeModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-eye me-2"></i>Charge Details</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="text-muted small">Member</label>
-                            <div class="fw-bold" id="viewMember">-</div>
-                        </div>
-                        <div class="col-6">
-                            <label class="text-muted small">Charge Type</label>
-                            <div class="fw-bold" id="viewChargeType">-</div>
-                        </div>
-                        <div class="col-6">
-                            <label class="text-muted small">Amount</label>
-                            <div class="fw-bold" id="viewAmount">-</div>
-                        </div>
-                        <div class="col-6">
-                            <label class="text-muted small">Status</label>
-                            <div id="viewStatus">-</div>
-                        </div>
-                        <div class="col-6">
-                            <label class="text-muted small">Applied Date</label>
-                            <div class="fw-bold" id="viewDate">-</div>
-                        </div>
-                        <div class="col-12">
-                            <label class="text-muted small">Reason</label>
-                            <div class="fw-bold" id="viewReason">-</div>
-                        </div>
+            <!-- Records Table -->
+            <div class="s-card">
+                <div class="s-head">
+                    <div class="s-head-title">
+                        <div class="s-head-icon" style="background:rgba(30,58,138,.1);color:var(--primary);"><i class="fas fa-table"></i></div>
+                        All Revenue Records
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <div class="filter-bar">
+                    <div style="flex:1;min-width:170px;">
+                        <label class="form-label">Search</label>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Member name, ID or reason…">
+                    </div>
+                    <div style="min-width:125px;">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="paid">Paid</option>
+                            <option value="pending">Pending</option>
+                            <option value="waived">Waived</option>
+                        </select>
+                    </div>
+                    <div style="min-width:150px;">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" id="typeFilter">
+                            <option value="">All Types</option>
+                            <option value="registration">Registration</option>
+                            <option value="loan-penalty">Loan Penalty</option>
+                            <option value="loan-interest">Loan Interest</option>
+                            <option value="forceful-withdrawal">Forceful W/D</option>
+                            <option value="late-payment">Late Payment</option>
+                            <option value="service">Service</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div style="min-width:115px;">
+                        <label class="form-label">Period</label>
+                        <select class="form-select" id="dateFilter">
+                            <option value="">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="year">This Year</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">&nbsp;</label>
+                        <button class="btn btn-outline-secondary w-100" onclick="resetFilters()" style="border-radius:9px;font-size:.82rem;font-weight:600;">
+                            <i class="fas fa-redo me-1"></i>Reset
+                        </button>
+                    </div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="charge-table">
+                        <thead>
+                            <tr>
+                                <th style="padding-left:1.4rem;">Member</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th style="padding-right:1.4rem;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="chargesTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="text-muted" style="font-size:.8rem;" id="paginationInfo"></div>
+                    <nav><ul class="pagination mb-0" id="paginationControls"></ul></nav>
                 </div>
             </div>
+
+        </div>
+
+        <!-- Right column -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+            <!-- Revenue Mix donut -->
+            <div class="s-card">
+                <div class="s-head">
+                    <div class="s-head-title">
+                        <div class="s-head-icon" style="background:rgba(30,58,138,.1);color:var(--primary);"><i class="fas fa-chart-pie"></i></div>
+                        Revenue Mix
+                    </div>
+                </div>
+                <div class="s-body" style="text-align:center;">
+                    <div style="position:relative;display:inline-flex;align-items:center;justify-content:center;margin-bottom:.5rem;">
+                        <svg width="130" height="130" viewBox="0 0 120 120" id="donutSvg">
+                            <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(30,58,138,.07)" stroke-width="14"/>
+                        </svg>
+                        <div style="position:absolute;text-align:center;">
+                            <div style="font-size:1.1rem;font-weight:900;color:#0f172a;line-height:1;" id="donutCenter">₦0</div>
+                            <div style="font-size:.55rem;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;">Total</div>
+                        </div>
+                    </div>
+                    <div class="donut-legend" id="donutLegend"></div>
+                </div>
+            </div>
+
+            <!-- Collection Summary -->
+            <div class="s-card">
+                <div class="s-head">
+                    <div class="s-head-title">
+                        <div class="s-head-icon" style="background:rgba(16,185,129,.1);color:#059669;"><i class="fas fa-chart-line"></i></div>
+                        Collection Summary
+                    </div>
+                </div>
+                <div class="s-body">
+                    <div class="summary-tiles">
+                        <div class="sum-tile" style="background:rgba(16,185,129,.07);">
+                            <div class="sum-tile-label" style="color:#059669;">Collected</div>
+                            <div class="sum-tile-value" style="color:#065f46;" id="sumCollected">₦0</div>
+                        </div>
+                        <div class="sum-tile" style="background:rgba(245,158,11,.07);">
+                            <div class="sum-tile-label" style="color:#d97706;">Pending</div>
+                            <div class="sum-tile-value" style="color:#78350f;" id="sumPending">₦0</div>
+                        </div>
+                        <div class="sum-tile" style="background:rgba(100,116,139,.07);">
+                            <div class="sum-tile-label" style="color:#475569;">Waived</div>
+                            <div class="sum-tile-value" style="color:#1e293b;" id="sumWaived">₦0</div>
+                        </div>
+                        <div class="sum-tile" style="background:rgba(30,58,138,.07);">
+                            <div class="sum-tile-label" style="color:var(--primary);">Total Records</div>
+                            <div class="sum-tile-value" style="color:#0f172a;" id="sumCount">0</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:.875rem;">
+                        <div style="font-size:.7rem;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.6rem;">Monthly Trend (Last 6 months)</div>
+                        <div class="month-bars" id="monthBars"></div>
+                        <div style="display:flex;gap:.35rem;" id="monthLabels"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Revenue Members -->
+            <div class="s-card">
+                <div class="s-head">
+                    <div class="s-head-title">
+                        <div class="s-head-icon" style="background:rgba(245,158,11,.1);color:#d97706;"><i class="fas fa-trophy"></i></div>
+                        Top Revenue Members
+                    </div>
+                </div>
+                <div class="s-body" id="topMembersList"></div>
+            </div>
+
         </div>
     </div>
 
+</div>
 
+<!-- VIEW MODAL -->
+<div class="modal fade" id="viewChargeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:18px;border:none;overflow:hidden;">
+            <div class="modal-header" style="background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);color:white;border:none;">
+                <h5 class="modal-title"><i class="fas fa-receipt me-2"></i>Revenue Record Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div style="background:rgba(30,58,138,.04);border-radius:10px;padding:.875rem;">
+                            <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;color:#9ca3af;margin-bottom:.35rem;">Member</div>
+                            <div class="fw-bold" id="viewMember">—</div>
+                            <div class="text-muted" style="font-size:.75rem;" id="viewMemberId">—</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div style="background:rgba(30,58,138,.04);border-radius:10px;padding:.875rem;">
+                            <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;color:#9ca3af;margin-bottom:.35rem;">Revenue Type</div>
+                            <div id="viewChargeType">—</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div style="background:linear-gradient(135deg,rgba(30,58,138,.07),rgba(59,130,246,.05));border-radius:12px;padding:1rem;text-align:center;border:1.5px solid rgba(30,58,138,.12);">
+                            <div style="font-size:.67rem;font-weight:800;text-transform:uppercase;color:var(--primary);letter-spacing:.07em;margin-bottom:.25rem;">Amount</div>
+                            <div style="font-size:2rem;font-weight:900;color:var(--primary);" id="viewAmount">₦0</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div style="font-size:.67rem;font-weight:800;text-transform:uppercase;color:#9ca3af;margin-bottom:.3rem;">Status</div>
+                        <div id="viewStatus"></div>
+                    </div>
+                    <div class="col-6">
+                        <div style="font-size:.67rem;font-weight:800;text-transform:uppercase;color:#9ca3af;margin-bottom:.3rem;">Date Applied</div>
+                        <div class="fw-bold" id="viewDate">—</div>
+                    </div>
+                    <div class="col-12">
+                        <div style="font-size:.67rem;font-weight:800;text-transform:uppercase;color:#9ca3af;margin-bottom:.3rem;">Reason / Notes</div>
+                        <div style="background:rgba(30,58,138,.03);border-radius:9px;padding:.75rem;font-size:.85rem;" id="viewReason">—</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top:1px solid rgba(30,58,138,.07);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="powered-by"><strong style="color:var(--primary);">Cloudbaam</strong> · <strong style="color:var(--primary);">JESZ LIMITED</strong></div>
 
-
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 <script>
-/* ============================
-   DATA FROM BACKEND
-============================ */
 let charges = <%- JSON.stringify(charges || []) %>;
-let currentChargeId = null;
-
-/* ============================
-   PAGINATION STATE
-============================ */
 let currentPage = 1;
-const pageSize = 10;
+const pageSize  = 10;
 let currentData = [...charges];
 
-/* ============================
-   INIT
-============================ */
+const STREAM_CONFIG = [
+    { key: 'loan-interest',       label: 'Loan Interest',        color: '#1e3a8a', icon: 'fa-percentage',         variant: '' },
+    { key: 'loan-penalty',        label: 'Loan Penalties',       color: '#ef4444', icon: 'fa-exclamation-circle', variant: 'danger' },
+    { key: 'forceful-withdrawal', label: 'Withdrawal Penalties', color: '#f59e0b', icon: 'fa-money-check-alt',    variant: 'warning' },
+    { key: 'registration',        label: 'Registration Fees',    color: '#10b981', icon: 'fa-user-plus',          variant: 'success' },
+    { key: 'late-payment',        label: 'Late Payment Fees',    color: '#3b82f6', icon: 'fa-clock',              variant: '' },
+    { key: 'service',             label: 'Service Charges',      color: '#06b6d4', icon: 'fa-cog',                variant: 'info' },
+    { key: 'other',               label: 'Other',                color: '#94a3b8', icon: 'fa-ellipsis-h',         variant: 'muted' },
+];
+
+const TYPE_BADGE_HTML = (type) => {
+    const map = {
+        'registration':        ['fa-user-plus',         '',        'Registration'],
+        'loan-penalty':        ['fa-exclamation-circle','danger',  'Loan Penalty'],
+        'loan-interest':       ['fa-percentage',        '',        'Loan Interest'],
+        'forceful-withdrawal': ['fa-money-check-alt',   'warning', 'W/D Penalty'],
+        'late-payment':        ['fa-clock',             '',        'Late Payment'],
+        'service':             ['fa-cog',               'info',    'Service'],
+        'other':               ['fa-ellipsis-h',        'muted',   'Other'],
+    };
+    const [icon, variant, label] = map[type] || ['fa-circle','muted', type || 'Unknown'];
+    return `<span class="type-pill ${variant}"><i class="fas ${icon}" style="font-size:.65em;"></i>${label}</span>`;
+};
+
+const STATUS_BADGE_HTML = (status) => ({
+    paid:    '<span class="badge-pill badge-paid"><i class="fas fa-check-circle" style="font-size:.65em;"></i>Paid</span>',
+    pending: '<span class="badge-pill badge-pending"><i class="fas fa-clock" style="font-size:.65em;"></i>Pending</span>',
+    waived:  '<span class="badge-pill badge-waived"><i class="fas fa-minus-circle" style="font-size:.65em;"></i>Waived</span>',
+})[status] || `<span class="badge-pill badge-waived">${status}</span>`;
+
+function fmt(n) { return '₦' + Number(n || 0).toLocaleString(); }
+
 document.addEventListener('DOMContentLoaded', () => {
-    updateStats();
-    renderCharges(currentData, currentPage);
+    document.getElementById('headerDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    buildKPIs(); buildStreams(); buildDonut(); buildSummaryTiles(); buildMonthBars(); buildTopMembers(); renderCharges(charges, 1);
 });
 
-/* ============================
-   STATS (EXTRA CHARGES ONLY)
-============================ */
-function updateStats() {
-    const totalCollected = charges
-        .filter(c => c.status === 'paid')
-        .reduce((sum, c) => sum + c.amount, 0);
-
-    const pendingAmount = charges
-        .filter(c => c.status === 'pending')
-        .reduce((sum, c) => sum + c.amount, 0);
-
-    const totalChargeCount = charges.length;
-
-    const lastCharge = charges
-        .slice()
-        .sort((a, b) => new Date(b.appliedAt) - new Date(a.appliedAt))[0];
-
-    document.getElementById('totalCollected').textContent =
-        `₦${totalCollected.toLocaleString()}`;
-
-    document.getElementById('pendingAmount').textContent =
-        `₦${pendingAmount.toLocaleString()}`;
-
-    document.getElementById('totalChargeCount').textContent =
-        totalChargeCount;
-
-    document.getElementById('lastChargeDate').textContent =
-        lastCharge
-            ? new Date(lastCharge.appliedAt).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-              })
-            : '—';
+function buildKPIs() {
+    const paid = (type) => charges.filter(c => c.chargeType === type && c.status === 'paid').reduce((s, c) => s + c.amount, 0);
+    const wdPenalty = ['forceful-withdrawal','loan-penalty'].reduce((s, t) => s + paid(t), 0);
+    const other = charges.filter(c => !['loan-interest','forceful-withdrawal','loan-penalty','registration'].includes(c.chargeType) && c.status === 'paid').reduce((s, c) => s + c.amount, 0);
+    const total = charges.filter(c => c.status === 'paid').reduce((s, c) => s + c.amount, 0);
+    document.getElementById('heroTotal').textContent       = fmt(total);
+    document.getElementById('kpiLoanInterest').textContent = fmt(paid('loan-interest'));
+    document.getElementById('kpiWdPenalty').textContent    = fmt(wdPenalty);
+    document.getElementById('kpiRegFees').textContent      = fmt(paid('registration'));
+    document.getElementById('kpiOther').textContent        = fmt(other);
+    document.getElementById('kpiLoanCount').textContent    = charges.filter(c => c.chargeType === 'loan-interest').length + ' loans';
+    document.getElementById('kpiWdCount').textContent      = charges.filter(c => ['forceful-withdrawal','loan-penalty'].includes(c.chargeType)).length + ' charges';
+    document.getElementById('kpiRegCount').textContent     = charges.filter(c => c.chargeType === 'registration').length + ' members';
+    document.getElementById('kpiOtherCount').textContent   = charges.filter(c => !['loan-interest','forceful-withdrawal','loan-penalty','registration'].includes(c.chargeType)).length + ' items';
 }
 
-/* ============================
-   RENDER TABLE + PAGINATION
-============================ */
-function renderCharges(data = currentData, page = 1) {
-    currentData = data;
-    currentPage = page;
+function buildStreams() {
+    const total = charges.filter(c => c.status === 'paid').reduce((s, c) => s + c.amount, 0) || 1;
+    const el = document.getElementById('streamsList');
+    el.innerHTML = '';
+    STREAM_CONFIG.forEach(stream => {
+        const amt = charges.filter(c => c.chargeType === stream.key && c.status === 'paid').reduce((s, c) => s + c.amount, 0);
+        if (!amt) return;
+        const pct = Math.round((amt / total) * 100);
+        el.insertAdjacentHTML('beforeend', `
+            <div class="rev-stream">
+                <div class="rev-stream-ico type-pill ${stream.variant}" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;justify-content:center;">
+                    <i class="fas ${stream.icon}"></i>
+                </div>
+                <div class="rev-stream-body">
+                    <div class="rev-stream-name">${stream.label}</div>
+                    <div class="rev-stream-desc">${charges.filter(c => c.chargeType === stream.key).length} records</div>
+                    <div class="rev-stream-bar"><div class="rev-stream-fill" style="width:${pct}%;background:${stream.color};"></div></div>
+                </div>
+                <div class="rev-stream-right">
+                    <div class="rev-stream-amt" style="color:${stream.color};">${fmt(amt)}</div>
+                    <div class="rev-stream-pct">${pct}%</div>
+                </div>
+            </div>`);
+    });
+    if (!el.innerHTML) el.innerHTML = '<div style="text-align:center;padding:2rem;color:#9ca3af;font-size:.85rem;"><i class="fas fa-inbox d-block mb-2" style="font-size:2rem;opacity:.2;"></i>No revenue data available</div>';
+}
 
-    const tbody = document.getElementById('chargesTableBody');
-    tbody.innerHTML = '';
+function buildDonut() {
+    const total = charges.filter(c => c.status === 'paid').reduce((s, c) => s + c.amount, 0);
+    document.getElementById('donutCenter').textContent = total >= 1000000 ? '₦' + (total/1000000).toFixed(1)+'M' : total >= 1000 ? '₦'+Math.round(total/1000)+'K' : fmt(total);
+    const svg = document.getElementById('donutSvg');
+    const legend = document.getElementById('donutLegend');
+    const C = 314; let offset = 0; const used = [];
+    STREAM_CONFIG.forEach(stream => {
+        const amt = charges.filter(c => c.chargeType === stream.key && c.status === 'paid').reduce((s, c) => s + c.amount, 0);
+        if (!amt || !total) return;
+        const arc = (amt / total) * C;
+        const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        ['cx','cy','r'].forEach((a,i)=>circle.setAttribute(a,[60,60,50][i]));
+        circle.setAttribute('fill','none'); circle.setAttribute('stroke',stream.color); circle.setAttribute('stroke-width',14);
+        circle.setAttribute('stroke-dasharray',`${arc} ${C}`); circle.setAttribute('stroke-dashoffset',-offset);
+        circle.setAttribute('transform','rotate(-90 60 60)');
+        svg.appendChild(circle); offset += arc;
+        used.push({ label: stream.label, color: stream.color, pct: Math.round((amt/total)*100) });
+    });
+    legend.innerHTML = used.map(u => `<div class="dleg"><div class="dleg-dot" style="background:${u.color};"></div>${u.label} (${u.pct}%)</div>`).join('');
+}
 
-    const totalItems = data.length;
-    const totalPages = Math.ceil(totalItems / pageSize);
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize;
-    const pageData = data.slice(start, end);
+function buildSummaryTiles() {
+    const get = (s) => charges.filter(c => c.status === s).reduce((sum, c) => sum + c.amount, 0);
+    document.getElementById('sumCollected').textContent = fmt(get('paid'));
+    document.getElementById('sumPending').textContent   = fmt(get('pending'));
+    document.getElementById('sumWaived').textContent    = fmt(get('waived'));
+    document.getElementById('sumCount').textContent     = charges.length;
+}
 
-    if (pageData.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center py-5 text-muted">
-                    No charges found
-                </td>
-            </tr>`;
-        updatePagination(0, 0, 0);
-        return;
+function buildMonthBars() {
+    const now = new Date();
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const total = charges.filter(c => { const cd = new Date(c.appliedAt); return cd.getFullYear()===d.getFullYear() && cd.getMonth()===d.getMonth() && c.status==='paid'; }).reduce((s,c)=>s+c.amount,0);
+        months.push({ label: d.toLocaleDateString('en-US',{month:'short'}), total });
     }
+    const max = Math.max(...months.map(m=>m.total),1);
+    document.getElementById('monthBars').innerHTML = months.map(m => {
+        const h = Math.max(Math.round((m.total/max)*70),4);
+        return `<div class="month-bar-wrap"><div class="month-bar" style="height:${h}px;" title="${m.label}: ${fmt(m.total)}"></div></div>`;
+    }).join('');
+    document.getElementById('monthLabels').innerHTML = months.map(m =>
+        `<div style="flex:1;text-align:center;font-size:.58rem;font-weight:700;color:#94a3b8;">${m.label}</div>`
+    ).join('');
+}
 
-    pageData.forEach(charge => {
-        // Status badge
-        const statusBadge = {
-            paid: '<span class="badge bg-success">Paid</span>',
-            pending: '<span class="badge bg-warning">Pending</span>',
-        }[charge.status] || '<span class="badge bg-secondary">Unknown</span>';
+function buildTopMembers() {
+    const map = {};
+    charges.filter(c=>c.status==='paid').forEach(c=>{ if(!map[c.memberId]) map[c.memberId]={name:c.memberName,id:c.memberId,total:0}; map[c.memberId].total+=c.amount; });
+    const top = Object.values(map).sort((a,b)=>b.total-a.total).slice(0,6);
+    const el  = document.getElementById('topMembersList');
+    if (!top.length) { el.innerHTML='<div style="text-align:center;padding:1.5rem;color:#9ca3af;font-size:.83rem;">No data available</div>'; return; }
+    const medals = ['🥇','🥈','🥉'];
+    el.innerHTML = top.map((m,i)=>`
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid rgba(30,58,138,.05);">
+            <div style="font-size:.85rem;width:22px;text-align:center;">${medals[i]||(i+1)}</div>
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:.65rem;flex-shrink:0;">${m.name.slice(0,2).toUpperCase()}</div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:.82rem;font-weight:700;color:#1f2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m.name}</div>
+                <div style="font-size:.67rem;color:#9ca3af;">${m.id}</div>
+            </div>
+            <div style="font-size:.85rem;font-weight:800;color:var(--primary);">${fmt(m.total)}</div>
+        </div>`).join('');
+}
 
-        // Charge type badge
-        const chargeTypeBadge = {
-            registration: '<span class="badge bg-primary">Registration</span>',
-            'loan-penalty': '<span class="badge bg-danger">Loan Penalty</span>',
-            'forceful-withdrawal': '<span class="badge bg-warning">Forceful Withdrawal</span>',
-            'late-payment': '<span class="badge bg-orange">Late Payment</span>',
-            service: '<span class="badge bg-purple">Service</span>',
-            other: '<span class="badge bg-secondary">Other</span>',
-        }[charge.chargeType?.trim()] || '<span class="badge bg-secondary">Unknown</span>';
-
+function renderCharges(data, page) {
+    currentData = data; currentPage = page;
+    const tbody = document.getElementById('chargesTableBody');
+    const total = data.length; const pages = Math.ceil(total/pageSize);
+    const start = (page-1)*pageSize; const slice = data.slice(start,start+pageSize);
+    tbody.innerHTML = '';
+    if (!slice.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:3rem;color:#9ca3af;"><i class="fas fa-inbox d-block mb-2" style="font-size:2rem;opacity:.2;"></i>No records found</td></tr>'; updatePagination(0,0,0,0); return; }
+    slice.forEach(c => {
+        const date = c.appliedAt ? new Date(c.appliedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
         tbody.insertAdjacentHTML('beforeend', `
             <tr>
-                <td>
-                    <strong>${charge.memberName}</strong><br>
-                    <small class="text-muted">${charge.memberId}</small>
-                </td>
-                <td>${chargeTypeBadge}</td>
-                <td><strong>₦${charge.amount.toLocaleString()}</strong></td>
-                <td>${statusBadge}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary" onclick="viewCharge('${charge.id}')">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </td>
-            </tr>
-        `);
+                <td style="padding-left:1.4rem;"><div style="font-weight:700;font-size:.84rem;color:#1f2937;">${c.memberName}</div><div style="font-size:.7rem;color:#9ca3af;">${c.memberId}</div></td>
+                <td>${TYPE_BADGE_HTML(c.chargeType)}</td>
+                <td style="font-weight:800;font-size:.88rem;color:var(--primary);">${fmt(c.amount)}</td>
+                <td>${STATUS_BADGE_HTML(c.status)}</td>
+                <td style="font-size:.78rem;color:#64748b;">${date}</td>
+                <td style="padding-right:1.4rem;"><button class="btn btn-sm btn-outline-primary" onclick="viewCharge('${c.id}')" style="border-radius:8px;font-size:.8rem;font-weight:600;padding:.3rem .75rem;"><i class="fas fa-eye me-1"></i>View</button></td>
+            </tr>`);
     });
-
-    updatePagination(
-        start + 1,
-        Math.min(end, totalItems),
-        totalItems,
-        totalPages
-    );
+    updatePagination(start+1, Math.min(start+pageSize,total), total, pages);
 }
 
-/* ============================
-   PAGINATION UI
-============================ */
-function updatePagination(from, to, total, totalPages = 1) {
+function updatePagination(from, to, total, pages) {
     const info = document.getElementById('paginationInfo');
-    const controls = document.getElementById('paginationControls');
-
-    info.textContent = total
-        ? `Showing ${from}-${to} of ${total} charges`
-        : 'Showing 0 charges';
-
-    controls.innerHTML = '';
-    if (totalPages <= 1) return;
-
-    // Previous
-    controls.insertAdjacentHTML('beforeend', `
-        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="goToPage(${currentPage - 1})">
-                <i class="fas fa-chevron-left"></i>
-            </a>
-        </li>
-    `);
-
-    // Page numbers
-    for (let i = 1; i <= totalPages; i++) {
-        controls.insertAdjacentHTML('beforeend', `
-            <li class="page-item ${i === currentPage ? 'active' : ''}">
-                <a class="page-link" href="#" onclick="goToPage(${i})">${i}</a>
-            </li>
-        `);
-    }
-
-    // Next
-    controls.insertAdjacentHTML('beforeend', `
-        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="goToPage(${currentPage + 1})">
-                <i class="fas fa-chevron-right"></i>
-            </a>
-        </li>
-    `);
+    const ctrl = document.getElementById('paginationControls');
+    info.textContent = total ? `Showing ${from}–${to} of ${total} records` : 'No records';
+    ctrl.innerHTML = '';
+    if (pages<=1) return;
+    const li = (label,page,disabled,active) => ctrl.insertAdjacentHTML('beforeend',`<li class="page-item ${disabled?'disabled':''} ${active?'active':''}"><a class="page-link" href="#" onclick="goToPage(${page});return false;">${label}</a></li>`);
+    li('<i class="fas fa-chevron-left"></i>',currentPage-1,currentPage===1,false);
+    for(let i=1;i<=pages;i++){ if(pages>7&&i>2&&i<pages-1&&Math.abs(i-currentPage)>1){if(i===3||i===pages-2)ctrl.insertAdjacentHTML('beforeend','<li class="page-item disabled"><a class="page-link">…</a></li>');}else{li(i,i,false,i===currentPage);} }
+    li('<i class="fas fa-chevron-right"></i>',currentPage+1,currentPage===pages,false);
 }
+function goToPage(p){ const pages=Math.ceil(currentData.length/pageSize); if(p<1||p>pages)return; renderCharges(currentData,p); }
 
-function goToPage(page) {
-    const totalPages = Math.ceil(currentData.length / pageSize);
-    if (page < 1 || page > totalPages) return;
-    renderCharges(currentData, page);
-}
-
-/* ============================
-   VIEW MODAL
-============================ */
-function viewCharge(id) {
-    const charge = charges.find(c => c.id === id);
-    if (!charge) return;
-
-    document.getElementById('viewMember').textContent =
-        `${charge.memberName} (${charge.memberId})`;
-
-    document.getElementById('viewChargeType').textContent =
-        charge.chargeType?.replace('-', ' ').toUpperCase() || 'UNKNOWN';
-
-    document.getElementById('viewAmount').textContent =
-        `₦${charge.amount.toLocaleString()}`;
-
-    document.getElementById('viewStatus').innerHTML = {
-        paid: '<span class="badge bg-success">Paid</span>',
-        pending: '<span class="badge bg-warning">Pending</span>',
-    }[charge.status] || '<span class="badge bg-secondary">Unknown</span>';
-
-    document.getElementById('viewDate').textContent = charge.appliedAt;
-    document.getElementById('viewReason').textContent = charge.reason || '—';
-
-    openModal('viewChargeModal');
-}
-
-/* ============================
-   FILTERS
-============================ */
-document.getElementById('searchInput').addEventListener('input', applyFilters);
-document.getElementById('statusFilter').addEventListener('change', applyFilters);
-document.getElementById('typeFilter').addEventListener('change', applyFilters);
-document.getElementById('dateFilter').addEventListener('change', applyFilters);
-
+['searchInput','statusFilter','typeFilter','dateFilter'].forEach(id => {
+    document.getElementById(id).addEventListener(id==='searchInput'?'input':'change', applyFilters);
+});
 function applyFilters() {
-    let filtered = [...charges];
-
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const status = document.getElementById('statusFilter').value;
+    let f = [...charges];
+    const srch = document.getElementById('searchInput').value.toLowerCase();
+    const stat = document.getElementById('statusFilter').value;
     const type = document.getElementById('typeFilter').value;
-    const dateRange = document.getElementById('dateFilter').value;
+    const dt   = document.getElementById('dateFilter').value;
+    if(srch) f=f.filter(c=>(c.memberName+c.memberId+(c.reason||'')).toLowerCase().includes(srch));
+    if(stat) f=f.filter(c=>c.status===stat);
+    if(type) f=f.filter(c=>c.chargeType===type);
+    if(dt){ const now=new Date(); f=f.filter(c=>{ const d=new Date(c.appliedAt); if(dt==='today')return d.toDateString()===now.toDateString(); if(dt==='week')return d>=new Date(now-7*86400000); if(dt==='month')return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); if(dt==='year')return d.getFullYear()===now.getFullYear(); return true; }); }
+    renderCharges(f,1);
+}
+function resetFilters(){ ['searchInput','statusFilter','typeFilter','dateFilter'].forEach(id=>document.getElementById(id).value=''); renderCharges(charges,1); }
 
-    if (search) {
-        filtered = filtered.filter(c =>
-            c.memberName.toLowerCase().includes(search) ||
-            c.memberId.toLowerCase().includes(search) ||
-            (c.reason || '').toLowerCase().includes(search)
-        );
-    }
-
-    if (status) filtered = filtered.filter(c => c.status === status);
-    if (type) filtered = filtered.filter(c => c.chargeType === type);
-
-    if (dateRange) {
-        const now = new Date();
-        filtered = filtered.filter(c => {
-            const d = new Date(c.appliedAt);
-            if (dateRange === 'today') return d.toDateString() === now.toDateString();
-            if (dateRange === 'week') return d >= new Date(now - 7 * 86400000);
-            if (dateRange === 'month') return d.getMonth() === now.getMonth();
-            if (dateRange === 'year') return d.getFullYear() === now.getFullYear();
-            return true;
-        });
-    }
-
-    currentPage = 1;
-    renderCharges(filtered, 1);
+function viewCharge(id) {
+    const c=charges.find(x=>x.id===id); if(!c)return;
+    document.getElementById('viewMember').textContent   = c.memberName;
+    document.getElementById('viewMemberId').textContent = c.memberId;
+    document.getElementById('viewChargeType').innerHTML = TYPE_BADGE_HTML(c.chargeType);
+    document.getElementById('viewAmount').textContent   = fmt(c.amount);
+    document.getElementById('viewStatus').innerHTML     = STATUS_BADGE_HTML(c.status);
+    document.getElementById('viewDate').textContent     = c.appliedAt ? new Date(c.appliedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—';
+    document.getElementById('viewReason').textContent   = c.reason || '—';
+    new bootstrap.Modal(document.getElementById('viewChargeModal')).show();
 }
 
-/* ============================
-   MODAL HELPER
-============================ */
-function openModal(id) {
-    new bootstrap.Modal(document.getElementById(id)).show();
+function exportRevenue() {
+    const rows=[['Member','Member ID','Type','Amount','Status','Date','Reason']];
+    charges.forEach(c=>rows.push([c.memberName,c.memberId,c.chargeType,c.amount,c.status,c.appliedAt,c.reason||'']));
+    const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+    const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+    a.download='company-revenue-'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
 }
+
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('active'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); }
+
+async function loadSidebarPendingCount(){
+    try{ const res=await fetch('/admin/pending-approvals-count'); const data=await res.json(); const badge=document.getElementById('sidebarPendingBadge'); if(!badge)return; if(data.count>0){badge.style.display='inline-block';badge.textContent=data.count;}else badge.style.display='none'; }catch(e){ console.error('Sidebar count error:',e); }
+}
+document.addEventListener('DOMContentLoaded',loadSidebarPendingCount);
 </script>
-
-<script>
-async function loadSidebarPendingCount() {
-  try {
-    console.log("Loading sidebar approval count...");
-
-    const res = await fetch('/admin/pending-approvals-count');
-    const data = await res.json();
-
-    console.log("Pending approvals count:", data);
-
-    const badge = document.getElementById('sidebarPendingBadge');
-
-    if (!badge) {
-      console.log("Sidebar badge not found on page");
-      return;
-    }
-
-    if (data.count > 0) {
-      badge.style.display = 'inline-block';
-      badge.textContent = data.count;
-    } else {
-      badge.style.display = 'none';
-    }
-
-  } catch (err) {
-    console.error("Sidebar count error:", err);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", loadSidebarPendingCount);
-</script>
-
 </body>
 </html>

@@ -8,664 +8,337 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #1e3a8a;
-            --primary-dark: #1e40af;
+            --primary:       #1e3a8a;
+            --primary-dark:  #1e40af;
             --primary-light: #3b82f6;
-            --secondary: #64748b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #06b6d4;
+            --secondary:     #64748b;
+            --success:       #10b981;
+            --danger:        #ef4444;
+            --warning:       #f59e0b;
+            --info:          #06b6d4;
             --sidebar-width: 280px;
+            --navbar-h:      70px;
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
             min-height: 100vh;
             overflow-x: hidden;
         }
-        
+
+        /* ══════════ SIDEBAR ══════════ */
         .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
+            position: fixed; left: 0; top: 0; bottom: 0;
             width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            z-index: 1040;
-            transition: all 0.3s;
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
-            transform: translateX(0);
+            background: linear-gradient(180deg, #0f2357 0%, #1e3a8a 40%, #1e40af 100%);
+            z-index: 1040; overflow-y: auto;
+            transition: transform .3s ease;
+            box-shadow: 4px 0 24px rgba(30,58,138,.25);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,.15) transparent;
         }
-        
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+
         .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
+            padding: 1.4rem 1.25rem 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            background: rgba(0,0,0,.18);
+            position: sticky; top: 0; z-index: 2;
         }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        
+        .logo-row { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
         .logo-box {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            flex-shrink: 0;
+            width: 42px; height: 42px; background: white; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: var(--primary); font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,.25); flex-shrink: 0;
         }
-        
-        .sidebar-title {
-            font-size: 1.1rem;
-            line-height: 1.2;
+        .sidebar-brand { font-size: .95rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: .05em; line-height: 1.2; }
+        .sidebar-brand small { font-size: .65rem; font-weight: 500; opacity: .55; display: block; letter-spacing: .08em; }
+        .role-pill {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 4px 10px; background: rgba(239,68,68,.2);
+            border-radius: 20px; border: 1px solid rgba(239,68,68,.3);
+            font-weight: 700; font-size: .7rem; color: #fca5a5;
         }
-        
-        .admin-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            background: rgba(239, 68, 68, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            font-weight: 600;
-            font-size: 0.8rem;
-            margin-top: 8px;
+
+        /* ── Category groups ── */
+        .nav-group { padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .nav-group:last-child { border-bottom: none; }
+        .nav-category {
+            display: flex; align-items: center; gap: 7px;
+            padding: .55rem 1.25rem .3rem;
+            font-size: .62rem; font-weight: 800;
+            color: rgba(255,255,255,.38);
+            text-transform: uppercase; letter-spacing: .1em;
+            user-select: none;
         }
-        
-        .sidebar-menu {
-            padding: 1rem 0;
+        .nav-category::after {
+            content: ''; flex: 1; height: 1px;
+            background: rgba(255,255,255,.08); margin-left: 4px;
         }
-        
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            padding: 0.875rem 1.5rem;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-            font-weight: 500;
-            font-size: 0.95rem;
+
+        /* ── Nav links ── */
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 11px;
+            padding: .62rem 1.25rem; color: rgba(255,255,255,.72);
+            text-decoration: none; font-weight: 500; font-size: .84rem;
+            border-left: 3px solid transparent; transition: all .18s;
         }
-        
-        .sidebar-menu a:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left-color: white;
+        .sidebar-nav a:hover  { background: rgba(255,255,255,.09); color: white; border-left-color: rgba(255,255,255,.4); }
+        .sidebar-nav a.active { background: rgba(255,255,255,.15); color: white; border-left-color: white; }
+        .sidebar-nav a i { width: 18px; font-size: .9rem; flex-shrink: 0; opacity: .8; text-align: center; }
+        .sidebar-nav a.active i { opacity: 1; }
+        .nav-badge {
+            margin-left: auto; font-size: .63rem; font-weight: 800;
+            padding: 2px 7px; border-radius: 10px;
+            background: rgba(239,68,68,.9); color: white; flex-shrink: 0; line-height: 1.4;
         }
-        
-        .sidebar-menu a.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left-color: white;
+        .nav-back {
+            display: flex; align-items: center; gap: 10px;
+            padding: .7rem 1.25rem .9rem; font-size: .8rem; font-weight: 600;
+            color: rgba(255,255,255,.42); text-decoration: none;
+            transition: color .18s; border-top: 1px solid rgba(255,255,255,.07); margin-top: .25rem;
         }
-        
-        .sidebar-menu a i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-        
+        .nav-back:hover { color: rgba(255,255,255,.7); }
+
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1035; }
+        .sidebar-overlay.active { display: block; }
+
+        /* ══════════ NAVBAR ══════════ */
         .top-navbar {
-            position: fixed;
-            top: 0;
-            left: var(--sidebar-width);
-            right: 0;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.95);
+            position: fixed; top: 0;
+            left: var(--sidebar-width); right: 0;
+            height: var(--navbar-h);
+            background: rgba(255,255,255,.97);
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
+            box-shadow: 0 4px 15px rgba(30,58,138,.08);
             z-index: 1030;
-            display: flex;
-            align-items: center;
+            display: flex; align-items: center;
             padding: 0 1.5rem;
-            transition: all 0.3s;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+            border-bottom: 1px solid rgba(30,58,138,.1);
         }
-        
+
+        /* ══════════ MAIN ══════════ */
         .main-content {
             margin-left: var(--sidebar-width);
-            margin-top: 70px;
+            margin-top: var(--navbar-h);
             padding: 1.5rem;
-            min-height: calc(100vh - 70px);
-            transition: all 0.3s;
+            min-height: calc(100vh - var(--navbar-h));
         }
-        
+
+        /* ══════════ WELCOME / HERO ══════════ */
         .welcome-card {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
-            position: relative;
-            overflow: hidden;
+            background: linear-gradient(130deg, #1e3a8a 0%, #1e40af 45%, #3b82f6 100%);
+            color: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem;
+            box-shadow: 0 10px 36px rgba(30,58,138,.28);
+            position: relative; overflow: hidden;
         }
-        
         .welcome-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 400px;
-            height: 400px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50%;
+            content: ''; position: absolute; top: -50%; right: -20%;
+            width: 400px; height: 400px;
+            background: rgba(255,255,255,.05); border-radius: 50%; pointer-events: none;
         }
-        
+
+        /* ══════════ STAT CARDS ══════════ */
         .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-            height: 100%;
-            border: 1px solid rgba(30, 58, 138, 0.05);
+            background: white; border-radius: 16px; padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30,58,138,.08);
+            transition: transform .3s, box-shadow .3s;
+            height: 100%; border: 1px solid rgba(30,58,138,.05);
         }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
-        }
-        
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            margin-bottom: 1rem;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            background: white;
-            border: 1px solid rgba(30, 58, 138, 0.05);
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
-            padding: 1.25rem;
-            border-radius: 16px 16px 0 0 !important;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none;
-            padding: 0.6rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
-        }
-        
-        .table {
-            font-size: 0.9rem;
-        }
-        
-        .table th {
-            font-weight: 600;
-            color: var(--primary);
-            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
-            white-space: nowrap;
-        }
-        
-        .badge {
-            padding: 0.4rem 0.8rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
-        
-        .powered-by {
-            position: fixed;
-            bottom: 15px;
-            right: 15px;
-            background: white;
-            padding: 10px 16px;
-            border-radius: 25px;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--primary);
-            z-index: 1000;
-        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(30,58,138,.15); }
+        .stat-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1rem; }
 
+        /* ══════════ GENERAL CARDS ══════════ */
+        .card { border: none; border-radius: 16px; box-shadow: 0 8px 20px rgba(30,58,138,.08); background: white; border: 1px solid rgba(30,58,138,.05); }
+        .card-header { background: linear-gradient(135deg, rgba(30,58,138,.03) 0%, rgba(59,130,246,.03) 100%); border-bottom: 2px solid rgba(30,58,138,.1); padding: 1.25rem; border-radius: 16px 16px 0 0 !important; }
+
+        /* ══════════ BUTTONS ══════════ */
+        .btn-primary { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border: none; padding: .6rem 1.5rem; border-radius: 10px; font-weight: 600; transition: all .3s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(30,58,138,.3); }
+        .btn-sm { padding: .4rem 1rem; font-size: .85rem; border-radius: 8px; }
+        .btn-outline-primary { border: 2px solid var(--primary); color: var(--primary); background: transparent; font-weight: 600; transition: all .3s; border-radius: 10px; }
+        .btn-outline-primary:hover { background: var(--primary); color: white; transform: translateY(-2px); }
+        .btn-outline-danger { border: 2px solid var(--danger); color: var(--danger); background: transparent; font-weight: 600; transition: all .3s; border-radius: 10px; }
+        .btn-outline-danger:hover { background: var(--danger); color: white; transform: translateY(-2px); }
+
+        /* ══════════ TABLE ══════════ */
+        .table { font-size: .9rem; }
+        .table th { font-weight: 600; color: var(--primary); border-bottom: 2px solid rgba(30,58,138,.1); white-space: nowrap; }
+        .badge { padding: .4rem .8rem; border-radius: 8px; font-weight: 600; font-size: .75rem; }
+
+        /* ══════════ MEMBERSHIP CARDS ══════════ */
         .membership-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-            height: 100%;
-            border: 2px solid rgba(30, 58, 138, 0.05);
-            position: relative;
-            overflow: hidden;
+            background: white; border-radius: 16px; padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30,58,138,.08);
+            transition: transform .3s, box-shadow .3s;
+            height: 100%; border: 2px solid rgba(30,58,138,.05);
+            position: relative; overflow: hidden;
         }
-
-        .membership-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
-        }
-
+        .membership-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(30,58,138,.15); }
         .membership-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
         }
+        .membership-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; }
+        .membership-title { font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: .25rem; }
+        .membership-features { list-style: none; padding: 0; margin: 1rem 0; }
+        .membership-features li { padding: .5rem 0; color: #64748b; display: flex; align-items: center; gap: .5rem; }
+        .membership-features li i { color: var(--success); font-size: .85rem; }
+        .membership-actions { display: flex; gap: .5rem; margin-top: 1rem; }
 
-        .membership-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 1rem;
-        }
-
-        .membership-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .membership-price {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .membership-features {
-            list-style: none;
-            padding: 0;
-            margin: 1rem 0;
-        }
-
-        .membership-features li {
-            padding: 0.5rem 0;
-            color: #64748b;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .membership-features li i {
-            color: var(--success);
-            font-size: 0.85rem;
-        }
-
-        .membership-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .btn-sm {
-            padding: 0.4rem 1rem;
-            font-size: 0.85rem;
-            border-radius: 8px;
-        }
-
-        .btn-outline-primary {
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            background: transparent;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-outline-primary:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .btn-outline-danger {
-            border: 2px solid var(--danger);
-            color: var(--danger);
-            background: transparent;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-outline-danger:hover {
-            background: var(--danger);
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .top-navbar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 1rem;
-            }
-            
-            .welcome-card {
-                padding: 1.5rem;
-            }
-            
-            .stat-card {
-                padding: 1.25rem;
-            }
-            
-            .powered-by {
-                bottom: 10px;
-                right: 10px;
-                font-size: 0.7rem;
-                padding: 8px 12px;
-            }
-            
-            .table-responsive {
-                font-size: 0.85rem;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .top-navbar {
-                height: 60px;
-                padding: 0 1rem;
-            }
-            
-            .main-content {
-                margin-top: 60px;
-                padding: 0.75rem;
-            }
-            
-            .welcome-card {
-                padding: 1.25rem;
-                border-radius: 16px;
-            }
-            
-            .stat-card {
-                padding: 1rem;
-            }
-            
-            .stat-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.4rem;
-            }
-            
-            .card-header {
-                padding: 1rem;
-            }
-            
-            .sidebar-header {
-                padding: 1.25rem;
-            }
-            
-            .logo-box {
-                width: 40px;
-                height: 40px;
-                font-size: 1.25rem;
-            }
-            
-            .sidebar-title {
-                font-size: 1rem;
-            }
-
-            .membership-card {
-                padding: 1.25rem;
-            }
-
-            .membership-price {
-                font-size: 1.5rem;
-            }
-
-            .membership-actions {
-                flex-direction: column;
-            }
-
-            .membership-actions button {
-                width: 100%;
-            }
-        }
-        
-        .modal-content {
-            border-radius: 16px;
-        }
-        
-        .modal-header {
-            border-radius: 16px 16px 0 0;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-        }
-
-        .modal-header .btn-close {
-            filter: invert(1);
-        }
-
-        .loading-spinner {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .loading-spinner.active {
-            display: flex;
-        }
-
-        .content-section {
-            animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.15);
-        }
-
+        /* ══════════ FORM CONTROLS ══════════ */
+        .form-label { font-weight: 600; color: var(--primary); margin-bottom: .5rem; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 .2rem rgba(30,58,138,.15); }
         .settings-section {
-            background: #f8f9fa;
-            padding: 1.25rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            border-left: 4px solid var(--primary);
+            background: #f8f9fa; padding: 1.25rem; border-radius: 12px;
+            margin-bottom: 1.5rem; border-left: 4px solid var(--primary);
         }
+        .settings-section h6 { color: var(--primary); font-weight: 700; margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: .5rem; }
+        .input-group-text { background: var(--primary); color: white; border: none; font-weight: 600; }
+        .form-text { font-size: .8rem; color: #6c757d; }
 
-        .settings-section h6 {
-            color: var(--primary);
-            font-weight: 700;
-            margin-bottom: 1rem;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .input-group-text {
-            background: var(--primary);
-            color: white;
-            border: none;
-            font-weight: 600;
-        }
-
-        .form-text {
-            font-size: 0.8rem;
-            color: #6c757d;
-        }
-
-        /* ── Notification Modal ── */
-        #notifModal .modal-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        }
+        /* ══════════ MODALS ══════════ */
+        .modal-content { border-radius: 16px; border: none; }
+        .modal-header { border-radius: 16px 16px 0 0; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; border: none; }
+        .modal-header .btn-close { filter: invert(1); }
         #notifModal .modal-header.success-header { background: linear-gradient(135deg, #065f46 0%, #10b981 100%); }
         #notifModal .modal-header.danger-header  { background: linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%); }
         #notifModal .modal-header.warning-header { background: linear-gradient(135deg, #78350f 0%, #f59e0b 100%); }
+        #confirmDeleteModal .modal-header { background: linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%); }
 
-        .notif-icon-wrap {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            margin: 0 auto 1rem;
-        }
+        .notif-icon-wrap { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 1rem; }
         .notif-icon-wrap.success { background: rgba(16,185,129,.12); color: #10b981; }
         .notif-icon-wrap.danger  { background: rgba(239,68,68,.12);  color: #ef4444; }
         .notif-icon-wrap.warning { background: rgba(245,158,11,.12); color: #f59e0b; }
         .notif-icon-wrap.info    { background: rgba(6,182,212,.12);  color: #06b6d4; }
 
-        /* ── Confirm Delete Modal ── */
-        #confirmDeleteModal .modal-header {
-            background: linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%);
-        }
+        /* ══════════ LOADING ══════════ */
+        .loading-spinner { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.5); z-index: 9999; justify-content: center; align-items: center; }
+        .loading-spinner.active { display: flex; }
 
-        #sidebar { transform: translateX(0); }
-        .sidebar-overlay { display: none; }
+        /* ══════════ ANIMATIONS ══════════ */
+        .content-section { animation: fadeIn .5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* ══════════ POWERED BY ══════════ */
+        .powered-by { position: fixed; bottom: 15px; right: 15px; background: white; padding: 10px 16px; border-radius: 25px; box-shadow: 0 4px 15px rgba(30,58,138,.15); font-size: .8rem; font-weight: 600; color: var(--primary); z-index: 1000; }
+
+        /* ══════════ RESPONSIVE ══════════ */
         @media (max-width: 992px) {
-            #sidebar {
-                transform: translateX(-100%);
-                position: fixed;
-                z-index: 1040;
-                height: 100vh;
-            }
-            #sidebar.active { transform: translateX(0); }
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                top: 0; left: 0;
-                width: 100%; height: 100vh;
-                background: rgba(0,0,0,0.4);
-                z-index: 1035;
-            }
-            .sidebar-overlay.active { display: block; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
             .top-navbar { left: 0 !important; }
-            .main-content { margin-left: 0 !important; }
+            .main-content { margin-left: 0 !important; padding: 1rem; }
+        }
+        @media (max-width: 576px) {
+            :root { --navbar-h: 60px; }
+            .main-content { padding: .75rem; }
+            .welcome-card { padding: 1.25rem; border-radius: 16px; }
+            .stat-card { padding: 1rem; }
+            .stat-icon { width: 50px; height: 50px; font-size: 1.4rem; }
+            .membership-card { padding: 1.25rem; }
+            .membership-actions { flex-direction: column; }
+            .membership-actions button { width: 100%; }
         }
     </style>
 </head>
 <body>
+
     <!-- Loading Spinner -->
     <div class="loading-spinner" id="loadingSpinner">
-        <div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status">
+        <div class="spinner-border text-light" style="width:3rem;height:3rem;" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
 
-    <!-- Sidebar -->
+    <!-- ════════════════════════ SIDEBAR ════════════════════════ -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="logo-container">
+            <div class="logo-row">
                 <div class="logo-box">C</div>
                 <div>
-                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
-                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                    <div class="sidebar-brand">Club De Stars<small>Admin Panel</small></div>
                 </div>
             </div>
-            <div class="admin-badge">
-                <i class="fas fa-shield-alt"></i>
-                <span>Super Admin</span>
-            </div>
+            <div class="role-pill"><i class="fas fa-shield-alt" style="font-size:.65rem;"></i>&nbsp;Super Admin</div>
         </div>
-      <div class="sidebar-menu">
-            <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
-            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
-            <a href="/admin/manage/memberType" class="active"><i class="fas fa-id-card"></i> Membership Types</a>
-            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
-            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
-            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
-            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
-            <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
-            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
-            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
-            <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
-            <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
-            <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
-            <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
-            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
-            <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
-            <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-            <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
-            <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
+
+        <div class="sidebar-nav">
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-home" style="font-size:.6rem;"></i>Main</div>
+            <a href="/admin/dashboard"><i class="fas fa-chart-pie"></i>Overview</a>
         </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-users" style="font-size:.6rem;"></i>Members</div>
+            <a href="/admin/manage-members"><i class="fas fa-users"></i>Manage Members</a>
+            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i>Kiddies Accounts</a>
+            <a href="/admin/manage/memberType" class='active'><i class="fas fa-id-card"></i>Membership Types</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-hand-holding-usd" style="font-size:.6rem;"></i>Loans</div>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i>Loan Management</a>
+            <a href="/admin/loan-payments"><i class="fas fa-file-invoice-dollar"></i>Loan Payments</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i>Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i>External Loans</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-landmark" style="font-size:.6rem;"></i>Finance</div>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i>Company Finance</a>
+            <a href="/admin/operating-earnings"><i class="fas fa-chart-line"></i>Operating Earnings</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-chart-bar"></i>Company Revenue</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-cog" style="font-size:.6rem;"></i>System</div>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i>Manage Subscriptions</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i>Roles &amp; Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i>Settings</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-file-alt" style="font-size:.6rem;"></i>Reporting</div>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i>Reports</a>
+            <a href="/admin/logs"><i class="fas fa-history"></i>Admin Logs</a>
+        </div>
+    </div>
+
+        <a href="/cds-cooperative/dashboard" class="nav-back"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
     </div>
 
     <!-- Top Navbar -->
     <div class="top-navbar">
-        <i class="fas fa-bars d-lg-none me-3"
-           style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-           onclick="toggleSidebar()"></i>
+        <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.5rem;" onclick="toggleSidebar()"></i>
         <div class="flex-grow-1 d-none d-lg-block">
-            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Membership Type Management</h5>
+            <h5 class="mb-0 fw-bold" style="color:var(--primary)">Membership Type Management</h5>
             <small class="text-muted">Create and manage membership tiers and benefits</small>
         </div>
+        <div class="d-lg-none"><span class="fw-bold" style="color:var(--primary);font-size:.95rem;">Membership Types</span></div>
     </div>
+
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
 
     <!-- Main Content -->
     <div class="main-content">
         <div class="welcome-card position-relative">
-            <div class="row align-items-center position-relative" style="z-index: 1;">
+            <div class="row align-items-center position-relative" style="z-index:1;">
                 <div class="col-md-8">
                     <h2 class="mb-2 fw-bold">Membership Type Management</h2>
                     <p class="mb-0 opacity-90">Define membership tiers, pricing, and financial rules for your cooperative</p>
@@ -682,36 +355,28 @@
         <div class="row g-3 mb-4">
             <div class="col-lg-3 col-md-6 col-6">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
-                        <i class="fas fa-layer-group"></i>
-                    </div>
+                    <div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;"><i class="fas fa-layer-group"></i></div>
                     <p class="text-muted mb-1 fw-semibold small">Total Types</p>
                     <h3 class="mb-0 fw-bold" id="totalTypes">0</h3>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 col-6">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
+                    <div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:white;"><i class="fas fa-check-circle"></i></div>
                     <p class="text-muted mb-1 fw-semibold small">Active</p>
                     <h3 class="mb-0 fw-bold" id="activeTypes">0</h3>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 col-6">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
-                        <i class="fas fa-users"></i>
-                    </div>
+                    <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;"><i class="fas fa-users"></i></div>
                     <p class="text-muted mb-1 fw-semibold small">Members</p>
                     <h3 class="mb-0 fw-bold" id="totalMembers">0</h3>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 col-6">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
-                        <i class="fas fa-percent"></i>
-                    </div>
+                    <div class="stat-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:white;"><i class="fas fa-percent"></i></div>
                     <p class="text-muted mb-1 fw-semibold small">Avg. Interest</p>
                     <h3 class="mb-0 fw-bold" id="avgInterest">0%</h3>
                 </div>
@@ -722,15 +387,10 @@
         <div class="row g-4" id="membershipGrid"></div>
     </div>
 
-    <!-- Powered By Footer -->
-    <div class="powered-by">
-        Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
-    </div>
+    <div class="powered-by">Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong></div>
 
 
-    <!-- ══════════════════════════════════════════════
-         NOTIFICATION MODAL (replaces all alert())
-    ══════════════════════════════════════════════ -->
+    <!-- NOTIFICATION MODAL -->
     <div class="modal fade" id="notifModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
@@ -742,9 +402,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-center py-4">
-                    <div class="notif-icon-wrap" id="notifIconWrap">
-                        <i id="notifBodyIcon" class="fas fa-info-circle"></i>
-                    </div>
+                    <div class="notif-icon-wrap" id="notifIconWrap"><i id="notifBodyIcon" class="fas fa-info-circle"></i></div>
                     <p id="notifMessage" class="mb-0 fs-6"></p>
                 </div>
                 <div class="modal-footer justify-content-center">
@@ -754,47 +412,33 @@
         </div>
     </div>
 
-
-    <!-- ══════════════════════════════════════════════
-         CONFIRM DELETE MODAL
-    ══════════════════════════════════════════════ -->
+    <!-- CONFIRM DELETE MODAL -->
     <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
-                    <h5 class="modal-title text-white">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
-                    </h5>
+                    <h5 class="modal-title text-white"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-center py-4">
-                    <div class="notif-icon-wrap danger">
-                        <i class="fas fa-trash-alt"></i>
-                    </div>
+                    <div class="notif-icon-wrap danger"><i class="fas fa-trash-alt"></i></div>
                     <p class="mb-1 fs-6 fw-semibold">Are you sure you want to delete this membership type?</p>
                     <p class="text-muted small mb-0">This action cannot be undone.</p>
                 </div>
                 <div class="modal-footer justify-content-center gap-2">
                     <button class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-danger px-4" id="confirmDeleteBtn">
-                        <i class="fas fa-trash me-1"></i>Delete
-                    </button>
+                    <button class="btn btn-danger px-4" id="confirmDeleteBtn"><i class="fas fa-trash me-1"></i>Delete</button>
                 </div>
             </div>
         </div>
     </div>
 
-
-    <!-- ══════════════════════════════════════════════
-         UNAUTHORIZED ACCESS MODAL
-    ══════════════════════════════════════════════ -->
+    <!-- UNAUTHORIZED MODAL -->
     <div class="modal fade" id="unauthorizedModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">
-                        <i class="fas fa-shield-alt me-2"></i>Unauthorized Action
-                    </h5>
+                    <h5 class="modal-title"><i class="fas fa-shield-alt me-2"></i>Unauthorized Action</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-center py-4">
@@ -808,14 +452,13 @@
         </div>
     </div>
 
-
-    <!-- Add/Edit Membership Type Modal -->
+    <!-- ADD/EDIT MEMBERSHIP TYPE MODAL -->
     <div class="modal fade" id="membershipModal" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitle"><i class="fas fa-plus-circle me-2"></i>Add Membership Type</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="membershipForm">
@@ -894,7 +537,7 @@
                                     <label for="loanPenaltyRate" class="form-label">Loan Penalty Rate</label>
                                     <div class="input-group">
                                         <input type="number" class="form-control" id="loanPenaltyRate" placeholder="0" min="0" max="100" step="0.1" value="0">
-                                        <select class="form-select" id="loanPenaltyType" style="max-width: 120px;">
+                                        <select class="form-select" id="loanPenaltyType" style="max-width:120px;">
                                             <option value="percentage">%</option>
                                             <option value="fixed">₦</option>
                                         </select>
@@ -932,7 +575,7 @@
 
                         <!-- ROI/Dividend Settings -->
                         <div class="settings-section">
-                            <h6><i class="fas fa-chart-line me-2"></i>ROI & Dividend Settings</h6>
+                            <h6><i class="fas fa-chart-line me-2"></i>ROI &amp; Dividend Settings</h6>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="roiDistributionFrequency" class="form-label">Distribution Frequency</label>
@@ -963,51 +606,36 @@
         </div>
     </div>
 
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
-        // MemberTypes will come from backend EJS
         let membershipTypes = <%- JSON.stringify(memberTypes) %>;
         let editingId = null;
-        let membershipModal;
-        let notifModal;
-        let confirmDeleteModal;
-        let unauthorizedModal;
-        let pendingDeleteId = null;   // stores ID awaiting confirmation
+        let membershipModal, notifModal, confirmDeleteModal, unauthorizedModal;
+        let pendingDeleteId = null;
 
         document.addEventListener('DOMContentLoaded', function () {
-            membershipModal   = new bootstrap.Modal(document.getElementById('membershipModal'));
-            notifModal        = new bootstrap.Modal(document.getElementById('notifModal'));
+            membershipModal    = new bootstrap.Modal(document.getElementById('membershipModal'));
+            notifModal         = new bootstrap.Modal(document.getElementById('notifModal'));
             confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-            unauthorizedModal = new bootstrap.Modal(document.getElementById('unauthorizedModal'));
+            unauthorizedModal  = new bootstrap.Modal(document.getElementById('unauthorizedModal'));
 
-            // Wire up the confirm-delete button
             document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
                 confirmDeleteModal.hide();
-                if (pendingDeleteId) {
-                    executeDelete(pendingDeleteId);
-                    pendingDeleteId = null;
-                }
+                if (pendingDeleteId) { executeDelete(pendingDeleteId); pendingDeleteId = null; }
             });
 
             loadMembershipTypes();
             updateStats();
         });
 
-
-        /* ═══════════════════════════════════════════════
-           NOTIFICATION HELPER  –  replaces all alert()
-           type: 'success' | 'danger' | 'warning' | 'info'
-           onClose (optional): callback after OK
-        ═══════════════════════════════════════════════ */
+        /* ── Notification helper ── */
         function showNotif(message, type = 'info', onClose = null) {
             const config = {
-                success: { headerClass: 'success-header', iconClass: 'success', icon: 'fa-check-circle',  titleIcon: 'fa-check-circle',  title: 'Success'  },
-                danger:  { headerClass: 'danger-header',  iconClass: 'danger',  icon: 'fa-times-circle',  titleIcon: 'fa-times-circle',  title: 'Error'    },
-                warning: { headerClass: 'warning-header', iconClass: 'warning', icon: 'fa-exclamation-triangle', titleIcon: 'fa-exclamation-triangle', title: 'Warning' },
-                info:    { headerClass: '',               iconClass: 'info',    icon: 'fa-info-circle',   titleIcon: 'fa-info-circle',   title: 'Info'     },
+                success: { headerClass:'success-header', iconClass:'success', icon:'fa-check-circle',        titleIcon:'fa-check-circle',        title:'Success'  },
+                danger:  { headerClass:'danger-header',  iconClass:'danger',  icon:'fa-times-circle',        titleIcon:'fa-times-circle',        title:'Error'    },
+                warning: { headerClass:'warning-header', iconClass:'warning', icon:'fa-exclamation-triangle',titleIcon:'fa-exclamation-triangle',title:'Warning'  },
+                info:    { headerClass:'',               iconClass:'info',    icon:'fa-info-circle',         titleIcon:'fa-info-circle',         title:'Info'     },
             };
-
             const c = config[type] || config.info;
             const header    = document.getElementById('notifModalHeader');
             const titleIcon = document.getElementById('notifModalTitleIcon');
@@ -1017,59 +645,41 @@
             const msgEl     = document.getElementById('notifMessage');
             const okBtn     = document.getElementById('notifOkBtn');
 
-            // Reset header classes
             header.className = 'modal-header';
             if (c.headerClass) header.classList.add(c.headerClass);
-
             titleIcon.className = `fas ${c.titleIcon} me-2`;
             titleText.textContent = c.title;
-
             iconWrap.className = `notif-icon-wrap ${c.iconClass}`;
             bodyIcon.className = `fas ${c.icon}`;
-
             msgEl.textContent = message;
 
-            // Remove old listener, add new one
             const newBtn = okBtn.cloneNode(true);
             okBtn.parentNode.replaceChild(newBtn, okBtn);
-            if (onClose) {
-                newBtn.addEventListener('click', onClose, { once: true });
-            }
+            if (onClose) newBtn.addEventListener('click', onClose, { once: true });
 
             notifModal.show();
         }
 
-
-        /* ═══════════════════════════════════════════
-           UNAUTHORIZED HELPER
-        ═══════════════════════════════════════════ */
+        /* ── Unauthorized helper ── */
         function showUnauthorized(reason = 'permission') {
-            const messageMap = {
-                auth:       'Your session has expired. Please login again.',
-                permission: "You don't have permission to perform this action.",
-                inactive:   'Your admin role is currently inactive.',
-                norole:     'No role is assigned to your account.',
-                member:     'Members are not allowed to access admin actions.',
-            };
-            document.getElementById('unauthorizedMessage').innerText =
-                messageMap[reason] || 'Unauthorized action.';
+            const messageMap = { auth:'Your session has expired. Please login again.', permission:"You don't have permission to perform this action.", inactive:'Your admin role is currently inactive.', norole:'No role is assigned to your account.', member:'Members are not allowed to access admin actions.' };
+            document.getElementById('unauthorizedMessage').innerText = messageMap[reason] || 'Unauthorized action.';
             unauthorizedModal.show();
         }
 
-
-        /* ═══════════════════════════════════════════
-           CARD RENDERING
-        ═══════════════════════════════════════════ */
+        /* ── Card rendering ── */
         function loadMembershipTypes() {
             const grid = document.getElementById('membershipGrid');
             grid.innerHTML = '';
 
-            membershipTypes.forEach(type => {
-                const defaultBadge = type.isDefault
-                    ? `<span class="badge bg-warning text-dark ms-2">Default</span>`
-                    : '';
+            if (!membershipTypes.length) {
+                grid.innerHTML = `<div class="col-12"><div class="text-center py-5"><i class="fas fa-layer-group fa-3x text-muted mb-3 d-block" style="opacity:.2;"></i><p class="text-muted">No membership types yet. Click "Add New Type" to get started.</p></div></div>`;
+                return;
+            }
 
-                const card = `
+            membershipTypes.forEach(type => {
+                const defaultBadge = type.isDefault ? `<span class="badge bg-warning text-dark ms-2">Default</span>` : '';
+                grid.innerHTML += `
                     <div class="col-lg-4 col-md-6">
                         <div class="membership-card">
                             <div class="membership-header">
@@ -1088,106 +698,83 @@
                                 <li><i class="fas fa-check-circle"></i><span>ROI Distribution: <strong>${formatFrequency(type.roiDistributionFrequency)}</strong></span></li>
                             </ul>
                             <div class="d-flex align-items-center justify-content-between mb-3">
-                                <small class="text-muted"><i class="fas fa-users me-1"></i> ${type.members || 0} members</small>
+                                <small class="text-muted"><i class="fas fa-users me-1"></i>${type.members || 0} members</small>
                             </div>
                             <div class="membership-actions">
-                                <button class="btn btn-sm btn-outline-primary flex-fill" onclick="editMembershipType('${type._id}')">
-                                    <i class="fas fa-edit me-1"></i> Edit
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteMembershipType('${type._id}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                <button class="btn btn-sm btn-outline-primary flex-fill" onclick="editMembershipType('${type._id}')"><i class="fas fa-edit me-1"></i>Edit</button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteMembershipType('${type._id}')"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
-                    </div>
-                `;
-                grid.innerHTML += card;
+                    </div>`;
             });
         }
 
         function formatFrequency(freq) {
-            const map = { monthly: 'Monthly', quarterly: 'Quarterly', biannually: 'Bi-annually', annually: 'Annually' };
-            return map[freq] || 'Monthly';
+            return { monthly:'Monthly', quarterly:'Quarterly', biannually:'Bi-annually', annually:'Annually' }[freq] || 'Monthly';
         }
 
         function updateStats() {
-            document.getElementById('totalTypes').innerText  = membershipTypes.length;
-            document.getElementById('activeTypes').innerText = membershipTypes.filter(t => t.active !== false).length;
+            document.getElementById('totalTypes').innerText   = membershipTypes.length;
+            document.getElementById('activeTypes').innerText  = membershipTypes.filter(t => t.active !== false).length;
             document.getElementById('totalMembers').innerText = membershipTypes.reduce((s, t) => s + (t.members || 0), 0);
             const avg = membershipTypes.reduce((s, t) => s + (t.interestRate || 0), 0) / (membershipTypes.length || 1);
-            document.getElementById('avgInterest').innerText = avg.toFixed(1) + '%';
+            document.getElementById('avgInterest').innerText  = avg.toFixed(1) + '%';
         }
 
-
-        /* ═══════════════════════════════════════════
-           ADD MODAL
-        ═══════════════════════════════════════════ */
+        /* ── Add modal ── */
         function openAddModal() {
             editingId = null;
             document.getElementById('membershipForm').reset();
+            document.getElementById('membershipId').value = '';
             document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle me-2"></i>Add Membership Type';
-            document.getElementById('forceWithdrawalPenalty').value  = 2;
-            document.getElementById('loanRolloverRate').value        = 0;
-            document.getElementById('loanPenaltyRate').value         = 0;
-            document.getElementById('gracePeriodDays').value         = 0;
-            document.getElementById('maxLoanAmount').value           = 0;
-            document.getElementById('minDepositBeforeLoan').value    = 0;
-            document.getElementById('loanToDepositRatio').value      = 80;
-            document.getElementById('earlyWithdrawalPeriodMonths').value = 6;
-            document.getElementById('minimumBalanceForROI').value    = 0;
-            document.getElementById('allowForcedWithdrawal').checked = true;
+            document.getElementById('forceWithdrawalPenalty').value      = 2;
+            document.getElementById('loanRolloverRate').value             = 0;
+            document.getElementById('loanPenaltyRate').value              = 0;
+            document.getElementById('gracePeriodDays').value              = 0;
+            document.getElementById('maxLoanAmount').value                = 0;
+            document.getElementById('minDepositBeforeLoan').value         = 0;
+            document.getElementById('loanToDepositRatio').value           = 80;
+            document.getElementById('earlyWithdrawalPeriodMonths').value  = 6;
+            document.getElementById('minimumBalanceForROI').value         = 0;
+            document.getElementById('allowForcedWithdrawal').checked      = true;
             membershipModal.show();
         }
 
-
-        /* ═══════════════════════════════════════════
-           EDIT MODAL
-        ═══════════════════════════════════════════ */
+        /* ── Edit modal ── */
         function editMembershipType(id) {
             const type = membershipTypes.find(t => t._id === id);
             if (!type) return;
             editingId = id;
-
-            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Membership Type';
-            document.getElementById('membershipId').value            = type._id;
-            document.getElementById('typeName').value                = type.name;
-            document.getElementById('shortName').value               = type.shortCode;
-            document.getElementById('interestRate').value            = type.interestRate;
-            document.getElementById('isDefault').checked             = type.isDefault || false;
-            document.getElementById('forceWithdrawalPenalty').value  = type.forceWithdrawalPenalty || 2;
+            document.getElementById('modalTitle').innerHTML              = '<i class="fas fa-edit me-2"></i>Edit Membership Type';
+            document.getElementById('membershipId').value                = type._id;
+            document.getElementById('typeName').value                    = type.name;
+            document.getElementById('shortName').value                   = type.shortCode;
+            document.getElementById('interestRate').value                = type.interestRate;
+            document.getElementById('isDefault').checked                 = type.isDefault || false;
+            document.getElementById('forceWithdrawalPenalty').value      = type.forceWithdrawalPenalty || 2;
             document.getElementById('earlyWithdrawalPeriodMonths').value = type.earlyWithdrawalPeriodMonths || 6;
-            document.getElementById('allowForcedWithdrawal').checked = type.allowForcedWithdrawal !== false;
-            document.getElementById('loanRolloverRate').value        = type.loanRolloverRate || 0;
-            document.getElementById('loanPenaltyRate').value         = type.loanPenaltyRate || 0;
-            document.getElementById('loanPenaltyType').value         = type.loanPenaltyType || 'percentage';
-            document.getElementById('gracePeriodDays').value         = type.gracePeriodDays || 0;
-            document.getElementById('maxLoanAmount').value           = type.maxLoanAmount || 0;
-            document.getElementById('minDepositBeforeLoan').value    = type.minDepositBeforeLoan || 0;
-            document.getElementById('loanToDepositRatio').value      = type.loanToDepositRatio || 80;
-            document.getElementById('roiDistributionFrequency').value = type.roiDistributionFrequency || 'monthly';
-            document.getElementById('minimumBalanceForROI').value    = type.minimumBalanceForROI || 0;
-
+            document.getElementById('allowForcedWithdrawal').checked     = type.allowForcedWithdrawal !== false;
+            document.getElementById('loanRolloverRate').value            = type.loanRolloverRate || 0;
+            document.getElementById('loanPenaltyRate').value             = type.loanPenaltyRate || 0;
+            document.getElementById('loanPenaltyType').value             = type.loanPenaltyType || 'percentage';
+            document.getElementById('gracePeriodDays').value             = type.gracePeriodDays || 0;
+            document.getElementById('maxLoanAmount').value               = type.maxLoanAmount || 0;
+            document.getElementById('minDepositBeforeLoan').value        = type.minDepositBeforeLoan || 0;
+            document.getElementById('loanToDepositRatio').value          = type.loanToDepositRatio || 80;
+            document.getElementById('roiDistributionFrequency').value    = type.roiDistributionFrequency || 'monthly';
+            document.getElementById('minimumBalanceForROI').value        = type.minimumBalanceForROI || 0;
             membershipModal.show();
         }
 
-
-        /* ═══════════════════════════════════════════
-           SAVE (CREATE / UPDATE)
-        ═══════════════════════════════════════════ */
+        /* ── Save ── */
         async function saveMembershipType() {
             const id        = document.getElementById('membershipId').value;
             const name      = document.getElementById('typeName').value.trim();
             const shortCode = document.getElementById('shortName').value.trim();
-
-            if (!name || !shortCode) {
-                showNotif('Please fill in all required fields.', 'warning');
-                return;
-            }
+            if (!name || !shortCode) { showNotif('Please fill in all required fields.', 'warning'); return; }
 
             const payload = {
-                id,
-                name,
-                shortCode,
+                id, name, shortCode,
                 interestRate:               parseFloat(document.getElementById('interestRate').value) || 0,
                 isDefault:                  document.getElementById('isDefault').checked,
                 forceWithdrawalPenalty:     parseFloat(document.getElementById('forceWithdrawalPenalty').value) || 0,
@@ -1207,31 +794,24 @@
             try {
                 const response = await fetch('/admin/manage/memberType', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                     body: JSON.stringify(payload),
                 });
 
                 if (response.status === 401) {
                     membershipModal.hide();
-                    // Wait for modal to fully close before showing next
-                    document.getElementById('membershipModal').addEventListener('hidden.bs.modal', function onHidden() {
-                        this.removeEventListener('hidden.bs.modal', onHidden);
+                    document.getElementById('membershipModal').addEventListener('hidden.bs.modal', function onH() {
+                        this.removeEventListener('hidden.bs.modal', onH);
                         showUnauthorized('auth');
                         setTimeout(() => { window.location.href = '/login'; }, 1500);
                     });
                     return;
                 }
-
                 if (response.status === 403) {
-                    let errorData = {};
-                    try { errorData = await response.json(); } catch (_) {}
+                    let errorData = {}; try { errorData = await response.json(); } catch(_) {}
                     membershipModal.hide();
-                    // Wait for modal to fully close before showing next
-                    document.getElementById('membershipModal').addEventListener('hidden.bs.modal', function onHidden() {
-                        this.removeEventListener('hidden.bs.modal', onHidden);
+                    document.getElementById('membershipModal').addEventListener('hidden.bs.modal', function onH() {
+                        this.removeEventListener('hidden.bs.modal', onH);
                         showUnauthorized(errorData.reason || 'permission');
                     });
                     return;
@@ -1240,101 +820,54 @@
                 const data = await response.json();
                 if (data.success) {
                     membershipModal.hide();
-                    showNotif(
-                        id ? 'Membership type updated successfully!' : 'Membership type added successfully!',
-                        'success',
-                        () => location.reload()
-                    );
+                    showNotif(id ? 'Membership type updated successfully!' : 'Membership type added successfully!', 'success', () => location.reload());
                 } else {
                     showNotif(data.message || 'Failed to save membership type.', 'danger');
                 }
-
             } catch (err) {
                 console.error(err);
                 showNotif('An unexpected error occurred while saving. Please try again.', 'danger');
             }
         }
 
+        /* ── Delete – step 1: confirm ── */
+        function deleteMembershipType(id) { pendingDeleteId = id; confirmDeleteModal.show(); }
 
-        /* ═══════════════════════════════════════════
-           DELETE  –  Step 1: show confirm dialog
-        ═══════════════════════════════════════════ */
-        function deleteMembershipType(id) {
-            pendingDeleteId = id;
-            confirmDeleteModal.show();
-        }
-
-        /* ═══════════════════════════════════════════
-           DELETE  –  Step 2: execute after confirmation
-        ═══════════════════════════════════════════ */
+        /* ── Delete – step 2: execute ── */
         async function executeDelete(id) {
             try {
                 const response = await fetch(`/admin/manage/memberType/${id}`, {
                     method: 'DELETE',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 });
-
-                if (response.status === 401) {
-                    showUnauthorized('auth');
-                    setTimeout(() => { window.location.href = '/login'; }, 1500);
-                    return;
-                }
-
+                if (response.status === 401) { showUnauthorized('auth'); setTimeout(() => { window.location.href = '/login'; }, 1500); return; }
                 if (response.status === 403) {
-                    let errorData = {};
-                    try { errorData = await response.json(); } catch (_) {}
-                    showUnauthorized(errorData.reason || 'permission');
-                    return;
+                    let errorData = {}; try { errorData = await response.json(); } catch(_) {}
+                    showUnauthorized(errorData.reason || 'permission'); return;
                 }
-
                 const data = await response.json();
-                if (data.success) {
-                    showNotif('Membership type deleted successfully.', 'success', () => location.reload());
-                } else {
-                    showNotif(data.message || 'Failed to delete membership type.', 'danger');
-                }
-
+                if (data.success) { showNotif('Membership type deleted successfully.', 'success', () => location.reload()); }
+                else { showNotif(data.message || 'Failed to delete membership type.', 'danger'); }
             } catch (err) {
                 console.error(err);
                 showNotif('An unexpected error occurred while deleting. Please try again.', 'danger');
             }
         }
-    </script>
 
-    <script>
-        function toggleSidebar() {
-            if (window.innerWidth <= 992) {
-                document.getElementById('sidebar').classList.toggle('active');
-                document.getElementById('sidebarOverlay').classList.toggle('active');
-            }
-        }
+        /* ── Sidebar ── */
+        function toggleSidebar() { if(window.innerWidth<=992){document.getElementById('sidebar').classList.toggle('active');document.getElementById('sidebarOverlay').classList.toggle('active');} }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); }
 
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.remove('active');
-            document.getElementById('sidebarOverlay').classList.remove('active');
-        }
-    </script>
-
-    <script>
+        /* ── Sidebar pending badge ── */
         async function loadSidebarPendingCount() {
             try {
                 const res  = await fetch('/admin/pending-approvals-count');
                 const data = await res.json();
-                const badge = document.getElementById('sidebarPendingBadge');
-                if (!badge) return;
-                if (data.count > 0) {
-                    badge.style.display = 'inline-block';
-                    badge.textContent = data.count;
-                } else {
-                    badge.style.display = 'none';
-                }
-            } catch (err) {
-                console.error('Sidebar count error:', err);
-            }
+                const badge = document.getElementById('sidebarBadge'); if(!badge) return;
+                badge.style.display = data.count > 0 ? 'inline-block' : 'none';
+                if (data.count > 0) badge.textContent = data.count;
+            } catch (err) { console.error('Sidebar count error:', err); }
         }
-
         document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
     </script>
 </body>

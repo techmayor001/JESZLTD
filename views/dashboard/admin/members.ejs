@@ -22,38 +22,101 @@
             background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
             min-height: 100vh; overflow-x: hidden;
         }
+
+        /* ══════════ SIDEBAR ══════════ */
         .sidebar {
-            position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white; z-index: 1040; transition: transform .3s ease;
-            overflow-y: auto; box-shadow: 4px 0 20px rgba(30,58,138,.15);
+            position: fixed; left: 0; top: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #0f2357 0%, #1e3a8a 40%, #1e40af 100%);
+            z-index: 1040; overflow-y: auto;
+            transition: transform .3s ease;
+            box-shadow: 4px 0 24px rgba(30,58,138,.25);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,.15) transparent;
         }
-        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.1); }
-        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+
+        .sidebar-header {
+            padding: 1.4rem 1.25rem 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            background: rgba(0,0,0,.18);
+            position: sticky; top: 0; z-index: 2;
+        }
+        .logo-row { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
         .logo-box {
-            width: 45px; height: 45px; background: white; border-radius: 10px;
+            width: 42px; height: 42px; background: white; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: var(--primary); font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,.2); flex-shrink: 0;
+            font-weight: 800; color: var(--primary); font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,.25); flex-shrink: 0;
         }
-        .sidebar-title { font-size: 1.1rem; line-height: 1.2; }
-        .admin-badge {
-            display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
-            background: rgba(239,68,68,.2); backdrop-filter: blur(10px);
+        .sidebar-brand { font-size: .95rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: .05em; line-height: 1.2; }
+        .sidebar-brand small { font-size: .65rem; font-weight: 500; opacity: .55; display: block; letter-spacing: .08em; }
+        .role-pill {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 4px 10px; background: rgba(239,68,68,.2);
             border-radius: 20px; border: 1px solid rgba(239,68,68,.3);
-            font-weight: 600; font-size: .8rem; margin-top: 8px;
+            font-weight: 700; font-size: .7rem; color: #fca5a5;
         }
-        .sidebar-menu { padding: 1rem 0; }
-        .sidebar-menu a {
-            color: rgba(255,255,255,.85); text-decoration: none; padding: .875rem 1.5rem;
-            display: flex; align-items: center; transition: all .3s;
-            border-left: 3px solid transparent; font-weight: 500; font-size: .95rem;
+
+        /* ── Category groups ── */
+        .nav-group { padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .nav-group:last-child { border-bottom: none; }
+
+        .nav-category {
+            display: flex; align-items: center; gap: 7px;
+            padding: .55rem 1.25rem .3rem;
+            font-size: .62rem; font-weight: 800;
+            color: rgba(255,255,255,.38);
+            text-transform: uppercase; letter-spacing: .1em;
+            user-select: none;
         }
-        .sidebar-menu a:hover { background: rgba(255,255,255,.1); color: white; border-left-color: white; }
-        .sidebar-menu a.active { background: rgba(255,255,255,.15); color: white; border-left-color: white; }
-        .sidebar-menu a i { width: 24px; margin-right: 12px; font-size: 1.1rem; flex-shrink: 0; }
+        .nav-category::after {
+            content: '';
+            flex: 1; height: 1px;
+            background: rgba(255,255,255,.08);
+            margin-left: 4px;
+        }
+
+        /* ── Nav links ── */
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 11px;
+            padding: .62rem 1.25rem; color: rgba(255,255,255,.72);
+            text-decoration: none; font-weight: 500; font-size: .84rem;
+            border-left: 3px solid transparent;
+            transition: all .18s; position: relative;
+        }
+        .sidebar-nav a:hover  { background: rgba(255,255,255,.09); color: white; border-left-color: rgba(255,255,255,.4); }
+        .sidebar-nav a.active { background: rgba(255,255,255,.15); color: white; border-left-color: white; }
+        .sidebar-nav a i { width: 18px; font-size: .9rem; flex-shrink: 0; opacity: .8; text-align: center; }
+        .sidebar-nav a.active i { opacity: 1; }
+
+        .nav-badge {
+            margin-left: auto;
+            font-size: .63rem; font-weight: 800;
+            padding: 2px 7px; border-radius: 10px;
+            background: rgba(239,68,68,.9); color: white;
+            flex-shrink: 0; line-height: 1.4;
+        }
+
+        .nav-back {
+            display: flex; align-items: center; gap: 10px;
+            padding: .7rem 1.25rem .9rem;
+            font-size: .8rem; font-weight: 600;
+            color: rgba(255,255,255,.42);
+            text-decoration: none;
+            transition: color .18s;
+            border-top: 1px solid rgba(255,255,255,.07);
+            margin-top: .25rem;
+        }
+        .nav-back:hover { color: rgba(255,255,255,.7); }
+        .nav-back i { font-size: .8rem; }
+
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1035; }
         .sidebar-overlay.active { display: block; }
+
+        /* ══════════ TOP NAVBAR ══════════ */
         .top-navbar {
             position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: var(--navbar-h);
             background: rgba(255,255,255,.97); backdrop-filter: blur(10px);
@@ -125,7 +188,7 @@
         .fin-snap-tile .fst-label { font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; margin-bottom: .2rem; }
         .fin-snap-tile .fst-value { font-size: 1.05rem; font-weight: 900; }
 
-        /* KIDDIES INFO BANNER in view modal */
+        /* KIDDIES INFO BANNER */
         .kiddies-info-banner {
             background: rgba(236,72,153,.06); border: 1px solid rgba(236,72,153,.2);
             border-radius: 12px; padding: 1rem; margin-bottom: 1rem;
@@ -181,41 +244,70 @@
 </head>
 <body>
 
+    <!-- ════════════════════════ SIDEBAR ════════════════════════ -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="logo-container">
+            <div class="logo-row">
                 <div class="logo-box">C</div>
                 <div>
-                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform:uppercase;">Club De Stars</h5>
-                    <small class="opacity-75" style="font-size:.75rem;">ADMIN PANEL</small>
+                    <div class="sidebar-brand">Club De Stars<small>Admin Panel</small></div>
                 </div>
             </div>
-            <div class="admin-badge"><i class="fas fa-shield-alt"></i><span>Super Admin</span></div>
+            <div class="role-pill"><i class="fas fa-shield-alt" style="font-size:.65rem;"></i>&nbsp;Super Admin</div>
         </div>
-        <div class="sidebar-menu">
+
+        <div class="sidebar-nav">
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-home" style="font-size:.6rem;"></i>Main</div>
             <a href="/admin/dashboard"><i class="fas fa-chart-pie"></i>Overview</a>
-            <a href="/admin/members" class="active"><i class="fas fa-users"></i> Members</a>
-            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
-            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
-            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
-            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
-            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
-            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
-            <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
-            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
-            <a href="/admin/loan-payments"><i class="fas fa-file-invoice-dollar"></i> Loan Payments</a>
-            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
-            <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
-            <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
-            <a href="/admin/operating-earnings"><i class="fas fa-chart-line"></i> Operating Earnings</a>
-            <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
-            <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
-            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
-            <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
-            <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-            <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
-            <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
         </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-users" style="font-size:.6rem;"></i>Members</div>
+            <a href="/admin/manage-members" class="active"><i class="fas fa-users"></i>Manage Members</a>
+            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i>Kiddies Accounts</a>
+            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i>Membership Types</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-hand-holding-usd" style="font-size:.6rem;"></i>Loans</div>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i>Loan Management</a>
+            <a href="/admin/loan-payments"><i class="fas fa-file-invoice-dollar"></i>Loan Payments</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i>Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i>External Loans</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-landmark" style="font-size:.6rem;"></i>Finance</div>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i>Company Finance</a>
+            <a href="/admin/operating-earnings"><i class="fas fa-chart-line"></i>Operating Earnings</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-chart-bar"></i>Company Revenue</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-cog" style="font-size:.6rem;"></i>System</div>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i>Manage Subscriptions</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i>Roles &amp; Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i>Settings</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-file-alt" style="font-size:.6rem;"></i>Reporting</div>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i>Reports</a>
+            <a href="/admin/logs"><i class="fas fa-history"></i>Admin Logs</a>
+        </div>
+    </div>
+
+        <a href="/cds-cooperative/dashboard" class="nav-back"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
     </div>
 
     <div class="top-navbar">
@@ -256,7 +348,7 @@
             </div>
         </div>
 
-        <!-- Stats: 4 for regular members + 1 for kiddies -->
+        <!-- Stats -->
         <div class="row g-3 mb-4 stats-row">
             <div class="col-lg col-md-4 col-6"><div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;"><i class="fas fa-users"></i></div><div><p class="text-muted mb-1 fw-semibold" style="font-size:.82rem;">Total</p><h3 class="mb-0 fw-bold" id="totalMembers">0</h3></div></div></div>
             <div class="col-lg col-md-4 col-6"><div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);color:white;"><i class="fas fa-user-check"></i></div><div><p class="text-muted mb-1 fw-semibold" style="font-size:.82rem;">Active</p><h3 class="mb-0 fw-bold text-primary" id="activeMembers">0</h3></div></div></div>
@@ -356,8 +448,6 @@
                             <p class="text-muted mb-1" id="view_membershipId"></p>
                             <span class="badge mb-1" id="view_status_badge"></span>
                             <div id="view_type_badge_wrap" class="mb-2 mt-1"></div>
-
-                            <!-- ★ KIDDIES BANNER — shown only for kiddies accounts -->
                             <div id="view_kiddies_banner" class="kiddies-info-banner" style="display:none;text-align:left;">
                                 <div class="kb-title"><i class="fas fa-baby me-1"></i> Kiddies Account</div>
                                 <div class="row g-2" style="font-size:.8rem;">
@@ -372,42 +462,17 @@
                                     <i class="fas fa-external-link-alt me-1"></i>Manage in Kiddies Panel
                                 </a>
                             </div>
-
-                            <!-- ★ FINANCIAL SNAPSHOT -->
                             <div class="fin-snap mt-2 mb-3">
-                                <div class="fin-snap-tile" style="background:rgba(30,58,138,.07);">
-                                    <div class="fst-label" style="color:#1e3a8a;">Savings</div>
-                                    <div class="fst-value" style="color:#1e3a8a;" id="view_savings">₦0</div>
-                                </div>
-                                <div class="fin-snap-tile" style="background:rgba(139,92,246,.07);">
-                                    <div class="fst-label" style="color:#7c3aed;">Accum. ROI</div>
-                                    <div class="fst-value" style="color:#7c3aed;" id="view_accumROI">₦0</div>
-                                </div>
-                                <div class="fin-snap-tile" style="background:rgba(16,185,129,.07);">
-                                    <div class="fst-label" style="color:#059669;">Total Balance</div>
-                                    <div class="fst-value" style="color:#059669;" id="view_totalBalance">₦0</div>
-                                </div>
-                                <div class="fin-snap-tile" style="background:rgba(245,158,11,.07);">
-                                    <div class="fst-label" style="color:#d97706;">Share %</div>
-                                    <div class="fst-value" style="color:#d97706;" id="view_sharePercent">0%</div>
-                                </div>
-                                <div class="fin-snap-tile" style="background:rgba(16,185,129,.07);">
-                                    <div class="fst-label" style="color:#059669;">Est. ROI Earn</div>
-                                    <div class="fst-value" style="color:#059669;" id="view_roiEarning">₦0</div>
-                                </div>
-                                <div class="fin-snap-tile" style="background:rgba(239,68,68,.07);">
-                                    <div class="fst-label" style="color:#dc2626;">Co. Charge</div>
-                                    <div class="fst-value" style="color:#dc2626;" id="view_companyCharge">₦0</div>
-                                </div>
+                                <div class="fin-snap-tile" style="background:rgba(30,58,138,.07);"><div class="fst-label" style="color:#1e3a8a;">Savings</div><div class="fst-value" style="color:#1e3a8a;" id="view_savings">₦0</div></div>
+                                <div class="fin-snap-tile" style="background:rgba(139,92,246,.07);"><div class="fst-label" style="color:#7c3aed;">Accum. ROI</div><div class="fst-value" style="color:#7c3aed;" id="view_accumROI">₦0</div></div>
+                                <div class="fin-snap-tile" style="background:rgba(16,185,129,.07);"><div class="fst-label" style="color:#059669;">Total Balance</div><div class="fst-value" style="color:#059669;" id="view_totalBalance">₦0</div></div>
+                                <div class="fin-snap-tile" style="background:rgba(245,158,11,.07);"><div class="fst-label" style="color:#d97706;">Share %</div><div class="fst-value" style="color:#d97706;" id="view_sharePercent">0%</div></div>
+                                <div class="fin-snap-tile" style="background:rgba(16,185,129,.07);"><div class="fst-label" style="color:#059669;">Est. ROI Earn</div><div class="fst-value" style="color:#059669;" id="view_roiEarning">₦0</div></div>
+                                <div class="fin-snap-tile" style="background:rgba(239,68,68,.07);"><div class="fst-label" style="color:#dc2626;">Co. Charge</div><div class="fst-value" style="color:#dc2626;" id="view_companyCharge">₦0</div></div>
                             </div>
-
-                            <!-- Buttons — hidden for kiddies -->
                             <div class="d-grid gap-2 mt-2" id="view_member_actions">
                                 <button class="btn btn-primary btn-sm" id="editMemberBtn"><i class="fas fa-edit me-2"></i>Edit Member</button>
-                                <button class="btn btn-sm fw-semibold text-white" id="changeTypeBtnView"
-                                    style="background:linear-gradient(135deg,#312e81 0%,#6366f1 100%);border:none;">
-                                    <i class="fas fa-exchange-alt me-2"></i>Change Member Type
-                                </button>
+                                <button class="btn btn-sm fw-semibold text-white" id="changeTypeBtnView" style="background:linear-gradient(135deg,#312e81 0%,#6366f1 100%);border:none;"><i class="fas fa-exchange-alt me-2"></i>Change Member Type</button>
                                 <button class="btn btn-danger btn-sm" id="deleteMemberBtn"><i class="fas fa-trash me-2"></i>Delete Member</button>
                             </div>
                         </div>
@@ -458,40 +523,26 @@
     <div class="modal fade" id="changeTypeModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-exchange-alt me-2"></i>Change Member Type</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
+                <div class="modal-header"><h5 class="modal-title"><i class="fas fa-exchange-alt me-2"></i>Change Member Type</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <div class="ct-summary">
                         <img id="ct_avatar" alt="avatar">
-                        <div style="flex:1;min-width:0;">
-                            <div class="fw-bold" id="ct_name" style="color:#312e81;"></div>
-                            <small class="text-muted d-block text-truncate" id="ct_email"></small>
-                            <span class="badge mt-1" id="ct_currentTypeBadge" style="font-size:.72rem;"></span>
-                        </div>
+                        <div style="flex:1;min-width:0;"><div class="fw-bold" id="ct_name" style="color:#312e81;"></div><small class="text-muted d-block text-truncate" id="ct_email"></small><span class="badge mt-1" id="ct_currentTypeBadge" style="font-size:.72rem;"></span></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold"><i class="fas fa-star me-2" style="color:#6366f1;"></i>Select New Membership Type</label>
                         <select class="form-select" id="ct_memberTypeId">
                             <option value="">Choose new type...</option>
                             <% memberTypes.forEach(type => { %>
-                                <option value="<%= type.id %>" data-short="<%= type.shortCode %>" data-rate="<%= type.interestRate %>" data-name="<%= type.name %>">
-                                    <%= type.name %> (<%= type.shortCode %>) — <%= type.interestRate %>% Interest
-                                </option>
+                                <option value="<%= type.id %>" data-short="<%= type.shortCode %>" data-rate="<%= type.interestRate %>" data-name="<%= type.name %>"><%= type.name %> (<%= type.shortCode %>) — <%= type.interestRate %>% Interest</option>
                             <% }) %>
                         </select>
                     </div>
-                    <div class="alert alert-warning py-2 mb-0" style="font-size:.85rem;">
-                        <i class="fas fa-exclamation-triangle me-1"></i>
-                        The member's current Membership ID will be <strong>replaced</strong> with a new sequential ID for the selected type.
-                    </div>
+                    <div class="alert alert-warning py-2 mb-0" style="font-size:.85rem;"><i class="fas fa-exclamation-triangle me-1"></i>The member's current Membership ID will be <strong>replaced</strong> with a new sequential ID for the selected type.</div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn fw-semibold text-white" style="background:linear-gradient(135deg,#312e81 0%,#6366f1 100%);border:none;" onclick="confirmChangeType()">
-                        <i class="fas fa-check me-2"></i>Change Type
-                    </button>
+                    <button type="button" class="btn fw-semibold text-white" style="background:linear-gradient(135deg,#312e81 0%,#6366f1 100%);border:none;" onclick="confirmChangeType()"><i class="fas fa-check me-2"></i>Change Type</button>
                 </div>
             </div>
         </div>
@@ -501,10 +552,7 @@
     <div class="modal fade" id="editMemberModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Member</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
+                <div class="modal-header"><h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Member</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <form id="editMemberForm" autocomplete="off" enctype="multipart/form-data">
                         <div class="edit-section-header mb-3"><i class="fas fa-user me-2" style="color:var(--primary);"></i><strong class="section-title">Personal Information</strong></div>
@@ -524,11 +572,7 @@
                             <div class="col-md-6"><label class="form-label">ID Type</label><select name="idType" id="edit_idType" class="form-select"><option value="">Select ID type...</option><option value="nin">NIN</option><option value="passport">International Passport</option><option value="drivers">Driver's License</option><option value="voters">Voter's Card</option></select></div>
                             <div class="col-md-6"><label class="form-label">ID Number</label><input type="text" name="idNumber" id="edit_idNumber" class="form-control"></div>
                         </div>
-                        <div class="edit-section-header mb-3">
-                            <i class="fas fa-file-upload me-2" style="color:var(--primary);"></i>
-                            <strong class="section-title">KYC Documents</strong>
-                            <small class="text-muted ms-2 fw-normal" style="font-size:.78rem;">(leave blank to keep existing file)</small>
-                        </div>
+                        <div class="edit-section-header mb-3"><i class="fas fa-file-upload me-2" style="color:var(--primary);"></i><strong class="section-title">KYC Documents</strong><small class="text-muted ms-2 fw-normal" style="font-size:.78rem;">(leave blank to keep existing file)</small></div>
                         <div class="row g-3 mb-4">
                             <div class="col-md-6"><label class="form-label">Passport Photo</label><div class="file-current-preview" id="prev_passportPhoto"><span class="dot-gray"></span><span class="text-muted fst-italic small">No file uploaded</span></div><input type="file" name="passportPhoto" id="edit_passportPhoto" class="form-control" accept="image/*,.pdf"></div>
                             <div class="col-md-6"><label class="form-label">Display Picture</label><div class="file-current-preview" id="prev_displayPicture"><span class="dot-gray"></span><span class="text-muted fst-italic small">No file uploaded</span></div><input type="file" name="displayPicture" id="edit_displayPicture" class="form-control" accept="image/*"></div>
@@ -640,10 +684,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
+    /* ─── All JS from original file preserved exactly ─── */
 
-    /* ═══════════════════════════════════════════════════
-       NOTIFICATION MODAL
-    ═══════════════════════════════════════════════════ */
     let _notifyResolve = null;
     function showNotify({ type='info', title='', message='', confirmLabel='OK', cancelLabel=null } = {}) {
         return new Promise(resolve => {
@@ -666,9 +708,6 @@
     function notifyClose()  { bootstrap.Modal.getInstance(document.getElementById('notifyModal'))?.hide(); if(_notifyResolve){_notifyResolve(true);_notifyResolve=null;} }
     function notifyCancel() { bootstrap.Modal.getInstance(document.getElementById('notifyModal'))?.hide(); if(_notifyResolve){_notifyResolve(false);_notifyResolve=null;} }
 
-    /* ═══════════════════════════════════════════════════
-       UNAUTHORIZED MODAL
-    ═══════════════════════════════════════════════════ */
     const unauthorizedMessages = { auth:'Your session has expired. Please login again.', permission:"You don't have permission to perform this action.", inactive:'Your admin role is currently inactive.', norole:'No role is assigned to your account.', member:'Members are not allowed to access admin actions.' };
     function showUnauthorized(reason='permission', onClose=null) {
         document.getElementById('unauthorizedMessage').innerText = unauthorizedMessages[reason]||'Unauthorized action.';
@@ -677,9 +716,6 @@
         new bootstrap.Modal(el).show();
     }
 
-    /* ═══════════════════════════════════════════════════
-       PERMISSION-AWARE FETCH
-    ═══════════════════════════════════════════════════ */
     async function permFetch(url, options={}, sourceModal=null) {
         const hide = () => { if(sourceModal){ const i=bootstrap.Modal.getInstance(sourceModal); if(i)i.hide(); } };
         const res = await fetch(url, { headers:{'X-Requested-With':'XMLHttpRequest',...(options.headers||{})}, ...options });
@@ -699,213 +735,104 @@
         return {ok:true, data:await res.json(), status:res.status};
     }
 
-    /* ═══════════════════════════════════════════════════
-       PAGE DATA — regular members + kiddies merged
-    ═══════════════════════════════════════════════════ */
     let members = <%- JSON.stringify([
-        // ── Regular members ──────────────────────────────
         ...users.map(u => {
             const account = u.account || null;
             const stats   = u._memberStats || {};
             return {
-                id:           String(u._id),
-                entityType:   'member',
-                firstName:    u.firstName||'',
-                lastName:     u.lastName||'',
-                email:        u.email||'',
-                phone:        u.phone||'',
-                dob:          u.dob||null,
-                memberID:     u.membershipID||(account?.memberID||'N/A'),
-                type:         account?.accountType?.shortCode||'N/A',
-                typeName:     account?.accountType?.name||'No Membership',
-                status:       u.status||'pending',
-                registrationStatus: u.registrationStatus||'pending',
-                balance:      account?.balance||0,
-                state:        u.state||'', lga: u.lga||'', address: u.address||'',
-                idType:       u.idType||'', idNumber: u.idNumber||'',
-                joinDate:     u.createdAt||new Date(),
-                displayPicture: u.displayPicture||null,
-                passportPhoto:  u.passportPhoto||null,
-                idFile:         u.idFile||null,
-                addressProof:   u.addressProof||null,
-                signature:      u.signature||null,
-                bankDetails:  u.bankDetails||{},
-                nextOfKin:    u.nextOfKin||{},
-                memberStats: {
-                    memberSavings:       stats.memberSavings       || 0,
-                    accumulativeROI:     stats.accumulativeROI     || 0,
-                    totalBalance:        stats.totalBalance        || 0,
-                    sharePercentage:     stats.sharePercentage     || 0,
-                    userShare:           stats.userShare           || 0,
-                    companyChargeOnUser: stats.companyChargeOnUser || 0,
-                    ROI:                 stats.ROI                 || 0,
-                },
-                account: account ? {
-                    memberID: account.memberID||'N/A',
-                    balance:  account.balance||0,
-                    accountType: account.accountType ? {
-                        id:           String(account.accountType._id),
-                        name:         account.accountType.name,
-                        shortCode:    account.accountType.shortCode,
-                        interestRate: account.accountType.interestRate
-                    } : null
-                } : null,
-                // kiddies-only fields (empty for regular members)
-                parentName: '', parentMemberID: '',
-                lockPeriodYears: null, unlockDate: null, beneficiaryType: null,
-                childDOB: null,
+                id: String(u._id), entityType: 'member',
+                firstName: u.firstName||'', lastName: u.lastName||'',
+                email: u.email||'', phone: u.phone||'', dob: u.dob||null,
+                memberID: u.membershipID||(account?.memberID||'N/A'),
+                type: account?.accountType?.shortCode||'N/A',
+                typeName: account?.accountType?.name||'No Membership',
+                status: u.status||'pending', registrationStatus: u.registrationStatus||'pending',
+                balance: account?.balance||0,
+                state: u.state||'', lga: u.lga||'', address: u.address||'',
+                idType: u.idType||'', idNumber: u.idNumber||'',
+                joinDate: u.createdAt||new Date(),
+                displayPicture: u.displayPicture||null, passportPhoto: u.passportPhoto||null,
+                idFile: u.idFile||null, addressProof: u.addressProof||null, signature: u.signature||null,
+                bankDetails: u.bankDetails||{}, nextOfKin: u.nextOfKin||{},
+                memberStats: { memberSavings: stats.memberSavings||0, accumulativeROI: stats.accumulativeROI||0, totalBalance: stats.totalBalance||0, sharePercentage: stats.sharePercentage||0, userShare: stats.userShare||0, companyChargeOnUser: stats.companyChargeOnUser||0, ROI: stats.ROI||0 },
+                account: account ? { memberID: account.memberID||'N/A', balance: account.balance||0, accountType: account.accountType ? { id: String(account.accountType._id), name: account.accountType.name, shortCode: account.accountType.shortCode, interestRate: account.accountType.interestRate } : null } : null,
+                parentName: '', parentMemberID: '', lockPeriodYears: null, unlockDate: null, beneficiaryType: null, childDOB: null,
             };
         }),
-        // ── Kiddies accounts ─────────────────────────────
         ...kiddiesAccounts.map(k => {
-            const d     = k._display || {};
-            const stats = k._memberStats || {};
+            const d = k._display||{}; const stats = k._memberStats||{};
             return {
-                id:           String(k._id),
-                entityType:   'kiddies',
-                firstName:    k.childFirstName||'',
-                lastName:     k.childLastName||'',
-                email:        d.email||'',
-                phone:        d.phone||'',
-                dob:          k.childDOB||null,
-                memberID:     k.accountID||'N/A',
-                type:         'KIDDIES',
-                typeName:     'Kiddies Account',
-                status:       k.status||'locked',
-                registrationStatus: k.registrationStatus||'pending',
-                balance:      d.balance||0,
-                state: '', lga: '', address: '',
-                idType: '', idNumber: '',
-                joinDate:     k.createdAt||new Date(),
-                displayPicture: d.displayPicture||null,
-                passportPhoto: null, idFile: null, addressProof: null, signature: null,
-                bankDetails:  {},
-                nextOfKin:    k.nextOfKin||{},
-                memberStats: {
-                    memberSavings:       stats.memberSavings       || 0,
-                    accumulativeROI:     stats.accumulativeROI     || 0,
-                    totalBalance:        stats.totalBalance        || 0,
-                    sharePercentage:     stats.sharePercentage     || 0,
-                    userShare:           stats.userShare           || 0,
-                    companyChargeOnUser: stats.companyChargeOnUser || 0,
-                    ROI:                 stats.ROI                 || 0,
-                },
+                id: String(k._id), entityType: 'kiddies',
+                firstName: k.childFirstName||'', lastName: k.childLastName||'',
+                email: d.email||'', phone: d.phone||'', dob: k.childDOB||null,
+                memberID: k.accountID||'N/A', type: 'KIDDIES', typeName: 'Kiddies Account',
+                status: k.status||'locked', registrationStatus: k.registrationStatus||'pending',
+                balance: d.balance||0, state:'', lga:'', address:'', idType:'', idNumber:'',
+                joinDate: k.createdAt||new Date(),
+                displayPicture: d.displayPicture||null, passportPhoto: null, idFile: null, addressProof: null, signature: null,
+                bankDetails: {}, nextOfKin: k.nextOfKin||{},
+                memberStats: { memberSavings: stats.memberSavings||0, accumulativeROI: stats.accumulativeROI||0, totalBalance: stats.totalBalance||0, sharePercentage: stats.sharePercentage||0, userShare: stats.userShare||0, companyChargeOnUser: stats.companyChargeOnUser||0, ROI: stats.ROI||0 },
                 account: k.account ? { balance: k.account.balance||0, accountType: null } : null,
-                // kiddies-specific fields
-                parentName:      d.parentName||'',
-                parentMemberID:  d.parentMemberID||'',
-                lockPeriodYears: k.lockPeriodYears||5,
-                unlockDate:      k.unlockDate||null,
-                beneficiaryType: k.beneficiaryType||'family',
-                childDOB:        k.childDOB||null,
+                parentName: d.parentName||'', parentMemberID: d.parentMemberID||'',
+                lockPeriodYears: k.lockPeriodYears||5, unlockDate: k.unlockDate||null,
+                beneficiaryType: k.beneficiaryType||'family', childDOB: k.childDOB||null,
             };
         })
     ]) %>;
 
-    let memberTypes = <%- JSON.stringify(memberTypes.map(m => ({
-        id: String(m._id), name: m.name, shortCode: m.shortCode, interestRate: m.interestRate
-    }))) %>;
+    let memberTypes = <%- JSON.stringify(memberTypes.map(m => ({ id: String(m._id), name: m.name, shortCode: m.shortCode, interestRate: m.interestRate }))) %>;
 
     let currentMemberId = null;
     let selectedMembers = [];
     let _currentFilteredMembers = members;
-
-    // Pagination
     const PER_PAGE = 20;
     let currentPage = 1;
 
-    /* ═══════════════════════════════════════════════════
-       INIT
-    ═══════════════════════════════════════════════════ */
-    document.addEventListener('DOMContentLoaded', () => {
-        updateStats(); renderMembers(); attachFilterListeners();
-    });
+    document.addEventListener('DOMContentLoaded', () => { updateStats(); renderMembers(); attachFilterListeners(); });
 
-    /* ═══════════════════════════════════════════════════
-       STATS
-    ═══════════════════════════════════════════════════ */
     function updateStats() {
-        const regularMembers = members.filter(m => m.entityType === 'member');
-        const kiddiesMembers = members.filter(m => m.entityType === 'kiddies');
+        const r = members.filter(m=>m.entityType==='member');
+        const k = members.filter(m=>m.entityType==='kiddies');
         document.getElementById('totalMembers').textContent    = members.length;
-        document.getElementById('activeMembers').textContent   = regularMembers.filter(m=>m.status==='active').length;
-        document.getElementById('pendingMembers').textContent  = regularMembers.filter(m=>m.status==='pending').length;
-        document.getElementById('rejectedMembers').textContent = regularMembers.filter(m=>m.status==='rejected').length;
-        document.getElementById('kiddiesCount').textContent    = kiddiesMembers.length;
+        document.getElementById('activeMembers').textContent   = r.filter(m=>m.status==='active').length;
+        document.getElementById('pendingMembers').textContent  = r.filter(m=>m.status==='pending').length;
+        document.getElementById('rejectedMembers').textContent = r.filter(m=>m.status==='rejected').length;
+        document.getElementById('kiddiesCount').textContent    = k.length;
         document.getElementById('memberCountDisplay').textContent = _currentFilteredMembers.length;
     }
 
-    /* ═══════════════════════════════════════════════════
-       TYPE BADGE
-    ═══════════════════════════════════════════════════ */
     function getMemberTypeBadge(member) {
-        if (member.entityType === 'kiddies') {
-            return `<span class="badge" style="background:linear-gradient(135deg,#ec4899,#db2777);color:white;"><i class="fas fa-baby me-1"></i>Kiddies</span>`;
-        }
+        if (member.entityType === 'kiddies') return `<span class="badge" style="background:linear-gradient(135deg,#ec4899,#db2777);color:white;"><i class="fas fa-baby me-1"></i>Kiddies</span>`;
         const type = member.account?.accountType;
         if (!type) return `<span class="badge" style="background:#6b7280;color:white;">No Membership</span>`;
         const colors = { CDS:'#10b981', NCDS:'#f59e0b' };
         return `<span class="badge" style="background:${colors[type.shortCode]||'#6366f1'};color:white;">${type.name}</span>`;
     }
 
-    /* ═══════════════════════════════════════════════════
-       RENDER TABLE (paginated)
-    ═══════════════════════════════════════════════════ */
     function renderMembers(filteredMembers = members, page = 1) {
         currentPage = page;
         _currentFilteredMembers = filteredMembers;
         document.getElementById('memberCountDisplay').textContent = filteredMembers.length;
-
-        const start    = (page - 1) * PER_PAGE;
-        const end      = Math.min(start + PER_PAGE, filteredMembers.length);
+        const start = (page-1)*PER_PAGE, end = Math.min(start+PER_PAGE, filteredMembers.length);
         const pageData = filteredMembers.slice(start, end);
-
-        document.getElementById('showingFrom').textContent = filteredMembers.length ? start + 1 : 0;
-        document.getElementById('showingTo').textContent   = end;
-
+        document.getElementById('showingFrom').textContent = filteredMembers.length ? start+1 : 0;
+        document.getElementById('showingTo').textContent = end;
         const tbody = document.getElementById('membersTableBody');
         tbody.innerHTML = '';
-
-        if (!pageData.length) {
-            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-5"><i class="fas fa-users fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No members found</p></td></tr>`;
-            renderPagination(filteredMembers.length, page);
-            return;
-        }
-
+        if (!pageData.length) { tbody.innerHTML = `<tr><td colspan="9" class="text-center py-5"><i class="fas fa-users fa-3x text-muted mb-3 d-block"></i><p class="text-muted">No members found</p></td></tr>`; renderPagination(filteredMembers.length, page); return; }
         pageData.forEach(member => {
             const row = document.createElement('tr');
             if (member.entityType === 'kiddies') row.classList.add('kiddies-row');
-
-            const statusColors = {
-                active:   '<span class="badge bg-success">Active</span>',
-                pending:  '<span class="badge bg-warning">Pending</span>',
-                rejected: '<span class="badge bg-danger">Rejected</span>',
-                locked:   '<span class="badge" style="background:rgba(236,72,153,.15);color:#db2777;border:1px solid rgba(236,72,153,.3);">Locked</span>',
-                closed:   '<span class="badge bg-secondary">Closed</span>',
-            };
+            const statusColors = { active:'<span class="badge bg-success">Active</span>', pending:'<span class="badge bg-warning">Pending</span>', rejected:'<span class="badge bg-danger">Rejected</span>', locked:'<span class="badge" style="background:rgba(236,72,153,.15);color:#db2777;border:1px solid rgba(236,72,153,.3);">Locked</span>', closed:'<span class="badge bg-secondary">Closed</span>' };
             const statusBadge = statusColors[member.status] || '<span class="badge bg-secondary">Unknown</span>';
-
-            // Action buttons
             let actionButtons;
             if (member.entityType === 'kiddies') {
-                actionButtons = `
-                    <button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button>
-                    <a class="action-btn btn btn-sm" href="/admin/kiddies-accounts" title="Manage Kiddies" style="background:linear-gradient(135deg,#ec4899,#db2777);color:white;"><i class="fas fa-baby"></i></a>`;
+                actionButtons = `<button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button><a class="action-btn btn btn-sm" href="/admin/kiddies-accounts" title="Manage Kiddies" style="background:linear-gradient(135deg,#ec4899,#db2777);color:white;"><i class="fas fa-baby"></i></a>`;
             } else if (member.status === 'pending') {
-                actionButtons = `
-                    <button class="action-btn btn btn-sm btn-success" onclick="showApprovalModal('${member.id}')" title="Approve"><i class="fas fa-check"></i></button>
-                    <button class="action-btn btn btn-sm btn-danger" onclick="rejectMember('${member.id}')" title="Reject"><i class="fas fa-times"></i></button>
-                    <button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button>
-                    <button class="action-btn btn btn-sm text-white" onclick="openChangeTypeModal('${member.id}')" title="Change Type" style="background:linear-gradient(135deg,#312e81,#6366f1);"><i class="fas fa-exchange-alt"></i></button>`;
+                actionButtons = `<button class="action-btn btn btn-sm btn-success" onclick="showApprovalModal('${member.id}')" title="Approve"><i class="fas fa-check"></i></button><button class="action-btn btn btn-sm btn-danger" onclick="rejectMember('${member.id}')" title="Reject"><i class="fas fa-times"></i></button><button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button><button class="action-btn btn btn-sm text-white" onclick="openChangeTypeModal('${member.id}')" title="Change Type" style="background:linear-gradient(135deg,#312e81,#6366f1);"><i class="fas fa-exchange-alt"></i></button>`;
             } else {
-                actionButtons = `
-                    <button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button>
-                    <button class="action-btn btn btn-sm btn-warning" onclick="editMember('${member.id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn btn btn-sm text-white" onclick="openChangeTypeModal('${member.id}')" title="Change Type" style="background:linear-gradient(135deg,#312e81,#6366f1);"><i class="fas fa-exchange-alt"></i></button>
-                    <button class="action-btn btn btn-sm btn-danger" onclick="deleteMember('${member.id}')" title="Delete"><i class="fas fa-trash"></i></button>`;
+                actionButtons = `<button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button><button class="action-btn btn btn-sm btn-warning" onclick="editMember('${member.id}')" title="Edit"><i class="fas fa-edit"></i></button><button class="action-btn btn btn-sm text-white" onclick="openChangeTypeModal('${member.id}')" title="Change Type" style="background:linear-gradient(135deg,#312e81,#6366f1);"><i class="fas fa-exchange-alt"></i></button><button class="action-btn btn btn-sm btn-danger" onclick="deleteMember('${member.id}')" title="Delete"><i class="fas fa-trash"></i></button>`;
             }
-
-            // Avatar — kiddies get initials avatar, members get photo
             let avatarHtml;
             if (member.entityType === 'kiddies') {
                 const initials = (member.firstName[0]||'?') + (member.lastName[0]||'?');
@@ -914,52 +841,28 @@
                 const src = member.displayPicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.firstName+' '+member.lastName)}&background=1e3a8a&color=fff&size=80`;
                 avatarHtml = `<img src="${src}" alt="Avatar" class="member-avatar">`;
             }
-
-            // Sub-label under name
-            const subLabel = member.entityType === 'kiddies'
-                ? `<small class="text-muted" style="color:#ec4899!important;">Parent: ${member.parentName||'—'}</small>`
-                : `<small class="text-muted">${member.email}</small>`;
-
-            row.innerHTML = `
-                <td><input type="checkbox" class="member-checkbox" data-id="${member.id}" onchange="updateSelection()"></td>
-                <td><div class="d-flex align-items-center gap-2">${avatarHtml}<div><div class="fw-semibold">${member.firstName} ${member.lastName}</div>${subLabel}</div></div></td>
-                <td><span class="badge bg-primary-subtle text-primary">${member.memberID||'-'}</span></td>
-                <td>${getMemberTypeBadge(member)}</td>
-                <td>${member.phone||'-'}</td>
-                <td>${statusBadge}</td>
-                <td><strong>₦${member.balance.toLocaleString()}</strong></td>
-                <td>${new Date(member.joinDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
-                <td><div class="btn-group">${actionButtons}</div></td>`;
+            const subLabel = member.entityType === 'kiddies' ? `<small class="text-muted" style="color:#ec4899!important;">Parent: ${member.parentName||'—'}</small>` : `<small class="text-muted">${member.email}</small>`;
+            row.innerHTML = `<td><input type="checkbox" class="member-checkbox" data-id="${member.id}" onchange="updateSelection()"></td><td><div class="d-flex align-items-center gap-2">${avatarHtml}<div><div class="fw-semibold">${member.firstName} ${member.lastName}</div>${subLabel}</div></div></td><td><span class="badge bg-primary-subtle text-primary">${member.memberID||'-'}</span></td><td>${getMemberTypeBadge(member)}</td><td>${member.phone||'-'}</td><td>${statusBadge}</td><td><strong>₦${member.balance.toLocaleString()}</strong></td><td>${new Date(member.joinDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td><td><div class="btn-group">${actionButtons}</div></td>`;
             tbody.appendChild(row);
         });
-
         renderPagination(filteredMembers.length, page);
     }
 
     function renderPagination(total, current) {
-        const totalPages = Math.ceil(total / PER_PAGE);
+        const totalPages = Math.ceil(total/PER_PAGE);
         const el = document.getElementById('paginationEl');
-        if (totalPages <= 1) { el.innerHTML = ''; return; }
+        if (totalPages <= 1) { el.innerHTML=''; return; }
         let html = `<li class="page-item ${current===1?'disabled':''}"><a class="page-link" href="#" onclick="goPage(${current-1});return false;"><i class="fas fa-chevron-left"></i></a></li>`;
-        const start = Math.max(1, current - 2);
-        const end   = Math.min(totalPages, current + 2);
-        if (start > 1) html += `<li class="page-item"><a class="page-link" href="#" onclick="goPage(1);return false;">1</a></li>${start > 2 ? '<li class="page-item disabled"><a class="page-link">…</a></li>' : ''}`;
-        for (let i = start; i <= end; i++) {
-            html += `<li class="page-item ${i===current?'active':''}"><a class="page-link" href="#" onclick="goPage(${i});return false;">${i}</a></li>`;
-        }
-        if (end < totalPages) html += `${end < totalPages - 1 ? '<li class="page-item disabled"><a class="page-link">…</a></li>' : ''}<li class="page-item"><a class="page-link" href="#" onclick="goPage(${totalPages});return false;">${totalPages}</a></li>`;
+        const start = Math.max(1, current-2), end = Math.min(totalPages, current+2);
+        if (start>1) html += `<li class="page-item"><a class="page-link" href="#" onclick="goPage(1);return false;">1</a></li>${start>2?'<li class="page-item disabled"><a class="page-link">…</a></li>':''}`;
+        for (let i=start; i<=end; i++) html += `<li class="page-item ${i===current?'active':''}"><a class="page-link" href="#" onclick="goPage(${i});return false;">${i}</a></li>`;
+        if (end<totalPages) html += `${end<totalPages-1?'<li class="page-item disabled"><a class="page-link">…</a></li>':''}<li class="page-item"><a class="page-link" href="#" onclick="goPage(${totalPages});return false;">${totalPages}</a></li>`;
         html += `<li class="page-item ${current===totalPages?'disabled':''}"><a class="page-link" href="#" onclick="goPage(${current+1});return false;"><i class="fas fa-chevron-right"></i></a></li>`;
         el.innerHTML = html;
     }
 
-    function goPage(p) {
-        renderMembers(_currentFilteredMembers, p);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    function goPage(p) { renderMembers(_currentFilteredMembers, p); window.scrollTo({top:0,behavior:'smooth'}); }
 
-    /* ═══════════════════════════════════════════════════
-       FILTERS
-    ═══════════════════════════════════════════════════ */
     function attachFilterListeners() {
         ['searchInput','statusFilter','typeFilter','sortFilter'].forEach(id => {
             const el = document.getElementById(id);
@@ -970,251 +873,160 @@
     function applyFilters() {
         let f = [...members];
         const s = document.getElementById('searchInput').value.toLowerCase();
-        if (s) f = f.filter(m => (m.firstName + m.lastName + m.email + m.memberID + m.parentName).toLowerCase().includes(s));
+        if (s) f = f.filter(m=>(m.firstName+m.lastName+m.email+m.memberID+m.parentName).toLowerCase().includes(s));
         const st = document.getElementById('statusFilter').value;
-        if (st) f = f.filter(m => m.status === st);
+        if (st) f = f.filter(m=>m.status===st);
         const ty = document.getElementById('typeFilter').value;
-        if (ty) f = f.filter(m => m.type === ty);
+        if (ty) f = f.filter(m=>m.type===ty);
         const so = document.getElementById('sortFilter').value;
-        if      (so==='newest') f.sort((a,b)=>new Date(b.joinDate)-new Date(a.joinDate));
+        if (so==='newest') f.sort((a,b)=>new Date(b.joinDate)-new Date(a.joinDate));
         else if (so==='oldest') f.sort((a,b)=>new Date(a.joinDate)-new Date(b.joinDate));
-        else if (so==='name')   f.sort((a,b)=>a.firstName.localeCompare(b.firstName));
+        else if (so==='name') f.sort((a,b)=>a.firstName.localeCompare(b.firstName));
         renderMembers(f, 1);
     }
-    function resetFilters() {
-        ['searchInput','statusFilter','typeFilter'].forEach(id=>document.getElementById(id).value='');
-        document.getElementById('sortFilter').value='newest';
-        renderMembers(members, 1);
-    }
+    function resetFilters() { ['searchInput','statusFilter','typeFilter'].forEach(id=>document.getElementById(id).value=''); document.getElementById('sortFilter').value='newest'; renderMembers(members,1); }
 
-    /* ═══════════════════════════════════════════════════
-       SELECTION
-    ═══════════════════════════════════════════════════ */
     function toggleSelectAll() { const c=document.getElementById('selectAll').checked; document.querySelectorAll('.member-checkbox').forEach(cb=>cb.checked=c); updateSelection(); }
     function updateSelection() { selectedMembers=[...document.querySelectorAll('.member-checkbox:checked')].map(cb=>cb.dataset.id); }
     function openModal(id) { new bootstrap.Modal(document.getElementById(id)).show(); }
 
-    /* ═══════════════════════════════════════════════════
-       HELPERS
-    ═══════════════════════════════════════════════════ */
-    function normPath(p) {
-        if (!p) return null;
-        p = p.replace(/\\/g,'/');
-        if (p.startsWith('public/')) p = p.replace('public/','/')
-        if (!p.startsWith('/')) p = '/' + p;
-        return p;
-    }
+    function normPath(p) { if(!p) return null; p=p.replace(/\\/g,'/'); if(p.startsWith('public/')) p=p.replace('public/','/'); if(!p.startsWith('/')) p='/'+p; return p; }
     function renderFilePreview(wrapId, filePath, label) {
         const wrap = document.getElementById(wrapId); if(!wrap) return;
         const src = normPath(filePath);
         if (src) {
             const isImg = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(src);
-            wrap.innerHTML = `
-                <span class="dot-green"></span>
-                ${isImg ? `<img src="${src}" alt="${label}" title="Click to preview" onclick="viewDocument('${src}','${label}')">` : `<i class="fas fa-file-alt text-primary" style="font-size:1.4rem;flex-shrink:0;"></i>`}
-                <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                    <strong style="color:#065f46;font-size:.82rem;">File exists</strong>
-                    <a href="${src}" target="_blank" class="text-primary text-decoration-none small ms-1">view</a>
-                </span>`;
-        } else {
-            wrap.innerHTML = `<span class="dot-gray"></span><span class="text-muted fst-italic small">No file uploaded</span>`;
-        }
+            wrap.innerHTML = `<span class="dot-green"></span>${isImg?`<img src="${src}" alt="${label}" title="Click to preview" onclick="viewDocument('${src}','${label}')">`:`<i class="fas fa-file-alt text-primary" style="font-size:1.4rem;flex-shrink:0;"></i>`}<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><strong style="color:#065f46;font-size:.82rem;">File exists</strong><a href="${src}" target="_blank" class="text-primary text-decoration-none small ms-1">view</a></span>`;
+        } else { wrap.innerHTML = `<span class="dot-gray"></span><span class="text-muted fst-italic small">No file uploaded</span>`; }
     }
-    const fmt  = n => '₦' + Number(n||0).toLocaleString('en-NG', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const fmt = n => '₦' + Number(n||0).toLocaleString('en-NG', {minimumFractionDigits:2, maximumFractionDigits:2});
 
-    /* ═══════════════════════════════════════════════════
-       ADD MEMBER
-    ═══════════════════════════════════════════════════ */
     function openAddMemberModal() { openModal('addMemberModal'); }
     async function saveNewMember() {
         const formData = new FormData(document.getElementById('addMemberForm'));
-        const modalEl  = document.getElementById('addMemberModal');
-        const result   = await permFetch('/add',{method:'POST',body:formData},modalEl);
+        const modalEl = document.getElementById('addMemberModal');
+        const result = await permFetch('/add',{method:'POST',body:formData},modalEl);
         if (!result.ok) return;
         if (result.data.status) { bootstrap.Modal.getInstance(modalEl).hide(); await showNotify({type:'success',title:'Member Added',message:'The new member has been successfully added.'}); location.reload(); }
         else { await showNotify({type:'error',title:'Failed to Add Member',message:result.data.message||'An error occurred.'}); }
     }
 
-    /* ═══════════════════════════════════════════════════
-       EDIT MEMBER
-    ═══════════════════════════════════════════════════ */
     function editMember(id) {
         currentMemberId = id;
         const m = members.find(m=>m.id==id); if(!m) return;
-        if (m.entityType === 'kiddies') { showNotify({type:'info',title:'Kiddies Account',message:'Kiddies accounts are managed via the Kiddies Accounts panel.'}); return; }
+        if (m.entityType==='kiddies') { showNotify({type:'info',title:'Kiddies Account',message:'Kiddies accounts are managed via the Kiddies Accounts panel.'}); return; }
         document.getElementById('edit_firstName').value = m.firstName||'';
-        document.getElementById('edit_lastName').value  = m.lastName ||'';
-        document.getElementById('edit_email').value     = m.email    ||'';
-        document.getElementById('edit_phone').value     = m.phone    ||'';
-        document.getElementById('edit_status').value    = m.status   ||'pending';
-        document.getElementById('edit_state').value     = m.state    ||'';
-        document.getElementById('edit_lga').value       = m.lga      ||'';
-        document.getElementById('edit_address').value   = m.address  ||'';
-        if (m.dob) { try{ document.getElementById('edit_dob').value=new Date(m.dob).toISOString().split('T')[0]; }catch(_){document.getElementById('edit_dob').value='';} }
-        else document.getElementById('edit_dob').value='';
-        document.getElementById('edit_idType').value   = m.idType  ||'';
+        document.getElementById('edit_lastName').value  = m.lastName||'';
+        document.getElementById('edit_email').value     = m.email||'';
+        document.getElementById('edit_phone').value     = m.phone||'';
+        document.getElementById('edit_status').value    = m.status||'pending';
+        document.getElementById('edit_state').value     = m.state||'';
+        document.getElementById('edit_lga').value       = m.lga||'';
+        document.getElementById('edit_address').value   = m.address||'';
+        if (m.dob) { try{ document.getElementById('edit_dob').value=new Date(m.dob).toISOString().split('T')[0]; }catch(_){document.getElementById('edit_dob').value='';} } else document.getElementById('edit_dob').value='';
+        document.getElementById('edit_idType').value   = m.idType||'';
         document.getElementById('edit_idNumber').value = m.idNumber||'';
-        renderFilePreview('prev_passportPhoto',  m.passportPhoto,  'Passport Photo');
-        renderFilePreview('prev_displayPicture', m.displayPicture, 'Display Picture');
-        renderFilePreview('prev_idFile',         m.idFile,         'ID Document');
-        renderFilePreview('prev_addressProof',   m.addressProof,   'Proof of Address');
-        renderFilePreview('prev_signature',      m.signature,      'Signature');
-        ['edit_passportPhoto','edit_displayPicture','edit_idFile','edit_addressProof','edit_signature']
-            .forEach(id=>{ document.getElementById(id).value=''; });
-        document.getElementById('edit_bankName').value      = m.bankDetails?.bankName     ||'';
+        renderFilePreview('prev_passportPhoto',m.passportPhoto,'Passport Photo');
+        renderFilePreview('prev_displayPicture',m.displayPicture,'Display Picture');
+        renderFilePreview('prev_idFile',m.idFile,'ID Document');
+        renderFilePreview('prev_addressProof',m.addressProof,'Proof of Address');
+        renderFilePreview('prev_signature',m.signature,'Signature');
+        ['edit_passportPhoto','edit_displayPicture','edit_idFile','edit_addressProof','edit_signature'].forEach(id=>{document.getElementById(id).value='';});
+        document.getElementById('edit_bankName').value      = m.bankDetails?.bankName||'';
         document.getElementById('edit_accountNumber').value = m.bankDetails?.accountNumber||'';
-        document.getElementById('edit_accountName').value   = m.bankDetails?.accountName  ||'';
-        document.getElementById('edit_nokFullName').value     = m.nextOfKin?.fullName    ||'';
+        document.getElementById('edit_accountName').value   = m.bankDetails?.accountName||'';
+        document.getElementById('edit_nokFullName').value     = m.nextOfKin?.fullName||'';
         document.getElementById('edit_nokRelationship').value = m.nextOfKin?.relationship||'';
-        document.getElementById('edit_nokPhone').value        = m.nextOfKin?.phone       ||'';
-        document.getElementById('edit_nokAddress').value      = m.nextOfKin?.address     ||'';
+        document.getElementById('edit_nokPhone').value        = m.nextOfKin?.phone||'';
+        document.getElementById('edit_nokAddress').value      = m.nextOfKin?.address||'';
         const vi = bootstrap.Modal.getInstance(document.getElementById('viewMemberModal'));
         if (vi) { vi.hide(); document.getElementById('viewMemberModal').addEventListener('hidden.bs.modal', function once(){ this.removeEventListener('hidden.bs.modal',once); openModal('editMemberModal'); }); }
         else openModal('editMemberModal');
     }
 
     async function saveEditMember() {
-        const form    = document.getElementById('editMemberForm');
+        const form = document.getElementById('editMemberForm');
         const modalEl = document.getElementById('editMemberModal');
         if (!form.checkValidity()) { form.reportValidity(); return; }
         const formData = new FormData(form);
-        const result = await permFetch(`/admin/members/edit/${currentMemberId}`, { method:'POST', body:formData }, modalEl);
+        const result = await permFetch(`/admin/members/edit/${currentMemberId}`,{method:'POST',body:formData},modalEl);
         if (!result.ok) return;
         if (result.data?.status) {
             const idx = members.findIndex(m=>m.id===currentMemberId);
             if (idx !== -1) {
-                const m = members[idx];
-                const g = k => formData.get(k)||'';
-                m.firstName = g('firstName')||m.firstName; m.lastName  = g('lastName') ||m.lastName;
-                m.email     = g('email')    ||m.email;     m.phone     = g('phone')    ||m.phone;
-                m.status    = g('status')   ||m.status;    m.state     = g('state')    ||m.state;
-                m.lga       = g('lga')      ||m.lga;       m.address   = g('address')  ||m.address;
-                m.idType    = g('idType')   ||m.idType;    m.idNumber  = g('idNumber') ||m.idNumber;
-                m.bankDetails = { bankName:g('bankName')||m.bankDetails?.bankName||'', accountNumber:g('accountNumber')||m.bankDetails?.accountNumber||'', accountName:g('accountName')||m.bankDetails?.accountName||'' };
-                m.nextOfKin   = { fullName:g('nokFullName')||m.nextOfKin?.fullName||'', relationship:g('nokRelationship')||m.nextOfKin?.relationship||'', phone:g('nokPhone')||m.nextOfKin?.phone||'', address:g('nokAddress')||m.nextOfKin?.address||'' };
-                if (result.data.files) {
-                    if (result.data.files.passportPhoto)  m.passportPhoto  = result.data.files.passportPhoto;
-                    if (result.data.files.displayPicture) m.displayPicture = result.data.files.displayPicture;
-                    if (result.data.files.idFile)         m.idFile         = result.data.files.idFile;
-                    if (result.data.files.addressProof)   m.addressProof   = result.data.files.addressProof;
-                    if (result.data.files.signature)      m.signature      = result.data.files.signature;
-                }
+                const m = members[idx]; const g = k => formData.get(k)||'';
+                m.firstName=g('firstName')||m.firstName; m.lastName=g('lastName')||m.lastName;
+                m.email=g('email')||m.email; m.phone=g('phone')||m.phone;
+                m.status=g('status')||m.status; m.state=g('state')||m.state;
+                m.lga=g('lga')||m.lga; m.address=g('address')||m.address;
+                m.idType=g('idType')||m.idType; m.idNumber=g('idNumber')||m.idNumber;
+                m.bankDetails={bankName:g('bankName')||m.bankDetails?.bankName||'',accountNumber:g('accountNumber')||m.bankDetails?.accountNumber||'',accountName:g('accountName')||m.bankDetails?.accountName||''};
+                m.nextOfKin={fullName:g('nokFullName')||m.nextOfKin?.fullName||'',relationship:g('nokRelationship')||m.nextOfKin?.relationship||'',phone:g('nokPhone')||m.nextOfKin?.phone||'',address:g('nokAddress')||m.nextOfKin?.address||''};
+                if (result.data.files) { if(result.data.files.passportPhoto) m.passportPhoto=result.data.files.passportPhoto; if(result.data.files.displayPicture) m.displayPicture=result.data.files.displayPicture; if(result.data.files.idFile) m.idFile=result.data.files.idFile; if(result.data.files.addressProof) m.addressProof=result.data.files.addressProof; if(result.data.files.signature) m.signature=result.data.files.signature; }
             }
             updateStats(); renderMembers(_currentFilteredMembers, currentPage);
             bootstrap.Modal.getInstance(modalEl).hide();
             await showNotify({type:'success',title:'Member Updated',message:'Member details have been successfully updated.'});
-        } else {
-            await showNotify({type:'error',title:'Update Failed',message:result.data?.message||'An error occurred.'});
-        }
+        } else { await showNotify({type:'error',title:'Update Failed',message:result.data?.message||'An error occurred.'}); }
     }
 
-    /* ═══════════════════════════════════════════════════
-       VIEW MEMBER — handles both regular + kiddies
-    ═══════════════════════════════════════════════════ */
     function viewMember(id) {
         const m = members.find(m=>m.id==id); if(!m) return;
-        const isKiddies = m.entityType === 'kiddies';
-
-        // Avatar
+        const isKiddies = m.entityType==='kiddies';
         let avatarSrc;
-        if (isKiddies) {
-            avatarSrc = m.displayPicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.firstName+' '+m.lastName)}&background=ec4899&color=fff&size=150`;
-        } else {
-            avatarSrc = m.displayPicture || m.passportPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.firstName+' '+m.lastName)}&background=1e3a8a&color=fff&size=150`;
-        }
+        if (isKiddies) { avatarSrc = m.displayPicture||`https://ui-avatars.com/api/?name=${encodeURIComponent(m.firstName+' '+m.lastName)}&background=ec4899&color=fff&size=150`; }
+        else { avatarSrc = m.displayPicture||m.passportPhoto||`https://ui-avatars.com/api/?name=${encodeURIComponent(m.firstName+' '+m.lastName)}&background=1e3a8a&color=fff&size=150`; }
         document.getElementById('view_avatar').src = avatarSrc;
-        document.getElementById('view_fullname').innerText     = `${m.firstName} ${m.lastName}`.trim()||'No name';
+        document.getElementById('view_fullname').innerText = `${m.firstName} ${m.lastName}`.trim()||'No name';
         document.getElementById('view_membershipId').innerText = m.memberID||'No ID';
-
-        // Status badge
         const sb = document.getElementById('view_status_badge');
-        const statusMap = {
-            active:   ['bg-success',  'Active'],
-            pending:  ['bg-warning',  'Pending'],
-            rejected: ['bg-danger',   'Rejected'],
-            locked:   ['',            'Locked'],
-            closed:   ['bg-secondary','Closed'],
-        };
-        const [cls, lbl] = statusMap[m.status] || ['bg-secondary', m.status||'Unknown'];
-        sb.className = 'badge ' + cls;
-        if (m.status === 'locked') sb.style.cssText = 'background:rgba(236,72,153,.15);color:#db2777;border:1px solid rgba(236,72,153,.3);';
-        else sb.style.cssText = '';
-        sb.innerText = lbl;
-
+        const statusMap = { active:['bg-success','Active'], pending:['bg-warning','Pending'], rejected:['bg-danger','Rejected'], locked:['','Locked'], closed:['bg-secondary','Closed'] };
+        const [cls, lbl] = statusMap[m.status]||['bg-secondary',m.status||'Unknown'];
+        sb.className='badge '+cls;
+        if (m.status==='locked') sb.style.cssText='background:rgba(236,72,153,.15);color:#db2777;border:1px solid rgba(236,72,153,.3);'; else sb.style.cssText='';
+        sb.innerText=lbl;
         document.getElementById('view_type_badge_wrap').innerHTML = getMemberTypeBadge(m);
-
-        // ★ Kiddies banner
         const banner = document.getElementById('view_kiddies_banner');
         const actions = document.getElementById('view_member_actions');
         const bankSection = document.getElementById('view_bank_section');
         if (isKiddies) {
-            banner.style.display = 'block';
-            actions.style.display = 'none';
-            bankSection.style.display = 'none';
-            document.getElementById('view_kiddies_parent').textContent      = m.parentName || '—';
-            document.getElementById('view_kiddies_parentID').textContent    = m.parentMemberID || '—';
-            document.getElementById('view_kiddies_lock').textContent        = m.lockPeriodYears ? `${m.lockPeriodYears} years` : '—';
-            document.getElementById('view_kiddies_unlock').textContent      = m.unlockDate
-                ? new Date(m.unlockDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
-                : '—';
-            document.getElementById('view_kiddies_beneficiary').textContent = m.beneficiaryType
-                ? m.beneficiaryType.charAt(0).toUpperCase() + m.beneficiaryType.slice(1)
-                : '—';
-            document.getElementById('view_kiddies_dob').textContent         = m.childDOB
-                ? new Date(m.childDOB).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
-                : '—';
-        } else {
-            banner.style.display  = 'none';
-            actions.style.display = 'grid';
-            bankSection.style.display = 'block';
-        }
-
-        // ★ Financial snapshot — Share % now 2 decimal places (CHANGED: was toFixed(4))
+            banner.style.display='block'; actions.style.display='none'; bankSection.style.display='none';
+            document.getElementById('view_kiddies_parent').textContent = m.parentName||'—';
+            document.getElementById('view_kiddies_parentID').textContent = m.parentMemberID||'—';
+            document.getElementById('view_kiddies_lock').textContent = m.lockPeriodYears?`${m.lockPeriodYears} years`:'—';
+            document.getElementById('view_kiddies_unlock').textContent = m.unlockDate?new Date(m.unlockDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+            document.getElementById('view_kiddies_beneficiary').textContent = m.beneficiaryType?m.beneficiaryType.charAt(0).toUpperCase()+m.beneficiaryType.slice(1):'—';
+            document.getElementById('view_kiddies_dob').textContent = m.childDOB?new Date(m.childDOB).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+        } else { banner.style.display='none'; actions.style.display='grid'; bankSection.style.display='block'; }
         const s = m.memberStats;
         document.getElementById('view_savings').innerText       = fmt(s.memberSavings);
         document.getElementById('view_accumROI').innerText      = fmt(s.accumulativeROI);
         document.getElementById('view_totalBalance').innerText  = fmt(s.totalBalance);
-        document.getElementById('view_sharePercent').innerText  = Number(s.sharePercentage||0).toFixed(2) + '%';
+        document.getElementById('view_sharePercent').innerText  = Number(s.sharePercentage||0).toFixed(2)+'%';
         document.getElementById('view_roiEarning').innerText    = fmt(s.ROI);
         document.getElementById('view_companyCharge').innerText = fmt(s.companyChargeOnUser);
-
-        // Personal info
-        document.getElementById('view_email').innerText           = m.email   ||'---';
-        document.getElementById('view_phone').innerText           = m.phone   ||'---';
-        document.getElementById('view_dob').innerText             = m.dob ? new Date(m.dob).toLocaleDateString() : '---';
-        document.getElementById('view_state_lga').innerText       = (m.state||'---') + (m.lga?', '+m.lga:'');
+        document.getElementById('view_email').innerText           = m.email||'---';
+        document.getElementById('view_phone').innerText           = m.phone||'---';
+        document.getElementById('view_dob').innerText             = m.dob?new Date(m.dob).toLocaleDateString():'---';
+        document.getElementById('view_state_lga').innerText       = (m.state||'---')+(m.lga?', '+m.lga:'');
         document.getElementById('view_address').innerText         = m.address||'---';
-
-        // Bank (regular members only — already hidden for kiddies)
-        document.getElementById('view_bankName').innerText        = m.bankDetails?.bankName     ||'---';
+        document.getElementById('view_bankName').innerText        = m.bankDetails?.bankName||'---';
         document.getElementById('view_accountNumber').innerText   = m.bankDetails?.accountNumber||'---';
-        document.getElementById('view_accountName').innerText     = m.bankDetails?.accountName  ||'---';
-
-        // NOK
-        document.getElementById('view_nok_name').innerText        = m.nextOfKin?.fullName    ||'---';
+        document.getElementById('view_accountName').innerText     = m.bankDetails?.accountName||'---';
+        document.getElementById('view_nok_name').innerText        = m.nextOfKin?.fullName||'---';
         document.getElementById('view_nok_relationship').innerText= m.nextOfKin?.relationship||'---';
-        document.getElementById('view_nok_phone').innerText       = m.nextOfKin?.phone       ||'---';
-        document.getElementById('view_nok_address').innerText     = m.nextOfKin?.address     ||'---';
-
-        // KYC docs (only for regular members)
+        document.getElementById('view_nok_phone').innerText       = m.nextOfKin?.phone||'---';
+        document.getElementById('view_nok_address').innerText     = m.nextOfKin?.address||'---';
         const dc = document.getElementById('view_documents'); dc.innerHTML='';
         if (!isKiddies) {
-            const docs = [
-                {label:'Passport Photo', src:normPath(m.passportPhoto)},
-                {label:'ID Document',    src:normPath(m.idFile)},
-                {label:'Address Proof',  src:normPath(m.addressProof)},
-                {label:'Signature',      src:normPath(m.signature)}
-            ];
-            docs.forEach(doc=>{ if(!doc.src) return; const w=document.createElement('div'); w.innerHTML=`<small class="text-muted d-block mb-2">${doc.label}</small><div style="cursor:pointer"><img src="${doc.src}" class="document-preview" alt="${doc.label}"></div>`; w.querySelector('div').addEventListener('click',()=>viewDocument(doc.src,doc.label)); dc.appendChild(w); });
+            [{label:'Passport Photo',src:normPath(m.passportPhoto)},{label:'ID Document',src:normPath(m.idFile)},{label:'Address Proof',src:normPath(m.addressProof)},{label:'Signature',src:normPath(m.signature)}]
+            .forEach(doc=>{ if(!doc.src) return; const w=document.createElement('div'); w.innerHTML=`<small class="text-muted d-block mb-2">${doc.label}</small><div style="cursor:pointer"><img src="${doc.src}" class="document-preview" alt="${doc.label}"></div>`; w.querySelector('div').addEventListener('click',()=>viewDocument(doc.src,doc.label)); dc.appendChild(w); });
         }
-
-        // Action buttons for regular members
         if (!isKiddies) {
             document.getElementById('editMemberBtn').onclick     = () => editMember(id);
             document.getElementById('changeTypeBtnView').onclick = () => openChangeTypeModal(id);
             document.getElementById('deleteMemberBtn').onclick   = () => deleteMember(id);
         }
-
         new bootstrap.Modal(document.getElementById('viewMemberModal')).show();
     }
 
@@ -1225,34 +1037,19 @@
         else window.open(url,'_blank');
     }
 
-    /* ═══════════════════════════════════════════════════
-       CHANGE MEMBER TYPE
-    ═══════════════════════════════════════════════════ */
     function openChangeTypeModal(id) {
         currentMemberId = id;
         const m = members.find(m=>m.id==id); if(!m) return;
-        if (m.entityType === 'kiddies') { showNotify({type:'info',title:'Not Applicable',message:'Member type cannot be changed for kiddies accounts.'}); return; }
+        if (m.entityType==='kiddies') { showNotify({type:'info',title:'Not Applicable',message:'Member type cannot be changed for kiddies accounts.'}); return; }
         const avatar = m.displayPicture||m.passportPhoto||`https://ui-avatars.com/api/?name=${encodeURIComponent(m.firstName+' '+m.lastName)}&background=312e81&color=fff&size=80`;
         document.getElementById('ct_avatar').src        = avatar;
         document.getElementById('ct_name').textContent  = `${m.firstName} ${m.lastName}`;
         document.getElementById('ct_email').textContent = m.email||'';
         const ctb = document.getElementById('ct_currentTypeBadge');
-        if (m.account?.accountType) {
-            ctb.style.cssText = 'background:#6366f1;color:white;';
-            ctb.textContent   = `Current: ${m.account.accountType.name} (${m.account.accountType.shortCode})`;
-        } else {
-            ctb.style.cssText = 'background:#6b7280;color:white;';
-            ctb.textContent   = 'No type assigned yet';
-        }
-        const sel = document.getElementById('ct_memberTypeId');
-        sel.value = '';
-        Array.from(sel.options).forEach(opt => {
-            if (!opt.value) return;
-            const isCurrent = m.account?.accountType && opt.value === m.account.accountType.id;
-            opt.disabled    = isCurrent;
-            opt.textContent = opt.textContent.replace(/\s*✓ \(current\)$/, '');
-            if (isCurrent) opt.textContent += ' ✓ (current)';
-        });
+        if (m.account?.accountType) { ctb.style.cssText='background:#6366f1;color:white;'; ctb.textContent=`Current: ${m.account.accountType.name} (${m.account.accountType.shortCode})`; }
+        else { ctb.style.cssText='background:#6b7280;color:white;'; ctb.textContent='No type assigned yet'; }
+        const sel = document.getElementById('ct_memberTypeId'); sel.value='';
+        Array.from(sel.options).forEach(opt=>{ if(!opt.value) return; const isCurrent=m.account?.accountType&&opt.value===m.account.accountType.id; opt.disabled=isCurrent; opt.textContent=opt.textContent.replace(/\s*✓ \(current\)$/,''); if(isCurrent) opt.textContent+=' ✓ (current)'; });
         const vi = bootstrap.Modal.getInstance(document.getElementById('viewMemberModal'));
         if (vi) { vi.hide(); document.getElementById('viewMemberModal').addEventListener('hidden.bs.modal', function once(){ this.removeEventListener('hidden.bs.modal',once); openModal('changeTypeModal'); }); }
         else openModal('changeTypeModal');
@@ -1262,56 +1059,34 @@
         const memberTypeId = document.getElementById('ct_memberTypeId').value;
         if (!memberTypeId) { await showNotify({type:'warning',title:'Select a Type',message:'Please select a membership type to switch to.'}); return; }
         const modalEl = document.getElementById('changeTypeModal');
-        const result  = await permFetch(`/admin/members/change-type/${currentMemberId}`, {
-            method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({memberTypeId})
-        }, modalEl);
+        const result = await permFetch(`/admin/members/change-type/${currentMemberId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({memberTypeId})},modalEl);
         if (!result.ok) return;
         if (result.data?.status) {
             const idx = members.findIndex(m=>m.id===currentMemberId);
-            if (idx !== -1) {
-                const m = members[idx];
-                const typeObj = memberTypes.find(t=>t.id===memberTypeId);
-                if (typeObj) {
-                    m.type     = typeObj.shortCode;
-                    m.memberID = result.data.newMembershipID;
-                    if (!m.account) m.account = {};
-                    m.account.accountType = {id:typeObj.id, name:typeObj.name, shortCode:typeObj.shortCode, interestRate:typeObj.interestRate};
-                }
-            }
+            if (idx !== -1) { const m=members[idx]; const typeObj=memberTypes.find(t=>t.id===memberTypeId); if(typeObj){m.type=typeObj.shortCode;m.memberID=result.data.newMembershipID;if(!m.account)m.account={};m.account.accountType={id:typeObj.id,name:typeObj.name,shortCode:typeObj.shortCode,interestRate:typeObj.interestRate};} }
             updateStats(); renderMembers(_currentFilteredMembers, currentPage);
             bootstrap.Modal.getInstance(modalEl).hide();
             await showNotify({type:'success',title:'Type Changed',message:`Membership type updated!\n\nNew Type: ${result.data.newMemberTypeName}\nNew Membership ID: ${result.data.newMembershipID}`});
-        } else {
-            await showNotify({type:'error',title:'Change Failed',message:result.data?.message||'An error occurred.'});
-        }
+        } else { await showNotify({type:'error',title:'Change Failed',message:result.data?.message||'An error occurred.'}); }
     }
 
-    /* ═══════════════════════════════════════════════════
-       DELETE MEMBER
-    ═══════════════════════════════════════════════════ */
     function deleteMember(id) {
         const m = members.find(m=>m.id==id);
-        if (m?.entityType === 'kiddies') { showNotify({type:'info',title:'Kiddies Account',message:'Kiddies accounts are deleted via the Kiddies Accounts panel.'}); return; }
+        if (m?.entityType==='kiddies') { showNotify({type:'info',title:'Kiddies Account',message:'Kiddies accounts are deleted via the Kiddies Accounts panel.'}); return; }
         currentMemberId=id; openModal('deleteConfirmModal');
     }
     async function confirmDelete() {
         const modalEl = document.getElementById('deleteConfirmModal');
-        const result  = await permFetch(`/members/delete/${currentMemberId}`,{method:'POST'},modalEl);
+        const result = await permFetch(`/members/delete/${currentMemberId}`,{method:'POST'},modalEl);
         if (!result.ok) return;
         if (result.data.status) {
-            members = members.filter(m=>m.id!==currentMemberId);
-            _currentFilteredMembers = _currentFilteredMembers.filter(m=>m.id!==currentMemberId);
+            members=members.filter(m=>m.id!==currentMemberId); _currentFilteredMembers=_currentFilteredMembers.filter(m=>m.id!==currentMemberId);
             updateStats(); renderMembers(_currentFilteredMembers, currentPage);
             bootstrap.Modal.getInstance(modalEl).hide();
             await showNotify({type:'success',title:'Member Deleted',message:'The member has been successfully deleted.'});
-        } else {
-            await showNotify({type:'error',title:'Delete Failed',message:result.data.message||'Failed to delete member.'});
-        }
+        } else { await showNotify({type:'error',title:'Delete Failed',message:result.data.message||'Failed to delete member.'}); }
     }
 
-    /* ═══════════════════════════════════════════════════
-       APPROVE MEMBER
-    ═══════════════════════════════════════════════════ */
     function showApprovalModal(id) {
         currentMemberId=id; const m=members.find(m=>m.id==id); if(!m) return;
         document.getElementById('approvalMemberName').textContent  = `${m.firstName} ${m.lastName}`;
@@ -1325,41 +1100,22 @@
         const memberTypeId = document.getElementById('approvalMemberType').value;
         if (!memberTypeId) { await showNotify({type:'warning',title:'Missing Information',message:'Please select a membership type before approving this member.'}); return; }
         const modalEl = document.getElementById('approveMemberModal');
-        const result  = await permFetch(`/admin/members/approve/${currentMemberId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({memberTypeId})},modalEl);
+        const result = await permFetch(`/admin/members/approve/${currentMemberId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({memberTypeId})},modalEl);
         if (!result.ok) return;
-        if (!result.data?.error) {
-            bootstrap.Modal.getInstance(modalEl).hide();
-            await showNotify({type:'success',title:'Member Approved',message:`Member approved successfully!\n\nMembership Type: ${result.data.memberTypeName}\nMember ID: ${result.data.membershipID}\nEmail sent to: ${result.data.email}`});
-            location.reload();
-        } else { await showNotify({type:'error',title:'Approval Failed',message:result.data.message||'An error occurred during approval.'}); }
+        if (!result.data?.error) { bootstrap.Modal.getInstance(modalEl).hide(); await showNotify({type:'success',title:'Member Approved',message:`Member approved successfully!\n\nMembership Type: ${result.data.memberTypeName}\nMember ID: ${result.data.membershipID}\nEmail sent to: ${result.data.email}`}); location.reload(); }
+        else { await showNotify({type:'error',title:'Approval Failed',message:result.data.message||'An error occurred during approval.'}); }
     }
     function approveMember(id) { showApprovalModal(id); }
 
-    /* ═══════════════════════════════════════════════════
-       REJECT MEMBER
-    ═══════════════════════════════════════════════════ */
     async function rejectMember(id) {
-        const confirmed = await showNotify({
-            type: 'warning', title: 'Confirm Rejection',
-            message: 'Are you sure you want to reject this member?',
-            confirmLabel: 'Yes, Reject', cancelLabel: 'Cancel'
-        });
+        const confirmed = await showNotify({type:'warning',title:'Confirm Rejection',message:'Are you sure you want to reject this member?',confirmLabel:'Yes, Reject',cancelLabel:'Cancel'});
         if (!confirmed) return;
-        const result = await permFetch(`/admin/members/reject/${id}`, { method:'POST', headers:{'Content-Type':'application/json'} });
+        const result = await permFetch(`/admin/members/reject/${id}`,{method:'POST',headers:{'Content-Type':'application/json'}});
         if (!result.ok) return;
-        if (result.data.status) {
-            const m = members.find(m => m.id === id);
-            if (m) m.status = 'rejected';
-            updateStats(); renderMembers(_currentFilteredMembers, currentPage);
-            await showNotify({ type:'success', title:'Member Rejected', message:'The member status has been set to rejected.' });
-        } else {
-            await showNotify({ type:'error', title:'Rejection Failed', message:result.data.message||'Failed to reject member.' });
-        }
+        if (result.data.status) { const m=members.find(m=>m.id===id); if(m) m.status='rejected'; updateStats(); renderMembers(_currentFilteredMembers, currentPage); await showNotify({type:'success',title:'Member Rejected',message:'The member status has been set to rejected.'}); }
+        else { await showNotify({type:'error',title:'Rejection Failed',message:result.data.message||'Failed to reject member.'}); }
     }
 
-    /* ═══════════════════════════════════════════════════
-       BULK ACTIONS
-    ═══════════════════════════════════════════════════ */
     async function bulkApprove() {
         if (!selectedMembers.length) { await showNotify({type:'warning',title:'No Selection',message:'Please select at least one member.'}); return; }
         const ok = await showNotify({type:'info',title:'Approve Members',message:`Approve ${selectedMembers.length} member(s)?`,confirmLabel:'Yes, Approve',cancelLabel:'Cancel'});
@@ -1374,304 +1130,90 @@
         const ok = await showNotify({type:'warning',title:'Delete Members',message:`Delete ${selectedMembers.length} member(s)? This cannot be undone.`,confirmLabel:'Yes, Delete All',cancelLabel:'Cancel'});
         if (!ok) return;
         for (const id of selectedMembers) { const r=await permFetch(`/members/delete/${id}`,{method:'POST'}); if(!r.ok) return; }
-        members = members.filter(m=>!selectedMembers.includes(m.id));
-        _currentFilteredMembers = _currentFilteredMembers.filter(m=>!selectedMembers.includes(m.id));
-        selectedMembers=[];
+        members=members.filter(m=>!selectedMembers.includes(m.id)); _currentFilteredMembers=_currentFilteredMembers.filter(m=>!selectedMembers.includes(m.id)); selectedMembers=[];
         updateStats(); renderMembers(_currentFilteredMembers, currentPage);
         await showNotify({type:'success',title:'Members Deleted',message:'Selected members have been permanently deleted.'});
     }
 
-    /* ═══════════════════════════════════════════════════
-       SIDEBAR
-    ═══════════════════════════════════════════════════ */
     function toggleSidebar() { if(window.innerWidth<=992){document.getElementById('sidebar').classList.toggle('active');document.getElementById('sidebarOverlay').classList.toggle('active');} }
     function closeSidebar() { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); }
 
-    /* ═══════════════════════════════════════════════════
-       EXPORT — build rows (handles both types)
-       Share % uses toFixed(2) throughout (CHANGED: was toFixed(4))
-    ═══════════════════════════════════════════════════ */
     function buildExportRows(data) {
         return data.map((m, i) => ({
-            '#':                    i + 1,
-            'Entity Type':          m.entityType === 'kiddies' ? 'Kiddies Account' : 'Member',
-            'Member / Account ID':  m.memberID || 'N/A',
-            'First Name':           m.firstName,
-            'Last Name':            m.lastName,
-            'Email':                m.email || '---',
-            'Phone':                m.phone || '---',
-            'Status':               m.status.charAt(0).toUpperCase() + m.status.slice(1),
-            'Type':                 m.entityType === 'kiddies' ? 'Kiddies Account' : (m.account?.accountType?.name || 'No Membership'),
-            'Savings (₦)':          m.memberStats.memberSavings,
-            'Accum. ROI (₦)':       m.memberStats.accumulativeROI,
-            'Total Balance (₦)':    m.memberStats.totalBalance,
-            'Share (%)':            Number(m.memberStats.sharePercentage || 0).toFixed(2),  // CHANGED: was raw number formatted to 4dp in Excel
-            'Est. ROI Earning (₦)': m.memberStats.ROI,
-            'Company Charge (₦)':   m.memberStats.companyChargeOnUser,
-            'State':                m.state || '---',
-            'LGA':                  m.lga   || '---',
-            'Date Joined':          new Date(m.joinDate).toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'}),
-            'Parent Name':          m.entityType === 'kiddies' ? (m.parentName||'---') : '---',
-            'Parent Member ID':     m.entityType === 'kiddies' ? (m.parentMemberID||'---') : '---',
-            'Unlock Date':          m.entityType === 'kiddies' && m.unlockDate ? new Date(m.unlockDate).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '---',
-            'Bank Name':            m.bankDetails?.bankName      || '---',
-            'Account Number':       m.bankDetails?.accountNumber || '---',
-            'Account Name':         m.bankDetails?.accountName   || '---',
-            'NOK Name':             m.nextOfKin?.fullName        || '---',
-            'NOK Phone':            m.nextOfKin?.phone           || '---',
-            'NOK Relationship':     m.nextOfKin?.relationship    || '---',
+            '#': i+1, 'Entity Type': m.entityType==='kiddies'?'Kiddies Account':'Member',
+            'Member / Account ID': m.memberID||'N/A', 'First Name': m.firstName, 'Last Name': m.lastName,
+            'Email': m.email||'---', 'Phone': m.phone||'---',
+            'Status': m.status.charAt(0).toUpperCase()+m.status.slice(1),
+            'Type': m.entityType==='kiddies'?'Kiddies Account':(m.account?.accountType?.name||'No Membership'),
+            'Savings (₦)': m.memberStats.memberSavings, 'Accum. ROI (₦)': m.memberStats.accumulativeROI,
+            'Total Balance (₦)': m.memberStats.totalBalance, 'Share (%)': Number(m.memberStats.sharePercentage||0).toFixed(2),
+            'Est. ROI Earning (₦)': m.memberStats.ROI, 'Company Charge (₦)': m.memberStats.companyChargeOnUser,
+            'State': m.state||'---', 'LGA': m.lga||'---',
+            'Date Joined': new Date(m.joinDate).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}),
+            'Parent Name': m.entityType==='kiddies'?(m.parentName||'---'):'---',
+            'Parent Member ID': m.entityType==='kiddies'?(m.parentMemberID||'---'):'---',
+            'Unlock Date': m.entityType==='kiddies'&&m.unlockDate?new Date(m.unlockDate).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}):'---',
+            'Bank Name': m.bankDetails?.bankName||'---', 'Account Number': m.bankDetails?.accountNumber||'---',
+            'Account Name': m.bankDetails?.accountName||'---', 'NOK Name': m.nextOfKin?.fullName||'---',
+            'NOK Phone': m.nextOfKin?.phone||'---', 'NOK Relationship': m.nextOfKin?.relationship||'---',
         }));
     }
 
-    function exportToExcel(useFiltered = false) {
-        const data = useFiltered ? _currentFilteredMembers : members;
-        if (!data.length) { showNotify({ type:'warning', title:'No Data', message:'No members to export.' }); return; }
-
+    function exportToExcel(useFiltered=false) {
+        const data = useFiltered?_currentFilteredMembers:members;
+        if (!data.length) { showNotify({type:'warning',title:'No Data',message:'No members to export.'}); return; }
         const rows = buildExportRows(data);
-        const ws   = XLSX.utils.json_to_sheet(rows);
-
-        ws['!cols'] = [
-            {wch:4},{wch:14},{wch:14},{wch:16},{wch:16},{wch:28},{wch:16},
-            {wch:10},{wch:18},{wch:16},{wch:16},{wch:16},{wch:10},
-            {wch:18},{wch:18},{wch:14},{wch:14},{wch:16},
-            {wch:16},{wch:14},{wch:14},{wch:16},{wch:16},{wch:20},{wch:20},{wch:16},{wch:16}
-        ];
-
+        const ws = XLSX.utils.json_to_sheet(rows);
+        ws['!cols']=[{wch:4},{wch:14},{wch:14},{wch:16},{wch:16},{wch:28},{wch:16},{wch:10},{wch:18},{wch:16},{wch:16},{wch:16},{wch:10},{wch:18},{wch:18},{wch:14},{wch:14},{wch:16},{wch:16},{wch:14},{wch:14},{wch:16},{wch:16},{wch:20},{wch:20},{wch:16},{wch:16}];
         const range = XLSX.utils.decode_range(ws['!ref']);
-
-        // Header styling
-        for (let C = range.s.c; C <= range.e.c; C++) {
-            const addr = XLSX.utils.encode_cell({ r:0, c:C });
-            if (!ws[addr]) continue;
-            ws[addr].s = {
-                fill:      { fgColor: { rgb: '1E3A8A' } },
-                font:      { bold: true, color: { rgb: 'FFFFFF' }, sz: 11 },
-                alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
-                border:    { bottom:{style:'thin',color:{rgb:'FFFFFF'}}, right:{style:'thin',color:{rgb:'FFFFFF'}} }
-            };
+        for (let C=range.s.c; C<=range.e.c; C++) { const addr=XLSX.utils.encode_cell({r:0,c:C}); if(!ws[addr]) continue; ws[addr].s={fill:{fgColor:{rgb:'1E3A8A'}},font:{bold:true,color:{rgb:'FFFFFF'},sz:11},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:{bottom:{style:'thin',color:{rgb:'FFFFFF'}},right:{style:'thin',color:{rgb:'FFFFFF'}}}}; }
+        for (let R=1; R<=range.e.r; R++) {
+            const isKiddiesRow=rows[R-1]?.['Entity Type']==='Kiddies Account';
+            const fillColor=isKiddiesRow?'FFF0F9':(R%2===0?'EEF2FF':'FFFFFF');
+            for (let C=range.s.c; C<=range.e.c; C++) { const addr=XLSX.utils.encode_cell({r:R,c:C}); if(!ws[addr]) ws[addr]={v:'',t:'s'}; ws[addr].s={fill:{fgColor:{rgb:fillColor}},alignment:{vertical:'center'},border:{bottom:{style:'thin',color:{rgb:'E0E7FF'}},right:{style:'thin',color:{rgb:'E0E7FF'}}}}; }
+            [9,10,11,13,14].forEach(c=>{const addr=XLSX.utils.encode_cell({r:R,c});if(ws[addr]){ws[addr].t='n';ws[addr].z='#,##0.00';}});
+            const shareAddr=XLSX.utils.encode_cell({r:R,c:12}); if(ws[shareAddr]){ws[shareAddr].t='s';ws[shareAddr].v=ws[shareAddr].v+'%';}
+            const stAddr=XLSX.utils.encode_cell({r:R,c:7}); if(ws[stAddr]){const v=ws[stAddr].v;const fc=v==='Active'?'065F46':v==='Pending'?'92400E':v==='Locked'?'831843':'7F1D1D';ws[stAddr].s={...ws[stAddr].s,font:{bold:true,color:{rgb:fc}}};}
         }
-
-        // Data rows
-        for (let R = 1; R <= range.e.r; R++) {
-            const isKiddiesRow = rows[R-1]?.['Entity Type'] === 'Kiddies Account';
-            const fillColor    = isKiddiesRow ? 'FFF0F9' : (R % 2 === 0 ? 'EEF2FF' : 'FFFFFF');
-
-            for (let C = range.s.c; C <= range.e.c; C++) {
-                const addr = XLSX.utils.encode_cell({ r:R, c:C });
-                if (!ws[addr]) ws[addr] = { v:'', t:'s' };
-                ws[addr].s = {
-                    fill:      { fgColor: { rgb: fillColor } },
-                    alignment: { vertical: 'center' },
-                    border:    { bottom:{style:'thin',color:{rgb:'E0E7FF'}}, right:{style:'thin',color:{rgb:'E0E7FF'}} }
-                };
-            }
-            // Numeric columns: savings(9), accumROI(10), totalBal(11), ROI(13), coCharge(14)
-            [9,10,11,13,14].forEach(c => {
-                const addr = XLSX.utils.encode_cell({ r:R, c });
-                if (ws[addr]) { ws[addr].t = 'n'; ws[addr].z = '#,##0.00'; }
-            });
-            // Share % column (col 12) — stored as string with 2dp, display as-is
-            // CHANGED: was number type with '0.0000"%"' format, now plain text "2.62%"
-            const shareAddr = XLSX.utils.encode_cell({ r:R, c:12 });
-            if (ws[shareAddr]) {
-                ws[shareAddr].t = 's';
-                ws[shareAddr].v = ws[shareAddr].v + '%';
-            }
-            // Status colour (col 7)
-            const stAddr = XLSX.utils.encode_cell({ r:R, c:7 });
-            if (ws[stAddr]) {
-                const v  = ws[stAddr].v;
-                const fc = v==='Active'?'065F46':v==='Pending'?'92400E':v==='Locked'?'831843':'7F1D1D';
-                ws[stAddr].s = { ...ws[stAddr].s, font:{ bold:true, color:{ rgb:fc } } };
-            }
-        }
-
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'All Members');
-
-        // Summary sheet
-        const regularData = data.filter(m=>m.entityType==='member');
-        const kiddiesData = data.filter(m=>m.entityType==='kiddies');
-        const totSavings  = data.reduce((s,m)=>s+m.memberStats.memberSavings,0);
-        const totROI      = data.reduce((s,m)=>s+m.memberStats.ROI,0);
-        const totAccumROI = data.reduce((s,m)=>s+m.memberStats.accumulativeROI,0);
-        const totBalance  = data.reduce((s,m)=>s+m.memberStats.totalBalance,0);
-
-        const summaryData = [
-            ['Club De Stars Cooperative — Member Export', ''],
-            ['Generated', new Date().toLocaleString()],
-            ['', ''],
-            ['MEMBER COUNTS', ''],
-            ['Total Records Exported',  data.length],
-            ['Regular Members',         regularData.length],
-            ['  — Active',              regularData.filter(m=>m.status==='active').length],
-            ['  — Pending',             regularData.filter(m=>m.status==='pending').length],
-            ['  — Rejected',            regularData.filter(m=>m.status==='rejected').length],
-            ['Kiddies Accounts',        kiddiesData.length],
-            ['  — Active Kiddies',      kiddiesData.filter(m=>m.status==='active').length],
-            ['  — Locked Kiddies',      kiddiesData.filter(m=>m.status==='locked').length],
-            ['', ''],
-            ['FINANCIAL TOTALS (Exported Set)', ''],
-            ['Total Savings',            totSavings],
-            ['Total Accum. ROI',         totAccumROI],
-            ['Total Balance',            totBalance],
-            ['Total Est. ROI Earnings',  totROI],
-        ];
-        const ws2 = XLSX.utils.aoa_to_sheet(summaryData);
-        ws2['!cols'] = [{wch:32},{wch:20}];
-        XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
-
-        const filename = `CDS_Members_${new Date().toISOString().split('T')[0]}${useFiltered?'_filtered':''}.xlsx`;
-        XLSX.writeFile(wb, filename);
-        showNotify({ type:'success', title:'Excel Exported', message:`${data.length} record(s) exported to ${filename}` });
+        const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'All Members');
+        const regularData=data.filter(m=>m.entityType==='member'); const kiddiesData=data.filter(m=>m.entityType==='kiddies');
+        const totSavings=data.reduce((s,m)=>s+m.memberStats.memberSavings,0); const totROI=data.reduce((s,m)=>s+m.memberStats.ROI,0); const totAccumROI=data.reduce((s,m)=>s+m.memberStats.accumulativeROI,0); const totBalance=data.reduce((s,m)=>s+m.memberStats.totalBalance,0);
+        const summaryData=[['Club De Stars Cooperative — Member Export',''],['Generated',new Date().toLocaleString()],['',''],['MEMBER COUNTS',''],['Total Records Exported',data.length],['Regular Members',regularData.length],['  — Active',regularData.filter(m=>m.status==='active').length],['  — Pending',regularData.filter(m=>m.status==='pending').length],['  — Rejected',regularData.filter(m=>m.status==='rejected').length],['Kiddies Accounts',kiddiesData.length],['  — Active Kiddies',kiddiesData.filter(m=>m.status==='active').length],['  — Locked Kiddies',kiddiesData.filter(m=>m.status==='locked').length],['',''],['FINANCIAL TOTALS (Exported Set)',''],['Total Savings',totSavings],['Total Accum. ROI',totAccumROI],['Total Balance',totBalance],['Total Est. ROI Earnings',totROI]];
+        const ws2=XLSX.utils.aoa_to_sheet(summaryData); ws2['!cols']=[{wch:32},{wch:20}]; XLSX.utils.book_append_sheet(wb,ws2,'Summary');
+        const filename=`CDS_Members_${new Date().toISOString().split('T')[0]}${useFiltered?'_filtered':''}.xlsx`;
+        XLSX.writeFile(wb,filename);
+        showNotify({type:'success',title:'Excel Exported',message:`${data.length} record(s) exported to ${filename}`});
     }
 
-    /* ═══════════════════════════════════════════════════
-       EXPORT — PDF
-       Share % uses toFixed(2) (CHANGED: was toFixed(4))
-    ═══════════════════════════════════════════════════ */
-    function exportToPDF(useFiltered = false) {
-        const data = useFiltered ? _currentFilteredMembers : members;
-        if (!data.length) { showNotify({ type:'warning', title:'No Data', message:'No members to export.' }); return; }
-
-        const now         = new Date().toLocaleString('en-US', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
-        const regular     = data.filter(m=>m.entityType==='member');
-        const kiddies     = data.filter(m=>m.entityType==='kiddies');
-        const active      = regular.filter(m=>m.status==='active').length;
-        const pending     = regular.filter(m=>m.status==='pending').length;
-        const rejected    = regular.filter(m=>m.status==='rejected').length;
-        const totSavings  = data.reduce((s,m)=>s+m.memberStats.memberSavings,0);
-        const totROI      = data.reduce((s,m)=>s+m.memberStats.ROI,0);
-        const totBalance  = data.reduce((s,m)=>s+m.memberStats.totalBalance,0);
-
-        const rows = data.map((m, i) => {
-            const isKiddies   = m.entityType === 'kiddies';
-            const statusColor = m.status==='active'?'#065f46':m.status==='pending'?'#92400e':m.status==='locked'?'#831843':'#7f1d1d';
-            const statusBg    = m.status==='active'?'#d1fae5':m.status==='pending'?'#fef3c7':m.status==='locked'?'#fce7f3':'#fee2e2';
-            const rowBg       = isKiddies ? (i%2===0?'#fff8fc':'#fdf2f8') : (i%2===0?'#fff':'#f8fafc');
-            const s = m.memberStats;
-            const typeLabel = isKiddies
-                ? `<span style="background:#fce7f3;color:#db2777;padding:1px 6px;border-radius:6px;font-size:9px;font-weight:700;">👶 Kiddies</span>`
-                : `<span style="font-size:10px;">${m.account?.accountType?.name||'—'}</span>`;
-            const subLine = isKiddies
-                ? `<span style="color:#ec4899;font-size:9px;">Parent: ${m.parentName||'—'} · ${m.parentMemberID||'—'}</span>`
-                : `<span style="color:#9ca3af;font-size:10px;">${m.email}</span>`;
-            return `
-            <tr style="background:${rowBg};">
-                <td style="text-align:center;color:#9ca3af;font-size:11px;">${i+1}</td>
-                <td>
-                    <strong style="font-size:12px;">${m.firstName} ${m.lastName}</strong><br>
-                    ${subLine}<br>
-                    <span style="font-family:monospace;font-size:10px;color:#6366f1;">${m.memberID||'N/A'}</span>
-                </td>
-                <td>${typeLabel}</td>
-                <td style="text-align:center;">
-                    <span style="background:${statusBg};color:${statusColor};padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;">${m.status}</span>
-                </td>
-                <td style="text-align:right;font-size:11px;">
-                    <strong style="color:#1e3a8a;">₦${Number(s.memberSavings).toLocaleString('en-NG',{minimumFractionDigits:2})}</strong><br>
-                    <span style="color:#9ca3af;font-size:10px;">Accum: ₦${Number(s.accumulativeROI).toLocaleString('en-NG',{minimumFractionDigits:2})}</span>
-                </td>
-                <td style="text-align:right;font-size:11px;">
-                    <strong style="color:#059669;">₦${Number(s.totalBalance).toLocaleString('en-NG',{minimumFractionDigits:2})}</strong>
-                </td>
-                <td style="text-align:right;font-size:11px;">
-                    <span style="color:#d97706;font-weight:700;">${Number(s.sharePercentage).toFixed(2)}%</span><br>
-                    <span style="color:#059669;font-size:10px;">ROI: ₦${Number(s.ROI).toLocaleString('en-NG',{minimumFractionDigits:2})}</span>
-                </td>
-                <td style="font-size:10px;color:#6b7280;">${new Date(m.joinDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
-            </tr>`;
+    function exportToPDF(useFiltered=false) {
+        const data=useFiltered?_currentFilteredMembers:members;
+        if (!data.length) { showNotify({type:'warning',title:'No Data',message:'No members to export.'}); return; }
+        const now=new Date().toLocaleString('en-US',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        const regular=data.filter(m=>m.entityType==='member'); const kiddies=data.filter(m=>m.entityType==='kiddies');
+        const active=regular.filter(m=>m.status==='active').length; const pending=regular.filter(m=>m.status==='pending').length; const rejected=regular.filter(m=>m.status==='rejected').length;
+        const totSavings=data.reduce((s,m)=>s+m.memberStats.memberSavings,0); const totROI=data.reduce((s,m)=>s+m.memberStats.ROI,0); const totBalance=data.reduce((s,m)=>s+m.memberStats.totalBalance,0);
+        const rows=data.map((m,i)=>{
+            const isKiddies=m.entityType==='kiddies';
+            const statusColor=m.status==='active'?'#065f46':m.status==='pending'?'#92400e':m.status==='locked'?'#831843':'#7f1d1d';
+            const statusBg=m.status==='active'?'#d1fae5':m.status==='pending'?'#fef3c7':m.status==='locked'?'#fce7f3':'#fee2e2';
+            const rowBg=isKiddies?(i%2===0?'#fff8fc':'#fdf2f8'):(i%2===0?'#fff':'#f8fafc');
+            const s=m.memberStats;
+            const typeLabel=isKiddies?`<span style="background:#fce7f3;color:#db2777;padding:1px 6px;border-radius:6px;font-size:9px;font-weight:700;">👶 Kiddies</span>`:`<span style="font-size:10px;">${m.account?.accountType?.name||'—'}</span>`;
+            const subLine=isKiddies?`<span style="color:#ec4899;font-size:9px;">Parent: ${m.parentName||'—'} · ${m.parentMemberID||'—'}</span>`:`<span style="color:#9ca3af;font-size:10px;">${m.email}</span>`;
+            return `<tr style="background:${rowBg};"><td style="text-align:center;color:#9ca3af;font-size:11px;">${i+1}</td><td><strong style="font-size:12px;">${m.firstName} ${m.lastName}</strong><br>${subLine}<br><span style="font-family:monospace;font-size:10px;color:#6366f1;">${m.memberID||'N/A'}</span></td><td>${typeLabel}</td><td style="text-align:center;"><span style="background:${statusBg};color:${statusColor};padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;">${m.status}</span></td><td style="text-align:right;font-size:11px;"><strong style="color:#1e3a8a;">₦${Number(s.memberSavings).toLocaleString('en-NG',{minimumFractionDigits:2})}</strong><br><span style="color:#9ca3af;font-size:10px;">Accum: ₦${Number(s.accumulativeROI).toLocaleString('en-NG',{minimumFractionDigits:2})}</span></td><td style="text-align:right;font-size:11px;"><strong style="color:#059669;">₦${Number(s.totalBalance).toLocaleString('en-NG',{minimumFractionDigits:2})}</strong></td><td style="text-align:right;font-size:11px;"><span style="color:#d97706;font-weight:700;">${Number(s.sharePercentage).toFixed(2)}%</span><br><span style="color:#059669;font-size:10px;">ROI: ₦${Number(s.ROI).toLocaleString('en-NG',{minimumFractionDigits:2})}</span></td><td style="font-size:10px;color:#6b7280;">${new Date(m.joinDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td></tr>`;
         }).join('');
-
-        const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Club De Stars — Member Report</title>
-<style>
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:#1e293b; background:#fff; }
-  .header { background:linear-gradient(135deg,#1e3a8a,#3b82f6); color:white; padding:24px 28px; }
-  .header h1 { font-size:20px; font-weight:800; margin-bottom:3px; }
-  .header p  { font-size:11px; opacity:.8; }
-  .meta { display:flex; gap:16px; padding:12px 28px; background:#f8fafc; border-bottom:1px solid #e2e8f0; flex-wrap:wrap; }
-  .meta-item { display:flex; flex-direction:column; }
-  .meta-item span:first-child { font-size:9px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.07em; }
-  .meta-item span:last-child  { font-size:14px; font-weight:800; color:#1e3a8a; }
-  .meta-item.green  span:last-child { color:#059669; }
-  .meta-item.amber  span:last-child { color:#d97706; }
-  .meta-item.red    span:last-child { color:#dc2626; }
-  .meta-item.purple span:last-child { color:#7c3aed; }
-  .meta-item.pink   span:last-child { color:#db2777; }
-  table { width:100%; border-collapse:collapse; font-size:12px; }
-  thead tr { background:#1e3a8a; color:white; }
-  thead th { padding:9px 10px; text-align:left; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; }
-  thead th:first-child { text-align:center; width:30px; }
-  tbody td { padding:8px 10px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
-  .footer { padding:16px 28px; font-size:10px; color:#9ca3af; border-top:2px solid #e2e8f0; display:flex; justify-content:space-between; margin-top:8px; }
-  @media print { @page { size:A4 landscape; margin:8mm; } .no-print { display:none; } }
-</style>
-</head>
-<body>
-<div class="header">
-  <h1>Club De Stars Cooperative — Member Report</h1>
-  <p>Generated: ${now}${useFiltered?' · Filtered export':' · Full export'}</p>
-</div>
-<div class="meta">
-  <div class="meta-item"><span>Total Records</span><span>${data.length}</span></div>
-  <div class="meta-item green"><span>Active Members</span><span>${active}</span></div>
-  <div class="meta-item amber"><span>Pending</span><span>${pending}</span></div>
-  <div class="meta-item red"><span>Rejected</span><span>${rejected}</span></div>
-  <div class="meta-item pink"><span>Kiddies</span><span>${kiddies.length}</span></div>
-  <div class="meta-item"><span>Total Savings</span><span>₦${totSavings.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
-  <div class="meta-item green"><span>Total Balance</span><span>₦${totBalance.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
-  <div class="meta-item purple"><span>Total Est. ROI</span><span>₦${totROI.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
-</div>
-<div style="padding:0 0 12px;">
-<table>
-  <thead>
-    <tr>
-      <th>#</th><th>Member / Child</th><th>Type</th><th>Status</th>
-      <th style="text-align:right;">Savings / Accum.</th>
-      <th style="text-align:right;">Total Balance</th>
-      <th style="text-align:right;">Share % / ROI</th>
-      <th>Joined</th>
-    </tr>
-  </thead>
-  <tbody>${rows}</tbody>
-</table>
-</div>
-<div class="footer">
-  <span>Club De Stars Cooperative &nbsp;·&nbsp; Powered by JESZ LIMITED</span>
-  <span>${data.length} records · Members: ${regular.length} · Kiddies: ${kiddies.length}</span>
-</div>
-<div style="text-align:center;padding:14px;" class="no-print">
-  <button onclick="window.print()" style="padding:10px 28px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;margin-right:8px;">
-    🖨 Print / Save as PDF
-  </button>
-  <button onclick="window.close()" style="padding:10px 20px;background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">
-    Close
-  </button>
-</div>
-</body>
-</html>`;
-
-        const win = window.open('', '_blank', 'width=1200,height=800');
-        win.document.write(html);
-        win.document.close();
-        win.focus();
+        const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Club De Stars — Member Report</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1e293b;background:#fff;}.header{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;padding:24px 28px;}.header h1{font-size:20px;font-weight:800;margin-bottom:3px;}.header p{font-size:11px;opacity:.8;}.meta{display:flex;gap:16px;padding:12px 28px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-wrap:wrap;}.meta-item{display:flex;flex-direction:column;}.meta-item span:first-child{font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;}.meta-item span:last-child{font-size:14px;font-weight:800;color:#1e3a8a;}.meta-item.green span:last-child{color:#059669;}.meta-item.amber span:last-child{color:#d97706;}.meta-item.red span:last-child{color:#dc2626;}.meta-item.purple span:last-child{color:#7c3aed;}.meta-item.pink span:last-child{color:#db2777;}table{width:100%;border-collapse:collapse;font-size:12px;}thead tr{background:#1e3a8a;color:white;}thead th{padding:9px 10px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}thead th:first-child{text-align:center;width:30px;}tbody td{padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}.footer{padding:16px 28px;font-size:10px;color:#9ca3af;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;margin-top:8px;}@media print{@page{size:A4 landscape;margin:8mm;}.no-print{display:none;}}</style></head><body><div class="header"><h1>Club De Stars Cooperative — Member Report</h1><p>Generated: ${now}${useFiltered?' · Filtered export':' · Full export'}</p></div><div class="meta"><div class="meta-item"><span>Total Records</span><span>${data.length}</span></div><div class="meta-item green"><span>Active Members</span><span>${active}</span></div><div class="meta-item amber"><span>Pending</span><span>${pending}</span></div><div class="meta-item red"><span>Rejected</span><span>${rejected}</span></div><div class="meta-item pink"><span>Kiddies</span><span>${kiddies.length}</span></div><div class="meta-item"><span>Total Savings</span><span>₦${totSavings.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div><div class="meta-item green"><span>Total Balance</span><span>₦${totBalance.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div><div class="meta-item purple"><span>Total Est. ROI</span><span>₦${totROI.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div></div><div style="padding:0 0 12px;"><table><thead><tr><th>#</th><th>Member / Child</th><th>Type</th><th>Status</th><th style="text-align:right;">Savings / Accum.</th><th style="text-align:right;">Total Balance</th><th style="text-align:right;">Share % / ROI</th><th>Joined</th></tr></thead><tbody>${rows}</tbody></table></div><div class="footer"><span>Club De Stars Cooperative &nbsp;·&nbsp; Powered by JESZ LIMITED</span><span>${data.length} records · Members: ${regular.length} · Kiddies: ${kiddies.length}</span></div><div style="text-align:center;padding:14px;" class="no-print"><button onclick="window.print()" style="padding:10px 28px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;margin-right:8px;">🖨 Print / Save as PDF</button><button onclick="window.close()" style="padding:10px 20px;background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Close</button></div></body></html>`;
+        const win=window.open('','_blank','width=1200,height=800'); win.document.write(html); win.document.close(); win.focus();
     }
 
-    </script>
-    <script>
     async function loadSidebarPendingCount() {
         try {
             const res=await fetch('/admin/pending-approvals-count'); const data=await res.json();
-            const badge=document.getElementById('sidebarPendingBadge'); if(!badge) return;
+            const badge=document.getElementById('sidebarBadge'); if(!badge) return;
             badge.style.display=data.count>0?'inline-block':'none'; if(data.count>0) badge.textContent=data.count;
         } catch(err){ console.error('Sidebar count error:',err); }
     }
-    document.addEventListener('DOMContentLoaded',loadSidebarPendingCount);
+    document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
     </script>
 </body>
 </html>

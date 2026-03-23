@@ -22,24 +22,44 @@
             overflow-x: hidden;
         }
 
-        /* ── SIDEBAR ── */
+        /* ══════════ NEW SIDEBAR STYLES ══════════ */
         .sidebar {
             position: fixed; left: 0; top: 0; bottom: 0;
             width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white; z-index: 1040; transition: transform .3s ease;
-            overflow-y: auto; box-shadow: 4px 0 20px rgba(30,58,138,.15);
+            background: linear-gradient(180deg, #0f2357 0%, #1e3a8a 40%, #1e40af 100%);
+            z-index: 1040; overflow-y: auto; transition: transform .3s ease;
+            box-shadow: 4px 0 24px rgba(30,58,138,.25);
+            scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.15) transparent;
         }
-        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.1); }
-        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-        .logo-box { width: 45px; height: 45px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--primary); font-size: 1.5rem; flex-shrink: 0; }
-        .admin-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(239,68,68,.2); border-radius: 20px; border: 1px solid rgba(239,68,68,.3); font-weight: 600; font-size: .78rem; margin-top: 6px; }
-        .sidebar-menu { padding: 1rem 0; }
-        .sidebar-menu a { color: rgba(255,255,255,.85); text-decoration: none; padding: .75rem 1.5rem; display: flex; align-items: center; transition: all .2s; border-left: 3px solid transparent; font-weight: 500; font-size: .9rem; }
-        .sidebar-menu a:hover, .sidebar-menu a.active { background: rgba(255,255,255,.12); color: white; border-left-color: white; }
-        .sidebar-menu a i { width: 22px; margin-right: 10px; font-size: 1rem; flex-shrink: 0; }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+        .sidebar-header {
+            padding: 1.4rem 1.25rem 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            background: rgba(0,0,0,.18);
+            position: sticky; top: 0; z-index: 2;
+        }
+        .logo-row { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
+        .logo-box { width: 42px; height: 42px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--primary); font-size: 1.3rem; box-shadow: 0 4px 12px rgba(0,0,0,.25); flex-shrink: 0; }
+        .sidebar-brand { font-size: .95rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: .05em; line-height: 1.2; }
+        .sidebar-brand small { font-size: .65rem; font-weight: 500; opacity: .55; display: block; letter-spacing: .08em; }
+        .role-pill { display: inline-flex; align-items: center; gap: 7px; padding: 4px 10px; background: rgba(239,68,68,.2); border-radius: 20px; border: 1px solid rgba(239,68,68,.3); font-weight: 700; font-size: .7rem; color: #fca5a5; }
+        .nav-group { padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .nav-group:last-child { border-bottom: none; }
+        .nav-category { display: flex; align-items: center; gap: 7px; padding: .55rem 1.25rem .3rem; font-size: .62rem; font-weight: 800; color: rgba(255,255,255,.38); text-transform: uppercase; letter-spacing: .1em; user-select: none; }
+        .nav-category::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.08); margin-left: 4px; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 11px; padding: .62rem 1.25rem; color: rgba(255,255,255,.72); text-decoration: none; font-weight: 500; font-size: .84rem; border-left: 3px solid transparent; transition: all .18s; }
+        .sidebar-nav a:hover { background: rgba(255,255,255,.09); color: white; border-left-color: rgba(255,255,255,.4); }
+        .sidebar-nav a.active { background: rgba(255,255,255,.15); color: white; border-left-color: white; }
+        .sidebar-nav a i { width: 18px; font-size: .9rem; flex-shrink: 0; opacity: .8; text-align: center; }
+        .sidebar-nav a.active i { opacity: 1; }
+        .nav-badge { margin-left: auto; font-size: .63rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; background: rgba(239,68,68,.9); color: white; flex-shrink: 0; line-height: 1.4; }
+        .nav-back { display: flex; align-items: center; gap: 10px; padding: .7rem 1.25rem .9rem; font-size: .8rem; font-weight: 600; color: rgba(255,255,255,.42); text-decoration: none; transition: color .18s; border-top: 1px solid rgba(255,255,255,.07); margin-top: .25rem; }
+        .nav-back:hover { color: rgba(255,255,255,.7); }
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1035; }
         .sidebar-overlay.active { display: block; }
+        /* ══════════ END NEW SIDEBAR STYLES ══════════ */
 
         /* ── NAVBAR ── */
         .top-navbar {
@@ -68,7 +88,6 @@
         .btn-xs:hover { background: var(--primary); color: white; }
 
         /* ── CARDS ── */
-        .card-white { background: white; border-radius: 16px; box-shadow: 0 4px 16px rgba(30,58,138,.08); border: 1px solid rgba(30,58,138,.05); }
         .page-header { background: white; border-radius: 16px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 4px 16px rgba(30,58,138,.08); }
         .filter-card { background: white; border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 4px 16px rgba(30,58,138,.08); border: 2px solid rgba(30,58,138,.06); }
 
@@ -105,20 +124,14 @@
         .action-badge { padding: .3rem .65rem; border-radius: 7px; font-weight: 600; font-size: .7rem; white-space: nowrap; display: inline-block; }
         .log-description { font-size: .78rem; max-width: 300px; overflow: hidden; text-overflow: ellipsis; word-break: break-word; line-height: 1.3; }
         .ip-address { font-family: 'Courier New', monospace; font-size: .72rem; color: #64748b; white-space: nowrap; }
-
-        /* ── ACTION TYPE COLORS ── */
         .action-member { background: #dbeafe; color: #1e3a8a; }
         .action-financial { background: #d1fae5; color: #065f46; }
         .action-system { background: #e0e7ff; color: #3730a3; }
         .action-auth { background: #fef3c7; color: #92400e; }
         .action-danger { background: #fee2e2; color: #7f1d1d; }
-
-        /* ── STATUS BADGES ── */
         .status-success { background: #d1fae5; color: #065f46; }
         .status-failed { background: #fee2e2; color: #7f1d1d; }
         .status-partial { background: #fef3c7; color: #92400e; }
-
-        /* ── ROLE PILL ── */
         .role-pill { display: inline-flex; align-items: center; gap: 4px; background: rgba(30,58,138,.07); border-radius: 20px; padding: 2px 8px; font-size: .7rem; font-weight: 600; color: var(--primary); white-space: nowrap; }
 
         /* ── PAGINATION ── */
@@ -130,19 +143,14 @@
         .page-link.active { background: var(--primary); color: white; border-color: var(--primary); }
         .page-link.disabled { opacity: .5; pointer-events: none; }
 
-        /* ── EMPTY STATE ── */
+        /* ── EMPTY / PRESET ── */
         .empty-state { padding: 3rem 1rem; text-align: center; color: #94a3b8; }
         .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: .35; }
         .empty-state p { margin: 0; font-size: .9rem; }
-
-        /* ── PRESET BUTTONS ── */
         .preset-row { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
         .preset-label { font-size: .75rem; color: #94a3b8; font-weight: 600; margin-right: .25rem; }
-
-        /* ── MOBILE SWIPE HINT ── */
         .swipe-hint { display: none; align-items: center; gap: 5px; padding: .6rem 1rem; background: rgba(30,58,138,.04); font-size: .72rem; color: var(--primary); font-weight: 600; border-bottom: 1px solid rgba(30,58,138,.05); }
 
-        /* ── TABLET (<=992px) — sidebar off-canvas ── */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.active { transform: translateX(0); }
@@ -151,8 +159,6 @@
             .swipe-hint { display: flex; }
             .stats-row { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
         }
-
-        /* ── TABLET PORTRAIT (<=768px) ── */
         @media (max-width: 768px) {
             :root { --navbar-h: 58px; }
             .top-navbar { height: 58px; padding: 0 .9rem; gap: .5rem; }
@@ -166,15 +172,11 @@
             .logs-table tbody td { padding: .5rem .6rem; font-size: .76rem; }
             .log-description { max-width: 200px; }
         }
-
-        /* ── MOBILE (<=576px) ── */
         @media (max-width: 576px) {
             :root { --navbar-h: 54px; }
             .top-navbar { height: 54px; padding: 0 .75rem; gap: .4rem; }
             .main-content { padding: .75rem; }
             .page-header { padding: .75rem; border-radius: 12px; margin-bottom: .75rem; }
-            .page-header h5 { font-size: .9rem !important; }
-            .page-header p { font-size: .72rem !important; }
             .filter-card { padding: .75rem; border-radius: 12px; margin-bottom: .75rem; }
             .form-label { font-size: .75rem; margin-bottom: .2rem; }
             .form-control, .form-select { padding: .45rem .7rem; font-size: .82rem; border-radius: 8px; }
@@ -206,42 +208,79 @@
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ════════════════════════ SIDEBAR ════════════════════════ -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <div class="logo-container">
+        <div class="logo-row">
             <div class="logo-box">C</div>
-            <div>
-                <div class="fw-bold" style="text-transform:uppercase;font-size:1rem;line-height:1.2;">Club De Stars</div>
-                <small class="opacity-75" style="font-size:.72rem;">ADMIN PANEL</small>
-            </div>
+            <div><div class="sidebar-brand">Club De Stars<small>Admin Panel</small></div></div>
         </div>
-        <div class="admin-badge"><i class="fas fa-shield-alt"></i> <%= admin.role?.name || 'Admin' %></div>
+        <div class="role-pill">
+            <i class="fas fa-shield-alt" style="font-size:.65rem;"></i>&nbsp;<%= admin.role?.name?.toUpperCase() || 'SUPER ADMIN' %>
+        </div>
     </div>
-       <div class="sidebar-menu">
-            <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
-            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
-            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
-            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
-            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
-            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
-            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
-            <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
-            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
-            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
-            <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
-            <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
-            <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
-            <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
-            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
-            <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
-            <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-            <a href="/admin/logs" class="active"><i class="fas fa-history"></i> Admin Logs</a>
-            <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
-        </div>
-</div>
 
-<!-- ── TOP NAVBAR ── -->
+    <div class="sidebar-nav">
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-home" style="font-size:.6rem;"></i>Main</div>
+            <a href="/admin/dashboard"><i class="fas fa-chart-pie"></i>Overview</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-users" style="font-size:.6rem;"></i>Members</div>
+            <a href="/admin/manage-members"><i class="fas fa-users"></i>Manage Members</a>
+            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i>Kiddies Accounts</a>
+            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i>Membership Types</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-hand-holding-usd" style="font-size:.6rem;"></i>Loans</div>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i>Loan Management</a>
+            <a href="/admin/loan-payments"><i class="fas fa-file-invoice-dollar"></i>Loan Payments</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i>Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i>External Loans</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-landmark" style="font-size:.6rem;"></i>Finance</div>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i>Company Finance</a>
+            <a href="/admin/operating-earnings"><i class="fas fa-chart-line"></i>Operating Earnings</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-chart-bar"></i>Company Revenue</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-cog" style="font-size:.6rem;"></i>System</div>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i>Manage Subscriptions</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i>Roles &amp; Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i>Settings</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-file-alt" style="font-size:.6rem;"></i>Reporting</div>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i>Reports</a>
+            <a href="/admin/logs" class="active"><i class="fas fa-history"></i>Admin Logs</a>
+        </div>
+    </div>
+
+    <a href="/cds-cooperative/dashboard" class="nav-back">
+        <i class="fas fa-arrow-left"></i>Back to Dashboard
+    </a>
+</div>
+<!-- ════════════════════════ END SIDEBAR ════════════════════════ -->
+
+<!-- TOP NAVBAR -->
 <div class="top-navbar">
     <i class="fas fa-bars d-lg-none" style="cursor:pointer;color:var(--primary);font-size:1.3rem;" onclick="toggleSidebar()"></i>
     <div class="navbar-title d-none d-md-block">
@@ -259,9 +298,7 @@
     </div>
 </div>
 
-<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
-
-<!-- ── MAIN CONTENT ── -->
+<!-- MAIN CONTENT -->
 <div class="main-content">
 
     <!-- Page Header -->
@@ -280,36 +317,28 @@
     <!-- Stats Cards -->
     <div class="stats-row">
         <div class="stat-card">
-            <div class="stat-icon" style="background:#dbeafe;color:#1e3a8a;">
-                <i class="fas fa-clipboard-list"></i>
-            </div>
+            <div class="stat-icon" style="background:#dbeafe;color:#1e3a8a;"><i class="fas fa-clipboard-list"></i></div>
             <div class="stat-content">
                 <div class="stat-label">Total Events</div>
                 <div class="stat-value"><%= stats.total.toLocaleString() %></div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background:#d1fae5;color:#065f46;">
-                <i class="fas fa-check-circle"></i>
-            </div>
+            <div class="stat-icon" style="background:#d1fae5;color:#065f46;"><i class="fas fa-check-circle"></i></div>
             <div class="stat-content">
                 <div class="stat-label">Successful</div>
                 <div class="stat-value"><%= stats.success.toLocaleString() %></div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background:#fee2e2;color:#dc2626;">
-                <i class="fas fa-exclamation-circle"></i>
-            </div>
+            <div class="stat-icon" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-exclamation-circle"></i></div>
             <div class="stat-content">
                 <div class="stat-label">Failed</div>
                 <div class="stat-value"><%= stats.failed.toLocaleString() %></div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background:#e0e7ff;color:#3730a3;">
-                <i class="fas fa-user-shield"></i>
-            </div>
+            <div class="stat-icon" style="background:#e0e7ff;color:#3730a3;"><i class="fas fa-user-shield"></i></div>
             <div class="stat-content">
                 <div class="stat-label">Active Admins</div>
                 <div class="stat-value"><%= stats.uniqueAdmins.toLocaleString() %></div>
@@ -408,11 +437,11 @@
                 <span class="badge" style="background:rgba(30,58,138,.1);color:var(--primary);font-size:.7rem;"><%= pagination.total.toLocaleString() %> results</span>
             </div>
         </div>
-        
+
         <div class="swipe-hint">
             <i class="fas fa-arrows-left-right"></i> Swipe to view all columns
         </div>
-        
+
         <div class="table-scroll">
             <table class="logs-table">
                 <thead>
@@ -439,18 +468,18 @@
                         </td>
                     </tr>
                     <% } else { %>
-                        <% 
+                        <%
                         const startIdx = (pagination.page - 1) * pagination.limit;
-                        logs.forEach((log, idx) => { 
+                        logs.forEach((log, idx) => {
                             const date = new Date(log.createdAt);
                             let actionClass = 'action-member';
                             if (log.actionType.startsWith('member_')) actionClass = 'action-member';
-                            else if (log.actionType.includes('deposit') || log.actionType.includes('withdrawal') || 
-                                     log.actionType.includes('loan') || log.actionType.includes('roi') || 
+                            else if (log.actionType.includes('deposit') || log.actionType.includes('withdrawal') ||
+                                     log.actionType.includes('loan') || log.actionType.includes('roi') ||
                                      log.actionType.includes('charge')) actionClass = 'action-financial';
-                            else if (log.actionType.startsWith('role_') || log.actionType.includes('permission') || 
+                            else if (log.actionType.startsWith('role_') || log.actionType.includes('permission') ||
                                      log.actionType.includes('settings') || log.actionType.includes('subscription')) actionClass = 'action-system';
-                            else if (log.actionType.includes('login') || log.actionType.includes('logout') || 
+                            else if (log.actionType.includes('login') || log.actionType.includes('logout') ||
                                      log.actionType.includes('password')) actionClass = 'action-auth';
                             else if (log.actionType.includes('delete') || log.actionType.includes('reject')) actionClass = 'action-danger';
                         %>
@@ -510,14 +539,14 @@
         <% if (pagination.pages > 0) { %>
         <div class="pagination-wrapper">
             <div class="pagination-info">
-                <% 
+                <%
                 const start = (pagination.page - 1) * pagination.limit + 1;
                 const end = Math.min(pagination.page * pagination.limit, pagination.total);
                 %>
                 Showing <%= start %>-<%= end %> of <%= pagination.total.toLocaleString() %> results
             </div>
             <ul class="pagination">
-                <% 
+                <%
                 const currentPage = pagination.page;
                 const totalPages = pagination.pages;
                 const maxVisible = 5;
@@ -526,49 +555,29 @@
                 if (endPage - startPage < maxVisible - 1) {
                     startPage = Math.max(1, endPage - maxVisible + 1);
                 }
-                
-                // Build query string for pagination
                 const queryParams = { ...filters, page: '' };
                 delete queryParams.page;
                 const baseQuery = new URLSearchParams(queryParams).toString();
                 const makeUrl = (p) => `/admin/logs?${baseQuery ? baseQuery + '&' : ''}page=${p}`;
                 %>
-                
-                <!-- Previous -->
                 <li class="page-item">
                     <a class="page-link <%= currentPage === 1 ? 'disabled' : '' %>" href="<%= currentPage > 1 ? makeUrl(currentPage - 1) : '#' %>">
                         <i class="fas fa-chevron-left"></i>
                     </a>
                 </li>
-
-                <!-- First page -->
                 <% if (startPage > 1) { %>
-                    <li class="page-item">
-                        <a class="page-link" href="<%= makeUrl(1) %>">1</a>
-                    </li>
-                    <% if (startPage > 2) { %>
-                        <li class="page-item disabled"><a class="page-link">...</a></li>
-                    <% } %>
+                    <li class="page-item"><a class="page-link" href="<%= makeUrl(1) %>">1</a></li>
+                    <% if (startPage > 2) { %><li class="page-item disabled"><a class="page-link">...</a></li><% } %>
                 <% } %>
-
-                <!-- Page numbers -->
                 <% for (let i = startPage; i <= endPage; i++) { %>
                     <li class="page-item">
                         <a class="page-link <%= i === currentPage ? 'active' : '' %>" href="<%= makeUrl(i) %>"><%= i %></a>
                     </li>
                 <% } %>
-
-                <!-- Last page -->
                 <% if (endPage < totalPages) { %>
-                    <% if (endPage < totalPages - 1) { %>
-                        <li class="page-item disabled"><a class="page-link">...</a></li>
-                    <% } %>
-                    <li class="page-item">
-                        <a class="page-link" href="<%= makeUrl(totalPages) %>"><%= totalPages %></a>
-                    </li>
+                    <% if (endPage < totalPages - 1) { %><li class="page-item disabled"><a class="page-link">...</a></li><% } %>
+                    <li class="page-item"><a class="page-link" href="<%= makeUrl(totalPages) %>"><%= totalPages %></a></li>
                 <% } %>
-
-                <!-- Next -->
                 <li class="page-item">
                     <a class="page-link <%= currentPage === totalPages ? 'disabled' : '' %>" href="<%= currentPage < totalPages ? makeUrl(currentPage + 1) : '#' %>">
                         <i class="fas fa-chevron-right"></i>
@@ -583,58 +592,30 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 <script>
-// ══════════════════════════════════════════════════════════
-// SIDEBAR TOGGLE
-// ══════════════════════════════════════════════════════════
 function toggleSidebar() {
-    if (window.innerWidth <= 992) {
-        document.getElementById('sidebar').classList.toggle('active');
-        document.getElementById('sidebarOverlay').classList.toggle('active');
-    }
+    document.getElementById('sidebar').classList.toggle('active');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
 }
 function closeSidebar() {
     document.getElementById('sidebar').classList.remove('active');
     document.getElementById('sidebarOverlay').classList.remove('active');
 }
 
-// ══════════════════════════════════════════════════════════
-// DATE PRESETS
-// ══════════════════════════════════════════════════════════
 function setPreset(preset) {
     const today = new Date();
     const fmt = d => d.toISOString().slice(0,10);
     let from, to = fmt(today);
-
     switch(preset) {
-        case 'today':
-            from = to;
-            break;
-        case 'yesterday':
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            from = to = fmt(yesterday);
-            break;
-        case 'week':
-            const weekStart = new Date(today);
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-            from = fmt(weekStart);
-            break;
-        case 'month':
-            from = fmt(new Date(today.getFullYear(), today.getMonth(), 1));
-            break;
-        case 'all':
-            from = '';
-            to = '';
-            break;
+        case 'today':     from = to; break;
+        case 'yesterday': const y = new Date(today); y.setDate(y.getDate()-1); from = to = fmt(y); break;
+        case 'week':      const w = new Date(today); w.setDate(w.getDate()-w.getDay()); from = fmt(w); break;
+        case 'month':     from = fmt(new Date(today.getFullYear(), today.getMonth(), 1)); break;
+        case 'all':       from = ''; to = ''; break;
     }
-
     document.querySelector('[name="dateFrom"]').value = from;
     document.querySelector('[name="dateTo"]').value = to;
 }
 
-// ══════════════════════════════════════════════════════════
-// LOAD PENDING BADGE COUNT
-// ══════════════════════════════════════════════════════════
 async function loadSidebarPendingCount() {
     try {
         const data = await fetch('/admin/pending-approvals-count').then(r=>r.json());
@@ -647,6 +628,5 @@ async function loadSidebarPendingCount() {
 
 document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
 </script>
-
 </body>
 </html>

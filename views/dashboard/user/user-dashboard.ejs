@@ -47,19 +47,82 @@ html,body{
 a{text-decoration:none;color:inherit;}
 button,input,select,textarea{font-family:inherit;}
 
-/* ══ LOADER ══ */
+/* ═══════════════════════════════════════
+   PREMIUM LOADER — SHORT FORM
+   Ring + "CloudBaam" word-mark only.
+   No tagline, no progress bar.
+   Total runtime ≈ 2.4 s → reveal at 2.8 s.
+═══════════════════════════════════════ */
 #loader{
-  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  position:fixed;inset:0;background:#05101e;z-index:9999;
   display:flex;align-items:center;justify-content:center;
-  flex-direction:column;gap:20px;transition:opacity .5s;
+  flex-direction:column;gap:18px;overflow:hidden;
+  transition:opacity .5s;
 }
-.loader-ring{
-  width:48px;height:48px;
-  border:2.5px solid var(--border2);border-top-color:var(--accent);
-  border-radius:50%;animation:spin 1s linear infinite;
+/* Ambient floating particles */
+.ld-particles{position:absolute;inset:0;pointer-events:none;}
+.ldp{
+  position:absolute;width:2px;height:2px;border-radius:50%;
+  background:#5cc8ff;opacity:0;
+  animation:ldpDrift var(--dur) ease-in-out var(--delay) infinite;
 }
-.loader-label{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
-@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes ldpDrift{
+  0%  {transform:translate(0,0) scale(1);opacity:0;}
+  20% {opacity:.5;}
+  100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0;}
+}
+/* Soft radial glow */
+.ld-glow{
+  position:absolute;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(92,200,255,.06) 0%,transparent 70%);
+  animation:ldGlowP 3s ease-in-out infinite;pointer-events:none;
+}
+@keyframes ldGlowP{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.12);opacity:1;}}
+
+/* Centre stack */
+.ld-center{display:flex;flex-direction:column;align-items:center;gap:16px;position:relative;z-index:2;}
+
+/* Ring mark */
+.ld-ring-wrap{
+  width:58px;height:58px;position:relative;opacity:0;
+  animation:ldRingIn .55s cubic-bezier(.16,1,.3,1) .15s forwards;
+}
+@keyframes ldRingIn{
+  from{opacity:0;transform:scale(.45) rotate(-120deg);}
+  to  {opacity:1;transform:scale(1) rotate(0);}
+}
+.ld-ring-svg{width:100%;height:100%;}
+.ld-ring-bg  {fill:none;stroke:#0c2236;stroke-width:3;}
+.ld-ring-arc {
+  fill:none;stroke:#5cc8ff;stroke-width:3;stroke-linecap:round;
+  stroke-dasharray:127;stroke-dashoffset:127;
+  animation:ldArcDraw .9s cubic-bezier(.4,0,.2,1) .65s forwards;
+}
+@keyframes ldArcDraw{to{stroke-dashoffset:32;}}
+.ld-ring-dot {fill:#5cc8ff;r:0;opacity:0;animation:ldDotPop .3s cubic-bezier(.34,1.56,.64,1) 1.5s forwards;}
+@keyframes ldDotPop{to{r:3.5;opacity:1;}}
+.ld-ring-orbit{fill:none;stroke:#0d2d45;stroke-width:1;stroke-dasharray:4 6;animation:ldOrbit 12s linear infinite;transform-origin:29px 29px;}
+@keyframes ldOrbit{to{transform:rotate(360deg);}}
+.ld-ring-letter{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:700;color:#5cc8ff;opacity:0;
+  animation:ldLetterPop .35s cubic-bezier(.34,1.56,.64,1) 1.2s forwards;
+}
+@keyframes ldLetterPop{from{opacity:0;transform:scale(1.6);}to{opacity:1;transform:scale(1);}}
+
+/* Brand name */
+.ld-brand{display:flex;align-items:baseline;overflow:hidden;height:40px;}
+.ld-word{display:flex;}
+.ldl{
+  font-size:28px;font-weight:700;letter-spacing:-.5px;display:inline-block;
+  opacity:0;transform:translateY(36px);
+  animation:ldlRise .45s cubic-bezier(.16,1,.3,1) var(--ld) forwards;
+}
+.ldl.w{color:#ffffff;}
+.ldl.a{color:#5cc8ff;}
+@keyframes ldlRise{to{opacity:1;transform:translateY(0);}}
+.ld-word-gap{width:3px;}
+/* ─── end short loader ─── */
 
 /* ══ SIDEBAR ══ */
 .sidebar{
@@ -148,8 +211,6 @@ button,input,select,textarea{font-family:inherit;}
 }
 .kyc-chip.verified{background:rgba(34,199,138,.08);border-color:rgba(34,199,138,.2);color:var(--green);}
 .kyc-chip i,.status-dot{flex-shrink:0;}
-
-/* ── Theme toggle ── */
 .theme-toggle{
   width:40px;height:22px;border-radius:20px;border:1px solid var(--border2);
   background:var(--tog-bg);cursor:pointer;position:relative;flex-shrink:0;
@@ -309,6 +370,30 @@ button,input,select,textarea{font-family:inherit;}
 }
 .no-loan-cta:hover{background:rgba(79,142,247,.18);}
 
+/* ══ COPYABLE ACCOUNT NUMBER ══ */
+.acct-copy-row{
+  display:inline-flex;align-items:center;gap:6px;
+  font-weight:600;letter-spacing:.04em;cursor:pointer;
+  padding:2px 6px;border-radius:6px;
+  transition:background .18s;
+}
+.acct-copy-row:hover{background:rgba(79,142,247,.12);}
+.acct-copy-row .copy-icon{
+  font-size:11px;color:var(--accent);opacity:.7;transition:opacity .15s;
+}
+.acct-copy-row:hover .copy-icon{opacity:1;}
+.acct-copy-row.copied{background:rgba(34,199,138,.1);color:var(--green);}
+.acct-copy-row.copied .copy-icon{color:var(--green);}
+/* tooltip bubble */
+.copy-toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(8px);
+  background:rgba(34,199,138,.15);border:1px solid rgba(34,199,138,.3);
+  color:var(--green);padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;
+  pointer-events:none;opacity:0;z-index:9998;
+  transition:opacity .25s,transform .25s;
+}
+.copy-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
 /* ══ MAINTENANCE ══ */
 .maintenance-overlay{
   position:fixed;inset:0;z-index:9998;
@@ -397,7 +482,6 @@ button,input,select,textarea{font-family:inherit;}
   border-radius:10px;padding:12px;font-size:12px;color:var(--amber);
   line-height:1.6;margin-bottom:14px;
 }
-/* ── NEW: danger alert box ── */
 .modal-danger{
   background:rgba(240,82,82,.09);border:1px solid rgba(240,82,82,.28);
   border-radius:10px;padding:12px 14px;font-size:12px;color:var(--red);
@@ -444,8 +528,6 @@ button,input,select,textarea{font-family:inherit;}
 .lob-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:var(--muted);}
 .lob-row span{color:var(--text);}
 .lob-warn{background:rgba(240,82,82,.08);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:11px;color:var(--red);}
-
-/* ══ LOCK WARNING BANNER (inline in modal) ══ */
 .lock-warning{
   display:flex;align-items:flex-start;gap:10px;
   background:rgba(240,82,82,.09);border:1px solid rgba(240,82,82,.3);
@@ -472,9 +554,7 @@ button,input,select,textarea{font-family:inherit;}
 .powered-by strong{color:var(--accent);}
 
 /* ══ RESPONSIVE ══ */
-@media(max-width:1100px){
-  .cards-row{grid-template-columns:1fr;}
-}
+@media(max-width:1100px){.cards-row{grid-template-columns:1fr;}}
 @media(max-width:900px){
   .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
   .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3);}
@@ -520,11 +600,48 @@ button,input,select,textarea{font-family:inherit;}
 </head>
 <body>
 
-<!-- LOADER -->
+<!-- ═══════════════════════════════════════
+     PREMIUM LOADER — SHORT FORM (dashboard)
+     Ring in → arc draw → dot snap → "C" pop
+     → "Cloud" + "Baam" cascade
+     Total ≈ 2.4 s, reveal at 2.8 s
+═══════════════════════════════════════ -->
 <div id="loader">
-  <div class="loader-ring"></div>
-  <div class="loader-label">Club De Stars</div>
+  <div class="ld-particles" id="ldParticles"></div>
+  <div class="ld-glow"></div>
+
+  <div class="ld-center">
+    <div class="ld-ring-wrap">
+      <svg class="ld-ring-svg" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle class="ld-ring-orbit" cx="29" cy="29" r="26"/>
+        <circle class="ld-ring-bg"    cx="29" cy="29" r="20"/>
+        <circle class="ld-ring-arc"   cx="29" cy="29" r="20" transform="rotate(-90 29 29)"/>
+        <circle class="ld-ring-dot"   cx="29" cy="9"/>
+      </svg>
+      <div class="ld-ring-letter">C</div>
+    </div>
+
+    <div class="ld-brand">
+      <div class="ld-word">
+        <span class="ldl w" style="--ld:1.05s">C</span>
+        <span class="ldl w" style="--ld:1.13s">l</span>
+        <span class="ldl w" style="--ld:1.21s">o</span>
+        <span class="ldl w" style="--ld:1.29s">u</span>
+        <span class="ldl w" style="--ld:1.37s">d</span>
+      </div>
+      <div class="ld-word-gap"></div>
+      <div class="ld-word">
+        <span class="ldl a" style="--ld:1.48s">B</span>
+        <span class="ldl a" style="--ld:1.56s">a</span>
+        <span class="ldl a" style="--ld:1.64s">a</span>
+        <span class="ldl a" style="--ld:1.72s">m</span>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Copy toast -->
+<div class="copy-toast" id="copyToast">Account number copied!</div>
 
 <%
   const sharePercentage = allMembersTotalSavings > 0
@@ -537,7 +654,6 @@ button,input,select,textarea{font-family:inherit;}
   const accountConfigured = bankName !== "—" && accountNumber !== "—";
   const isAdmin = user.role && user.role.name !== 'member';
 
-  // Resolve forceWithdrawalPenalty from memberType, fallback to settings
   const forceWithdrawalPenalty = (user.account && user.account.accountType && user.account.accountType.forceWithdrawalPenalty != null)
     ? user.account.accountType.forceWithdrawalPenalty
     : (forceWithdrawalCharge || 2.5);
@@ -838,8 +954,6 @@ button,input,select,textarea{font-family:inherit;}
     </div>
     <div class="modal-body">
       <div class="modal-warn"><i class="fas fa-calendar-alt" style="margin-right:6px;"></i>Regular window: <strong>Dec 1–10</strong> · On-demand withdrawal at <strong><%= forceWithdrawalPenalty %>% fee</strong> · Max <strong>50% of balance</strong> per request · Max <strong>2 per year</strong></div>
-
-      <!-- Minimum balance notice — always visible -->
       <div class="lock-warning" id="minBalanceNotice">
         <div class="lock-warning-icon"><i class="fas fa-lock"></i></div>
         <div class="lock-warning-text">
@@ -847,7 +961,6 @@ button,input,select,textarea{font-family:inherit;}
           A minimum balance of <strong>₦10,000</strong> must be maintained. If your balance drops below this after a withdrawal, your account will be <strong>automatically deactivated</strong>.
         </div>
       </div>
-
       <div class="form-group">
         <label class="form-label">Type</label>
         <select class="form-control" id="withdrawalType" onchange="updateWithdrawalFee()">
@@ -861,21 +974,16 @@ button,input,select,textarea{font-family:inherit;}
         <input type="number" class="form-control" id="withdrawAmount" placeholder="0.00" max="<%= user.account?.balance || 0 %>" oninput="updateWithdrawalFee()">
         <div class="form-hint" id="withdrawAvailableHint">Available: ₦<%= (user.account?.balance || 0).toLocaleString() %> · Min. balance retained: ₦10,000</div>
       </div>
-
-      <!-- Dynamic on-demand 50% cap warning -->
       <div class="modal-danger" id="overCapAlertBox" style="display:none;">
         <i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>
         <strong>Amount exceeds 50% limit.</strong><br>
         On-demand withdrawals are capped at <strong>50% of your balance</strong>. Maximum allowed: <span id="overCapMax">₦0</span>.
       </div>
-
-      <!-- Dynamic lock alert shown when amount would drop balance below 10k -->
       <div class="modal-danger" id="lockAlertBox" style="display:none;">
         <i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>
         <strong>Your account will be deactivated.</strong><br>
         This withdrawal will bring your balance below <strong>₦10,000</strong>. Your account will be <strong>automatically locked (deactivated)</strong> after this transaction. Contact the administrator to reactivate.
       </div>
-
       <div id="withdrawalFeeInfo" style="display:none;">
         <div class="fee-breakdown">
           <div class="fee-row"><span class="fee-row-label">Requested amount</span><span id="withdrawAmountDisplay">₦0</span></div>
@@ -885,7 +993,6 @@ button,input,select,textarea{font-family:inherit;}
           <div class="form-hint" id="withdrawTimingNotice" style="margin-top:6px;"></div>
         </div>
       </div>
-
       <div class="form-group">
         <label class="form-label">Method</label>
         <select class="form-control" id="withdrawMethod">
@@ -905,7 +1012,7 @@ button,input,select,textarea{font-family:inherit;}
   </div>
 </div>
 
-<!-- ══ WITHDRAWAL CONFIRMATION MODAL (shown when account will be deactivated) ══ -->
+<!-- ══ WITHDRAWAL CONFIRMATION MODAL ══ -->
 <div class="modal-backdrop" id="withdrawConfirmModal">
   <div class="modal-box"><div class="modal-handle"></div>
     <div class="modal-header">
@@ -919,13 +1026,9 @@ button,input,select,textarea{font-family:inherit;}
       </div>
       <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:12px;">
         <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--muted);">Requested amount</span><span id="confirmAmount" style="font-weight:500;">₦0</span></div>
-        <!-- Force fee summary -->
         <div id="confirmFeeRow" style="display:none;justify-content:space-between;padding:4px 0;"><span style="color:var(--muted);" id="confirmFeeLabel">Total force fee</span><span id="confirmFeeAmt" style="color:var(--red);font-weight:500;">₦0</span></div>
-        <!-- Phase 1 -->
         <div id="confirmPhase1Row" style="display:none;justify-content:space-between;padding:4px 0;"><span style="color:var(--muted);">Phase 1 — immediate payout</span><span id="confirmPhase1Amt" style="color:var(--green);font-weight:500;">₦0</span></div>
-        <!-- Phase 2 (split only) -->
         <div id="confirmPhase2Row" style="display:none;justify-content:space-between;padding:4px 0;"><span style="color:var(--muted);">Phase 2 — within 30 days</span><span id="confirmPhase2Amt" style="color:var(--accent);font-weight:500;">₦0</span></div>
-        <!-- Total net (force) or single net (regular) -->
         <div id="confirmNetRow" style="display:none;justify-content:space-between;padding:4px 0;border-top:1px solid var(--border);margin-top:4px;padding-top:8px;"><span style="color:var(--muted);font-weight:600;">Total you receive</span><span id="confirmNetAmt" style="color:var(--green);font-weight:600;">₦0</span></div>
         <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--muted);">Balance after deduction</span><span id="confirmBalAfter" style="color:var(--red);font-weight:500;">₦0</span></div>
         <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--muted);">Account status after</span><span style="color:var(--red);font-weight:600;">Deactivated</span></div>
@@ -969,7 +1072,7 @@ button,input,select,textarea{font-family:inherit;}
   </div>
 </div>
 
-<!-- Deposit -->
+<!-- ══ DEPOSIT MODAL ══ -->
 <div class="modal-backdrop" id="depositModal">
   <div class="modal-box"><div class="modal-handle"></div>
     <div class="modal-header">
@@ -1000,10 +1103,25 @@ button,input,select,textarea{font-family:inherit;}
             <option value="no">No — external transfer</option>
           </select>
         </div>
+        <!-- Bank details box with copyable account number -->
         <div id="coopBankDetails" class="modal-info" style="display:none;">
           <% if (accountConfigured) { %>
-            <i class="fas fa-university" style="margin-right:6px;"></i>
-            <strong><%= bankName %></strong> · <%= accountName %> · <strong><%= accountNumber %></strong>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;">
+                <i class="fas fa-university"></i>
+                <span><strong><%= bankName %></strong></span>
+              </div>
+              <div style="font-size:12px;color:var(--text2);">
+                Account Name: <strong><%= accountName %></strong>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <div style="font-size:12px;">Account No:</div>
+                <span class="acct-copy-row" onclick="copyAccountNumber('<%= accountNumber %>', this)" title="Click to copy">
+                  <span style="font-family:'DM Mono',monospace;font-size:13px;"><%= accountNumber %></span>
+                  <i class="fas fa-copy copy-icon"></i>
+                </span>
+              </div>
+            </div>
           <% } else { %>
             <i class="fas fa-info-circle" style="margin-right:6px;color:var(--amber);"></i>
             <span style="color:var(--amber);">Bank details not configured. Contact admin.</span>
@@ -1052,7 +1170,7 @@ button,input,select,textarea{font-family:inherit;}
   </div>
 </div>
 
-<!-- Loan Payment -->
+<!-- ══ LOAN PAYMENT MODAL ══ -->
 <div class="modal-backdrop" id="loanPaymentModal">
   <div class="modal-box"><div class="modal-handle"></div>
     <div class="modal-header">
@@ -1087,11 +1205,26 @@ button,input,select,textarea{font-family:inherit;}
           <input type="number" id="loanPaystackAmount" class="form-control" min="100">
         </div>
       </div>
+      <!-- Loan manual transfer section — copyable account number -->
       <div id="loanCoopSection" style="display:none;">
         <div class="modal-info" style="margin-bottom:12px;">
           <% if (accountConfigured) { %>
-            <i class="fas fa-university" style="margin-right:6px;"></i>
-            <strong><%= bankName %></strong> · <%= accountName %> · <strong><%= accountNumber %></strong>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;">
+                <i class="fas fa-university"></i>
+                <span><strong><%= bankName %></strong></span>
+              </div>
+              <div style="font-size:12px;color:var(--text2);">
+                Account Name: <strong><%= accountName %></strong>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <div style="font-size:12px;">Account No:</div>
+                <span class="acct-copy-row" onclick="copyAccountNumber('<%= accountNumber %>', this)" title="Click to copy">
+                  <span style="font-family:'DM Mono',monospace;font-size:13px;"><%= accountNumber %></span>
+                  <i class="fas fa-copy copy-icon"></i>
+                </span>
+              </div>
+            </div>
           <% } else { %>
             <span style="color:var(--amber);">Bank details not configured. Contact admin.</span>
           <% } %>
@@ -1141,11 +1274,10 @@ const USER_STATUS               = "<%= user.status %>";
 const USER_HAS_LOAN             = <%= loan ? "true" : "false" %>;
 const USER_IS_GUARANTOR         = <%= user.guarantorRequests?.some(g=>g.status==="accepted") ? "true" : "false" %>;
 const USER_BALANCE              = <%= user.account?.balance || 0 %>;
-/* On-demand fee % sourced from memberType.forceWithdrawalPenalty */
 const ONDEMAND_FEE_PERCENT      = <%= forceWithdrawalPenalty %>;
 const ONDEMAND_COUNT_THIS_YEAR  = <%= forcefulWithdrawalCount || 0 %>;
 const MAX_ONDEMAND_PER_YEAR     = 2;
-const MIN_BALANCE               = 10000; // ₦10,000 — account deactivates if balance drops below this
+const MIN_BALANCE               = 10000;
 
 /* ── Theme ── */
 (function(){
@@ -1188,18 +1320,41 @@ function checkUserStatus(modalId){
   else openModal(modalId);
 }
 
+/* ── Copy account number ── */
+let copyToastTimer = null;
+function copyAccountNumber(number, el){
+  navigator.clipboard.writeText(number).then(function(){
+    /* Visual feedback on the element */
+    el.classList.add('copied');
+    const icon = el.querySelector('.copy-icon');
+    if(icon){ icon.className = 'fas fa-check copy-icon'; }
+    /* Toast */
+    const toast = document.getElementById('copyToast');
+    toast.classList.add('show');
+    if(copyToastTimer) clearTimeout(copyToastTimer);
+    copyToastTimer = setTimeout(function(){
+      toast.classList.remove('show');
+      el.classList.remove('copied');
+      if(icon){ icon.className = 'fas fa-copy copy-icon'; }
+    }, 2200);
+  }).catch(function(){
+    /* Fallback for older browsers / http */
+    const ta = document.createElement('textarea');
+    ta.value = number; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+
 /* ── helpers ── */
 const fmt = n => '₦' + Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 
-/* ── Determines whether a withdrawal will trigger account deactivation ──
-   RULE: Deactivation happens ONLY when balance after < ₦10,000.
-   Applies equally to regular and on-demand withdrawals.
-*/
 function willDeactivate(type, amount){
   return (USER_BALANCE - amount) < MIN_BALANCE;
 }
 
-/* ── Live fee/payout preview in the withdraw modal ── */
+/* ── Live fee/payout preview ── */
 function updateWithdrawalFee(){
   const type    = document.getElementById('withdrawalType').value;
   const input   = document.getElementById('withdrawAmount');
@@ -1209,51 +1364,34 @@ function updateWithdrawalFee(){
   const amount  = Number(input.value) || 0;
   const half    = parseFloat((USER_BALANCE / 2).toFixed(2));
   const rate    = ONDEMAND_FEE_PERCENT / 100;
-
-  /* Reset all alerts */
   box.style.display    = 'none';
   lockAl.style.display = 'none';
   capAl.style.display  = 'none';
-
   if(!type || amount <= 0) return;
   if(amount > USER_BALANCE){ input.value = USER_BALANCE; return updateWithdrawalFee(); }
-
-  /* On-demand: check yearly limit before showing anything */
   if(type === 'ondemand' && ONDEMAND_COUNT_THIS_YEAR >= MAX_ONDEMAND_PER_YEAR){
     openModal('withdrawLimitModal');
     document.getElementById('withdrawalType').value = '';
     return;
   }
-
-  /* On-demand: 50% cap alert (show but don't prevent typing) */
   if(type === 'ondemand' && amount > half){
     document.getElementById('overCapMax').textContent = fmt(half);
     capAl.style.display = 'block';
-    /* Still show fee breakdown so user sees what 50% would cost */
   }
-
-  /* Deactivation alert */
-  if(willDeactivate(type, amount)){
-    lockAl.style.display = 'block';
-  }
-
-  /* Fee breakdown */
+  if(willDeactivate(type, amount)) lockAl.style.display = 'block';
   const isOnDemand  = type === 'ondemand';
   const penaltyAmt  = isOnDemand ? parseFloat((amount * rate).toFixed(2)) : 0;
   const net         = parseFloat((amount - penaltyAmt).toFixed(2));
-
   box.style.display = 'block';
   document.getElementById('withdrawAmountDisplay').textContent = fmt(amount);
-
   const feeRow = document.getElementById('feeRow');
   if(isOnDemand && penaltyAmt > 0){
     feeRow.style.display = 'flex';
-    document.getElementById('feeRowLabel').textContent = `On-demand fee (${ONDEMAND_FEE_PERCENT}%)`;
+    document.getElementById('feeRowLabel').textContent = 'On-demand fee (' + ONDEMAND_FEE_PERCENT + '%)';
     document.getElementById('initialFee').textContent  = fmt(penaltyAmt);
   } else {
     feeRow.style.display = 'none';
   }
-
   document.getElementById('payoutLabel').textContent = isOnDemand ? 'You receive (immediate)' : 'You receive';
   document.getElementById('netAmount').textContent   = fmt(net);
   document.getElementById('withdrawTimingNotice').textContent = isOnDemand
@@ -1261,73 +1399,55 @@ function updateWithdrawalFee(){
     : 'Processed within 24–48 hours.';
 }
 
-/* ── Validate then proceed or show deactivation confirmation ── */
 function confirmWithdrawal(){
   const type   = document.getElementById('withdrawalType').value;
   const amount = Number(document.getElementById('withdrawAmount').value);
   const errMsg = document.getElementById('withdrawErrorMsg');
-
   try {
     if(!type)                  throw new Error('Select a withdrawal type.');
     if(!amount || amount <= 0) throw new Error('Enter a valid amount.');
     if(amount > USER_BALANCE)  throw new Error('Insufficient balance.');
-
     if(type === 'ondemand'){
-      if(ONDEMAND_COUNT_THIS_YEAR >= MAX_ONDEMAND_PER_YEAR){
-        openModal('withdrawLimitModal'); return;
-      }
+      if(ONDEMAND_COUNT_THIS_YEAR >= MAX_ONDEMAND_PER_YEAR){ openModal('withdrawLimitModal'); return; }
       const half = parseFloat((USER_BALANCE / 2).toFixed(2));
-      if(amount > half)
-        throw new Error(`On-demand withdrawals cannot exceed 50% of your balance (${fmt(half)}).`);
+      if(amount > half) throw new Error('On-demand withdrawals cannot exceed 50% of your balance (' + fmt(half) + ').');
     }
-
-    if(USER_HAS_LOAN)
-      throw new Error('You cannot withdraw while you have an active loan.');
-    if(USER_IS_GUARANTOR === 'true' && amount >= USER_BALANCE)
-      throw new Error('Guarantors cannot withdraw their full balance.');
-
+    if(USER_HAS_LOAN) throw new Error('You cannot withdraw while you have an active loan.');
+    if(USER_IS_GUARANTOR === 'true' && amount >= USER_BALANCE) throw new Error('Guarantors cannot withdraw their full balance.');
     if(type === 'regular'){
       const d = new Date();
       if(d.getMonth() !== 11 || d.getDate() < 1 || d.getDate() > 10)
         throw new Error('Regular withdrawals are only allowed Dec 1–10.');
     }
-
     if(willDeactivate(type, amount)){
-      /* Show deactivation confirmation modal */
-      const balAfter    = Math.max(0, USER_BALANCE - amount);
-      const isOnDemand  = type === 'ondemand';
-      const penaltyAmt  = isOnDemand ? parseFloat((amount * ONDEMAND_FEE_PERCENT / 100).toFixed(2)) : 0;
-      const netAmt      = parseFloat((amount - penaltyAmt).toFixed(2));
-
+      const balAfter   = Math.max(0, USER_BALANCE - amount);
+      const isOnDemand = type === 'ondemand';
+      const penaltyAmt = isOnDemand ? parseFloat((amount * ONDEMAND_FEE_PERCENT / 100).toFixed(2)) : 0;
+      const netAmt     = parseFloat((amount - penaltyAmt).toFixed(2));
       document.getElementById('confirmDeactivationMsg').innerHTML =
-        `This withdrawal will reduce your balance to <strong>${fmt(balAfter)}</strong>, ` +
-        `which is below the <strong>₦10,000 minimum</strong>. Your account will be ` +
-        `<strong>automatically deactivated</strong> once processed. ` +
-        `Contact the cooperative administrator to reactivate.`;
-
+        'This withdrawal will reduce your balance to <strong>' + fmt(balAfter) + '</strong>, ' +
+        'which is below the <strong>₦10,000 minimum</strong>. Your account will be ' +
+        '<strong>automatically deactivated</strong> once processed. ' +
+        'Contact the cooperative administrator to reactivate.';
       document.getElementById('confirmAmount').textContent   = fmt(amount);
       document.getElementById('confirmBalAfter').textContent = fmt(balAfter);
-
       const confirmFeeRow = document.getElementById('confirmFeeRow');
       const confirmNetRow = document.getElementById('confirmNetRow');
       if(isOnDemand && penaltyAmt > 0){
         confirmFeeRow.style.display = 'flex';
-        document.getElementById('confirmFeeLabel').textContent = `On-demand fee (${ONDEMAND_FEE_PERCENT}%)`;
+        document.getElementById('confirmFeeLabel').textContent = 'On-demand fee (' + ONDEMAND_FEE_PERCENT + '%)';
         document.getElementById('confirmFeeAmt').textContent   = fmt(penaltyAmt);
         confirmNetRow.style.display = 'flex';
         document.getElementById('confirmNetAmt').innerHTML =
-          `${fmt(netAmt)} <span style="color:var(--muted);font-size:11px;">(immediate)</span>`;
+          fmt(netAmt) + ' <span style="color:var(--muted);font-size:11px;">(immediate)</span>';
       } else {
         confirmFeeRow.style.display = 'none';
         confirmNetRow.style.display = 'none';
       }
-
-      /* Hide unused phase rows if they exist */
       const p1r = document.getElementById('confirmPhase1Row');
       const p2r = document.getElementById('confirmPhase2Row');
       if(p1r) p1r.style.display = 'none';
       if(p2r) p2r.style.display = 'none';
-
       closeModal('withdrawModal');
       openModal('withdrawConfirmModal');
     } else {
@@ -1339,43 +1459,25 @@ function confirmWithdrawal(){
   }
 }
 
-/* ── API call + success message ── */
 async function proceedWithWithdrawal(){
   const type   = document.getElementById('withdrawalType').value;
   const amount = Number(document.getElementById('withdrawAmount').value);
   const errMsg = document.getElementById('withdrawErrorMsg');
-
   closeModal('withdrawConfirmModal');
-
   try {
-    const res  = await fetch('/withdraw', {
-      method:  'POST',
-      headers: {'Content-Type':'application/json'},
-      body:    JSON.stringify({ type, amount })
-    });
+    const res  = await fetch('/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,amount})});
     const data = await res.json();
     if(!res.ok) throw new Error(data.message || 'Withdrawal failed.');
-
     const successEl = document.getElementById('withdrawSuccessMsg');
     if(successEl){
       const s = data.summary || {};
       if(type === 'ondemand'){
-        const feeLine    = s.penaltyAmount > 0
-          ? `Fee (${s.penaltyRate}%): <strong style="color:var(--red);">${fmt(s.penaltyAmount)}</strong> · `
-          : '';
-        const netLine    = `You receive: <strong style="color:var(--green);">${fmt(s.phase1Amount)}</strong> (immediate)`;
-        const deactLine  = data.deactivated
-          ? `<br><br>⚠️ <strong>Account deactivated</strong> — balance below ₦10,000. Contact the administrator.`
-          : '';
-        successEl.innerHTML =
-          `On-demand withdrawal submitted.<br>` +
-          `<span style="font-size:12px;color:var(--muted);line-height:1.8;">` +
-          `Gross: <strong>${fmt(s.grossAmount)}</strong> · ${feeLine}${netLine}` +
-          `</span>${deactLine}`;
+        const feeLine   = s.penaltyAmount > 0 ? 'Fee (' + s.penaltyRate + '%): <strong style="color:var(--red);">' + fmt(s.penaltyAmount) + '</strong> · ' : '';
+        const netLine   = 'You receive: <strong style="color:var(--green);">' + fmt(s.phase1Amount) + '</strong> (immediate)';
+        const deactLine = data.deactivated ? '<br><br>⚠️ <strong>Account deactivated</strong> — balance below ₦10,000. Contact the administrator.' : '';
+        successEl.innerHTML = 'On-demand withdrawal submitted.<br><span style="font-size:12px;color:var(--muted);line-height:1.8;">Gross: <strong>' + fmt(s.grossAmount) + '</strong> · ' + feeLine + netLine + '</span>' + deactLine;
       } else if(data.deactivated){
-        successEl.innerHTML =
-          `Withdrawal submitted.<br><br>` +
-          `⚠️ <strong>Account deactivated</strong> — balance below ₦10,000. Contact the administrator.`;
+        successEl.innerHTML = 'Withdrawal submitted.<br><br>⚠️ <strong>Account deactivated</strong> — balance below ₦10,000. Contact the administrator.';
       } else {
         successEl.textContent = 'Request submitted — expected within 5 minutes.';
       }
@@ -1390,12 +1492,12 @@ async function proceedWithWithdrawal(){
 
 /* ── Deposit ── */
 document.getElementById('paymentMethod').addEventListener('change', function(){
-  document.getElementById('paystackSection').style.display    = this.value==='paystack'     ? 'block' : 'none';
-  document.getElementById('cooperativeSection').style.display = this.value==='cooperative'  ? 'block' : 'none';
+  document.getElementById('paystackSection').style.display    = this.value==='paystack'    ? 'block' : 'none';
+  document.getElementById('cooperativeSection').style.display = this.value==='cooperative' ? 'block' : 'none';
 });
 document.getElementById('coopSource').addEventListener('change', function(){
-  document.getElementById('coopBankDetails').style.display = this.value       ? 'block' : 'none';
-  document.getElementById('coopNoExtra').style.display     = this.value==='no'? 'block' : 'none';
+  document.getElementById('coopBankDetails').style.display = this.value        ? 'block' : 'none';
+  document.getElementById('coopNoExtra').style.display     = this.value==='no' ? 'block' : 'none';
 });
 async function submitDeposit(){
   const method = document.getElementById('paymentMethod').value;
@@ -1433,12 +1535,12 @@ async function loadLoans(){
     if(!Array.isArray(loansData) || !loansData.length){
       sel.innerHTML = '<option value="">No active loans</option>'; return;
     }
-    loansData.forEach(l=>{
+    loansData.forEach(function(l){
       const o   = document.createElement('option');
       o.value   = l._id;
       const bal = Number(l.outstandingBalance || l.totalRepay || 0);
       const due = l.dueDate ? new Date(l.dueDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'N/A';
-      o.textContent = `₦${bal.toLocaleString()} outstanding — ${l.status==='overdue'?'⚠️ OVERDUE':'due'} ${due}`;
+      o.textContent = '₦' + bal.toLocaleString() + ' outstanding — ' + (l.status==='overdue'?'⚠️ OVERDUE':'due') + ' ' + due;
       sel.appendChild(o);
     });
   } catch(e){
@@ -1446,7 +1548,7 @@ async function loadLoans(){
   }
 }
 document.getElementById('loanSelect').addEventListener('change', function(){
-  const loan       = loansData.find(l => l._id === this.value);
+  const loan       = loansData.find(function(l){ return l._id === this.value; }, this);
   const box        = document.getElementById('loanOutstandingBox');
   if(!loan){ box.style.display = 'none'; return; }
   const outstanding = Number(loan.outstandingBalance || loan.totalRepay || 0);
@@ -1459,18 +1561,18 @@ document.getElementById('loanSelect').addEventListener('change', function(){
   box.style.display   = 'block';
   box.className       = 'lob-box' + (isOverdue ? ' overdue' : '');
   document.getElementById('loanBoxTag').textContent    = isOverdue ? '⚠️ Overdue — Total Owed' : 'Outstanding Balance';
-  document.getElementById('loanBoxAmount').textContent = `₦${outstanding.toLocaleString()}`;
+  document.getElementById('loanBoxAmount').textContent = '₦' + outstanding.toLocaleString();
   const bd = document.getElementById('loanBoxBreakdown');
   bd.innerHTML = '';
-  const row = (l,v,c) => {
+  const row = function(l,v,c){
     const d = document.createElement('div');
     d.className = 'lob-row';
-    d.innerHTML = `<span>${l}</span><span style="color:${c||'var(--text)'}">${v}</span>`;
+    d.innerHTML = '<span>' + l + '</span><span style="color:' + (c||'var(--text)') + '">' + v + '</span>';
     return d;
   };
-  bd.appendChild(row('Principal:',       `₦${loanAmount.toLocaleString()}`, 'var(--muted)'));
-  bd.appendChild(row('Base repayment:',  `₦${totalRepay.toLocaleString()}`, 'var(--accent)'));
-  if(penalty > 0) bd.appendChild(row('Penalty:', `+₦${penalty.toLocaleString()}`, 'var(--red)'));
+  bd.appendChild(row('Principal:',       '₦' + loanAmount.toLocaleString(), 'var(--muted)'));
+  bd.appendChild(row('Base repayment:',  '₦' + totalRepay.toLocaleString(), 'var(--accent)'));
+  if(penalty > 0) bd.appendChild(row('Penalty:', '+₦' + penalty.toLocaleString(), 'var(--red)'));
   bd.appendChild(row('Due:', due, 'var(--muted)'));
   const warn = document.getElementById('loanOverdueWarn');
   warn.style.display = (isOverdue && penRate > 0) ? 'block' : 'none';
@@ -1500,7 +1602,7 @@ async function submitLoanPayment(){
       const res = await fetch('/loan/payment/manual',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({loanId,amount:document.getElementById('loanCoopAmount').value,payerName:document.getElementById('loanPayerName').value})});
       if(!res.ok) throw new Error('Manual payment failed');
       closeModal('loanPaymentModal'); openModal('loanPaymentSuccessModal');
-      setTimeout(() => location.reload(), 2500);
+      setTimeout(function(){ location.reload(); }, 2500);
     }
   } catch(e){
     openModal('loanPaymentFailedModal');
@@ -1509,14 +1611,40 @@ async function submitLoanPayment(){
   }
 }
 
-/* ── Loader dismiss ── */
-window.addEventListener('load', () => {
-  const l = document.getElementById('loader');
-  setTimeout(()=>{ l.style.opacity='0'; setTimeout(()=>l.style.display='none',500); }, 400);
+/* ── Loader — short form, reveal at 2.8 s ── */
+(function(){
+  const c = document.getElementById('ldParticles');
+  for(let i = 0; i < 20; i++){
+    const p = document.createElement('div');
+    p.className = 'ldp';
+    p.style.cssText =
+      'left:' + (Math.random()*100).toFixed(1) + '%;' +
+      'top:'  + (Math.random()*100).toFixed(1) + '%;' +
+      '--tx:' + ((Math.random()-.5)*120).toFixed(0) + 'px;' +
+      '--ty:' + ((Math.random()-.5)*120).toFixed(0) + 'px;' +
+      '--dur:' + (2.5 + Math.random()*3).toFixed(1) + 's;' +
+      '--delay:' + (Math.random()*4).toFixed(1) + 's;';
+    c.appendChild(p);
+  }
+})();
+
+window.addEventListener('load', function(){
+  const loader = document.getElementById('loader');
+  const MIN_MS = 2800; // short form: animation finishes ~2.4 s, +0.4 s buffer
+  const t0 = Date.now();
+  function dismiss(){
+    const wait = Math.max(0, MIN_MS - (Date.now() - t0));
+    setTimeout(function(){
+      loader.style.opacity    = '0';
+      loader.style.transition = 'opacity 0.5s ease';
+      setTimeout(function(){ loader.style.display = 'none'; }, 500);
+    }, wait);
+  }
+  dismiss();
 });
 
 /* ── Close sidebar on outside click ── */
-document.addEventListener('click', e => {
+document.addEventListener('click', function(e){
   const sb = document.getElementById('sidebar');
   const hb = document.querySelector('.hamburger');
   if(window.innerWidth<=900 && sb.classList.contains('open') && !sb.contains(e.target) && !hb.contains(e.target)) closeSidebar();

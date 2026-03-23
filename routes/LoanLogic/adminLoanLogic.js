@@ -142,29 +142,120 @@ function computeDueDate(startDate, duration, durationUnit = "months") {
 router.get("/admin/manage-loan", ensureAdmin("view_loans"), async (req, res) => {
   try {
     const loans = await Loan.find()
+ 
+      // ── Borrower (internal member) ──
       .populate({
         path: "user",
         select: "firstName lastName membershipID email phone account",
         populate: {
           path: "account",
-          select: "accountType",
-          populate: { path: "accountType", model: "MemberType", select: "name" }
+          select: "accountType balance",
+          populate: {
+            path: "accountType",
+            model: "MemberType",
+            select: "name shortCode interestRate"
+          }
         }
       })
-      .populate("duration")
+ 
+      // ── Loan duration settings ──
+      .populate("duration", "duration label")
+ 
+      // ── Guarantors with their account balances ──
       .populate({
         path: "guarantors.guarantor",
-        select: "firstName lastName membershipID email phone account"
+        select: "firstName lastName membershipID email phone account",
+        populate: {
+          path: "account",
+          select: "balance"
+        }
       })
+ 
+      // ── Admin who initiated the loan (optional, for audit) ──
+      .populate("initiatedBy", "firstName lastName email")
+ 
+      // ── Rollover: the replacement loan this was rolled into ──
+      .populate("rolledIntoLoan", "amount status createdAt")
+ 
       .sort({ createdAt: -1 });
-
-    res.render("dashboard/admin/loan", { admin: req.user, loans });
+ 
+    // ── Compute stats server-side ──────────────────────────────
+    // "Active" = approved + rolled_over (both are live/disbursed loans)
+    const stats = {
+      pendingCount:   0,
+      approvedCount:  0,   // strictly status === 'approved'
+      overdueCount:   0,
+      rejectedCount:  0,
+      paidCount:      0,
+      rolledOverCount: 0,  // status === 'rolled_over'
+      activeCount:    0,   // approved + rolled_over
+ 
+      // Financial sums
+      activeTotalAmount:    0,   // approved + rolled_over amounts
+      overdueTotalAmount:   0,
+      pendingTotalAmount:   0,
+      outstandingTotal:     0,   // sum of outstandingBalance across all active/overdue
+      paidBackTotal:        0,   // sum of paidAmount across all loans
+      totalPenaltiesCharged:0,
+      grandTotal:           0,   // all loan amounts combined
+    };
+ 
+    loans.forEach(loan => {
+      const status = (loan.status || "").toLowerCase();
+      const amount = Number(loan.amount)             || 0;
+      const outBal = Number(loan.outstandingBalance) || 0;
+      const paid   = Number(loan.paidAmount)         || 0;
+      const pen    = Number(loan.totalPenalty)        || 0;
+ 
+      stats.grandTotal           += amount;
+      stats.outstandingTotal     += outBal;
+      stats.paidBackTotal        += paid;
+      stats.totalPenaltiesCharged+= pen;
+ 
+      switch (status) {
+        case "pending":
+          stats.pendingCount++;
+          stats.pendingTotalAmount += amount;
+          break;
+ 
+        case "approved":
+          stats.approvedCount++;
+          stats.activeCount++;
+          stats.activeTotalAmount += amount;
+          break;
+ 
+        case "rolled_over":
+          stats.rolledOverCount++;
+          stats.activeCount++;               // counts as active
+          stats.activeTotalAmount += amount;
+          break;
+ 
+        case "overdue":
+          stats.overdueCount++;
+          stats.overdueTotalAmount += amount;
+          break;
+ 
+        case "rejected":
+          stats.rejectedCount++;
+          break;
+ 
+        case "paid":
+          stats.paidCount++;
+          break;
+      }
+    });
+ 
+    res.render("dashboard/admin/loan", {
+      admin: req.user,
+      loans,
+      stats,  // available in template via <%= stats.activeCount %> etc.
+    });
+ 
   } catch (error) {
     console.error("Error fetching loans:", error);
     res.status(500).send("Internal Server Error");
   }
 });
-
 
 
 function parseDateLocal(dateStr) {
@@ -783,16 +874,28 @@ router.get("/admin/external-loans", ensureAdmin("view_external_loans"), async (r
           populate: { path: "accountType", model: "MemberType", select: "name" }
         }
       })
-      .populate({ path: "initiatedBy", select: "fullName email role" })
+      // Select both fullName (Admin model) and firstName+lastName (User model)
+      // so the template can fall through to whichever is populated
+      .populate({ path: "initiatedBy", select: "fullName firstName lastName email role" })
       .populate("duration")
       .populate({ path: "guarantors.guarantor", select: "firstName lastName membershipID email phone" })
       .sort({ createdAt: -1 });
 
     const users = await User.find().select("firstName lastName membershipID email phone");
 
+    // Deep-populate loan.external and loan.user inside each payment so the
+    // payments table and export can safely reference payment.loan.external.borrowerName
+    // and payment.loan.user.membershipID without crashing on null.
     const payments = await Payment.find({ loan: { $in: loans.map(l => l._id) } })
-      .populate("loan")
-      .populate("paidBy")
+      .populate({
+        path: "loan",
+        select: "external user amount totalRepay paidAmount interestRate dueDate status",
+        populate: {
+          path: "user",
+          select: "firstName lastName membershipID email"
+        }
+      })
+      .populate({ path: "paidBy", select: "fullName firstName lastName email" })
       .sort({ createdAt: -1 })
       .limit(10);
 

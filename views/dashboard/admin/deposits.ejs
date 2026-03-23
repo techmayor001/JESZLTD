@@ -18,118 +18,116 @@
             --info: #06b6d4;
             --sidebar-width: 280px;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
             min-height: 100vh;
             overflow-x: hidden;
         }
-        
-        /* Sidebar Styles */
+
+        /* ══════════ SIDEBAR ══════════ */
         .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
+            position: fixed; left: 0; top: 0; bottom: 0;
             width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            z-index: 1040;
-            transition: all 0.3s;
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
-            transform: translateX(0);
+            background: linear-gradient(180deg, #0f2357 0%, #1e3a8a 40%, #1e40af 100%);
+            z-index: 1040; overflow-y: auto;
+            transition: transform .3s ease;
+            box-shadow: 4px 0 24px rgba(30,58,138,.25);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,.15) transparent;
         }
-        
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+
         .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
+            padding: 1.4rem 1.25rem 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            background: rgba(0,0,0,.18);
+            position: sticky; top: 0; z-index: 2;
         }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        
+        .logo-row { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
         .logo-box {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            flex-shrink: 0;
+            width: 42px; height: 42px; background: white; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: var(--primary); font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,.25); flex-shrink: 0;
         }
-        
-        .sidebar-title {
-            font-size: 1.1rem;
-            line-height: 1.2;
+        .sidebar-brand {
+            font-size: .95rem; font-weight: 800; color: white;
+            text-transform: uppercase; letter-spacing: .05em; line-height: 1.2;
         }
-        
-        .admin-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            background: rgba(239, 68, 68, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            font-weight: 600;
-            font-size: 0.8rem;
-            margin-top: 8px;
+        .sidebar-brand small {
+            font-size: .65rem; font-weight: 500; opacity: .55;
+            display: block; letter-spacing: .08em;
         }
-        
-        .sidebar-menu {
-            padding: 1rem 0;
+        .role-pill {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 4px 10px; background: rgba(239,68,68,.2);
+            border-radius: 20px; border: 1px solid rgba(239,68,68,.3);
+            font-weight: 700; font-size: .7rem; color: #fca5a5;
         }
-        
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            padding: 0.875rem 1.5rem;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s;
+
+        /* ── Category groups ── */
+        .nav-group { padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .nav-group:last-child { border-bottom: none; }
+
+        .nav-category {
+            display: flex; align-items: center; gap: 7px;
+            padding: .55rem 1.25rem .3rem;
+            font-size: .62rem; font-weight: 800;
+            color: rgba(255,255,255,.38);
+            text-transform: uppercase; letter-spacing: .1em;
+            user-select: none;
+        }
+        .nav-category::after {
+            content: '';
+            flex: 1; height: 1px;
+            background: rgba(255,255,255,.08);
+            margin-left: 4px;
+        }
+
+        /* ── Nav links ── */
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 11px;
+            padding: .62rem 1.25rem; color: rgba(255,255,255,.72);
+            text-decoration: none; font-weight: 500; font-size: .84rem;
             border-left: 3px solid transparent;
-            font-weight: 500;
-            font-size: 0.95rem;
+            transition: all .18s;
         }
-        
-        .sidebar-menu a:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left-color: white;
+        .sidebar-nav a:hover  { background: rgba(255,255,255,.09); color: white; border-left-color: rgba(255,255,255,.4); }
+        .sidebar-nav a.active { background: rgba(255,255,255,.15); color: white; border-left-color: white; }
+        .sidebar-nav a i { width: 18px; font-size: .9rem; flex-shrink: 0; opacity: .8; text-align: center; }
+        .sidebar-nav a.active i { opacity: 1; }
+
+        .nav-badge {
+            margin-left: auto;
+            font-size: .63rem; font-weight: 800;
+            padding: 2px 7px; border-radius: 10px;
+            background: rgba(239,68,68,.9); color: white;
+            flex-shrink: 0; line-height: 1.4;
         }
-        
-        .sidebar-menu a.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left-color: white;
+
+        .nav-back {
+            display: flex; align-items: center; gap: 10px;
+            padding: .7rem 1.25rem .9rem;
+            font-size: .8rem; font-weight: 600;
+            color: rgba(255,255,255,.42);
+            text-decoration: none;
+            transition: color .18s;
+            border-top: 1px solid rgba(255,255,255,.07);
+            margin-top: .25rem;
         }
-        
-        .sidebar-menu a i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-        
+        .nav-back:hover { color: rgba(255,255,255,.7); }
+        .nav-back i { font-size: .8rem; }
+
         /* Top Navbar */
         .top-navbar {
             position: fixed;
@@ -147,7 +145,7 @@
             transition: all 0.3s;
             border-bottom: 1px solid rgba(30, 58, 138, 0.1);
         }
-        
+
         /* Main Content */
         .main-content {
             margin-left: var(--sidebar-width);
@@ -156,7 +154,7 @@
             min-height: calc(100vh - 70px);
             transition: all 0.3s;
         }
-        
+
         .page-header {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
             color: white;
@@ -167,7 +165,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .page-header::before {
             content: '';
             position: absolute;
@@ -178,7 +176,7 @@
             background: rgba(255,255,255,0.05);
             border-radius: 50%;
         }
-        
+
         /* Stats Cards */
         .stats-card {
             background: white;
@@ -191,7 +189,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .stats-card::before {
             content: '';
             position: absolute;
@@ -202,13 +200,13 @@
             background: rgba(30, 58, 138, 0.03);
             border-radius: 0 16px 0 100%;
         }
-        
+
         .stats-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
             border-color: var(--primary);
         }
-        
+
         .stats-icon {
             width: 60px;
             height: 60px;
@@ -219,40 +217,19 @@
             font-size: 1.8rem;
             margin-bottom: 1rem;
         }
-        
+
         .stats-value {
             font-size: 2rem;
             font-weight: bold;
             margin-bottom: 0.5rem;
         }
-        
+
         .stats-label {
             color: var(--secondary);
             font-size: 0.9rem;
             font-weight: 500;
         }
-        
-        .stats-change {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-top: 0.5rem;
-        }
-        
-        .stats-change.positive {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
-        
-        .stats-change.negative {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-        
+
         /* Card Styles */
         .card {
             border: none;
@@ -261,14 +238,14 @@
             background: white;
             border: 1px solid rgba(30, 58, 138, 0.05);
         }
-        
+
         .card-header {
             background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
             border-bottom: 2px solid rgba(30, 58, 138, 0.1);
             padding: 1.25rem;
             border-radius: 16px 16px 0 0 !important;
         }
-        
+
         /* Deposit Status Badges */
         .status-badge {
             padding: 6px 12px;
@@ -278,25 +255,25 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
         .status-pending {
             background: rgba(245, 158, 11, 0.1);
             color: var(--warning);
             border: 1px solid rgba(245, 158, 11, 0.3);
         }
-        
+
         .status-approved {
             background: rgba(16, 185, 129, 0.1);
             color: var(--success);
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
-        
+
         .status-rejected {
             background: rgba(239, 68, 68, 0.1);
             color: var(--danger);
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
-        
+
         /* Action Buttons */
         .action-btn {
             padding: 6px 12px;
@@ -307,37 +284,37 @@
             border: none;
             cursor: pointer;
         }
-        
+
         .btn-approve {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
         }
-        
+
         .btn-approve:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
         }
-        
+
         .btn-reject {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
         }
-        
+
         .btn-reject:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
         }
-        
+
         .btn-view {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
         }
-        
+
         .btn-view:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
         }
-        
+
         /* Filter Section */
         .filter-section {
             background: white;
@@ -346,7 +323,7 @@
             margin-bottom: 1rem;
             box-shadow: 0 4px 12px rgba(30, 58, 138, 0.06);
         }
-        
+
         .filter-btn {
             padding: 8px 16px;
             border-radius: 8px;
@@ -357,27 +334,27 @@
             transition: all 0.3s;
             cursor: pointer;
         }
-        
+
         .filter-btn:hover, .filter-btn.active {
             background: var(--primary);
             color: white;
             border-color: var(--primary);
         }
-        
+
         /* Table Styles */
         .table-responsive {
             border-radius: 0 0 16px 16px;
             overflow: hidden;
         }
-        
+
         .table {
             margin: 0;
         }
-        
+
         .table thead {
             background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
         }
-        
+
         .table thead th {
             border: none;
             padding: 1rem;
@@ -385,21 +362,21 @@
             color: var(--primary);
             white-space: nowrap;
         }
-        
+
         .table tbody td {
             padding: 1rem;
             vertical-align: middle;
             border-bottom: 1px solid rgba(30, 58, 138, 0.05);
         }
-        
+
         .table tbody tr:last-child td {
             border-bottom: none;
         }
-        
+
         .table tbody tr:hover {
             background: rgba(30, 58, 138, 0.02);
         }
-        
+
         /* Receipt Styles */
         .receipt-container {
             max-width: 800px;
@@ -408,14 +385,14 @@
             padding: 2rem;
             border: 2px solid #e5e7eb;
         }
-        
+
         .receipt-header {
             text-align: center;
             border-bottom: 3px solid var(--primary);
             padding-bottom: 1.5rem;
             margin-bottom: 1.5rem;
         }
-        
+
         .receipt-logo {
             width: 80px;
             height: 80px;
@@ -429,23 +406,21 @@
             font-weight: bold;
             margin: 0 auto 1rem;
         }
-        
+
         .receipt-title {
             font-size: 1.8rem;
             font-weight: bold;
             color: var(--primary);
             margin-bottom: 0.5rem;
         }
-        
+
         .receipt-subtitle {
             color: var(--secondary);
             font-size: 0.9rem;
         }
-        
-        .receipt-section {
-            margin-bottom: 1.5rem;
-        }
-        
+
+        .receipt-section { margin-bottom: 1.5rem; }
+
         .receipt-section-title {
             font-weight: bold;
             color: var(--primary);
@@ -453,18 +428,16 @@
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
-        
+
         .receipt-row {
             display: flex;
             justify-content: space-between;
             padding: 0.5rem 0;
             border-bottom: 1px dashed #e5e7eb;
         }
-        
-        .receipt-row:last-child {
-            border-bottom: none;
-        }
-        
+
+        .receipt-row:last-child { border-bottom: none; }
+
         .receipt-amount {
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
             border: 2px solid var(--success);
@@ -473,20 +446,20 @@
             text-align: center;
             margin: 1.5rem 0;
         }
-        
+
         .receipt-amount-value {
             font-size: 2.5rem;
             font-weight: bold;
             color: var(--success);
         }
-        
+
         .receipt-footer {
             text-align: center;
             border-top: 3px solid var(--primary);
             padding-top: 1.5rem;
             margin-top: 2rem;
         }
-        
+
         .receipt-stamp {
             display: inline-block;
             border: 3px solid var(--success);
@@ -497,7 +470,7 @@
             transform: rotate(-5deg);
             margin: 1rem 0;
         }
-        
+
         .powered-by {
             position: fixed;
             bottom: 15px;
@@ -512,175 +485,136 @@
             z-index: 1000;
         }
 
-        /* ── Custom Alert Modal ── */
+        /* Custom Alert Modal */
         #alertModal .modal-content {
             border: none;
             border-radius: 18px;
             overflow: hidden;
             box-shadow: 0 20px 60px rgba(30, 58, 138, 0.2);
         }
-        #alertModal .modal-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: none;
-        }
-        #alertModal .modal-body {
-            padding: 1.5rem;
-            text-align: center;
-        }
+        #alertModal .modal-header { padding: 1.25rem 1.5rem; border-bottom: none; }
+        #alertModal .modal-body { padding: 1.5rem; text-align: center; }
         #alertModal .alert-icon-wrapper {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 2rem;
+            width: 72px; height: 72px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1rem; font-size: 2rem;
         }
-        #alertModal .modal-footer {
-            border-top: none;
-            padding: 0 1.5rem 1.5rem;
-            justify-content: center;
-        }
-        
-        /* Responsive Styles */
+        #alertModal .modal-footer { border-top: none; padding: 0 1.5rem 1.5rem; justify-content: center; }
+
+        /* Responsive */
         @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .top-navbar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 1rem;
-            }
-            
-            .table thead {
-                display: none;
-            }
-            
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .top-navbar { left: 0; }
+            .main-content { margin-left: 0; padding: 1rem; }
+            .table thead { display: none; }
             .table tbody tr {
-                display: block;
-                margin-bottom: 1rem;
+                display: block; margin-bottom: 1rem;
                 border: 2px solid rgba(30, 58, 138, 0.1);
-                border-radius: 12px;
-                overflow: hidden;
-                background: white;
+                border-radius: 12px; overflow: hidden; background: white;
             }
-            
             .table tbody td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0.75rem 1rem;
+                display: flex; justify-content: space-between;
+                align-items: center; padding: 0.75rem 1rem;
                 border-bottom: 1px solid rgba(30, 58, 138, 0.05);
             }
-            
-            .table tbody td:last-child {
-                border-bottom: none;
-            }
-            
+            .table tbody td:last-child { border-bottom: none; }
             .table tbody td::before {
                 content: attr(data-label);
-                font-weight: 600;
-                color: var(--primary);
-                margin-right: 1rem;
+                font-weight: 600; color: var(--primary); margin-right: 1rem;
             }
         }
-        
+
         @media (max-width: 576px) {
-            .stats-value {
-                font-size: 1.5rem;
-            }
-            
-            .stats-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.5rem;
-            }
+            .stats-value { font-size: 1.5rem; }
+            .stats-icon { width: 50px; height: 50px; font-size: 1.5rem; }
         }
-        
+
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            
-            #printReceipt, #printReceipt * {
-                visibility: visible;
-            }
-            
-            #printReceipt {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
-            
-            .sidebar, .top-navbar, .powered-by, .no-print {
-                display: none !important;
-            }
+            body * { visibility: hidden; }
+            #printReceipt, #printReceipt * { visibility: visible; }
+            #printReceipt { position: absolute; left: 0; top: 0; width: 100%; }
+            .sidebar, .top-navbar, .powered-by, .no-print { display: none !important; }
         }
-        
+
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease;
-        }
+
+        .fade-in { animation: fadeIn 0.5s ease; }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
+
+    <!-- ════════════════════════ SIDEBAR ════════════════════════ -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="logo-container">
+            <div class="logo-row">
                 <div class="logo-box">C</div>
                 <div>
-                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
-                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+                    <div class="sidebar-brand">Club De Stars<small>Admin Panel</small></div>
                 </div>
             </div>
-            <div class="admin-badge">
-                <i class="fas fa-shield-alt"></i>
-                <span>SUPER ADMIN</span>
+            <div class="role-pill">
+                <i class="fas fa-shield-alt" style="font-size:.65rem;"></i>&nbsp;Super Admin
             </div>
         </div>
-         <div class="sidebar-menu">
-            <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
-            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
-            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
-            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
-            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
-            <a href="/admin/manage-deposits" class="active"><i class="fas fa-coins"></i> Deposit Management</a>
-            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
-            <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
-            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
-            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
-            <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
-            <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
-            <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
-            <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
-            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
-            <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
-            <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-            <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
-            <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
+
+        <div class="sidebar-nav">
+            <div class="nav-group">
+                <div class="nav-category"><i class="fas fa-home" style="font-size:.6rem;"></i>Main</div>
+                <a href="/admin/dashboard"><i class="fas fa-chart-pie"></i>Overview</a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-category"><i class="fas fa-users" style="font-size:.6rem;"></i>Members</div>
+                <a href="/admin/manage-members"><i class="fas fa-users"></i>Manage Members</a>
+                <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i>Kiddies Accounts</a>
+                <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i>Membership Types</a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
+                <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
+                <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
+                <a href="/admin/manage-deposits" class='active'><i class="fas fa-coins"></i>Deposits</a>
+                <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
+                <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-category"><i class="fas fa-hand-holding-usd" style="font-size:.6rem;"></i>Loans</div>
+                <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i>Loan Management</a>
+                <a href="/admin/loan-payments"><i class="fas fa-file-invoice-dollar"></i>Loan Payments</a>
+                <a href="/admin/loan/settings"><i class="fas fa-cogs"></i>Loan Settings</a>
+                <a href="/admin/external-loans"><i class="fas fa-building"></i>External Loans</a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-category"><i class="fas fa-landmark" style="font-size:.6rem;"></i>Finance</div>
+                <a href="/admin/finance"><i class="fas fa-landmark"></i>Company Finance</a>
+                <a href="/admin/operating-earnings"><i class="fas fa-chart-line"></i>Operating Earnings</a>
+                <a href="/admin/manage-extra-charges"><i class="fas fa-chart-bar"></i>Company Revenue</a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-category"><i class="fas fa-cog" style="font-size:.6rem;"></i>System</div>
+                <a href="/manage-subscriptions"><i class="fas fa-cube"></i>Manage Subscriptions</a>
+                <a href="/manage-roles"><i class="fas fa-user-shield"></i>Roles &amp; Permissions</a>
+                <a href="/admin/settings"><i class="fas fa-cog"></i>Settings</a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-category"><i class="fas fa-file-alt" style="font-size:.6rem;"></i>Reporting</div>
+                <a href="/admin/reports"><i class="fas fa-file-alt"></i>Reports</a>
+                <a href="/admin/logs"><i class="fas fa-history"></i>Admin Logs</a>
+            </div>
         </div>
+
+        <a href="/cds-cooperative/dashboard" class="nav-back">
+            <i class="fas fa-arrow-left"></i>Back to Dashboard
+        </a>
     </div>
 
     <!-- Top Navbar -->
@@ -688,12 +622,12 @@
         <i class="fas fa-bars d-lg-none me-3"
            style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
            onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
-        
+
         <div class="flex-grow-1 d-none d-lg-block">
             <h5 class="mb-0 fw-bold" style="color: var(--primary)">Deposit Management</h5>
             <small class="text-muted">Review and approve member deposits</small>
         </div>
-        
+
         <div class="d-flex align-items-center gap-3">
             <div class="badge bg-light text-dark">
                 <i class="fas fa-calendar me-1"></i>
@@ -721,55 +655,54 @@
 
         <!-- Statistics Cards -->
         <div class="row g-3 mb-4">
-    <div class="col-lg-3 col-md-6">
-        <div class="stats-card">
-            <div class="stats-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                <i class="fas fa-wallet"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="stats-value" style="color: var(--success); font-size: 14px;">
+                        ₦<%= stats.totalIncome.toLocaleString() %>
+                    </div>
+                    <div class="stats-label" style="font-size: 12px;">Total Income</div>
+                </div>
             </div>
-            <div class="stats-value" style="color: var(--success); font-size: 14px;">
-                ₦<%= stats.totalIncome.toLocaleString() %>
-            </div>
-            <div class="stats-label" style="font-size: 12px;">Total Income</div>
-        </div>
-    </div>
 
-    <div class="col-lg-3 col-md-6">
-        <div class="stats-card">
-            <div class="stats-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
-                <i class="fas fa-clock"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stats-value" style="color: var(--warning); font-size: 14px;">
+                        <%= stats.pendingCount %>
+                    </div>
+                    <div class="stats-label" style="font-size: 12px;">Pending Deposits</div>
+                </div>
             </div>
-            <div class="stats-value" style="color: var(--warning); font-size: 14px;">
-                <%= stats.pendingCount %>
-            </div>
-            <div class="stats-label" style="font-size: 12px;">Pending Deposits</div>
-        </div>
-    </div>
 
-    <div class="col-lg-3 col-md-6">
-        <div class="stats-card">
-            <div class="stats-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
-                <i class="fas fa-check-circle"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stats-value" style="color: var(--primary); font-size: 14px;">
+                        <%= stats.approvedToday %>
+                    </div>
+                    <div class="stats-label" style="font-size: 12px;">Approved Today</div>
+                </div>
             </div>
-            <div class="stats-value" style="color: var(--primary); font-size: 14px;">
-                <%= stats.approvedToday %>
-            </div>
-            <div class="stats-label" style="font-size: 12px;">Approved Today</div>
-        </div>
-    </div>
 
-    <div class="col-lg-3 col-md-6">
-        <div class="stats-card">
-            <div class="stats-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
-                <i class="fas fa-users"></i>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stats-value" style="color: #8b5cf6; font-size: 14px;">
+                        <%= stats.activeMembers %>
+                    </div>
+                    <div class="stats-label" style="font-size: 12px;">Active Members</div>
+                </div>
             </div>
-            <div class="stats-value" style="color: #8b5cf6; font-size: 14px;">
-                <%= stats.activeMembers %>
-            </div>
-            <div class="stats-label" style="font-size: 12px;">Active Members</div>
         </div>
-    </div>
-</div>
-
 
         <!-- Filter Section -->
         <div class="filter-section">
@@ -840,7 +773,6 @@
                                             <small class="text-muted"><%= deposit.memberId %></small>
                                         </td>
 
-
                                         <td data-label="Amount" class="fw-bold" style="color: var(--success);">
                                             ₦<%= deposit.amount.toLocaleString() %>
                                         </td>
@@ -891,7 +823,6 @@
                                 </tr>
                             <% } %>
                         </tbody>
-
                     </table>
                 </div>
             </div>
@@ -903,9 +834,7 @@
         <strong style="color: var(--primary);">Cloudbaam</strong> Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
     </div>
 
-    <!-- ══════════════════════════════════════════
-         CUSTOM ALERT MODAL (replaces all alert())
-         ══════════════════════════════════════════ -->
+    <!-- Custom Alert Modal -->
     <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
             <div class="modal-content">
@@ -938,7 +867,6 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <!-- Deposit Information -->
                         <div class="col-md-6 mb-4">
                             <div class="card h-100" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%); border: 2px solid rgba(30, 58, 138, 0.1);">
                                 <div class="card-body">
@@ -965,7 +893,6 @@
                             </div>
                         </div>
 
-                        <!-- Member Information -->
                         <div class="col-md-6 mb-4">
                             <div class="card h-100" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(5, 150, 105, 0.03) 100%); border: 2px solid rgba(16, 185, 129, 0.1);">
                                 <div class="card-body">
@@ -992,7 +919,6 @@
                             </div>
                         </div>
 
-                        <!-- Amount Details -->
                         <div class="col-12 mb-4">
                             <div class="card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.03) 0%, rgba(217, 119, 6, 0.03) 100%); border: 2px solid rgba(245, 158, 11, 0.1);">
                                 <div class="card-body text-center">
@@ -1014,7 +940,6 @@
                             </div>
                         </div>
 
-                        <!-- Additional Notes -->
                         <div class="col-12">
                             <div class="card" style="border: 2px solid rgba(30, 58, 138, 0.1);">
                                 <div class="card-body">
@@ -1130,19 +1055,17 @@
     <!-- Hidden Printable Receipt -->
     <div id="printReceipt" style="display: none;">
         <div class="receipt-container">
-            <!-- Receipt Header -->
             <div class="receipt-header">
                 <div class="receipt-logo">C</div>
                 <div class="receipt-title">CLUB DE STARS</div>
                 <div class="receipt-subtitle">Official Deposit Receipt</div>
                 <div class="receipt-subtitle mt-2">
                     <i class="fas fa-map-marker-alt me-1"></i>123 Business Avenue, Port Harcourt, Rivers State, Nigeria<br>
-                    <i class="fas fa-phone me-1"></i>+234 800 123 4567 | 
+                    <i class="fas fa-phone me-1"></i>+234 800 123 4567 |
                     <i class="fas fa-envelope me-1"></i>info@clubdestars.com
                 </div>
             </div>
 
-            <!-- Receipt Body -->
             <div class="receipt-section">
                 <div class="receipt-section-title">DEPOSIT INFORMATION</div>
                 <div class="receipt-row">
@@ -1179,7 +1102,6 @@
                 </div>
             </div>
 
-            <!-- Amount Section -->
             <div class="receipt-amount">
                 <div class="receipt-amount-label">DEPOSIT AMOUNT</div>
                 <div class="receipt-amount-value" id="printAmount">₦50,000.00</div>
@@ -1201,15 +1123,12 @@
                 </div>
             </div>
 
-            <!-- Receipt Footer -->
             <div class="receipt-footer">
                 <div class="receipt-stamp">VERIFIED & APPROVED</div>
-                
                 <p style="font-size: 0.8rem; color: var(--secondary); margin-top: 1rem;">
                     This is a computer-generated receipt and does not require a signature.<br>
                     For inquiries, please contact us at support@clubdestars.com
                 </p>
-                
                 <p style="font-size: 0.7rem; color: var(--secondary); margin-top: 1rem;">
                     Generated on: <span id="printGeneratedDate"></span><br>
                     Powered by <strong>JESZ LIMITED</strong>
@@ -1223,21 +1142,15 @@
         let currentDepositId = null;
         let currentFilter = 'all';
 
-        // Sample deposit data
         const deposits = <%- JSON.stringify(deposits) %>;
 
-        // Display current date
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { 
-            weekday: 'short', 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
         });
 
-        // ══════════════════════════════════════════
-        // Modal Sequencing Helper
-        // Always closes the current modal fully before opening the next one.
-        // ══════════════════════════════════════════
         function switchModal(fromId, toFn) {
             const fromEl = document.getElementById(fromId);
             const instance = bootstrap.Modal.getInstance(fromEl);
@@ -1252,76 +1165,32 @@
             }
         }
 
-        // ══════════════════════════════════════════
-        // Custom Alert Modal Helper
-        // ══════════════════════════════════════════
-        /**
-         * showAlert(message, type, title)
-         * type: 'success' | 'danger' | 'warning' | 'info'  (default: 'info')
-         */
         function showAlert(message, type = 'info', title = null) {
             const config = {
-                success: {
-                    headerBg: 'bg-success',
-                    iconBg: 'rgba(16,185,129,0.12)',
-                    iconColor: '#10b981',
-                    iconClass: 'fas fa-check-circle',
-                    btnClass: 'btn-success',
-                    defaultTitle: 'Success'
-                },
-                danger: {
-                    headerBg: 'bg-danger',
-                    iconBg: 'rgba(239,68,68,0.12)',
-                    iconColor: '#ef4444',
-                    iconClass: 'fas fa-times-circle',
-                    btnClass: 'btn-danger',
-                    defaultTitle: 'Error'
-                },
-                warning: {
-                    headerBg: 'bg-warning',
-                    iconBg: 'rgba(245,158,11,0.12)',
-                    iconColor: '#f59e0b',
-                    iconClass: 'fas fa-exclamation-triangle',
-                    btnClass: 'btn-warning',
-                    defaultTitle: 'Warning'
-                },
-                info: {
-                    headerBg: 'bg-primary',
-                    iconBg: 'rgba(59,130,246,0.12)',
-                    iconColor: '#3b82f6',
-                    iconClass: 'fas fa-info-circle',
-                    btnClass: 'btn-primary',
-                    defaultTitle: 'Information'
-                }
+                success: { headerBg: 'bg-success', iconBg: 'rgba(16,185,129,0.12)', iconColor: '#10b981', iconClass: 'fas fa-check-circle', btnClass: 'btn-success', defaultTitle: 'Success' },
+                danger:  { headerBg: 'bg-danger',  iconBg: 'rgba(239,68,68,0.12)',  iconColor: '#ef4444', iconClass: 'fas fa-times-circle', btnClass: 'btn-danger',  defaultTitle: 'Error' },
+                warning: { headerBg: 'bg-warning', iconBg: 'rgba(245,158,11,0.12)', iconColor: '#f59e0b', iconClass: 'fas fa-exclamation-triangle', btnClass: 'btn-warning', defaultTitle: 'Warning' },
+                info:    { headerBg: 'bg-primary', iconBg: 'rgba(59,130,246,0.12)', iconColor: '#3b82f6', iconClass: 'fas fa-info-circle', btnClass: 'btn-primary', defaultTitle: 'Information' }
             };
 
             const c = config[type] || config.info;
 
-            // Set header
             const header = document.getElementById('alertModalHeader');
             header.className = `modal-header ${c.headerBg} text-white border-0`;
-
-            // Set close button color
             document.getElementById('alertModalCloseBtn').className = 'btn-close btn-close-white';
-
-            // Set title
             document.getElementById('alertModalLabel').textContent = title || c.defaultTitle;
 
-            // Set icon
             const iconWrapper = document.getElementById('alertModalIconWrapper');
             iconWrapper.style.background = c.iconBg;
             const icon = document.getElementById('alertModalIcon');
             icon.className = `${c.iconClass} fa-2x`;
             icon.style.color = c.iconColor;
 
-            // Set message
             document.getElementById('alertModalMessage').textContent = message;
 
-            // Set OK button
             const okBtn = document.getElementById('alertModalOkBtn');
             okBtn.className = `btn px-4 fw-semibold ${c.btnClass}`;
 
-            // Close any currently open modal first, then show the alert
             const openModal = document.querySelector('.modal.show');
             if (openModal && openModal.id !== 'alertModal') {
                 switchModal(openModal.id, () => {
@@ -1331,46 +1200,34 @@
                 new bootstrap.Modal(document.getElementById('alertModal')).show();
             }
         }
-        // ══════════════════════════════════════════
 
         function filterDeposits(status) {
             currentFilter = status;
-            
-            // Update active button
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
-            // Filter table rows
             const rows = document.querySelectorAll('#depositsTableBody tr');
             rows.forEach(row => {
                 if (status === 'all') {
                     row.style.display = '';
                 } else {
-                    const rowStatus = row.getAttribute('data-status');
-                    row.style.display = rowStatus === status ? '' : 'none';
+                    row.style.display = row.getAttribute('data-status') === status ? '' : 'none';
                 }
             });
         }
 
         function searchDeposits() {
             const searchTerm = document.getElementById('searchDeposit').value.toLowerCase();
-            const rows = document.querySelectorAll('#depositsTableBody tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            document.querySelectorAll('#depositsTableBody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
             });
         }
 
         function viewDepositDetails(depositId) {
             const deposit = deposits.find(d => d.id === depositId);
             if (!deposit) return;
-            
+
             currentDepositId = depositId;
-            
-            // Populate modal
+
             document.getElementById('detailReference').textContent = deposit.reference;
             document.getElementById('detailDateTime').textContent = `${deposit.date} at ${deposit.time}`;
             document.getElementById('detailMethod').textContent = deposit.method;
@@ -1379,23 +1236,14 @@
             document.getElementById('detailEmail').textContent = deposit.email;
             document.getElementById('detailBalance').textContent = `₦${deposit.balance.toLocaleString()}`;
             document.getElementById('detailAmount').textContent = `₦${deposit.amount.toLocaleString()}.00`;
-            const newBalance =
-            deposit.status === "approved"
-                ? deposit.balance
-                : deposit.balance; // unchanged for rejected/pending
-
-            document.getElementById('detailNewBalance').textContent =
-            `₦${newBalance.toLocaleString()}`;
-
+            document.getElementById('detailNewBalance').textContent = `₦${deposit.balance.toLocaleString()}`;
             document.getElementById('detailFee').textContent = '₦0';
             document.getElementById('detailNotes').textContent = deposit.notes;
-            
-            // Update status badge
+
             const statusBadge = document.getElementById('detailStatus');
             statusBadge.className = `status-badge status-${deposit.status}`;
             statusBadge.textContent = deposit.status.charAt(0).toUpperCase() + deposit.status.slice(1);
-            
-            // Show/hide action buttons based on status
+
             if (deposit.status === 'approved' || deposit.status === 'rejected') {
                 document.getElementById('approveBtn').style.display = 'none';
                 document.getElementById('rejectBtn').style.display = 'none';
@@ -1403,8 +1251,7 @@
                 document.getElementById('approveBtn').style.display = 'inline-block';
                 document.getElementById('rejectBtn').style.display = 'inline-block';
             }
-            
-            // Show modal
+
             new bootstrap.Modal(document.getElementById('depositDetailsModal')).show();
         }
 
@@ -1419,48 +1266,40 @@
             });
         }
 
-async function confirmApproval() {
-    const notes = document.getElementById('approvalNotes').value;
+        async function confirmApproval() {
+            const notes = document.getElementById('approvalNotes').value;
+            try {
+                const response = await fetch(`/admin/deposits/${currentDepositId}/approve`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ notes })
+                });
 
-    try {
-        const response = await fetch(`/admin/deposits/${currentDepositId}/approve`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ notes })
-        });
+                const result = await response.json();
 
-        const result = await response.json();
+                if (!response.ok) {
+                    showAlert(result.message || "Approval failed", "danger", "Approval Failed");
+                    return;
+                }
 
-        if (!response.ok) {
-            showAlert(result.message || "Approval failed", "danger", "Approval Failed");
-            return;
+                const deposit = deposits.find(d => d.id === currentDepositId);
+                if (deposit) {
+                    deposit.status = "approved";
+                    deposit.balance = result.newBalance;
+                }
+
+                updateTableRow(currentDepositId, "approved");
+                document.getElementById('approvalNotes').value = "";
+                document.getElementById('successMessage').textContent = "Deposit Approved Successfully!";
+                switchModal('approvalModal', () => {
+                    new bootstrap.Modal(document.getElementById('successModal')).show();
+                });
+
+            } catch (err) {
+                console.error(err);
+                showAlert("Network error while approving deposit. Please try again.", "danger", "Network Error");
+            }
         }
-
-        // ✅ Update local data
-        const deposit = deposits.find(d => d.id === currentDepositId);
-        if (deposit) {
-            deposit.status = "approved";
-            deposit.balance = result.newBalance;
-        }
-
-        // ✅ Update UI
-        updateTableRow(currentDepositId, "approved");
-
-        document.getElementById('approvalNotes').value = "";
-
-        document.getElementById('successMessage').textContent = "Deposit Approved Successfully!";
-        switchModal('approvalModal', () => {
-            new bootstrap.Modal(document.getElementById('successModal')).show();
-        });
-
-    } catch (err) {
-        console.error(err);
-        showAlert("Network error while approving deposit. Please try again.", "danger", "Network Error");
-    }
-}
-
 
         function rejectDeposit(depositId) {
             currentDepositId = depositId;
@@ -1473,61 +1312,46 @@ async function confirmApproval() {
             });
         }
 
-async function confirmRejection() {
-    const reason = document.getElementById('rejectionReason').value;
-
-    if (!reason.trim()) {
-        showAlert("Please provide a reason for rejection before proceeding.", "warning", "Reason Required");
-        return;
-    }
-
-    try {
-        const response = await fetch(
-            `/admin/deposits/${currentDepositId}/reject`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ reason })
+        async function confirmRejection() {
+            const reason = document.getElementById('rejectionReason').value;
+            if (!reason.trim()) {
+                showAlert("Please provide a reason for rejection before proceeding.", "warning", "Reason Required");
+                return;
             }
-        );
 
-        const result = await response.json();
+            try {
+                const response = await fetch(`/admin/deposits/${currentDepositId}/reject`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ reason })
+                });
 
-        if (!response.ok) {
-            showAlert(result.message || "Rejection failed", "danger", "Rejection Failed");
-            return;
+                const result = await response.json();
+
+                if (!response.ok) {
+                    showAlert(result.message || "Rejection failed", "danger", "Rejection Failed");
+                    return;
+                }
+
+                const deposit = deposits.find(d => d.id === currentDepositId);
+                if (deposit) deposit.status = "rejected";
+
+                updateTableRow(currentDepositId, "rejected");
+                document.getElementById('rejectionReason').value = "";
+                document.getElementById('successMessage').textContent = "Deposit Rejected Successfully";
+                switchModal('rejectionModal', () => {
+                    new bootstrap.Modal(document.getElementById('successModal')).show();
+                });
+
+            } catch (err) {
+                console.error(err);
+                showAlert("Network error while rejecting deposit. Please try again.", "danger", "Network Error");
+            }
         }
-
-        // ✅ Update local data
-        const deposit = deposits.find(d => d.id === currentDepositId);
-        if (deposit) {
-            deposit.status = "rejected";
-        }
-
-        // ✅ Update UI
-        updateTableRow(currentDepositId, "rejected");
-
-        // Reset form
-        document.getElementById('rejectionReason').value = "";
-
-        // Show success modal after rejection modal fully closes
-        document.getElementById('successMessage').textContent = "Deposit Rejected Successfully";
-        switchModal('rejectionModal', () => {
-            new bootstrap.Modal(document.getElementById('successModal')).show();
-        });
-
-    } catch (err) {
-        console.error(err);
-        showAlert("Network error while rejecting deposit. Please try again.", "danger", "Network Error");
-    }
-}
 
         function updateTableRow(depositId, status) {
             const rows = document.querySelectorAll('#depositsTableBody tr');
             rows.forEach(row => {
-                // Find the row by checking the onclick attribute or data
                 const viewBtn = row.querySelector(`button[onclick*="viewDepositDetails(${depositId})"]`);
                 if (viewBtn) {
                     row.setAttribute('data-status', status);
@@ -1535,8 +1359,6 @@ async function confirmRejection() {
                     if (statusCell) {
                         statusCell.innerHTML = `<span class="status-badge status-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
                     }
-                    
-                    // Update action buttons
                     const actionsCell = row.querySelector('[data-label="Actions"]');
                     if (actionsCell && status === 'approved') {
                         actionsCell.innerHTML = `
@@ -1557,8 +1379,7 @@ async function confirmRejection() {
         function generateReceipt() {
             const deposit = deposits.find(d => d.id === currentDepositId);
             if (!deposit) return;
-            
-            // Populate receipt
+
             document.getElementById('printReference').textContent = deposit.reference;
             document.getElementById('printDateTime').textContent = `${deposit.date} at ${deposit.time}`;
             document.getElementById('printMethod').textContent = deposit.method;
@@ -1571,26 +1392,16 @@ async function confirmRejection() {
             const previousBalance = deposit.balance - deposit.amount;
             const newBalance = deposit.balance;
 
-            document.getElementById('printPrevBalance').textContent =
-            `₦${previousBalance.toLocaleString()}.00`;
+            document.getElementById('printPrevBalance').textContent = `₦${previousBalance.toLocaleString()}.00`;
+            document.getElementById('printDepositAmount').textContent = `₦${deposit.amount.toLocaleString()}.00`;
+            document.getElementById('printNewBalance').textContent = `₦${newBalance.toLocaleString()}.00`;
 
-            document.getElementById('printDepositAmount').textContent =
-            `₦${deposit.amount.toLocaleString()}.00`;
-
-            document.getElementById('printNewBalance').textContent =
-            `₦${newBalance.toLocaleString()}.00`;
-            
             const now = new Date();
             document.getElementById('printGeneratedDate').textContent = now.toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
             });
-            
-            // Close success modal, then print after it fully closes
+
             const successModalEl = document.getElementById('successModal');
             const successModalInstance = bootstrap.Modal.getInstance(successModalEl);
 
@@ -1612,40 +1423,35 @@ async function confirmRejection() {
             currentDepositId = depositId;
             generateReceipt();
         }
+
+        function refreshData() {
+            window.location.reload();
+        }
+
+        function exportDeposits() {
+            showAlert("Export feature coming soon.", "info", "Export");
+        }
     </script>
 
-
-
     <script>
-async function loadSidebarPendingCount() {
-  try {
-    console.log("Loading sidebar approval count...");
+        async function loadSidebarPendingCount() {
+            try {
+                const res = await fetch('/admin/pending-approvals-count');
+                const data = await res.json();
+                const badge = document.getElementById('sidebarPendingBadge');
+                if (!badge) return;
+                if (data.count > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = data.count;
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch (err) {
+                console.error("Sidebar count error:", err);
+            }
+        }
 
-    const res = await fetch('/admin/pending-approvals-count');
-    const data = await res.json();
-
-    console.log("Pending approvals count:", data);
-
-    const badge = document.getElementById('sidebarPendingBadge');
-
-    if (!badge) {
-      console.log("Sidebar badge not found on page");
-      return;
-    }
-
-    if (data.count > 0) {
-      badge.style.display = 'inline-block';
-      badge.textContent = data.count;
-    } else {
-      badge.style.display = 'none';
-    }
-
-  } catch (err) {
-    console.error("Sidebar count error:", err);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", loadSidebarPendingCount);
-</script>
+        document.addEventListener("DOMContentLoaded", loadSidebarPendingCount);
+    </script>
 </body>
 </html>

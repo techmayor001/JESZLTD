@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loan Payments - Club De Stars Admin</title>
+    <title>Loan Payments | Club De Stars Admin</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -19,234 +20,315 @@
             --purple: #8b5cf6;
             --sidebar-width: 280px;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
+            min-height: 100vh; overflow-x: hidden;
         }
 
-        /* ── Sidebar ── */
+        /* ══════════ SIDEBAR ══════════ */
         .sidebar {
             position: fixed; left: 0; top: 0; bottom: 0;
             width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white; z-index: 1040;
-            transition: all 0.3s; overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30,58,138,0.15);
+            background: linear-gradient(180deg, #0f2357 0%, #1e3a8a 40%, #1e40af 100%);
+            z-index: 1040; overflow-y: auto;
+            transition: transform .3s ease;
+            box-shadow: 4px 0 24px rgba(30,58,138,.25);
+            scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.15) transparent;
         }
-        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.1); }
-        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+        .sidebar-header {
+            padding: 1.4rem 1.25rem 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            background: rgba(0,0,0,.18); position: sticky; top: 0; z-index: 2;
+        }
+        .logo-row { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
         .logo-box {
-            width: 45px; height: 45px; background: white; border-radius: 10px;
+            width: 42px; height: 42px; background: white; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: var(--primary); font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0;
+            font-weight: 800; color: var(--primary); font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,.25); flex-shrink: 0;
         }
-        .sidebar-title { font-size: 1.1rem; line-height: 1.2; }
-        .admin-badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 6px 12px; background: rgba(239,68,68,0.2);
-            border-radius: 20px; border: 1px solid rgba(239,68,68,0.3);
-            font-weight: 600; font-size: 0.8rem; margin-top: 8px;
+        .sidebar-brand { font-size: .95rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: .05em; line-height: 1.2; }
+        .sidebar-brand small { font-size: .65rem; font-weight: 500; opacity: .55; display: block; letter-spacing: .08em; }
+        .role-pill {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 4px 10px; background: rgba(239,68,68,.2);
+            border-radius: 20px; border: 1px solid rgba(239,68,68,.3);
+            font-weight: 700; font-size: .7rem; color: #fca5a5;
         }
-        .sidebar-menu { padding: 1rem 0; }
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85); text-decoration: none;
-            padding: 0.875rem 1.5rem; display: flex; align-items: center;
-            transition: all 0.3s; border-left: 3px solid transparent;
-            font-weight: 500; font-size: 0.95rem;
+        .nav-group { padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .nav-group:last-child { border-bottom: none; }
+        .nav-category {
+            display: flex; align-items: center; gap: 7px;
+            padding: .55rem 1.25rem .3rem; font-size: .62rem; font-weight: 800;
+            color: rgba(255,255,255,.38); text-transform: uppercase; letter-spacing: .1em; user-select: none;
         }
-        .sidebar-menu a:hover { background: rgba(255,255,255,0.1); color: white; border-left-color: white; }
-        .sidebar-menu a.active { background: rgba(255,255,255,0.15); color: white; border-left-color: white; }
-        .sidebar-menu a i { width: 24px; margin-right: 12px; font-size: 1.1rem; flex-shrink: 0; }
+        .nav-category::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.08); margin-left: 4px; }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 11px;
+            padding: .62rem 1.25rem; color: rgba(255,255,255,.72);
+            text-decoration: none; font-weight: 500; font-size: .84rem;
+            border-left: 3px solid transparent; transition: all .18s;
+        }
+        .sidebar-nav a:hover  { background: rgba(255,255,255,.09); color: white; border-left-color: rgba(255,255,255,.4); }
+        .sidebar-nav a.active { background: rgba(255,255,255,.15); color: white; border-left-color: white; }
+        .sidebar-nav a i { width: 18px; font-size: .9rem; flex-shrink: 0; opacity: .8; text-align: center; }
+        .sidebar-nav a.active i { opacity: 1; }
+        .nav-badge {
+            margin-left: auto; font-size: .63rem; font-weight: 800;
+            padding: 2px 7px; border-radius: 10px;
+            background: rgba(239,68,68,.9); color: white; flex-shrink: 0; line-height: 1.4;
+        }
+        .nav-back {
+            display: flex; align-items: center; gap: 10px;
+            padding: .7rem 1.25rem .9rem; font-size: .8rem; font-weight: 600;
+            color: rgba(255,255,255,.42); text-decoration: none; transition: color .18s;
+            border-top: 1px solid rgba(255,255,255,.07); margin-top: .25rem;
+        }
+        .nav-back:hover { color: rgba(255,255,255,.7); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1035; }
+        .sidebar-overlay.active { display: block; }
 
-        /* ── Navbar ── */
+        /* ══════════ TOPBAR ══════════ */
         .top-navbar {
             position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 70px;
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30,58,138,0.08); z-index: 1030;
+            background: rgba(255,255,255,.95); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30,58,138,.08); z-index: 1030;
             display: flex; align-items: center; padding: 0 1.5rem;
-            transition: all 0.3s; border-bottom: 1px solid rgba(30,58,138,0.1);
+            border-bottom: 1px solid rgba(30,58,138,.1); transition: all .3s;
+        }
+        .main-content {
+            margin-left: var(--sidebar-width); margin-top: 70px;
+            padding: 1.5rem; min-height: calc(100vh - 70px); transition: all .3s;
         }
 
-        /* ── Main Content ── */
-        .main-content { margin-left: var(--sidebar-width); margin-top: 70px; padding: 1.5rem; min-height: calc(100vh - 70px); transition: all 0.3s; }
-
-        /* ── Page Header ── */
+        /* ══════════ PAGE HEADER — no overflow:hidden ══════════ */
         .page-header {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
             color: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem;
-            box-shadow: 0 15px 40px rgba(30,58,138,0.25); position: relative; overflow: hidden;
+            box-shadow: 0 15px 40px rgba(30,58,138,.25); position: relative;
+            /* NO overflow:hidden — keeps export dropdown visible */
         }
         .page-header::before {
             content: ''; position: absolute; top: -50%; right: -20%;
-            width: 400px; height: 400px; background: rgba(255,255,255,0.05); border-radius: 50%;
+            width: 400px; height: 400px; background: rgba(255,255,255,.05); border-radius: 50%;
+            pointer-events: none;
         }
 
-        /* ── Stats Cards ── */
+        /* ══════════ EXPORT DROPDOWN — custom, always visible ══════════ */
+        .export-wrapper { position: relative; z-index: 200; display: inline-block; }
+        .btn-export {
+            background: white; color: var(--primary); border: none;
+            font-weight: 700; border-radius: 10px; padding: .55rem 1.1rem;
+            font-size: .88rem; display: inline-flex; align-items: center; gap: .5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,.12); transition: all .2s; cursor: pointer;
+        }
+        .btn-export:hover { background: rgba(255,255,255,.92); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.15); }
+        .btn-export .caret { font-size: .7rem; transition: transform .2s; }
+        .btn-export.open .caret { transform: rotate(180deg); }
+        .export-dropdown-menu {
+            position: absolute; top: calc(100% + 6px); right: 0; left: auto;
+            min-width: 230px; background: white; border-radius: 14px; border: none;
+            box-shadow: 0 20px 50px rgba(30,58,138,.22), 0 4px 16px rgba(0,0,0,.1);
+            padding: .5rem; z-index: 99999;
+        }
+        .export-dropdown-menu .drop-header {
+            font-size: .68rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .08em; color: #94a3b8; padding: .5rem .75rem .25rem;
+        }
+        .export-dropdown-menu .drop-item {
+            border-radius: 9px; padding: .6rem .875rem;
+            font-weight: 600; font-size: .85rem; color: #1e293b;
+            display: flex; align-items: center; gap: .6rem;
+            transition: background .15s; text-decoration: none; cursor: pointer;
+        }
+        .export-dropdown-menu .drop-item:hover { background: rgba(30,58,138,.06); }
+        .export-dropdown-menu .drop-divider { margin: .35rem .5rem; border-top: 1px solid rgba(30,58,138,.1); }
+        @media (max-width: 576px) { .export-dropdown-menu { right: auto; left: 0; } }
+
+        /* ══════════ STATS ══════════ */
         .stats-card {
             background: white; border-radius: 16px; padding: 1.5rem;
-            box-shadow: 0 8px 20px rgba(30,58,138,0.08); transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(30,58,138,.08); transition: all .3s;
             border: 2px solid transparent; height: 100%; position: relative; overflow: hidden;
         }
         .stats-card::before {
             content: ''; position: absolute; top: 0; right: 0;
-            width: 100px; height: 100px; background: rgba(30,58,138,0.03);
+            width: 100px; height: 100px; background: rgba(30,58,138,.03);
             border-radius: 0 16px 0 100%;
         }
-        .stats-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(30,58,138,0.15); border-color: var(--primary); }
+        .stats-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(30,58,138,.15); border-color: var(--primary); }
         .stats-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1rem; }
-        .stats-value { font-size: 1.6rem; font-weight: bold; margin-bottom: 0.5rem; }
-        .stats-label { color: var(--secondary); font-size: 0.9rem; font-weight: 500; }
+        .stats-value { font-size: 1.6rem; font-weight: bold; margin-bottom: .5rem; }
+        .stats-label { color: var(--secondary); font-size: .9rem; font-weight: 500; }
 
-        /* ── Card ── */
-        .card { border: none; border-radius: 16px; box-shadow: 0 8px 20px rgba(30,58,138,0.08); background: white; border: 1px solid rgba(30,58,138,0.05); }
-        .card-header {
-            background: linear-gradient(135deg, rgba(30,58,138,0.03) 0%, rgba(59,130,246,0.03) 100%);
-            border-bottom: 2px solid rgba(30,58,138,0.1); padding: 1.25rem; border-radius: 16px 16px 0 0 !important;
-        }
+        /* ══════════ CARDS ══════════ */
+        .card { border: none; border-radius: 16px; box-shadow: 0 8px 20px rgba(30,58,138,.08); background: white; border: 1px solid rgba(30,58,138,.05); }
+        .card-header { background: linear-gradient(135deg,rgba(30,58,138,.03) 0%,rgba(59,130,246,.03) 100%); border-bottom: 2px solid rgba(30,58,138,.1); padding: 1.25rem; border-radius: 16px 16px 0 0 !important; }
 
-        /* ── Type Badges ── */
-        .type-badge {
-            padding: 4px 10px; border-radius: 20px; font-size: 0.72rem;
-            font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;
-        }
-        .type-repayment  { background: rgba(16,185,129,0.1);  color: #059669; border: 1px solid rgba(16,185,129,0.3); }
-        .type-rollover   { background: rgba(139,92,246,0.1);  color: #7c3aed; border: 1px solid rgba(139,92,246,0.3); }
-        .type-interest   { background: rgba(6,182,212,0.1);   color: #0891b2; border: 1px solid rgba(6,182,212,0.3); }
-        .type-penalty    { background: rgba(239,68,68,0.1);   color: #dc2626; border: 1px solid rgba(239,68,68,0.3); }
-        .type-disbursement { background: rgba(245,158,11,0.1); color: #d97706; border: 1px solid rgba(245,158,11,0.3); }
+        /* ══════════ TYPE / STATUS BADGES ══════════ */
+        .type-badge { padding: 4px 10px; border-radius: 20px; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; display: inline-flex; align-items: center; gap: 4px; }
+        .type-repayment   { background: rgba(16,185,129,.1);  color: #059669; border: 1px solid rgba(16,185,129,.3); }
+        .type-rollover    { background: rgba(139,92,246,.1);  color: #7c3aed; border: 1px solid rgba(139,92,246,.3); }
+        .type-interest    { background: rgba(6,182,212,.1);   color: #0891b2; border: 1px solid rgba(6,182,212,.3); }
+        .type-penalty     { background: rgba(239,68,68,.1);   color: #dc2626; border: 1px solid rgba(239,68,68,.3); }
+        .type-disbursement{ background: rgba(245,158,11,.1);  color: #d97706; border: 1px solid rgba(245,158,11,.3); }
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+        .status-pending  { background: rgba(245,158,11,.1); color: var(--warning); border: 1px solid rgba(245,158,11,.3); }
+        .status-approved { background: rgba(16,185,129,.1); color: var(--success); border: 1px solid rgba(16,185,129,.3); }
+        .status-rejected { background: rgba(239,68,68,.1);  color: var(--danger);  border: 1px solid rgba(239,68,68,.3); }
 
-        /* ── Status Badges ── */
-        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .status-pending  { background: rgba(245,158,11,0.1); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
-        .status-approved { background: rgba(16,185,129,0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
-        .status-rejected { background: rgba(239,68,68,0.1);  color: var(--danger);  border: 1px solid rgba(239,68,68,0.3); }
+        /* ══════════ ACTION BUTTONS ══════════ */
+        .action-btn { padding: 6px 12px; border-radius: 8px; font-size: .85rem; font-weight: 600; transition: all .3s; border: none; cursor: pointer; }
+        .btn-approve { background: linear-gradient(135deg,#10b981,#059669); color: white; }
+        .btn-approve:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,.3); }
+        .btn-reject  { background: linear-gradient(135deg,#ef4444,#dc2626); color: white; }
+        .btn-reject:hover  { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239,68,68,.3); }
+        .btn-view    { background: linear-gradient(135deg,#3b82f6,#2563eb); color: white; }
+        .btn-view:hover    { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59,130,246,.3); }
 
-        /* ── Action Buttons ── */
-        .action-btn { padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; transition: all 0.3s; border: none; cursor: pointer; }
-        .btn-approve { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
-        .btn-approve:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
-        .btn-reject  { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; }
-        .btn-reject:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239,68,68,0.3); }
-        .btn-view    { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
-        .btn-view:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59,130,246,0.3); }
-
-        /* ── Filter Section ── */
-        .filter-section { background: white; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(30,58,138,0.06); }
-        .filter-btn { padding: 8px 16px; border-radius: 8px; border: 2px solid rgba(30,58,138,0.1); background: white; color: var(--primary); font-weight: 600; transition: all 0.3s; cursor: pointer; font-size: 0.85rem; }
+        /* ══════════ FILTER ══════════ */
+        .filter-section { background: white; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(30,58,138,.06); }
+        .filter-btn { padding: 8px 16px; border-radius: 8px; border: 2px solid rgba(30,58,138,.1); background: white; color: var(--primary); font-weight: 600; transition: all .3s; cursor: pointer; font-size: .85rem; }
         .filter-btn:hover, .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .filter-btn.filter-type { border-color: rgba(139,92,246,0.2); color: var(--purple); }
+        .filter-btn.filter-type { border-color: rgba(139,92,246,.2); color: var(--purple); }
         .filter-btn.filter-type:hover, .filter-btn.filter-type.active { background: var(--purple); color: white; border-color: var(--purple); }
 
-        /* ── Table ── */
+        /* ══════════ TABLE ══════════ */
         .table-responsive { border-radius: 0 0 16px 16px; overflow: hidden; }
         .table { margin: 0; }
-        .table thead { background: linear-gradient(135deg, rgba(30,58,138,0.05) 0%, rgba(59,130,246,0.05) 100%); }
+        .table thead { background: linear-gradient(135deg,rgba(30,58,138,.05) 0%,rgba(59,130,246,.05) 100%); }
         .table thead th { border: none; padding: 1rem; font-weight: 600; color: var(--primary); white-space: nowrap; }
-        .table tbody td { padding: 0.85rem 1rem; vertical-align: middle; border-bottom: 1px solid rgba(30,58,138,0.05); }
+        .table tbody td { padding: .85rem 1rem; vertical-align: middle; border-bottom: 1px solid rgba(30,58,138,.05); }
         .table tbody tr:last-child td { border-bottom: none; }
-        .table tbody tr:hover { background: rgba(30,58,138,0.02); }
+        .table tbody tr:hover { background: rgba(30,58,138,.02); }
 
-        /* ── Breakdown Bar ── */
+        /* Breakdown bar */
         .breakdown-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; gap: 1px; margin-top: 6px; }
         .breakdown-bar .seg-principal { background: #10b981; }
         .breakdown-bar .seg-interest  { background: #06b6d4; }
         .breakdown-bar .seg-penalty   { background: #ef4444; }
 
-        /* ── Detail Modal specifics ── */
-        .detail-chip {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
-        }
-        .breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px dashed rgba(30,58,138,0.1); }
+        /* Detail modal */
+        .breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: .6rem 0; border-bottom: 1px dashed rgba(30,58,138,.1); }
         .breakdown-row:last-child { border-bottom: none; }
 
-        /* ── Alert Modal ── */
-        #alertModal .modal-content { border: none; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(30,58,138,0.2); }
+        /* Alert modal */
+        #alertModal .modal-content { border: none; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(30,58,138,.2); }
         #alertModal .modal-header  { padding: 1.25rem 1.5rem; border-bottom: none; }
         #alertModal .modal-body    { padding: 1.5rem; text-align: center; }
         #alertModal .alert-icon-wrapper { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; }
         #alertModal .modal-footer  { border-top: none; padding: 0 1.5rem 1.5rem; justify-content: center; }
 
-        /* ── Powered By ── */
-        .powered-by { position: fixed; bottom: 15px; right: 15px; background: white; padding: 10px 16px; border-radius: 25px; box-shadow: 0 4px 15px rgba(30,58,138,0.15); font-size: 0.8rem; font-weight: 600; color: var(--primary); z-index: 1000; }
+        .powered-by { position: fixed; bottom: 15px; right: 15px; background: white; padding: 10px 16px; border-radius: 25px; box-shadow: 0 4px 15px rgba(30,58,138,.15); font-size: .8rem; font-weight: 600; color: var(--primary); z-index: 1000; }
 
-        /* ── Responsive ── */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.active { transform: translateX(0); }
             .top-navbar { left: 0; }
             .main-content { margin-left: 0; padding: 1rem; }
             .table thead { display: none; }
-            .table tbody tr { display: block; margin-bottom: 1rem; border: 2px solid rgba(30,58,138,0.1); border-radius: 12px; overflow: hidden; background: white; }
-            .table tbody td { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid rgba(30,58,138,0.05); }
+            .table tbody tr { display: block; margin-bottom: 1rem; border: 2px solid rgba(30,58,138,.1); border-radius: 12px; overflow: hidden; background: white; }
+            .table tbody td { display: flex; justify-content: space-between; align-items: center; padding: .75rem 1rem; border-bottom: 1px solid rgba(30,58,138,.05); }
             .table tbody td:last-child { border-bottom: none; }
             .table tbody td::before { content: attr(data-label); font-weight: 600; color: var(--primary); margin-right: 1rem; }
         }
 
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-        .fade-in { animation: fadeIn 0.5s ease; }
+        .fade-in { animation: fadeIn .5s ease; }
     </style>
 </head>
 <body>
 
-<!-- ══ Sidebar ══ -->
+<!-- ════════════════════════ SIDEBAR ════════════════════════ -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <div class="logo-container">
+        <div class="logo-row">
             <div class="logo-box">C</div>
-            <div>
-                <h5 class="mb-0 fw-bold sidebar-title" style="text-transform:uppercase;">Club De Stars</h5>
-                <small class="opacity-75" style="font-size:0.75rem;">ADMIN PANEL</small>
-            </div>
+            <div><div class="sidebar-brand">Club De Stars<small>Admin Panel</small></div></div>
         </div>
-        <div class="admin-badge"><i class="fas fa-shield-alt"></i><span>SUPER ADMIN</span></div>
+        <div class="role-pill">
+            <i class="fas fa-shield-alt" style="font-size:.65rem;"></i>&nbsp;<%= admin.role?.name?.toUpperCase() || 'SUPER ADMIN' %>
+        </div>
     </div>
-    <div class="sidebar-menu">
-        <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
-        <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
-        <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
-        <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
-        <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
-        <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
-        <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
-        <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
-        <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
-        <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
-        <a href="/admin/loan-payments" class="active"><i class="fas fa-file-invoice-dollar"></i> Loan Payments</a>
-        <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
-        <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
-        <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
-        <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
-        <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
-        <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
-        <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-        <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
-        <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
+
+      <div class="sidebar-nav">
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-home" style="font-size:.6rem;"></i>Main</div>
+            <a href="/admin/dashboard"><i class="fas fa-chart-pie"></i>Overview</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-users" style="font-size:.6rem;"></i>Members</div>
+            <a href="/admin/manage-members"><i class="fas fa-users"></i>Manage Members</a>
+            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i>Kiddies Accounts</a>
+            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i>Membership Types</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-hand-holding-usd" style="font-size:.6rem;"></i>Loans</div>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i>Loan Management</a>
+            <a href="/admin/loan-payments" class="active"><i class="fas fa-file-invoice-dollar"></i>Loan Payments</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i>Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i>External Loans</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-landmark" style="font-size:.6rem;"></i>Finance</div>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i>Company Finance</a>
+            <a href="/admin/operating-earnings"><i class="fas fa-chart-line"></i>Operating Earnings</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-chart-bar"></i>Company Revenue</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-cog" style="font-size:.6rem;"></i>System</div>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i>Manage Subscriptions</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i>Roles &amp; Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i>Settings</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-file-alt" style="font-size:.6rem;"></i>Reporting</div>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i>Reports</a>
+            <a href="/admin/logs"><i class="fas fa-history"></i>Admin Logs</a>
+        </div>
     </div>
+
+    <a href="/cds-cooperative/dashboard" class="nav-back"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
 </div>
 
-<!-- ══ Top Navbar ══ -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Top Navbar -->
 <div class="top-navbar">
-    <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.5rem;" onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+    <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.5rem;" onclick="toggleSidebar(event)"></i>
     <div class="flex-grow-1 d-none d-lg-block">
         <h5 class="mb-0 fw-bold" style="color:var(--primary)">Loan Payment Management</h5>
         <small class="text-muted">Review, approve and track all loan repayments</small>
     </div>
-    <div class="d-flex align-items-center gap-3">
+    <div class="d-lg-none fw-bold" style="color:var(--primary);font-size:.95rem;">Loan Payments</div>
+    <div class="ms-auto d-flex align-items-center gap-3">
         <div class="badge bg-light text-dark"><i class="fas fa-calendar me-1"></i><span id="currentDate"></span></div>
     </div>
 </div>
 
-<!-- ══ Main Content ══ -->
+<!-- Main Content -->
 <div class="main-content">
 
-    <!-- Page Header -->
+    <!-- PAGE HEADER -->
     <div class="page-header position-relative">
         <div class="row align-items-center position-relative" style="z-index:1;">
             <div class="col-md-8">
@@ -254,12 +336,36 @@
                 <p class="mb-0 opacity-90">Monitor repayments, rollovers, interest &amp; penalty settlements</p>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <button class="btn btn-light" onclick="refreshData()"><i class="fas fa-sync-alt me-2"></i>Refresh</button>
+                <!-- EXPORT — custom dropdown, never clipped -->
+                <div class="export-wrapper">
+                    <button class="btn-export" id="exportBtn" onclick="toggleExportMenu(event)">
+                        <i class="fas fa-download"></i>
+                        Export
+                        <i class="fas fa-chevron-down caret" id="exportCaret"></i>
+                    </button>
+                    <div class="export-dropdown-menu" id="exportMenu" style="display:none;">
+                        <div class="drop-header">Export All Records</div>
+                        <a class="drop-item" onclick="exportToExcel(false);closeExportMenu();return false;">
+                            <i class="fas fa-file-excel" style="color:#10b981;font-size:1rem;"></i>Excel — All Payments
+                        </a>
+                        <a class="drop-item" onclick="exportToPDF(false);closeExportMenu();return false;">
+                            <i class="fas fa-file-pdf" style="color:#ef4444;font-size:1rem;"></i>PDF — All Payments
+                        </a>
+                        <div class="drop-divider"></div>
+                        <div class="drop-header">Export Current Filter</div>
+                        <a class="drop-item" onclick="exportToExcel(true);closeExportMenu();return false;">
+                            <i class="fas fa-file-excel" style="color:#059669;font-size:1rem;"></i>Excel — Filtered View
+                        </a>
+                        <a class="drop-item" onclick="exportToPDF(true);closeExportMenu();return false;">
+                            <i class="fas fa-file-pdf" style="color:#dc2626;font-size:1rem;"></i>PDF — Filtered View
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Stats -->
+    <!-- STATS -->
     <div class="row g-3 mb-4">
         <div class="col-lg-3 col-md-6">
             <div class="stats-card">
@@ -291,10 +397,9 @@
         </div>
     </div>
 
-    <!-- Filter Section -->
+    <!-- FILTER SECTION -->
     <div class="filter-section">
         <div class="row g-2 align-items-center">
-            <!-- Status filters -->
             <div class="col-12">
                 <small class="text-muted fw-semibold me-2">STATUS:</small>
                 <div class="d-inline-flex flex-wrap gap-2">
@@ -304,7 +409,6 @@
                     <button class="filter-btn" onclick="applyFilter('status','rejected',this)"><i class="fas fa-times me-1"></i>Rejected</button>
                 </div>
             </div>
-            <!-- Type filters -->
             <div class="col-12 mt-2">
                 <small class="text-muted fw-semibold me-2">TYPE:</small>
                 <div class="d-inline-flex flex-wrap gap-2">
@@ -315,18 +419,17 @@
                     <button class="filter-btn filter-type" onclick="applyFilter('type','penalty',this)"><i class="fas fa-exclamation-triangle me-1"></i>Penalty</button>
                 </div>
             </div>
-            <!-- Search -->
             <div class="col-lg-4 mt-2">
                 <input type="text" class="form-control" id="searchInput" placeholder="Search member, loan ID, reference…" oninput="applySearch()">
             </div>
         </div>
     </div>
 
-    <!-- Table -->
+    <!-- TABLE -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0 fw-bold"><i class="fas fa-list me-2" style="color:var(--primary);"></i>Loan Payment Records</h5>
-            <button class="btn btn-sm btn-outline-primary" onclick="exportData()"><i class="fas fa-download me-1"></i>Export</button>
+            <small class="text-muted" id="tableInfo"></small>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -356,16 +459,16 @@
                                     <small class="text-muted"><%= p.borrowerType === 'external' ? '🏢 External' : p.memberId %></small>
                                 </td>
                                 <td data-label="Loan Ref">
-                                    <small class="text-muted"><%= p.loanRef || p.reference %></small>
+                                    <small class="text-muted font-monospace"><%= p.loanRef || p.reference %></small>
                                 </td>
                                 <td data-label="Type">
                                     <%
                                         const typeMap = {
-                                            repayment:   ['type-repayment',  'fa-hand-holding-usd', 'Repayment'],
-                                            rollover:    ['type-rollover',   'fa-sync-alt',         'Rollover'],
-                                            interest:    ['type-interest',   'fa-percentage',       'Interest'],
-                                            penalty:     ['type-penalty',    'fa-exclamation-triangle','Penalty'],
-                                            disbursement:['type-disbursement','fa-arrow-up',        'Disbursement'],
+                                            repayment:   ['type-repayment',   'fa-hand-holding-usd',     'Repayment'],
+                                            rollover:    ['type-rollover',    'fa-sync-alt',             'Rollover'],
+                                            interest:    ['type-interest',    'fa-percentage',           'Interest'],
+                                            penalty:     ['type-penalty',     'fa-exclamation-triangle', 'Penalty'],
+                                            disbursement:['type-disbursement','fa-arrow-up',             'Disbursement'],
                                         };
                                         const [cls, icon, label] = typeMap[p.transactionType] || ['type-repayment','fa-hand-holding-usd','Repayment'];
                                     %>
@@ -378,16 +481,16 @@
                                 </td>
                                 <td data-label="Breakdown">
                                     <% if (p.principalPaid > 0 || p.interestPaid > 0 || p.penaltyPaid > 0) { %>
-                                        <div style="font-size:0.72rem; color:var(--secondary); min-width:110px;">
+                                        <div style="font-size:.72rem;color:var(--secondary);min-width:110px;">
                                             <% if (p.principalPaid > 0) { %><span style="color:#059669;">P:₦<%= p.principalPaid.toLocaleString() %></span>&nbsp;<% } %>
-                                            <% if (p.interestPaid > 0) { %><span style="color:#0891b2;">I:₦<%= p.interestPaid.toLocaleString() %></span>&nbsp;<% } %>
-                                            <% if (p.penaltyPaid > 0) { %><span style="color:#dc2626;">Pen:₦<%= p.penaltyPaid.toLocaleString() %></span><% } %>
+                                            <% if (p.interestPaid  > 0) { %><span style="color:#0891b2;">I:₦<%= p.interestPaid.toLocaleString() %></span>&nbsp;<% } %>
+                                            <% if (p.penaltyPaid   > 0) { %><span style="color:#dc2626;">Pen:₦<%= p.penaltyPaid.toLocaleString() %></span><% } %>
                                         </div>
                                         <%
-                                            const total = (p.principalPaid||0) + (p.interestPaid||0) + (p.penaltyPaid||0);
-                                            const pPct  = total ? Math.round((p.principalPaid||0)/total*100) : 0;
-                                            const iPct  = total ? Math.round((p.interestPaid||0)/total*100)  : 0;
-                                            const penPct= 100 - pPct - iPct;
+                                            const total = (p.principalPaid||0)+(p.interestPaid||0)+(p.penaltyPaid||0);
+                                            const pPct   = total ? Math.round((p.principalPaid||0)/total*100) : 0;
+                                            const iPct   = total ? Math.round((p.interestPaid||0)/total*100)  : 0;
+                                            const penPct = 100 - pPct - iPct;
                                         %>
                                         <div class="breakdown-bar">
                                             <div class="seg-principal" style="width:<%= pPct %>%;"></div>
@@ -424,8 +527,7 @@
     </div>
 </div>
 
-<!-- ══ Powered By ══ -->
-<div class="powered-by"><strong style="color:var(--primary);">Cloudbaam</strong> Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong></div>
+<div class="powered-by"><strong style="color:var(--primary);">Cloudbaam</strong> · <strong style="color:var(--primary);">JESZ LIMITED</strong></div>
 
 <!-- ══ Custom Alert Modal ══ -->
 <div class="modal fade" id="alertModal" tabindex="-1" aria-modal="true" role="dialog">
@@ -456,9 +558,8 @@
             </div>
             <div class="modal-body">
                 <div class="row g-3">
-                    <!-- Borrower info -->
                     <div class="col-md-6">
-                        <div class="card h-100" style="border:2px solid rgba(16,185,129,0.15);background:rgba(16,185,129,0.02);">
+                        <div class="card h-100" style="border:2px solid rgba(16,185,129,.15);background:rgba(16,185,129,.02);">
                             <div class="card-body">
                                 <h6 class="fw-bold mb-3" style="color:var(--success);"><i class="fas fa-user me-2"></i>Borrower</h6>
                                 <div class="mb-2"><small class="text-muted d-block">Name</small><strong id="dBorrowerName">—</strong></div>
@@ -467,9 +568,8 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Payment info -->
                     <div class="col-md-6">
-                        <div class="card h-100" style="border:2px solid rgba(30,58,138,0.1);background:rgba(30,58,138,0.02);">
+                        <div class="card h-100" style="border:2px solid rgba(30,58,138,.1);background:rgba(30,58,138,.02);">
                             <div class="card-body">
                                 <h6 class="fw-bold mb-3" style="color:var(--primary);"><i class="fas fa-info-circle me-2"></i>Payment Info</h6>
                                 <div class="mb-2"><small class="text-muted d-block">Reference</small><strong id="dReference">—</strong></div>
@@ -479,10 +579,8 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Amount breakdown -->
                     <div class="col-12">
-                        <div class="card" style="border:2px solid rgba(245,158,11,0.15);background:rgba(245,158,11,0.02);">
+                        <div class="card" style="border:2px solid rgba(245,158,11,.15);background:rgba(245,158,11,.02);">
                             <div class="card-body">
                                 <h6 class="fw-bold mb-3" style="color:var(--warning);"><i class="fas fa-money-bill-wave me-2"></i>Amount Breakdown</h6>
                                 <div class="text-center mb-3">
@@ -491,52 +589,36 @@
                                 </div>
                                 <div class="row g-2">
                                     <div class="col-4">
-                                        <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:10px;text-align:center;">
-                                            <small class="text-muted d-block">Principal</small>
-                                            <strong style="color:#059669;" id="dPrincipal">₦0</strong>
+                                        <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:10px;text-align:center;">
+                                            <small class="text-muted d-block">Principal</small><strong style="color:#059669;" id="dPrincipal">₦0</strong>
                                         </div>
                                     </div>
                                     <div class="col-4">
-                                        <div style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.2);border-radius:10px;padding:10px;text-align:center;">
-                                            <small class="text-muted d-block">Interest</small>
-                                            <strong style="color:#0891b2;" id="dInterest">₦0</strong>
+                                        <div style="background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.2);border-radius:10px;padding:10px;text-align:center;">
+                                            <small class="text-muted d-block">Interest</small><strong style="color:#0891b2;" id="dInterest">₦0</strong>
                                         </div>
                                     </div>
                                     <div class="col-4">
-                                        <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:10px;text-align:center;">
-                                            <small class="text-muted d-block">Penalty</small>
-                                            <strong style="color:#dc2626;" id="dPenalty">₦0</strong>
+                                        <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:10px;text-align:center;">
+                                            <small class="text-muted d-block">Penalty</small><strong style="color:#dc2626;" id="dPenalty">₦0</strong>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Loan balance -->
                     <div class="col-12">
-                        <div class="card" style="border:2px solid rgba(30,58,138,0.1);">
+                        <div class="card" style="border:2px solid rgba(30,58,138,.1);">
                             <div class="card-body">
                                 <h6 class="fw-bold mb-3" style="color:var(--primary);"><i class="fas fa-balance-scale me-2"></i>Loan Balance</h6>
-                                <div class="breakdown-row">
-                                    <span class="text-muted">Balance Before</span>
-                                    <strong id="dBalanceBefore">—</strong>
-                                </div>
-                                <div class="breakdown-row">
-                                    <span class="text-muted">Payment Applied</span>
-                                    <strong style="color:var(--success);" id="dAmountApplied">—</strong>
-                                </div>
-                                <div class="breakdown-row">
-                                    <span class="text-muted">Balance After</span>
-                                    <strong id="dBalanceAfter">—</strong>
-                                </div>
+                                <div class="breakdown-row"><span class="text-muted">Balance Before</span><strong id="dBalanceBefore">—</strong></div>
+                                <div class="breakdown-row"><span class="text-muted">Payment Applied</span><strong style="color:var(--success);" id="dAmountApplied">—</strong></div>
+                                <div class="breakdown-row"><span class="text-muted">Balance After</span><strong id="dBalanceAfter">—</strong></div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Notes -->
                     <div class="col-12">
-                        <div class="card" style="border:2px solid rgba(30,58,138,0.1);">
+                        <div class="card" style="border:2px solid rgba(30,58,138,.1);">
                             <div class="card-body">
                                 <h6 class="fw-bold mb-2" style="color:var(--primary);"><i class="fas fa-comment-alt me-2"></i>Notes</h6>
                                 <p class="mb-0" id="dNotes">—</p>
@@ -622,241 +704,456 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 <script>
-    /* ── Seed data from server ── */
-    const payments = <%- JSON.stringify(payments) %>;
+/* ══════════════════════════════════════
+   DATA FROM SERVER
+══════════════════════════════════════ */
+const payments = <%- JSON.stringify(payments) %>;
 
-    let currentId     = null;
-    let activeStatus  = 'all';
-    let activeType    = 'all';
+let currentId    = null;
+let activeStatus = 'all';
+let activeType   = 'all';
 
-    /* ── Date ── */
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { weekday:'short', year:'numeric', month:'short', day:'numeric' });
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+});
 
-    /* ══════════════════════════════════════════
-       Modal helpers
-    ══════════════════════════════════════════ */
-    function switchModal(fromId, toFn) {
-        const el = document.getElementById(fromId);
-        const inst = bootstrap.Modal.getInstance(el);
-        if (inst) {
-            el.addEventListener('hidden.bs.modal', function h() {
-                el.removeEventListener('hidden.bs.modal', h);
-                toFn();
-            });
-            inst.hide();
-        } else { toFn(); }
-    }
+/* ── Update record count in card header ── */
+function updateTableInfo() {
+    const visible = [...document.querySelectorAll('#tableBody tr')].filter(r => r.style.display !== 'none').length;
+    const total   = payments.length;
+    document.getElementById('tableInfo').textContent =
+        visible === total ? `${total} records` : `Showing ${visible} of ${total}`;
+}
+document.addEventListener('DOMContentLoaded', updateTableInfo);
 
-    function showAlert(message, type = 'info', title = null) {
-        const cfg = {
-            success: { hdr:'bg-success', ibg:'rgba(16,185,129,0.12)', ic:'#10b981', icls:'fas fa-check-circle',           btn:'btn-success', t:'Success' },
-            danger:  { hdr:'bg-danger',  ibg:'rgba(239,68,68,0.12)',  ic:'#ef4444', icls:'fas fa-times-circle',            btn:'btn-danger',  t:'Error'   },
-            warning: { hdr:'bg-warning', ibg:'rgba(245,158,11,0.12)', ic:'#f59e0b', icls:'fas fa-exclamation-triangle',    btn:'btn-warning', t:'Warning' },
-            info:    { hdr:'bg-primary', ibg:'rgba(59,130,246,0.12)', ic:'#3b82f6', icls:'fas fa-info-circle',             btn:'btn-primary', t:'Info'    },
+/* ══════════════════════════════════════
+   EXPORT DROPDOWN — custom (no Bootstrap)
+══════════════════════════════════════ */
+function toggleExportMenu(e) {
+    e.stopPropagation();
+    const menu  = document.getElementById('exportMenu');
+    const btn   = document.getElementById('exportBtn');
+    const isOpen = menu.style.display !== 'none';
+    menu.style.display = isOpen ? 'none' : 'block';
+    btn.classList.toggle('open', !isOpen);
+}
+function closeExportMenu() {
+    document.getElementById('exportMenu').style.display = 'none';
+    document.getElementById('exportBtn').classList.remove('open');
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.export-wrapper')) closeExportMenu();
+});
+
+/* ══════════════════════════════════════
+   HELPERS
+══════════════════════════════════════ */
+function fmt(n)   { return '₦' + Number(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function capSt(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+function getVisibleData(useFilter) {
+    if (!useFilter) return payments;
+    return payments.filter(p => {
+        const sMatch = activeStatus === 'all' || p.status        === activeStatus;
+        const tMatch = activeType   === 'all' || p.transactionType === activeType;
+        const term   = document.getElementById('searchInput').value.toLowerCase();
+        const qMatch = !term || JSON.stringify(p).toLowerCase().includes(term);
+        return sMatch && tMatch && qMatch;
+    });
+}
+
+/* ══════════════════════════════════════
+   EXCEL EXPORT (SheetJS)
+══════════════════════════════════════ */
+function exportToExcel(useFilter) {
+    const data = getVisibleData(useFilter);
+    if (!data.length) { alert('No records to export.'); return; }
+
+    const rows = data.map((p, i) => ({
+        '#': i + 1,
+        'Date': p.date || '—',
+        'Time': p.time || '—',
+        'Borrower Name': p.borrowerName || '—',
+        'Member ID': p.borrowerType === 'external' ? 'External' : (p.memberId || '—'),
+        'Borrower Type': p.borrowerType || '—',
+        'Email': p.email || '—',
+        'Loan Reference': p.loanRef || p.reference || '—',
+        'Transaction Type': capSt(p.transactionType || '—'),
+        'Total Amount (₦)': p.amount || 0,
+        'Principal Paid (₦)': p.principalPaid || 0,
+        'Interest Paid (₦)': p.interestPaid   || 0,
+        'Penalty Paid (₦)': p.penaltyPaid     || 0,
+        'Balance Before (₦)': p.balanceBefore != null ? p.balanceBefore : '—',
+        'Balance After (₦)':  p.balanceAfter  != null ? p.balanceAfter  : '—',
+        'Payment Method': p.paymentMethod || '—',
+        'Status': capSt(p.status || '—'),
+        'Notes': p.notes || '—',
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [
+        {wch:4},{wch:14},{wch:10},{wch:24},{wch:16},{wch:14},{wch:26},
+        {wch:20},{wch:16},{wch:18},{wch:18},{wch:18},{wch:16},
+        {wch:18},{wch:16},{wch:16},{wch:12},{wch:30}
+    ];
+
+    // Header styling
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let C = range.s.c; C <= range.e.c; C++) {
+        const addr = XLSX.utils.encode_cell({ r: 0, c: C });
+        if (!ws[addr]) continue;
+        ws[addr].s = {
+            fill: { fgColor: { rgb: '1E3A8A' } },
+            font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 10 },
+            alignment: { horizontal: 'center', vertical: 'center', wrapText: true }
         };
-        const c = cfg[type] || cfg.info;
-        document.getElementById('alertModalHeader').className = `modal-header ${c.hdr} text-white border-0`;
-        document.getElementById('alertModalCloseBtn').className = 'btn-close btn-close-white';
-        document.getElementById('alertModalLabel').textContent = title || c.t;
-        const iw = document.getElementById('alertModalIconWrapper');
-        iw.style.background = c.ibg;
-        const ic = document.getElementById('alertModalIcon');
-        ic.className = `${c.icls} fa-2x`; ic.style.color = c.ic;
-        document.getElementById('alertModalMessage').textContent = message;
-        document.getElementById('alertModalOkBtn').className = `btn px-4 fw-semibold ${c.btn}`;
-        const open = document.querySelector('.modal.show');
-        if (open && open.id !== 'alertModal') {
-            switchModal(open.id, () => new bootstrap.Modal(document.getElementById('alertModal')).show());
-        } else {
-            new bootstrap.Modal(document.getElementById('alertModal')).show();
-        }
     }
-
-    /* ══════════════════════════════════════════
-       Filtering
-    ══════════════════════════════════════════ */
-    function applyFilter(dimension, value, btn) {
-        if (dimension === 'status') {
-            activeStatus = value;
-            btn.closest('.d-inline-flex').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        } else {
-            activeType = value;
-            btn.closest('.d-inline-flex').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    // Row styling
+    const numCols = [9, 10, 11, 12, 13, 14]; // amount columns
+    for (let R = 1; R <= range.e.r; R++) {
+        const fill = R % 2 === 0 ? 'EEF2FF' : 'FFFFFF';
+        for (let C = range.s.c; C <= range.e.c; C++) {
+            const addr = XLSX.utils.encode_cell({ r: R, c: C });
+            if (!ws[addr]) ws[addr] = { v: '', t: 's' };
+            ws[addr].s = { fill: { fgColor: { rgb: fill } }, alignment: { vertical: 'center' }, border: { bottom: { style: 'thin', color: { rgb: 'E0E7FF' } } } };
         }
-        btn.classList.add('active');
-        applySearch();
-    }
-
-    function applySearch() {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        document.querySelectorAll('#tableBody tr').forEach(row => {
-            const sMatch = activeStatus === 'all' || row.dataset.status === activeStatus;
-            const tMatch = activeType   === 'all' || row.dataset.type   === activeType;
-            const qMatch = !term || row.textContent.toLowerCase().includes(term);
-            row.style.display = (sMatch && tMatch && qMatch) ? '' : 'none';
+        numCols.forEach(C => {
+            const addr = XLSX.utils.encode_cell({ r: R, c: C });
+            if (ws[addr] && typeof ws[addr].v === 'number') { ws[addr].t = 'n'; ws[addr].z = '#,##0.00'; }
         });
     }
 
-    /* ══════════════════════════════════════════
-       View Details
-    ══════════════════════════════════════════ */
-    function viewDetails(id) {
-        const p = payments.find(x => x.id === id);
-        if (!p) return;
-        currentId = id;
+    // Summary sheet
+    const now = new Date().toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const totalAmt   = data.reduce((s, p) => s + (p.amount || 0), 0);
+    const totalPrin  = data.reduce((s, p) => s + (p.principalPaid || 0), 0);
+    const totalInt   = data.reduce((s, p) => s + (p.interestPaid  || 0), 0);
+    const totalPen   = data.reduce((s, p) => s + (p.penaltyPaid   || 0), 0);
+    const summaryData = [
+        ['Club De Stars — Loan Payments Export', ''],
+        ['Generated', now],
+        ['Export Scope', useFilter ? `Filter: ${activeStatus} / ${activeType}` : 'All Records'],
+        ['', ''],
+        ['RECORD COUNTS', ''],
+        ['Total Records',  data.length],
+        ['Pending',        data.filter(p => p.status === 'pending').length],
+        ['Approved',       data.filter(p => p.status === 'approved').length],
+        ['Rejected',       data.filter(p => p.status === 'rejected').length],
+        ['', ''],
+        ['BY TYPE', ''],
+        ['Repayments',    data.filter(p => p.transactionType === 'repayment').length],
+        ['Rollovers',     data.filter(p => p.transactionType === 'rollover').length],
+        ['Interest',      data.filter(p => p.transactionType === 'interest').length],
+        ['Penalties',     data.filter(p => p.transactionType === 'penalty').length],
+        ['', ''],
+        ['FINANCIAL TOTALS', ''],
+        ['Total Amount',     totalAmt],
+        ['Total Principal',  totalPrin],
+        ['Total Interest',   totalInt],
+        ['Total Penalties',  totalPen],
+    ];
+    const ws2 = XLSX.utils.aoa_to_sheet(summaryData);
+    ws2['!cols'] = [{ wch: 30 }, { wch: 22 }];
 
-        document.getElementById('dBorrowerName').textContent  = p.borrowerName || '—';
-        document.getElementById('dBorrowerId').textContent    = p.borrowerType === 'external' ? '🏢 External' : (p.memberId || '—');
-        document.getElementById('dBorrowerEmail').textContent = p.email || '—';
-        document.getElementById('dReference').textContent     = p.reference || '—';
-        document.getElementById('dDateTime').textContent      = `${p.date} at ${p.time}`;
-        document.getElementById('dMethod').textContent        = p.paymentMethod || '—';
-        document.getElementById('dNotes').textContent         = p.notes || '—';
-        document.getElementById('dTotalAmount').textContent   = `₦${(p.amount||0).toLocaleString()}`;
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Loan Payments');
+    XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
+    XLSX.writeFile(wb, `CDS_LoanPayments_${new Date().toISOString().split('T')[0]}${useFilter ? '_filtered' : ''}.xlsx`);
+}
 
-        const statusEl = document.getElementById('dStatus');
-        statusEl.className = `status-badge status-${p.status}`;
-        statusEl.textContent = p.status.charAt(0).toUpperCase() + p.status.slice(1);
+/* ══════════════════════════════════════
+   PDF EXPORT
+══════════════════════════════════════ */
+function exportToPDF(useFilter) {
+    const data = getVisibleData(useFilter);
+    if (!data.length) { alert('No records to export.'); return; }
 
-        const typeMap = {
-            repayment:   ['type-repayment',  'fa-hand-holding-usd', 'Repayment'],
-            rollover:    ['type-rollover',   'fa-sync-alt',         'Rollover'],
-            interest:    ['type-interest',   'fa-percentage',       'Interest'],
-            penalty:     ['type-penalty',    'fa-exclamation-triangle','Penalty'],
-            disbursement:['type-disbursement','fa-arrow-up',        'Disbursement'],
-        };
-        const [cls, icon, label] = typeMap[p.transactionType] || typeMap.repayment;
-        const tb = document.getElementById('dTypeBadge');
-        tb.className = `type-badge ${cls} ms-2`;
-        tb.innerHTML = `<i class="fas ${icon} me-1"></i>${label}`;
+    const now      = new Date().toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const totalAmt = data.reduce((s, p) => s + (p.amount || 0), 0);
+    const typeColor = { repayment:'#059669', rollover:'#7c3aed', interest:'#0891b2', penalty:'#dc2626', disbursement:'#d97706' };
+    const typeBg    = { repayment:'#d1fae5', rollover:'#ede9fe', interest:'#cffafe', penalty:'#fee2e2', disbursement:'#fef3c7' };
+    const stColor   = { approved:'#059669', pending:'#d97706', rejected:'#dc2626' };
+    const stBg      = { approved:'#d1fae5', pending:'#fef3c7', rejected:'#fee2e2' };
 
-        document.getElementById('dPrincipal').textContent    = `₦${(p.principalPaid||0).toLocaleString()}`;
-        document.getElementById('dInterest').textContent     = `₦${(p.interestPaid||0).toLocaleString()}`;
-        document.getElementById('dPenalty').textContent      = `₦${(p.penaltyPaid||0).toLocaleString()}`;
-        document.getElementById('dBalanceBefore').textContent = p.balanceBefore != null ? `₦${p.balanceBefore.toLocaleString()}` : '—';
-        document.getElementById('dBalanceAfter').textContent  = p.balanceAfter  != null ? `₦${p.balanceAfter.toLocaleString()}`  : '—';
-        document.getElementById('dAmountApplied').textContent = `₦${(p.amount||0).toLocaleString()}`;
+    const rows = data.map((p, i) => {
+        const tc = typeColor[p.transactionType] || '#475569';
+        const tb = typeBg[p.transactionType]    || '#f1f5f9';
+        const sc = stColor[p.status] || '#475569';
+        const sb = stBg[p.status]    || '#f1f5f9';
+        const rowBg = i % 2 === 0 ? '#fff' : '#f8fafc';
+        const breakdown = [
+            p.principalPaid > 0 ? `<span style="color:#059669;font-size:9px;">P:₦${p.principalPaid.toLocaleString()}</span>` : '',
+            p.interestPaid  > 0 ? `<span style="color:#0891b2;font-size:9px;">I:₦${p.interestPaid.toLocaleString()}</span>`  : '',
+            p.penaltyPaid   > 0 ? `<span style="color:#dc2626;font-size:9px;">Pen:₦${p.penaltyPaid.toLocaleString()}</span>` : '',
+        ].filter(Boolean).join(' &nbsp;');
+        return `<tr style="background:${rowBg};">
+            <td style="text-align:center;color:#9ca3af;font-size:11px;">${i+1}</td>
+            <td style="font-size:11px;color:#6b7280;">${p.date || '—'} ${p.time || ''}</td>
+            <td><strong style="font-size:12px;">${p.borrowerName || '—'}</strong><br><span style="color:#9ca3af;font-size:10px;">${p.borrowerType === 'external' ? '🏢 External' : (p.memberId || '—')}</span></td>
+            <td style="font-size:10px;color:#6b7280;font-family:monospace;">${p.loanRef || p.reference || '—'}</td>
+            <td><span style="background:${tb};color:${tc};padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;">${capSt(p.transactionType || '—')}</span></td>
+            <td style="text-align:right;font-weight:800;font-size:12px;color:#059669;">₦${(p.amount||0).toLocaleString('en-NG',{minimumFractionDigits:2})}</td>
+            <td>${breakdown || '<span style="color:#9ca3af;font-size:10px;">—</span>'}</td>
+            <td><span style="background:${sb};color:${sc};padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;">${capSt(p.status || '—')}</span></td>
+        </tr>`;
+    }).join('');
 
-        const isPending = p.status === 'pending';
-        document.getElementById('detailApproveBtn').style.display = isPending ? '' : 'none';
-        document.getElementById('detailRejectBtn').style.display  = isPending ? '' : 'none';
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Club De Stars — Loan Payments</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1e293b;background:#fff;}
+.header{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;padding:22px 28px;}
+.header h1{font-size:20px;font-weight:800;margin-bottom:3px;}.header p{font-size:11px;opacity:.8;}
+.meta{display:flex;gap:14px;padding:10px 28px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-wrap:wrap;}
+.mi{display:flex;flex-direction:column;min-width:80px;}
+.mi span:first-child{font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;}
+.mi span:last-child{font-size:13px;font-weight:800;color:#1e3a8a;}
+.mi.g span:last-child{color:#059669;}.mi.r span:last-child{color:#dc2626;}.mi.a span:last-child{color:#d97706;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:#1e3a8a;color:white;}
+thead th{padding:8px 9px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+thead th:first-child{text-align:center;width:28px;}
+tbody td{padding:7px 9px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+.footer{padding:14px 28px;font-size:10px;color:#9ca3af;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;margin-top:6px;}
+@media print{@page{size:A4 landscape;margin:7mm;}.no-print{display:none;}}
+</style></head><body>
+<div class="header">
+    <h1>Club De Stars Cooperative — Loan Payments Report</h1>
+    <p>Generated: ${now} &nbsp;|&nbsp; ${useFilter && (activeStatus !== 'all' || activeType !== 'all') ? `Filter: ${activeStatus} / ${activeType}` : 'Full Export'}</p>
+</div>
+<div class="meta">
+    <div class="mi"><span>Total</span><span>${data.length}</span></div>
+    <div class="mi g"><span>Approved</span><span>${data.filter(p=>p.status==='approved').length}</span></div>
+    <div class="mi a"><span>Pending</span><span>${data.filter(p=>p.status==='pending').length}</span></div>
+    <div class="mi r"><span>Rejected</span><span>${data.filter(p=>p.status==='rejected').length}</span></div>
+    <div class="mi g"><span>Repayments</span><span>${data.filter(p=>p.transactionType==='repayment').length}</span></div>
+    <div class="mi r"><span>Penalties</span><span>${data.filter(p=>p.transactionType==='penalty').length}</span></div>
+    <div class="mi"><span>Rollovers</span><span>${data.filter(p=>p.transactionType==='rollover').length}</span></div>
+    <div class="mi g"><span>Grand Total</span><span>₦${totalAmt.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
+</div>
+<div style="padding:0 0 10px;">
+<table>
+<thead><tr>
+    <th>#</th><th>Date / Time</th><th>Borrower</th><th>Loan Ref</th>
+    <th>Type</th><th style="text-align:right;">Amount</th><th>Breakdown</th><th>Status</th>
+</tr></thead>
+<tbody>${rows}</tbody>
+</table>
+</div>
+<div class="footer">
+    <span>Club De Stars Cooperative &nbsp;·&nbsp; Powered by JESZ LIMITED</span>
+    <span>${data.length} payment records</span>
+</div>
+<div style="text-align:center;padding:14px;" class="no-print">
+    <button onclick="window.print()" style="padding:10px 28px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;margin-right:8px;">🖨 Print / Save as PDF</button>
+    <button onclick="window.close()" style="padding:10px 20px;background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Close</button>
+</div>
+</body></html>`;
+    const win = window.open('', '_blank', 'width=1300,height=850');
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+}
 
-        new bootstrap.Modal(document.getElementById('detailModal')).show();
+/* ══════════════════════════════════════
+   FILTER + SEARCH
+══════════════════════════════════════ */
+function applyFilter(dimension, value, btn) {
+    if (dimension === 'status') {
+        activeStatus = value;
+        btn.closest('.d-inline-flex').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    } else {
+        activeType = value;
+        btn.closest('.d-inline-flex').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     }
+    btn.classList.add('active');
+    applySearch();
+}
 
-    /* ══════════════════════════════════════════
-       Approve flow
-    ══════════════════════════════════════════ */
-    function openApprove(id) {
-        currentId = id;
-        new bootstrap.Modal(document.getElementById('approvalModal')).show();
-    }
-    function approveFromDetail() {
-        switchModal('detailModal', () => new bootstrap.Modal(document.getElementById('approvalModal')).show());
-    }
+function applySearch() {
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#tableBody tr').forEach(row => {
+        const sMatch = activeStatus === 'all' || row.dataset.status === activeStatus;
+        const tMatch = activeType   === 'all' || row.dataset.type   === activeType;
+        const qMatch = !term || row.textContent.toLowerCase().includes(term);
+        row.style.display = (sMatch && tMatch && qMatch) ? '' : 'none';
+    });
+    updateTableInfo();
+}
 
-    async function confirmApproval() {
-        const notes = document.getElementById('approvalNotes').value;
-        try {
-            const res = await fetch(`/admin/loans/${currentId}/approve-payment`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ notes })
-            });
-            const result = await res.json();
-            if (!res.ok) {
-                showAlert(result.message || 'Approval failed.', 'danger', 'Approval Failed');
-                return;
-            }
-            const p = payments.find(x => x.id === currentId);
-            if (p) p.status = 'approved';
-            updateRow(currentId, 'approved');
-            document.getElementById('approvalNotes').value = '';
-            document.getElementById('successMessage').textContent = result.overpaymentCredited
-                ? `Payment approved! ₦${result.overpaymentCredited.toLocaleString()} overpayment credited to savings.`
-                : 'Loan payment approved and applied successfully!';
-            switchModal('approvalModal', () => new bootstrap.Modal(document.getElementById('successModal')).show());
-        } catch (e) {
-            showAlert('Network error. Please try again.', 'danger', 'Network Error');
-        }
-    }
+/* ══════════════════════════════════════
+   VIEW DETAILS
+══════════════════════════════════════ */
+function viewDetails(id) {
+    const p = payments.find(x => x.id === id);
+    if (!p) return;
+    currentId = id;
 
-    /* ══════════════════════════════════════════
-       Reject flow
-    ══════════════════════════════════════════ */
-    function openReject(id) {
-        currentId = id;
-        new bootstrap.Modal(document.getElementById('rejectionModal')).show();
-    }
-    function rejectFromDetail() {
-        switchModal('detailModal', () => new bootstrap.Modal(document.getElementById('rejectionModal')).show());
-    }
+    document.getElementById('dBorrowerName').textContent  = p.borrowerName || '—';
+    document.getElementById('dBorrowerId').textContent    = p.borrowerType === 'external' ? '🏢 External' : (p.memberId || '—');
+    document.getElementById('dBorrowerEmail').textContent = p.email || '—';
+    document.getElementById('dReference').textContent     = p.reference || '—';
+    document.getElementById('dDateTime').textContent      = `${p.date} at ${p.time}`;
+    document.getElementById('dMethod').textContent        = p.paymentMethod || '—';
+    document.getElementById('dNotes').textContent         = p.notes || '—';
+    document.getElementById('dTotalAmount').textContent   = fmt(p.amount);
 
-    async function confirmRejection() {
-        const reason = document.getElementById('rejectionReason').value.trim();
-        if (!reason) {
-            showAlert('Please provide a reason before proceeding.', 'warning', 'Reason Required');
-            return;
-        }
-        try {
-            const res = await fetch(`/admin/loans/${currentId}/reject-payment`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reason })
-            });
-            const result = await res.json();
-            if (!res.ok) {
-                showAlert(result.message || 'Rejection failed.', 'danger', 'Rejection Failed');
-                return;
-            }
-            const p = payments.find(x => x.id === currentId);
-            if (p) p.status = 'rejected';
-            updateRow(currentId, 'rejected');
-            document.getElementById('rejectionReason').value = '';
-            document.getElementById('successMessage').textContent = 'Loan payment rejected.';
-            switchModal('rejectionModal', () => new bootstrap.Modal(document.getElementById('successModal')).show());
-        } catch (e) {
-            showAlert('Network error. Please try again.', 'danger', 'Network Error');
-        }
-    }
+    const statusEl = document.getElementById('dStatus');
+    statusEl.className = `status-badge status-${p.status}`;
+    statusEl.textContent = capSt(p.status);
 
-    /* ══════════════════════════════════════════
-       Update row in place
-    ══════════════════════════════════════════ */
-    function updateRow(id, status) {
-        document.querySelectorAll('#tableBody tr').forEach(row => {
-            if (row.querySelector(`button[onclick*="'${id}'"]`)) {
-                row.dataset.status = status;
-                const statusCell = row.querySelector('[data-label="Status"]');
-                if (statusCell) {
-                    statusCell.innerHTML = `<span class="status-badge status-${status}">${status.charAt(0).toUpperCase()+status.slice(1)}</span>`;
-                }
-                const actionsCell = row.querySelector('[data-label="Actions"]');
-                if (actionsCell) {
-                    actionsCell.innerHTML = `
-                        <div class="d-flex gap-1 flex-wrap">
-                            <button class="action-btn btn-view" onclick="viewDetails('${id}')"><i class="fas fa-eye"></i></button>
-                        </div>`;
-                }
-            }
+    const typeMap = {
+        repayment:   ['type-repayment',   'fa-hand-holding-usd',     'Repayment'],
+        rollover:    ['type-rollover',    'fa-sync-alt',             'Rollover'],
+        interest:    ['type-interest',    'fa-percentage',           'Interest'],
+        penalty:     ['type-penalty',     'fa-exclamation-triangle', 'Penalty'],
+        disbursement:['type-disbursement','fa-arrow-up',             'Disbursement'],
+    };
+    const [cls, icon, label] = typeMap[p.transactionType] || typeMap.repayment;
+    const tb = document.getElementById('dTypeBadge');
+    tb.className = `type-badge ${cls} ms-2`;
+    tb.innerHTML = `<i class="fas ${icon} me-1"></i>${label}`;
+
+    document.getElementById('dPrincipal').textContent     = fmt(p.principalPaid);
+    document.getElementById('dInterest').textContent      = fmt(p.interestPaid);
+    document.getElementById('dPenalty').textContent       = fmt(p.penaltyPaid);
+    document.getElementById('dBalanceBefore').textContent = p.balanceBefore != null ? fmt(p.balanceBefore) : '—';
+    document.getElementById('dBalanceAfter').textContent  = p.balanceAfter  != null ? fmt(p.balanceAfter)  : '—';
+    document.getElementById('dAmountApplied').textContent = fmt(p.amount);
+
+    const isPending = p.status === 'pending';
+    document.getElementById('detailApproveBtn').style.display = isPending ? '' : 'none';
+    document.getElementById('detailRejectBtn').style.display  = isPending ? '' : 'none';
+
+    new bootstrap.Modal(document.getElementById('detailModal')).show();
+}
+
+/* ══════════════════════════════════════
+   MODAL SWITCHING
+══════════════════════════════════════ */
+function switchModal(fromId, toFn) {
+    const el = document.getElementById(fromId);
+    const inst = bootstrap.Modal.getInstance(el);
+    if (inst) {
+        el.addEventListener('hidden.bs.modal', function h() { el.removeEventListener('hidden.bs.modal', h); toFn(); });
+        inst.hide();
+    } else { toFn(); }
+}
+
+function showAlert(message, type = 'info', title = null) {
+    const cfg = {
+        success: { hdr:'bg-success', ibg:'rgba(16,185,129,0.12)', ic:'#10b981', icls:'fas fa-check-circle',        btn:'btn-success', t:'Success' },
+        danger:  { hdr:'bg-danger',  ibg:'rgba(239,68,68,0.12)',  ic:'#ef4444', icls:'fas fa-times-circle',         btn:'btn-danger',  t:'Error'   },
+        warning: { hdr:'bg-warning', ibg:'rgba(245,158,11,0.12)', ic:'#f59e0b', icls:'fas fa-exclamation-triangle', btn:'btn-warning', t:'Warning' },
+        info:    { hdr:'bg-primary', ibg:'rgba(59,130,246,0.12)', ic:'#3b82f6', icls:'fas fa-info-circle',          btn:'btn-primary', t:'Info'    },
+    };
+    const c = cfg[type] || cfg.info;
+    document.getElementById('alertModalHeader').className    = `modal-header ${c.hdr} text-white border-0`;
+    document.getElementById('alertModalCloseBtn').className  = 'btn-close btn-close-white';
+    document.getElementById('alertModalLabel').textContent   = title || c.t;
+    const iw = document.getElementById('alertModalIconWrapper');
+    iw.style.background = c.ibg;
+    const ic = document.getElementById('alertModalIcon');
+    ic.className = `${c.icls} fa-2x`; ic.style.color = c.ic;
+    document.getElementById('alertModalMessage').textContent = message;
+    document.getElementById('alertModalOkBtn').className     = `btn px-4 fw-semibold ${c.btn}`;
+    const open = document.querySelector('.modal.show');
+    if (open && open.id !== 'alertModal') {
+        switchModal(open.id, () => new bootstrap.Modal(document.getElementById('alertModal')).show());
+    } else {
+        new bootstrap.Modal(document.getElementById('alertModal')).show();
+    }
+}
+
+/* ══════════════════════════════════════
+   APPROVE / REJECT
+══════════════════════════════════════ */
+function openApprove(id) { currentId = id; new bootstrap.Modal(document.getElementById('approvalModal')).show(); }
+function approveFromDetail() { switchModal('detailModal', () => new bootstrap.Modal(document.getElementById('approvalModal')).show()); }
+
+async function confirmApproval() {
+    const notes = document.getElementById('approvalNotes').value;
+    try {
+        const res    = await fetch(`/admin/loans/${currentId}/approve-payment`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ notes })
         });
-    }
+        const result = await res.json();
+        if (!res.ok) { showAlert(result.message || 'Approval failed.', 'danger', 'Approval Failed'); return; }
+        const p = payments.find(x => x.id === currentId);
+        if (p) p.status = 'approved';
+        updateRow(currentId, 'approved');
+        document.getElementById('approvalNotes').value = '';
+        document.getElementById('successMessage').textContent = result.overpaymentCredited
+            ? `Payment approved! ₦${result.overpaymentCredited.toLocaleString()} overpayment credited to savings.`
+            : 'Loan payment approved and applied successfully!';
+        switchModal('approvalModal', () => new bootstrap.Modal(document.getElementById('successModal')).show());
+    } catch { showAlert('Network error. Please try again.', 'danger', 'Network Error'); }
+}
 
-    function refreshData() { window.location.reload(); }
-    function exportData()  { window.location.href = '/admin/loan-payments/export'; }
+function openReject(id) { currentId = id; new bootstrap.Modal(document.getElementById('rejectionModal')).show(); }
+function rejectFromDetail() { switchModal('detailModal', () => new bootstrap.Modal(document.getElementById('rejectionModal')).show()); }
 
-    /* ── Sidebar pending badge ── */
-    async function loadSidebarPendingCount() {
-        try {
-            const res = await fetch('/admin/pending-approvals-count');
-            const data = await res.json();
-            const badge = document.getElementById('sidebarPendingBadge');
-            if (!badge) return;
-            badge.style.display = data.count > 0 ? 'inline-block' : 'none';
-            badge.textContent = data.count;
-        } catch (e) { console.error('Sidebar count error:', e); }
-    }
-    document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
+async function confirmRejection() {
+    const reason = document.getElementById('rejectionReason').value.trim();
+    if (!reason) { showAlert('Please provide a reason before proceeding.', 'warning', 'Reason Required'); return; }
+    try {
+        const res    = await fetch(`/admin/loans/${currentId}/reject-payment`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason })
+        });
+        const result = await res.json();
+        if (!res.ok) { showAlert(result.message || 'Rejection failed.', 'danger', 'Rejection Failed'); return; }
+        const p = payments.find(x => x.id === currentId);
+        if (p) p.status = 'rejected';
+        updateRow(currentId, 'rejected');
+        document.getElementById('rejectionReason').value = '';
+        document.getElementById('successMessage').textContent = 'Loan payment rejected.';
+        switchModal('rejectionModal', () => new bootstrap.Modal(document.getElementById('successModal')).show());
+    } catch { showAlert('Network error. Please try again.', 'danger', 'Network Error'); }
+}
+
+function updateRow(id, status) {
+    document.querySelectorAll('#tableBody tr').forEach(row => {
+        if (row.innerHTML.includes(`'${id}'`)) {
+            row.dataset.status = status;
+            const statusCell = row.querySelector('[data-label="Status"]');
+            if (statusCell) statusCell.innerHTML = `<span class="status-badge status-${status}">${capSt(status)}</span>`;
+            const actionsCell = row.querySelector('[data-label="Actions"]');
+            if (actionsCell) actionsCell.innerHTML = `<div class="d-flex gap-1 flex-wrap"><button class="action-btn btn-view" onclick="viewDetails('${id}')"><i class="fas fa-eye"></i></button></div>`;
+        }
+    });
+    updateTableInfo();
+}
+
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+function toggleSidebar(e) {
+    e.stopPropagation();
+    document.getElementById('sidebar').classList.toggle('active');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('active');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+}
+document.addEventListener('click', e => {
+    const sb = document.getElementById('sidebar');
+    if (window.innerWidth <= 992 && !sb.contains(e.target) && !e.target.closest('.fa-bars') && sb.classList.contains('active'))
+        closeSidebar();
+});
+
+async function loadSidebarPendingCount() {
+    try {
+        const res  = await fetch('/admin/pending-approvals-count');
+        const data = await res.json();
+        const badge = document.getElementById('sidebarPendingBadge');
+        if (!badge) return;
+        badge.style.display = data.count > 0 ? 'inline-block' : 'none';
+        if (data.count > 0) badge.textContent = data.count;
+    } catch {}
+}
+document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
 </script>
 </body>
 </html>

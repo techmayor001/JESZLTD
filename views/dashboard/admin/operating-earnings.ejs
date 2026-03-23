@@ -6,33 +6,71 @@
     <title>Club De Stars – Operating Earnings</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary:#1e3a8a; --primary-dark:#1e40af; --primary-light:#3b82f6;
             --success:#10b981; --danger:#ef4444; --warning:#f59e0b;
-            --sidebar-width:280px;
+            --sidebar-width:280px; --navbar-h:70px;
         }
         *{margin:0;padding:0;box-sizing:border-box;}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f1f5f9;min-height:100vh;overflow-x:hidden;}
 
-        .sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-width);background:#1e3a8a;color:#fff;z-index:1040;transition:all .3s;overflow-y:auto;box-shadow:4px 0 20px rgba(30,58,138,.15);}
-        .sidebar-header{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.1);}
-        .logo-container{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
-        .logo-box{width:45px;height:45px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary);font-size:1.5rem;box-shadow:0 4px 10px rgba(0,0,0,.2);flex-shrink:0;}
-        .admin-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(239,68,68,.2);border-radius:20px;border:1px solid rgba(239,68,68,.3);font-weight:600;font-size:.8rem;margin-top:8px;}
-        .sidebar-menu{padding:1rem 0;}
-        .sidebar-menu a{color:rgba(255,255,255,.85);text-decoration:none;padding:.875rem 1.5rem;display:flex;align-items:center;transition:all .3s;border-left:3px solid transparent;font-weight:500;font-size:.95rem;}
-        .sidebar-menu a:hover,.sidebar-menu a.active{background:rgba(255,255,255,.15);color:#fff;border-left-color:#fff;}
-        .sidebar-menu a i{width:24px;margin-right:12px;font-size:1.1rem;flex-shrink:0;}
+        /* ══════════ SIDEBAR ══════════ */
+        .sidebar{
+            position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-width);
+            background:linear-gradient(180deg,#0f2357 0%,#1e3a8a 40%,#1e40af 100%);
+            z-index:1040;overflow-y:auto;transition:transform .3s ease;
+            box-shadow:4px 0 24px rgba(30,58,138,.25);
+            scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;
+        }
+        .sidebar::-webkit-scrollbar{width:4px;}
+        .sidebar::-webkit-scrollbar-track{background:transparent;}
+        .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
+        .sidebar-header{
+            padding:1.4rem 1.25rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);
+            background:rgba(0,0,0,.18);position:sticky;top:0;z-index:2;
+        }
+        .logo-row{display:flex;align-items:center;gap:11px;margin-bottom:10px;}
+        .logo-box{width:42px;height:42px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--primary);font-size:1.3rem;box-shadow:0 4px 12px rgba(0,0,0,.25);flex-shrink:0;}
+        .sidebar-brand{font-size:.95rem;font-weight:800;color:white;text-transform:uppercase;letter-spacing:.05em;line-height:1.2;}
+        .sidebar-brand small{font-size:.65rem;font-weight:500;opacity:.55;display:block;letter-spacing:.08em;}
+        .role-pill{display:inline-flex;align-items:center;gap:7px;padding:4px 10px;background:rgba(239,68,68,.2);border-radius:20px;border:1px solid rgba(239,68,68,.3);font-weight:700;font-size:.7rem;color:#fca5a5;}
+        .nav-group{padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.06);}
+        .nav-group:last-child{border-bottom:none;}
+        .nav-category{display:flex;align-items:center;gap:7px;padding:.55rem 1.25rem .3rem;font-size:.62rem;font-weight:800;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.1em;user-select:none;}
+        .nav-category::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);margin-left:4px;}
+        .sidebar-nav a{display:flex;align-items:center;gap:11px;padding:.62rem 1.25rem;color:rgba(255,255,255,.72);text-decoration:none;font-weight:500;font-size:.84rem;border-left:3px solid transparent;transition:all .18s;}
+        .sidebar-nav a:hover{background:rgba(255,255,255,.09);color:white;border-left-color:rgba(255,255,255,.4);}
+        .sidebar-nav a.active{background:rgba(255,255,255,.15);color:white;border-left-color:white;}
+        .sidebar-nav a i{width:18px;font-size:.9rem;flex-shrink:0;opacity:.8;text-align:center;}
+        .sidebar-nav a.active i{opacity:1;}
+        .nav-badge{margin-left:auto;font-size:.63rem;font-weight:800;padding:2px 7px;border-radius:10px;background:rgba(239,68,68,.9);color:white;flex-shrink:0;line-height:1.4;}
+        .nav-back{display:flex;align-items:center;gap:10px;padding:.7rem 1.25rem .9rem;font-size:.8rem;font-weight:600;color:rgba(255,255,255,.42);text-decoration:none;transition:color .18s;border-top:1px solid rgba(255,255,255,.07);margin-top:.25rem;}
+        .nav-back:hover{color:rgba(255,255,255,.7);}
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1035;}
+        .sidebar-overlay.active{display:block;}
 
-        .top-navbar{position:fixed;top:0;left:var(--sidebar-width);right:0;height:70px;background:rgba(255,255,255,.97);box-shadow:0 2px 10px rgba(30,58,138,.08);z-index:1030;display:flex;align-items:center;padding:0 1.5rem;border-bottom:1px solid rgba(30,58,138,.1);}
-        .main-content{margin-left:var(--sidebar-width);margin-top:70px;padding:1.5rem;min-height:calc(100vh - 70px);}
+        /* ══ EXPORT DROPDOWN ══ */
+        .export-wrapper{position:relative;display:inline-block;}
+        .btn-export{background:white;color:var(--primary);border:none;font-weight:700;border-radius:8px;padding:.35rem .9rem;font-size:.82rem;display:inline-flex;align-items:center;gap:.4rem;box-shadow:0 2px 6px rgba(0,0,0,.1);transition:all .2s;cursor:pointer;}
+        .btn-export:hover{background:#f8fafc;transform:translateY(-1px);}
+        .btn-export .caret{font-size:.65rem;transition:transform .2s;}
+        .btn-export.open .caret{transform:rotate(180deg);}
+        .export-dropdown-menu{position:absolute;top:calc(100% + 5px);right:0;min-width:210px;background:white;border-radius:12px;box-shadow:0 16px 40px rgba(30,58,138,.2),0 4px 12px rgba(0,0,0,.08);padding:.4rem;z-index:99999;}
+        .export-dropdown-menu .drop-header{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;padding:.45rem .7rem .2rem;}
+        .export-dropdown-menu .drop-item{border-radius:8px;padding:.55rem .8rem;font-weight:600;font-size:.82rem;color:#1e293b;display:flex;align-items:center;gap:.55rem;transition:background .15s;text-decoration:none;cursor:pointer;}
+        .export-dropdown-menu .drop-item:hover{background:rgba(30,58,138,.06);}
+        .export-dropdown-menu .drop-divider{margin:.3rem .4rem;border-top:1px solid rgba(30,58,138,.08);}
 
+        /* ══ TOPBAR ══ */
+        .top-navbar{position:fixed;top:0;left:var(--sidebar-width);right:0;height:var(--navbar-h);background:rgba(255,255,255,.97);box-shadow:0 2px 10px rgba(30,58,138,.08);z-index:1030;display:flex;align-items:center;padding:0 1.5rem;border-bottom:1px solid rgba(30,58,138,.1);}
+        .main-content{margin-left:var(--sidebar-width);margin-top:var(--navbar-h);padding:1.5rem;min-height:calc(100vh - var(--navbar-h));}
+
+        /* ══ CARDS ══ */
         .card{border:1px solid rgba(30,58,138,.07);border-radius:14px;box-shadow:0 4px 12px rgba(30,58,138,.06);background:#fff;}
         .card-header{background:#f8faff;border-bottom:1px solid rgba(30,58,138,.1);padding:1rem 1.25rem;border-radius:14px 14px 0 0 !important;}
         .card-header h5,.card-header h6{color:var(--primary);font-weight:700;margin:0;}
-
         .stat-card{background:#fff;border-radius:14px;padding:1.25rem;border:1px solid rgba(30,58,138,.07);box-shadow:0 4px 12px rgba(30,58,138,.06);height:100%;}
         .stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:.8rem;}
 
@@ -49,14 +87,16 @@
         .summary-divider{width:1px;background:#e2e8f0;align-self:stretch;margin:.25rem 0;}
 
         .filter-wrap{background:#fff;border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.1rem;border:1px solid rgba(30,58,138,.08);box-shadow:0 2px 6px rgba(30,58,138,.04);}
+        .page-header{background:#fff;border-radius:14px;padding:1.4rem 1.6rem;margin-bottom:1.25rem;border:1px solid rgba(30,58,138,.08);box-shadow:0 2px 8px rgba(30,58,138,.05);}
+        .balance-pill{background:#eff6ff;border:2px solid #bfdbfe;border-radius:50px;padding:.45rem 1.1rem;color:var(--primary);font-weight:700;font-size:.9rem;display:inline-flex;align-items:center;gap:.45rem;}
 
+        /* ══ TABLE ══ */
         .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
         table.earn-table{width:100%;min-width:720px;border-collapse:separate;border-spacing:0;}
         table.earn-table thead th{background:#f8faff;color:var(--primary);font-weight:700;font-size:.73rem;text-transform:uppercase;letter-spacing:.04em;padding:.75rem .85rem;border-bottom:2px solid rgba(30,58,138,.1);white-space:nowrap;position:sticky;top:0;z-index:2;}
         table.earn-table tbody td{padding:.75rem .85rem;font-size:.875rem;vertical-align:middle;border-bottom:1px solid #f1f5f9;}
         table.earn-table tbody tr:last-child td{border-bottom:none;}
         table.earn-table tbody tr:hover td{background:#fafbff;}
-
         .amount-in{color:#059669;font-weight:700;}
         .amount-out{color:#dc2626;font-weight:700;}
         .balance-cell{color:#1e3a8a;font-weight:600;font-size:.82rem;}
@@ -71,17 +111,11 @@
         .chip-interest_income{background:#dbeafe;color:#1e40af;}
         .chip-other_income{background:#e0f2fe;color:#0369a1;}
         .chip-other_expense{background:#fce7f3;color:#9d174d;}
-
         .dir-in{background:#d1fae5;color:#065f46;padding:.2rem .55rem;border-radius:5px;font-size:.7rem;font-weight:700;}
         .dir-out{background:#fee2e2;color:#991b1b;padding:.2rem .55rem;border-radius:5px;font-size:.7rem;font-weight:700;}
-
         .row-charge td{background:#fffbeb !important;}
         .row-charge:hover td{background:#fef9c3 !important;}
-
         .charge-source-tag{display:inline-flex;align-items:center;gap:4px;background:#fef3c7;border:1px solid #fde68a;color:#92400e;padding:.18rem .5rem;border-radius:5px;font-size:.68rem;font-weight:700;}
-
-        .page-header{background:#fff;border-radius:14px;padding:1.4rem 1.6rem;margin-bottom:1.25rem;border:1px solid rgba(30,58,138,.08);box-shadow:0 2px 8px rgba(30,58,138,.05);}
-        .balance-pill{background:#eff6ff;border:2px solid #bfdbfe;border-radius:50px;padding:.45rem 1.1rem;color:var(--primary);font-weight:700;font-size:.9rem;display:inline-flex;align-items:center;gap:.45rem;}
 
         .btn-primary{background:var(--primary);border:none;padding:.5rem 1.2rem;border-radius:9px;font-weight:600;}
         .btn-primary:hover{background:var(--primary-dark);}
@@ -105,10 +139,11 @@
             .main-content{margin-left:0;padding:1rem;}
         }
         @media(max-width:768px){
-            .top-navbar{height:60px;padding:0 1rem;}
-            .main-content{margin-top:60px;padding:.75rem;}
+            :root{--navbar-h:60px;}
+            .main-content{padding:.75rem;}
             table.earn-table thead th{font-size:.67rem;padding:.6rem;}
             table.earn-table tbody td{font-size:.8rem;padding:.6rem;}
+            .export-dropdown-menu{right:auto;left:0;}
         }
         .pagination .page-link{border-radius:7px;margin:0 2px;color:var(--primary);border-color:#e2e8f0;font-size:.85rem;}
         .pagination .page-item.active .page-link{background:var(--primary);border-color:var(--primary);}
@@ -116,53 +151,78 @@
 </head>
 <body>
 
-<!-- ── Sidebar ── -->
+<!-- ════════════════════════ SIDEBAR ════════════════════════ -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <div class="logo-container">
+        <div class="logo-row">
             <div class="logo-box">C</div>
-            <div>
-                <h5 class="mb-0 fw-bold" style="text-transform:uppercase;font-size:1rem;">Club De Stars</h5>
-                <small class="opacity-75" style="font-size:.7rem;">ADMIN PANEL</small>
-            </div>
+            <div><div class="sidebar-brand">Club De Stars<small>Admin Panel</small></div></div>
         </div>
-        <div class="admin-badge"><i class="fas fa-shield-alt"></i><span>SuperAdmin</span></div>
+        <div class="role-pill">
+            <i class="fas fa-shield-alt" style="font-size:.65rem;"></i>&nbsp;<%= admin.role?.name?.toUpperCase() || 'SUPER ADMIN' %>
+        </div>
     </div>
-    <div class="sidebar-menu">
-        <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
-        <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
-        <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
-        <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
-        <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
-        <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
-        <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
-        <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
-        <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
-        <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
-        <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
-        <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
-        <a href="/admin/operating-earnings" class="active"><i class="fas fa-chart-line"></i> Operating Earnings</a>
-        <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
-        <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
-        <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
-        <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
-        <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-        <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
-        <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
+    <div class="sidebar-nav">
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-home" style="font-size:.6rem;"></i>Main</div>
+            <a href="/admin/dashboard"><i class="fas fa-chart-pie"></i>Overview</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-users" style="font-size:.6rem;"></i>Members</div>
+            <a href="/admin/manage-members"><i class="fas fa-users"></i>Manage Members</a>
+            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i>Kiddies Accounts</a>
+            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i>Membership Types</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-hand-holding-usd" style="font-size:.6rem;"></i>Loans</div>
+            <a href="/admin/manage-loan"><i class="fas fa-hand-holding-usd"></i>Loan Management</a>
+            <a href="/admin/loan-payments"><i class="fas fa-file-invoice-dollar"></i>Loan Payments</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i>Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i>External Loans</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-landmark" style="font-size:.6rem;"></i>Finance</div>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i>Company Finance</a>
+            <a href="/admin/operating-earnings" class="active"><i class="fas fa-chart-line"></i>Operating Earnings</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-chart-bar"></i>Company Revenue</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-cog" style="font-size:.6rem;"></i>System</div>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i>Manage Subscriptions</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i>Roles &amp; Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i>Settings</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-file-alt" style="font-size:.6rem;"></i>Reporting</div>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i>Reports</a>
+            <a href="/admin/logs"><i class="fas fa-history"></i>Admin Logs</a>
+        </div>
     </div>
+    <a href="/cds-cooperative/dashboard" class="nav-back"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
 </div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <!-- ── Top Navbar ── -->
 <div class="top-navbar">
-    <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.4rem;"
-       onclick="document.getElementById('sidebar').classList.toggle('active')"></i>
+    <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.4rem;" onclick="toggleSidebar(event)"></i>
     <div class="flex-grow-1">
         <h6 class="mb-0 fw-bold" style="color:var(--primary);">Operating Earnings</h6>
-        <small class="text-muted d-none d-sm-block">Welcome, <%= admin.fullName %></small>
-    </div>
-    <div class="position-relative">
-        <i class="fas fa-bell" style="color:var(--primary);font-size:1.2rem;cursor:pointer;"></i>
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.6rem;">5</span>
+        <small class="text-muted d-none d-sm-block">Welcome, <%= admin.fullName || admin.firstName %></small>
     </div>
 </div>
 
@@ -178,10 +238,7 @@
             <p class="text-muted mb-0" style="font-size:.82rem;">All company operating income and expenses — loan charges, staff salaries, admin entries &amp; more</p>
         </div>
         <div class="d-flex flex-wrap gap-2 align-items-center">
-            <div class="balance-pill">
-                <i class="fas fa-coins"></i>
-                Operating Balance: ₦<%= operatingBalance.toLocaleString() %>
-            </div>
+            <div class="balance-pill"><i class="fas fa-coins"></i>Operating Balance: ₦<%= operatingBalance.toLocaleString() %></div>
             <button class="btn btn-success btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#incomeModal">
                 <i class="fas fa-plus-circle me-1"></i>Add Income
             </button>
@@ -199,7 +256,7 @@
         <div class="flex-grow-1">
             <div class="fw-bold" style="color:#92400e;font-size:.9rem;">Loan Operating Charges — Auto-Recorded</div>
             <div style="font-size:.78rem;color:#a16207;">
-                Every approved loan automatically captures an operating charge from the interest earned and logs it here as income.
+                Every approved loan automatically captures an operating charge from the interest earned.
                 Current rate: <strong><%= roiOperatingCharge %>%</strong> of total loan interest goes to operating earnings.
             </div>
         </div>
@@ -248,33 +305,18 @@
         </div>
     </div>
 
-    <!-- Period summary bar (only when date filter active) -->
+    <!-- Period summary bar -->
     <% if(filterFrom || filterTo) { %>
     <div class="summary-bar d-flex flex-wrap align-items-center gap-0 mb-3">
-        <div class="summary-item">
-            <span class="label">Period</span>
-            <span class="value" style="font-size:.85rem;color:#475569;"><%= filterFrom || '—' %> → <%= filterTo || 'Today' %></span>
-        </div>
+        <div class="summary-item"><span class="label">Period</span><span class="value" style="font-size:.85rem;color:#475569;"><%= filterFrom || '—' %> → <%= filterTo || 'Today' %></span></div>
         <div class="summary-divider d-none d-sm-block"></div>
-        <div class="summary-item">
-            <span class="label">Opening Balance</span>
-            <span class="value" style="color:var(--primary);">₦<%= openingBalance.toLocaleString() %></span>
-        </div>
+        <div class="summary-item"><span class="label">Opening Balance</span><span class="value" style="color:var(--primary);">₦<%= openingBalance.toLocaleString() %></span></div>
         <div class="summary-divider d-none d-sm-block"></div>
-        <div class="summary-item">
-            <span class="label">+ Income</span>
-            <span class="value amount-in">₦<%= periodIn.toLocaleString() %></span>
-        </div>
+        <div class="summary-item"><span class="label">+ Income</span><span class="value amount-in">₦<%= periodIn.toLocaleString() %></span></div>
         <div class="summary-divider d-none d-sm-block"></div>
-        <div class="summary-item">
-            <span class="label">− Expenses</span>
-            <span class="value amount-out">₦<%= periodOut.toLocaleString() %></span>
-        </div>
+        <div class="summary-item"><span class="label">− Expenses</span><span class="value amount-out">₦<%= periodOut.toLocaleString() %></span></div>
         <div class="summary-divider d-none d-sm-block"></div>
-        <div class="summary-item">
-            <span class="label">Closing Balance</span>
-            <span class="value fw-bold" style="color:var(--primary);font-size:1.05rem;">₦<%= closingBalance.toLocaleString() %></span>
-        </div>
+        <div class="summary-item"><span class="label">Closing Balance</span><span class="value fw-bold" style="color:var(--primary);font-size:1.05rem;">₦<%= closingBalance.toLocaleString() %></span></div>
     </div>
     <% } %>
 
@@ -315,13 +357,24 @@
                 </div>
                 <div class="col-12 col-sm-8 col-md-4">
                     <label class="form-label mb-1 d-none d-md-block" style="font-size:.72rem;">&nbsp;</label>
-                    <div class="d-flex gap-2 flex-wrap">
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
                         <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search me-1"></i>Filter</button>
                         <a href="/admin/operating-earnings" class="btn btn-outline-secondary btn-sm"><i class="fas fa-times me-1"></i>Reset</a>
-                        <a href="/admin/operating-earnings/export/csv?type=<%=filterType%>&direction=<%=filterDirection%>&from=<%=filterFrom%>&to=<%=filterTo%>"
-                           class="btn btn-outline-success btn-sm"><i class="fas fa-file-csv me-1"></i>CSV</a>
-                        <a href="/admin/operating-earnings/export/pdf?type=<%=filterType%>&direction=<%=filterDirection%>&from=<%=filterFrom%>&to=<%=filterTo%>"
-                           target="_blank" class="btn btn-outline-danger btn-sm"><i class="fas fa-file-pdf me-1"></i>PDF</a>
+                        <!-- Client-side export dropdown -->
+                        <div class="export-wrapper">
+                            <button type="button" class="btn-export" id="exportBtn" onclick="toggleExportMenu(event)">
+                                <i class="fas fa-download"></i>Export<i class="fas fa-chevron-down caret"></i>
+                            </button>
+                            <div class="export-dropdown-menu" id="exportMenu" style="display:none;">
+                                <div class="drop-header">Current View</div>
+                                <a class="drop-item" onclick="exportExcel();closeExportMenu();return false;">
+                                    <i class="fas fa-file-excel" style="color:#10b981;font-size:.95rem;"></i>Excel — All Entries
+                                </a>
+                                <a class="drop-item" onclick="exportPDF();closeExportMenu();return false;">
+                                    <i class="fas fa-file-pdf" style="color:#ef4444;font-size:.95rem;"></i>PDF — All Entries
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -336,62 +389,44 @@
         </div>
         <div class="card-body p-0">
             <div class="table-wrap">
-                <table class="earn-table">
+                <table class="earn-table" id="earningsTable">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>Dir</th>
-                            <th>Amount</th>
-                            <th>Balance</th>
-                            <th>Source / Staff</th>
-                            <th>Description</th>
-                            <th>Recorded By</th>
+                            <th>#</th><th>Date</th><th>Type</th><th>Dir</th>
+                            <th>Amount</th><th>Balance</th><th>Source / Staff</th>
+                            <th>Description</th><th>Recorded By</th>
                         </tr>
                     </thead>
                     <tbody>
                     <% if(entries.length === 0) { %>
-                        <tr>
-                            <td colspan="9">
-                                <div class="empty-state">
-                                    <i class="fas fa-chart-line"></i>
-                                    <p class="fw-semibold mb-1">No entries found</p>
-                                    <small>Try adjusting your filters or add a new entry</small>
-                                </div>
-                            </td>
-                        </tr>
+                        <tr><td colspan="9"><div class="empty-state"><i class="fas fa-chart-line"></i><p class="fw-semibold mb-1">No entries found</p><small>Try adjusting your filters or add a new entry</small></div></td></tr>
                     <% } else { %>
                     <% entries.forEach((e, i) => { %>
-                        <tr class="<%= e.type==='operating_charge' ? 'row-charge' : '' %>">
+                        <tr class="<%= e.type==='operating_charge' ? 'row-charge' : '' %>"
+                            data-type="<%= e.type %>"
+                            data-direction="<%= e.direction %>"
+                            data-amount="<%= e.amount %>"
+                            data-balance="<%= e.runningBalance %>"
+                            data-date="<%= new Date(e.createdAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'}) %>"
+                            data-time="<%= new Date(e.createdAt).toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'}) %>"
+                            data-desc="<%= (e.description||'').replace(/"/g,'&quot;') %>"
+                            data-source="<%= e.type==='staff_payment'&&e.meta?.staffName ? e.meta.staffName+(e.meta.staffRole?' · '+e.meta.staffRole:'') : e.relatedUser ? e.relatedUser.firstName+' '+e.relatedUser.lastName+' ('+e.relatedUser.membershipID+')' : '' %>"
+                            data-by="<%= e.recordedBy ? (e.recordedBy.fullName||[e.recordedBy.firstName,e.recordedBy.lastName].filter(Boolean).join(' ')||'—') : 'System' %>"
+                            data-loan="<%= e.relatedLoan ? e.relatedLoan.toString().slice(-6).toUpperCase() : '' %>">
                             <td class="text-muted" style="font-size:.75rem;"><%= (currentPage-1)*perPage + i + 1 %></td>
                             <td style="white-space:nowrap;">
-                                <div style="font-size:.8rem;font-weight:600;">
-                                    <%= new Date(e.createdAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'}) %>
-                                </div>
-                                <div style="font-size:.72rem;color:#94a3b8;">
-                                    <%= new Date(e.createdAt).toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'}) %>
-                                </div>
+                                <div style="font-size:.8rem;font-weight:600;"><%= new Date(e.createdAt).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'}) %></div>
+                                <div style="font-size:.72rem;color:#94a3b8;"><%= new Date(e.createdAt).toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'}) %></div>
                             </td>
                             <td>
-                                <span class="type-chip chip-<%= e.type %>">
-                                    <%= e.type.replace(/_/g,' ') %>
-                                </span>
+                                <span class="type-chip chip-<%= e.type %>"><%= e.type.replace(/_/g,' ') %></span>
                                 <% if(e.type==='operating_charge' && e.relatedLoan) { %>
-                                <div class="mt-1">
-                                    <span class="charge-source-tag">
-                                        <i class="fas fa-link" style="font-size:.6rem;"></i>
-                                        Loan #<%= e.relatedLoan.toString().slice(-6).toUpperCase() %>
-                                    </span>
-                                </div>
+                                <div class="mt-1"><span class="charge-source-tag"><i class="fas fa-link" style="font-size:.6rem;"></i>Loan #<%= e.relatedLoan.toString().slice(-6).toUpperCase() %></span></div>
                                 <% } %>
                             </td>
                             <td>
-                                <% if(e.direction==='in') { %>
-                                    <span class="dir-in"><i class="fas fa-arrow-down me-1"></i>In</span>
-                                <% } else { %>
-                                    <span class="dir-out"><i class="fas fa-arrow-up me-1"></i>Out</span>
-                                <% } %>
+                                <% if(e.direction==='in') { %><span class="dir-in"><i class="fas fa-arrow-down me-1"></i>In</span>
+                                <% } else { %><span class="dir-out"><i class="fas fa-arrow-up me-1"></i>Out</span><% } %>
                             </td>
                             <td class="<%= e.direction==='in' ? 'amount-in' : 'amount-out' %>" style="white-space:nowrap;">
                                 <%= e.direction==='in' ? '+' : '-' %>₦<%= e.amount.toLocaleString() %>
@@ -405,9 +440,7 @@
                                 <% } else if(e.relatedUser) { %>
                                     <div style="font-size:.8rem;font-weight:600;white-space:nowrap;"><%= e.relatedUser.firstName %> <%= e.relatedUser.lastName %></div>
                                     <div style="font-size:.7rem;color:#94a3b8;"><%= e.relatedUser.membershipID %></div>
-                                <% } else { %>
-                                    <span class="text-muted" style="font-size:.8rem;">—</span>
-                                <% } %>
+                                <% } else { %><span class="text-muted" style="font-size:.8rem;">—</span><% } %>
                             </td>
                             <td style="max-width:160px;">
                                 <span style="font-size:.8rem;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="<%= e.description %>">
@@ -417,11 +450,9 @@
                             <td style="white-space:nowrap;">
                                 <% if(e.recordedBy) { %>
                                     <span style="font-size:.78rem;color:#475569;font-weight:600;">
-                                        <%= e.recordedBy.fullName || (e.recordedBy.firstName+' '+e.recordedBy.lastName) %>
+                                        <%= e.recordedBy.fullName || [e.recordedBy.firstName, e.recordedBy.lastName].filter(Boolean).join(' ') || '—' %>
                                     </span>
-                                <% } else { %>
-                                    <span style="font-size:.78rem;color:#94a3b8;">System</span>
-                                <% } %>
+                                <% } else { %><span style="font-size:.78rem;color:#94a3b8;">System</span><% } %>
                             </td>
                         </tr>
                     <% }) %>
@@ -436,9 +467,7 @@
             <nav>
                 <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
                     <li class="page-item <%=currentPage<=1?'disabled':''%>">
-                        <a class="page-link" href="?page=<%=currentPage-1%>&type=<%=filterType%>&direction=<%=filterDirection%>&from=<%=filterFrom%>&to=<%=filterTo%>">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
+                        <a class="page-link" href="?page=<%=currentPage-1%>&type=<%=filterType%>&direction=<%=filterDirection%>&from=<%=filterFrom%>&to=<%=filterTo%>"><i class="fas fa-chevron-left"></i></a>
                     </li>
                     <% for(let p=Math.max(1,currentPage-2); p<=Math.min(totalPages,currentPage+2); p++) { %>
                     <li class="page-item <%=p===currentPage?'active':''%>">
@@ -446,9 +475,7 @@
                     </li>
                     <% } %>
                     <li class="page-item <%=currentPage>=totalPages?'disabled':''%>">
-                        <a class="page-link" href="?page=<%=currentPage+1%>&type=<%=filterType%>&direction=<%=filterDirection%>&from=<%=filterFrom%>&to=<%=filterTo%>">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
+                        <a class="page-link" href="?page=<%=currentPage+1%>&type=<%=filterType%>&direction=<%=filterDirection%>&from=<%=filterFrom%>&to=<%=filterTo%>"><i class="fas fa-chevron-right"></i></a>
                     </li>
                 </ul>
             </nav>
@@ -490,9 +517,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success fw-semibold" id="incomeSubmitBtn">
-                        <i class="fas fa-check-circle me-1"></i>Confirm Income
-                    </button>
+                    <button type="submit" class="btn btn-success fw-semibold" id="incomeSubmitBtn"><i class="fas fa-check-circle me-1"></i>Confirm Income</button>
                 </div>
             </form>
         </div>
@@ -519,28 +544,16 @@
                             <option value="other_expense">Other Expense</option>
                         </select>
                     </div>
-
-                    <!-- Staff fields — shown only for staff_payment -->
                     <div id="staffFields" style="display:none;">
                         <div class="mb-3 p-3" style="background:#fff8f0;border-radius:10px;border:1px solid #fed7aa;">
                             <div class="fw-semibold mb-2" style="font-size:.83rem;color:#9a3412;"><i class="fas fa-user-tie me-1"></i>Staff Details</div>
                             <div class="row g-2">
-                                <div class="col-6">
-                                    <label class="form-label" style="font-size:.8rem;">Staff Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control form-control-sm" name="staffName" placeholder="Full name" id="staffNameInput">
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label" style="font-size:.8rem;">Role / Position</label>
-                                    <input type="text" class="form-control form-control-sm" name="staffRole" placeholder="e.g. Accountant">
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label" style="font-size:.8rem;">Payment Period</label>
-                                    <input type="text" class="form-control form-control-sm" name="paymentPeriod" placeholder="e.g. March 2025">
-                                </div>
+                                <div class="col-6"><label class="form-label" style="font-size:.8rem;">Staff Name <span class="text-danger">*</span></label><input type="text" class="form-control form-control-sm" name="staffName" placeholder="Full name" id="staffNameInput"></div>
+                                <div class="col-6"><label class="form-label" style="font-size:.8rem;">Role / Position</label><input type="text" class="form-control form-control-sm" name="staffRole" placeholder="e.g. Accountant"></div>
+                                <div class="col-12"><label class="form-label" style="font-size:.8rem;">Payment Period</label><input type="text" class="form-control form-control-sm" name="paymentPeriod" placeholder="e.g. March 2025"></div>
                             </div>
                         </div>
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label">Amount (₦) <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" name="amount" min="1" placeholder="e.g. 80000" required>
@@ -550,16 +563,13 @@
                         <textarea class="form-control" name="description" rows="3" placeholder="Details for this expense..." required></textarea>
                     </div>
                     <div class="alert py-2 mb-0" style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:9px;color:#991b1b;font-size:.82rem;">
-                        <i class="fas fa-exclamation-triangle me-1"></i>
-                        This will <strong>deduct</strong> from the operating balance.
+                        <i class="fas fa-exclamation-triangle me-1"></i>This will <strong>deduct</strong> from the operating balance.
                     </div>
                     <div id="expenseError" class="alert alert-danger d-none py-2 mt-2" style="font-size:.85rem;border-radius:9px;"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning fw-semibold text-white" id="expenseSubmitBtn">
-                        <i class="fas fa-paper-plane me-1"></i>Confirm Expense
-                    </button>
+                    <button type="submit" class="btn btn-warning fw-semibold text-white" id="expenseSubmitBtn"><i class="fas fa-paper-plane me-1"></i>Confirm Expense</button>
                 </div>
             </form>
         </div>
@@ -578,7 +588,186 @@
 
 <div class="powered-by">Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 <script>
+/* ══ Sidebar ══ */
+function toggleSidebar(e) { e.stopPropagation(); document.getElementById('sidebar').classList.toggle('active'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+function closeSidebar()   { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); }
+document.addEventListener('click', e => {
+    const sb = document.getElementById('sidebar');
+    if (window.innerWidth <= 992 && !sb.contains(e.target) && !e.target.closest('.fa-bars') && sb.classList.contains('active')) closeSidebar();
+    if (!e.target.closest('.export-wrapper')) closeExportMenu();
+});
+async function loadSidebarPendingCount() {
+    try {
+        const res = await fetch('/admin/pending-approvals-count');
+        const data = await res.json();
+        const badge = document.getElementById('sidebarBadge'); if (!badge) return;
+        badge.style.display = data.count > 0 ? 'inline-block' : 'none';
+        if (data.count > 0) badge.textContent = data.count;
+    } catch {}
+}
+
+/* ══ Export dropdown ══ */
+function toggleExportMenu(e) {
+    e.stopPropagation();
+    const menu = document.getElementById('exportMenu');
+    const btn  = document.getElementById('exportBtn');
+    const open = menu.style.display !== 'none';
+    menu.style.display = open ? 'none' : 'block';
+    btn.classList.toggle('open', !open);
+}
+function closeExportMenu() {
+    document.getElementById('exportMenu').style.display = 'none';
+    document.getElementById('exportBtn').classList.remove('open');
+}
+
+/* ══ Read rows from table (current page) ══ */
+function getRows() {
+    const rows = [];
+    document.querySelectorAll('#earningsTable tbody tr[data-type]').forEach((tr, i) => {
+        const d = tr.dataset;
+        rows.push({
+            '#':             i + 1,
+            'Date':          d.date,
+            'Time':          d.time,
+            'Type':          d.type.replace(/_/g, ' '),
+            'Direction':     d.direction === 'in' ? 'In (Income)' : 'Out (Expense)',
+            'Amount (₦)':    Number(d.amount),
+            'Running Balance (₦)': Number(d.balance),
+            'Source / Staff': d.source || '—',
+            'Linked Loan':   d.loan   || '—',
+            'Description':   d.desc   || '—',
+            'Recorded By':   d.by,
+        });
+    });
+    return rows;
+}
+
+/* ══ Excel export ══ */
+function exportExcel() {
+    const rows = getRows();
+    if (!rows.length) { alert('No entries on this page to export.'); return; }
+    const now = new Date().toLocaleString('en-US', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const totalIn  = rows.filter(r => r['Direction'].startsWith('In')).reduce((s,r) => s + r['Amount (₦)'], 0);
+    const totalOut = rows.filter(r => r['Direction'].startsWith('Out')).reduce((s,r) => s + r['Amount (₦)'], 0);
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{wch:4},{wch:14},{wch:8},{wch:18},{wch:14},{wch:16},{wch:20},{wch:24},{wch:14},{wch:36},{wch:22}];
+
+    /* Header styling */
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let C = range.s.c; C <= range.e.c; C++) {
+        const addr = XLSX.utils.encode_cell({r:0,c:C});
+        if (!ws[addr]) continue;
+        ws[addr].s = { fill:{fgColor:{rgb:'1E3A8A'}}, font:{bold:true,color:{rgb:'FFFFFF'},sz:9}, alignment:{horizontal:'center',wrapText:true} };
+    }
+    /* Row striping + number format */
+    for (let R = 1; R <= range.e.r; R++) {
+        const fill = R%2===0 ? 'EEF2FF' : 'FFFFFF';
+        for (let C = range.s.c; C <= range.e.c; C++) {
+            const addr = XLSX.utils.encode_cell({r:R,c:C});
+            if (!ws[addr]) ws[addr] = {v:'',t:'s'};
+            ws[addr].s = { fill:{fgColor:{rgb:fill}}, alignment:{vertical:'center'}, border:{bottom:{style:'thin',color:{rgb:'E0E7FF'}}} };
+        }
+        [5,6].forEach(C => { // amount + balance columns
+            const addr = XLSX.utils.encode_cell({r:R,c:C});
+            if (ws[addr] && typeof ws[addr].v === 'number') { ws[addr].t = 'n'; ws[addr].z = '#,##0.00'; }
+        });
+    }
+
+    /* Summary sheet */
+    const summaryData = [
+        ['Club De Stars — Operating Earnings Export', ''],
+        ['Generated', now],
+        ['Page Entries', rows.length],
+        ['', ''],
+        ['SUMMARY', ''],
+        ['Total Income (this page)',   totalIn],
+        ['Total Expenses (this page)', totalOut],
+        ['Net (this page)',            totalIn - totalOut],
+        ['', ''],
+        ['BY TYPE', ''],
+        ...Object.entries(rows.reduce((acc, r) => { acc[r['Type']] = (acc[r['Type']]||0) + 1; return acc; }, {})).map(([k,v]) => [k, v]),
+    ];
+    const ws2 = XLSX.utils.aoa_to_sheet(summaryData);
+    ws2['!cols'] = [{wch:32},{wch:20}];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Operating Earnings');
+    XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
+    XLSX.writeFile(wb, `CDS_OperatingEarnings_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+/* ══ PDF export ══ */
+function exportPDF() {
+    const rows = getRows();
+    if (!rows.length) { alert('No entries on this page to export.'); return; }
+    const now = new Date().toLocaleString('en-US', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const totalIn  = rows.filter(r => r['Direction'].startsWith('In')).reduce((s,r) => s + r['Amount (₦)'], 0);
+    const totalOut = rows.filter(r => r['Direction'].startsWith('Out')).reduce((s,r) => s + r['Amount (₦)'], 0);
+
+    const typeColors = {
+        'operating charge':{'bg':'#fef3c7','c':'#92400e'},
+        'staff payment':   {'bg':'#fee2e2','c':'#991b1b'},
+        'expense':         {'bg':'#fce7f3','c':'#9d174d'},
+        'interest income': {'bg':'#dbeafe','c':'#1e40af'},
+        'external income': {'bg':'#f3e8ff','c':'#6b21a8'},
+        'manual credit':   {'bg':'#d1fae5','c':'#065f46'},
+        'manual debit':    {'bg':'#fee2e2','c':'#991b1b'},
+        'other income':    {'bg':'#e0f2fe','c':'#0369a1'},
+        'other expense':   {'bg':'#fce7f3','c':'#9d174d'},
+    };
+    const tableRows = rows.map((r, i) => {
+        const tc = typeColors[r['Type']] || {bg:'#f1f5f9',c:'#475569'};
+        const isIn = r['Direction'].startsWith('In');
+        return `<tr style="background:${i%2===0?'#fff':'#f8fafc'}">
+            <td style="color:#9ca3af;font-size:10px;text-align:center;">${r['#']}</td>
+            <td style="font-size:10px;">${r['Date']}<br><small style="color:#9ca3af;">${r['Time']}</small></td>
+            <td><span style="background:${tc.bg};color:${tc.c};padding:2px 6px;border-radius:5px;font-size:9px;font-weight:700;text-transform:capitalize;">${r['Type']}</span></td>
+            <td><span style="background:${isIn?'#d1fae5':'#fee2e2'};color:${isIn?'#065f46':'#991b1b'};padding:2px 6px;border-radius:5px;font-size:9px;font-weight:700;">${isIn?'IN':'OUT'}</span></td>
+            <td style="text-align:right;font-weight:800;font-size:11px;color:${isIn?'#059669':'#dc2626'};">${isIn?'+':'-'}₦${r['Amount (₦)'].toLocaleString('en-NG',{minimumFractionDigits:2})}</td>
+            <td style="text-align:right;font-size:10px;color:#1e3a8a;font-weight:600;">₦${r['Running Balance (₦)'].toLocaleString('en-NG',{minimumFractionDigits:2})}</td>
+            <td style="font-size:10px;">${r['Source / Staff']||'—'}</td>
+            <td style="font-size:10px;max-width:140px;word-break:break-word;">${(r['Description']||'—').substring(0,60)}</td>
+            <td style="font-size:10px;color:#475569;">${r['Recorded By']}</td>
+        </tr>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Operating Earnings — Club De Stars</title>
+    <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:sans-serif;color:#1e293b;background:#fff;}
+    .hdr{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;padding:20px 26px;}
+    .hdr h1{font-size:17px;font-weight:800;margin-bottom:3px;}.hdr p{font-size:10px;opacity:.8;}
+    .meta{display:flex;gap:10px;padding:8px 26px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-wrap:wrap;}
+    .mi{display:flex;flex-direction:column;min-width:80px;}
+    .mi span:first-child{font-size:8px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;}
+    .mi span:last-child{font-size:12px;font-weight:800;color:#1e3a8a;}
+    .mi.g span:last-child{color:#059669;}.mi.r span:last-child{color:#dc2626;}
+    table{width:100%;border-collapse:collapse;}
+    thead tr{background:#1e3a8a;color:white;}
+    thead th{padding:7px 6px;text-align:left;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+    tbody td{padding:6px 6px;border-bottom:1px solid #f1f5f9;vertical-align:top;}
+    .ftr{padding:10px 26px;font-size:9px;color:#9ca3af;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;}
+    @media print{@page{size:A4 landscape;margin:7mm;}.np{display:none;}}</style></head><body>
+    <div class="hdr"><h1>Club De Stars — Operating Earnings</h1><p>Generated: ${now} &nbsp;·&nbsp; ${rows.length} entries</p></div>
+    <div class="meta">
+        <div class="mi"><span>Entries</span><span>${rows.length}</span></div>
+        <div class="mi g"><span>Total Income</span><span>₦${totalIn.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
+        <div class="mi r"><span>Total Expenses</span><span>₦${totalOut.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
+        <div class="mi ${totalIn-totalOut>=0?'g':'r'}"><span>Net</span><span>${totalIn-totalOut>=0?'+':''}₦${(totalIn-totalOut).toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
+    </div>
+    <div style="padding:0 0 8px;overflow-x:auto;">
+    <table><thead><tr><th>#</th><th>Date</th><th>Type</th><th>Dir</th><th style="text-align:right;">Amount</th><th style="text-align:right;">Balance</th><th>Source / Staff</th><th>Description</th><th>Recorded By</th></tr></thead>
+    <tbody>${tableRows}</tbody></table></div>
+    <div class="ftr"><span>Club De Stars Cooperative &nbsp;·&nbsp; Powered by JESZ LIMITED</span><span>${rows.length} operating earnings entries</span></div>
+    <div style="text-align:center;padding:14px;" class="np">
+        <button onclick="window.print()" style="padding:10px 28px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-right:8px;">🖨 Print / Save PDF</button>
+        <button onclick="window.close()" style="padding:10px 20px;background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;border-radius:8px;font-weight:600;cursor:pointer;">Close</button>
+    </div></body></html>`;
+    const win = window.open('','_blank','width=1200,height=850'); win.document.write(html); win.document.close();
+}
+
+/* ══ Toast ══ */
 function showToast(msg, success=true) {
     const el = document.getElementById('mainToast');
     el.style.background = success ? '#059669' : '#dc2626';
@@ -586,14 +775,16 @@ function showToast(msg, success=true) {
     new bootstrap.Toast(el, { delay: 4000 }).show();
 }
 
+/* ══ Staff fields toggle ══ */
 function toggleStaffFields() {
     const type = document.getElementById('expenseTypeSelect').value;
     const sf   = document.getElementById('staffFields');
     const sn   = document.getElementById('staffNameInput');
-    if (type === 'staff_payment') { sf.style.display = 'block'; sn.required = true; }
-    else                          { sf.style.display = 'none';  sn.required = false; }
+    sf.style.display = type === 'staff_payment' ? 'block' : 'none';
+    sn.required      = type === 'staff_payment';
 }
 
+/* ══ Form submit ══ */
 function setupForm(formId, url, btnId, errId, modalId, defaultLabel) {
     document.getElementById(formId).addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -605,7 +796,7 @@ function setupForm(formId, url, btnId, errId, modalId, defaultLabel) {
         const body = {};
         new FormData(e.target).forEach((v, k) => body[k] = v);
         try {
-            const res  = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            const res  = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
             const data = await res.json();
             if (data.status) {
                 bootstrap.Modal.getInstance(document.getElementById(modalId)).hide();
@@ -627,10 +818,10 @@ function setupForm(formId, url, btnId, errId, modalId, defaultLabel) {
     });
 }
 
-setupForm('incomeForm',  '/admin/operating-earnings/income',  'incomeSubmitBtn',  'incomeError',  'incomeModal',
-    '<i class="fas fa-check-circle me-1"></i>Confirm Income');
-setupForm('expenseForm', '/admin/operating-earnings/expense', 'expenseSubmitBtn', 'expenseError', 'expenseModal',
-    '<i class="fas fa-paper-plane me-1"></i>Confirm Expense');
+setupForm('incomeForm',  '/admin/operating-earnings/income',  'incomeSubmitBtn',  'incomeError',  'incomeModal',  '<i class="fas fa-check-circle me-1"></i>Confirm Income');
+setupForm('expenseForm', '/admin/operating-earnings/expense', 'expenseSubmitBtn', 'expenseError', 'expenseModal', '<i class="fas fa-paper-plane me-1"></i>Confirm Expense');
+
+document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
 </script>
 </body>
 </html>

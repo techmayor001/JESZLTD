@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Club De Stars - Loan Management | Powered by JESZ LIMITED</title>
+    <title>Loan Management | Club De Stars Admin</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -18,995 +19,594 @@
             --info: #06b6d4;
             --sidebar-width: 280px;
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
+            min-height: 100vh; overflow-x: hidden;
         }
-        
+
+        /* ══════════ SIDEBAR ══════════ */
         .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
+            position: fixed; left: 0; top: 0; bottom: 0;
             width: var(--sidebar-width);
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            z-index: 1040;
-            transition: all 0.3s;
-            overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
-            transform: translateX(0);
+            background: linear-gradient(180deg, #0f2357 0%, #1e3a8a 40%, #1e40af 100%);
+            z-index: 1040; overflow-y: auto;
+            transition: transform .3s ease;
+            box-shadow: 4px 0 24px rgba(30,58,138,.25);
+            scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.15) transparent;
         }
-        
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
         .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
+            padding: 1.4rem 1.25rem 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            background: rgba(0,0,0,.18); position: sticky; top: 0; z-index: 2;
         }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        
+        .logo-row { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
         .logo-box {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            flex-shrink: 0;
+            width: 42px; height: 42px; background: white; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: var(--primary); font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,.25); flex-shrink: 0;
         }
-        
-        .sidebar-title {
-            font-size: 1.1rem;
-            line-height: 1.2;
+        .sidebar-brand { font-size: .95rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: .05em; line-height: 1.2; }
+        .sidebar-brand small { font-size: .65rem; font-weight: 500; opacity: .55; display: block; letter-spacing: .08em; }
+        .role-pill {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 4px 10px; background: rgba(239,68,68,.2);
+            border-radius: 20px; border: 1px solid rgba(239,68,68,.3);
+            font-weight: 700; font-size: .7rem; color: #fca5a5;
         }
-        
-        .admin-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            background: rgba(239, 68, 68, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            font-weight: 600;
-            font-size: 0.8rem;
-            margin-top: 8px;
+        .nav-group { padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .nav-group:last-child { border-bottom: none; }
+        .nav-category {
+            display: flex; align-items: center; gap: 7px;
+            padding: .55rem 1.25rem .3rem; font-size: .62rem; font-weight: 800;
+            color: rgba(255,255,255,.38); text-transform: uppercase; letter-spacing: .1em; user-select: none;
         }
-        
-        .sidebar-menu {
-            padding: 1rem 0;
+        .nav-category::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.08); margin-left: 4px; }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 11px;
+            padding: .62rem 1.25rem; color: rgba(255,255,255,.72);
+            text-decoration: none; font-weight: 500; font-size: .84rem;
+            border-left: 3px solid transparent; transition: all .18s;
         }
-        
-        .sidebar-menu a {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            padding: 0.875rem 1.5rem;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-            font-weight: 500;
-            font-size: 0.95rem;
+        .sidebar-nav a:hover  { background: rgba(255,255,255,.09); color: white; border-left-color: rgba(255,255,255,.4); }
+        .sidebar-nav a.active { background: rgba(255,255,255,.15); color: white; border-left-color: white; }
+        .sidebar-nav a i { width: 18px; font-size: .9rem; flex-shrink: 0; opacity: .8; text-align: center; }
+        .sidebar-nav a.active i { opacity: 1; }
+        .nav-badge {
+            margin-left: auto; font-size: .63rem; font-weight: 800;
+            padding: 2px 7px; border-radius: 10px;
+            background: rgba(239,68,68,.9); color: white; flex-shrink: 0; line-height: 1.4;
         }
-        
-        .sidebar-menu a:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-left-color: white;
+        .nav-back {
+            display: flex; align-items: center; gap: 10px;
+            padding: .7rem 1.25rem .9rem; font-size: .8rem; font-weight: 600;
+            color: rgba(255,255,255,.42); text-decoration: none; transition: color .18s;
+            border-top: 1px solid rgba(255,255,255,.07); margin-top: .25rem;
         }
-        
-        .sidebar-menu a.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left-color: white;
-        }
-        
-        .sidebar-menu a i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-        
+        .nav-back:hover { color: rgba(255,255,255,.7); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1035; }
+        .sidebar-overlay.active { display: block; }
+
+        /* ══════════ TOPBAR ══════════ */
         .top-navbar {
-            position: fixed;
-            top: 0;
-            left: var(--sidebar-width);
-            right: 0;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.08);
-            z-index: 1030;
-            display: flex;
-            align-items: center;
-            padding: 0 1.5rem;
-            transition: all 0.3s;
-            border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+            position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 70px;
+            background: rgba(255,255,255,.95); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(30,58,138,.08); z-index: 1030;
+            display: flex; align-items: center; padding: 0 1.5rem;
+            border-bottom: 1px solid rgba(30,58,138,.1); transition: all .3s;
         }
-        
         .main-content {
-            margin-left: var(--sidebar-width);
-            margin-top: 70px;
-            padding: 1.5rem;
-            min-height: calc(100vh - 70px);
-            transition: all 0.3s;
+            margin-left: var(--sidebar-width); margin-top: 70px;
+            padding: 1.5rem; min-height: calc(100vh - 70px); transition: all .3s;
         }
-        
+
+        /* ══════════ PAGE HEADER ══════════
+           KEY FIX: overflow must NOT be hidden — the dropdown needs to escape.
+           Use a pseudo-element circle instead of overflow:hidden.
+        ══════════ */
         .welcome-card {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 15px 40px rgba(30, 58, 138, 0.25);
+            color: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem;
+            box-shadow: 0 15px 40px rgba(30,58,138,.25);
+            /* NO overflow:hidden here — that clips the dropdown */
             position: relative;
-            overflow: hidden;
         }
-        
         .welcome-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 400px;
-            height: 400px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50%;
+            content: ''; position: absolute; top: -50%; right: -20%;
+            width: 400px; height: 400px; background: rgba(255,255,255,.05); border-radius: 50%;
+            /* pointer-events:none so it doesn't block clicks */
+            pointer-events: none;
         }
-        
+
+        /* ══════════ EXPORT DROPDOWN — always on top ══════════ */
+        .export-wrapper {
+            position: relative;
+            /* Establish its own stacking context so dropdown escapes welcome-card */
+            z-index: 100;
+        }
+        .export-dropdown-menu {
+            /* Override Bootstrap to guarantee visibility */
+            position: absolute !important;
+            top: calc(100% + 6px) !important;
+            right: 0 !important;
+            left: auto !important;
+            min-width: 230px !important;
+            background: white;
+            border-radius: 14px !important;
+            border: none !important;
+            box-shadow: 0 20px 50px rgba(30,58,138,.22), 0 4px 16px rgba(0,0,0,.1) !important;
+            padding: .5rem !important;
+            z-index: 99999 !important;
+        }
+        .export-dropdown-menu .dropdown-header {
+            font-size: .68rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .08em; color: #94a3b8; padding: .5rem .75rem .25rem;
+        }
+        .export-dropdown-menu .dropdown-item {
+            border-radius: 9px; padding: .6rem .875rem;
+            font-weight: 600; font-size: .85rem; color: #1e293b;
+            display: flex; align-items: center; gap: .6rem;
+            transition: background .15s;
+        }
+        .export-dropdown-menu .dropdown-item:hover { background: rgba(30,58,138,.06); }
+        .export-dropdown-menu .dropdown-divider {
+            margin: .35rem .5rem; border-color: rgba(30,58,138,.1);
+        }
+        .btn-export {
+            background: white; color: var(--primary); border: none;
+            font-weight: 700; border-radius: 10px; padding: .55rem 1.1rem;
+            font-size: .88rem; display: flex; align-items: center; gap: .5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,.12); transition: all .2s; cursor: pointer;
+        }
+        .btn-export:hover { background: rgba(255,255,255,.92); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.15); }
+        .btn-export .caret { font-size: .7rem; transition: transform .2s; }
+        .btn-export.open .caret { transform: rotate(180deg); }
+
+        /* ══════════ STAT CARDS ══════════ */
         .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-            height: 100%;
-            border: 1px solid rgba(30, 58, 138, 0.05);
+            background: white; border-radius: 16px; padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(30,58,138,.08); transition: transform .3s, box-shadow .3s;
+            height: 100%; border: 1px solid rgba(30,58,138,.05);
         }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.15);
-        }
-        
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            margin-bottom: 1rem;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.08);
-            background: white;
-            border: 1px solid rgba(30, 58, 138, 0.05);
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
-            padding: 1.25rem;
-            border-radius: 16px 16px 0 0 !important;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            border: none;
-            padding: 0.6rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
-        }
-        
-        .table {
-            font-size: 0.9rem;
-        }
-        
-        .table th {
-            font-weight: 600;
-            color: var(--primary);
-            border-bottom: 2px solid rgba(30, 58, 138, 0.1);
-            white-space: nowrap;
-        }
-        
-        .badge {
-            padding: 0.4rem 0.8rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
-        
-        .powered-by {
-            position: fixed;
-            bottom: 15px;
-            right: 15px;
-            background: white;
-            padding: 10px 16px;
-            border-radius: 25px;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.15);
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--primary);
-            z-index: 1000;
-        }
-        
-        .filter-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-        
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(30,58,138,.15); }
+        .stat-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1rem; }
+        .stat-sub { font-size: .78rem; font-weight: 700; margin-top: .3rem; }
+
+        /* ══════════ CARDS ══════════ */
+        .card { border: none; border-radius: 16px; box-shadow: 0 8px 20px rgba(30,58,138,.08); background: white; border: 1px solid rgba(30,58,138,.05); }
+        .card-header { background: linear-gradient(135deg, rgba(30,58,138,.03) 0%, rgba(59,130,246,.03) 100%); border-bottom: 2px solid rgba(30,58,138,.1); padding: 1.25rem; border-radius: 16px 16px 0 0 !important; }
+
+        /* ══════════ FILTER TABS ══════════ */
+        .filter-tabs { display: flex; gap: .5rem; margin-bottom: 1rem; flex-wrap: wrap; }
         .filter-tab {
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            border: 2px solid rgba(30, 58, 138, 0.1);
-            background: white;
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.85rem;
+            padding: .5rem 1rem; border-radius: 10px; border: 2px solid rgba(30,58,138,.1);
+            background: white; color: var(--primary); font-weight: 600; cursor: pointer;
+            transition: all .3s; font-size: .85rem; white-space: nowrap;
         }
-        
-        .filter-tab:hover {
-            background: rgba(30, 58, 138, 0.05);
-        }
-        
-        .filter-tab.active {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            color: white;
-            border-color: transparent;
-        }
-        
-        .loan-details-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .detail-item {
-            padding: 1rem;
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%);
-            border-radius: 10px;
-            border: 1px solid rgba(30, 58, 138, 0.1);
-        }
-        
-        .detail-label {
-            font-size: 0.75rem;
-            color: #6b7280;
-            margin-bottom: 0.25rem;
-        }
-        
-        .detail-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        
+        .filter-tab:hover { background: rgba(30,58,138,.05); }
+        .filter-tab.active { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; border-color: transparent; }
+
+        /* ══════════ TABLE ══════════ */
+        .table { font-size: .9rem; }
+        .table th { font-weight: 600; color: var(--primary); border-bottom: 2px solid rgba(30,58,138,.1); white-space: nowrap; }
+        .badge { padding: .4rem .8rem; border-radius: 8px; font-weight: 600; font-size: .75rem; }
+
+        /* ══════════ MODALS ══════════ */
+        .modal-content { border-radius: 16px; border: none; }
+        .modal-header { border-radius: 16px 16px 0 0; }
+        .loan-details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+        .detail-item { padding: 1rem; background: linear-gradient(135deg, rgba(30,58,138,.03) 0%, rgba(59,130,246,.03) 100%); border-radius: 10px; border: 1px solid rgba(30,58,138,.1); }
+        .detail-label { font-size: .75rem; color: #6b7280; margin-bottom: .25rem; }
+        .detail-value { font-size: 1.05rem; font-weight: 700; color: var(--primary); }
+        .alert-info-custom    { background: linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%); border: 2px solid #3b82f6; border-radius: 12px; padding: 1rem; color: #1e40af; }
+        .alert-warning-custom { background: linear-gradient(135deg,#fef3c7 0%,#fde68a 100%); border: 2px solid #f59e0b; border-radius: 12px; padding: 1rem; color: #92400e; }
+        .alert-success-custom { background: linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%); border: 2px solid #10b981; border-radius: 12px; padding: 1rem; color: #065f46; }
+        .alert-danger-custom  { background: linear-gradient(135deg,#fee2e2 0%,#fecaca 100%); border: 2px solid #ef4444; border-radius: 12px; padding: 1rem; color: #991b1b; }
+
+        .powered-by { position: fixed; bottom: 15px; right: 15px; background: white; padding: 10px 16px; border-radius: 25px; box-shadow: 0 4px 15px rgba(30,58,138,.15); font-size: .8rem; font-weight: 600; color: var(--primary); z-index: 1000; }
+
         @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .top-navbar {
-                left: 0;
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 1rem;
-            }
-            
-            .welcome-card {
-                padding: 1.5rem;
-            }
-            
-            .stat-card {
-                padding: 1.25rem;
-            }
-            
-            .powered-by {
-                bottom: 10px;
-                right: 10px;
-                font-size: 0.7rem;
-                padding: 8px 12px;
-            }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .top-navbar { left: 0; } .main-content { margin-left: 0; padding: 1rem; }
         }
-        
         @media (max-width: 576px) {
-            .top-navbar {
-                height: 60px;
-                padding: 0 1rem;
-            }
-            
-            .main-content {
-                margin-top: 60px;
-                padding: 0.75rem;
-            }
-            
-            .welcome-card {
-                padding: 1.25rem;
-                border-radius: 16px;
-            }
-            
-            .stat-card {
-                padding: 1rem;
-            }
-            
-            .stat-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.4rem;
-            }
-            
-            .card-header {
-                padding: 1rem;
-            }
-            
-            .filter-tab {
-                font-size: 0.75rem;
-                padding: 0.4rem 0.8rem;
-            }
-            
-            .table {
-                font-size: 0.8rem;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-            }
-            
-            .action-buttons .btn {
-                width: 100%;
-            }
-        }
-        
-        .modal-content {
-            border-radius: 16px;
-        }
-        
-        .modal-header {
-            border-radius: 16px 16px 0 0;
-        }
-        
-        .alert-info-custom {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border: 2px solid #3b82f6;
-            border-radius: 12px;
-            padding: 1rem;
-            color: #1e40af;
-        }
-        
-        .alert-warning-custom {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border: 2px solid #f59e0b;
-            border-radius: 12px;
-            padding: 1rem;
-            color: #92400e;
-        }
-        
-        .alert-success-custom {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-            border: 2px solid #10b981;
-            border-radius: 12px;
-            padding: 1rem;
-            color: #065f46;
-        }
-        
-        .alert-danger-custom {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-            border: 2px solid #ef4444;
-            border-radius: 12px;
-            padding: 1rem;
-            color: #991b1b;
+            .top-navbar { height: 60px; padding: 0 1rem; }
+            .main-content { margin-top: 60px; padding: .75rem; }
+            .welcome-card { padding: 1.25rem; border-radius: 16px; }
+            .stat-icon { width: 50px; height: 50px; font-size: 1.4rem; }
+            .filter-tab { font-size: .75rem; padding: .4rem .8rem; }
+            .table { font-size: .8rem; }
+            .export-dropdown-menu { right: auto !important; left: 0 !important; }
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <div class="logo-box">C</div>
-                <div>
-                    <h5 class="mb-0 fw-bold sidebar-title" style="text-transform: uppercase;">Club De Stars</h5>
-                    <small class="opacity-75" style="font-size: 0.75rem;">ADMIN PANEL</small>
+
+<!-- ════════════════════════ SIDEBAR ════════════════════════ -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-row">
+            <div class="logo-box">C</div>
+            <div><div class="sidebar-brand">Club De Stars<small>Admin Panel</small></div></div>
+        </div>
+        <div class="role-pill">
+            <i class="fas fa-shield-alt" style="font-size:.65rem;"></i>&nbsp;<%= admin.role?.name?.toUpperCase() || 'SUPER ADMIN' %>
+        </div>
+    </div>
+  <div class="sidebar-nav">
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-home" style="font-size:.6rem;"></i>Main</div>
+            <a href="/admin/dashboard"><i class="fas fa-chart-pie"></i>Overview</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-users" style="font-size:.6rem;"></i>Members</div>
+            <a href="/admin/manage-members"><i class="fas fa-users"></i>Manage Members</a>
+            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i>Kiddies Accounts</a>
+            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i>Membership Types</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
+            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
+            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
+            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
+            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-hand-holding-usd" style="font-size:.6rem;"></i>Loans</div>
+            <a href="/admin/manage-loan" class='active'><i class="fas fa-hand-holding-usd"></i>Loan Management</a>
+            <a href="/admin/loan-payments"><i class="fas fa-file-invoice-dollar"></i>Loan Payments</a>
+            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i>Loan Settings</a>
+            <a href="/admin/external-loans"><i class="fas fa-building"></i>External Loans</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-landmark" style="font-size:.6rem;"></i>Finance</div>
+            <a href="/admin/finance"><i class="fas fa-landmark"></i>Company Finance</a>
+            <a href="/admin/operating-earnings"><i class="fas fa-chart-line"></i>Operating Earnings</a>
+            <a href="/admin/manage-extra-charges"><i class="fas fa-chart-bar"></i>Company Revenue</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-cog" style="font-size:.6rem;"></i>System</div>
+            <a href="/manage-subscriptions"><i class="fas fa-cube"></i>Manage Subscriptions</a>
+            <a href="/manage-roles"><i class="fas fa-user-shield"></i>Roles &amp; Permissions</a>
+            <a href="/admin/settings"><i class="fas fa-cog"></i>Settings</a>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-category"><i class="fas fa-file-alt" style="font-size:.6rem;"></i>Reporting</div>
+            <a href="/admin/reports"><i class="fas fa-file-alt"></i>Reports</a>
+            <a href="/admin/logs"><i class="fas fa-history"></i>Admin Logs</a>
+        </div>
+    </div>
+    <a href="/cds-cooperative/dashboard" class="nav-back"><i class="fas fa-arrow-left"></i>Back to Dashboard</a>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Top Navbar -->
+<div class="top-navbar">
+    <i class="fas fa-bars d-lg-none me-3" style="cursor:pointer;color:var(--primary);font-size:1.5rem;" onclick="toggleSidebar(event)"></i>
+    <div class="flex-grow-1 d-none d-lg-block">
+        <h5 class="mb-0 fw-bold" style="color:var(--primary)">Loan Management</h5>
+        <small class="text-muted">Manage loan applications and active loans</small>
+    </div>
+    <div class="d-lg-none fw-bold" style="color:var(--primary);font-size:.95rem;">Loan Management</div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- WELCOME CARD — no overflow:hidden so dropdown is never clipped -->
+    <div class="welcome-card position-relative">
+        <div class="row align-items-center position-relative" style="z-index:1;">
+            <div class="col-md-8">
+                <h2 class="mb-2 fw-bold"><i class="fas fa-hand-holding-usd me-3"></i>Loan Management Center</h2>
+                <p class="mb-3 opacity-90">Review applications, approve loans, and manage repayments</p>
+                <div class="badge bg-light text-dark">
+                    <i class="fas fa-calendar me-1"></i><span id="currentDate"></span>
                 </div>
             </div>
-            <div class="admin-badge">
-                <i class="fas fa-shield-alt"></i>
-                <span>Super Admin</span>
-            </div>
-        </div>
-        <div class="sidebar-menu">
-            <a href="/admin-dashboard"><i class="fas fa-users"></i> Members</a>
-            <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i> Kiddies Accounts</a>
-            <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i> Membership Types</a>
-            <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i> Payments</a>
-            <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i> Approvals<span id="sidebarPendingBadge" class="badge bg-danger ms-1" style="display:none;">0</span></a>
-            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i> Deposit Management</a>
-            <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i> Withdrawals</a>
-            <a href="/admin/manage-extra-charges"><i class="fas fa-hand-holding-usd"></i> Extra Charges</a>
-            <a href="/admin/manage-loan" class="active"><i class="fas fa-hand-holding-usd"></i> Loan Management</a>
-            <a href="/admin/loan/settings"><i class="fas fa-cogs"></i> Loan Settings</a>
-            <a href="/admin/external-loans"><i class="fas fa-building"></i> External Loans</a>
-            <a href="/admin/finance"><i class="fas fa-landmark"></i> Company Finance</a>
-            <a href="#"><i class="fas fa-chart-pie"></i> ROI Distribution</a>
-            <a href="/manage-subscriptions"><i class="fas fa-cube"></i> Manage Subscription</a>
-            <a href="/manage-roles"><i class="fas fa-user-shield"></i> Roles &amp; Permissions</a>
-            <a href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
-            <a href="/admin/reports"><i class="fas fa-file-alt"></i> Reports</a>
-            <a href="/admin/logs"><i class="fas fa-history"></i> Admin Logs</a>
-            <a href="/cds-cooperative/dashboard" class="mt-3" style="color:rgba(255,255,255,.6);"><i class="fas fa-sign-in-alt"></i> Back to Dashboard</a>
-        </div>
-    </div>
 
-    <!-- Top Navbar -->
-    <div class="top-navbar">
-<i class="fas fa-bars d-lg-none me-3"
-   style="cursor: pointer; color: var(--primary); font-size: 1.5rem;"
-   onclick="toggleSidebar(event)">
-</i>
-
-        
-        <div class="flex-grow-1 d-none d-lg-block">
-            <h5 class="mb-0 fw-bold" style="color: var(--primary)">Loan Management</h5>
-            <small class="text-muted">Manage loan applications and active loans</small>
-        </div>
-        
-        <!-- <div class="d-flex align-items-center gap-3">
-            <div class="position-relative">
-                <i class="fas fa-bell" style="color: var(--primary); font-size: 1.25rem; cursor: pointer;"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">15</span>
-            </div>
-        </div> -->
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Welcome Card -->
-        <div class="welcome-card position-relative">
-            <div class="row align-items-center position-relative" style="z-index: 1;">
-                <div class="col-md-8">
-                    <h2 class="mb-2 fw-bold">Loan Management Center</h2>
-                    <p class="mb-3 opacity-90">Review applications, approve loans, and manage repayments</p>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <div class="badge bg-light text-dark">
-                            <i class="fas fa-calendar me-1"></i>
-                            <span id="currentDate"></span>
-                        </div>
+            <!-- EXPORT BUTTON — custom dropdown, not Bootstrap dropdown (avoids clipping) -->
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <div class="export-wrapper d-inline-block">
+                    <button class="btn-export" id="exportBtn" onclick="toggleExportMenu(event)">
+                        <i class="fas fa-download"></i>
+                        Export Loans
+                        <i class="fas fa-chevron-down caret" id="exportCaret"></i>
+                    </button>
+                    <div class="export-dropdown-menu" id="exportMenu" style="display:none;">
+                        <div class="dropdown-header">Export All</div>
+                        <a class="dropdown-item" href="#" onclick="exportToExcel(false);closeExportMenu();return false;">
+                            <i class="fas fa-file-excel" style="color:#10b981;font-size:1rem;"></i>Excel — All Loans
+                        </a>
+                        <a class="dropdown-item" href="#" onclick="exportToPDF(false);closeExportMenu();return false;">
+                            <i class="fas fa-file-pdf" style="color:#ef4444;font-size:1rem;"></i>PDF — All Loans
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-header">Export Current Filter</div>
+                        <a class="dropdown-item" href="#" onclick="exportToExcel(true);closeExportMenu();return false;">
+                            <i class="fas fa-file-excel" style="color:#059669;font-size:1rem;"></i>Excel — Filtered View
+                        </a>
+                        <a class="dropdown-item" href="#" onclick="exportToPDF(true);closeExportMenu();return false;">
+                            <i class="fas fa-file-pdf" style="color:#dc2626;font-size:1rem;"></i>PDF — Filtered View
+                        </a>
                     </div>
                 </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <button class="btn btn-light fw-semibold" onclick="generateLoanReport()">
-                        <i class="fas fa-download me-2"></i>Export Loan Report
-                    </button>
-                </div>
             </div>
-        </div>
-
-        <!-- Stats Cards -->
-<div class="row g-3 mb-4">
-
-    <div class="col-lg-3 col-md-6 col-6">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
-                <i class="fas fa-file-invoice"></i>
-            </div>
-            <p class="text-muted mb-1 fw-semibold small">Pending Applications</p>
-            <h3 class="mb-1 fw-bold" id="stat-pending">0</h3>
-            <small class="text-warning fw-semibold">
-                <i class="fas fa-clock me-1"></i>Needs Review
-            </small>
         </div>
     </div>
 
-    <div class="col-lg-3 col-md-6 col-6">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                <i class="fas fa-check-circle"></i>
+    <!-- STATS CARDS -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-6 col-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:white;"><i class="fas fa-file-invoice"></i></div>
+                <p class="text-muted mb-1 fw-semibold small">Pending Applications</p>
+                <h3 class="mb-0 fw-bold" id="stat-pending">0</h3>
+                <div class="stat-sub text-warning"><i class="fas fa-clock me-1"></i>Needs Review</div>
             </div>
-            <p class="text-muted mb-1 fw-semibold small">Active Loans</p>
-            <h3 class="mb-1 fw-bold" id="stat-approved">0</h3>
-            <small class="text-success fw-semibold">
-                <i class="fas fa-arrow-up me-1"></i>
-                ₦<span id="stat-approved-amount">0</span>
-            </small>
+        </div>
+        <div class="col-lg-3 col-md-6 col-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;"><i class="fas fa-check-circle"></i></div>
+                <p class="text-muted mb-1 fw-semibold small">Active Loans <small class="text-muted fw-normal" style="font-size:.65rem;">(approved + rolled)</small></p>
+                <h3 class="mb-0 fw-bold" id="stat-active">0</h3>
+                <div class="stat-sub text-success fw-bold">₦<span id="stat-active-amount">0</span> disbursed</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:white;"><i class="fas fa-exclamation-triangle"></i></div>
+                <p class="text-muted mb-1 fw-semibold small">Overdue Payments</p>
+                <h3 class="mb-0 fw-bold" id="stat-overdue">0</h3>
+                <div class="stat-sub text-danger fw-bold">₦<span id="stat-overdue-amount">0</span> at risk</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-6">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%);color:white;"><i class="fas fa-sync-alt"></i></div>
+                <p class="text-muted mb-1 fw-semibold small">Rolled Over Loans</p>
+                <h3 class="mb-0 fw-bold" id="stat-rolled">0</h3>
+                <div class="stat-sub" style="color:#7c3aed;">₦<span id="stat-rolled-amount">0</span> rolled</div>
+            </div>
         </div>
     </div>
 
-    <div class="col-lg-3 col-md-6 col-6">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <p class="text-muted mb-1 fw-semibold small">Overdue Payments</p>
-            <h3 class="mb-1 fw-bold" id="stat-overdue">0</h3>
-            <small class="text-danger fw-semibold">
-                <i class="fas fa-exclamation me-1"></i>
-                ₦<span id="stat-overdue-amount">0</span>
-            </small>
-        </div>
+    <!-- FILTER TABS -->
+    <div class="filter-tabs">
+        <button class="filter-tab active"  data-filter="all"          onclick="filterLoans('all',event)">         <i class="fas fa-th-large me-1"></i>All             <span class="ms-1">(<span id="count-all">0</span>)</span></button>
+        <button class="filter-tab"         data-filter="pending"      onclick="filterLoans('pending',event)">     <i class="fas fa-clock me-1"></i>Pending         <span class="ms-1">(<span id="count-pending">0</span>)</span></button>
+        <button class="filter-tab"         data-filter="approved"     onclick="filterLoans('approved',event)">    <i class="fas fa-check me-1"></i>Approved        <span class="ms-1">(<span id="count-approved">0</span>)</span></button>
+        <button class="filter-tab"         data-filter="overdue"      onclick="filterLoans('overdue',event)">     <i class="fas fa-exclamation-triangle me-1"></i>Overdue  <span class="ms-1">(<span id="count-overdue">0</span>)</span></button>
+        <button class="filter-tab"         data-filter="rejected"     onclick="filterLoans('rejected',event)">    <i class="fas fa-times me-1"></i>Rejected        <span class="ms-1">(<span id="count-rejected">0</span>)</span></button>
+        <button class="filter-tab"         data-filter="paid"         onclick="filterLoans('paid',event)">        <i class="fas fa-check-double me-1"></i>Paid       <span class="ms-1">(<span id="count-paid">0</span>)</span></button>
+        <button class="filter-tab"         data-filter="rolled_over"  onclick="filterLoans('rolled_over',event)"> <i class="fas fa-sync-alt me-1"></i>Rolled Over    <span class="ms-1">(<span id="count-rolled_over">0</span>)</span></button>
     </div>
 
-    <div class="col-lg-3 col-md-6 col-6">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
-                <i class="fas fa-sync-alt"></i>
+    <!-- LOANS TABLE -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0 fw-bold" style="color:var(--primary);"><i class="fas fa-hand-holding-usd me-2"></i>Loan Applications</h5>
+            <div class="d-flex gap-2 flex-wrap">
+                <input type="search" class="form-control form-control-sm" placeholder="Search loans..." style="max-width:200px;" id="searchInput" oninput="searchLoans()">
+                <select class="form-select form-select-sm" style="max-width:150px;" onchange="sortLoans(this.value)">
+                    <option value="date">Sort by Date</option>
+                    <option value="amount">Sort by Amount</option>
+                    <option value="member">Sort by Member</option>
+                    <option value="status">Sort by Status</option>
+                </select>
             </div>
-            <p class="text-muted mb-1 fw-semibold small">Rollover Requests</p>
-            <h3 class="mb-1 fw-bold" id="stat-rollover">0</h3>
-            <small class="text-info fw-semibold">
-                <i class="fas fa-clock me-1"></i>Pending
-            </small>
         </div>
-    </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="loansTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Member / Borrower</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Outstanding</th>
+                            <th>Interest</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="loansTableBody">
+                    <% loans.forEach(loan => {
+                        const accType = loan?.user?.account?.accountType?.name || 'Unknown';
+                        const statusLower = (loan.status || '').toLowerCase();
+                        const statusMap = {
+                            pending:    'bg-warning',
+                            approved:   'bg-success',
+                            rejected:   'bg-danger',
+                            overdue:    'bg-danger',
+                            paid:       'bg-primary',
+                            rolled_over:'bg-secondary'
+                        };
+                        const statusBadgeClass = statusMap[statusLower] || 'bg-secondary';
+                        const memberName = loan.user
+                            ? (loan.user.firstName + ' ' + loan.user.lastName)
+                            : (loan.external && loan.external.borrowerName ? loan.external.borrowerName : 'External');
+                    %>
+                        <tr class="loan-row"
+                            data-status="<%= statusLower %>"
+                            data-amount="<%= loan.amount %>"
+                            data-outstanding="<%= loan.outstandingBalance || 0 %>"
+                            data-member="<%= memberName %>">
 
-</div>
+                            <td><small class="fw-semibold"><%= new Date(loan.createdAt).toDateString() %></small></td>
 
-
-      <div class="filter-tabs">
-    <button class="filter-tab active" onclick="filterLoans('all', event)">
-        <i class="fas fa-th-large me-1"></i>
-        All Loans (<span id="count-all">0</span>)
-    </button>
-
-    <button class="filter-tab" onclick="filterLoans('pending', event)">
-        <i class="fas fa-clock me-1"></i>
-        Pending (<span id="count-pending">0</span>)
-    </button>
-
-    <button class="filter-tab" onclick="filterLoans('approved', event)">
-        <i class="fas fa-check me-1"></i>
-        Approved (<span id="count-approved">0</span>)
-    </button>
-
-    <button class="filter-tab" onclick="filterLoans('rejected', event)">
-        <i class="fas fa-times me-1"></i>
-        Rejected (<span id="count-rejected">0</span>)
-    </button>
-
-    <button class="filter-tab" onclick="filterLoans('overdue', event)">
-        <i class="fas fa-exclamation-triangle me-1"></i>
-        Overdue (<span id="count-overdue">0</span>)
-    </button>
-
-    <button class="filter-tab" onclick="filterLoans('rollover', event)">
-        <i class="fas fa-sync-alt me-1"></i>
-        Rollover (<span id="count-rollover">0</span>)
-    </button>
-</div>
-
-        <!-- Loan Applications Table -->
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h5 class="mb-0 fw-bold" style="color: var(--primary);"><i class="fas fa-hand-holding-usd me-2"></i>Loan Applications</h5>
-                <div class="d-flex gap-2 flex-wrap">
-                    <input type="search" class="form-control form-control-sm" placeholder="Search loans..." style="max-width: 200px;" id="searchInput">
-                    <select class="form-select form-select-sm" style="max-width: 150px;" onchange="sortLoans(this.value)">
-                        <option value="date">Sort by Date</option>
-                        <option value="amount">Sort by Amount</option>
-                        <option value="member">Sort by Member</option>
-                        <option value="status">Sort by Status</option>
-                    </select>
-                </div>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="loansTable">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Member</th>
-                                <th>Type</th>
-                                <th>Amount</th>
-                                <th>Interest</th>
-                                <th>Duration</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <% loans.forEach(loan => { %>
-
-                            <% 
-                                // Dynamic Account Type
-                                const accType = loan?.user?.account?.accountType?.name || "Unknown";
-
-                                // Badge text mapping
-                                const isClub = accType.toLowerCase().includes("club"); 
-                            %>
-
-                        <tr class="loan-row" data-status="<%= loan.status.toLowerCase() %>">
-
-                            <!-- DATE -->
                             <td>
-                                <small class="fw-semibold">
-                                    <%= loan.createdAt.toDateString() %>
-                                </small>
-                            </td>
-
-                            <!-- BORROWER -->
-                            <td>
-                                <div class="fw-semibold">
-                                    <%= loan.user
-                                        ? (loan.user.firstName + ' ' + loan.user.lastName)
-                                        : (loan.external?.borrowerName || 'External Loan')
-                                    %>
-                                </div>
+                                <div class="fw-semibold"><%= memberName %></div>
                                 <small class="text-muted">
                                     <%= loan.user
                                         ? loan.user.membershipID
-                                        : (loan.external?.borrowerType
-                                            ? loan.external.borrowerType.toUpperCase()
-                                            : '')
-                                    %>
+                                        : (loan.external && loan.external.borrowerType ? loan.external.borrowerType.toUpperCase() : '') %>
                                 </small>
                             </td>
 
-                            <!-- ACCOUNT TYPE -->
                             <td>
-                                <span class="badge <%= loan.user ? 'bg-success' : 'bg-warning' %>">
-                                    <%= loan.user
-                                        ? accType
-                                        : loan.external?.borrowerType?.toUpperCase()
-                                    %>
+                                <span class="badge <%= loan.user ? 'bg-success' : 'bg-warning text-dark' %>">
+                                    <%= loan.user ? accType : (loan.external && loan.external.borrowerType ? loan.external.borrowerType.toUpperCase() : 'EXTERNAL') %>
                                 </span>
                             </td>
 
-                            <!-- AMOUNT -->
-                            <td class="fw-bold">
-                                ₦<%= loan.amount.toLocaleString() %>
+                            <td class="fw-bold text-primary">₦<%= loan.amount.toLocaleString() %></td>
+
+                            <td>
+                                <% if (loan.outstandingBalance && loan.outstandingBalance > 0) { %>
+                                    <span class="fw-bold text-danger">₦<%= loan.outstandingBalance.toLocaleString() %></span>
+                                <% } else { %>
+                                    <span class="text-muted">—</span>
+                                <% } %>
                             </td>
 
-                            <!-- INTEREST RATE -->
+                            <td><span class="badge bg-info-subtle text-info"><%= loan.interestRate %>%</span></td>
+
+                            <td><%= loan.duration ? loan.duration.duration : (loan.externalDuration || 'N/A') %> mo</td>
+
                             <td>
-                                <span class="badge 
-                                    <%= loan.user ? 'bg-info-subtle text-info' : 'bg-warning-subtle text-warning' %>">
-                                    <%= loan.interestRate %>%
+                                <span class="badge <%= statusBadgeClass %>">
+                                    <%= (loan.status || '').replace('_', ' ').toUpperCase() %>
                                 </span>
                             </td>
 
-                            <!-- DURATION -->
-                            <td>
-                                <%= loan.duration
-                                    ? loan.duration.duration
-                                    : (loan.externalDuration || 'N/A')
-                                %> months
-                            </td>
-
-                            <!-- STATUS -->
-                            <td>
-                                <% 
-                                    const statusColors = {
-                                        pending: "bg-warning",
-                                        approved: "bg-success",
-                                        rejected: "bg-danger",
-                                        paid: "bg-primary",
-                                    };
-                                %>
-
-                                <span class="badge <%= statusColors[loan.status] %>">
-                                    <%= loan.status.toUpperCase() %>
-                                </span>
-                            </td>
-
-                            <!-- ACTIONS -->
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    <button
-                                        class="btn btn-info viewLoanBtn"
-                                        data-loan='<%- JSON.stringify(loan) %>'
-                                        title="View Details">
+                                    <button class="btn btn-info viewLoanBtn" data-loan='<%- JSON.stringify(loan) %>' title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </button>
-
-                                    <% if (loan.status === "approved") { %>
-                                        <button
-                                            class="btn btn-danger"
-                                            onclick="sendReminder('<%= loan._id %>')"
-                                            title="Send Reminder">
+                                    <% if (statusLower === 'approved' || statusLower === 'overdue') { %>
+                                        <button class="btn btn-warning" onclick="sendReminder('<%= loan._id %>')" title="Send Reminder">
                                             <i class="fas fa-bell"></i>
                                         </button>
                                     <% } %>
                                 </div>
                             </td>
-
                         </tr>
-
-
-                        <% }) %>
-                        </tbody>
-
-
-                    </table>
-                </div>
+                    <% }) %>
+                    </tbody>
+                </table>
             </div>
-            <div class="card-footer">
-                <nav>
-                    <ul class="pagination pagination-sm mb-0 justify-content-center">
-                        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                    </ul>
-                </nav>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <small class="text-muted" id="tableInfo">Showing all records</small>
+                <nav><ul class="pagination pagination-sm mb-0" id="paginationEl"></ul></nav>
             </div>
         </div>
     </div>
 
-    <!-- Powered By Footer -->
-    <div class="powered-by">
-        Powered by <strong style="color: var(--primary);">JESZ LIMITED</strong>
-    </div>
+</div><!-- /main-content -->
 
+<div class="powered-by">Powered by <strong style="color:var(--primary);">JESZ LIMITED</strong></div>
+
+<!-- ══ VIEW LOAN MODAL ══ -->
 <div class="modal fade" id="viewLoanModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
-                <h5 class="modal-title fw-bold"><i class="fas fa-file-invoice-dollar me-2"></i>Loan Application Details</h5>
+            <div class="modal-header" style="background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);color:white;">
+                <h5 class="modal-title fw-bold"><i class="fas fa-file-invoice-dollar me-2"></i>Loan Details</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-
-                <!-- Member Information -->
                 <div class="alert-info-custom mb-3">
-                    <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                         <div>
                             <h6 class="fw-bold mb-1" id="loanMemberName"></h6>
-                            <small id="loanMemberID"></small><br>
-                            <small id="loanMemberEmail"></small><br>
-                            <small id="loanMemberPhone"></small>
+                            <small id="loanMemberID" class="d-block"></small>
+                            <small id="loanMemberEmail" class="d-block"></small>
+                            <small id="loanMemberPhone" class="d-block"></small>
+                            <small id="loanMemberAddress" class="d-block text-muted"></small>
                         </div>
-                        <span id="loanAccountBadge" class="badge"></span>
+                        <span id="loanAccountBadge" class="badge fs-6"></span>
                     </div>
                 </div>
-
-                <!-- Loan Details -->
-                <h6 class="fw-bold mb-3" style="color: var(--primary);">Loan Information</h6>
+                <h6 class="fw-bold mb-3" style="color:var(--primary);">Loan Figures</h6>
                 <div class="loan-details-grid">
-                    <div class="detail-item">
-                        <div class="detail-label">Loan Amount</div>
-                        <div class="detail-value" id="loanAmount"></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Interest Rate</div>
-                        <div class="detail-value" id="loanInterest"></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Duration</div>
-                        <div class="detail-value" id="loanDuration"></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Total Repayment</div>
-                        <div class="detail-value" id="loanTotalRepay"></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Application Date</div>
-                        <div class="detail-value" id="loanCreatedAt" style="font-size: 0.9rem;"></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Repayment Date</div>
-                        <div class="detail-value" id="loanRepayDate" style="font-size: 0.9rem;"></div>
-                    </div>
-                </div>,
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">
-                        Additional Details <span class="text-danger">*</span>
-                    </label>
-                    <textarea
-                        class="form-control"
-                        id="rejectionDetails"
-                        rows="3"
-                        placeholder="Provide more details for the rejection..."
-                        required>
-                    </textarea>
+                    <div class="detail-item"><div class="detail-label">Loan Amount</div><div class="detail-value" id="loanAmount"></div></div>
+                    <div class="detail-item"><div class="detail-label">Total Repayment</div><div class="detail-value text-success" id="loanTotalRepay"></div></div>
+                    <div class="detail-item"><div class="detail-label">Outstanding Balance</div><div class="detail-value text-danger" id="loanOutstanding"></div></div>
+                    <div class="detail-item"><div class="detail-label">Amount Paid</div><div class="detail-value text-primary" id="loanPaidAmount"></div></div>
+                    <div class="detail-item"><div class="detail-label">Interest Rate</div><div class="detail-value" id="loanInterest"></div></div>
+                    <div class="detail-item"><div class="detail-label">Interest Amount</div><div class="detail-value" id="loanInterestAmount"></div></div>
+                    <div class="detail-item"><div class="detail-label">Duration</div><div class="detail-value" id="loanDuration"></div></div>
+                    <div class="detail-item"><div class="detail-label">Disbursement Method</div><div class="detail-value" id="loanDisbursementMethod"></div></div>
                 </div>
-
-
-                <!-- Guarantor Information -->
-                <div class="mt-3">
-                    <h6 class="fw-bold mb-2" style="color: var(--primary);">Guarantor Information</h6>
-                    <div id="guarantorList"></div>
+                <h6 class="fw-bold mb-3 mt-3" style="color:var(--primary);">Dates &amp; Status</h6>
+                <div class="loan-details-grid">
+                    <div class="detail-item"><div class="detail-label">Application Date</div><div class="detail-value" id="loanCreatedAt" style="font-size:.9rem;"></div></div>
+                    <div class="detail-item"><div class="detail-label">Disbursement Date</div><div class="detail-value" id="loanDisbursementDate" style="font-size:.9rem;"></div></div>
+                    <div class="detail-item"><div class="detail-label">Due Date</div><div class="detail-value" id="loanDueDate" style="font-size:.9rem;"></div></div>
+                    <div class="detail-item"><div class="detail-label">Approved At</div><div class="detail-value" id="loanApprovedAt" style="font-size:.9rem;"></div></div>
+                    <div class="detail-item"><div class="detail-label">Paid At</div><div class="detail-value" id="loanPaidAt" style="font-size:.9rem;"></div></div>
+                    <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value"><span id="loanStatusBadge" class="badge fs-6"></span></div></div>
                 </div>
+                <div id="penaltySection" style="display:none;">
+                    <h6 class="fw-bold mb-2 mt-3" style="color:var(--danger);">Penalty Information</h6>
+                    <div class="loan-details-grid">
+                        <div class="detail-item"><div class="detail-label">Penalty Rate</div><div class="detail-value text-danger" id="loanPenaltyRate"></div></div>
+                        <div class="detail-item"><div class="detail-label">Total Penalty</div><div class="detail-value text-danger" id="loanTotalPenalty"></div></div>
+                        <div class="detail-item"><div class="detail-label">Last Penalty Applied</div><div class="detail-value" id="loanLastPenalty" style="font-size:.85rem;"></div></div>
+                    </div>
+                </div>
+                <div id="rolloverSection" style="display:none;">
+                    <h6 class="fw-bold mb-2 mt-3" style="color:#7c3aed;">Rollover Information</h6>
+                    <div class="loan-details-grid">
+                        <div class="detail-item"><div class="detail-label">Rollover Count</div><div class="detail-value" style="color:#7c3aed;" id="loanRolloverCount"></div></div>
+                        <div class="detail-item"><div class="detail-label">Rollover Rate</div><div class="detail-value" style="color:#7c3aed;" id="loanRolloverRate"></div></div>
+                    </div>
+                    <div id="rolloverHistoryList"></div>
+                </div>
+                <div id="rejectionSection" style="display:none;" class="alert-danger-custom mt-3">
+                    <h6 class="fw-bold mb-2"><i class="fas fa-times-circle me-2"></i>Rejection Details</h6>
+                    <div><strong>Reason:</strong> <span id="loanRejectionReason"></span></div>
+                    <div id="rejectionDetailsRow" style="display:none;"><strong>Details:</strong> <span id="loanRejectionDetails"></span></div>
+                </div>
+                <h6 class="fw-bold mb-2 mt-3" style="color:var(--primary);">Guarantors</h6>
+                <div id="guarantorList"></div>
             </div>
-
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" onclick="rejectLoanFromModal(selectedLoan._id)">
-                    <i class="fas fa-times me-2"></i>Reject
-                </button>
-                <button type="button" class="btn btn-success" onclick="approveLoan(selectedLoan._id)">
-    <i class="fas fa-check me-2"></i>Approve Loan
-</button>
-
+                <button type="button" class="btn btn-danger"  id="rejectBtnModal"  onclick="rejectLoanFromModal()" style="display:none;"><i class="fas fa-times me-2"></i>Reject</button>
+                <button type="button" class="btn btn-success" id="approveBtnModal" onclick="approveLoan()"          style="display:none;"><i class="fas fa-check me-2"></i>Approve Loan</button>
             </div>
         </div>
     </div>
 </div>
-<script>
-function viewLoan(loan) {
-    // Member Info
-    document.getElementById("loanMemberName").innerText =
-        `${loan.user.firstName} ${loan.user.lastName}`;
 
-    document.getElementById("loanMemberID").innerText =
-        `Member ID: ${loan.user.membershipID}`;
-
-    document.getElementById("loanMemberEmail").innerText =
-        `Email: ${loan.user.email || 'N/A'}`;
-
-    document.getElementById("loanMemberPhone").innerText =
-        `Phone: ${loan.user.phone || 'N/A'}`;
-
-    // Account Type Badge
-    const accType = loan?.user?.account?.accountType?.name || "Unknown";
-    const badge = document.getElementById("loanAccountBadge");
-
-    badge.innerText = accType;
-    badge.className = "badge " + 
-        (accType.toLowerCase().includes("club") ? "bg-success" : "bg-warning");
-
-    // Loan Details
-    document.getElementById("loanAmount").innerText =
-        "₦" + loan.amount.toLocaleString();
-
-    document.getElementById("loanInterest").innerText =
-        loan.interestRate + "%";
-
-    document.getElementById("loanDuration").innerText =
-        loan.duration?.duration + " Months";
-
-    document.getElementById("loanTotalRepay").innerText =
-        "₦" + loan.totalRepay.toLocaleString();
-
-    const createdDate = new Date(loan.createdAt);
-    document.getElementById("loanCreatedAt").innerText =
-        createdDate.toDateString();
-
-    const repayDate = new Date(createdDate);
-    repayDate.setMonth(repayDate.getMonth() + loan.duration.duration);
-    document.getElementById("loanRepayDate").innerText =
-        repayDate.toDateString();
-
-    // Guarantors Section
-    const gList = document.getElementById("guarantorList");
-    gList.innerHTML = "";
-
-    if (!loan.guarantors || loan.guarantors.length === 0) {
-        gList.innerHTML =
-            `<p class="text-muted">No guarantors attached.</p>`;
-    } else {
-        loan.guarantors.forEach(g => {
-            const bal = g.guarantor?.account?.balance || 0;
-
-            gList.innerHTML += `
-                <div class="card mb-2">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>Name:</strong> ${g.guarantor.firstName} ${g.guarantor.lastName}<br>
-                                <strong>Member ID:</strong> ${g.guarantor.membershipID}<br>
-                                <strong>Phone:</strong> ${g.guarantor.phone || 'N/A'}
-                            </div>
-                            <div class="col-md-6">
-                                <strong>Email:</strong> ${g.guarantor.email || 'N/A'}<br>
-                                <strong>Account Balance:</strong> ₦${bal.toLocaleString()}<br>
-                                <strong>Status:</strong> ${g.status}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    // Show Modal
-    const modal = new bootstrap.Modal(document.getElementById("viewLoanModal"));
-    modal.show();
-}
-
-// Global function
-window.viewLoan = viewLoan;
-
-// Dataset-based click handlers
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".viewLoanBtn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const loan = JSON.parse(btn.dataset.loan);
-            viewLoan(loan);
-        });
-    });
-});
-</script>
-
-
-    <!-- Approve Loan Modal -->
+<!-- ══ APPROVE MODAL ══ -->
 <div class="modal fade" id="approveLoanModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-check-circle me-2" style="color: var(--success);"></i>
-                    Approve Loan
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
+            <div class="modal-header"><h5 class="modal-title fw-bold"><i class="fas fa-check-circle me-2 text-success"></i>Approve Loan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
-                <div class="alert-success-custom mb-3">
-                    <small><i class="fas fa-info-circle me-2"></i><strong>Confirm loan approval</strong></small>
-                </div>
-
-                <div class="card mb-3" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.05));">
+                <div class="alert-success-custom mb-3"><small><i class="fas fa-info-circle me-2"></i><strong>Confirm loan approval</strong></small></div>
+                <div class="card mb-3" style="background:linear-gradient(135deg,rgba(16,185,129,.05),rgba(5,150,105,.05));">
                     <div class="card-body">
                         <h6 class="fw-bold mb-2">Loan Summary</h6>
-                        <div class="row">
-                            <div class="col-6">
-                                <small class="text-muted">Member:</small><br>
-                                <strong id="approveMemberName"></strong>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted">Amount:</small><br>
-                                <strong id="approveLoanAmount"></strong>
-                            </div>
-                            <div class="col-6 mt-2">
-                                <small class="text-muted">Interest Rate:</small><br>
-                                <strong id="approveLoanInterest"></strong>
-                            </div>
-                            <div class="col-6 mt-2">
-                                <small class="text-muted">Duration:</small><br>
-                                <strong id="approveLoanDuration"></strong>
-                            </div>
+                        <div class="row g-2">
+                            <div class="col-6"><small class="text-muted">Member:</small><br><strong id="approveMemberName"></strong></div>
+                            <div class="col-6"><small class="text-muted">Amount:</small><br><strong id="approveLoanAmount"></strong></div>
+                            <div class="col-6"><small class="text-muted">Interest Rate:</small><br><strong id="approveLoanInterest"></strong></div>
+                            <div class="col-6"><small class="text-muted">Duration:</small><br><strong id="approveLoanDuration"></strong></div>
                         </div>
                     </div>
                 </div>
-
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Disbursement Method</label>
                     <select class="form-select" id="disbursementMethod" required>
@@ -1016,63 +616,36 @@ document.addEventListener("DOMContentLoaded", () => {
                         <option value="check">Cheque</option>
                     </select>
                 </div>
-
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Disbursement Date</label>
                     <input type="date" class="form-control" id="disbursementDate" required>
                 </div>
-
-                <div class="alert-warning-custom">
-                    <small><i class="fas fa-exclamation-triangle me-2"></i>Notify Member via email and SMS upon approval</small>
-                </div>
+                <div class="alert-warning-custom"><small><i class="fas fa-exclamation-triangle me-2"></i>Member will be notified via email and SMS upon approval</small></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" onclick="confirmApproval()">
-                    <i class="fas fa-check me-2"></i>Confirm Approval
-                </button>
+                <button type="button" class="btn btn-success" onclick="confirmApproval()"><i class="fas fa-check me-2"></i>Confirm Approval</button>
             </div>
         </div>
     </div>
 </div>
 
-    
-
-    <!-- Reject Loan Modal -->
+<!-- ══ REJECT MODAL ══ -->
 <div class="modal fade" id="rejectLoanModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-times-circle me-2" style="color: var(--danger);"></i>Reject Loan
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
+            <div class="modal-header"><h5 class="modal-title fw-bold"><i class="fas fa-times-circle me-2 text-danger"></i>Reject Loan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
-                <div class="alert-danger-custom mb-3">
-                    <small>
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Please provide a reason for rejection</strong>
-                    </small>
-                </div>
-
-                <div class="card mb-3" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(220, 38, 38, 0.05));">
+                <div class="alert-danger-custom mb-3"><small><i class="fas fa-exclamation-triangle me-2"></i><strong>Please provide a reason for rejection</strong></small></div>
+                <div class="card mb-3" style="background:linear-gradient(135deg,rgba(239,68,68,.05),rgba(220,38,38,.05));">
                     <div class="card-body">
-                        <h6 class="fw-bold mb-2">Loan Details</h6>
-                        <div class="row">
-                            <div class="col-6">
-                                <small class="text-muted">Member:</small><br>
-                                <strong id="rejectMemberName"></strong>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted">Amount:</small><br>
-                                <strong id="rejectLoanAmount"></strong>
-                            </div>
+                        <div class="row g-2">
+                            <div class="col-6"><small class="text-muted">Member:</small><br><strong id="rejectMemberName"></strong></div>
+                            <div class="col-6"><small class="text-muted">Amount:</small><br><strong id="rejectLoanAmount"></strong></div>
                         </div>
                     </div>
                 </div>
-
-              <div class="mb-3">
+                <div class="mb-3">
                     <label class="form-label fw-semibold">Rejection Reason <span class="text-danger">*</span></label>
                     <select class="form-select mb-2" id="rejectionReason" required>
                         <option value="">Select reason...</option>
@@ -1084,433 +657,314 @@ document.addEventListener("DOMContentLoaded", () => {
                         <option value="Other">Other (Specify below)</option>
                     </select>
                 </div>
-
                 <div class="mb-3" id="otherReasonDiv" style="display:none;">
                     <label class="form-label fw-semibold">Additional Details</label>
                     <textarea class="form-control" id="rejectionDetails" rows="3" placeholder="Specify other reason..."></textarea>
                 </div>
-
-                <div class="alert-info-custom">
-                    <small>
-                        <i class="fas fa-info-circle me-2"></i>
-                        Member will receive notification with the rejection reason
-                    </small>
-                </div>
+                <div class="alert-info-custom"><small><i class="fas fa-info-circle me-2"></i>Member will receive notification with the rejection reason</small></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="confirmRejection()">
-                    <i class="fas fa-times me-2"></i>Confirm Rejection
-                </button>
+                <button type="button" class="btn btn-danger" onclick="confirmRejection()"><i class="fas fa-times me-2"></i>Confirm Rejection</button>
             </div>
         </div>
     </div>
 </div>
 
-    <!-- Rollover Request Modal -->
-    <div class="modal fade" id="rolloverModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-sync-alt me-2" style="color: var(--warning);"></i>Process Loan Rollover</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert-warning-custom mb-3">
-                        <small><i class="fas fa-info-circle me-2"></i><strong>Review rollover request carefully</strong></small>
-                    </div>
-
-                    <div class="card mb-3" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%);">
-                        <div class="card-body">
-                            <h6 class="fw-bold mb-2">Current Loan Details</h6>
-                            <div class="row">
-                                <div class="col-6">
-                                    <small class="text-muted">Member:</small><br>
-                                    <strong>Patricia White</strong>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-muted">Original Amount:</small><br>
-                                    <strong>₦250,000</strong>
-                                </div>
-                                <div class="col-6 mt-2">
-                                    <small class="text-muted">Outstanding:</small><br>
-                                    <strong class="text-danger">₦125,000</strong>
-                                </div>
-                                <div class="col-6 mt-2">
-                                    <small class="text-muted">Paid:</small><br>
-                                    <strong class="text-success">₦125,000</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">New Interest Rate</label>
-                        <select class="form-select" required>
-                            <option value="5">5% (Standard)</option>
-                            <option value="7">7% (Rollover Rate)</option>
-                            <option value="10">10% (Premium)</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Extension Period</label>
-                        <select class="form-select" required>
-                            <option value="3">3 Months</option>
-                            <option value="6">6 Months</option>
-                            <option value="12">12 Months</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Rollover Notes</label>
-                        <textarea class="form-control" rows="2" placeholder="Optional notes..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger me-auto" onclick="rejectRollover()">
-                        <i class="fas fa-times me-2"></i>Reject
-                    </button>
-                    <button type="button" class="btn btn-success" onclick="approveRollover()">
-                        <i class="fas fa-check me-2"></i>Approve Rollover
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- View Repayments Modal -->
-    <div class="modal fade" id="repaymentsModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-list me-2" style="color: var(--primary);"></i>Loan Repayment Schedule</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert-info-custom mb-3">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <small>Member:</small><br>
-                                <strong>Robert Taylor</strong>
-                            </div>
-                            <div class="col-md-3">
-                                <small>Loan Amount:</small><br>
-                                <strong>₦500,000</strong>
-                            </div>
-                            <div class="col-md-3">
-                                <small>Paid:</small><br>
-                                <strong class="text-success">₦210,000</strong>
-                            </div>
-                            <div class="col-md-3">
-                                <small>Outstanding:</small><br>
-                                <strong class="text-warning">₦315,000</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Month</th>
-                                    <th>Due Date</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Paid Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Month 1</td>
-                                    <td>Dec 15, 2024</td>
-                                    <td>₦43,750</td>
-                                    <td><span class="badge bg-success">Paid</span></td>
-                                    <td>Dec 14, 2024</td>
-                                </tr>
-                                <tr>
-                                    <td>Month 2</td>
-                                    <td>Jan 15, 2025</td>
-                                    <td>₦43,750</td>
-                                    <td><span class="badge bg-success">Paid</span></td>
-                                    <td>Jan 15, 2025</td>
-                                </tr>
-                                <tr>
-                                    <td>Month 3</td>
-                                    <td>Feb 15, 2025</td>
-                                    <td>₦43,750</td>
-                                    <td><span class="badge bg-success">Paid</span></td>
-                                    <td>Feb 13, 2025</td>
-                                </tr>
-                                <tr>
-                                    <td>Month 4</td>
-                                    <td>Mar 15, 2025</td>
-                                    <td>₦43,750</td>
-                                    <td><span class="badge bg-success">Paid</span></td>
-                                    <td>Mar 15, 2025</td>
-                                </tr>
-                                <tr>
-                                    <td>Month 5</td>
-                                    <td>Apr 15, 2025</td>
-                                    <td>₦43,750</td>
-                                    <td><span class="badge bg-success">Paid</span></td>
-                                    <td>Apr 14, 2025</td>
-                                </tr>
-                                <tr class="table-warning">
-                                    <td>Month 6</td>
-                                    <td>May 15, 2025</td>
-                                    <td>₦43,750</td>
-                                    <td><span class="badge bg-warning">Due Soon</span></td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Month 7</td>
-                                    <td>Jun 15, 2025</td>
-                                    <td>₦43,750</td>
-                                    <td><span class="badge bg-secondary">Upcoming</span></td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Month 8</td>
-                                    <td>Jul 15, 2025</td>
-                                    <td>₦43,750</td>
-                                    <td><span class="badge bg-secondary">Upcoming</span></td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Month 9</td>
-                                    <td>Aug 15, 2025</td>
-                                    <td>₦43,750</td>
-                                    <td><span class="badge bg-secondary">Upcoming</span></td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Month 10</td>
-                                    <td>Sep 15, 2025</td>
-                                    <td>₦43,750</td>
-                                    <td><span class="badge bg-secondary">Upcoming</span></td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Month 11</td>
-                                    <td>Oct 15, 2025</td>
-                                    <td>₦43,750</td>
-                                    <td><span class="badge bg-secondary">Upcoming</span></td>
-                                    <td>-</td>
-                                </tr>
-                                <tr>
-                                    <td>Month 12</td>
-                                    <td>Nov 15, 2025</td>
-                                    <td>₦43,750</td>
-                                    <td><span class="badge bg-secondary">Upcoming</span></td>
-                                    <td>-</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="recordPayment()">
-                        <i class="fas fa-plus me-2"></i>Record Payment
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 <script>
-    let selectedLoan = null;
+/* ══════════════════════════════════════
+   FULL LOAN DATA FROM SERVER
+══════════════════════════════════════ */
+const loansData = <%- JSON.stringify(loans.map(l => ({
+    _id:   String(l._id),
+    status: l.status || 'pending',
+    amount: l.amount || 0,
+    interestAmount:     l.interestAmount     || 0,
+    outstandingBalance: l.outstandingBalance || 0,
+    totalRepay:         l.totalRepay         || 0,
+    paidAmount:         l.paidAmount         || 0,
+    interestRate:       l.interestRate       || 0,
+    penaltyPercentage:  l.penaltyPercentage  || 0,
+    totalPenalty:       l.totalPenalty       || 0,
+    rolloverPercentage: l.rolloverPercentage || 0,
+    rolloverCount:      l.rolloverCount      || 0,
+    disbursementMethod: l.disbursementMethod || '',
+    disbursementDate:   l.disbursementDate   || null,
+    dueDate:            l.dueDate            || null,
+    approvedAt:         l.approvedAt         || null,
+    rejectedAt:         l.rejectedAt         || null,
+    paidAt:             l.paidAt             || null,
+    overdueAt:          l.overdueAt          || null,
+    lastPenaltyAppliedAt: l.lastPenaltyAppliedAt || null,
+    rejectionReason:    l.rejectionReason    || '',
+    rejectionDetails:   l.rejectionDetails   || '',
+    externalDuration:   l.externalDuration   || null,
+    rolledIntoLoan:     l.rolledIntoLoan     ? String(l.rolledIntoLoan) : null,
+    createdAt:          l.createdAt,
+    penaltyHistory: (l.penaltyHistory || []).map(p => ({
+        appliedAt: p.appliedAt, periodLabel: p.periodLabel || '',
+        penaltyRate: p.penaltyRate || 0, penaltyAmount: p.penaltyAmount || 0,
+        balanceBefore: p.balanceBefore || 0, balanceAfter: p.balanceAfter || 0
+    })),
+    rolloverHistory: (l.rolloverHistory || []).map(r => ({
+        rolledOverAt: r.rolledOverAt, rolloverFee: r.rolloverFee || 0,
+        balanceBefore: r.balanceBefore || 0, balanceAfter: r.balanceAfter || 0,
+        newDueDate: r.newDueDate || null
+    })),
+    duration: l.duration ? { duration: l.duration.duration } : null,
+    user: l.user ? {
+        firstName:    l.user.firstName    || '',
+        lastName:     l.user.lastName     || '',
+        membershipID: l.user.membershipID || '',
+        email:        l.user.email        || '',
+        phone:        l.user.phone        || '',
+        account: l.user.account ? {
+            balance: l.user.account.balance || 0,
+            accountType: l.user.account.accountType ? { name: l.user.account.accountType.name } : null
+        } : null
+    } : null,
+    external: l.external ? {
+        borrowerType: l.external.borrowerType || '',
+        borrowerName: l.external.borrowerName || '',
+        email:        l.external.email        || '',
+        phone:        l.external.phone        || '',
+        address:      l.external.address      || ''
+    } : null,
+    guarantors: (l.guarantors || []).map(g => ({
+        status: g.status || 'pending',
+        respondedAt: g.respondedAt || null,
+        guarantor: g.guarantor ? {
+            firstName:    g.guarantor.firstName    || '',
+            lastName:     g.guarantor.lastName     || '',
+            membershipID: g.guarantor.membershipID || '',
+            email:        g.guarantor.email        || '',
+            phone:        g.guarantor.phone        || '',
+            account: g.guarantor.account ? { balance: g.guarantor.account.balance || 0 } : null
+        } : null
+    }))
+}))) %>;
 
-// When user clicks Approve in View Loan modal
-function approveLoan(loanId) {
-    if (!selectedLoan || selectedLoan._id !== loanId) return;
+let selectedLoan  = null;
+let currentFilter = 'all';
+let currentSearch = '';
 
-    const isInternal = !!selectedLoan.user;
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+});
 
-    const borrowerName = isInternal
-        ? `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}`
-        : (selectedLoan.external?.borrowerName || "Company Loan");
+/* ── Helpers ── */
+function fmt(n)   { return '₦' + Number(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fmtN(n)  { return Number(n || 0).toLocaleString(); }
+function fmtD(d)  { return d ? new Date(d).toDateString() : '—'; }
+function capSt(s) { return (s || '').replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 
-    const durationText = isInternal
-        ? `${selectedLoan.duration.duration} Months`
-        : `${selectedLoan.externalDuration} Months`;
+/* ══════════════════════════════════════
+   EXPORT DROPDOWN — custom (not Bootstrap)
+   Avoids clipping by welcome-card
+══════════════════════════════════════ */
+function toggleExportMenu(e) {
+    e.stopPropagation();
+    const menu  = document.getElementById('exportMenu');
+    const btn   = document.getElementById('exportBtn');
+    const caret = document.getElementById('exportCaret');
+    const isOpen = menu.style.display !== 'none';
+    menu.style.display  = isOpen ? 'none' : 'block';
+    btn.classList.toggle('open', !isOpen);
+}
+function closeExportMenu() {
+    document.getElementById('exportMenu').style.display = 'none';
+    document.getElementById('exportBtn').classList.remove('open');
+}
+// Close dropdown when clicking anywhere else
+document.addEventListener('click', e => {
+    if (!e.target.closest('.export-wrapper')) closeExportMenu();
+});
 
-    document.getElementById("approveMemberName").innerText = borrowerName;
-    document.getElementById("approveLoanAmount").innerText =
-        "₦" + selectedLoan.amount.toLocaleString();
-    document.getElementById("approveLoanInterest").innerText =
-        selectedLoan.interestRate + "%";
-    document.getElementById("approveLoanDuration").innerText =
-        durationText;
-
-    document.getElementById("disbursementMethod").value = "";
-    document.getElementById("disbursementDate").value = "";
-
-    const viewModal = bootstrap.Modal.getInstance(
-        document.getElementById("viewLoanModal")
-    );
-    viewModal.hide();
-
-    new bootstrap.Modal(
-        document.getElementById("approveLoanModal")
-    ).show();
+/* ══════════════════════════════════════
+   STATS — approved + rolled_over = "active"
+══════════════════════════════════════ */
+function computeStats() {
+    let pending = 0, active = 0, overdue = 0, rolled = 0, rejected = 0, paid = 0;
+    let activeAmt = 0, overdueAmt = 0, rolledAmt = 0;
+    loansData.forEach(l => {
+        const st  = (l.status || '').toLowerCase();
+        const amt = Number(l.amount) || 0;
+        if (st === 'pending')     { pending++;  }
+        if (st === 'approved')    { active++;   activeAmt  += amt; }
+        if (st === 'rolled_over') { rolled++;   rolledAmt  += amt; active++; activeAmt += amt; }
+        if (st === 'overdue')     { overdue++;  overdueAmt += amt; }
+        if (st === 'rejected')    { rejected++; }
+        if (st === 'paid')        { paid++;     }
+    });
+    document.getElementById('stat-pending').textContent        = pending;
+    document.getElementById('stat-active').textContent         = active;
+    document.getElementById('stat-active-amount').textContent  = fmtN(activeAmt);
+    document.getElementById('stat-overdue').textContent        = overdue;
+    document.getElementById('stat-overdue-amount').textContent = fmtN(overdueAmt);
+    document.getElementById('stat-rolled').textContent         = rolled;
+    document.getElementById('stat-rolled-amount').textContent  = fmtN(rolledAmt);
 }
 
-
-// Confirm Approval
-async function confirmApproval() {
-    if (!selectedLoan) {
-        alert("No loan selected.");
-        return;
-    }
-
-    const method = document.getElementById("disbursementMethod").value;
-    const date = document.getElementById("disbursementDate").value;
-
-    if (!method || !date) {
-        alert("Please select a disbursement method and date.");
-        return;
-    }
-
-    // Prepare payload
-    const payload = {
-        loanId: selectedLoan._id,
-        disbursementMethod: method,
-        disbursementDate: date
-    };
-
-    try {
-        const response = await fetch("/api/loans/approve", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                // Add authorization header if needed, e.g.:
-                // "Authorization": "Bearer YOUR_TOKEN"
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Failed to approve loan.");
-        }
-
-        const result = await response.json();
-        console.log("Loan approved successfully:", result);
-
-        // Determine borrower name safely
-        const borrowerName = selectedLoan.user
-            ? `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}`
-            : selectedLoan.external?.borrowerName || "Company Loan";
-
-        alert(`Loan for ${borrowerName} approved successfully!`);
-
-        // Hide modal
-        const approveModal = bootstrap.Modal.getInstance(
-            document.getElementById("approveLoanModal")
-        );
-        approveModal.hide();
-
-        // Optionally, refresh loan list or update UI
-        // loadLoans();
-
-    } catch (error) {
-        console.error("Error approving loan:", error);
-        alert(`Error: ${error.message}`);
-    }
+/* ── Filter counts ── */
+function computeFilterCounts() {
+    const c = { all: loansData.length, pending: 0, approved: 0, overdue: 0, rejected: 0, paid: 0, rolled_over: 0 };
+    loansData.forEach(l => { const st = (l.status || '').toLowerCase(); if (c.hasOwnProperty(st)) c[st]++; });
+    Object.keys(c).forEach(k => { const el = document.getElementById(`count-${k}`); if (el) el.textContent = c[k]; });
 }
 
+/* ── Filter tabs ── */
+function filterLoans(status, event) {
+    currentFilter = status;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    applyVisibility();
+}
 
-// Update viewLoan to set selectedLoan
+/* ── Search ── */
+function searchLoans() {
+    currentSearch = document.getElementById('searchInput').value.toLowerCase();
+    applyVisibility();
+}
+
+/* ── Visibility ── */
+function applyVisibility() {
+    let visible = 0;
+    document.querySelectorAll('.loan-row').forEach(row => {
+        const matchFilter = currentFilter === 'all' || row.dataset.status === currentFilter;
+        const matchSearch = !currentSearch || row.textContent.toLowerCase().includes(currentSearch);
+        const show = matchFilter && matchSearch;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    const total = document.querySelectorAll('.loan-row').length;
+    document.getElementById('tableInfo').textContent =
+        currentFilter === 'all' && !currentSearch
+            ? `Showing all ${total} records`
+            : `Showing ${visible} of ${total} records`;
+}
+
+/* ── Sort ── */
+function sortLoans(by) {
+    const tbody = document.getElementById('loansTableBody');
+    const rows  = [...tbody.querySelectorAll('tr')];
+    rows.sort((a, b) => {
+        if (by === 'amount') return Number(b.dataset.amount) - Number(a.dataset.amount);
+        if (by === 'member') return (a.dataset.member || '').localeCompare(b.dataset.member || '');
+        if (by === 'status') return (a.dataset.status || '').localeCompare(b.dataset.status || '');
+        return 0;
+    });
+    rows.forEach(r => tbody.appendChild(r));
+}
+
+/* ══════════════════════════════════════
+   VIEW LOAN MODAL
+══════════════════════════════════════ */
 function viewLoan(loan) {
     selectedLoan = loan;
+    const isInt = !!loan.user;
+    const name    = isInt ? `${loan.user.firstName} ${loan.user.lastName}` : (loan.external?.borrowerName || 'Company/External');
+    const id      = isInt ? `Member ID: ${loan.user.membershipID}` : `Type: ${(loan.external?.borrowerType || 'external').toUpperCase()}`;
+    const email   = isInt ? (loan.user.email || 'N/A') : (loan.external?.email || 'N/A');
+    const phone   = isInt ? (loan.user.phone || 'N/A') : (loan.external?.phone || 'N/A');
+    const address = isInt ? '' : (loan.external?.address || '');
+    const accType = isInt ? (loan.user?.account?.accountType?.name || 'Unknown') : (loan.external?.borrowerType?.toUpperCase() || 'EXTERNAL');
 
-    const isInternal = !!loan.user;
-    const borrowerName = isInternal
-        ? `${loan.user.firstName} ${loan.user.lastName}`
-        : (loan.external?.borrowerName || "Company Loan");
+    document.getElementById('loanMemberName').textContent    = name;
+    document.getElementById('loanMemberID').textContent      = id;
+    document.getElementById('loanMemberEmail').textContent   = `Email: ${email}`;
+    document.getElementById('loanMemberPhone').textContent   = `Phone: ${phone}`;
+    document.getElementById('loanMemberAddress').textContent = address ? `Address: ${address}` : '';
 
-    const borrowerId = isInternal
-        ? `Member ID: ${loan.user.membershipID}`
-        : `Type: ${loan.external?.borrowerType?.toUpperCase() || 'EXTERNAL'}`;
+    const badge = document.getElementById('loanAccountBadge');
+    badge.textContent = accType;
+    badge.className   = 'badge fs-6 ' + (isInt ? 'bg-success' : 'bg-warning text-dark');
 
-    const borrowerEmail = isInternal
-        ? loan.user.email || "N/A"
-        : loan.external?.email || "N/A";
+    document.getElementById('loanAmount').textContent             = fmt(loan.amount);
+    document.getElementById('loanTotalRepay').textContent         = fmt(loan.totalRepay);
+    document.getElementById('loanOutstanding').textContent        = loan.outstandingBalance > 0 ? fmt(loan.outstandingBalance) : '₦0.00';
+    document.getElementById('loanPaidAmount').textContent         = fmt(loan.paidAmount);
+    document.getElementById('loanInterest').textContent           = loan.interestRate + '%';
+    document.getElementById('loanInterestAmount').textContent     = fmt(loan.interestAmount);
+    document.getElementById('loanDuration').textContent           = (loan.duration ? loan.duration.duration : (loan.externalDuration || 'N/A')) + ' Months';
+    document.getElementById('loanDisbursementMethod').textContent = loan.disbursementMethod ? capSt(loan.disbursementMethod) : '—';
+    document.getElementById('loanCreatedAt').textContent          = fmtD(loan.createdAt);
+    document.getElementById('loanDisbursementDate').textContent   = fmtD(loan.disbursementDate);
+    document.getElementById('loanDueDate').textContent            = fmtD(loan.dueDate);
+    document.getElementById('loanApprovedAt').textContent         = fmtD(loan.approvedAt);
+    document.getElementById('loanPaidAt').textContent             = fmtD(loan.paidAt);
 
-    const borrowerPhone = isInternal
-        ? loan.user.phone || "N/A"
-        : loan.external?.phone || "N/A";
+    const stBadge  = document.getElementById('loanStatusBadge');
+    const stColors = { pending:'bg-warning', approved:'bg-success', rejected:'bg-danger', overdue:'bg-danger', paid:'bg-primary', rolled_over:'bg-secondary' };
+    stBadge.className   = 'badge fs-6 ' + (stColors[loan.status] || 'bg-secondary');
+    stBadge.textContent = capSt(loan.status);
 
-    // Header
-    document.getElementById("loanMemberName").innerText = borrowerName;
-    document.getElementById("loanMemberID").innerText = borrowerId;
-    document.getElementById("loanMemberEmail").innerText = `Email: ${borrowerEmail}`;
-    document.getElementById("loanMemberPhone").innerText = `Phone: ${borrowerPhone}`;
+    // Penalty
+    const penSec = document.getElementById('penaltySection');
+    if (loan.totalPenalty > 0 || loan.penaltyPercentage > 0) {
+        penSec.style.display = '';
+        document.getElementById('loanPenaltyRate').textContent  = loan.penaltyPercentage + '%';
+        document.getElementById('loanTotalPenalty').textContent = fmt(loan.totalPenalty);
+        document.getElementById('loanLastPenalty').textContent  = fmtD(loan.lastPenaltyAppliedAt);
+    } else { penSec.style.display = 'none'; }
 
-    // Account badge
-    const accType = isInternal
-        ? loan?.user?.account?.accountType?.name || "Unknown"
-        : loan.external?.borrowerType?.toUpperCase() || "EXTERNAL";
+    // Rollover
+    const rolSec = document.getElementById('rolloverSection');
+    if (loan.rolloverCount > 0 || loan.status === 'rolled_over') {
+        rolSec.style.display = '';
+        document.getElementById('loanRolloverCount').textContent = loan.rolloverCount;
+        document.getElementById('loanRolloverRate').textContent  = loan.rolloverPercentage + '%';
+        const histList = document.getElementById('rolloverHistoryList');
+        histList.innerHTML = '';
+        (loan.rolloverHistory || []).forEach((r, i) => {
+            histList.innerHTML += `
+                <div class="card mb-2" style="font-size:.82rem;">
+                    <div class="card-body py-2">
+                        <strong>Rollover ${i + 1}</strong> — ${fmtD(r.rolledOverAt)}<br>
+                        Fee: <span class="text-danger fw-bold">${fmt(r.rolloverFee)}</span> &nbsp;|&nbsp;
+                        Balance: ${fmt(r.balanceBefore)} → ${fmt(r.balanceAfter)}<br>
+                        New Due Date: ${fmtD(r.newDueDate)}
+                    </div>
+                </div>`;
+        });
+    } else { rolSec.style.display = 'none'; }
 
-    const badge = document.getElementById("loanAccountBadge");
-    badge.innerText = accType;
-    badge.className = "badge " + (isInternal ? "bg-success" : "bg-warning");
-
-    // Loan details
-    document.getElementById("loanAmount").innerText =
-        "₦" + loan.amount.toLocaleString();
-    document.getElementById("loanInterest").innerText =
-        loan.interestRate + "%";
-
-    document.getElementById("loanDuration").innerText =
-        loan.duration
-            ? loan.duration.duration + " Months"
-            : (loan.externalDuration + " Months");
-
-    document.getElementById("loanTotalRepay").innerText =
-        "₦" + loan.totalRepay.toLocaleString();
-
-    // Dates
-    const createdDate = new Date(loan.createdAt);
-    document.getElementById("loanCreatedAt").innerText =
-        createdDate.toDateString();
-
-    const repayDate = new Date(createdDate);
-    repayDate.setMonth(
-        repayDate.getMonth() +
-        (loan.duration?.duration || loan.externalDuration || 0)
-    );
-    document.getElementById("loanRepayDate").innerText =
-        repayDate.toDateString();
+    // Rejection
+    const rejSec = document.getElementById('rejectionSection');
+    if (loan.status === 'rejected') {
+        rejSec.style.display = '';
+        document.getElementById('loanRejectionReason').textContent = loan.rejectionReason || '—';
+        if (loan.rejectionDetails) {
+            document.getElementById('rejectionDetailsRow').style.display = '';
+            document.getElementById('loanRejectionDetails').textContent  = loan.rejectionDetails;
+        } else { document.getElementById('rejectionDetailsRow').style.display = 'none'; }
+    } else { rejSec.style.display = 'none'; }
 
     // Guarantors
-    const gList = document.getElementById("guarantorList");
-    gList.innerHTML = "";
-
+    const gList = document.getElementById('guarantorList');
+    gList.innerHTML = '';
     if (!loan.guarantors || loan.guarantors.length === 0) {
-        gList.innerHTML = `<p class="text-muted">No guarantors attached.</p>`;
+        gList.innerHTML = '<p class="text-muted mb-0">No guarantors attached.</p>';
     } else {
         loan.guarantors.forEach(g => {
-            const gua = g.guarantor;
-            const bal = gua?.account?.balance || 0;
-
+            const gua    = g.guarantor;
+            const bal    = gua?.account?.balance || 0;
+            const gSt    = g.status || 'pending';
+            const gBadge = gSt === 'accepted' ? 'bg-success' : gSt === 'declined' ? 'bg-danger' : 'bg-warning';
             gList.innerHTML += `
                 <div class="card mb-2">
-                    <div class="card-body">
-                        <div class="row">
+                    <div class="card-body py-2">
+                        <div class="row g-1" style="font-size:.82rem;">
                             <div class="col-md-6">
-                                <strong>Name:</strong> ${gua?.firstName || ''} ${gua?.lastName || ''}<br>
-                                <strong>Member ID:</strong> ${gua?.membershipID || 'N/A'}<br>
-                                <strong>Phone:</strong> ${gua?.phone || 'N/A'}
+                                <strong>${gua?.firstName || ''} ${gua?.lastName || ''}</strong>
+                                <span class="badge ${gBadge} ms-1" style="font-size:.65rem;">${gSt.toUpperCase()}</span><br>
+                                <span class="text-muted">ID: ${gua?.membershipID || 'N/A'}</span><br>
+                                <span class="text-muted">Phone: ${gua?.phone || 'N/A'}</span>
                             </div>
                             <div class="col-md-6">
-                                <strong>Email:</strong> ${gua?.email || 'N/A'}<br>
-                                <strong>Account Balance:</strong> ₦${bal.toLocaleString()}<br>
-                                <strong>Status:</strong> ${g.status}
+                                <span class="text-muted">Email: ${gua?.email || 'N/A'}</span><br>
+                                <span class="text-muted">Balance: </span><strong class="text-success">₦${bal.toLocaleString()}</strong><br>
+                                ${g.respondedAt ? `<span class="text-muted">Responded: ${new Date(g.respondedAt).toDateString()}</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -1518,258 +972,358 @@ function viewLoan(loan) {
         });
     }
 
-    // Show modal
-    new bootstrap.Modal(document.getElementById("viewLoanModal")).show();
+    const isPending = loan.status === 'pending';
+    document.getElementById('approveBtnModal').style.display = isPending ? 'inline-block' : 'none';
+    document.getElementById('rejectBtnModal').style.display  = isPending ? 'inline-block' : 'none';
+
+    new bootstrap.Modal(document.getElementById('viewLoanModal')).show();
 }
 
-        // Reject loan from modal
-        document.getElementById("rejectionReason").addEventListener("change", function() {
-    const otherDiv = document.getElementById("otherReasonDiv");
-    if (this.value === "other") {
-        otherDiv.style.display = "block";
-    } else {
-        otherDiv.style.display = "none";
-        document.getElementById("rejectionDetails").value = "";
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.viewLoanBtn').forEach(btn => {
+        btn.addEventListener('click', () => viewLoan(JSON.parse(btn.dataset.loan)));
+    });
+    computeStats();
+    computeFilterCounts();
 });
 
-// Open reject modal and populate fields
+/* ══════════════════════════════════════
+   APPROVE
+══════════════════════════════════════ */
+function approveLoan() {
+    if (!selectedLoan) return;
+    const isInt = !!selectedLoan.user;
+    const name  = isInt ? `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}` : (selectedLoan.external?.borrowerName || 'Company Loan');
+    const dur   = selectedLoan.duration ? `${selectedLoan.duration.duration} Months` : `${selectedLoan.externalDuration || 'N/A'} Months`;
+    document.getElementById('approveMemberName').textContent   = name;
+    document.getElementById('approveLoanAmount').textContent   = fmt(selectedLoan.amount);
+    document.getElementById('approveLoanInterest').textContent = selectedLoan.interestRate + '%';
+    document.getElementById('approveLoanDuration').textContent = dur;
+    document.getElementById('disbursementMethod').value = '';
+    document.getElementById('disbursementDate').value   = '';
+    bootstrap.Modal.getInstance(document.getElementById('viewLoanModal')).hide();
+    new bootstrap.Modal(document.getElementById('approveLoanModal')).show();
+}
+async function confirmApproval() {
+    if (!selectedLoan) { alert('No loan selected.'); return; }
+    const method = document.getElementById('disbursementMethod').value;
+    const date   = document.getElementById('disbursementDate').value;
+    if (!method || !date) { alert('Please select a disbursement method and date.'); return; }
+    try {
+        const res = await fetch('/api/loans/approve', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ loanId: selectedLoan._id, disbursementMethod: method, disbursementDate: date })
+        });
+        if (!res.ok) { const e = await res.json(); throw new Error(e.message || 'Failed to approve.'); }
+        alert('Loan approved successfully!');
+        bootstrap.Modal.getInstance(document.getElementById('approveLoanModal')).hide();
+        location.reload();
+    } catch (err) { alert(`Error: ${err.message}`); }
+}
+
+/* ══════════════════════════════════════
+   REJECT
+══════════════════════════════════════ */
+document.getElementById('rejectionReason').addEventListener('change', function () {
+    document.getElementById('otherReasonDiv').style.display = this.value === 'Other' ? 'block' : 'none';
+    if (this.value !== 'Other') document.getElementById('rejectionDetails').value = '';
+});
 function rejectLoanFromModal() {
     if (!selectedLoan) return;
-
-    document.getElementById("rejectMemberName").innerText =
-        `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}`;
-    document.getElementById("rejectLoanAmount").innerText =
-        "₦" + selectedLoan.amount.toLocaleString();
-
-    // Reset form fields
-    document.getElementById("rejectionReason").value = "";
-    document.getElementById("rejectionDetails").value = "";
-    document.getElementById("otherReasonDiv").style.display = "none";
-
-    // Hide view modal, show reject modal
-    const viewModal = bootstrap.Modal.getInstance(document.getElementById("viewLoanModal"));
-    viewModal.hide();
-
-    const rejectModal = new bootstrap.Modal(document.getElementById("rejectLoanModal"));
-    rejectModal.show();
+    const isInt = !!selectedLoan.user;
+    document.getElementById('rejectMemberName').textContent = isInt
+        ? `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}`
+        : (selectedLoan.external?.borrowerName || 'Company Loan');
+    document.getElementById('rejectLoanAmount').textContent = fmt(selectedLoan.amount);
+    document.getElementById('rejectionReason').value  = '';
+    document.getElementById('rejectionDetails').value = '';
+    document.getElementById('otherReasonDiv').style.display = 'none';
+    bootstrap.Modal.getInstance(document.getElementById('viewLoanModal')).hide();
+    new bootstrap.Modal(document.getElementById('rejectLoanModal')).show();
 }
-
-    // Confirm rejection and send to backend
-    async function confirmRejection() {
-        if (!selectedLoan) return;
-
-    let reason = document.getElementById("rejectionReason").value.trim();
-    let details = document.getElementById("rejectionDetails").value.trim();
-
-    // If "Other", require details
-    if (reason === "Other" && !details) {
-        alert("Please specify the rejection details for 'Other'.");
-        return;
-    }
-
-    // Use details if "Other", otherwise just the reason message
-    const messageToSend = (reason === "Other") ? details : reason;
-
-
+async function confirmRejection() {
+    if (!selectedLoan) return;
+    const reason  = document.getElementById('rejectionReason').value.trim();
+    const details = document.getElementById('rejectionDetails').value.trim();
+    if (!reason) { alert('Please select a rejection reason.'); return; }
+    if (reason === 'Other' && !details) { alert("Please specify the rejection details for 'Other'."); return; }
     try {
-        const response = await fetch("/api/loans/reject", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                loanId: selectedLoan._id,
-                reason,
-                details: details || reason // if not 'other', use reason as details
-            })
+        const res = await fetch('/api/loans/reject', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ loanId: selectedLoan._id, reason, details: details || reason })
         });
-
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.message || "Failed to reject loan.");
-        }
-
-        const result = await response.json();
-        alert(result.message);
-
-        const rejectModal = bootstrap.Modal.getInstance(document.getElementById("rejectLoanModal"));
-        rejectModal.hide();
-
-        // Refresh UI dynamically
-        updateLoanCounts();
-        updateLoanStats();
-
-    } catch (error) {
-        console.error("Error rejecting loan:", error);
-        alert(`Error: ${error.message}`);
-    }
+        if (!res.ok) { const e = await res.json(); throw new Error(e.message || 'Failed to reject.'); }
+        const result = await res.json();
+        alert(result.message || 'Loan rejected.');
+        bootstrap.Modal.getInstance(document.getElementById('rejectLoanModal')).hide();
+        location.reload();
+    } catch (err) { alert(`Error: ${err.message}`); }
 }
 
+async function sendReminder(loanId) {
+    try {
+        const res  = await fetch(`/api/loans/${loanId}/reminder`, { method: 'POST' });
+        const data = await res.json();
+        alert(data.message || 'Reminder sent successfully.');
+    } catch { alert('Failed to send reminder.'); }
+}
 
-
-</script>
-
-
-<script>
-  function toggleSidebar(e) {
-    e.stopPropagation(); // stop document click
-    document.getElementById("sidebar").classList.toggle("active");
-  }
-
-  // Close sidebar when clicking outside
-  document.addEventListener("click", function () {
-    const sidebar = document.getElementById("sidebar");
-    if (sidebar.classList.contains("active")) {
-      sidebar.classList.remove("active");
-    }
-  });
-
-  // Prevent clicks inside sidebar from closing it
-  document.getElementById("sidebar").addEventListener("click", function (e) {
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+function toggleSidebar(e) {
     e.stopPropagation();
-  });
-</script>
-
-
-<script>
-/* ============================
-   FILTER + COUNTS (MERGED)
-============================ */
-
-function updateLoanCounts() {
-    const rows = document.querySelectorAll("#loansTable tbody tr");
-
-    const counts = {
-        all: rows.length,
-        pending: 0,
-        approved: 0,
-        rejected: 0,
-        overdue: 0,
-        rollover: 0
-    };
-
-    rows.forEach(row => {
-        const status = row.dataset.status;
-        if (counts.hasOwnProperty(status)) {
-            counts[status]++;
-        }
-    });
-
-    Object.keys(counts).forEach(status => {
-        const el = document.getElementById(`count-${status}`);
-        if (el) el.textContent = counts[status];
-    });
+    document.getElementById('sidebar').classList.toggle('active');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
 }
-
-function filterLoans(status, event) {
-    // Active tab state
-    document.querySelectorAll(".filter-tab").forEach(tab =>
-        tab.classList.remove("active")
-    );
-    event.currentTarget.classList.add("active");
-
-    const rows = document.querySelectorAll("#loansTable tbody tr");
-
-    rows.forEach(row => {
-        const rowStatus = row.dataset.status;
-        row.style.display =
-            status === "all" || rowStatus === status ? "" : "none";
-    });
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('active');
+    document.getElementById('sidebarOverlay').classList.remove('active');
 }
-
-// Init on load
-document.addEventListener("DOMContentLoaded", () => {
-    updateLoanCounts();
+document.addEventListener('click', e => {
+    const sb = document.getElementById('sidebar');
+    if (window.innerWidth <= 992 && !sb.contains(e.target) && !e.target.closest('.fa-bars') && sb.classList.contains('active'))
+        closeSidebar();
 });
-</script>
-
-<script>
-function updateLoanStats() {
-    const rows = document.querySelectorAll("#loansTable tbody tr");
-
-    let pending = 0;
-    let approved = 0;
-    let overdue = 0;
-    let rollover = 0;
-
-    let approvedAmount = 0;
-    let overdueAmount = 0;
-
-    rows.forEach(row => {
-        const status = row.dataset.status;
-        const amount = Number(row.dataset.amount) || 0;
-
-        switch (status) {
-            case "pending":
-                pending++;
-                break;
-
-            case "approved":
-                approved++;
-                approvedAmount += amount;
-                break;
-
-            case "overdue":
-                overdue++;
-                overdueAmount += amount;
-                break;
-
-            case "rollover":
-                rollover++;
-                break;
-        }
-    });
-
-    // Update counts
-    document.getElementById("stat-pending").textContent = pending;
-    document.getElementById("stat-approved").textContent = approved;
-    document.getElementById("stat-overdue").textContent = overdue;
-    document.getElementById("stat-rollover").textContent = rollover;
-
-    // Update amounts
-    document.getElementById("stat-approved-amount").textContent =
-        approvedAmount.toLocaleString();
-
-    document.getElementById("stat-overdue-amount").textContent =
-        overdueAmount.toLocaleString();
-}
-
-// Init
-document.addEventListener("DOMContentLoaded", () => {
-    updateLoanCounts();   // your filter counts
-    updateLoanStats();    // stat cards
-});
-</script>
-
-<script>
 async function loadSidebarPendingCount() {
-  try {
-    console.log("Loading sidebar approval count...");
+    try {
+        const res  = await fetch('/admin/pending-approvals-count');
+        const data = await res.json();
+        const badge = document.getElementById('sidebarPendingBadge');
+        if (!badge) return;
+        badge.style.display = data.count > 0 ? 'inline-block' : 'none';
+        if (data.count > 0) badge.textContent = data.count;
+    } catch {}
+}
+document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
 
-    const res = await fetch('/admin/pending-approvals-count');
-    const data = await res.json();
-
-    console.log("Pending approvals count:", data);
-
-    const badge = document.getElementById('sidebarPendingBadge');
-
-    if (!badge) {
-      console.log("Sidebar badge not found on page");
-      return;
-    }
-
-    if (data.count > 0) {
-      badge.style.display = 'inline-block';
-      badge.textContent = data.count;
-    } else {
-      badge.style.display = 'none';
-    }
-
-  } catch (err) {
-    console.error("Sidebar count error:", err);
-  }
+/* ══════════════════════════════════════
+   EXPORT HELPERS
+══════════════════════════════════════ */
+function getFilteredData(useFilter) {
+    if (!useFilter) return loansData;
+    return loansData.filter(l => {
+        const st   = (l.status || '').toLowerCase();
+        const name = l.user ? `${l.user.firstName} ${l.user.lastName}` : (l.external?.borrowerName || '');
+        const matchFilter = currentFilter === 'all' || st === currentFilter;
+        const matchSearch = !currentSearch || name.toLowerCase().includes(currentSearch) || (l.user?.membershipID || '').toLowerCase().includes(currentSearch);
+        return matchFilter && matchSearch;
+    });
 }
 
-document.addEventListener("DOMContentLoaded", loadSidebarPendingCount);
+function buildExportRows(data) {
+    return data.map((l, i) => {
+        const isInt   = !!l.user;
+        const name    = isInt ? `${l.user.firstName} ${l.user.lastName}` : (l.external?.borrowerName || 'External');
+        const id      = isInt ? l.user.membershipID : (l.external?.borrowerType?.toUpperCase() || 'EXTERNAL');
+        const email   = isInt ? l.user.email : (l.external?.email || '');
+        const phone   = isInt ? l.user.phone : (l.external?.phone || '');
+        const addr    = isInt ? '' : (l.external?.address || '');
+        const accType = isInt ? (l.user?.account?.accountType?.name || 'Unknown') : 'External';
+        const dur     = l.duration ? l.duration.duration : (l.externalDuration || 'N/A');
+        const gNames  = (l.guarantors || []).map(g => g.guarantor
+            ? `${g.guarantor.firstName} ${g.guarantor.lastName} [${g.guarantor.membershipID || 'N/A'}] (${g.status})`
+            : 'N/A').join('; ');
+        const createdDate = new Date(l.createdAt);
+        const repayDate   = new Date(createdDate);
+        repayDate.setMonth(repayDate.getMonth() + (l.duration?.duration || l.externalDuration || 0));
+        return {
+            '#': i + 1,
+            'Borrower Name':           name,
+            'Member ID / Type':        id,
+            'Email':                   email,
+            'Phone':                   phone,
+            'Address':                 addr,
+            'Account / Borrower Type': accType,
+            'Loan Amount (₦)':         l.amount,
+            'Interest Rate (%)':       l.interestRate,
+            'Interest Amount (₦)':     l.interestAmount,
+            'Total Repayment (₦)':     l.totalRepay,
+            'Amount Paid (₦)':         l.paidAmount,
+            'Outstanding Balance (₦)': l.outstandingBalance,
+            'Duration (months)':       dur,
+            'Status':                  capSt(l.status),
+            'Disbursement Method':     l.disbursementMethod || '—',
+            'Application Date':        createdDate.toDateString(),
+            'Disbursement Date':       fmtD(l.disbursementDate),
+            'Due Date':                fmtD(l.dueDate),
+            'Approved At':             fmtD(l.approvedAt),
+            'Paid At':                 fmtD(l.paidAt),
+            'Overdue At':              fmtD(l.overdueAt),
+            'Rejected At':             fmtD(l.rejectedAt),
+            'Rejection Reason':        l.rejectionReason  || '—',
+            'Rejection Details':       l.rejectionDetails || '—',
+            'Penalty Rate (%)':        l.penaltyPercentage || 0,
+            'Total Penalty (₦)':       l.totalPenalty      || 0,
+            'Last Penalty Applied':    fmtD(l.lastPenaltyAppliedAt),
+            'Rollover Count':          l.rolloverCount      || 0,
+            'Rollover Rate (%)':       l.rolloverPercentage || 0,
+            'Rolled Into Loan ID':     l.rolledIntoLoan    || '—',
+            'Expected Repay Date':     repayDate.toDateString(),
+            'Guarantors':              gNames || 'None',
+        };
+    });
+}
+
+/* ── Excel ── */
+function exportToExcel(useFilter) {
+    const data = getFilteredData(useFilter);
+    if (!data.length) { alert('No loans to export.'); return; }
+    const rows = buildExportRows(data);
+    const ws   = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [
+        {wch:4},{wch:24},{wch:16},{wch:28},{wch:16},{wch:26},{wch:18},
+        {wch:16},{wch:14},{wch:16},{wch:18},{wch:16},{wch:20},{wch:16},
+        {wch:14},{wch:18},{wch:18},{wch:18},{wch:16},{wch:18},{wch:18},
+        {wch:18},{wch:16},{wch:24},{wch:24},{wch:14},{wch:16},{wch:22},
+        {wch:14},{wch:14},{wch:20},{wch:20},{wch:40}
+    ];
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let C = range.s.c; C <= range.e.c; C++) {
+        const addr = XLSX.utils.encode_cell({ r: 0, c: C });
+        if (!ws[addr]) continue;
+        ws[addr].s = { fill: { fgColor: { rgb: '1E3A8A' } }, font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 10 }, alignment: { horizontal: 'center', vertical: 'center', wrapText: true } };
+    }
+    const numCols = [7, 9, 10, 11, 12, 26, 28];
+    for (let R = 1; R <= range.e.r; R++) {
+        const fill = R % 2 === 0 ? 'EEF2FF' : 'FFFFFF';
+        for (let C = range.s.c; C <= range.e.c; C++) {
+            const addr = XLSX.utils.encode_cell({ r: R, c: C });
+            if (!ws[addr]) ws[addr] = { v: '', t: 's' };
+            ws[addr].s = { fill: { fgColor: { rgb: fill } }, alignment: { vertical: 'center' }, border: { bottom: { style: 'thin', color: { rgb: 'E0E7FF' } } } };
+        }
+        numCols.forEach(C => { const addr = XLSX.utils.encode_cell({ r: R, c: C }); if (ws[addr]) { ws[addr].t = 'n'; ws[addr].z = '#,##0.00'; } });
+    }
+    const approvedAmt = data.filter(l => l.status === 'approved' || l.status === 'rolled_over').reduce((s, l) => s + l.amount, 0);
+    const overdueAmt  = data.filter(l => l.status === 'overdue').reduce((s, l) => s + l.amount, 0);
+    const now = new Date().toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const summaryData = [
+        ['Club De Stars Cooperative — Loan Export', ''],
+        ['Generated', now],
+        ['Export Scope', useFilter ? `Filter: ${currentFilter}` : 'All Loans'],
+        ['', ''],
+        ['LOAN COUNTS', ''],
+        ['Total Records',        data.length],
+        ['Pending',              data.filter(l=>l.status==='pending').length],
+        ['Approved (Active)',    data.filter(l=>l.status==='approved').length],
+        ['Rolled Over (Active)', data.filter(l=>l.status==='rolled_over').length],
+        ['Total Active',         data.filter(l=>l.status==='approved'||l.status==='rolled_over').length],
+        ['Overdue',              data.filter(l=>l.status==='overdue').length],
+        ['Rejected',             data.filter(l=>l.status==='rejected').length],
+        ['Paid / Settled',       data.filter(l=>l.status==='paid').length],
+        ['', ''],
+        ['FINANCIAL TOTALS', ''],
+        ['Total Active Amount',              approvedAmt],
+        ['Total Overdue Amount',             overdueAmt],
+        ['Total Outstanding Balance',        data.reduce((s,l)=>s+(l.outstandingBalance||0),0)],
+        ['Total Amount Paid Back',           data.reduce((s,l)=>s+(l.paidAmount||0),0)],
+        ['Total Penalties Charged',          data.reduce((s,l)=>s+(l.totalPenalty||0),0)],
+        ['Grand Total (All Loan Amounts)',   data.reduce((s,l)=>s+l.amount,0)],
+    ];
+    const ws2 = XLSX.utils.aoa_to_sheet(summaryData);
+    ws2['!cols'] = [{ wch: 38 }, { wch: 22 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Loans');
+    XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
+    XLSX.writeFile(wb, `CDS_Loans_${new Date().toISOString().split('T')[0]}${useFilter ? '_' + currentFilter : ''}.xlsx`);
+}
+
+/* ── PDF ── */
+function exportToPDF(useFilter) {
+    const data = getFilteredData(useFilter);
+    if (!data.length) { alert('No loans to export.'); return; }
+    const now = new Date().toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const totalAmt    = data.reduce((s,l)=>s+l.amount,0);
+    const activeAmt   = data.filter(l=>l.status==='approved'||l.status==='rolled_over').reduce((s,l)=>s+l.amount,0);
+    const overdueAmt  = data.filter(l=>l.status==='overdue').reduce((s,l)=>s+l.amount,0);
+    const stColor = { approved:'#059669', pending:'#d97706', rejected:'#dc2626', overdue:'#dc2626', paid:'#1e3a8a', rolled_over:'#7c3aed' };
+    const stBg    = { approved:'#d1fae5', pending:'#fef3c7', rejected:'#fee2e2', overdue:'#fee2e2', paid:'#dbeafe', rolled_over:'#ede9fe' };
+    const counts = ['pending','approved','overdue','rejected','paid','rolled_over'].reduce((o,k)=>{ o[k]=data.filter(l=>l.status===k).length; return o; }, {});
+    const rows = data.map((l, i) => {
+        const isInt   = !!l.user;
+        const name    = isInt ? `${l.user.firstName} ${l.user.lastName}` : (l.external?.borrowerName || 'External');
+        const id      = isInt ? l.user.membershipID : (l.external?.borrowerType?.toUpperCase() || 'EXTERNAL');
+        const accType = isInt ? (l.user?.account?.accountType?.name || 'Unknown') : 'External';
+        const dur     = l.duration ? l.duration.duration : (l.externalDuration || 'N/A');
+        const sc = stColor[l.status] || '#475569';
+        const sb = stBg[l.status]    || '#f1f5f9';
+        const rowBg = i % 2 === 0 ? '#fff' : '#f8fafc';
+        const penalties = l.totalPenalty > 0 ? `<br><span style="color:#dc2626;font-size:9px;">Penalty: ₦${l.totalPenalty.toLocaleString()}</span>` : '';
+        const rollovers = l.rolloverCount > 0 ? `<br><span style="color:#7c3aed;font-size:9px;">Rollovers: ${l.rolloverCount}</span>` : '';
+        return `<tr style="background:${rowBg};">
+            <td style="text-align:center;color:#9ca3af;font-size:11px;">${i+1}</td>
+            <td><strong style="font-size:12px;">${name}</strong><br><span style="color:#9ca3af;font-size:10px;">${id}</span><br><span style="font-size:10px;color:#1e3a8a;">${accType}</span></td>
+            <td style="text-align:right;font-weight:800;font-size:12px;color:#1e3a8a;">₦${l.amount.toLocaleString('en-NG',{minimumFractionDigits:2})}</td>
+            <td style="text-align:right;font-size:11px;color:#dc2626;">${l.outstandingBalance > 0 ? '₦'+l.outstandingBalance.toLocaleString('en-NG',{minimumFractionDigits:2}) : '—'}${penalties}</td>
+            <td style="text-align:right;font-size:11px;color:#059669;">₦${l.paidAmount.toLocaleString('en-NG',{minimumFractionDigits:2})}</td>
+            <td style="text-align:center;"><span style="background:rgba(30,58,138,.1);color:#1e3a8a;padding:2px 6px;border-radius:5px;font-size:10px;font-weight:700;">${l.interestRate}%</span></td>
+            <td style="text-align:center;font-size:11px;color:#6b7280;">${dur}mo${rollovers}</td>
+            <td style="text-align:center;"><span style="background:${sb};color:${sc};padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;">${capSt(l.status)}</span></td>
+            <td style="font-size:10px;color:#6b7280;">${new Date(l.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
+            <td style="font-size:10px;color:#6b7280;">${fmtD(l.dueDate)}</td>
+        </tr>`;
+    }).join('');
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Club De Stars — Loan Report</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1e293b;background:#fff;}
+.header{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;padding:22px 28px;}
+.header h1{font-size:20px;font-weight:800;margin-bottom:3px;}.header p{font-size:11px;opacity:.8;}
+.meta{display:flex;gap:14px;padding:10px 28px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-wrap:wrap;}
+.mi{display:flex;flex-direction:column;min-width:80px;}
+.mi span:first-child{font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;}
+.mi span:last-child{font-size:13px;font-weight:800;color:#1e3a8a;}
+.mi.g span:last-child{color:#059669;}.mi.r span:last-child{color:#dc2626;}.mi.a span:last-child{color:#d97706;}.mi.p span:last-child{color:#7c3aed;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:#1e3a8a;color:white;}
+thead th{padding:8px 9px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+thead th:first-child{text-align:center;width:28px;}
+tbody td{padding:7px 9px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+.footer{padding:14px 28px;font-size:10px;color:#9ca3af;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;margin-top:6px;}
+@media print{@page{size:A4 landscape;margin:7mm;}.no-print{display:none;}}
+</style></head><body>
+<div class="header">
+    <h1>Club De Stars Cooperative — Loan Report</h1>
+    <p>Generated: ${now} &nbsp;|&nbsp; ${useFilter && currentFilter !== 'all' ? 'Filter: ' + capSt(currentFilter) : 'Full Export'}</p>
+</div>
+<div class="meta">
+    <div class="mi"><span>Total</span><span>${data.length}</span></div>
+    <div class="mi a"><span>Pending</span><span>${counts.pending}</span></div>
+    <div class="mi g"><span>Active</span><span>${counts.approved + counts.rolled_over}</span></div>
+    <div class="mi r"><span>Overdue</span><span>${counts.overdue}</span></div>
+    <div class="mi p"><span>Rolled Over</span><span>${counts.rolled_over}</span></div>
+    <div class="mi r"><span>Rejected</span><span>${counts.rejected}</span></div>
+    <div class="mi g"><span>Paid</span><span>${counts.paid}</span></div>
+    <div class="mi g"><span>Active Total</span><span>₦${activeAmt.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
+    <div class="mi r"><span>Overdue Total</span><span>₦${overdueAmt.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
+    <div class="mi"><span>Grand Total</span><span>₦${totalAmt.toLocaleString('en-NG',{minimumFractionDigits:2})}</span></div>
+</div>
+<div style="padding:0 0 10px;">
+<table>
+<thead><tr>
+    <th>#</th><th>Borrower</th><th style="text-align:right;">Amount</th>
+    <th style="text-align:right;">Outstanding</th><th style="text-align:right;">Paid</th>
+    <th style="text-align:center;">Rate</th><th style="text-align:center;">Duration</th>
+    <th style="text-align:center;">Status</th><th>Date Applied</th><th>Due Date</th>
+</tr></thead>
+<tbody>${rows}</tbody>
+</table>
+</div>
+<div class="footer">
+    <span>Club De Stars Cooperative &nbsp;·&nbsp; Powered by JESZ LIMITED</span>
+    <span>${data.length} loan records exported</span>
+</div>
+<div style="text-align:center;padding:14px;" class="no-print">
+    <button onclick="window.print()" style="padding:10px 28px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;margin-right:8px;">🖨 Print / Save as PDF</button>
+    <button onclick="window.close()" style="padding:10px 20px;background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Close</button>
+</div>
+</body></html>`;
+    const win = window.open('', '_blank', 'width=1300,height=850');
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+}
 </script>
 </body>
 </html>

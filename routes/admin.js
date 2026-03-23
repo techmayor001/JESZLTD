@@ -513,7 +513,7 @@ router.get(
 
 // HANDLING MEMBERS ONBOARDING, MEMBER TYPES MANAGEMENT - TECHMAYOR COMPANY LIMITED
 router.get(
-  '/admin-dashboard',
+  '/admin/manage-members',
   ensureAdmin("view_members"),
   async (req, res) => {
     try {
