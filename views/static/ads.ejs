@@ -1,0 +1,663 @@
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+#stage{width:100%;aspect-ratio:16/9;background:#03070f;position:relative;overflow:hidden;min-height:320px;font-family:'Segoe UI',system-ui,sans-serif;cursor:default;}
+canvas#stars{position:absolute;inset:0;width:100%;height:100%;z-index:0;}
+
+/* vignette */
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(0,0,0,.8) 100%);z-index:1;pointer-events:none;}
+
+/* all scenes sit in z-index 2 */
+#scenes{position:absolute;inset:0;z-index:2;}
+.sc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;}
+
+/* ── overlay tint per scene ── */
+.sc-tint-blue{background:rgba(4,18,44,.55);}
+.sc-tint-green{background:rgba(2,20,12,.5);}
+.sc-tint-amber{background:rgba(28,18,2,.5);}
+.sc-tint-none{background:transparent;}
+
+/* ── typography ── */
+.eyebrow{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:#2e6080;font-weight:400;margin-bottom:8px;opacity:0;transform:translateY(6px);}
+.headline{font-size:clamp(22px,4.5vw,38px);font-weight:700;line-height:1.15;text-align:center;color:#fff;opacity:0;transform:translateY(14px);}
+.headline .hi{color:#5cc8ff;}
+.headline .gr{color:#3de88a;}
+.headline .am{color:#f7c355;}
+.subline{font-size:clamp(12px,2vw,15px);color:#4a7a96;text-align:center;line-height:1.6;max-width:520px;margin-top:10px;opacity:0;transform:translateY(10px);}
+.subline b{color:#7ab8d0;font-weight:500;}
+
+/* ── stat pill ── */
+.stat-row{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center;opacity:0;transform:translateY(10px);}
+.stat{padding:8px 18px;border-radius:100px;font-size:12px;font-weight:600;letter-spacing:.04em;}
+.stat-b{background:rgba(92,200,255,.1);border:1px solid rgba(92,200,255,.2);color:#5cc8ff;}
+.stat-g{background:rgba(61,232,138,.1);border:1px solid rgba(61,232,138,.2);color:#3de88a;}
+.stat-a{background:rgba(247,195,85,.1);border:1px solid rgba(247,195,85,.2);color:#f7c355;}
+
+/* ── phone mockup ── */
+.phone-wrap{position:relative;width:clamp(120px,22vw,185px);flex-shrink:0;opacity:0;transform:translateY(20px) scale(.95);}
+.phone{width:100%;background:#0a1628;border:1.5px solid rgba(92,200,255,.18);border-radius:24px;overflow:hidden;padding:10px;}
+.phone-bar{display:flex;align-items:center;gap:6px;margin-bottom:8px;padding:0 2px;}
+.phone-dot{width:6px;height:6px;border-radius:50%;}
+.phone-screen-inner{background:#040d1e;border-radius:14px;padding:10px;min-height:120px;}
+
+/* ── screen content helpers ── */
+.prow{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.plbl{font-size:9px;color:#2e5a72;text-transform:uppercase;letter-spacing:.07em;}
+.pval{font-size:11px;font-weight:600;}
+.pbar-bg{height:3px;border-radius:2px;background:rgba(255,255,255,.07);overflow:hidden;margin:4px 0 8px;}
+.pbar-fill{height:100%;border-radius:2px;}
+.pcta-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px;}
+.pcta{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:6px 4px;text-align:center;}
+.pcta-icon{font-size:13px;margin-bottom:2px;}
+.pcta-lbl{font-size:8px;color:#2e5a72;}
+
+/* ── split layout ── */
+.split{display:flex;align-items:center;gap:clamp(16px,4vw,48px);width:min(90%,680px);justify-content:center;}
+.split-text{flex:1;min-width:0;}
+.split-text .eyebrow,.split-text .headline,.split-text .subline,.split-text .stat-row{text-align:left;}
+
+/* ── growth chart ── */
+.chart-wrap{width:clamp(140px,28vw,220px);flex-shrink:0;opacity:0;transform:translateY(16px);}
+.chart-inner{background:#040d1e;border:1px solid rgba(61,232,138,.15);border-radius:12px;padding:12px;}
+.chart-title{font-size:9px;color:#2e5a72;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:60px;}
+.cbar{flex:1;border-radius:3px 3px 0 0;min-width:0;}
+.chart-labels{display:flex;gap:4px;margin-top:4px;}
+.clbl{flex:1;font-size:7px;color:#1e3a52;text-align:center;}
+.chart-roi{margin-top:8px;padding:6px 8px;background:rgba(61,232,138,.07);border:1px solid rgba(61,232,138,.15);border-radius:6px;display:flex;justify-content:space-between;align-items:center;}
+.chart-roi-lbl{font-size:8px;color:#2e5a72;}
+.chart-roi-val{font-size:12px;font-weight:700;color:#3de88a;}
+
+/* ── loan card ── */
+.loan-card{width:clamp(140px,28vw,220px);flex-shrink:0;opacity:0;transform:translateY(16px);}
+.lc-inner{background:#040d1e;border:1px solid rgba(247,195,85,.15);border-radius:12px;padding:12px;}
+.lc-top{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.lc-icon{width:28px;height:28px;border-radius:7px;background:rgba(247,195,85,.12);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.lc-title{font-size:11px;font-weight:600;color:#c8d4f0;}
+.lc-sub{font-size:8px;color:#2e5a72;}
+.lc-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:9px;}
+.lc-row:last-child{border-bottom:none;}
+.lc-k{color:#2e5a72;}
+.lc-v{font-weight:600;color:#c8d4f0;}
+.lc-btn{margin-top:8px;padding:6px;background:linear-gradient(135deg,#7c4a00,#f7c355);border-radius:6px;font-size:9px;font-weight:700;color:#2a1800;text-align:center;}
+
+/* ── progress bar bottom ── */
+#prog{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.04);z-index:10;}
+#progfill{height:100%;width:0;background:linear-gradient(90deg,#1e40af,#5cc8ff);}
+
+/* ── chapter indicator ── */
+#chap-indicator{position:absolute;top:14px;left:16px;z-index:10;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#0f2a3a;font-family:'Segoe UI',sans-serif;opacity:0;transition:opacity .4s;}
+
+/* ── cta button ── */
+#cta-btn{position:absolute;bottom:18px;right:16px;z-index:10;background:none;border:1px solid rgba(92,200,255,.2);color:#2e6080;border-radius:8px;padding:5px 14px;font-size:10px;cursor:pointer;font-family:inherit;letter-spacing:.06em;opacity:0;transition:all .2s;}
+#cta-btn:hover{border-color:#5cc8ff;color:#5cc8ff;}
+
+/* ── start overlay ── */
+#so{position:absolute;inset:0;z-index:30;background:#03070f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+#so .ring{width:58px;height:58px;border-radius:50%;border:1.5px solid rgba(92,200,255,.25);display:flex;align-items:center;justify-content:center;}
+#so .tri{width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:18px solid #5cc8ff;margin-left:4px;}
+#so .stxt{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#1e4a60;font-family:inherit;}
+#so .stitle{font-size:clamp(13px,2.5vw,17px);color:#1a3a52;letter-spacing:.06em;font-weight:400;}
+</style>
+
+<div id="stage">
+  <canvas id="stars"></canvas>
+  <div id="vig"></div>
+  <div id="chap-indicator" id="ci">CloudBAAM</div>
+
+  <div id="scenes">
+
+    <!-- Scene 0: cold open — product stamp -->
+    <div class="sc sc-tint-none" id="s0" style="background:#000;">
+      <div class="eyebrow" id="s0e">A product of JESZ Limited</div>
+    </div>
+
+    <!-- Scene 1: opening hook — the struggle -->
+    <div class="sc sc-tint-blue" id="s1">
+      <div style="text-align:center;width:min(90%,600px);">
+        <div class="eyebrow" id="s1e">Your money deserves more</div>
+        <div class="headline" id="s1h">Your salary arrives.<br>Bills leave. <span class="hi">Nothing stays.</span></div>
+        <div class="subline" id="s1s">Most Nigerians work hard — but without the right system, savings don't grow and emergencies still break the bank. There's a smarter way.</div>
+        <div class="stat-row" id="s1r">
+          <div class="stat stat-b">Save with purpose</div>
+          <div class="stat stat-g">Earn real returns</div>
+          <div class="stat stat-a">Access loans fast</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 2: introduce CloudBAAM / Club De Stars -->
+    <div class="sc sc-tint-none" id="s2">
+      <div style="text-align:center;width:min(90%,560px);">
+        <div class="eyebrow" id="s2e">Introducing CloudBAAM</div>
+        <div class="headline" id="s2h">The cooperative that<br>works <span class="hi">while you sleep</span></div>
+        <div class="subline" id="s2s">Club De Stars Multipurpose Cooperative Society — powered by <b>CloudBAAM</b> — turns your regular contributions into a wealth-building engine with monthly ROI and instant loan access.</div>
+      </div>
+      <!-- animated ring logo -->
+      <div id="s2logo" style="margin-top:22px;opacity:0;">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" style="overflow:visible;">
+          <circle cx="40" cy="40" r="35" stroke="#0c2236" stroke-width="2" stroke-dasharray="5 8" style="animation:orbs 16s linear infinite;transform-origin:40px 40px;"/>
+          <circle cx="40" cy="40" r="26" fill="none" stroke="#0c2236" stroke-width="2"/>
+          <circle cx="40" cy="40" r="26" fill="none" stroke="#5cc8ff" stroke-width="2" stroke-linecap="round" stroke-dasharray="163" stroke-dashoffset="42" transform="rotate(-90 40 40)"/>
+          <circle cx="40" cy="14" r="4" fill="#5cc8ff"/>
+          <text x="40" y="40" text-anchor="middle" dominant-baseline="central" fill="#5cc8ff" font-size="16" font-weight="700" font-family="'Segoe UI',sans-serif">CB</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Scene 3: join & onboard -->
+    <div class="sc sc-tint-blue" id="s3">
+      <div class="split">
+        <div class="split-text">
+          <div class="eyebrow" id="s3e">Step 1 of 4</div>
+          <div class="headline" id="s3h">Join in<br><span class="hi">5 minutes</span></div>
+          <div class="subline" id="s3s">Register online, upload your ID and proof of address, pay a one-time ₦5,000 fee, and your account goes live once confirmed — usually within 30 minutes.</div>
+          <div class="stat-row" id="s3r">
+            <div class="stat stat-b">₦5,000 registration</div>
+            <div class="stat stat-b">100% online</div>
+          </div>
+        </div>
+        <div class="phone-wrap" id="s3phone">
+          <div class="phone">
+            <div class="phone-bar">
+              <div class="phone-dot" style="background:#f05252;"></div>
+              <div class="phone-dot" style="background:#f5a623;"></div>
+              <div class="phone-dot" style="background:#22c78a;"></div>
+            </div>
+            <div class="phone-screen-inner">
+              <div style="font-size:8px;color:#2e5a72;margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase;">Registration</div>
+              <!-- step dots -->
+              <div style="display:flex;align-items:center;gap:4px;margin-bottom:10px;">
+                <div style="width:7px;height:7px;border-radius:50%;background:#4f8ef7;"></div>
+                <div style="flex:1;height:1px;background:rgba(255,255,255,.08);"></div>
+                <div style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.1);"></div>
+                <div style="flex:1;height:1px;background:rgba(255,255,255,.08);"></div>
+                <div style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.1);"></div>
+              </div>
+              <!-- form fields -->
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:5px;padding:5px 7px;margin-bottom:4px;">
+                <div style="font-size:7px;color:#1e3a52;">Full Name</div>
+                <div style="font-size:10px;color:#c8d4f0;font-weight:500;">Adaeze Okonkwo</div>
+              </div>
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:5px;padding:5px 7px;margin-bottom:4px;">
+                <div style="font-size:7px;color:#1e3a52;">Email</div>
+                <div style="font-size:10px;color:#c8d4f0;font-weight:500;">adaeze@mail.com</div>
+              </div>
+              <div style="display:flex;gap:3px;margin-bottom:8px;">
+                <div style="flex:1;background:rgba(92,200,255,.08);border:1px solid rgba(92,200,255,.15);border-radius:5px;padding:4px 6px;font-size:7px;color:#5cc8ff;text-align:center;">NIN ✓</div>
+                <div style="flex:1;background:rgba(92,200,255,.08);border:1px solid rgba(92,200,255,.15);border-radius:5px;padding:4px 6px;font-size:7px;color:#5cc8ff;text-align:center;">Photo ✓</div>
+              </div>
+              <div style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:5px;padding:5px;text-align:center;font-size:9px;font-weight:700;color:#fff;">Register Now →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 4: save & earn ROI -->
+    <div class="sc sc-tint-green" id="s4">
+      <div class="split">
+        <div class="chart-wrap" id="s4chart">
+          <div class="chart-inner">
+            <div class="chart-title">Your savings grow monthly</div>
+            <div class="chart-bars" id="cbars">
+              <div class="cbar" id="cb0" style="background:rgba(61,232,138,.15);height:0%;"></div>
+              <div class="cbar" id="cb1" style="background:rgba(61,232,138,.25);height:0%;"></div>
+              <div class="cbar" id="cb2" style="background:rgba(61,232,138,.4);height:0%;"></div>
+              <div class="cbar" id="cb3" style="background:rgba(61,232,138,.55);height:0%;"></div>
+              <div class="cbar" id="cb4" style="background:rgba(61,232,138,.7);height:0%;"></div>
+              <div class="cbar" id="cb5" style="background:#3de88a;height:0%;"></div>
+            </div>
+            <div class="chart-labels">
+              <div class="clbl">Jan</div><div class="clbl">Feb</div><div class="clbl">Mar</div>
+              <div class="clbl">Apr</div><div class="clbl">May</div><div class="clbl">Jun</div>
+            </div>
+            <div class="chart-roi">
+              <div class="chart-roi-lbl">Monthly ROI earned</div>
+              <div class="chart-roi-val" id="roi-val">₦0</div>
+            </div>
+          </div>
+        </div>
+        <div class="split-text">
+          <div class="eyebrow" id="s4e">Step 2 of 4</div>
+          <div class="headline" id="s4h">Save once.<br><span class="gr">Earn every month.</span></div>
+          <div class="subline" id="s4s">Your savings are pooled and invested into low-risk portfolios. Each month, your balance earns ROI proportional to your share — distributed at year-end or compounding forward.</div>
+          <div class="stat-row" id="s4r">
+            <div class="stat stat-g">Min ₦1,000 deposit</div>
+            <div class="stat stat-g">Proportional ROI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 5: withdraw when ready -->
+    <div class="sc sc-tint-blue" id="s5">
+      <div style="text-align:center;width:min(90%,580px);">
+        <div class="eyebrow" id="s5e">Step 3 of 4</div>
+        <div class="headline" id="s5h">Your money,<br>on your <span class="hi">terms</span></div>
+        <div class="subline" id="s5s">Every December 1–10 is your open window — withdraw freely, no charge. Need funds outside that window? On-demand withdrawal is available anytime, with a small service fee. Your minimum ₦10,000 stays to keep the account active.</div>
+        <div class="stat-row" id="s5r">
+          <div class="stat stat-b">Dec 1–10: Free window</div>
+          <div class="stat stat-a">On-demand: 2.5% fee</div>
+          <div class="stat stat-g">Min ₦10k stays</div>
+        </div>
+        <!-- withdrawal timeline visual -->
+        <div id="s5timeline" style="display:flex;align-items:center;gap:0;margin-top:20px;width:min(90%,440px);opacity:0;transform:translateY(10px);">
+          <div style="flex:1;text-align:center;">
+            <div style="width:36px;height:36px;border-radius:50%;background:rgba(92,200,255,.1);border:1px solid rgba(92,200,255,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 5px;font-size:14px;">💰</div>
+            <div style="font-size:9px;color:#2e6080;">Save</div>
+          </div>
+          <div style="flex:1;height:1px;background:rgba(92,200,255,.15);"></div>
+          <div style="flex:1;text-align:center;">
+            <div style="width:36px;height:36px;border-radius:50%;background:rgba(61,232,138,.1);border:1px solid rgba(61,232,138,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 5px;font-size:14px;">📈</div>
+            <div style="font-size:9px;color:#2e6080;">Earn ROI</div>
+          </div>
+          <div style="flex:1;height:1px;background:rgba(61,232,138,.15);"></div>
+          <div style="flex:1;text-align:center;">
+            <div style="width:36px;height:36px;border-radius:50%;background:rgba(247,195,85,.1);border:1px solid rgba(247,195,85,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 5px;font-size:14px;">🏧</div>
+            <div style="font-size:9px;color:#2e6080;">Withdraw</div>
+          </div>
+          <div style="flex:1;height:1px;background:rgba(247,195,85,.15);"></div>
+          <div style="flex:1;text-align:center;">
+            <div style="width:36px;height:36px;border-radius:50%;background:rgba(92,200,255,.1);border:1px solid rgba(92,200,255,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 5px;font-size:14px;">🔄</div>
+            <div style="font-size:9px;color:#2e6080;">Grow more</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 6: loans -->
+    <div class="sc sc-tint-amber" id="s6">
+      <div class="split">
+        <div class="split-text">
+          <div class="eyebrow" id="s6e">Step 4 of 4</div>
+          <div class="headline" id="s6h">Need cash now?<br><span class="am">Your savings unlock it.</span></div>
+          <div class="subline" id="s6s">After just 1 month of membership, you can borrow up to <b>3× your savings</b>. Club members get 3% monthly interest. Emergency sorted — no bank queues, no lengthy approvals.</div>
+          <div class="stat-row" id="s6r">
+            <div class="stat stat-a">Up to 3× savings</div>
+            <div class="stat stat-a">3% monthly rate</div>
+            <div class="stat stat-a">2 guarantors needed</div>
+          </div>
+        </div>
+        <div class="loan-card" id="s6loan">
+          <div class="lc-inner">
+            <div class="lc-top">
+              <div class="lc-icon">💳</div>
+              <div><div class="lc-title">Loan Application</div><div class="lc-sub">Adaeze Okonkwo</div></div>
+            </div>
+            <div class="lc-row"><span class="lc-k">Savings balance</span><span class="lc-v" style="color:#3de88a;">₦50,000</span></div>
+            <div class="lc-row"><span class="lc-k">Max eligible loan</span><span class="lc-v" style="color:#f7c355;">₦150,000</span></div>
+            <div class="lc-row"><span class="lc-k">Rate (Club member)</span><span class="lc-v">3% / month</span></div>
+            <div class="lc-row"><span class="lc-k">Tenor</span><span class="lc-v">1 month</span></div>
+            <div class="lc-row"><span class="lc-k">Repay total</span><span class="lc-v" style="color:#f7c355;">₦154,500</span></div>
+            <div class="lc-btn" id="s6btn" style="opacity:0;">Apply Now →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 7: dashboard showcase -->
+    <div class="sc sc-tint-blue" id="s7">
+      <div style="text-align:center;width:min(92%,640px);">
+        <div class="eyebrow" id="s7e">Your command centre</div>
+        <div class="headline" id="s7h">Everything in one <span class="hi">dashboard</span></div>
+        <!-- dashboard mockup -->
+        <div id="s7dash" style="margin-top:18px;background:#040d1e;border:1px solid rgba(92,200,255,.12);border-radius:14px;padding:14px;opacity:0;transform:translateY(14px);">
+          <!-- top bar -->
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.05);">
+            <div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#4f8ef7,#7c5af4);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;">AO</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:11px;font-weight:600;color:#c8d4f0;">Hello, Adaeze 👋</div>
+              <div style="font-size:8px;color:#1e3a52;">Member since Jan 2025 · CD-20010</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <div style="width:5px;height:5px;border-radius:50%;background:#22c78a;box-shadow:0 0 4px #22c78a;"></div>
+              <span style="font-size:9px;color:#22c78a;font-weight:500;">Active</span>
+            </div>
+          </div>
+          <!-- balance hero -->
+          <div style="background:linear-gradient(135deg,#0a1628,#111f3a);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;margin-bottom:10px;">
+            <div style="font-size:8px;color:#1e3a52;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Total Savings Balance</div>
+            <div style="font-size:clamp(20px,4vw,28px);font-weight:300;color:#e0eaff;letter-spacing:-.5px;"><sup style="font-size:.42em;vertical-align:super;color:#1e3a52;">₦</sup><span id="dashcnt">0</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+              <div style="background:rgba(255,255,255,.03);border-radius:7px;padding:8px;border:1px solid rgba(255,255,255,.05);">
+                <div style="font-size:8px;color:#1e3a52;">Monthly ROI</div>
+                <div style="font-size:12px;font-weight:600;color:#22c78a;">₦1,250</div>
+              </div>
+              <div style="background:rgba(255,255,255,.03);border-radius:7px;padding:8px;border:1px solid rgba(255,255,255,.05);">
+                <div style="font-size:8px;color:#1e3a52;">Loan eligible</div>
+                <div style="font-size:12px;font-weight:600;color:#f7c355;">₦150,000</div>
+              </div>
+            </div>
+          </div>
+          <!-- ctas -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">
+            <div style="background:rgba(34,199,138,.07);border:1px solid rgba(34,199,138,.15);border-radius:8px;padding:8px 4px;text-align:center;">
+              <div style="font-size:13px;margin-bottom:2px;">+</div><div style="font-size:8px;color:#1e5a3a;">Deposit</div>
+            </div>
+            <div style="background:rgba(240,82,82,.07);border:1px solid rgba(240,82,82,.15);border-radius:8px;padding:8px 4px;text-align:center;">
+              <div style="font-size:13px;margin-bottom:2px;color:#f05252;">−</div><div style="font-size:8px;color:#3a1e1e;">Withdraw</div>
+            </div>
+            <div style="background:rgba(247,195,85,.07);border:1px solid rgba(247,195,85,.15);border-radius:8px;padding:8px 4px;text-align:center;">
+              <div style="font-size:13px;margin-bottom:2px;">₦</div><div style="font-size:8px;color:#3a2e1a;">Loan</div>
+            </div>
+            <div style="background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.15);border-radius:8px;padding:8px 4px;text-align:center;">
+              <div style="font-size:13px;margin-bottom:2px;color:#4f8ef7;">↩</div><div style="font-size:8px;color:#1a2a3a;">Repay</div>
+            </div>
+          </div>
+          <!-- nav pills -->
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            <div style="padding:3px 9px;border-radius:20px;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);font-size:8px;color:#4f8ef7;">Transactions</div>
+            <div style="padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);font-size:8px;color:#1e3a52;">Loans</div>
+            <div style="padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);font-size:8px;color:#1e3a52;">Reports</div>
+            <div style="padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);font-size:8px;color:#1e3a52;">Guarantor</div>
+            <div style="padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);font-size:8px;color:#1e3a52;">Kiddies</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scene 8: call to action finale -->
+    <div class="sc sc-tint-none" id="s8" style="background:#03070f;">
+      <div style="text-align:center;width:min(90%,560px);">
+        <div id="s8logo" style="opacity:0;margin-bottom:18px;">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" style="display:block;margin:0 auto;">
+            <circle cx="32" cy="32" r="29" stroke="#0c2236" stroke-width="1.5"/>
+            <circle cx="32" cy="32" r="29" stroke="#5cc8ff" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="140" stroke-dashoffset="35" transform="rotate(-90 32 32)"/>
+            <circle cx="32" cy="3" r="3.5" fill="#5cc8ff"/>
+            <text x="32" y="32" text-anchor="middle" dominant-baseline="central" fill="#5cc8ff" font-size="14" font-weight="700" font-family="'Segoe UI',sans-serif">CB</text>
+          </svg>
+        </div>
+        <div class="eyebrow" id="s8e">Start your journey today</div>
+        <div class="headline" id="s8h">Cloud<span class="hi">BAAM</span></div>
+        <div class="subline" id="s8s" style="font-size:clamp(11px,1.8vw,14px);color:#2e6080;margin-top:6px;">Save. Earn. Borrow. Grow.<br>Club De Stars Cooperative — powered by JESZ Limited.</div>
+        <div class="stat-row" id="s8r">
+          <div class="stat stat-b">Join now</div>
+          <div class="stat stat-g">₦5,000 to start</div>
+        </div>
+        <div id="s8sub" style="margin-top:16px;font-size:9px;color:#0f2030;letter-spacing:.12em;opacity:0;">A product of JESZ Limited</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="prog"><div id="progfill"></div></div>
+  <div id="chap-indicator">CloudBAAM</div>
+  <button id="cta-btn" onclick="startShow()">↺ Replay</button>
+
+  <div id="so" onclick="startShow()">
+    <div class="stitle">CloudBAAM · Cooperative Platform</div>
+    <div class="ring"><div class="tri"></div></div>
+    <div class="stxt">Play story</div>
+  </div>
+</div>
+
+<style>
+@keyframes orbs{to{transform:rotate(360deg);}}
+</style>
+
+<script>
+const TOTAL = 52000;
+let raf, t0, playing = false;
+const $ = id => document.getElementById(id);
+
+/* ─── audio ─── */
+let ax;
+function audio(){if(!ax){ax=new(window.AudioContext||window.webkitAudioContext)();}if(ax.state==='suspended')ax.resume();}
+function tone(f,d,v=.05,t='sine',a=.008){
+  if(!ax)return;
+  const g=ax.createGain(),o=ax.createOscillator();
+  o.type=t;o.frequency.value=f;
+  g.gain.setValueAtTime(0,ax.currentTime);
+  g.gain.linearRampToValueAtTime(v,ax.currentTime+a);
+  g.gain.exponentialRampToValueAtTime(.0001,ax.currentTime+d);
+  o.connect(g);g.connect(ax.destination);o.start();o.stop(ax.currentTime+d+.05);
+}
+function chord(fs,d,v=.04){fs.forEach(f=>tone(f,d,v));}
+function whoosh(){[200,280,380,480].forEach((f,i)=>setTimeout(()=>tone(f,.12,.03,'sine'),i*30));}
+function riseUp(){chord([261.6,329.6,392],.35,.04);}
+function shimmer(){[880,1100,1320].forEach((f,i)=>setTimeout(()=>tone(f,.08,.025),i*55));}
+function success(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.14,.04),i*80));}
+function coinSound(){[800,1000,1200].forEach((f,i)=>setTimeout(()=>tone(f,.1,.04,'triangle'),i*60));}
+function deepBoom(){tone(60,.8,.08,'sine');tone(80,.6,.06,'sine');}
+function barPop(){tone(440,.07,.04,'square');}
+function click(){tone(600,.04,.04,'square');}
+function finalFanfare(){[523,659,784,659,784,1047,784,1047,1318].forEach((f,i)=>setTimeout(()=>tone(f,i===8?.5:.13,.05),i*85));}
+function ambientDrone(freq,dur){
+  if(!ax)return;
+  const g=ax.createGain(),o=ax.createOscillator();
+  o.type='sine';o.frequency.value=freq;
+  g.gain.setValueAtTime(0,ax.currentTime);
+  g.gain.linearRampToValueAtTime(.02,ax.currentTime+.5);
+  g.gain.linearRampToValueAtTime(0,ax.currentTime+dur);
+  o.connect(g);g.connect(ax.destination);o.start();o.stop(ax.currentTime+dur+.1);
+}
+
+/* ─── stars ─── */
+function initStars(){
+  const c=$('stars'),w=c.parentElement.offsetWidth,h=c.parentElement.offsetHeight;
+  c.width=w;c.height=h;
+  const ctx=c.getContext('2d');
+  let t2=0;
+  (function tw(){
+    t2+=.008;ctx.clearRect(0,0,w,h);
+    for(let i=0;i<220;i++){
+      const x=(i*w/220+Math.sin(t2+i)*.4+w)%w;
+      const y=(i*h/220+Math.cos(t2*.7+i*.5)*.3+h)%h;
+      const r=.4+Math.sin(t2*2+i*.4)*.3;
+      const a=.05+Math.abs(Math.sin(t2+i*.3))*.3;
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle='rgba(92,200,255,'+a.toFixed(2)+')';ctx.fill();
+    }
+    if(playing)requestAnimationFrame(tw);
+  })();
+}
+
+/* ─── easing ─── */
+function ease(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+function easeOut(t){return 1-Math.pow(1-t,3);}
+function clamp(v){return Math.max(0,Math.min(1,v));}
+function seg(ms,s,e){return clamp((ms-s)/(e-s));}
+function lerp(a,b,t){return a+(b-a)*t;}
+
+/* ─── show/hide helpers ─── */
+function show(el,op){if(typeof el==='string')el=$(el);if(el)el.style.opacity=String(op);}
+function tr(el,ty,op){if(typeof el==='string')el=$(el);if(!el)return;el.style.opacity=String(op);el.style.transform='translateY('+ty+'px)';}
+function hideAll(){['s0','s1','s2','s3','s4','s5','s6','s7','s8'].forEach(id=>show(id,0));}
+
+/* ─── chapter labels ─── */
+const chapters=['CloudBAAM','The Problem','Solution','Join','Save & Earn','Withdraw','Loans','Dashboard','Get Started'];
+
+/* ─── sound fire map ─── */
+const sf=new Set();
+function sc(ms){
+  const cues=[
+    [0,    ()=>deepBoom()],
+    [2000, ()=>riseUp()],
+    [2800, ()=>ambientDrone(55,6)],
+    [6000, ()=>whoosh()],
+    [7000, ()=>ambientDrone(65,5)],
+    [12000,()=>whoosh()],
+    [13000,()=>shimmer()],
+    [13500,()=>ambientDrone(70,5)],
+    [18000,()=>whoosh()],
+    [19000,()=>coinSound()],
+    [19500,()=>ambientDrone(60,6)],
+    [25000,()=>whoosh()],
+    [26000,()=>riseUp()],
+    [30000,()=>whoosh()],
+    [31000,()=>coinSound()],
+    [31500,()=>ambientDrone(65,6)],
+    [37000,()=>whoosh()],
+    [38000,()=>success()],
+    [38500,()=>ambientDrone(70,5)],
+    [44000,()=>whoosh()],
+    [45000,()=>shimmer()],
+    [49000,()=>finalFanfare()],
+  ];
+  cues.forEach(([t,fn])=>{if(ms>=t&&!sf.has(t)){sf.add(t);try{fn();}catch(e){}}});
+}
+
+/* ─── main timeline ─── */
+function tl(ms){
+  $('progfill').style.width=(ms/TOTAL*100)+'%';
+  const ci=$('chap-indicator');
+
+  /* helper: fade a group of elements in sequence */
+  function seq(items,baseMs,delay=200){
+    items.forEach(([id,extraDelay],i)=>{
+      const t=ease(clamp((ms-baseMs-i*delay-(extraDelay||0))/450));
+      tr(id,lerp(10,0,t),t);
+    });
+  }
+
+  /* ══ S0: cold open 0–2s ══ */
+  const s0op = ms<2200 ? ease(clamp(ms/400))*(1-ease(clamp((ms-1600)/500))) : 0;
+  show('s0',s0op);
+  if(ms<2200) tr('s0e',lerp(6,0,ease(clamp(ms/400))),ease(clamp(ms/400)));
+  else tr('s0e',0,0);
+
+  /* ══ S1: the problem 2s–8s ══ */
+  const S1S=2000,S1E=8000;
+  const s1=ease(clamp((ms-S1S)/600))*(1-ease(clamp((ms-7200)/800)));
+  show('s1',s1);
+  if(ms>S1S&&ms<S1E){
+    ci.textContent=chapters[1];ci.style.opacity='1';
+    seq([['s1e',0],['s1h',100],['s1s',300],['s1r',500]],S1S+300);
+  }
+
+  /* ══ S2: introduce CloudBAAM 8s–14s ══ */
+  const S2S=8000,S2E=14000;
+  const s2=ease(clamp((ms-S2S)/600))*(1-ease(clamp((ms-13200)/800)));
+  show('s2',s2);
+  if(ms>S2S&&ms<S2E){
+    ci.textContent=chapters[2];
+    seq([['s2e',0],['s2h',100],['s2s',300]],S2S+300);
+    const lt=ease(clamp((ms-S2S-800)/700));
+    show('s2logo',lt);$('s2logo').style.transform='scale('+lerp(.8,1,lt)+')';
+  }
+
+  /* ══ S3: join 14s–20s ══ */
+  const S3S=14000,S3E=20000;
+  const s3=ease(clamp((ms-S3S)/600))*(1-ease(clamp((ms-19200)/800)));
+  show('s3',s3);
+  if(ms>S3S&&ms<S3E){
+    ci.textContent=chapters[3];
+    seq([['s3e',0],['s3h',100],['s3s',300],['s3r',500]],S3S+300);
+    const pt=ease(clamp((ms-S3S-500)/700));
+    show('s3phone',pt);$('s3phone').style.transform='translateY('+lerp(20,0,pt)+'px) scale('+lerp(.93,1,pt)+')';
+  }
+
+  /* ══ S4: save & ROI 20s–27s ══ */
+  const S4S=20000,S4E=27000;
+  const s4=ease(clamp((ms-S4S)/600))*(1-ease(clamp((ms-26200)/800)));
+  show('s4',s4);
+  if(ms>S4S&&ms<S4E){
+    ci.textContent=chapters[4];
+    seq([['s4e',0],['s4h',100],['s4s',300],['s4r',500]],S4S+400);
+    const ct=ease(clamp((ms-S4S-300)/700));
+    show('s4chart',ct);$('s4chart').style.transform='translateY('+lerp(16,0,ct)+'px)';
+    // animate bars
+    const barTargets=[30,45,55,65,78,92];
+    const barT=clamp((ms-S4S-600)/2000);
+    barTargets.forEach((pct,i)=>{
+      const bt=ease(clamp((ms-S4S-600-i*120)/600));
+      $('cb'+i).style.height=(bt*pct)+'%';
+    });
+    // ROI counter
+    const rv=clamp((ms-S4S-800)/2500);
+    $('roi-val').textContent='₦'+Math.round(rv*1250).toLocaleString();
+    if(ms>S4S+700&&ms<S4S+730) barPop();
+  }
+
+  /* ══ S5: withdrawals 27s–33s ══ */
+  const S5S=27000,S5E=33000;
+  const s5=ease(clamp((ms-S5S)/600))*(1-ease(clamp((ms-32200)/800)));
+  show('s5',s5);
+  if(ms>S5S&&ms<S5E){
+    ci.textContent=chapters[5];
+    seq([['s5e',0],['s5h',100],['s5s',300],['s5r',500]],S5S+300);
+    const tlt=ease(clamp((ms-S5S-800)/600));
+    show('s5timeline',tlt);$('s5timeline').style.transform='translateY('+lerp(10,0,tlt)+'px)';
+  }
+
+  /* ══ S6: loans 33s–40s ══ */
+  const S6S=33000,S6E=40000;
+  const s6=ease(clamp((ms-S6S)/600))*(1-ease(clamp((ms-39200)/800)));
+  show('s6',s6);
+  if(ms>S6S&&ms<S6E){
+    ci.textContent=chapters[6];
+    seq([['s6e',0],['s6h',100],['s6s',300],['s6r',500]],S6S+300);
+    const lt=ease(clamp((ms-S6S-400)/700));
+    show('s6loan',lt);$('s6loan').style.transform='translateY('+lerp(16,0,lt)+'px)';
+    const bt=ease(clamp((ms-S6S-1400)/400));
+    show('s6btn',bt);
+  }
+
+  /* ══ S7: dashboard 40s–47s ══ */
+  const S7S=40000,S7E=47000;
+  const s7=ease(clamp((ms-S7S)/600))*(1-ease(clamp((ms-46200)/800)));
+  show('s7',s7);
+  if(ms>S7S&&ms<S7E){
+    ci.textContent=chapters[7];
+    seq([['s7e',0],['s7h',100]],S7S+300);
+    const dt=ease(clamp((ms-S7S-500)/700));
+    show('s7dash',dt);$('s7dash').style.transform='translateY('+lerp(14,0,dt)+'px)';
+    const cv=clamp((ms-S7S-700)/2000);
+    $('dashcnt').textContent=Math.round(cv*50000).toLocaleString();
+  }
+
+  /* ══ S8: finale 47s–end ══ */
+  const S8S=47000;
+  const s8=ease(clamp((ms-S8S)/700));
+  show('s8',s8);
+  if(ms>S8S){
+    ci.textContent=chapters[8];
+    const lt=ease(clamp((ms-S8S-200)/700));
+    show('s8logo',lt);$('s8logo').style.transform='scale('+lerp(.8,1,lt)+')';
+    seq([['s8e',0],['s8h',100],['s8s',250],['s8r',400]],S8S+600);
+    const sub=ease(clamp((ms-S8S-1800)/600));
+    show('s8sub',sub);
+  }
+
+  /* replay button */
+  if(ms>=TOTAL){
+    show('cta-btn',1);
+  }
+}
+
+function frame(ts){
+  const ms=ts-t0;
+  if(ms>=TOTAL){tl(TOTAL);playing=false;return;}
+  tl(ms);sc(ms);
+  raf=requestAnimationFrame(frame);
+}
+
+function startShow(){
+  audio();
+  $('so').style.display='none';
+  if(raf)cancelAnimationFrame(raf);
+  sf.clear();
+  hideAll();
+
+  /* reset animated elements */
+  ['s0e','s1e','s1h','s1s','s1r','s2e','s2h','s2s','s3e','s3h','s3s','s3r',
+   's4e','s4h','s4s','s4r','s5e','s5h','s5s','s5r','s6e','s6h','s6s','s6r',
+   's7e','s7h','s8e','s8h','s8s','s8r','s8sub'].forEach(id=>{
+    const el=$(id);if(el){el.style.opacity='0';el.style.transform='translateY(10px)';}
+  });
+  ['s2logo','s3phone','s4chart','s6loan','s6btn','s7dash','s8logo','s5timeline'].forEach(id=>{
+    const el=$(id);if(el){el.style.opacity='0';}
+  });
+  for(let i=0;i<6;i++){const b=$('cb'+i);if(b)b.style.height='0%';}
+  $('roi-val').textContent='₦0';
+  $('dashcnt').textContent='0';
+  $('progfill').style.width='0';
+  show('cta-btn',0);
+  $('chap-indicator').style.opacity='0';
+
+  playing=true;
+  initStars();
+  requestAnimationFrame(ts=>{t0=ts;raf=requestAnimationFrame(frame);});
+}
+</script>

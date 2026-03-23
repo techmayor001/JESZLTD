@@ -31,6 +31,10 @@ router.get('/about-us', (req,res)=>{
     res.render("static/about")
 })
 
+router.get('/ads', (req,res)=>{
+  res.render("static/ads")
+});
+
 
 
 router.get('/cds-cooperative', async (req, res) => {
