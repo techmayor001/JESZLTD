@@ -337,9 +337,11 @@ button,input,select,textarea{font-family:inherit;}
   transition:border-color .18s,background .3s;outline:none;-webkit-appearance:none;
 }
 .form-control:focus{border-color:var(--accent);}
+.form-control.input-error{border-color:var(--red);}
 .form-control:disabled{opacity:.5;cursor:not-allowed;}
 .form-control option{background:var(--bg-card);color:var(--text);}
-.form-hint{font-size:11px;color:var(--muted);margin-top:5px;}
+.form-hint{font-size:11px;color:var(--muted);margin-top:5px;transition:color .2s;}
+.form-hint.hint-error{color:var(--red);}
 .modal-info{
   background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.18);
   border-radius:10px;padding:12px;font-size:12px;color:var(--accent);
@@ -790,8 +792,20 @@ button,input,select,textarea{font-family:inherit;}
       <form id="loanForm">
         <div class="form-group">
           <label class="form-label">Loan Amount (₦)</label>
-          <input type="number" class="form-control" name="amount" placeholder="0.00" max="<%= maxLoan %>" required <%= !canApply ? 'disabled' : '' %>>
-          <div class="form-hint">Max: ₦<%= maxLoan.toLocaleString() %></div>
+          <input
+            type="number"
+            class="form-control"
+            id="loanAmountInput"
+            name="amount"
+            placeholder="0.00"
+            min="1"
+            max="<%= maxLoan %>"
+            oninput="enforceLoanMax(this)"
+            required
+            <%= !canApply ? 'disabled' : '' %>>
+          <div class="form-hint" id="loanAmountHint">
+            Max: ₦<%= maxLoan.toLocaleString() %> &nbsp;·&nbsp; 3× your savings balance
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">Repayment Period</label>
@@ -1132,15 +1146,43 @@ function showError(title, msg){
   openModal('errorModal');
 }
 
+/* ── Max loan constant (server-rendered, single source of truth) ── */
+const MAX_LOAN = <%- maxLoan %>;
+
+/* ── Loan amount enforcement ── */
+function enforceLoanMax(input){
+  const hint = document.getElementById('loanAmountHint');
+  const val  = parseFloat(input.value);
+
+  if(val > MAX_LOAN){
+    input.value = MAX_LOAN;
+    input.classList.add('input-error');
+    hint.textContent = '⚠ Capped at ₦' + MAX_LOAN.toLocaleString() + ' — max is 3× your savings balance';
+    hint.classList.add('hint-error');
+    setTimeout(() => {
+      input.classList.remove('input-error');
+      hint.textContent = 'Max: ₦' + MAX_LOAN.toLocaleString() + ' · 3× your savings balance';
+      hint.classList.remove('hint-error');
+    }, 2500);
+  } else if(val <= 0 || isNaN(val)){
+    input.classList.remove('input-error');
+    hint.textContent = 'Max: ₦' + MAX_LOAN.toLocaleString() + ' · 3× your savings balance';
+    hint.classList.remove('hint-error');
+  } else {
+    input.classList.remove('input-error');
+    hint.textContent = 'Max: ₦' + MAX_LOAN.toLocaleString() + ' · 3× your savings balance';
+    hint.classList.remove('hint-error');
+  }
+}
+
 /* ── Calculator ── */
 function calculateLoan(){
   const amount   = parseFloat(document.getElementById('calcAmount').value) || 0;
   const duration = parseInt(document.getElementById('calcDuration').value) || 1;
   const rate     = parseFloat(document.getElementById('calcRate').value) || 0;
-  const max      = <%- maxLoan %>;
   const res      = document.getElementById('calcResult');
   if(amount <= 0){ res.style.display = 'none'; return; }
-  if(amount > max){ document.getElementById('calcAmount').value = max; return calculateLoan(); }
+  if(amount > MAX_LOAN){ document.getElementById('calcAmount').value = MAX_LOAN; return calculateLoan(); }
   const interest = amount * (rate / 100) * (duration / 12);
   const total    = amount + interest;
   const monthly  = total / duration;
@@ -1165,18 +1207,61 @@ async function submitLoanApplication(){
   const btn  = document.getElementById('loanSubmitBtn');
   const g1   = document.getElementById('guarantor1').value;
   const g2   = document.getElementById('guarantor2').value;
-  if(!document.getElementById('agreeTerms').checked){ showError('Agreement Required','You must agree to the loan terms.'); return; }
-  if(g1 === g2){ showError('Invalid Guarantors','You cannot select the same guarantor twice.'); return; }
-  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  if(!document.getElementById('agreeTerms').checked){
+    showError('Agreement Required','You must agree to the loan terms.');
+    return;
+  }
+  if(g1 === g2){
+    showError('Invalid Guarantors','You cannot select the same guarantor twice.');
+    return;
+  }
+
+  /* ── Max loan enforcement before submit ── */
+  const requestedAmount = parseFloat(form.amount.value);
+  if(!requestedAmount || requestedAmount <= 0){
+    showError('Invalid Amount','Please enter a loan amount greater than ₦0.');
+    return;
+  }
+  if(requestedAmount > MAX_LOAN){
+    /* Clamp the field and show error */
+    document.getElementById('loanAmountInput').value = MAX_LOAN;
+    enforceLoanMax(document.getElementById('loanAmountInput'));
+    showError(
+      'Amount Exceeds Limit',
+      'Your loan cannot exceed ₦' + MAX_LOAN.toLocaleString() +
+      ', which is 3× your current savings balance of ₦' +
+      (MAX_LOAN / 3).toLocaleString() + '.'
+    );
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
   try{
-    const res    = await fetch('/club-de-star-cooperative/apply-loan',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ amount: form.amount.value, duration: form.duration.value, guarantor1: g1, guarantor2: g2, agreeTerms: true })});
+    const res    = await fetch('/club-de-star-cooperative/apply-loan',{
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        amount:    requestedAmount,
+        duration:  form.duration.value,
+        guarantor1: g1,
+        guarantor2: g2,
+        agreeTerms: true
+      })
+    });
     const result = await res.json();
     if(!res.ok) throw new Error(result.message || 'Submission failed.');
     closeModal('loanRequestModal');
     setTimeout(() => openModal('loanSuccessModal'), 300);
     form.reset();
-  } catch(e){ showError('Submission Failed', e.message); }
-  finally{ btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:5px;font-size:11px;"></i>Submit Application'; }
+  } catch(e){
+    showError('Submission Failed', e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:5px;font-size:11px;"></i>Submit Application';
+  }
 }
 
 /* ── Loan payment ── */
@@ -1226,13 +1311,10 @@ function populateRolloverModal(data){
   const interest        = Number(data.interestOwed       || 0);
   const penalty         = Number(data.totalPenalty       || 0);
   const outstanding     = Number(data.outstandingBalance || 0);
-  // ⭐ rolloverPct is strictly from LoanSettings (e.g. 1%)
-  // this is both the fee rate AND the rate added to memberInterest
   const rolloverPct     = Number(data.rolloverPct        || 0);
-  const memberInterest  = Number(data.memberInterestRate || 0); // e.g. 5%
-  const newInterestRate = Number(data.newInterestRate    || 0); // e.g. 5 + 1 = 6%
+  const memberInterest  = Number(data.memberInterestRate || 0);
+  const newInterestRate = Number(data.newInterestRate    || 0);
 
-  // Store into hidden fields
   document.getElementById('rv_hiddenLoanId').value          = data.loanId;
   document.getElementById('rv_hiddenInterest').value        = interest;
   document.getElementById('rv_hiddenPenalty').value         = penalty;
@@ -1241,19 +1323,15 @@ function populateRolloverModal(data){
   document.getElementById('rv_hiddenMemberRate').value      = memberInterest;
   document.getElementById('rv_hiddenNewInterestRate').value = newInterestRate;
 
-  // Breakdown display
   document.getElementById('rv_principalAmt').textContent    = '₦' + principal.toLocaleString();
   document.getElementById('rv_interestAmt').textContent     = '₦' + interest.toLocaleString();
   document.getElementById('rv_outstandingAmt').textContent  = '₦' + outstanding.toLocaleString();
   document.getElementById('rv_rolloverPctLabel').textContent = newInterestRate;
 
-  // ⭐ Rate display: e.g. "5% → +1% → 6%"
-  // rolloverPct (from LoanSettings) is the increment added to memberInterest
   document.getElementById('rv_currentRateDisplay').textContent  = memberInterest + '%';
   document.getElementById('rv_rolloverRateDisplay').textContent = '+' + rolloverPct + '%';
   document.getElementById('rv_newRateDisplay').textContent      = newInterestRate + '%';
 
-  // Penalty rows
   const hasPenalty = penalty > 0;
   document.getElementById('rv_penaltyBreakRow').style.display   = hasPenalty ? 'flex' : 'none';
   document.getElementById('rv_penaltyBreakAmt').textContent     = '₦' + penalty.toLocaleString();
@@ -1261,7 +1339,6 @@ function populateRolloverModal(data){
   document.getElementById('rv_penaltyCheckAmt').textContent     = '₦' + penalty.toLocaleString();
   document.getElementById('rv_payPenalty').checked              = false;
 
-  // Reset method + form state
   selectRolloverMethod(null);
   document.getElementById('rv_payerName').value           = '';
   document.getElementById('rv_error').style.display       = 'none';
@@ -1289,20 +1366,11 @@ function updateRolloverSummary(){
   const newInterestRate = parseFloat(document.getElementById('rv_hiddenNewInterestRate').value) || 0;
   const payPenalty      = document.getElementById('rv_payPenalty').checked;
 
-  // What member pays now
-  const totalToPay = interest + (payPenalty ? penalty : 0);
-
-  // New loan base after rollover:
-  // penalty paid → cleared → base = principal only
-  // penalty skipped → carries forward → base = principal + penalty
-  const newBase = payPenalty ? principal : (principal + penalty);
-
-  // ⭐ New total = newBase + (newBase × newInterestRate%)
-  // e.g. base=1000, rate=6% → interest=60 → total=1060
+  const totalToPay  = interest + (payPenalty ? penalty : 0);
+  const newBase     = payPenalty ? principal : (principal + penalty);
   const newInterestAmt = parseFloat((newBase * (newInterestRate / 100)).toFixed(2));
   const newTotal       = parseFloat((newBase + newInterestAmt).toFixed(2));
 
-  // Payment summary lines
   document.getElementById('rv_payInterestLine').textContent = '₦' + interest.toLocaleString();
 
   const penaltyPayLine = document.getElementById('rv_payPenaltyLine');
@@ -1315,7 +1383,6 @@ function updateRolloverSummary(){
 
   document.getElementById('rv_totalToPay').textContent     = '₦' + totalToPay.toLocaleString();
   document.getElementById('rv_newBase').textContent        = '₦' + newBase.toLocaleString();
-  // ⭐ Label shows "New interest (6%)" instead of "Rollover fee (1%)"
   document.getElementById('rv_rolloverFeeAmt').textContent = '₦' + newInterestAmt.toLocaleString();
   document.getElementById('rv_newTotal').textContent       = '₦' + newTotal.toLocaleString();
   document.getElementById('rv_previewNewRate').textContent = newInterestRate + '%';
