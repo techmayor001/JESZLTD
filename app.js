@@ -9,6 +9,12 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
+app.use((req, res, next) => {
+  if (req.headers.host === 'jeszltd.com') {
+    return res.redirect(301, 'https://www.jeszltd.com' + req.url);
+  }
+  next();
+});
 const globalData = require("./globalData");
 const initSystem = require("./seed");
 
