@@ -1156,6 +1156,7 @@
             'Bank Name': m.bankDetails?.bankName||'---', 'Account Number': m.bankDetails?.accountNumber||'---',
             'Account Name': m.bankDetails?.accountName||'---', 'NOK Name': m.nextOfKin?.fullName||'---',
             'NOK Phone': m.nextOfKin?.phone||'---', 'NOK Relationship': m.nextOfKin?.relationship||'---',
+            'LOAN': m.loanDetails?.currentLoanAmount?fmt(m.loanDetails.currentLoanAmount):'---', 'LOAN STATUS': m.loanDetails?.loanStatus?m.loanDetails.loanStatus.charAt(0).toUpperCase()+m.loanDetails.loanStatus.slice(1):'---',
         }));
     }
 

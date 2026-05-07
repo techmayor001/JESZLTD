@@ -70,3 +70,9 @@ app.use(require("./routes/adminLogs"));
 app.use(require("./routes/LoanLogic/userLoanLogic"));
 app.use(require("./routes/LoanLogic/adminLoanLogic"));
 app.use(require("./routes/KiddiesLogic/kiddies"));
+
+
+app.use((req, res) => {
+  const previousPage = req.get('Referrer') || '/';
+  res.redirect(previousPage);
+});
