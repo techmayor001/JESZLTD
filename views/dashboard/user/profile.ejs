@@ -824,13 +824,14 @@ button,input,select,textarea{font-family:inherit;}
     </div>
     <div class="modal-body">
       <form id="changePasswordForm">
+        <!-- Change Password Modal -->
         <div class="form-group">
           <label class="form-label">Current Password</label>
-          <input type="password" class="form-control" name="password" required>
+          <input type="password" class="form-control" id="currentPassword" name="password" required>
         </div>
         <div class="form-group">
           <label class="form-label">New Password</label>
-          <input type="password" class="form-control" name="newPassword" required>
+          <input type="password" class="form-control" id="newPassword" name="newPassword" required>
           <div class="form-hint">At least 8 characters, mix of letters and numbers</div>
         </div>
         <div class="modal-info" style="margin-bottom:0;"><i class="fas fa-info-circle" style="margin-right:5px;"></i>You will be logged out after a successful password change.</div>
@@ -1051,23 +1052,46 @@ async function saveProfile(){
 
 /* ── Change password ── */
 async function changePassword(){
-  const form = document.getElementById('changePasswordForm');
   const btn  = document.getElementById('pwSaveBtn');
   const msg  = document.getElementById('passwordMsg');
-  const data = { password: form.password.value, newPassword: form.newPassword.value };
+
+  const password    = document.getElementById('currentPassword').value.trim();
+  const newPassword = document.getElementById('newPassword').value.trim();
+
+  // Client-side guard — prevents the undefined error entirely
+  if (!password || !newPassword) {
+    msg.className = 'modal-msg error';
+    msg.textContent = 'Please fill in both password fields.';
+    return;
+  }
+
   msg.className = 'modal-msg';
-  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Updating…';
-  try{
-    const res    = await fetch('/club-de-star-cooperative/changePassword',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:5px;"></i>Updating…';
+
+  try {
+    const res    = await fetch('/club-de-star-cooperative/changePassword', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, newPassword })
+    });
     const result = await res.json();
-    if(result.success){
-      msg.className = 'modal-msg success'; msg.textContent = result.message;
+
+    if (result.success) {
+      msg.className = 'modal-msg success';
+      msg.textContent = result.message;
       setTimeout(() => window.location.href = '/logout', 3000);
     } else {
-      msg.className = 'modal-msg error'; msg.textContent = result.error || 'Failed.';
+      msg.className = 'modal-msg error';
+      msg.textContent = result.error || 'Failed.';
     }
-  } catch(e){ msg.className = 'modal-msg error'; msg.textContent = 'Network error.'; }
-  finally{ btn.disabled = false; btn.innerHTML = '<i class="fas fa-key" style="margin-right:5px;font-size:11px;"></i>Update Password'; }
+  } catch(e) {
+    msg.className = 'modal-msg error';
+    msg.textContent = 'Network error.';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-key" style="margin-right:5px;font-size:11px;"></i>Update Password';
+  }
 }
 
 /* ── Bank account verification ── */

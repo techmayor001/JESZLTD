@@ -971,11 +971,16 @@ router.post("/club-de-star-cooperative/changePassword", async (req, res) => {
 
   const { password, newPassword } = req.body;
 
+  if (!password || !newPassword) {
+    return res.status(400).json({ success: false, error: "Both password fields are required." });
+  }
+
   try {
-    const user = await User.findById(req.user._id)
-      .populate("account")
-      .populate("loans")
-      .populate("referredUsers");
+ const user = await User.findById(req.user._id)
+  .select("+password")   // ← add this line
+  .populate("account")
+  .populate("loans")
+  .populate("referredUsers");
 
     if (!user) return res.status(404).json({ success: false, error: "User not found" });
 
