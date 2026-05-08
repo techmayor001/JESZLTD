@@ -1050,7 +1050,6 @@ router.post(
 
       res.redirect('/club-de-star-cooperative/profile?success=Avatar updated successfully');
     } catch (err) {
-      console.error("Upload avatar error:", err);
       res.redirect('/club-de-star-cooperative/profile?error=Failed to upload avatar');
     }
   }
