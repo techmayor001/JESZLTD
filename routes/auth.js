@@ -25,31 +25,49 @@ const fetch = require("node-fetch");
 
 
 // MULTER CONFIGURATIONs
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/media/uploads/')
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname)
-    },
-})
 
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png/;
-  const ext = path.extname(file.originalname).toLowerCase();
-  const mime = file.mimetype;
-  if (allowedTypes.test(ext) && allowedTypes.test(mime)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only .jpeg, .jpg, .png files are allowed'));
-  }
-};
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
+const { v4: uuidv4 } = require('uuid');
+const { r2, R2_BUCKET, R2_PUBLIC_BASE, deleteR2Object } = require('../config/r2');
 
-const upload = multer({ 
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+// Memory storage — files go to R2, never touch disk
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    fileFilter: (req, file, cb) => {
+        const allowedExts  = /jpeg|jpg|png|pdf/;
+        const allowedMimes = /image\/jpeg|image\/jpg|image\/png|application\/pdf/;
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowedExts.test(ext) && allowedMimes.test(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only .jpeg, .jpg, .png, and .pdf files are allowed'));
+        }
+    }
+});
 
- });
+/**
+ * Upload a single multer memory-storage file to R2.
+ * Returns the public URL of the uploaded object.
+ * @param {Express.Multer.File} file
+ * @param {string} folder  — e.g. 'kyc'
+ */
+async function uploadToR2(file, folder = 'kyc') {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const key = `${folder}/${uuidv4()}${ext}`;
+
+    await r2.send(new PutObjectCommand({
+        Bucket:      R2_BUCKET,
+        Key:         key,
+        Body:        file.buffer,
+        ContentType: file.mimetype,
+    }));
+
+    return `${R2_PUBLIC_BASE}/${key}`;
+}
+
+
+
 
 
 router.post(
@@ -91,10 +109,14 @@ router.post(
       }
 
       // ── Files ─────────────────────────────────────────────────────────────
-      const addressProof  = req.files["addressProof"]?.[0]?.path;
-      const passportPhoto = req.files["passportPhoto"]?.[0]?.path;
-      const idFile        = req.files["idFile"]?.[0]?.path;
-      const signature     = req.files["signature"]?.[0]?.path;
+      const fileFields = ['addressProof', 'passportPhoto', 'idFile', 'signature'];
+      const uploadedFiles = {};
+      await Promise.all(fileFields.map(async (field) => {
+        const file = req.files?.[field]?.[0];
+        if (file) uploadedFiles[field] = await uploadToR2(file, 'kyc');
+      }));
+
+      const { addressProof, passportPhoto, idFile, signature } = uploadedFiles;
 
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -483,7 +505,8 @@ router.post(
         openingBalance,
         accumulativeROI,
         memberTypeId,
-        referralCode
+        referralCode,
+        dateJoined
       } = req.body;
 
       const normalizedEmail = email.toLowerCase();
@@ -497,10 +520,14 @@ router.post(
       }
 
       // ── Files ─────────────────────────────────────────────────────────────
-      const addressProof  = req.files["addressProof"]?.[0]?.path;
-      const passportPhoto = req.files["passportPhoto"]?.[0]?.path;
-      const idFile        = req.files["idFile"]?.[0]?.path;
-      const signature     = req.files["signature"]?.[0]?.path;
+      const fileFields = ['addressProof', 'passportPhoto', 'idFile', 'signature'];
+      const uploadedFiles = {};
+      await Promise.all(fileFields.map(async (field) => {
+        const file = req.files?.[field]?.[0];
+        if (file) uploadedFiles[field] = await uploadToR2(file, 'kyc');
+      }));
+
+      const { addressProof, passportPhoto, idFile, signature } = uploadedFiles;
 
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -554,7 +581,8 @@ router.post(
         password:           hashedPassword,
         status:             "active",
         registrationStatus: "paid",
-        role:               memberRole?._id
+        role:               memberRole?._id,
+        ...(dateJoined ? { createdAt: new Date(dateJoined) } : {}),
       });
 
       // ── Handle referral linking ───────────────────────────────────────────
@@ -1168,10 +1196,10 @@ router.post("/club-de-star-cooperative/updateBankDetails", async (req, res) => {
 router.post(
   "/kyc/submit",
   upload.fields([
-    { name: "addressProof", maxCount: 1 },
+    { name: "addressProof",  maxCount: 1 },
     { name: "passportPhoto", maxCount: 1 },
-    { name: "idFile", maxCount: 1 },
-    { name: "signature", maxCount: 1 },
+    { name: "idFile",        maxCount: 1 },
+    { name: "signature",     maxCount: 1 },
   ]),
   async (req, res) => {
     if (!req.isAuthenticated()) {
@@ -1181,7 +1209,6 @@ router.post(
     try {
       const { idType, idNumber } = req.body;
 
-      // Validate required fields
       if (!idType || !idNumber) {
         return res.status(400).json({ status: false, message: "ID type and ID number are required." });
       }
@@ -1191,45 +1218,17 @@ router.post(
         return res.status(404).json({ status: false, message: "User not found." });
       }
 
-      // Build update object — only overwrite fields if a new file was uploaded
       const updates = { idType, idNumber };
 
-      if (req.files["addressProof"]?.[0]) {
-        // Optionally delete old file
-        if (user.addressProof) {
-          fs.unlink(path.resolve(user.addressProof), (err) => {
-            if (err) console.warn("Could not delete old addressProof:", err.message);
-          });
-        }
-        updates.addressProof = req.files["addressProof"][0].path;
-      }
+      const fields = ['addressProof', 'passportPhoto', 'idFile', 'signature'];
 
-      if (req.files["passportPhoto"]?.[0]) {
-        if (user.passportPhoto) {
-          fs.unlink(path.resolve(user.passportPhoto), (err) => {
-            if (err) console.warn("Could not delete old passportPhoto:", err.message);
-          });
-        }
-        updates.passportPhoto = req.files["passportPhoto"][0].path;
-      }
+      await Promise.all(fields.map(async (field) => {
+        const file = req.files?.[field]?.[0];
+        if (!file) return;
 
-      if (req.files["idFile"]?.[0]) {
-        if (user.idFile) {
-          fs.unlink(path.resolve(user.idFile), (err) => {
-            if (err) console.warn("Could not delete old idFile:", err.message);
-          });
-        }
-        updates.idFile = req.files["idFile"][0].path;
-      }
-
-      if (req.files["signature"]?.[0]) {
-        if (user.signature) {
-          fs.unlink(path.resolve(user.signature), (err) => {
-            if (err) console.warn("Could not delete old signature:", err.message);
-          });
-        }
-        updates.signature = req.files["signature"][0].path;
-      }
+        if (user[field]) await deleteR2Object(user[field]); // delete old from R2
+        updates[field] = await uploadToR2(file, 'kyc');     // upload new to R2
+      }));
 
       await User.findByIdAndUpdate(req.user._id, updates);
 
@@ -1241,5 +1240,11 @@ router.post(
     }
   }
 );
+
+
+// Keeps session alive — just needs to be an authenticated touch
+router.get('/api/ping', (req, res) => {
+    res.json({ ok: true });
+});
 
 module.exports = router;

@@ -27,11 +27,19 @@ require("./jobs/LoanPenaltyCron");
 
 app.use(session({
     secret: process.env.SESSION_SECRET || "defaultsecret",
-    resave: false,
+    resave: true,
     saveUninitialized: false,
-  }));
-  app.use(passport.initialize());
-  app.use(passport.session());
+    rolling: true,
+    cookie: {
+        maxAge:   1 * 60 * 1000,
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: true,
+    }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
   
   
   
