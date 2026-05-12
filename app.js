@@ -25,6 +25,7 @@ const passport = require("passport");
 require("./config/passport");
 require("./jobs/LoanPenaltyCron");
 
+app.set('trust proxy', 1);
 app.use(session({
     secret: process.env.SESSION_SECRET || "defaultsecret",
     resave: true,
