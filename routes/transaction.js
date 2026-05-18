@@ -30,7 +30,7 @@ router.post("/deposit/init", async (req, res) => {
       },
       body: JSON.stringify({
         email: user.email,
-        amount: amount * 100,
+        amount: amount * 100, // Paystack needs kobo
         metadata: { userId: user._id, type: "deposit" },
         callback_url: `${process.env.BASE_URL}/deposit/verify`,
       }),
@@ -40,11 +40,12 @@ router.post("/deposit/init", async (req, res) => {
     if (!data.status || !data.data) throw new Error("Failed to initialize payment with Paystack.");
 
     await Payment.create({
-      user: user._id,
-      email: user.email,
-      amount: amount * 100,
-      reference: data.data.reference,
-      status: "pending",
+      user:        user._id,
+      email:       user.email,
+      amount:      Number(amount), // store naira, not kobo
+      reference:   data.data.reference,
+      status:      "pending",
+      paymentType: "deposit",
     });
 
     res.json({ status: true, authorization_url: data.data.authorization_url });
@@ -55,56 +56,49 @@ router.post("/deposit/init", async (req, res) => {
 });
 
 
-// Verify Deposit
 router.get("/deposit/verify", async (req, res) => {
   const { reference } = req.query;
-
   if (!reference) return res.redirect("/cds-cooperative/dashboard?deposit=failed");
 
   try {
+    const payment = await Payment.findOne({ reference }).populate("user");
+    if (!payment) return res.redirect("/cds-cooperative/dashboard?deposit=not-found");
+
+    // ── Guard: already processed ──────────────────────────────────────────
+    if (payment.status === "paid") {
+      return res.redirect("/cds-cooperative/dashboard?deposit=success");
+    }
+
     const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-      },
+      headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
     });
 
     const data = await verifyRes.json();
     if (!data.status || !data.data) {
-      console.error("Invalid Paystack response:", data);
       return res.redirect("/cds-cooperative/dashboard?deposit=failed");
     }
 
     const transaction = data.data;
-
-    const payment = await Payment.findOne({ reference }).populate("user");
-    if (!payment) return res.redirect("/cds-cooperative/dashboard?deposit=not-found");
 
     payment.status = transaction.status === "success" ? "paid" : "failed";
     payment.paystackResponse = transaction;
     await payment.save();
 
     if (payment.status === "paid") {
-      // ── Find the member's account using ownerType + ownerId ──────────────
-      let account = await Account.findOne({
-        ownerType: "User",
-        ownerId:   payment.user._id
-      });
+      let account = await Account.findOne({ ownerType: "User", ownerId: payment.user._id });
 
       if (!account) {
-        console.warn(`No account found for ${payment.user.email}, creating one.`);
-
         const defaultMemberType = await MemberType.findOne({ isDefault: true });
-
         account = await Account.create({
           ownerType:       "User",
           ownerId:         payment.user._id,
           accountType:     defaultMemberType?._id,
           balance:         0,
-          accumulativeROI: 0
+          accumulativeROI: 0,
         });
       }
 
-      const depositAmount = payment.amount / 100;
+      const depositAmount = payment.amount; // already naira — stored correctly in init
 
       account.balance += depositAmount;
       await account.save();
@@ -113,20 +107,19 @@ router.get("/deposit/verify", async (req, res) => {
         user:        payment.user._id,
         type:        "deposit",
         amount:      depositAmount,
-        description: `Deposit (Ref: ${reference})`,
+        description: `Deposit via Paystack (Ref: ${reference})`,
         reference,
         method:      "Paystack",
         status:      "successful",
       });
 
-      console.log(`✅ Deposit recorded: ₦${depositAmount} for ${payment.user.email}`);
       return res.redirect("/cds-cooperative/dashboard?deposit=success");
 
     } else {
       await Transaction.create({
         user:        payment.user._id,
         type:        "deposit",
-        amount:      payment.amount / 100,
+        amount:      payment.amount,
         description: `Deposit Failed (Ref: ${reference})`,
         reference,
         method:      "Paystack",

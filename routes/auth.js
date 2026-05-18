@@ -1035,7 +1035,7 @@ router.post('/club-de-star-cooperative/updateProfile', async (req, res) => {
   if (!req.isAuthenticated()) 
     return res.status(401).json({ success: false, error: "Not authenticated" });
 
-  const allowedFields = ['firstName', 'lastName', 'email', 'phone', 'dob', 'address'];
+  const allowedFields = ['email', 'phone', 'dob', 'address'];
 
   try {
     const user = await User.findById(req.user._id);
