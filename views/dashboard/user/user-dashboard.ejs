@@ -1090,8 +1090,29 @@ button,input,select,textarea{font-family:inherit;}
       </div>
       <div id="paystackSection" style="display:none;">
         <div class="form-group">
-          <label class="form-label">Amount (₦)</label>
-          <input type="number" id="paystackAmount" class="form-control" placeholder="0.00" min="100">
+          <label class="form-label">Amount to deposit (₦)</label>
+          <input type="number" id="paystackAmount" class="form-control" placeholder="0.00" min="100" oninput="calcPaystackFee()">
+          <div class="form-hint">Enter the amount you want credited to your savings</div>
+        </div>
+        <!-- Fee breakdown — shown after amount is entered -->
+        <div id="paystackFeeBox" class="fee-breakdown" style="display:none;">
+          <div class="fee-row">
+            <span class="fee-row-label">Deposit amount</span>
+            <span id="feeDepositAmt">₦0</span>
+          </div>
+          <div class="fee-row">
+            <span class="fee-row-label">Paystack processing fee</span>
+            <span id="feePaystackAmt" style="color:var(--amber);">₦0</span>
+          </div>
+          <hr class="fee-divider">
+          <div class="fee-row fee-total">
+            <span>Total you'll be charged</span>
+            <span id="feeTotalAmt" style="color:var(--text);">₦0</span>
+          </div>
+          <div class="form-hint" style="margin-top:6px;">
+            <i class="fas fa-info-circle" style="margin-right:4px;color:var(--accent);"></i>
+            Your balance will be credited <strong id="feeBalanceCredited">₦0</strong> after payment.
+          </div>
         </div>
       </div>
       <div id="cooperativeSection" style="display:none;">
@@ -1103,7 +1124,6 @@ button,input,select,textarea{font-family:inherit;}
             <option value="no">No — external transfer</option>
           </select>
         </div>
-        <!-- Bank details box with copyable account number -->
         <div id="coopBankDetails" class="modal-info" style="display:none;">
           <% if (accountConfigured) { %>
             <div style="display:flex;flex-direction:column;gap:6px;">
@@ -1307,6 +1327,25 @@ function closeSidebar(){
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sbOverlay').classList.remove('show');
   document.body.style.overflow = '';
+}
+
+/* ── Paystack fee calculator (mirrors backend formula) ── */
+function calcPaystackFee(){
+  const amount = Number(document.getElementById('paystackAmount').value) || 0;
+  const box    = document.getElementById('paystackFeeBox');
+  if(amount <= 0){ box.style.display = 'none'; return; }
+
+  let fee = Math.round(amount * 0.015) + 100;
+  if(amount < 2500) fee = Math.round(amount * 0.015);
+  if(fee > 2000) fee = 2000;
+
+  const total = amount + fee;
+
+  document.getElementById('feeDepositAmt').textContent    = fmt(amount);
+  document.getElementById('feePaystackAmt').textContent   = fmt(fee);
+  document.getElementById('feeTotalAmt').textContent      = fmt(total);
+  document.getElementById('feeBalanceCredited').textContent = fmt(amount);
+  box.style.display = 'block';
 }
 
 /* ── Modals ── */

@@ -18,9 +18,19 @@ router.post("/deposit/init", async (req, res) => {
     const { amount } = req.body;
     const user = req.user;
 
-    if (!amount || amount <= 0) {
+    if (!amount || Number(amount) <= 0) {
       return res.status(400).json({ status: false, message: "Invalid amount entered." });
     }
+
+    const depositAmount = Number(amount); // what user wants to save
+
+    // ── Calculate Paystack fee ────────────────────────────────────────────
+    // Paystack: 1.5% + ₦100 flat, capped at ₦2,000, waived below ₦2,500
+    let fee = Math.round(depositAmount * 0.015) + 100;
+    if (depositAmount < 2500) fee = Math.round(depositAmount * 0.015);
+    if (fee > 2000) fee = 2000;
+
+    const chargeAmount = depositAmount + fee; // total user pays
 
     const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
@@ -30,8 +40,8 @@ router.post("/deposit/init", async (req, res) => {
       },
       body: JSON.stringify({
         email: user.email,
-        amount: amount * 100, // Paystack needs kobo
-        metadata: { userId: user._id, type: "deposit" },
+        amount: chargeAmount * 100, // Paystack needs kobo
+        metadata: { userId: user._id, type: "deposit", depositAmount, fee },
         callback_url: `${process.env.BASE_URL}/deposit/verify`,
       }),
     });
@@ -42,13 +52,20 @@ router.post("/deposit/init", async (req, res) => {
     await Payment.create({
       user:        user._id,
       email:       user.email,
-      amount:      Number(amount), // store naira, not kobo
+      amount:      depositAmount, // store naira the user intends to save
       reference:   data.data.reference,
       status:      "pending",
       paymentType: "deposit",
     });
 
-    res.json({ status: true, authorization_url: data.data.authorization_url });
+    res.json({
+      status:            true,
+      authorization_url: data.data.authorization_url,
+      depositAmount,
+      fee,
+      chargeAmount,
+    });
+
   } catch (err) {
     console.error("Deposit initialization error:", err);
     res.status(500).json({ status: false, message: "Error initializing deposit." });
