@@ -14,7 +14,7 @@ const Permission = require("../../models/Permission");
 const Role = require("../../models/Role");
 const KiddiesAccount = require("../../models/Kiddies/kiddiesAccount");
 const Transaction = require("../../models/Transaction");
-
+const OperatingLedger = require("../../models/OperatingLedger");
 
 
 
@@ -622,6 +622,30 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
         recordedBy:  approvedBy
       });
     }
+
+      const lastEntry = await OperatingLedger.findOne()
+    .sort({ createdAt: -1 })
+    .select("runningBalance");
+  const prevBalance = lastEntry?.runningBalance ?? 0;
+
+    await OperatingLedger.create({
+      type:           "operating_charge",
+      direction:      "in",
+      amount:         companyChargeForThisLoan,
+      runningBalance: prevBalance + companyChargeForThisLoan,
+      relatedLoan:    loan._id,
+      relatedUser:    ledgerUser,
+      recordedBy:     approvedBy,
+      description:    `ROI operating charge (${roiOperatingCharge}%) on loan for ${borrowerName}`,
+      meta: {
+        loanAmount:    loan.amount,
+        interestRate:  loan.interestRate,
+        durationValue,
+        chargePercent: roiOperatingCharge,
+        totalInterest: interestForLoan,
+        chargeAmount:  companyChargeForThisLoan
+      }
+    });
 
     return res.status(200).json({
       message:        `Loan for ${borrowerName} approved successfully.`,

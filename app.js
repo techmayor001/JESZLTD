@@ -54,9 +54,20 @@ mongoose
     console.log("✅ DB connected");
 
     await initSystem();
-    
+
+    // ── ONE-TIME BACKFILL — remove after first successful deploy ──
+    try {
+      const backfill = require("./backfillOperatingLedger");
+      await backfill();
+      console.log("✅ Backfill complete");
+    } catch (err) {
+      console.error("❌ Backfill failed:", err);
+      // non-fatal — server still starts
+    }
+    // ─────────────────────────────────────────────────────────────
+
     const port = process.env.PORT || 3000;
-    
+
     app.listen(port, () =>
       console.log(`🚀 Server running on Port ${port}`)
     );
