@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
+const multer = require("multer");
 
 const Admin = require("../models/Admin");
 const User = require("../models/User");
@@ -189,6 +190,49 @@ function parseDateRange(query) {
  
     return { dateFilter: {}, fromDate: null, toDate: null, periodLabel: "All Time" };
 }
+
+
+
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
+const { v4: uuidv4 } = require('uuid');
+const { r2, R2_BUCKET, R2_PUBLIC_BASE, deleteR2Object } = require('../config/r2');
+
+// Memory storage — files go to R2, never touch disk
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    fileFilter: (req, file, cb) => {
+        const allowedExts  = /jpeg|jpg|png|pdf/;
+        const allowedMimes = /image\/jpeg|image\/jpg|image\/png|application\/pdf/;
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowedExts.test(ext) && allowedMimes.test(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only .jpeg, .jpg, .png, and .pdf files are allowed'));
+        }
+    }
+});
+
+/**
+ * Upload a single multer memory-storage file to R2.
+ * Returns the public URL of the uploaded object.
+ * @param {Express.Multer.File} file
+ * @param {string} folder  — e.g. 'kyc'
+ */
+async function uploadToR2(file, folder = 'kyc') {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const key = `${folder}/${uuidv4()}${ext}`;
+
+    await r2.send(new PutObjectCommand({
+        Bucket:      R2_BUCKET,
+        Key:         key,
+        Body:        file.buffer,
+        ContentType: file.mimetype,
+    }));
+
+    return `${R2_PUBLIC_BASE}/${key}`;
+}
+
  
 // ── Route ────────────────────────────────────────────────────────────────────
 router.get(
@@ -830,22 +874,24 @@ router.post("/members/delete/:id", ensureAdmin("delete_members"), async (req, re
 router.post(
   "/admin/members/edit/:id",
   ensureAdmin("edit_members"),
+  upload.fields([
+    { name: 'passportPhoto',  maxCount: 1 },
+    { name: 'displayPicture', maxCount: 1 },
+    { name: 'idFile',         maxCount: 1 },
+    { name: 'addressProof',   maxCount: 1 },
+    { name: 'signature',      maxCount: 1 },
+  ]),
   async (req, res) => {
     try {
       const userId = req.params.id;
 
       const {
-        // Personal
         firstName, lastName, email, phone, dob,
         state, lga, address,
-        // Bank
         bankName, accountNumber, accountName,
-        // Next of Kin
         nokFullName, nokRelationship, nokPhone, nokAddress,
-        // Status & type
         status, memberTypeId,
-        // ID details (non-file)
-        idType, idNumber,
+        idType, idNumber, dateJoined
       } = req.body;
 
       const user = await User.findById(userId).populate({
@@ -858,17 +904,17 @@ router.post(
       }
 
       // ── 1. Update scalar fields ────────────────────────────
-      if (firstName)    user.firstName = firstName.trim();
-      if (lastName)     user.lastName  = lastName.trim();
-      if (email)        user.email     = email.toLowerCase().trim();
-      if (phone)        user.phone     = phone.trim();
-      if (dob)          user.dob       = new Date(dob);
-      if (state)        user.state     = state.trim();
-      if (lga)          user.lga       = lga.trim();
-      if (address)      user.address   = address.trim();
-      if (idType)       user.idType    = idType;
-      if (idNumber)     user.idNumber  = idNumber.trim();
-      if (status)       user.status    = status;
+      if (firstName)  user.firstName = firstName.trim();
+      if (lastName)   user.lastName  = lastName.trim();
+      if (email)      user.email     = email.toLowerCase().trim();
+      if (phone)      user.phone     = phone.trim();
+      if (dob)        user.dob       = new Date(dob);
+      if (state)      user.state     = state.trim();
+      if (lga)        user.lga       = lga.trim();
+      if (address)    user.address   = address.trim();
+      if (idType)     user.idType    = idType;
+      if (idNumber)   user.idNumber  = idNumber.trim();
+      if (status)     user.status    = status;
 
       // ── 2. Bank details ───────────────────────────────────
       user.bankDetails = {
@@ -885,7 +931,23 @@ router.post(
         address:      nokAddress      || user.nextOfKin?.address      || "",
       };
 
-      // ── 4. Member Type change (generates new membership ID) ─
+      // ── 4. File uploads to R2 ─────────────────────────────
+      const uploadedFiles = {};
+      const fileFields = ['passportPhoto', 'displayPicture', 'idFile', 'addressProof', 'signature'];
+
+      for (const field of fileFields) {
+        const fileArr = req.files?.[field];
+        if (fileArr && fileArr[0]) {
+          if (user[field]) {
+            try { await deleteR2Object(user[field]); } catch (_) {}
+          }
+          const url = await uploadToR2(fileArr[0], 'kyc');
+          user[field]          = url;
+          uploadedFiles[field] = url;
+        }
+      }
+
+      // ── 5. Member Type change ─────────────────────────────
       let newMemberTypeName = null;
       let newMembershipID   = null;
 
@@ -898,7 +960,6 @@ router.post(
             return res.status(404).json({ status: false, message: "Member type not found" });
           }
 
-          // Generate sequential ID for new type
           const lastUser = await User
             .findOne({ membershipID: { $regex: `^${type.shortCode}` } })
             .sort({ membershipID: -1 })
@@ -912,11 +973,8 @@ router.post(
 
           newMembershipID   = `${type.shortCode}${String(nextNumber).padStart(4, "0")}`;
           newMemberTypeName = type.name;
-
-          // Clear old membership ID, assign new one
           user.membershipID = newMembershipID;
 
-          // Update / create account
           let account = await Account.findOne({ user: user._id });
           if (!account) {
             account = new Account({ user: user._id, accountType: type._id });
@@ -925,7 +983,6 @@ router.post(
           }
           await account.save();
 
-          // Re-link account to user if needed
           if (!user.account || user.account.toString() !== account._id.toString()) {
             user.account = account._id;
           }
@@ -934,13 +991,19 @@ router.post(
 
       await user.save();
 
+      // ── 6. Override createdAt via raw driver (bypasses Mongoose timestamps) ──
+      if (dateJoined) {
+        await User.collection.updateOne(
+          { _id: user._id },
+          { $set: { createdAt: new Date(dateJoined) } }
+        );
+      }
+
       return res.json({
         status: true,
         message: "Member updated successfully",
-        ...(newMembershipID && {
-          newMembershipID,
-          newMemberTypeName,
-        }),
+        files: uploadedFiles,
+        ...(newMembershipID && { newMembershipID, newMemberTypeName }),
       });
     } catch (err) {
       console.error("Edit member error:", err);
@@ -948,7 +1011,6 @@ router.post(
     }
   }
 );
-
 
 router.post(
   "/admin/members/reject/:id",
@@ -3001,8 +3063,8 @@ router.post(
 /* ─── GET: render withdrawal management page ──────────────────────────── */
 router.get("/admin/manage-withdrawals", ensureAdmin("view_withdrawals"), async (req, res) => {
   try {
-    /* Fetch all non-success withdrawals (pending, processing, failed) */
-    const withdrawals = await Withdrawal.find({ status: { $ne: "success" } })
+    // Fetch ALL withdrawals (no status filter)
+    const withdrawals = await Withdrawal.find({})
       .populate({
         path: "user",
         select: "firstName lastName membershipID email phone account status",
@@ -3016,13 +3078,11 @@ router.get("/admin/manage-withdrawals", ensureAdmin("view_withdrawals"), async (
         ? `${w.user.firstName} ${w.user.lastName}`
         : "N/A";
 
-      /* Map DB status to display status */
       const displayStatus =
         w.status === "success"    ? "approved"   :
         w.status === "failed"     ? "rejected"   :
         w.status === "processing" ? "processing" : "pending";
 
-      /* Withdrawal type label */
       const typeLabel =
         w.type === "ondemand" ? "On-demand" :
         w.type === "regular"  ? "Regular"   : w.type;
@@ -3036,17 +3096,13 @@ router.get("/admin/manage-withdrawals", ensureAdmin("view_withdrawals"), async (
         memberId:        w.user?.membershipID || "N/A",
         memberEmail:     w.user?.email        || "N/A",
         memberPhone:     w.user?.phone        || "N/A",
-
-        /* ── Financial fields ── */
-        amount:          w.amount,          // gross requested
+        amount:          w.amount,
         penaltyRate:     w.penaltyRate  || 0,
         penaltyAmount:   w.penaltyAmount || 0,
-        netAmount:       w.netAmount    || w.amount, // what admin actually pays out
+        netAmount:       w.netAmount    || w.amount,
         phase1Amount:    w.phase1Amount || w.netAmount || w.amount,
         phase2Amount:    w.phase2Amount || 0,
         payoutType:      w.payoutType   || "immediate",
-
-        /* ── Bank & account ── */
         bankName:        w.bankName,
         accountName:     w.accountName,
         accountNumber:   w.accountNumber,
@@ -3055,14 +3111,11 @@ router.get("/admin/manage-withdrawals", ensureAdmin("view_withdrawals"), async (
         typeLabel,
         status:          displayStatus,
         balance:         w.user?.account?.balance || 0,
-
-        /* ── Flags ── */
         triggeredDeactivation: w.triggeredDeactivation || false,
         notes:           w.notes || "",
       };
     });
 
-    /* ── Stats ── */
     const pendingRequests = withdrawals.filter(
       (w) => w.status === "pending" || w.status === "processing"
     ).length;
@@ -3094,7 +3147,6 @@ router.get("/admin/manage-withdrawals", ensureAdmin("view_withdrawals"), async (
     res.status(500).send("Internal Server Error");
   }
 });
-
 /* ─── POST: approve a withdrawal ─────────────────────────────────────── */
 router.post(
   "/admin/withdrawals/:id/approve",

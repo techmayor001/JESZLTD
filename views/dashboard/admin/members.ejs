@@ -563,6 +563,10 @@
                             <div class="col-md-6"><label class="form-label">Phone</label><input type="tel" name="phone" id="edit_phone" class="form-control" placeholder="08012345678"></div>
                             <div class="col-md-6"><label class="form-label">Date of Birth</label><input type="date" name="dob" id="edit_dob" class="form-control"></div>
                             <div class="col-md-6"><label class="form-label">Status <span class="text-danger">*</span></label><select name="status" id="edit_status" class="form-select" required><option value="active">Active</option><option value="pending">Pending</option><option value="rejected">Rejected</option></select></div>
+                            <div class="col-md-6">
+                                <label class="form-label">Date Joined <span class="text-muted fw-normal" style="font-size:.78rem;">(override if needed)</span></label>
+                                <input type="date" name="dateJoined" id="edit_dateJoined" class="form-control">
+                            </div>
                             <div class="col-md-6"><label class="form-label">State</label><input type="text" name="state" id="edit_state" class="form-control" placeholder="e.g. Lagos"></div>
                             <div class="col-md-6"><label class="form-label">LGA</label><input type="text" name="lga" id="edit_lga" class="form-control" placeholder="e.g. Ikeja"></div>
                             <div class="col-12"><label class="form-label">Address</label><textarea name="address" id="edit_address" class="form-control" rows="2"></textarea></div>
@@ -934,6 +938,10 @@
         document.getElementById('edit_lga').value       = m.lga||'';
         document.getElementById('edit_address').value   = m.address||'';
         if (m.dob) { try{ document.getElementById('edit_dob').value=new Date(m.dob).toISOString().split('T')[0]; }catch(_){document.getElementById('edit_dob').value='';} } else document.getElementById('edit_dob').value='';
+        if (m.joinDate) {
+            try { document.getElementById('edit_dateJoined').value = new Date(m.joinDate).toISOString().split('T')[0]; }
+            catch(_) { document.getElementById('edit_dateJoined').value = ''; }
+        } else document.getElementById('edit_dateJoined').value = '';
         document.getElementById('edit_idType').value   = m.idType||'';
         document.getElementById('edit_idNumber').value = m.idNumber||'';
         renderFilePreview('prev_passportPhoto',m.passportPhoto,'Passport Photo');
@@ -970,6 +978,7 @@
                 m.status=g('status')||m.status; m.state=g('state')||m.state;
                 m.lga=g('lga')||m.lga; m.address=g('address')||m.address;
                 m.idType=g('idType')||m.idType; m.idNumber=g('idNumber')||m.idNumber;
+                m.joinDate=g('dateJoined')||m.joinDate;
                 m.bankDetails={bankName:g('bankName')||m.bankDetails?.bankName||'',accountNumber:g('accountNumber')||m.bankDetails?.accountNumber||'',accountName:g('accountName')||m.bankDetails?.accountName||''};
                 m.nextOfKin={fullName:g('nokFullName')||m.nextOfKin?.fullName||'',relationship:g('nokRelationship')||m.nextOfKin?.relationship||'',phone:g('nokPhone')||m.nextOfKin?.phone||'',address:g('nokAddress')||m.nextOfKin?.address||''};
                 if (result.data.files) { if(result.data.files.passportPhoto) m.passportPhoto=result.data.files.passportPhoto; if(result.data.files.displayPicture) m.displayPicture=result.data.files.displayPicture; if(result.data.files.idFile) m.idFile=result.data.files.idFile; if(result.data.files.addressProof) m.addressProof=result.data.files.addressProof; if(result.data.files.signature) m.signature=result.data.files.signature; }
