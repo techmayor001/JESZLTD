@@ -2340,64 +2340,64 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
       })
       .sort({ createdAt: -1 });
 
+    const MANUAL_PREFIXES = [
+      "COOP-",
+      "LOAN-MANUAL-",
+      "LOAN-INT-",
+      "EXT-LOAN-",
+      "MANUAL-REG-",
+      "KD-NEW-",
+      "KD-REG-MANUAL-",
+      "SUPERADMIN-",
+    ];
+
     const deposits = payments.map((payment) => {
       const dateObj = new Date(payment.createdAt);
       const memberFullName = payment.user
         ? `${payment.user.firstName} ${payment.user.lastName}`
         : "N/A";
 
-      const MANUAL_PREFIXES = [
-        "COOP-",
-        "LOAN-MANUAL-",
-        "LOAN-INT-",
-        "EXT-LOAN-",
-        "MANUAL-REG-",
-        "KD-NEW-",
-        "KD-REG-MANUAL-",
-      ];
+      const hasManualPrefix = MANUAL_PREFIXES.some((prefix) =>
+        payment.reference.startsWith(prefix)
+      );
 
       const isManual =
+        hasManualPrefix ||
         payment.method === "Manual" ||
-        payment.method === "Cash" ||
-        payment.method === "Bank Transfer" ||
-        MANUAL_PREFIXES.some(prefix => payment.reference.startsWith(prefix));
+        payment.method === "Cash";
 
-      // ── Amount ────────────────────────────────────────────────────────
-      // Manual payments are stored in full Naira → display as-is.
-      // Paystack payments are stored in kobo     → divide by 100.
-      const amount = isManual
-        ? payment.amount
-        : payment.amount / 100;
+      // Both Paystack and Manual routes store amount in full Naira.
+      // Paystack init saves `depositAmount` (Naira) — not the kobo value
+      // sent to Paystack API. No conversion needed for either method.
+      const amount = payment.amount;
 
-      // Account balance is always stored in Naira
       const balance = payment.user?.account?.balance || 0;
 
       return {
-        id:        payment._id,
+        id: payment._id,
         reference: payment.reference,
 
         date: dateObj.toLocaleDateString("en-US", {
           month: "short",
-          day:   "numeric",
-          year:  "numeric",
+          day: "numeric",
+          year: "numeric",
         }),
 
         time: dateObj.toLocaleTimeString("en-US", {
-          hour:   "2-digit",
+          hour: "2-digit",
           minute: "2-digit",
         }),
 
-        memberName:  memberFullName,
-        payeeName:   payment.payeeName || null,
-        memberId:    payment.user?.membershipID || "N/A",
-        email:       payment.email,
+        memberName: memberFullName,
+        payeeName: payment.payeeName || null,
+        memberId: payment.user?.membershipID || "N/A",
+        email: payment.email,
 
         amount,
         balance,
 
-        method: isManual ? "Manual Transfer" : "Paystack",
+        method: isManual ? (payment.method || "Manual Transfer") : "Paystack",
 
-        // Normalise status labels for the view
         status:
           payment.status === "paid" || payment.status === "success"
             ? "approved"
@@ -2405,28 +2405,26 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
             ? "rejected"
             : "pending",
 
-        // Payment type badge in admin table (interest, principal, deposit)
         paymentType: payment.type || "deposit",
 
-        notes: payment.paystackResponse?.adminNote
-          || payment.paystackResponse?.message
-          || payment.notes
-          || "Deposit / Loan payment",
+        notes:
+          payment.paystackResponse?.adminNote ||
+          payment.paystackResponse?.message ||
+          payment.notes ||
+          "Deposit / Loan payment",
       };
     });
 
-    // ── Stats ─────────────────────────────────────────────────────────────
-    // Use the corrected `deposits` array so totalIncome is in Naira, not kobo
     const totalIncome = deposits
-      .filter(d => d.status === "approved")
+      .filter((d) => d.status === "approved")
       .reduce((sum, d) => sum + d.amount, 0);
 
-    const pendingCount = deposits.filter(d => d.status === "pending").length;
+    const pendingCount = deposits.filter((d) => d.status === "pending").length;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const approvedToday = payments.filter(p => {
+    const approvedToday = payments.filter((p) => {
       const created = new Date(p.createdAt);
       return (
         (p.status === "paid" || p.status === "success") &&
@@ -2435,7 +2433,7 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
     }).length;
 
     const activeMembers = new Set(
-      payments.filter(p => p.user).map(p => p.user._id.toString())
+      payments.filter((p) => p.user).map((p) => p.user._id.toString())
     ).size;
 
     res.render("dashboard/admin/deposits", {
@@ -2454,7 +2452,6 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
     res.status(500).send("Internal Server Error");
   }
 });
-
 
 
 router.post(
@@ -5226,7 +5223,7 @@ async function opAggSum(query) {
 const opPopulateOpts = [
   { path: "relatedUser", select: "firstName lastName membershipID" },
   { path: "relatedLoan", select: "_id" },
-  { path: "recordedBy",  select: "firstName lastName fullName" },
+  { path: "recordedBy",  select: "firstName lastName", model: "User" },
 ];
 
 // ── GET /admin/operating-earnings ────────────────────────────────────────────
@@ -5347,6 +5344,110 @@ router.get(
     } catch (err) {
       console.error("Error loading operating earnings page:", err);
       res.status(500).send("Server error");
+    }
+  }
+);
+
+
+// ── POST /admin/operating-earnings/income ────────────────────────────────────
+router.post(
+  "/admin/operating-earnings/income",
+  ensureAdmin("view_finance"),
+  async (req, res) => {
+    try {
+      const { type, amount, description } = req.body;
+
+      const INCOME_TYPES = [
+        "manual_credit", "external_income", "interest_income", "other_income",
+      ];
+
+      if (!type || !INCOME_TYPES.includes(type))
+        return res.status(400).json({ status: false, message: "Invalid income type." });
+
+      const amt = parseFloat(amount);
+      if (!amt || amt <= 0)
+        return res.status(400).json({ status: false, message: "Amount must be greater than zero." });
+
+      if (!description || !description.trim())
+        return res.status(400).json({ status: false, message: "Description is required." });
+
+      const [totalIn, totalOut] = await Promise.all([
+        opAggSum({ direction: "in" }),
+        opAggSum({ direction: "out" }),
+      ]);
+      const runningBalance = totalIn - totalOut + amt;
+
+      await OperatingLedger.create({
+        type,
+        direction:      "in",
+        amount:         amt,
+        runningBalance,
+        description:    description.trim(),
+        recordedBy:     req.user._id,
+        meta:           {},
+      });
+
+      return res.json({ status: true, message: "Income recorded successfully." });
+    } catch (err) {
+      console.error("Add income error:", err);
+      return res.status(500).json({ status: false, message: "Server error. Please try again." });
+    }
+  }
+);
+
+// ── POST /admin/operating-earnings/expense ───────────────────────────────────
+router.post(
+  "/admin/operating-earnings/expense",
+  ensureAdmin("view_finance"),
+  async (req, res) => {
+    try {
+      const { type, amount, description, staffName, staffRole, paymentPeriod } = req.body;
+
+      const EXPENSE_TYPES = [
+        "staff_payment", "expense", "manual_debit", "other_expense",
+      ];
+
+      if (!type || !EXPENSE_TYPES.includes(type))
+        return res.status(400).json({ status: false, message: "Invalid expense type." });
+
+      const amt = parseFloat(amount);
+      if (!amt || amt <= 0)
+        return res.status(400).json({ status: false, message: "Amount must be greater than zero." });
+
+      if (!description || !description.trim())
+        return res.status(400).json({ status: false, message: "Description is required." });
+
+      if (type === "staff_payment" && (!staffName || !staffName.trim()))
+        return res.status(400).json({ status: false, message: "Staff name is required for salary payments." });
+
+      const meta = type === "staff_payment"
+        ? {
+            staffName:     staffName?.trim()     || "",
+            staffRole:     staffRole?.trim()     || "",
+            paymentPeriod: paymentPeriod?.trim() || "",
+          }
+        : {};
+
+      const [totalIn, totalOut] = await Promise.all([
+        opAggSum({ direction: "in" }),
+        opAggSum({ direction: "out" }),
+      ]);
+      const runningBalance = totalIn - totalOut - amt;
+
+      await OperatingLedger.create({
+        type,
+        direction:      "out",
+        amount:         amt,
+        runningBalance,
+        description:    description.trim(),
+        recordedBy:     req.user._id,
+        meta,
+      });
+
+      return res.json({ status: true, message: "Expense recorded successfully." });
+    } catch (err) {
+      console.error("Record expense error:", err);
+      return res.status(500).json({ status: false, message: "Server error. Please try again." });
     }
   }
 );

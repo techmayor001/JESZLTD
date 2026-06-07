@@ -69,7 +69,7 @@ const operatingLedgerSchema = new Schema({
   /** Admin who manually created this entry. null = system-generated */
   recordedBy: {
     type: Schema.Types.ObjectId,
-    ref: "Admin",
+    ref: "User",
     default: null
   },
 

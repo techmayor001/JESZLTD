@@ -822,14 +822,14 @@ button,input,select,textarea{font-family:inherit;}
           <label class="form-label">Guarantor 1</label>
           <select class="form-control guarantorSelect" id="guarantor1" name="guarantor1" required <%= !canApply ? 'disabled' : '' %>>
             <option value="">Select guarantor…</option>
-            <% users.forEach(u => { if(u._id.toString() !== user._id.toString()){ %><option value="<%= u._id %>"><%= u.firstName %> <%= u.lastName %> — <%= u.phone %></option><% }}) %>
+            <% users.forEach(u => { if(u._id.toString() !== user._id.toString()){ %><option value="<%= u._id %>"><%= u.membershipID %></option><% }}) %>
           </select>
         </div>
         <div class="form-group">
           <label class="form-label">Guarantor 2</label>
           <select class="form-control guarantorSelect" id="guarantor2" name="guarantor2" required <%= !canApply ? 'disabled' : '' %>>
             <option value="">Select guarantor…</option>
-            <% users.forEach(u => { if(u._id.toString() !== user._id.toString()){ %><option value="<%= u._id %>"><%= u.firstName %> <%= u.lastName %> — <%= u.phone %></option><% }}) %>
+            <% users.forEach(u => { if(u._id.toString() !== user._id.toString()){ %><option value="<%= u._id %>"><%= u.membershipID %></option><% }}) %>
           </select>
         </div>
         <div class="check-group">
@@ -1181,11 +1181,14 @@ function calculateLoan(){
   const duration = parseInt(document.getElementById('calcDuration').value) || 1;
   const rate     = parseFloat(document.getElementById('calcRate').value) || 0;
   const res      = document.getElementById('calcResult');
+
   if(amount <= 0){ res.style.display = 'none'; return; }
   if(amount > MAX_LOAN){ document.getElementById('calcAmount').value = MAX_LOAN; return calculateLoan(); }
-  const interest = amount * (rate / 100) * (duration / 12);
-  const total    = amount + interest;
-  const monthly  = total / duration;
+
+  const interest = amount * (rate / 100);          // flat: 5% of 5000 = 250
+  const total    = amount + interest;               // 5000 + 250 = 5250
+  const monthly  = total / duration;               // spread over months
+
   res.style.display = 'block';
   document.getElementById('monthlyPay').textContent = '₦' + monthly.toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});
   document.getElementById('totalInt').textContent   = '₦' + interest.toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});
