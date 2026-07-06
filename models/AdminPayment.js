@@ -106,6 +106,10 @@ const adminPaymentSchema = new mongoose.Schema(
       required: true,
     },
 
+    isReversed: { type: Boolean, default: false },
+    reversalTransaction: { type: mongoose.Schema.Types.ObjectId, ref: "AdminPayment", default: null },
+    isReversalOf: { type: mongoose.Schema.Types.ObjectId, ref: "AdminPayment", default: null },
+
     balanceAfter: {
       type: Number,
       required: true,

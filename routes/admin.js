@@ -1414,14 +1414,65 @@ router.get("/api/memberType/byCode/:shortCode", async (req, res) => {
 // HANDLING PAYMENTS MANAGEMENT -------------- TECHMAYOR COMPANY LIMITED 
 
 
-// ADMIN PAYMENT ROUTES 
+function resolveDateRange(query) {
+  const { range = "all", from, to } = query;
+  const now = new Date();
 
+  const startOfDay = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+  const endOfDay   = (d) => { const x = new Date(d); x.setHours(23, 59, 59, 999); return x; };
+
+  let start = null, end = null;
+
+  switch (range) {
+    case "today":
+      start = startOfDay(now); end = endOfDay(now);
+      break;
+    case "yesterday": {
+      const y = new Date(now); y.setDate(y.getDate() - 1);
+      start = startOfDay(y); end = endOfDay(y);
+      break;
+    }
+    case "7days":
+      start = startOfDay(new Date(now.getTime() - 6 * 86400000));
+      end   = endOfDay(now);
+      break;
+    case "thismonth":
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end   = endOfDay(now);
+      break;
+    case "lastmonth": {
+      const firstOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      end   = new Date(firstOfThisMonth.getTime() - 1);
+      start = new Date(end.getFullYear(), end.getMonth(), 1);
+      break;
+    }
+    case "custom":
+      if (from) start = startOfDay(new Date(from));
+      if (to)   end   = endOfDay(new Date(to));
+      break;
+    case "all":
+    default:
+      return null;
+  }
+
+  if (!start || !end) return null;
+  return { $gte: start, $lte: end };
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  UNIFIED PAYMENT PAGE — replaces manage-payment + manage-deposits
+// ═══════════════════════════════════════════════════════════════
 router.get(
   "/admin/manage-payment",
   ensureAdmin("view_transactions"),
   async (req, res) => {
     try {
-      const adminPayments = await AdminPayment.find()
+      const dateFilter = resolveDateRange(req.query);
+      const dateMatch   = dateFilter ? { createdAt: dateFilter } : {};
+
+      /* ── 1. Approval-workflow transactions (deposit/withdrawal/loan-repay/direct-debit/reversal) ── */
+      const adminPayments = await AdminPayment.find(dateMatch)
         .populate({ path: "admin", select: "firstName lastName email membershipID" })
         .populate({
           path: "member",
@@ -1429,11 +1480,7 @@ router.get(
           populate: {
             path: "account",
             select: "accountType balance",
-            populate: {
-              path: "accountType",
-              model: "MemberType",
-              select: "name",
-            },
+            populate: { path: "accountType", model: "MemberType", select: "name" },
           },
         })
         .populate({
@@ -1444,49 +1491,87 @@ router.get(
             { path: "parent", select: "firstName lastName email phone membershipID" },
           ],
         })
-        .populate({
-          path: "loan",
-          select: "amount balance duration",
-          populate: { path: "duration", model: "LoanSettings" },
-        })
+        .populate({ path: "loan", select: "amount balance duration", populate: { path: "duration", model: "LoanSettings" } })
+        .populate({ path: "reversalTransaction", select: "reference status createdAt" })
         .sort({ createdAt: -1 });
 
-      // ── Pull approval data from TransactionApproval using adminPayment ref ──
-      const adminPaymentIds = adminPayments.map(p => p._id);
+      const adminPaymentIds = adminPayments.map((p) => p._id);
 
       const approvalRecords = await TransactionApproval.find({
         adminPayment: { $in: adminPaymentIds },
       })
         .populate({ path: "selectedApprovers", select: "firstName lastName email" })
-        .populate({ path: "approvals.user",    select: "firstName lastName" })
-        .select("adminPayment selectedApprovers approvals finalizedAt");
+        .populate({ path: "approvals.user", select: "firstName lastName" })
+        .select("adminPayment selectedApprovers approvals finalizedAt action");
 
-      // Build a map: adminPaymentId → approvalRecord
       const approvalMap = {};
-      approvalRecords.forEach(rec => {
-        if (rec.adminPayment) {
-          approvalMap[rec.adminPayment.toString()] = rec;
-        }
+      approvalRecords.forEach((rec) => {
+        if (rec.adminPayment) approvalMap[rec.adminPayment.toString()] = rec;
       });
 
-      // Attach approval data to each adminPayment as a plain property
-      const paymentsWithApprovers = adminPayments.map(payment => {
+      const workflowTxns = adminPayments.map((payment) => {
         const plain    = payment.toObject();
         const approval = approvalMap[payment._id.toString()];
-        if (approval) {
-          plain.selectedApprovers = approval.selectedApprovers || [];
-          plain.approvals         = approval.approvals         || [];
-          plain.finalizedAt       = approval.finalizedAt       || null;
-        } else {
-          plain.selectedApprovers = [];
-          plain.approvals         = [];
-          plain.finalizedAt       = null;
-        }
+        plain.selectedApprovers = approval?.selectedApprovers || [];
+        plain.approvals         = approval?.approvals || [];
+        plain.finalizedAt       = approval?.finalizedAt || null;
+        plain.source            = "workflow";
         return plain;
       });
 
-      const memberRole = await Role.findOne({ name: /^member$/i }).select("_id");
+      /* ── 2. Self-service deposits: manual + Paystack, from the OLD deposits page ──
+         Excludes "APPR-" refs because those are already represented above
+         (finalizeTransaction() creates a mirror Payment record on approval). */
+      const selfServicePayments = await Payment.find({
+        ...dateMatch,
+        reference: { $not: /^APPR-/ },
+      })
+        .populate({
+          path: "user",
+          select: "firstName lastName membershipID email account",
+          populate: { path: "account", select: "balance" },
+        })
+        .sort({ createdAt: -1 });
 
+      const MANUAL_PREFIXES = [
+        "COOP-", "LOAN-MANUAL-", "LOAN-INT-", "EXT-LOAN-",
+        "MANUAL-REG-", "KD-NEW-", "KD-REG-MANUAL-", "SUPERADMIN-",
+      ];
+
+      const selfServiceTxns = selfServicePayments.map((p) => {
+        const isManual = MANUAL_PREFIXES.some((pre) => p.reference.startsWith(pre))
+          || p.method === "Manual" || p.method === "Cash";
+
+        return {
+          _id:            p._id,
+          createdAt:      p.createdAt,
+          source:         "self-service",
+          paymentType:    p.type || p.paymentType || "deposit",
+          amount:         p.amount,
+          chargeAmount:   0,
+          totalAmount:    p.amount,
+          reference:      p.reference,
+          paymentMethod:  isManual ? (p.method || "manual") : "paystack",
+          status:         p.status === "paid" || p.status === "success" ? "successful"
+                         : p.status === "failed" ? "rejected" : "pending",
+          notes:          p.paystackResponse?.adminNote || p.paystackResponse?.message || "Member-initiated deposit",
+          member:         p.user || null,
+          kiddiesMember:  null,
+          memberType:     "member",
+          balanceBefore:  null,
+          balanceAfter:   p.user?.account?.balance ?? null,
+          isReversed:     false,
+          selectedApprovers: [],
+          approvals:      [],
+          finalizedAt:    null,
+        };
+      });
+
+      /* ── 3. Merge + sort newest first ── */
+      const allTxns = [...workflowTxns, ...selfServiceTxns]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      const memberRole = await Role.findOne({ name: /^member$/i }).select("_id");
       const availableApprovers = await User.find({
         role:   { $ne: memberRole?._id },
         status: "active",
@@ -1496,16 +1581,284 @@ router.get(
         .select("firstName lastName email membershipID role");
 
       res.render("dashboard/admin/payment", {
-        admin:        req.user,
-        adminPayments: paymentsWithApprovers,  // now includes selectedApprovers + approvals
+        admin:          req.user,
+        adminPayments:  allTxns,
         availableApprovers,
+        currentRange:   req.query.range || "all",
+        currentFrom:    req.query.from  || "",
+        currentTo:      req.query.to    || "",
       });
     } catch (error) {
-      console.error("Error fetching admin direct payments:", error);
+      console.error("Error fetching payments:", error);
       res.status(500).send("Internal Server Error");
     }
   }
 );
+
+// Retire the standalone deposits page — everything now lives on /admin/manage-payment
+router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), (req, res) => {
+  res.redirect(301, "/admin/manage-payment");
+});
+
+
+
+
+// ═══════════════════════════════════════════════════════════════
+//  TRANSACTION REVERSAL — mirrors the submit-for-approval flow
+// ═══════════════════════════════════════════════════════════════
+router.post(
+  "/admin/reverse-transaction/:adminPaymentId",
+  ensureAdmin("authorize_transactions"),
+  async (req, res) => {
+    try {
+      const { adminPaymentId } = req.params;
+      const { selectedApprovers, notes } = req.body;
+
+      if (!selectedApprovers || !Array.isArray(selectedApprovers) || selectedApprovers.length < 3) {
+        return res.status(400).json({ success: false, message: "You must select at least 3 approvers" });
+      }
+      if (!notes || !notes.trim()) {
+        return res.status(400).json({ success: false, message: "A reason for the reversal is required" });
+      }
+
+      const original = await AdminPayment.findById(adminPaymentId);
+      if (!original) {
+        return res.status(404).json({ success: false, message: "Original transaction not found" });
+      }
+      if (original.status !== "successful") {
+        return res.status(400).json({ success: false, message: "Only successful transactions can be reversed" });
+      }
+      if (original.isReversed) {
+        return res.status(400).json({ success: false, message: "This transaction has already been reversed" });
+      }
+      if (original.paymentType === "loan-repayment") {
+        return res.status(400).json({
+          success: false,
+          message: "Loan repayment reversals must be processed via Loan Management (loan balance needs restoring too).",
+        });
+      }
+
+      const memberRole    = await Role.findOne({ name: /^member$/i }).select("_id");
+      const approverUsers = await User.find({ _id: { $in: selectedApprovers } }).populate("role", "name");
+      const invalidApprovers = approverUsers.filter(
+        (u) => u.role?._id?.toString() === memberRole?._id?.toString()
+      );
+      if (invalidApprovers.length > 0) {
+        return res.status(400).json({ success: false, message: "Selected approvers must have non-member roles" });
+      }
+
+      const approval = await TransactionApproval.create({
+        initiatedBy:       req.user._id,
+        member:            original.member       || undefined,
+        kiddiesMember:     original.kiddiesMember || undefined,
+        memberType:        original.memberType,
+        paymentType:       original.paymentType,
+        amount:            original.amount,
+        chargeAmount:      original.chargeAmount || 0,
+        totalAmount:       original.totalAmount,
+        paymentMethod:     original.paymentMethod,
+        reference:         `REV-${original.reference}-${Date.now()}`,
+        notes:             notes.trim(),
+        loan:              original.loan || null,
+        chargeType:        original.chargeType || null,
+        selectedApprovers,
+        status:            "pending",
+        approvalsRequired: 3,
+        approvalCount:      0,
+        action:             "reversal",
+        reversalTarget:      original._id,
+      });
+
+      res.json({ success: true, message: "Reversal submitted for approval.", approvalId: approval._id });
+    } catch (err) {
+      console.error("Reverse transaction error:", err);
+      res.status(500).json({ success: false, message: "Failed to submit reversal for approval" });
+    }
+  }
+);
+
+
+// ═══════════════════════════════════════════════════════════════
+//  APPROVE / DECLINE — branch to reversal finalizer when needed
+// ═══════════════════════════════════════════════════════════════
+router.post(
+  "/admin/approve-transaction/:approvalId",
+  ensureAdmin("authorize_transactions"),
+  async (req, res) => {
+    try {
+      const { approvalId } = req.params;
+      const { comment }    = req.body;
+      const userId         = req.user._id;
+
+      const approval = await TransactionApproval.findById(approvalId);
+      if (!approval) return res.status(404).json({ message: "Approval request not found" });
+      if (approval.status !== "pending") {
+        return res.status(400).json({ message: `Transaction is already ${approval.status}` });
+      }
+
+      const isSelected = approval.selectedApprovers.map((id) => id.toString()).includes(userId.toString());
+      if (!isSelected) return res.status(403).json({ message: "You are not authorised to approve this transaction" });
+
+      const alreadyVoted = approval.approvals.some((a) => a.user.toString() === userId.toString());
+      if (alreadyVoted) return res.status(400).json({ message: "You have already responded to this transaction" });
+
+      approval.approvals.push({ user: userId, action: "approved", comment: comment || "", respondedAt: new Date() });
+      approval.approvalCount = approval.approvals.filter((a) => a.action === "approved").length;
+
+      if (approval.approvalCount >= approval.approvalsRequired) {
+        approval.status = "approved";
+        await approval.save();
+
+        const result = approval.action === "reversal"
+          ? await finalizeReversal(approval, req.user)
+          : await finalizeTransaction(approval, req.user);
+
+        if (!result.success) {
+          approval.status = "pending";
+          await approval.save();
+          return res.status(400).json({ message: result.message });
+        }
+
+        return res.json({ success: true, message: `Transaction ${approval.action === "reversal" ? "reversed" : "approved"} and processed successfully!`, finalized: true, transaction: result.transaction });
+      }
+
+      await approval.save();
+      const remaining = approval.approvalsRequired - approval.approvalCount;
+      return res.json({ success: true, message: `Approval recorded. ${remaining} more approval(s) needed.`, finalized: false, approvalCount: approval.approvalCount, approvalsRequired: approval.approvalsRequired });
+    } catch (err) {
+      console.error("Approve transaction error:", err);
+      res.status(500).json({ message: "Failed to process approval" });
+    }
+  }
+);
+
+
+// ═══════════════════════════════════════════════════════════════
+//  FINALIZE REVERSAL — inverts the original balance effect
+// ═══════════════════════════════════════════════════════════════
+async function finalizeReversal(approval, processingUser) {
+  try {
+    const original = await AdminPayment.findById(approval.reversalTarget);
+    if (!original) return { success: false, message: "Original transaction no longer exists" };
+    if (original.isReversed) return { success: false, message: "Transaction was already reversed" };
+
+    const isKiddies = original.memberType === "kiddies";
+    let account, memberRef, memberDisplay = {};
+
+    if (isKiddies) {
+      const kiddiesDoc = await KiddiesAccount.findById(original.kiddiesMember)
+        .populate("account")
+        .populate("parent", "firstName lastName email phone membershipID");
+      if (!kiddiesDoc || !kiddiesDoc.account) return { success: false, message: "Kiddies account not found" };
+      account = kiddiesDoc.account; memberRef = kiddiesDoc;
+      memberDisplay = {
+        name: `${kiddiesDoc.childFirstName} ${kiddiesDoc.childLastName}`,
+        membershipID: kiddiesDoc.accountID || "N/A",
+        email: kiddiesDoc.parent?.email || "N/A",
+        phone: kiddiesDoc.parent?.phone || "N/A",
+      };
+    } else {
+      const member = await User.findById(original.member).populate("account");
+      if (!member || !member.account) return { success: false, message: "Member account not found" };
+      account = member.account; memberRef = member;
+      memberDisplay = { name: `${member.firstName} ${member.lastName}`, membershipID: member.membershipID, email: member.email, phone: member.phone };
+    }
+
+    const balanceBefore = account.balance;
+    let   balanceAfter  = balanceBefore;
+    const totalAmount   = original.totalAmount;
+
+    /* ── Invert the original effect ── */
+    switch (original.paymentType) {
+      case "deposit":
+        if (balanceBefore < totalAmount) return { success: false, message: "Insufficient balance to reverse this deposit" };
+        balanceAfter -= totalAmount;
+        break;
+      case "withdrawal":
+      case "direct-debit":
+        balanceAfter += totalAmount;
+        break;
+      default:
+        return { success: false, message: "Unsupported payment type for reversal" };
+    }
+
+    account.balance = balanceAfter;
+    await account.save();
+
+    const reversalPayment = await AdminPayment.create({
+      admin:         approval.initiatedBy,
+      member:        isKiddies ? undefined : memberRef._id,
+      kiddiesMember: isKiddies ? memberRef._id : undefined,
+      memberType:    original.memberType,
+      paymentType:   original.paymentType,
+      amount:        original.amount,
+      chargeAmount:  original.chargeAmount,
+      totalAmount:   original.totalAmount,
+      paymentMethod: original.paymentMethod,
+      reference:     approval.reference,
+      notes:         approval.notes,
+      balanceBefore,
+      balanceAfter,
+      status:        "successful",
+      isReversalOf:  original._id,
+    });
+
+    original.isReversed          = true;
+    original.reversalTransaction = reversalPayment._id;
+    await original.save();
+
+    const ledgerTypeMap      = { deposit: "deposit_reversal", withdrawal: "withdrawal_reversal", "direct-debit": "direct_debit_reversal" };
+    const ledgerDirectionMap = { deposit: "out", withdrawal: "in", "direct-debit": "in" };
+
+    await CompanyLedger.create({
+      type:      ledgerTypeMap[original.paymentType] || "reversal",
+      direction: ledgerDirectionMap[original.paymentType] || "in",
+      amount:    totalAmount,
+      relatedUser: isKiddies ? (memberRef.parent?._id || memberRef.parent) : memberRef._id,
+      description: `Reversal of ${original.paymentType.replace(/-/g, " ")} — ${memberDisplay.name}${isKiddies ? " [Kiddies]" : ""} (orig ref ${original.reference})`,
+      recordedBy: processingUser?._id,
+      meta: { originalAdminPaymentId: original._id, reversalAdminPaymentId: reversalPayment._id, reference: approval.reference },
+    });
+
+    await AdminActionLog.create({
+      admin: processingUser?._id,
+      adminRole: processingUser?.role?.name || "admin",
+      actionType: "transaction_reversal",
+      targetUser: isKiddies ? undefined : memberRef._id,
+      targetModel: "AdminPayment",
+      targetId: reversalPayment._id,
+      description: `Reversed ${original.paymentType} (orig ref ${original.reference}) for ${memberDisplay.email}`,
+      changes: { amount: totalAmount, balanceBefore, balanceAfter, reference: approval.reference },
+      status: "success",
+    });
+
+    approval.adminPayment = reversalPayment._id;
+    approval.status       = "processed";
+    approval.finalizedAt  = new Date();
+    await approval.save();
+
+    return {
+      success: true,
+      transaction: {
+        id: reversalPayment._id, reference: approval.reference,
+        type: `${original.paymentType}-reversal`, amount: original.amount,
+        totalAmount, balanceBefore, balanceAfter, member: memberDisplay,
+        processedBy: processingUser ? `${processingUser.firstName} ${processingUser.lastName}` : "System",
+      },
+    };
+  } catch (err) {
+    console.error("Finalize reversal error:", err);
+    return { success: false, message: "Reversal finalization failed" };
+  }
+}
+
+
+
+
+
+
+
+
 // ═══════════════════════════════════════════════════════════════
 //  MEMBER SEARCH — returns both regular users AND kiddies accounts
 // ═══════════════════════════════════════════════════════════════

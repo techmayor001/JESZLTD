@@ -109,6 +109,12 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
+    // In userSchema, alongside the loans array:
+    rolloverBlocked: {
+      type: Boolean,
+      default: false
+    },
+
     account: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Account",

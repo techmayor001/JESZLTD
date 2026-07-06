@@ -593,11 +593,19 @@ button,input,select,textarea{font-family:inherit;}
     </div>
     <div class="hero-grid">
       <div class="hero-stat">
-        <div class="hero-stat-label">Active Loan</div>
-        <div class="hero-stat-value" style="color:<%= loan ? (loanIsOverdue ? 'var(--red)' : 'var(--text)') : 'var(--muted)' %>;">
-          ₦<%= loan ? loan.amount.toLocaleString() : '0' %>
-        </div>
-        <div class="hero-stat-sub"><%= loan ? loan.status.toUpperCase() : 'None' %></div>
+          <div class="hero-stat-label" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>Active Loan</span>
+            <% if (loan && ['approved','overdue','rolled_over'].includes(loan.status)) { %>
+              <button onclick="printLoanOffer()" title="Print Loan Offer Letter"
+                      style="background:none;border:none;color:var(--accent);cursor:pointer;padding:0;font-size:12px;display:flex;align-items:center;gap:4px;">
+                <i class="fas fa-print"></i>
+              </button>
+            <% } %>
+          </div>
+          <div class="hero-stat-value" style="color:<%= loan ? (loanIsOverdue ? 'var(--red)' : 'var(--text)') : 'var(--muted)' %>;">
+            ₦<%= loan ? loan.amount.toLocaleString() : '0' %>
+          </div>
+          <div class="hero-stat-sub"><%= loan ? loan.status.toUpperCase() : 'None' %></div>
       </div>
       <div class="hero-stat">
         <div class="hero-stat-label">Outstanding</div>
@@ -710,10 +718,11 @@ button,input,select,textarea{font-family:inherit;}
               <button
                 class="loan-action-btn btn-rollover"
                 onclick="openRolloverFlow()"
-                <%= rolloverPending ? 'disabled title="Rollover pending admin approval"' : '' %>
-                style="<%= rolloverPending ? 'opacity:.5;cursor:not-allowed;' : '' %>">
-                <i class="fas fa-<%= rolloverPending ? 'clock' : 'sync-alt' %>" style="margin-right:6px;font-size:11px;"></i>
-                <%= rolloverPending ? 'Rollover Pending' : 'Rollover' %>
+                <%= (rolloverPending || user.rolloverBlocked) ? 'disabled' : '' %>
+                title="<%= user.rolloverBlocked ? 'Rollover blocked by admin' : (rolloverPending ? 'Rollover pending admin approval' : '') %>"
+                style="<%= (rolloverPending || user.rolloverBlocked) ? 'opacity:.5;cursor:not-allowed;' : '' %>">
+                <i class="fas fa-<%= user.rolloverBlocked ? 'ban' : (rolloverPending ? 'clock' : 'sync-alt') %>" style="margin-right:6px;font-size:11px;"></i>
+                <%= user.rolloverBlocked ? 'Rollover Blocked' : (rolloverPending ? 'Rollover Pending' : 'Rollover') %>
               </button>
             </div>
           </div>
@@ -1282,11 +1291,177 @@ async function submitLoanPayment(){
 }
 
 /* ══════════════════════════════════
+   PRINT LOAN OFFER LETTER
+══════════════════════════════════ */
+function printLoanOffer(){
+  const loanData = <%- loan ? JSON.stringify({
+    amount:         loan.amount || 0,
+    interestRate:   loan.interestRate || 0,
+    interestAmount: loan.interestAmount || 0,
+    totalRepay:     loan.totalRepay || 0,
+    durationMonths: loan.duration ? loan.duration.duration : (loan.externalDuration || 0),
+    status:         loan.status || '',
+    createdAt:      loan.createdAt || null,
+    disbursementDate: loan.disbursementDate || null,
+    dueDate:        loan.dueDate || null,
+    guarantors: (loan.guarantors || []).map(g => ({
+      name: g.guarantor ? `${g.guarantor.firstName} ${g.guarantor.lastName}` : 'N/A',
+      membershipID: g.guarantor ? g.guarantor.membershipID : '',
+      status: g.status || 'pending'
+    }))
+  }) : 'null' %>;
+
+  if(!loanData){ showError('No Active Loan','You have no active loan to print an offer letter for.'); return; }
+
+  const userSignature = <%- JSON.stringify(user.signature || '') %>;
+  const userFullName  = <%- JSON.stringify(user.firstName + ' ' + user.lastName) %>;
+  const userMembershipID = <%- JSON.stringify(user.membershipID || '') %>;
+  const userIdNumber  = <%- JSON.stringify(user.idNumber || '') %>;
+  const userAddress   = <%- JSON.stringify(user.address || '') %>;
+  const userPhone      = <%- JSON.stringify(user.phone || '') %>;
+  const userEmail      = <%- JSON.stringify(user.email || '') %>;
+
+  const fmtMoney = n => '₦' + Number(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtDate  = d => d ? new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : '—';
+  const today    = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  const guarantorRows = loanData.guarantors.length
+    ? loanData.guarantors.map((g,i) => `
+        <tr>
+          <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">${i+1}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">${g.name}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">${g.membershipID || 'N/A'}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;text-transform:capitalize;">${g.status}</td>
+        </tr>`).join('')
+    : `<tr><td colspan="4" style="padding:8px 10px;color:#94a3b8;">No guarantors on record.</td></tr>`;
+
+  const signatureBlock = userSignature
+    ? `<img src="${userSignature}" alt="Signature" style="height:60px;max-width:220px;object-fit:contain;border-bottom:1px solid #1e293b;padding-bottom:4px;">`
+    : `<div style="height:60px;display:flex;align-items:flex-end;color:#94a3b8;font-size:12px;border-bottom:1px solid #1e293b;padding-bottom:4px;">Signature on file</div>`;
+
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Loan Offer Letter — ${userFullName}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,'Times New Roman',serif;color:#1e293b;background:#fff;line-height:1.6;padding:40px 50px;}
+.letterhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1e3a8a;padding-bottom:16px;margin-bottom:28px;}
+.letterhead h1{font-size:20px;color:#1e3a8a;font-weight:800;letter-spacing:.02em;}
+.letterhead p{font-size:11px;color:#64748b;margin-top:2px;}
+.letterhead .ref{text-align:right;font-size:11px;color:#64748b;}
+h2{font-size:15px;color:#1e3a8a;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em;}
+.section{margin-bottom:22px;}
+.kv{display:grid;grid-template-columns:180px 1fr;gap:6px 12px;font-size:13px;margin-bottom:10px;}
+.kv strong{color:#475569;font-weight:600;}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+thead th{background:#f1f5f9;text-align:left;padding:6px 10px;font-size:11px;text-transform:uppercase;color:#475569;}
+.terms{font-size:12.5px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:14px 16px;margin-top:10px;}
+.terms li{margin-bottom:6px;}
+.sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:50px;}
+.sign-box{font-size:12px;}
+.sign-box .label{margin-top:6px;color:#475569;}
+.footer-note{margin-top:40px;font-size:10.5px;color:#94a3b8;text-align:center;border-top:1px solid #e2e8f0;padding-top:12px;}
+@media print{ @page{margin:14mm;} .no-print{display:none;} }
+</style></head><body>
+
+<div class="letterhead">
+  <div>
+    <h1>Club De Stars Cooperative</h1>
+    <p>Loan Offer Letter &nbsp;·&nbsp; Powered by JESZ LIMITED</p>
+  </div>
+  <div class="ref">
+    Date Issued: ${today}<br>
+    Member ID: ${userMembershipID}
+  </div>
+</div>
+
+<div class="section">
+  <h2>Borrower Information</h2>
+  <div class="kv">
+    <strong>Full Name</strong><span>${userFullName}</span>
+    <strong>Membership ID</strong><span>${userMembershipID}</span>
+    <strong>Email</strong><span>${userEmail || 'N/A'}</span>
+    <strong>Phone</strong><span>${userPhone || 'N/A'}</span>
+    <strong>Address</strong><span>${userAddress || 'N/A'}</span>
+    <strong>ID Number</strong><span>${userIdNumber || 'N/A'}</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Loan Terms</h2>
+  <div class="kv">
+    <strong>Loan Amount</strong><span>${fmtMoney(loanData.amount)}</span>
+    <strong>Interest Rate</strong><span>${loanData.interestRate}%</span>
+    <strong>Interest Amount</strong><span>${fmtMoney(loanData.interestAmount)}</span>
+    <strong>Total Repayable</strong><span><strong>${fmtMoney(loanData.totalRepay)}</strong></span>
+    <strong>Duration</strong><span>${loanData.durationMonths} months</span>
+    <strong>Application Date</strong><span>${fmtDate(loanData.createdAt)}</span>
+    <strong>Disbursement Date</strong><span>${fmtDate(loanData.disbursementDate)}</span>
+    <strong>Repayment Due Date</strong><span>${fmtDate(loanData.dueDate)}</span>
+    <strong>Status</strong><span style="text-transform:uppercase;">${loanData.status.replace('_',' ')}</span>
+  </div>
+
+  <div class="terms">
+    <strong>Key Conditions:</strong>
+    <ul>
+      <li>Repayment of the total amount above (${fmtMoney(loanData.totalRepay)}) is due in full by ${fmtDate(loanData.dueDate)}.</li>
+      <li>Late repayment attracts a daily penalty as defined in the cooperative's loan policy.</li>
+      <li>Rollover is available subject to admin approval and payment of accrued interest at the time of request.</li>
+      <li>This loan is guaranteed by the member(s) listed below, who accepted responsibility at the time of application.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Guarantors</h2>
+  <table>
+    <thead><tr><th>#</th><th>Name</th><th>Membership ID</th><th>Status</th></tr></thead>
+    <tbody>${guarantorRows}</tbody>
+  </table>
+</div>
+
+<div class="sign-grid">
+  <div class="sign-box">
+    ${signatureBlock}
+    <div class="label">${userFullName}<br>Borrower</div>
+  </div>
+  <div class="sign-box">
+    <div style="height:60px;border-bottom:1px solid #1e293b;"></div>
+    <div class="label">Authorized Signatory<br>Club De Stars Cooperative</div>
+  </div>
+</div>
+
+<div class="footer-note">
+  This document was generated electronically from the borrower's account dashboard and reflects loan terms on file as of ${today}.<br>
+  Club De Stars Cooperative &nbsp;·&nbsp; Powered by JESZ LIMITED
+</div>
+
+<div style="text-align:center;padding:24px;" class="no-print">
+  <button onclick="window.print()" style="padding:10px 28px;background:#1e3a8a;color:white;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;margin-right:8px;">🖨 Print / Save as PDF</button>
+  <button onclick="window.close()" style="padding:10px 20px;background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Close</button>
+</div>
+</body></html>`;
+
+  const win = window.open('', '_blank', 'width=900,height=950');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+}
+
+/* ══════════════════════════════════
    ROLLOVER FLOW
 ══════════════════════════════════ */
 let rolloverState = null;
+const ROLLOVER_BLOCKED = <%- user.rolloverBlocked ? 'true' : 'false' %>;
 
 async function openRolloverFlow(){
+  if(ROLLOVER_BLOCKED){
+    showError(
+      'Rollover Blocked',
+      'Rollover has been disabled on your account. Please settle your loan in full or contact admin to resolve this.'
+    );
+    return;
+  }
+
   const btn = document.querySelector('[onclick="openRolloverFlow()"]');
   if(btn){ btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;font-size:11px;"></i>Loading…'; }
   try{

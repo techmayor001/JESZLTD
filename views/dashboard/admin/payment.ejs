@@ -927,6 +927,29 @@
         </div>
     </div><!-- /paymentForm -->
 
+    <form method="GET" action="/admin/manage-payment" class="d-flex flex-wrap gap-2 align-items-center mb-3">
+    <select name="range" class="form-select form-select-sm" style="width:auto;" onchange="toggleCustomRange(this.value)">
+        <option value="all"       <%= currentRange==='all' ? 'selected':'' %>>All Time</option>
+        <option value="today"     <%= currentRange==='today' ? 'selected':'' %>>Today</option>
+        <option value="yesterday" <%= currentRange==='yesterday' ? 'selected':'' %>>Yesterday</option>
+        <option value="7days"     <%= currentRange==='7days' ? 'selected':'' %>>Last 7 Days</option>
+        <option value="thismonth" <%= currentRange==='thismonth' ? 'selected':'' %>>This Month</option>
+        <option value="lastmonth" <%= currentRange==='lastmonth' ? 'selected':'' %>>Last Month</option>
+        <option value="custom"    <%= currentRange==='custom' ? 'selected':'' %>>Custom Range</option>
+    </select>
+    <input type="date" name="from" id="rangeFrom" value="<%= currentFrom %>" class="form-control form-control-sm" style="width:auto; display:<%= currentRange==='custom'?'inline-block':'none' %>;">
+    <input type="date" name="to"   id="rangeTo"   value="<%= currentTo %>"   class="form-control form-control-sm" style="width:auto; display:<%= currentRange==='custom'?'inline-block':'none' %>;">
+    <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter me-1"></i>Apply</button>
+    <% if (currentRange !== 'all') { %><a href="/admin/manage-payment" class="btn btn-sm btn-outline-secondary">Clear</a><% } %>
+    </form>
+    <script>
+    function toggleCustomRange(val) {
+    const show = val === 'custom';
+    document.getElementById('rangeFrom').style.display = show ? 'inline-block' : 'none';
+    document.getElementById('rangeTo').style.display   = show ? 'inline-block' : 'none';
+    }
+    </script>
+
     <!-- Recent Transactions Table -->
     <div class="card mt-4">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -1050,6 +1073,9 @@
                                     notes:          txn.notes || 'No additional notes',
                                     approverNames:  approverNames  || 'N/A',
                                     approvalDetail: approvalDetail || 'N/A',
+                                    source:      txn.source,
+                                    rawType:     txn.paymentType,
+                                    isReversed:  !!txn.isReversed,
                                     finalizedAt:    txn.finalizedAt
                                         ? new Date(txn.finalizedAt).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' })
                                         : 'N/A',
@@ -1088,6 +1114,13 @@
                                         onclick='viewTransactionDetails(<%- JSON.stringify(txnData) %>)'>
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                <% if (txn.source === 'workflow' && txnStatus === 'successful' && !txn.isReversed && ['deposit','withdrawal','direct-debit'].includes(txn.paymentType)) { %>
+                                <button class="btn btn-sm btn-outline-danger" title="Reverse transaction"
+                                        onclick='openReverseModal(<%- JSON.stringify(txnData) %>)'>
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                                <% } %>
+                                <% if (txn.isReversed) { %><span class="badge bg-secondary ms-1">Reversed</span><% } %>
                             </td>
                         </tr>
                         <% }); } %>
@@ -1115,6 +1148,51 @@
             </div>
         </div>
     </div>
+</div>
+
+<div class="modal fade" id="reverseModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="background:linear-gradient(135deg,#7f1d1d 0%,#ef4444 100%);color:white;">
+        <h5 class="modal-title"><i class="fas fa-undo me-2"></i>Reverse Transaction</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Reversing <strong id="reverseTxnRef">—</strong> (₦<span id="reverseTxnAmount">0</span>).
+          Requires 3 approvals, same as a new transaction.
+        </div>
+        <label class="form-label fw-bold">Reason for Reversal <span class="text-danger">*</span></label>
+        <textarea class="form-control mb-3" id="reversalNotes" rows="2"></textarea>
+        <label class="form-label d-flex justify-content-between">
+          <span>Select 3 Approvers</span>
+          <span id="reverseApproverCount" class="approval-count-badge insufficient">0 / 3 selected</span>
+        </label>
+        <div class="approver-selector" id="reverseApproverList">
+          <% availableApprovers.forEach(function(approver){ %>
+          <label class="approver-item" data-id="<%= approver._id %>">
+            <input type="checkbox" value="<%= approver._id %>"
+                   data-name="<%= approver.firstName %> <%= approver.lastName %>"
+                   onchange="handleReverseApproverToggle(this)">
+            <div class="approver-avatar"><%= (approver.firstName[0]||'')+(approver.lastName[0]||'') %></div>
+            <div class="approver-info">
+              <div class="approver-name"><%= approver.firstName %> <%= approver.lastName %></div>
+              <div class="approver-role"><%= approver.role?approver.role.name:'Officer' %></div>
+            </div>
+            <i class="fas fa-check-circle approver-check"></i>
+          </label>
+          <% }) %>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" id="reverseSubmitBtn" onclick="submitReversal()" disabled>
+          <i class="fas fa-undo me-2"></i>Submit Reversal for Approval
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- UNAUTHORIZED MODAL -->
@@ -1309,6 +1387,63 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+    let reverseTargetId = null;
+let reverseApproverIds = [];
+let reverseApproverNames = {};
+
+function openReverseModal(txn) {
+    reverseTargetId = txn.id;
+    reverseApproverIds = []; reverseApproverNames = {};
+    document.getElementById('reverseTxnRef').textContent = txn.reference;
+    document.getElementById('reverseTxnAmount').textContent = Number(txn.amount).toLocaleString();
+    document.getElementById('reversalNotes').value = '';
+    document.querySelectorAll('#reverseApproverList .approver-item').forEach(el=>{
+        el.classList.remove('selected');
+        const cb=el.querySelector('input[type="checkbox"]'); if(cb) cb.checked=false;
+    });
+    updateReverseApproverUI();
+    new bootstrap.Modal(document.getElementById('reverseModal')).show();
+}
+
+function handleReverseApproverToggle(checkbox) {
+    const item=checkbox.closest('.approver-item'); const id=checkbox.value; const name=checkbox.dataset.name;
+    if(checkbox.checked){
+        if(reverseApproverIds.length>=3){checkbox.checked=false;showNotify({type:'warning',title:'Selection Limit',message:'You can only select up to 3 approvers.'});return;}
+        reverseApproverIds.push(id); reverseApproverNames[id]=name; item.classList.add('selected');
+    } else {
+        reverseApproverIds=reverseApproverIds.filter(a=>a!==id); delete reverseApproverNames[id]; item.classList.remove('selected');
+    }
+    updateReverseApproverUI();
+}
+
+function updateReverseApproverUI() {
+    const count=reverseApproverIds.length;
+    const badge=document.getElementById('reverseApproverCount');
+    badge.textContent=`${count} / 3 selected`;
+    badge.className=`approval-count-badge ${count>=3?'sufficient':'insufficient'}`;
+    document.getElementById('reverseSubmitBtn').disabled = count<3;
+}
+
+async function submitReversal() {
+    const notes = document.getElementById('reversalNotes').value.trim();
+    if(!notes){await showNotify({type:'warning',title:'Reason Required',message:'Please provide a reason for this reversal.'});return;}
+    if(reverseApproverIds.length<3){await showNotify({type:'warning',title:'Approvers Required',message:'Select exactly 3 approvers.'});return;}
+    const confirmed = await showNotify({type:'error',title:'Confirm Reversal',message:'This will submit a reversal for approval.\nIt only takes effect once 3 officers approve it.',confirmLabel:'Yes, Submit',cancelLabel:'Cancel'});
+    if(!confirmed) return;
+    const btn=document.getElementById('reverseSubmitBtn'); const orig=btn.innerHTML;
+    btn.disabled=true; btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Submitting…';
+    const result = await permFetch(`/admin/reverse-transaction/${reverseTargetId}`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ selectedApprovers: reverseApproverIds, notes })
+    }, document.getElementById('reverseModal'));
+    if(!result.ok){btn.disabled=false;btn.innerHTML=orig;return;}
+    if(!result.data?.success){await showNotify({type:'error',title:'Failed',message:result.data?.message||'Could not submit reversal.'});btn.disabled=false;btn.innerHTML=orig;return;}
+    bootstrap.Modal.getInstance(document.getElementById('reverseModal'))?.hide();
+    await showNotify({type:'success',title:'Reversal Submitted',message:'Pending approval from the 3 selected officers.'});
+    window.location.reload();
+}
+</script>
 <script>
 'use strict';
 

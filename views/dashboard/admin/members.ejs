@@ -473,6 +473,7 @@
                             <div class="d-grid gap-2 mt-2" id="view_member_actions">
                                 <button class="btn btn-primary btn-sm" id="editMemberBtn"><i class="fas fa-edit me-2"></i>Edit Member</button>
                                 <button class="btn btn-sm fw-semibold text-white" id="changeTypeBtnView" style="background:linear-gradient(135deg,#312e81 0%,#6366f1 100%);border:none;"><i class="fas fa-exchange-alt me-2"></i>Change Member Type</button>
+                                <button class="btn btn-sm fw-semibold text-white" id="printMouBtnView" style="background:linear-gradient(135deg,#0f1e4a 0%,#1e3a8a 100%);border:none;"><i class="fas fa-file-contract me-2"></i>Print MOU</button>
                                 <button class="btn btn-danger btn-sm" id="deleteMemberBtn"><i class="fas fa-trash me-2"></i>Delete Member</button>
                             </div>
                         </div>
@@ -1045,6 +1046,11 @@
             document.getElementById('editMemberBtn').onclick     = () => editMember(id);
             document.getElementById('changeTypeBtnView').onclick = () => openChangeTypeModal(id);
             document.getElementById('deleteMemberBtn').onclick   = () => deleteMember(id);
+            const mouBtn = document.getElementById('printMouBtnView');
+            if (mouBtn) { mouBtn.style.display=''; mouBtn.onclick = () => printMemberMOU(id); }
+        } else {
+            const mouBtn = document.getElementById('printMouBtnView');
+            if (mouBtn) mouBtn.style.display='none';
         }
         new bootstrap.Modal(document.getElementById('viewMemberModal')).show();
     }
@@ -1152,6 +1158,228 @@
         members=members.filter(m=>!selectedMembers.includes(m.id)); _currentFilteredMembers=_currentFilteredMembers.filter(m=>!selectedMembers.includes(m.id)); selectedMembers=[];
         updateStats(); renderMembers(_currentFilteredMembers, currentPage);
         await showNotify({type:'success',title:'Members Deleted',message:'Selected members have been permanently deleted.'});
+    }
+
+    /* ══════════════════════════════════
+       PRINT MEMBER MOU (Admin side)
+    ══════════════════════════════════ */
+    function printMemberMOU(id) {
+        const m = members.find(x => x.id == id); if (!m) return;
+        if (m.entityType === 'kiddies') { showNotify({type:'info',title:'Not Applicable',message:'Kiddies accounts do not have a Membership Agreement (MOU).'}); return; }
+
+        const fullName   = `${m.firstName||''} ${m.lastName||''}`.trim() || 'N/A';
+        const membershipID = m.memberID || 'N/A';
+        const address    = m.address || 'N/A';
+        const lga        = m.lga || '';
+        const state      = m.state || '';
+        const sigSrc     = normPath(m.signature);
+        const today      = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+
+        const signatureBlock = sigSrc
+            ? `<img src="${sigSrc}" alt="Member Signature" style="max-height:76px;max-width:220px;object-fit:contain;">`
+            : `<span style="font-size:12px;color:#94a3b8;">No signature uploaded yet</span>`;
+
+        const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Membership Agreement — ${fullName}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0f1523;background:#fff;line-height:1.6;}
+.doc-wrapper{max-width:860px;margin:0 auto;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;}
+.doc-header{background:linear-gradient(135deg,#0f1e4a 0%,#1a2e6e 50%,#1e3a8a 100%);padding:32px 36px;text-align:center;color:#fff;}
+.doc-header h1{font-size:20px;font-weight:700;letter-spacing:.02em;margin-bottom:6px;}
+.doc-header p{font-size:12px;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.04em;}
+.doc-meta-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px;flex-wrap:wrap;}
+.doc-meta-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:500;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);}
+.doc-body{padding:32px 36px;}
+.parties-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;}
+.party-card{border-radius:12px;padding:16px;border:1px solid;}
+.party-card.a{background:#eff6ff;border-color:#bfdbfe;}
+.party-card.b{background:#f0fdf4;border-color:#bbf7d0;}
+.party-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.party-tag.a{color:#4f8ef7;} .party-tag.b{color:#22c78a;}
+.party-name{font-size:13px;font-weight:600;margin-bottom:4px;}
+.party-desc{font-size:12px;color:#64748b;line-height:1.6;}
+.party-ref{font-size:11px;margin-top:8px;padding:5px 10px;border-radius:6px;display:inline-block;}
+.party-ref.a{background:rgba(79,142,247,.12);color:#3b6fe0;}
+.party-ref.b{background:rgba(34,199,138,.12);color:#189968;}
+.doc-section{margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid #eef1f6;}
+.doc-section:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.section-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
+.section-num{width:26px;height:26px;border-radius:7px;flex-shrink:0;background:rgba(30,58,138,.1);color:#1e3a8a;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.section-title{font-size:14px;font-weight:600;padding-top:3px;}
+.section-body{padding-left:38px;}
+.section-body p{font-size:13px;color:#334155;line-height:1.7;margin-bottom:8px;}
+.clause-list{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:6px;}
+.clause-list li{display:flex;gap:10px;font-size:13px;color:#334155;line-height:1.6;}
+.clause-marker{flex-shrink:0;width:18px;height:18px;border-radius:5px;background:rgba(30,58,138,.1);color:#1e3a8a;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:2px;}
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.sig-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;}
+.sig-role{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-bottom:10px;}
+.sig-img-wrap{height:56px;display:flex;align-items:center;margin-bottom:10px;}
+.sig-divider{border:none;border-top:1px solid #e2e8f0;margin:8px 0;}
+.sig-detail{font-size:12px;color:#64748b;margin-bottom:3px;}
+.sig-detail span{color:#0f1523;font-weight:500;}
+.member-sig-card{background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:20px;}
+.member-sig-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#4f8ef7;margin-bottom:14px;}
+.member-sig-img{height:80px;border:1px dashed #cbd5e1;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;background:#fff;}
+.member-details-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.member-detail-item{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;}
+.member-detail-label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;}
+.member-detail-value{font-size:12px;font-weight:500;word-break:break-word;}
+@media print{ @page{margin:12mm;} .no-print{display:none;} }
+</style></head><body>
+<div class="doc-wrapper">
+  <div class="doc-header">
+    <div style="width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px;"><i class="fas fa-file-contract"></i>📄</div>
+    <h1>MEMORANDUM OF UNDERSTANDING</h1>
+    <p>Membership Agreement &amp; Cooperative Bylaws</p>
+    <div class="doc-meta-row">
+      <span class="doc-meta-chip">Reg. No: BN/CRCS/14864</span>
+      <span class="doc-meta-chip">Effective: 16 March 2025</span>
+      <span class="doc-meta-chip">${membershipID}</span>
+    </div>
+  </div>
+  <div class="doc-body">
+    <div style="margin-bottom:28px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#64748b;margin-bottom:12px;">Parties to this Agreement</div>
+      <div class="parties-grid">
+        <div class="party-card a">
+          <div class="party-tag a">The Cooperative</div>
+          <div class="party-name">Club De Stars Multipurpose Cooperative Society Limited</div>
+          <div class="party-desc">A duly registered cooperative under the laws of the Federal Republic of Nigeria, having its registered office at Makurdi, Benue State.</div>
+          <span class="party-ref a">Reg. BN/CRCS/14864</span>
+        </div>
+        <div class="party-card b">
+          <div class="party-tag b">The Member</div>
+          <div class="party-name">${fullName}</div>
+          <div class="party-desc">Residing at <strong>${address}${lga?', '+lga:''}${state?', '+state+' State, Nigeria.':''}</strong></div>
+          <span class="party-ref b">ID: ${membershipID}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="doc-section">
+      <div class="section-header"><div class="section-num">1</div><div class="section-title">Purpose of the MOU</div></div>
+      <div class="section-body"><p>This Memorandum of Understanding outlines the terms and conditions of the relationship between the Cooperative and the Member regarding their rights, responsibilities, and obligations. These Terms govern the relationship between members and Club De Stars Multi-Purpose Cooperative Society Ltd., designed to promote mutual cooperation and shared benefits.</p></div>
+    </div>
+
+    <div class="doc-section">
+      <div class="section-header"><div class="section-num">2</div><div class="section-title">Membership Obligations</div></div>
+      <div class="section-body">
+        <p>Membership is open to individuals who meet the criteria set forth by the cooperative, as determined by the Board of Directors. The Member agrees to:</p>
+        <ul class="clause-list">
+          <li><div class="clause-marker">a</div><span>Adhere to the Cooperative's bylaws, policies, and regulations, pay annual dues, and contribute to the cooperative's objectives through active participation.</span></li>
+          <li><div class="clause-marker">b</div><span>Participate in Cooperative activities, meetings, and decision-making processes.</span></li>
+          <li><div class="clause-marker">c</div><span>Contribute financially as per the Cooperative's share capital and savings requirements.</span></li>
+          <li><div class="clause-marker">d</div><span>Uphold the values and principles of cooperation, mutual support, and good faith.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="doc-section">
+      <div class="section-header"><div class="section-num">3</div><div class="section-title">Rights and Benefits of the Member</div></div>
+      <div class="section-body">
+        <p>The Member is entitled to:</p>
+        <ul class="clause-list">
+          <li><div class="clause-marker">a</div><span>Participate in profit-sharing or dividends as per the Cooperative's policies.</span></li>
+          <li><div class="clause-marker">b</div><span>Vote and be elected to the Cooperative's leadership positions, if eligible.</span></li>
+          <li><div class="clause-marker">c</div><span>Access loans, credit facilities, and other services provided by the Cooperative.</span></li>
+          <li><div class="clause-marker">d</div><span>Receive training, education, and support from the Cooperative.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="doc-section">
+      <div class="section-header"><div class="section-num">4</div><div class="section-title">Financial Contributions</div></div>
+      <div class="section-body">
+        <p>The Member shall contribute:</p>
+        <ul class="clause-list">
+          <li><div class="clause-marker">a</div><span>A membership fee of <strong>₦5,000</strong> upon joining the Cooperative.</span></li>
+          <li><div class="clause-marker">b</div><span>A minimum share capital contribution of <strong>₦1,000</strong> as per Cooperative policy.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="doc-section">
+      <div class="section-header"><div class="section-num">5</div><div class="section-title">Termination of Membership</div></div>
+      <div class="section-body">
+        <p>Membership may be terminated by:</p>
+        <ul class="clause-list">
+          <li><div class="clause-marker">a</div><span>Voluntary withdrawal, provided the Member gives 30 days' notice.</span></li>
+          <li><div class="clause-marker">b</div><span>Failure to fulfill financial obligations or breach of Cooperative policies.</span></li>
+          <li><div class="clause-marker">c</div><span>Expulsion by the Board due to misconduct, fraud, or violation of Cooperative principles.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="doc-section">
+      <div class="section-header"><div class="section-num">6</div><div class="section-title">Dispute Resolution</div></div>
+      <div class="section-body"><p>Any dispute arising from this MOU shall first be resolved through dialogue and mediation within the Cooperative. If unresolved, the matter shall be referred to arbitration as per applicable law and the Cooperative Act.</p></div>
+    </div>
+
+    <div class="doc-section">
+      <div class="section-header"><div class="section-num">7</div><div class="section-title">Duration and Review</div></div>
+      <div class="section-body"><p>This MOU shall remain in effect for the duration of the Member's active participation in the Cooperative and may be reviewed periodically by the Board of Directors.</p></div>
+    </div>
+
+    <div class="doc-section">
+      <div class="section-header"><div class="section-num">8</div><div class="section-title">Miscellaneous Provisions</div></div>
+      <div class="section-body">
+        <ul class="clause-list">
+          <li><div class="clause-marker">a</div><span>This MOU does not create an employer-employee relationship between the parties.</span></li>
+          <li><div class="clause-marker">b</div><span>Amendments to this MOU shall be made in writing and agreed upon by both parties.</span></li>
+          <li><div class="clause-marker">c</div><span>The cooperative will hold meetings when need arises to discuss operations, financial performance, and future initiatives. Members will receive prior notice of all meetings.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="doc-section">
+      <div class="section-header"><div class="section-num">9</div><div class="section-title">Signatures</div></div>
+      <p style="font-size:13px;color:#64748b;line-height:1.7;margin-bottom:20px;">By signing below, all parties acknowledge that they have read, understood, and agreed to the terms outlined in this document.</p>
+
+      <div class="sig-grid">
+        <div class="sig-card">
+          <div class="sig-role">For the Cooperative</div>
+          <div class="sig-img-wrap"><img src="/images/staff-signatures/cooperative-sign.png" alt="Cooperative Signature" style="max-height:56px;max-width:100%;object-fit:contain;" onerror="this.style.display='none'"></div>
+          <hr class="sig-divider">
+          <div class="sig-detail">Name: <span>Adi Stanilus Duniya</span></div>
+          <div class="sig-detail">Position: <span>Director</span></div>
+          <div class="sig-detail">Date: <span>16/03/2025</span></div>
+        </div>
+        <div class="sig-card">
+          <div class="sig-role">For the Operating Company</div>
+          <div class="sig-img-wrap"><img src="/images/staff-signatures/operating-sign.png" alt="Operating Signature" style="max-height:56px;max-width:100%;object-fit:contain;" onerror="this.style.display='none'"></div>
+          <hr class="sig-divider">
+          <div class="sig-detail">Name: <span>Eraer Paul Kulugh</span></div>
+          <div class="sig-detail">Position: <span>Manager</span></div>
+          <div class="sig-detail">Date: <span>16/03/2025</span></div>
+        </div>
+      </div>
+
+      <div class="member-sig-card">
+        <div class="member-sig-title">Member Signature</div>
+        <div class="member-sig-img">${signatureBlock}</div>
+        <div class="member-details-grid">
+          <div class="member-detail-item"><div class="member-detail-label">Full Name</div><div class="member-detail-value">${fullName}</div></div>
+          <div class="member-detail-item"><div class="member-detail-label">Membership No.</div><div class="member-detail-value">${membershipID}</div></div>
+          <div class="member-detail-item"><div class="member-detail-label">Date</div><div class="member-detail-value">${today}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:20px 0 0;" class="no-print">
+      <button onclick="window.print()" style="padding:10px 28px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;margin-right:8px;">🖨 Print / Save as PDF</button>
+      <button onclick="window.close()" style="padding:10px 20px;background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Close</button>
+    </div>
+  </div>
+</div>
+</body></html>`;
+
+        const win = window.open('', '_blank', 'width=900,height=950');
+        if (!win) { showNotify({type:'warning',title:'Popup Blocked',message:'Please allow popups for this site to print the MOU.'}); return; }
+        win.document.write(html);
+        win.document.close();
+        win.focus();
     }
 
     function toggleSidebar() { if(window.innerWidth<=992){document.getElementById('sidebar').classList.toggle('active');document.getElementById('sidebarOverlay').classList.toggle('active');} }

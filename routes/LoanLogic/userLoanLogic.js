@@ -45,19 +45,23 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       })
       .lean();
 
+    // ✅ UPDATED dueDate block
     let dueDate      = null;
     let daysUntilDue = null;
 
-    if (activeLoan && activeLoan.duration) {
-      const createdAt   = new Date(activeLoan.createdAt);
-      const monthsToAdd = activeLoan.duration.duration;
-
-      dueDate = new Date(createdAt);
-      dueDate.setMonth(dueDate.getMonth() + monthsToAdd);
-
-      const today  = new Date();
-      const msDiff = dueDate - today;
-      daysUntilDue = Math.max(0, Math.ceil(msDiff / (1000 * 60 * 60 * 24)));
+    if (activeLoan) {
+      if (activeLoan.dueDate) {
+        dueDate = new Date(activeLoan.dueDate);
+        const msDiff = dueDate - new Date();
+        daysUntilDue = Math.max(0, Math.ceil(msDiff / (1000 * 60 * 60 * 24)));
+      } else if (activeLoan.duration) {
+        const createdAt   = new Date(activeLoan.createdAt);
+        const monthsToAdd = activeLoan.duration.duration;
+        dueDate = new Date(createdAt);
+        dueDate.setMonth(dueDate.getMonth() + monthsToAdd);
+        const msDiff = dueDate - new Date();
+        daysUntilDue = Math.max(0, Math.ceil(msDiff / (1000 * 60 * 60 * 24)));
+      }
     }
 
     const interestRate = user.account?.accountType?.interestRate || 0;
@@ -74,7 +78,6 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       ? user.guarantorRequests.filter(r => r.status === "pending").length
       : 0;
 
-    // ── Check if a rollover request is already pending ──────────────────────
     let rolloverPending = false;
     if (activeLoan) {
       const pendingRollover = await Payment.findOne({
@@ -84,7 +87,6 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       }).lean();
       rolloverPending = !!pendingRollover;
     }
-    // ────────────────────────────────────────────────────────────────────────
 
     res.render("dashboard/user/loan", {
       user,
@@ -97,7 +99,7 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       daysUntilDue,
       companyAccount,
       pendingGuarantorCount,
-      rolloverPending,        // ← new
+      rolloverPending,
     });
 
   } catch (err) {

@@ -146,7 +146,7 @@ router.get("/admin/manage-loan", ensureAdmin("view_loans"), async (req, res) => 
       // ── Borrower (internal member) ──
       .populate({
         path: "user",
-        select: "firstName lastName membershipID email phone account",
+        select: "firstName lastName membershipID email phone account rolloverBlocked",
         populate: {
           path: "account",
           select: "accountType balance",
@@ -157,6 +157,7 @@ router.get("/admin/manage-loan", ensureAdmin("view_loans"), async (req, res) => 
           }
         }
       })
+      
  
       // ── Loan duration settings ──
       .populate("duration", "duration label")
@@ -258,6 +259,26 @@ router.get("/admin/manage-loan", ensureAdmin("view_loans"), async (req, res) => 
 });
 
 
+// PATCH /api/admin/members/:userId/rollover-block
+router.patch("/api/admin/members/:userId/rollover-block", ensureAdmin("approve_loans"), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    if (!user) return res.status(404).json({ message: "Member not found" });
+
+    user.rolloverBlocked = !user.rolloverBlocked;
+    await user.save();
+
+    res.json({
+      success: true,
+      rolloverBlocked: user.rolloverBlocked,
+      message: `Rollover ${user.rolloverBlocked ? "blocked" : "unblocked"} for ${user.firstName} ${user.lastName}`
+    });
+  } catch (err) {
+    console.error("Rollover block toggle error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 function parseDateLocal(dateStr) {
   if (!dateStr) return null;
   if (dateStr.length > 10) return new Date(dateStr);
@@ -302,21 +323,11 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
     if (!approvedBy)
       return res.status(401).json({ message: "Unauthorized." });
 
-    const parsedDisburseDate = parseDateLocal(disbursementDate);
-
-    const loan = await Loan.findOneAndUpdate(
-      { _id: loanId, status: "pending" },
-      {
-        $set: {
-          status: "approved",
-          disbursementMethod,
-          disbursementDate: parsedDisburseDate,
-          approvedAt: new Date(),
-          updatedAt: new Date()
-        }
-      },
-      { new: true }
-    )
+    // ═══════════════════════════════════════════════════════════════════════════
+    // FETCH ONLY — do not mutate status yet. We validate everything first so a
+    // failed validation never leaves the loan stuck in "approved" with stale data.
+    // ═══════════════════════════════════════════════════════════════════════════
+    const loan = await Loan.findOne({ _id: loanId, status: "pending" })
       .populate("duration")
       .populate("user")
       .populate({ path: "initiatedBy", model: "User", select: "_id email firstName lastName" })
@@ -335,6 +346,26 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
     if (!durationValue)
       return res.status(400).json({ message: "Loan duration missing." });
 
+    // ── Parse disbursement date ──────────────────────────────────────────────
+    const [dy, dm, dd] = disbursementDate.split('-').map(Number);
+    const parsedDisburseDate = new Date(Date.UTC(dy, dm - 1, dd, 12, 0, 0));
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ALL VALIDATION PASSED — now it's safe to flip status to "approved"
+    // ═══════════════════════════════════════════════════════════════════════════
+    await Loan.updateOne(
+      { _id: loan._id, status: "pending" },
+      {
+        $set: {
+          status: "approved",
+          disbursementMethod,
+          disbursementDate: parsedDisburseDate,
+          approvedAt: new Date(),
+          updatedAt: new Date()
+        }
+      }
+    );
+
     // ── Remove other pending/approved loans for this user ─────────────────────
     if (loan.user) {
       const existing = await Loan.findOne({
@@ -346,8 +377,20 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
     }
 
     // ── Compute dates ─────────────────────────────────────────────────────────
-    const disburseDate = parsedDisburseDate;
-    const dueDate      = computeDueDate(disburseDate, durationValue, durationUnit);
+    const disburseDate    = parsedDisburseDate;
+    const computedDueDate = computeDueDate(disburseDate, durationValue, durationUnit);
+
+    // Optional admin override for due date — must be a valid date after disbursement
+    let dueDate = computedDueDate;
+    let dueDateAdjusted = false;
+    if (req.body.dueDate) {
+      const [y, m, d] = req.body.dueDate.split('-').map(Number);
+      const parsedOverrideDueDate = new Date(Date.UTC(y, m - 1, d, 23, 59, 59, 999));
+      if (parsedOverrideDueDate && parsedOverrideDueDate > disburseDate) {
+        dueDate = parsedOverrideDueDate;
+        dueDateAdjusted = Math.abs(dueDate - computedDueDate) > 1000;
+      }
+    }
 
     const penaltyPercentage =
       loan.duration?.penaltyPercentage ??
@@ -359,7 +402,28 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
       loan.rolloverPercentage ??
       0;
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // INTEREST RATE OVERRIDE (per-loan only — MemberType.interestRate is never
+    // touched, so this only affects this one loan document)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    // Snapshot the ORIGINAL rate before any override, guarded against
+    // undefined/null (older/external loans may not have it set).
+    const baseRate = Number.isFinite(loan.interestRate) ? loan.interestRate : 0;
+
+    const submittedRate = Number(req.body.interestRate);
+    const finalRate = (Number.isFinite(submittedRate) && submittedRate >= 0 && submittedRate <= 100)
+      ? submittedRate
+      : baseRate;
+
+    const rateChanged         = Math.abs(finalRate - baseRate) > 0.0001; // used only for logging/badges now
+    const finalInterestAmount = loan.amount * (finalRate / 100) * durationValue;
+    const finalTotalRepay     = loan.amount + finalInterestAmount;
+
     // ── Update computed fields ────────────────────────────────────────────────
+    // Always write the resolved rate/amount/total — no longer gated on
+    // rateChanged, so an override always persists even if the diff check
+    // has edge cases (e.g. floating point, undefined originals, etc.)
     await Loan.updateOne(
       { _id: loan._id },
       {
@@ -367,11 +431,29 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
           dueDate,
           penaltyPercentage,
           rolloverPercentage,
-          outstandingBalance: loan.totalRepay,
+          interestRate:       finalRate,
+          interestAmount:     finalInterestAmount,
+          totalRepay:         finalTotalRepay,
+          outstandingBalance: finalTotalRepay,
           totalPenalty: 0
         }
       }
     );
+
+    // Keep the in-memory `loan` doc in sync so everything below (and the
+    // final response payload) reflects the applied override without a re-fetch.
+    loan.interestRate       = finalRate;
+    loan.interestAmount     = finalInterestAmount;
+    loan.totalRepay         = finalTotalRepay;
+    loan.outstandingBalance = finalTotalRepay;
+    loan.totalPenalty       = 0;
+    loan.penaltyPercentage  = penaltyPercentage;
+    loan.rolloverPercentage = rolloverPercentage;
+    loan.dueDate            = dueDate;
+    loan.status              = "approved";
+    loan.disbursementMethod = disbursementMethod;
+    loan.disbursementDate   = disburseDate;
+    loan.approvedAt          = new Date();
 
     // ── Borrower label ────────────────────────────────────────────────────────
     const borrowerName   = loan.user
@@ -380,6 +462,16 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
 
     const isExternalLoan = !loan.user && !!loan.external;
     const ledgerUser     = loan.user?._id ?? loan.initiatedBy?._id ?? approvedBy;
+
+    // Rate-change note for logs (uses baseRate, the true original)
+    const rateNote = rateChanged
+      ? ` (interest rate adjusted from ${baseRate}% to ${finalRate}%)`
+      : "";
+
+    // Due-date-change note for logs
+    const dueDateNote = dueDateAdjusted
+      ? ` (due date manually set to ${dueDate.toDateString()}, auto-calculated would have been ${computedDueDate.toDateString()})`
+      : "";
 
     // ═══════════════════════════════════════════════════════════════════════════
     // LOAN LEDGER
@@ -390,11 +482,11 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
       transactionType:  "disbursement",
       amount:           loan.amount,
       balanceBefore:    0,
-      balanceAfter:     loan.totalRepay,
+      balanceAfter:     finalTotalRepay,
       paymentMethod:    disbursementMethod.toLowerCase(),
       member:           loan.user?._id,
       externalBorrower: loan.user ? undefined : loan.external,
-      notes:            `Loan disbursed to ${borrowerName} on ${disburseDate.toISOString()}`
+      notes:            `Loan disbursed to ${borrowerName} on ${disburseDate.toISOString()}${rateNote}`
     });
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -407,19 +499,22 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
       relatedUser: ledgerUser,
       relatedLoan: loan._id,
       description: isExternalLoan
-        ? `External loan disbursed to ${borrowerName} via ${disbursementMethod}`
-        : `Member loan disbursed to ${borrowerName} via ${disbursementMethod}`,
+        ? `External loan disbursed to ${borrowerName} via ${disbursementMethod}${rateNote}`
+        : `Member loan disbursed to ${borrowerName} via ${disbursementMethod}${rateNote}`,
       recordedBy: approvedBy,
       meta: {
         disbursementMethod,
-        disbursementDate:  disburseDate,
+        disbursementDate:     disburseDate,
         dueDate,
-        interestRate:      loan.interestRate,
-        totalRepay:        loan.totalRepay,
+        interestRate:         finalRate,
+        originalInterestRate: baseRate,
+        rateAdjusted:         rateChanged,
+        totalRepay:           finalTotalRepay,
+        interestAmount:       finalInterestAmount,
         penaltyPercentage,
         rolloverPercentage,
-        isExternal:        isExternalLoan,
-        loanLedgerId:      ledgerEntry._id
+        isExternal:           isExternalLoan,
+        loanLedgerId:         ledgerEntry._id
       }
     });
 
@@ -433,7 +528,7 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
         amount:      loan.amount,
         status:      "successful",
         method:      disbursementMethod,
-        description: "Loan approved and disbursed"
+        description: `Loan approved and disbursed${rateNote}`
       });
     }
 
@@ -448,36 +543,40 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
       targetModel: "Loan",
       targetId:    loan._id,
       description: isExternalLoan
-        ? `Approved external loan of ₦${loan.amount.toLocaleString()} for ${borrowerName}`
-        : `Approved member loan of ₦${loan.amount.toLocaleString()} for ${borrowerName}`,
+        ? `Approved external loan of ₦${loan.amount.toLocaleString()} for ${borrowerName}${rateNote}`
+        : `Approved member loan of ₦${loan.amount.toLocaleString()} for ${borrowerName}${rateNote}`,
       ipAddress:  req.ip,
       userAgent:  req.headers["user-agent"],
       status:     "success",
       meta: {
-        loanId:            loan._id,
-        amount:            loan.amount,
-        totalRepay:        loan.totalRepay,
-        interestRate:      loan.interestRate,
+        loanId:                loan._id,
+        amount:                loan.amount,
+        totalRepay:            finalTotalRepay,
+        interestRate:          finalRate,
+        originalInterestRate:  baseRate,
+        rateAdjusted:          rateChanged,
+        interestAmount:        finalInterestAmount,
         disbursementMethod,
-        disbursementDate:  disburseDate,
+        disbursementDate:      disburseDate,
         dueDate,
-        isExternal:        isExternalLoan
+        isExternal:            isExternalLoan
       }
     });
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // ROI DISTRIBUTION — regular member accounts + kiddies accounts
+    // ROI DISTRIBUTION — uses finalInterestAmount throughout
     // ═══════════════════════════════════════════════════════════════════════════
     const settings           = await Settings.getSettings();
     const roiOperatingCharge = Number(settings.otherFees?.roiOperatingCharge || 10);
     const now                = new Date();
     const currentMonth       = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-    const interestForLoan          = loan.interestAmount ?? (loan.amount * (loan.interestRate / 100) * durationValue);
+    const interestForLoan          = finalInterestAmount;
     const companyChargeForThisLoan = interestForLoan * (roiOperatingCharge / 100);
     const netInterestForThisLoan   = interestForLoan - companyChargeForThisLoan;
 
-    console.log("[ROI] loan.interestAmount:", loan.interestAmount);
+    console.log("[ROI] finalRate:", finalRate, "baseRate:", baseRate, "rateChanged:", rateChanged);
+    console.log("[ROI] finalInterestAmount:", finalInterestAmount);
     console.log("[ROI] interestForLoan:", interestForLoan);
     console.log("[ROI] companyChargeForThisLoan:", companyChargeForThisLoan);
     console.log("[ROI] netInterestForThisLoan:", netInterestForThisLoan);
@@ -557,17 +656,15 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
 
     console.log("[ROI] pool size:", pool.length);
 
-    // ── Total savings across the whole pool ───────────────────────────────────
     const totalCumulativeSavings = pool.reduce(
       (sum, entry) => sum + Number(entry.accountDoc?.balance || 0), 0
     );
 
     console.log("[ROI] totalCumulativeSavings:", totalCumulativeSavings);
 
-    const safeMoney      = n => Math.round(n * 100) / 100;
+    const safeMoney        = n => Math.round(n * 100) / 100;
     let   totalDistributed = 0;
 
-    // ── Distribute proportionally and persist ─────────────────────────────────
     for (const entry of pool) {
       const { accountDoc, ownerUserId, description } = entry;
       const balance = Number(accountDoc?.balance || 0);
@@ -623,10 +720,10 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
       });
     }
 
-      const lastEntry = await OperatingLedger.findOne()
-    .sort({ createdAt: -1 })
-    .select("runningBalance");
-  const prevBalance = lastEntry?.runningBalance ?? 0;
+    const lastEntry = await OperatingLedger.findOne()
+      .sort({ createdAt: -1 })
+      .select("runningBalance");
+    const prevBalance = lastEntry?.runningBalance ?? 0;
 
     await OperatingLedger.create({
       type:           "operating_charge",
@@ -638,12 +735,14 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
       recordedBy:     approvedBy,
       description:    `ROI operating charge (${roiOperatingCharge}%) on loan for ${borrowerName}`,
       meta: {
-        loanAmount:    loan.amount,
-        interestRate:  loan.interestRate,
+        loanAmount:            loan.amount,
+        interestRate:          finalRate,
+        originalInterestRate:  baseRate,
+        rateAdjusted:          rateChanged,
         durationValue,
-        chargePercent: roiOperatingCharge,
-        totalInterest: interestForLoan,
-        chargeAmount:  companyChargeForThisLoan
+        chargePercent:         roiOperatingCharge,
+        totalInterest:         interestForLoan,
+        chargeAmount:          companyChargeForThisLoan
       }
     });
 
@@ -652,7 +751,12 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
       roiDistributed: totalDistributed,
       loan,
       ledger:         ledgerEntry,
-      companyRoi
+      companyRoi,
+      appliedRate:      finalRate,
+      originalRate:     baseRate,
+      rateAdjusted:     rateChanged,
+      finalTotalRepay,
+      finalInterestAmount
     });
 
   } catch (error) {
@@ -660,7 +764,6 @@ router.post("/api/loans/approve", ensureAdmin("approve_loans"), async (req, res)
     return res.status(500).json({ message: "Server error while approving loan." });
   }
 });
-
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/loans/reject
 // ─────────────────────────────────────────────────────────────────────────────
@@ -737,6 +840,17 @@ router.post("/api/loans/rollover", ensureAdmin("approve_loans"), async (req, res
     if (!["approved", "overdue"].includes(loan.status))
       return res.status(400).json({ message: "Only approved or overdue loans can be rolled over." });
 
+    // ── Per-user rollover block check ──
+    if (loan.user) {
+      const borrower = await User.findById(loan.user).select("rolloverBlocked firstName lastName");
+      if (!borrower) return res.status(404).json({ message: "Borrower not found." });
+      if (borrower.rolloverBlocked) {
+        return res.status(403).json({
+          message: `Rollover is blocked for ${borrower.firstName} ${borrower.lastName}. Remove the block from their profile to proceed.`
+        });
+      }
+    }
+
     const durationValue      = loan.duration?.duration    ?? loan.externalDuration ?? 1;
     const durationUnit       = loan.duration?.durationUnit ?? "months";
     const rolloverPercentage = loan.rolloverPercentage ?? loan.duration?.rolloverPercentage ?? 0;
@@ -748,7 +862,7 @@ router.post("/api/loans/rollover", ensureAdmin("approve_loans"), async (req, res
 
     loan.outstandingBalance = newBalance;
     loan.totalPenalty       = parseFloat(((loan.totalPenalty || 0) + rolloverFee).toFixed(2));
-    loan.status             = "approved";   // reset from overdue
+    loan.status             = "approved";
     loan.dueDate            = newDueDate;
     loan.rolloverCount      = (loan.rolloverCount || 0) + 1;
     loan.updatedAt          = new Date();

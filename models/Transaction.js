@@ -12,6 +12,9 @@ const transactionSchema = mongoose.Schema({
   description: { type: String },
   reference: { type: String },
 
+  action: { type: String, enum: ["submit", "reversal"], default: "submit" },
+  reversalTarget: { type: mongoose.Schema.Types.ObjectId, ref: "AdminPayment", default: null },
+
   method: { type: String },
   createdAt: { type: Date, default: Date.now },
 });

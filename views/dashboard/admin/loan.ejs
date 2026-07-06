@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Loan Management | Club De Stars Admin</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
@@ -20,10 +20,12 @@
             --sidebar-width: 280px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
+        html, body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-            min-height: 100vh; overflow-x: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
+            max-width: 100%;
         }
 
         /* ══════════ SIDEBAR ══════════ */
@@ -102,35 +104,28 @@
         }
         .main-content {
             margin-left: var(--sidebar-width); margin-top: 70px;
-            padding: 1.5rem; min-height: calc(100vh - 70px); transition: all .3s;
+            padding: 1.5rem; min-height: calc(100vh - 70px);
+            transition: all .3s; overflow-x: hidden; min-width: 0;
         }
 
-        /* ══════════ PAGE HEADER ══════════
-           KEY FIX: overflow must NOT be hidden — the dropdown needs to escape.
-           Use a pseudo-element circle instead of overflow:hidden.
-        ══════════ */
+        /* ══════════ WELCOME CARD ══════════ */
         .welcome-card {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
             color: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem;
             box-shadow: 0 15px 40px rgba(30,58,138,.25);
-            /* NO overflow:hidden here — that clips the dropdown */
             position: relative;
         }
         .welcome-card::before {
             content: ''; position: absolute; top: -50%; right: -20%;
             width: 400px; height: 400px; background: rgba(255,255,255,.05); border-radius: 50%;
-            /* pointer-events:none so it doesn't block clicks */
             pointer-events: none;
         }
+        .welcome-card .row { margin-right: 0; margin-left: 0; }
+        .welcome-card h2 { font-size: clamp(1.1rem, 4vw, 1.6rem); word-break: break-word; }
 
-        /* ══════════ EXPORT DROPDOWN — always on top ══════════ */
-        .export-wrapper {
-            position: relative;
-            /* Establish its own stacking context so dropdown escapes welcome-card */
-            z-index: 100;
-        }
+        /* ══════════ EXPORT DROPDOWN ══════════ */
+        .export-wrapper { position: relative; z-index: 100; }
         .export-dropdown-menu {
-            /* Override Bootstrap to guarantee visibility */
             position: absolute !important;
             top: calc(100% + 6px) !important;
             right: 0 !important;
@@ -150,13 +145,10 @@
         .export-dropdown-menu .dropdown-item {
             border-radius: 9px; padding: .6rem .875rem;
             font-weight: 600; font-size: .85rem; color: #1e293b;
-            display: flex; align-items: center; gap: .6rem;
-            transition: background .15s;
+            display: flex; align-items: center; gap: .6rem; transition: background .15s;
         }
         .export-dropdown-menu .dropdown-item:hover { background: rgba(30,58,138,.06); }
-        .export-dropdown-menu .dropdown-divider {
-            margin: .35rem .5rem; border-color: rgba(30,58,138,.1);
-        }
+        .export-dropdown-menu .dropdown-divider { margin: .35rem .5rem; border-color: rgba(30,58,138,.1); }
         .btn-export {
             background: white; color: var(--primary); border: none;
             font-weight: 700; border-radius: 10px; padding: .55rem 1.1rem;
@@ -208,21 +200,114 @@
         .alert-success-custom { background: linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%); border: 2px solid #10b981; border-radius: 12px; padding: 1rem; color: #065f46; }
         .alert-danger-custom  { background: linear-gradient(135deg,#fee2e2 0%,#fecaca 100%); border: 2px solid #ef4444; border-radius: 12px; padding: 1rem; color: #991b1b; }
 
+        /* ══════════ INTEREST PREVIEW BOX ══════════ */
+        .interest-preview-box {
+            background: linear-gradient(135deg, rgba(30,58,138,.05) 0%, rgba(59,130,246,.05) 100%);
+            border: 1.5px solid rgba(30,58,138,.15);
+            border-radius: 10px;
+            padding: .75rem 1rem;
+            margin-top: .5rem;
+            font-size: .82rem;
+        }
+        .interest-preview-box .preview-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: .2rem 0;
+        }
+        .interest-preview-box .preview-label { color: #6b7280; font-weight: 600; }
+        .interest-preview-box .preview-val   { font-weight: 800; }
+        .interest-rate-changed-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: .65rem; font-weight: 800;
+            padding: 2px 8px; border-radius: 8px;
+            background: rgba(245,158,11,.15); color: #d97706;
+            text-transform: uppercase; letter-spacing: .04em;
+            margin-left: 6px; vertical-align: middle;
+        }
+
         .powered-by { position: fixed; bottom: 15px; right: 15px; background: white; padding: 10px 16px; border-radius: 25px; box-shadow: 0 4px 15px rgba(30,58,138,.15); font-size: .8rem; font-weight: 600; color: var(--primary); z-index: 1000; }
 
+        /* ══════════ ROLLOVER BLOCK TOGGLE ══════════ */
+        .rollover-block-box {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: .75rem; padding: .85rem 1rem; border-radius: 12px;
+            border: 2px solid rgba(30,58,138,.1); background: rgba(30,58,138,.03);
+            margin-top: .75rem; flex-wrap: wrap;
+        }
+        .rollover-block-box.is-blocked { border-color: rgba(239,68,68,.3); background: rgba(239,68,68,.06); }
+        .rollover-block-label { font-size: .85rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: .5rem; }
+        .rollover-block-box.is-blocked .rollover-block-label { color: #991b1b; }
+        .rollover-block-sub { font-size: .72rem; color: #6b7280; font-weight: 500; margin-top: 2px; }
+        .rollover-toggle-switch {
+            position: relative; display: inline-block; width: 46px; height: 25px; flex-shrink: 0;
+        }
+        .rollover-toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .rollover-toggle-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background-color: #cbd5e1; border-radius: 25px; transition: .25s;
+        }
+        .rollover-toggle-slider::before {
+            position: absolute; content: ""; height: 19px; width: 19px; left: 3px; bottom: 3px;
+            background-color: white; border-radius: 50%; transition: .25s;
+            box-shadow: 0 1px 3px rgba(0,0,0,.3);
+        }
+        .rollover-toggle-switch input:checked + .rollover-toggle-slider { background-color: #ef4444; }
+        .rollover-toggle-switch input:checked + .rollover-toggle-slider::before { transform: translateX(21px); }
+        .rollover-toggle-switch input:disabled + .rollover-toggle-slider { opacity: .55; cursor: not-allowed; }
+        .rollover-block-badge-inline {
+            display: inline-flex; align-items: center; gap: 4px; font-size: .65rem; font-weight: 800;
+            padding: 2px 8px; border-radius: 8px; background: rgba(239,68,68,.12); color: #dc2626;
+            text-transform: uppercase; letter-spacing: .04em; margin-left: 6px; vertical-align: middle;
+        }
+
+        /* ══════════ RESPONSIVE ══════════ */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.active { transform: translateX(0); }
-            .top-navbar { left: 0; } .main-content { margin-left: 0; padding: 1rem; }
+            .top-navbar { left: 0; }
+            .main-content { margin-left: 0; padding: 1rem; }
         }
+
         @media (max-width: 576px) {
-            .top-navbar { height: 60px; padding: 0 1rem; }
-            .main-content { margin-top: 60px; padding: .75rem; }
-            .welcome-card { padding: 1.25rem; border-radius: 16px; }
-            .stat-icon { width: 50px; height: 50px; font-size: 1.4rem; }
-            .filter-tab { font-size: .75rem; padding: .4rem .8rem; }
-            .table { font-size: .8rem; }
-            .export-dropdown-menu { right: auto !important; left: 0 !important; }
+            .top-navbar { height: 60px; padding: 0 1rem; left: 0; }
+            .main-content { margin-left: 0; margin-top: 60px; padding: .65rem; }
+
+            .welcome-card { padding: 1rem; border-radius: 14px; }
+            .welcome-card h2 { font-size: 1.05rem; }
+            .welcome-card p  { font-size: .8rem; }
+            .col-md-4.text-md-end { text-align: left !important; margin-top: .5rem; }
+
+            .row.g-3.mb-4 > [class*="col-"] {
+                flex: 0 0 50% !important;
+                max-width: 50% !important;
+                padding: .3rem !important;
+            }
+            .stat-card { padding: .875rem .75rem; }
+            .stat-icon { width: 40px; height: 40px; font-size: 1.1rem; margin-bottom: .5rem; }
+            .stat-card h3 { font-size: 1.1rem; }
+            .stat-card p  { font-size: .7rem; }
+            .stat-sub     { font-size: .65rem; }
+
+            .filter-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: .35rem;
+                padding-bottom: .35rem;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            .filter-tabs::-webkit-scrollbar { display: none; }
+            .filter-tab { flex-shrink: 0; font-size: .72rem; padding: .38rem .7rem; }
+
+            .table-responsive { overflow-x: auto; }
+            .table { font-size: .75rem; min-width: 600px; }
+
+            .export-dropdown-menu { right: auto !important; left: 0 !important; min-width: 200px !important; }
+
+            .card-header .d-flex { flex-wrap: wrap; }
+            .card-header input[type="search"] { max-width: 100% !important; width: 100%; }
+            .card-header select { max-width: 100% !important; width: 100%; }
+
+            .powered-by { display: none; }
         }
     </style>
 </head>
@@ -239,19 +324,17 @@
             <i class="fas fa-shield-alt" style="font-size:.65rem;"></i>&nbsp;<%= admin.role?.name?.toUpperCase() || 'SUPER ADMIN' %>
         </div>
     </div>
-  <div class="sidebar-nav">
+    <div class="sidebar-nav">
         <div class="nav-group">
             <div class="nav-category"><i class="fas fa-home" style="font-size:.6rem;"></i>Main</div>
             <a href="/admin/dashboard"><i class="fas fa-chart-pie"></i>Overview</a>
         </div>
-
         <div class="nav-group">
             <div class="nav-category"><i class="fas fa-users" style="font-size:.6rem;"></i>Members</div>
             <a href="/admin/manage-members"><i class="fas fa-users"></i>Manage Members</a>
             <a href="/admin/kiddies-accounts"><i class="fas fa-baby"></i>Kiddies Accounts</a>
             <a href="/admin/manage/memberType"><i class="fas fa-id-card"></i>Membership Types</a>
         </div>
-
         <div class="nav-group">
             <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
             <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
@@ -260,7 +343,6 @@
             <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
             <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
         </div>
-
         <div class="nav-group">
             <div class="nav-category"><i class="fas fa-hand-holding-usd" style="font-size:.6rem;"></i>Loans</div>
             <a href="/admin/manage-loan" class='active'><i class="fas fa-hand-holding-usd"></i>Loan Management</a>
@@ -268,21 +350,18 @@
             <a href="/admin/loan/settings"><i class="fas fa-cogs"></i>Loan Settings</a>
             <a href="/admin/external-loans"><i class="fas fa-building"></i>External Loans</a>
         </div>
-
         <div class="nav-group">
             <div class="nav-category"><i class="fas fa-landmark" style="font-size:.6rem;"></i>Finance</div>
             <a href="/admin/finance"><i class="fas fa-landmark"></i>Company Finance</a>
             <a href="/admin/operating-earnings"><i class="fas fa-chart-line"></i>Operating Earnings</a>
             <a href="/admin/manage-extra-charges"><i class="fas fa-chart-bar"></i>Company Revenue</a>
         </div>
-
         <div class="nav-group">
             <div class="nav-category"><i class="fas fa-cog" style="font-size:.6rem;"></i>System</div>
             <a href="/manage-subscriptions"><i class="fas fa-cube"></i>Manage Subscriptions</a>
             <a href="/manage-roles"><i class="fas fa-user-shield"></i>Roles &amp; Permissions</a>
             <a href="/admin/settings"><i class="fas fa-cog"></i>Settings</a>
         </div>
-
         <div class="nav-group">
             <div class="nav-category"><i class="fas fa-file-alt" style="font-size:.6rem;"></i>Reporting</div>
             <a href="/admin/reports"><i class="fas fa-file-alt"></i>Reports</a>
@@ -307,7 +386,7 @@
 <!-- Main Content -->
 <div class="main-content">
 
-    <!-- WELCOME CARD — no overflow:hidden so dropdown is never clipped -->
+    <!-- WELCOME CARD -->
     <div class="welcome-card position-relative">
         <div class="row align-items-center position-relative" style="z-index:1;">
             <div class="col-md-8">
@@ -317,8 +396,6 @@
                     <i class="fas fa-calendar me-1"></i><span id="currentDate"></span>
                 </div>
             </div>
-
-            <!-- EXPORT BUTTON — custom dropdown, not Bootstrap dropdown (avoids clipping) -->
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
                 <div class="export-wrapper d-inline-block">
                     <button class="btn-export" id="exportBtn" onclick="toggleExportMenu(event)">
@@ -441,6 +518,7 @@
                         const memberName = loan.user
                             ? (loan.user.firstName + ' ' + loan.user.lastName)
                             : (loan.external && loan.external.borrowerName ? loan.external.borrowerName : 'External');
+                        const isRolloverBlocked = !!(loan.user && loan.user.rolloverBlocked);
                     %>
                         <tr class="loan-row"
                             data-status="<%= statusLower %>"
@@ -451,7 +529,12 @@
                             <td><small class="fw-semibold"><%= new Date(loan.createdAt).toDateString() %></small></td>
 
                             <td>
-                                <div class="fw-semibold"><%= memberName %></div>
+                                <div class="fw-semibold">
+                                    <%= memberName %>
+                                    <% if (isRolloverBlocked) { %>
+                                        <span class="rollover-block-badge-inline" title="Rollover blocked for this member"><i class="fas fa-ban"></i>No Rollover</span>
+                                    <% } %>
+                                </div>
                                 <small class="text-muted">
                                     <%= loan.user
                                         ? loan.user.membershipID
@@ -536,7 +619,24 @@
                         <span id="loanAccountBadge" class="badge fs-6"></span>
                     </div>
                 </div>
-                <h6 class="fw-bold mb-3" style="color:var(--primary);">Loan Figures</h6>
+
+                <!-- ROLLOVER BLOCK TOGGLE -->
+                <div id="rolloverBlockContainer" style="display:none;">
+                    <div class="rollover-block-box" id="rolloverBlockBox">
+                        <div>
+                            <div class="rollover-block-label">
+                                <i class="fas fa-ban"></i><span id="rolloverBlockLabelText">Block Rollover</span>
+                            </div>
+                            <div class="rollover-block-sub">When enabled, this member cannot roll over any active loan.</div>
+                        </div>
+                        <label class="rollover-toggle-switch">
+                            <input type="checkbox" id="rolloverBlockCheckbox" onchange="toggleRolloverBlock()">
+                            <span class="rollover-toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold mb-3 mt-3" style="color:var(--primary);">Loan Figures</h6>
                 <div class="loan-details-grid">
                     <div class="detail-item"><div class="detail-label">Loan Amount</div><div class="detail-value" id="loanAmount"></div></div>
                     <div class="detail-item"><div class="detail-label">Total Repayment</div><div class="detail-value text-success" id="loanTotalRepay"></div></div>
@@ -582,6 +682,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-primary" id="printOfferBtnModal" onclick="printLoanOffer()" style="display:none;"><i class="fas fa-print me-2"></i>Print Offer</button>
                 <button type="button" class="btn btn-danger"  id="rejectBtnModal"  onclick="rejectLoanFromModal()" style="display:none;"><i class="fas fa-times me-2"></i>Reject</button>
                 <button type="button" class="btn btn-success" id="approveBtnModal" onclick="approveLoan()"          style="display:none;"><i class="fas fa-check me-2"></i>Approve Loan</button>
             </div>
@@ -593,20 +694,69 @@
 <div class="modal fade" id="approveLoanModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title fw-bold"><i class="fas fa-check-circle me-2 text-success"></i>Approve Loan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="fas fa-check-circle me-2 text-success"></i>Approve Loan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <div class="modal-body">
-                <div class="alert-success-custom mb-3"><small><i class="fas fa-info-circle me-2"></i><strong>Confirm loan approval</strong></small></div>
+                <div class="alert-success-custom mb-3">
+                    <small><i class="fas fa-info-circle me-2"></i><strong>Confirm loan approval. You may adjust the interest rate below before disbursing.</strong></small>
+                </div>
+
+                <!-- Loan Summary -->
                 <div class="card mb-3" style="background:linear-gradient(135deg,rgba(16,185,129,.05),rgba(5,150,105,.05));">
                     <div class="card-body">
                         <h6 class="fw-bold mb-2">Loan Summary</h6>
                         <div class="row g-2">
                             <div class="col-6"><small class="text-muted">Member:</small><br><strong id="approveMemberName"></strong></div>
-                            <div class="col-6"><small class="text-muted">Amount:</small><br><strong id="approveLoanAmount"></strong></div>
-                            <div class="col-6"><small class="text-muted">Interest Rate:</small><br><strong id="approveLoanInterest"></strong></div>
+                            <div class="col-6"><small class="text-muted">Principal Amount:</small><br><strong id="approveLoanAmount"></strong></div>
+                            <div class="col-6"><small class="text-muted">Requested Rate:</small><br><strong id="approveLoanInterest"></strong></div>
                             <div class="col-6"><small class="text-muted">Duration:</small><br><strong id="approveLoanDuration"></strong></div>
                         </div>
                     </div>
                 </div>
+
+                <!-- ── INTEREST RATE OVERRIDE ── -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        Interest Rate (%)
+                        <span class="interest-rate-changed-badge" id="rateAdjustedBadge" style="display:none;">
+                            <i class="fas fa-edit"></i> Adjusted
+                        </span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background:rgba(30,58,138,.07);border-color:rgba(30,58,138,.2);">
+                            <i class="fas fa-percent" style="color:var(--primary);font-size:.85rem;"></i>
+                        </span>
+                        <input type="number" class="form-control" id="approveInterestRate"
+                               min="0" max="100" step="0.1"
+                               placeholder="Enter interest rate"
+                               oninput="previewApprovalTotals()"
+                               style="border-color:rgba(30,58,138,.2);">
+                        <span class="input-group-text" style="background:rgba(30,58,138,.07);border-color:rgba(30,58,138,.2);font-weight:700;color:var(--primary);">%</span>
+                    </div>
+                    <div class="form-text text-muted" id="approveRateHint" style="font-size:.72rem;">
+                        Original requested rate: <strong id="approveOriginalRate"></strong>
+                    </div>
+
+                    <!-- Live Preview Box -->
+                    <div class="interest-preview-box" id="approveInterestPreview" style="display:none;">
+                        <div class="preview-row">
+                            <span class="preview-label"><i class="fas fa-coins me-1" style="color:#d97706;"></i>Interest Amount</span>
+                            <span class="preview-val text-warning" id="previewInterestAmt">—</span>
+                        </div>
+                        <div class="preview-row">
+                            <span class="preview-label"><i class="fas fa-calculator me-1" style="color:#059669;"></i>Total Repayment</span>
+                            <span class="preview-val text-success" id="previewTotalRepay">—</span>
+                        </div>
+                        <div class="preview-row" style="border-top:1px solid rgba(30,58,138,.1);margin-top:.3rem;padding-top:.3rem;">
+                            <span class="preview-label" style="color:#6b7280;font-size:.72rem;">vs original total</span>
+                            <span class="preview-val" id="previewDiff" style="font-size:.78rem;">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disbursement Method -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Disbursement Method</label>
                     <select class="form-select" id="disbursementMethod" required>
@@ -616,15 +766,36 @@
                         <option value="check">Cheque</option>
                     </select>
                 </div>
+
+                            <!-- Disbursement Date -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Disbursement Date</label>
-                    <input type="date" class="form-control" id="disbursementDate" required>
+                    <input type="date" class="form-control" id="disbursementDate" required oninput="recalcDueDate()">
                 </div>
-                <div class="alert-warning-custom"><small><i class="fas fa-exclamation-triangle me-2"></i>Member will be notified via email and SMS upon approval</small></div>
+
+                <!-- ── DUE DATE OVERRIDE ── -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        Due Date
+                        <span class="interest-rate-changed-badge" id="dueDateAdjustedBadge" style="display:none;">
+                            <i class="fas fa-edit"></i> Adjusted
+                        </span>
+                    </label>
+                    <input type="date" class="form-control" id="approveDueDate" oninput="onDueDateManualChange()">
+                    <div class="form-text text-muted" id="approveDueDateHint" style="font-size:.72rem;">
+                        Auto-calculated from disbursement date + duration. You can override it.
+                    </div>
+                </div>
+
+                <div class="alert-warning-custom">
+                    <small><i class="fas fa-exclamation-triangle me-2"></i>Member will be notified via email and SMS upon approval. Interest rate changes are final and logged.</small>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" onclick="confirmApproval()"><i class="fas fa-check me-2"></i>Confirm Approval</button>
+                <button type="button" class="btn btn-success" onclick="confirmApproval()">
+                    <i class="fas fa-check me-2"></i>Confirm Approval
+                </button>
             </div>
         </div>
     </div>
@@ -671,6 +842,20 @@
     </div>
 </div>
 
+<!-- ══ INLINE TOAST ══ -->
+<div id="appToast" style="
+    position:fixed; bottom:80px; right:20px; z-index:99999;
+    min-width:280px; max-width:360px; padding:.85rem 1.1rem;
+    border-radius:14px; box-shadow:0 8px 28px rgba(30,58,138,.18);
+    display:flex; align-items:center; gap:.75rem;
+    font-size:.85rem; font-weight:600; color:white;
+    transform:translateY(20px); opacity:0;
+    transition:opacity .25s, transform .25s; pointer-events:none;
+">
+    <i id="appToastIcon" class="fas" style="font-size:1.1rem;flex-shrink:0;"></i>
+    <span id="appToastMsg"></span>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 <script>
 /* ══════════════════════════════════════
@@ -714,11 +899,13 @@ const loansData = <%- JSON.stringify(loans.map(l => ({
     })),
     duration: l.duration ? { duration: l.duration.duration } : null,
     user: l.user ? {
+        _id:          String(l.user._id || l.user),
         firstName:    l.user.firstName    || '',
         lastName:     l.user.lastName     || '',
         membershipID: l.user.membershipID || '',
         email:        l.user.email        || '',
         phone:        l.user.phone        || '',
+        rolloverBlocked: !!l.user.rolloverBlocked,
         account: l.user.account ? {
             balance: l.user.account.balance || 0,
             accountType: l.user.account.accountType ? { name: l.user.account.accountType.name } : null
@@ -759,43 +946,62 @@ function fmtN(n)  { return Number(n || 0).toLocaleString(); }
 function fmtD(d)  { return d ? new Date(d).toDateString() : '—'; }
 function capSt(s) { return (s || '').replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 
+/* ── Toast ── */
+let _toastTimer = null;
+function showToast(msg, type = 'success') {
+    const toast = document.getElementById('appToast');
+    const icon  = document.getElementById('appToastIcon');
+    const text  = document.getElementById('appToastMsg');
+    const colors = {
+        success: { bg: 'linear-gradient(135deg,#10b981,#059669)', icon: 'fa-check-circle' },
+        danger:  { bg: 'linear-gradient(135deg,#ef4444,#dc2626)', icon: 'fa-times-circle' },
+        warning: { bg: 'linear-gradient(135deg,#f59e0b,#d97706)', icon: 'fa-exclamation-circle' },
+    };
+    const c = colors[type] || colors.success;
+    toast.style.background = c.bg;
+    icon.className  = `fas ${c.icon}`;
+    text.textContent = msg;
+    toast.style.opacity   = '1';
+    toast.style.transform = 'translateY(0)';
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => {
+        toast.style.opacity   = '0';
+        toast.style.transform = 'translateY(20px)';
+    }, 3500);
+}
+
 /* ══════════════════════════════════════
-   EXPORT DROPDOWN — custom (not Bootstrap)
-   Avoids clipping by welcome-card
+   EXPORT DROPDOWN
 ══════════════════════════════════════ */
 function toggleExportMenu(e) {
     e.stopPropagation();
-    const menu  = document.getElementById('exportMenu');
-    const btn   = document.getElementById('exportBtn');
-    const caret = document.getElementById('exportCaret');
+    const menu = document.getElementById('exportMenu');
+    const btn  = document.getElementById('exportBtn');
     const isOpen = menu.style.display !== 'none';
-    menu.style.display  = isOpen ? 'none' : 'block';
+    menu.style.display = isOpen ? 'none' : 'block';
     btn.classList.toggle('open', !isOpen);
 }
 function closeExportMenu() {
     document.getElementById('exportMenu').style.display = 'none';
     document.getElementById('exportBtn').classList.remove('open');
 }
-// Close dropdown when clicking anywhere else
 document.addEventListener('click', e => {
     if (!e.target.closest('.export-wrapper')) closeExportMenu();
 });
 
 /* ══════════════════════════════════════
-   STATS — approved + rolled_over = "active"
+   STATS
 ══════════════════════════════════════ */
 function computeStats() {
-    let pending = 0, active = 0, overdue = 0, rolled = 0, rejected = 0, paid = 0;
+    let pending = 0, active = 0, overdue = 0, rolled = 0;
     let activeAmt = 0, overdueAmt = 0, rolledAmt = 0;
     loansData.forEach(l => {
         const st  = (l.status || '').toLowerCase();
         const amt = Number(l.amount) || 0;
-        if (st === 'pending')     { pending++;  }
+        if (st === 'pending')     { pending++; }
         if (st === 'approved')    { active++;   activeAmt  += amt; }
         if (st === 'rolled_over') { rolled++;   rolledAmt  += amt; active++; activeAmt += amt; }
         if (st === 'overdue')     { overdue++;  overdueAmt += amt; }
-        if (st === 'rejected')    { rejected++; }
-        if (st === 'paid')        { paid++;     }
     });
     document.getElementById('stat-pending').textContent        = pending;
     document.getElementById('stat-active').textContent         = active;
@@ -806,14 +1012,12 @@ function computeStats() {
     document.getElementById('stat-rolled-amount').textContent  = fmtN(rolledAmt);
 }
 
-/* ── Filter counts ── */
 function computeFilterCounts() {
     const c = { all: loansData.length, pending: 0, approved: 0, overdue: 0, rejected: 0, paid: 0, rolled_over: 0 };
     loansData.forEach(l => { const st = (l.status || '').toLowerCase(); if (c.hasOwnProperty(st)) c[st]++; });
     Object.keys(c).forEach(k => { const el = document.getElementById(`count-${k}`); if (el) el.textContent = c[k]; });
 }
 
-/* ── Filter tabs ── */
 function filterLoans(status, event) {
     currentFilter = status;
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
@@ -821,13 +1025,11 @@ function filterLoans(status, event) {
     applyVisibility();
 }
 
-/* ── Search ── */
 function searchLoans() {
     currentSearch = document.getElementById('searchInput').value.toLowerCase();
     applyVisibility();
 }
 
-/* ── Visibility ── */
 function applyVisibility() {
     let visible = 0;
     document.querySelectorAll('.loan-row').forEach(row => {
@@ -844,7 +1046,6 @@ function applyVisibility() {
             : `Showing ${visible} of ${total} records`;
 }
 
-/* ── Sort ── */
 function sortLoans(by) {
     const tbody = document.getElementById('loansTableBody');
     const rows  = [...tbody.querySelectorAll('tr')];
@@ -862,7 +1063,7 @@ function sortLoans(by) {
 ══════════════════════════════════════ */
 function viewLoan(loan) {
     selectedLoan = loan;
-    const isInt = !!loan.user;
+    const isInt   = !!loan.user;
     const name    = isInt ? `${loan.user.firstName} ${loan.user.lastName}` : (loan.external?.borrowerName || 'Company/External');
     const id      = isInt ? `Member ID: ${loan.user.membershipID}` : `Type: ${(loan.external?.borrowerType || 'external').toUpperCase()}`;
     const email   = isInt ? (loan.user.email || 'N/A') : (loan.external?.email || 'N/A');
@@ -879,6 +1080,14 @@ function viewLoan(loan) {
     const badge = document.getElementById('loanAccountBadge');
     badge.textContent = accType;
     badge.className   = 'badge fs-6 ' + (isInt ? 'bg-success' : 'bg-warning text-dark');
+
+    const rbContainer = document.getElementById('rolloverBlockContainer');
+    if (isInt) {
+        rbContainer.style.display = '';
+        renderRolloverBlockUI(!!loan.user.rolloverBlocked);
+    } else {
+        rbContainer.style.display = 'none';
+    }
 
     document.getElementById('loanAmount').textContent             = fmt(loan.amount);
     document.getElementById('loanTotalRepay').textContent         = fmt(loan.totalRepay);
@@ -899,7 +1108,6 @@ function viewLoan(loan) {
     stBadge.className   = 'badge fs-6 ' + (stColors[loan.status] || 'bg-secondary');
     stBadge.textContent = capSt(loan.status);
 
-    // Penalty
     const penSec = document.getElementById('penaltySection');
     if (loan.totalPenalty > 0 || loan.penaltyPercentage > 0) {
         penSec.style.display = '';
@@ -908,7 +1116,6 @@ function viewLoan(loan) {
         document.getElementById('loanLastPenalty').textContent  = fmtD(loan.lastPenaltyAppliedAt);
     } else { penSec.style.display = 'none'; }
 
-    // Rollover
     const rolSec = document.getElementById('rolloverSection');
     if (loan.rolloverCount > 0 || loan.status === 'rolled_over') {
         rolSec.style.display = '';
@@ -929,7 +1136,6 @@ function viewLoan(loan) {
         });
     } else { rolSec.style.display = 'none'; }
 
-    // Rejection
     const rejSec = document.getElementById('rejectionSection');
     if (loan.status === 'rejected') {
         rejSec.style.display = '';
@@ -940,7 +1146,6 @@ function viewLoan(loan) {
         } else { document.getElementById('rejectionDetailsRow').style.display = 'none'; }
     } else { rejSec.style.display = 'none'; }
 
-    // Guarantors
     const gList = document.getElementById('guarantorList');
     gList.innerHTML = '';
     if (!loan.guarantors || loan.guarantors.length === 0) {
@@ -976,6 +1181,9 @@ function viewLoan(loan) {
     document.getElementById('approveBtnModal').style.display = isPending ? 'inline-block' : 'none';
     document.getElementById('rejectBtnModal').style.display  = isPending ? 'inline-block' : 'none';
 
+    const canPrintOffer = ['approved', 'overdue', 'paid', 'rolled_over'].includes(loan.status);
+    document.getElementById('printOfferBtnModal').style.display = canPrintOffer ? 'inline-block' : 'none';
+
     new bootstrap.Modal(document.getElementById('viewLoanModal')).show();
 }
 
@@ -988,31 +1196,200 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ══════════════════════════════════════
-   APPROVE
+   ROLLOVER BLOCK TOGGLE
 ══════════════════════════════════════ */
+function renderRolloverBlockUI(isBlocked) {
+    const box       = document.getElementById('rolloverBlockBox');
+    const checkbox  = document.getElementById('rolloverBlockCheckbox');
+    const labelText = document.getElementById('rolloverBlockLabelText');
+    checkbox.checked = isBlocked;
+    box.classList.toggle('is-blocked', isBlocked);
+    labelText.textContent = isBlocked ? 'Rollover Blocked' : 'Block Rollover';
+}
+
+async function toggleRolloverBlock() {
+    if (!selectedLoan || !selectedLoan.user) return;
+    const checkbox     = document.getElementById('rolloverBlockCheckbox');
+    const userId       = selectedLoan.user._id;
+    const desiredState = checkbox.checked;
+    checkbox.disabled  = true;
+    try {
+        const res  = await fetch(`/api/admin/members/${userId}/rollover-block`, { method: 'PATCH' });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Failed to update rollover block.');
+        selectedLoan.user.rolloverBlocked = data.rolloverBlocked;
+        renderRolloverBlockUI(data.rolloverBlocked);
+        const name = `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}`;
+        showToast(
+            data.rolloverBlocked ? `Rollover blocked for ${name}.` : `Rollover unblocked for ${name}.`,
+            data.rolloverBlocked ? 'warning' : 'success'
+        );
+    } catch (err) {
+        checkbox.checked = !desiredState;
+        renderRolloverBlockUI(!desiredState);
+        showToast(`Error: ${err.message}`, 'danger');
+    } finally {
+        checkbox.disabled = false;
+    }
+}
+
+/* ══════════════════════════════════════
+   APPROVE — with interest rate override
+══════════════════════════════════════ */
+let _dueDateManuallyEdited = false;
+
 function approveLoan() {
     if (!selectedLoan) return;
     const isInt = !!selectedLoan.user;
-    const name  = isInt ? `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}` : (selectedLoan.external?.borrowerName || 'Company Loan');
-    const dur   = selectedLoan.duration ? `${selectedLoan.duration.duration} Months` : `${selectedLoan.externalDuration || 'N/A'} Months`;
+    const name  = isInt
+        ? `${selectedLoan.user.firstName} ${selectedLoan.user.lastName}`
+        : (selectedLoan.external?.borrowerName || 'Company Loan');
+    const dur = selectedLoan.duration
+        ? `${selectedLoan.duration.duration} Months`
+        : `${selectedLoan.externalDuration || 'N/A'} Months`;
+
+    // Populate summary
     document.getElementById('approveMemberName').textContent   = name;
     document.getElementById('approveLoanAmount').textContent   = fmt(selectedLoan.amount);
     document.getElementById('approveLoanInterest').textContent = selectedLoan.interestRate + '%';
     document.getElementById('approveLoanDuration').textContent = dur;
+
+    // Reset form fields
     document.getElementById('disbursementMethod').value = '';
     document.getElementById('disbursementDate').value   = '';
+    document.getElementById('approveDueDate').value      = '';
+    document.getElementById('dueDateAdjustedBadge').style.display = 'none';
+    _dueDateManuallyEdited = false;
+
+    // Pre-fill interest rate with original and show hint
+    const originalRate = selectedLoan.interestRate || 0;
+    document.getElementById('approveInterestRate').value  = originalRate;
+    document.getElementById('approveOriginalRate').textContent = originalRate + '%';
+    document.getElementById('rateAdjustedBadge').style.display = 'none';
+
+    // Show initial preview
+    previewApprovalTotals();
+
     bootstrap.Modal.getInstance(document.getElementById('viewLoanModal')).hide();
     new bootstrap.Modal(document.getElementById('approveLoanModal')).show();
 }
+
+/* ── Due date auto-calc + override ── */
+function getDurationMonths() {
+    return selectedLoan?.duration?.duration || selectedLoan?.externalDuration || 0;
+}
+
+function computeDefaultDueDate(disburseDateStr) {
+    if (!disburseDateStr) return '';
+    const months = getDurationMonths();
+    const d = new Date(disburseDateStr + 'T00:00:00');
+    d.setMonth(d.getMonth() + months);
+    return d.toISOString().split('T')[0];
+}
+
+function recalcDueDate() {
+    const disburseVal = document.getElementById('disbursementDate').value;
+    // Only auto-fill if the admin hasn't manually typed a custom due date
+    if (!_dueDateManuallyEdited) {
+        document.getElementById('approveDueDate').value = computeDefaultDueDate(disburseVal);
+    }
+    updateDueDateBadge();
+}
+
+function onDueDateManualChange() {
+    _dueDateManuallyEdited = true;
+    updateDueDateBadge();
+}
+
+function updateDueDateBadge() {
+    const disburseVal = document.getElementById('disbursementDate').value;
+    const currentVal   = document.getElementById('approveDueDate').value;
+    const defaultVal    = computeDefaultDueDate(disburseVal);
+    const badge = document.getElementById('dueDateAdjustedBadge');
+    badge.style.display = (defaultVal && currentVal && currentVal !== defaultVal) ? 'inline-flex' : 'none';
+}
+
+function previewApprovalTotals() {
+    if (!selectedLoan) return;
+
+    const rateInput   = document.getElementById('approveInterestRate');
+    const preview     = document.getElementById('approveInterestPreview');
+    const adjBadge    = document.getElementById('rateAdjustedBadge');
+    const rate        = parseFloat(rateInput.value);
+    const originalRate = selectedLoan.interestRate || 0;
+
+    if (isNaN(rate) || rate < 0) {
+        preview.style.display = 'none';
+        adjBadge.style.display = 'none';
+        return;
+    }
+
+    const dur             = selectedLoan.duration?.duration || selectedLoan.externalDuration || 0;
+    const principal       = selectedLoan.amount || 0;
+    const interestAmt     = principal * (rate / 100) * dur;
+    const totalRepay      = principal + interestAmt;
+
+    // Original figures for diff
+    const origInterest    = principal * (originalRate / 100) * dur;
+    const origTotal       = principal + origInterest;
+    const diff            = totalRepay - origTotal;
+
+    document.getElementById('previewInterestAmt').textContent = fmt(interestAmt);
+    document.getElementById('previewTotalRepay').textContent  = fmt(totalRepay);
+
+    const diffEl = document.getElementById('previewDiff');
+    if (Math.abs(diff) < 0.01) {
+        diffEl.textContent  = 'No change from original';
+        diffEl.style.color  = '#6b7280';
+    } else if (diff > 0) {
+        diffEl.textContent  = `+${fmt(diff)} more than original`;
+        diffEl.style.color  = '#dc2626';
+    } else {
+        diffEl.textContent  = `${fmt(diff)} less than original`;
+        diffEl.style.color  = '#059669';
+    }
+
+    // Show/hide "Adjusted" badge
+    adjBadge.style.display = (Math.abs(rate - originalRate) > 0.001) ? 'inline-flex' : 'none';
+    preview.style.display  = 'block';
+}
+
 async function confirmApproval() {
     if (!selectedLoan) { alert('No loan selected.'); return; }
-    const method = document.getElementById('disbursementMethod').value;
-    const date   = document.getElementById('disbursementDate').value;
-    if (!method || !date) { alert('Please select a disbursement method and date.'); return; }
+
+    const method  = document.getElementById('disbursementMethod').value;
+    const date    = document.getElementById('disbursementDate').value;
+    const rate    = parseFloat(document.getElementById('approveInterestRate').value);
+    const dueDate = document.getElementById('approveDueDate').value;   // ← add this line
+
+    if (!method || !date) {
+        alert('Please select a disbursement method and date.');
+        return;
+    }
+    if (isNaN(rate) || rate < 0 || rate > 100) {
+        alert('Please enter a valid interest rate between 0 and 100.');
+        return;
+    }
+    if (!dueDate) {
+        alert('Please confirm a due date.');
+        return;
+    }
+    if (new Date(dueDate) <= new Date(date)) {
+        alert('Due date must be after the disbursement date.');
+        return;
+    }
+
     try {
         const res = await fetch('/api/loans/approve', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ loanId: selectedLoan._id, disbursementMethod: method, disbursementDate: date })
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                loanId:             selectedLoan._id,
+                disbursementMethod: method,
+                disbursementDate:   date,
+                interestRate:       rate,
+                dueDate:            dueDate
+            })
         });
         if (!res.ok) { const e = await res.json(); throw new Error(e.message || 'Failed to approve.'); }
         alert('Loan approved successfully!');
@@ -1022,12 +1399,157 @@ async function confirmApproval() {
 }
 
 /* ══════════════════════════════════════
+   PRINT LOAN OFFER LETTER (admin)
+══════════════════════════════════════ */
+function printLoanOffer() {
+    if (!selectedLoan) { showToast('No loan selected.', 'danger'); return; }
+    const loan  = selectedLoan;
+    const isInt = !!loan.user;
+
+    const borrowerName    = isInt ? `${loan.user.firstName} ${loan.user.lastName}` : (loan.external?.borrowerName || 'Company/External');
+    const membershipID    = isInt ? (loan.user.membershipID || 'N/A') : (loan.external?.borrowerType?.toUpperCase() || 'EXTERNAL');
+    const borrowerEmail   = isInt ? (loan.user.email || 'N/A') : (loan.external?.email || 'N/A');
+    const borrowerPhone   = isInt ? (loan.user.phone || 'N/A') : (loan.external?.phone || 'N/A');
+    const borrowerAddress = isInt ? 'N/A' : (loan.external?.address || 'N/A');
+    const durationMonths  = loan.duration ? loan.duration.duration : (loan.externalDuration || 0);
+
+    const fmtMoney = n => '₦' + Number(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtDate  = d => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+    const today    = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    const guarantorRows = (loan.guarantors || []).length
+        ? loan.guarantors.map((g, i) => {
+            const gua   = g.guarantor;
+            const gname = gua ? `${gua.firstName} ${gua.lastName}` : 'N/A';
+            return `
+                <tr>
+                    <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">${i + 1}</td>
+                    <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">${gname}</td>
+                    <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">${gua?.membershipID || 'N/A'}</td>
+                    <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;text-transform:capitalize;">${g.status || 'pending'}</td>
+                </tr>`;
+        }).join('')
+        : `<tr><td colspan="4" style="padding:8px 10px;color:#94a3b8;">No guarantors on record.</td></tr>`;
+
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Loan Offer Letter — ${borrowerName}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,'Times New Roman',serif;color:#1e293b;background:#fff;line-height:1.6;padding:40px 50px;}
+.letterhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1e3a8a;padding-bottom:16px;margin-bottom:28px;}
+.letterhead h1{font-size:20px;color:#1e3a8a;font-weight:800;letter-spacing:.02em;}
+.letterhead p{font-size:11px;color:#64748b;margin-top:2px;}
+.letterhead .ref{text-align:right;font-size:11px;color:#64748b;}
+h2{font-size:15px;color:#1e3a8a;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em;}
+.section{margin-bottom:22px;}
+.kv{display:grid;grid-template-columns:180px 1fr;gap:6px 12px;font-size:13px;margin-bottom:10px;}
+.kv strong{color:#475569;font-weight:600;}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+thead th{background:#f1f5f9;text-align:left;padding:6px 10px;font-size:11px;text-transform:uppercase;color:#475569;}
+.terms{font-size:12.5px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:14px 16px;margin-top:10px;}
+.terms li{margin-bottom:6px;}
+.admin-tag{display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#1e3a8a;border-radius:20px;padding:3px 10px;margin-top:6px;letter-spacing:.04em;}
+.sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:50px;}
+.sign-box{font-size:12px;}
+.sign-box .label{margin-top:6px;color:#475569;}
+.footer-note{margin-top:40px;font-size:10.5px;color:#94a3b8;text-align:center;border-top:1px solid #e2e8f0;padding-top:12px;}
+@media print{ @page{margin:14mm;} .no-print{display:none;} }
+</style></head><body>
+
+<div class="letterhead">
+  <div>
+    <h1>Club De Stars Cooperative</h1>
+    <p>Loan Offer Letter &nbsp;·&nbsp; Powered by JESZ LIMITED</p>
+    <span class="admin-tag"><i class="fas fa-user-shield"></i> Issued by Admin</span>
+  </div>
+  <div class="ref">
+    Date Issued: ${today}<br>
+    Reference ID: ${membershipID}
+  </div>
+</div>
+
+<div class="section">
+  <h2>Borrower Information</h2>
+  <div class="kv">
+    <strong>Full Name</strong><span>${borrowerName}</span>
+    <strong>${isInt ? 'Membership ID' : 'Borrower Type'}</strong><span>${membershipID}</span>
+    <strong>Email</strong><span>${borrowerEmail}</span>
+    <strong>Phone</strong><span>${borrowerPhone}</span>
+    <strong>Address</strong><span>${borrowerAddress}</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Loan Terms</h2>
+  <div class="kv">
+    <strong>Loan Amount</strong><span>${fmtMoney(loan.amount)}</span>
+    <strong>Interest Rate</strong><span>${loan.interestRate}%</span>
+    <strong>Interest Amount</strong><span>${fmtMoney(loan.interestAmount)}</span>
+    <strong>Total Repayable</strong><span><strong>${fmtMoney(loan.totalRepay)}</strong></span>
+    <strong>Amount Paid</strong><span>${fmtMoney(loan.paidAmount)}</span>
+    <strong>Outstanding Balance</strong><span>${loan.outstandingBalance > 0 ? fmtMoney(loan.outstandingBalance) : '₦0.00'}</span>
+    <strong>Duration</strong><span>${durationMonths} months</span>
+    <strong>Application Date</strong><span>${fmtDate(loan.createdAt)}</span>
+    <strong>Disbursement Date</strong><span>${fmtDate(loan.disbursementDate)}</span>
+    <strong>Repayment Due Date</strong><span>${fmtDate(loan.dueDate)}</span>
+    <strong>Status</strong><span style="text-transform:uppercase;">${capSt(loan.status)}</span>
+  </div>
+
+  <div class="terms">
+    <strong>Key Conditions:</strong>
+    <ul>
+      <li>Repayment of the total amount above (${fmtMoney(loan.totalRepay)}) is due in full by ${fmtDate(loan.dueDate)}.</li>
+      <li>Late repayment attracts a daily penalty as defined in the cooperative's loan policy${loan.penaltyPercentage ? ` (${loan.penaltyPercentage}% per day)` : ''}.</li>
+      <li>Rollover is available subject to admin approval and payment of accrued interest at the time of request.</li>
+      <li>This loan is guaranteed by the member(s) listed below, who accepted responsibility at the time of application.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Guarantors</h2>
+  <table>
+    <thead><tr><th>#</th><th>Name</th><th>Membership ID</th><th>Status</th></tr></thead>
+    <tbody>${guarantorRows}</tbody>
+  </table>
+</div>
+
+<div class="sign-grid">
+  <div class="sign-box">
+    <div style="height:60px;display:flex;align-items:flex-end;color:#94a3b8;font-size:12px;border-bottom:1px solid #1e293b;padding-bottom:4px;">Signature on file</div>
+    <div class="label">${borrowerName}<br>Borrower</div>
+  </div>
+  <div class="sign-box">
+    <div style="height:60px;border-bottom:1px solid #1e293b;"></div>
+    <div class="label">Authorized Signatory<br>Club De Stars Cooperative</div>
+  </div>
+</div>
+
+<div class="footer-note">
+  This document was generated electronically by an administrator and reflects loan terms on file as of ${today}.<br>
+  Club De Stars Cooperative &nbsp;·&nbsp; Powered by JESZ LIMITED
+</div>
+
+<div style="text-align:center;padding:24px;" class="no-print">
+  <button onclick="window.print()" style="padding:10px 28px;background:#1e3a8a;color:white;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;margin-right:8px;">🖨 Print / Save as PDF</button>
+  <button onclick="window.close()" style="padding:10px 20px;background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Close</button>
+</div>
+</body></html>`;
+
+    const win = window.open('', '_blank', 'width=900,height=950');
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+}
+
+/* ══════════════════════════════════════
    REJECT
 ══════════════════════════════════════ */
 document.getElementById('rejectionReason').addEventListener('change', function () {
     document.getElementById('otherReasonDiv').style.display = this.value === 'Other' ? 'block' : 'none';
     if (this.value !== 'Other') document.getElementById('rejectionDetails').value = '';
 });
+
 function rejectLoanFromModal() {
     if (!selectedLoan) return;
     const isInt = !!selectedLoan.user;
@@ -1041,6 +1563,7 @@ function rejectLoanFromModal() {
     bootstrap.Modal.getInstance(document.getElementById('viewLoanModal')).hide();
     new bootstrap.Modal(document.getElementById('rejectLoanModal')).show();
 }
+
 async function confirmRejection() {
     if (!selectedLoan) return;
     const reason  = document.getElementById('rejectionReason').value.trim();
@@ -1087,8 +1610,8 @@ document.addEventListener('click', e => {
 });
 async function loadSidebarPendingCount() {
     try {
-        const res  = await fetch('/admin/pending-approvals-count');
-        const data = await res.json();
+        const res   = await fetch('/admin/pending-approvals-count');
+        const data  = await res.json();
         const badge = document.getElementById('sidebarPendingBadge');
         if (!badge) return;
         badge.style.display = data.count > 0 ? 'inline-block' : 'none';
@@ -1161,11 +1684,11 @@ function buildExportRows(data) {
             'Rolled Into Loan ID':     l.rolledIntoLoan    || '—',
             'Expected Repay Date':     repayDate.toDateString(),
             'Guarantors':              gNames || 'None',
+            'Rollover Blocked':        isInt ? (l.user.rolloverBlocked ? 'Yes' : 'No') : '—',
         };
     });
 }
 
-/* ── Excel ── */
 function exportToExcel(useFilter) {
     const data = getFilteredData(useFilter);
     if (!data.length) { alert('No loans to export.'); return; }
@@ -1176,7 +1699,7 @@ function exportToExcel(useFilter) {
         {wch:16},{wch:14},{wch:16},{wch:18},{wch:16},{wch:20},{wch:16},
         {wch:14},{wch:18},{wch:18},{wch:18},{wch:16},{wch:18},{wch:18},
         {wch:18},{wch:16},{wch:24},{wch:24},{wch:14},{wch:16},{wch:22},
-        {wch:14},{wch:14},{wch:20},{wch:20},{wch:40}
+        {wch:14},{wch:14},{wch:20},{wch:20},{wch:40},{wch:16}
     ];
     const range = XLSX.utils.decode_range(ws['!ref']);
     for (let C = range.s.c; C <= range.e.c; C++) {
@@ -1213,12 +1736,12 @@ function exportToExcel(useFilter) {
         ['Paid / Settled',       data.filter(l=>l.status==='paid').length],
         ['', ''],
         ['FINANCIAL TOTALS', ''],
-        ['Total Active Amount',              approvedAmt],
-        ['Total Overdue Amount',             overdueAmt],
-        ['Total Outstanding Balance',        data.reduce((s,l)=>s+(l.outstandingBalance||0),0)],
-        ['Total Amount Paid Back',           data.reduce((s,l)=>s+(l.paidAmount||0),0)],
-        ['Total Penalties Charged',          data.reduce((s,l)=>s+(l.totalPenalty||0),0)],
-        ['Grand Total (All Loan Amounts)',   data.reduce((s,l)=>s+l.amount,0)],
+        ['Total Active Amount',            approvedAmt],
+        ['Total Overdue Amount',           overdueAmt],
+        ['Total Outstanding Balance',      data.reduce((s,l)=>s+(l.outstandingBalance||0),0)],
+        ['Total Amount Paid Back',         data.reduce((s,l)=>s+(l.paidAmount||0),0)],
+        ['Total Penalties Charged',        data.reduce((s,l)=>s+(l.totalPenalty||0),0)],
+        ['Grand Total (All Loan Amounts)', data.reduce((s,l)=>s+l.amount,0)],
     ];
     const ws2 = XLSX.utils.aoa_to_sheet(summaryData);
     ws2['!cols'] = [{ wch: 38 }, { wch: 22 }];
@@ -1228,31 +1751,31 @@ function exportToExcel(useFilter) {
     XLSX.writeFile(wb, `CDS_Loans_${new Date().toISOString().split('T')[0]}${useFilter ? '_' + currentFilter : ''}.xlsx`);
 }
 
-/* ── PDF ── */
 function exportToPDF(useFilter) {
     const data = getFilteredData(useFilter);
     if (!data.length) { alert('No loans to export.'); return; }
-    const now = new Date().toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    const totalAmt    = data.reduce((s,l)=>s+l.amount,0);
-    const activeAmt   = data.filter(l=>l.status==='approved'||l.status==='rolled_over').reduce((s,l)=>s+l.amount,0);
-    const overdueAmt  = data.filter(l=>l.status==='overdue').reduce((s,l)=>s+l.amount,0);
+    const now        = new Date().toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const totalAmt   = data.reduce((s,l)=>s+l.amount,0);
+    const activeAmt  = data.filter(l=>l.status==='approved'||l.status==='rolled_over').reduce((s,l)=>s+l.amount,0);
+    const overdueAmt = data.filter(l=>l.status==='overdue').reduce((s,l)=>s+l.amount,0);
     const stColor = { approved:'#059669', pending:'#d97706', rejected:'#dc2626', overdue:'#dc2626', paid:'#1e3a8a', rolled_over:'#7c3aed' };
     const stBg    = { approved:'#d1fae5', pending:'#fef3c7', rejected:'#fee2e2', overdue:'#fee2e2', paid:'#dbeafe', rolled_over:'#ede9fe' };
-    const counts = ['pending','approved','overdue','rejected','paid','rolled_over'].reduce((o,k)=>{ o[k]=data.filter(l=>l.status===k).length; return o; }, {});
+    const counts  = ['pending','approved','overdue','rejected','paid','rolled_over'].reduce((o,k)=>{ o[k]=data.filter(l=>l.status===k).length; return o; }, {});
     const rows = data.map((l, i) => {
         const isInt   = !!l.user;
         const name    = isInt ? `${l.user.firstName} ${l.user.lastName}` : (l.external?.borrowerName || 'External');
         const id      = isInt ? l.user.membershipID : (l.external?.borrowerType?.toUpperCase() || 'EXTERNAL');
         const accType = isInt ? (l.user?.account?.accountType?.name || 'Unknown') : 'External';
         const dur     = l.duration ? l.duration.duration : (l.externalDuration || 'N/A');
-        const sc = stColor[l.status] || '#475569';
-        const sb = stBg[l.status]    || '#f1f5f9';
-        const rowBg = i % 2 === 0 ? '#fff' : '#f8fafc';
+        const sc      = stColor[l.status] || '#475569';
+        const sb      = stBg[l.status]    || '#f1f5f9';
+        const rowBg   = i % 2 === 0 ? '#fff' : '#f8fafc';
         const penalties = l.totalPenalty > 0 ? `<br><span style="color:#dc2626;font-size:9px;">Penalty: ₦${l.totalPenalty.toLocaleString()}</span>` : '';
         const rollovers = l.rolloverCount > 0 ? `<br><span style="color:#7c3aed;font-size:9px;">Rollovers: ${l.rolloverCount}</span>` : '';
+        const blockTag  = (isInt && l.user.rolloverBlocked) ? `<br><span style="color:#dc2626;font-size:9px;font-weight:700;">⛔ Rollover Blocked</span>` : '';
         return `<tr style="background:${rowBg};">
             <td style="text-align:center;color:#9ca3af;font-size:11px;">${i+1}</td>
-            <td><strong style="font-size:12px;">${name}</strong><br><span style="color:#9ca3af;font-size:10px;">${id}</span><br><span style="font-size:10px;color:#1e3a8a;">${accType}</span></td>
+            <td><strong style="font-size:12px;">${name}</strong><br><span style="color:#9ca3af;font-size:10px;">${id}</span><br><span style="font-size:10px;color:#1e3a8a;">${accType}</span>${blockTag}</td>
             <td style="text-align:right;font-weight:800;font-size:12px;color:#1e3a8a;">₦${l.amount.toLocaleString('en-NG',{minimumFractionDigits:2})}</td>
             <td style="text-align:right;font-size:11px;color:#dc2626;">${l.outstandingBalance > 0 ? '₦'+l.outstandingBalance.toLocaleString('en-NG',{minimumFractionDigits:2}) : '—'}${penalties}</td>
             <td style="text-align:right;font-size:11px;color:#059669;">₦${l.paidAmount.toLocaleString('en-NG',{minimumFractionDigits:2})}</td>
