@@ -27,6 +27,9 @@ router.get("/cds-cooperative/loan", async (req, res) => {
 
     if (!user) return res.redirect("/login");
 
+    // Merge role from req.user (already populated by Passport)
+    user.role = req.user.role;
+
     const users = await User.find({});
 
     const loanSettings = await LoanSettings.find({ status: "active" })
@@ -45,7 +48,6 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       })
       .lean();
 
-    // ✅ UPDATED dueDate block
     let dueDate      = null;
     let daysUntilDue = null;
 
@@ -107,7 +109,6 @@ router.get("/cds-cooperative/loan", async (req, res) => {
     res.redirect("/cds-cooperative/dashboard");
   }
 });
-
 // LOAN APPLICATION ROUTE
 router.post("/club-de-star-cooperative/apply-loan", async (req, res) => {
   if (!req.isAuthenticated()) {

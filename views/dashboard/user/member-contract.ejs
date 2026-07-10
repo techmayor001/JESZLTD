@@ -60,10 +60,67 @@ a{text-decoration:none;color:inherit;}
 button,input{font-family:inherit;}
 
 /* ══ LOADER ══ */
-#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;transition:opacity .5s;}
-.loader-ring{width:48px;height:48px;border:2.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
-.loader-label{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
-@keyframes spin{to{transform:rotate(360deg)}}
+#loader{
+  position:fixed;inset:0;background:#05101e;z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:18px;overflow:hidden;
+  transition:opacity .5s;
+}
+.ld-particles{position:absolute;inset:0;pointer-events:none;}
+.ldp{
+  position:absolute;width:2px;height:2px;border-radius:50%;
+  background:#5cc8ff;opacity:0;
+  animation:ldpDrift var(--dur) ease-in-out var(--delay) infinite;
+}
+@keyframes ldpDrift{
+  0%  {transform:translate(0,0) scale(1);opacity:0;}
+  20% {opacity:.5;}
+  100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0;}
+}
+.ld-glow{
+  position:absolute;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(92,200,255,.06) 0%,transparent 70%);
+  animation:ldGlowP 3s ease-in-out infinite;pointer-events:none;
+}
+@keyframes ldGlowP{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.12);opacity:1;}}
+.ld-center{display:flex;flex-direction:column;align-items:center;gap:16px;position:relative;z-index:2;}
+.ld-ring-wrap{
+  width:58px;height:58px;position:relative;opacity:0;
+  animation:ldRingIn .55s cubic-bezier(.16,1,.3,1) .15s forwards;
+}
+@keyframes ldRingIn{
+  from{opacity:0;transform:scale(.45) rotate(-120deg);}
+  to  {opacity:1;transform:scale(1) rotate(0);}
+}
+.ld-ring-svg{width:100%;height:100%;}
+.ld-ring-bg  {fill:none;stroke:#0c2236;stroke-width:3;}
+.ld-ring-arc {
+  fill:none;stroke:#5cc8ff;stroke-width:3;stroke-linecap:round;
+  stroke-dasharray:127;stroke-dashoffset:127;
+  animation:ldArcDraw .9s cubic-bezier(.4,0,.2,1) .65s forwards;
+}
+@keyframes ldArcDraw{to{stroke-dashoffset:32;}}
+.ld-ring-dot {fill:#5cc8ff;r:0;opacity:0;animation:ldDotPop .3s cubic-bezier(.34,1.56,.64,1) 1.5s forwards;}
+@keyframes ldDotPop{to{r:3.5;opacity:1;}}
+.ld-ring-orbit{fill:none;stroke:#0d2d45;stroke-width:1;stroke-dasharray:4 6;animation:ldOrbit 12s linear infinite;transform-origin:29px 29px;}
+@keyframes ldOrbit{to{transform:rotate(360deg);}}
+.ld-ring-letter{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:700;color:#5cc8ff;opacity:0;
+  animation:ldLetterPop .35s cubic-bezier(.34,1.56,.64,1) 1.2s forwards;
+}
+@keyframes ldLetterPop{from{opacity:0;transform:scale(1.6);}to{opacity:1;transform:scale(1);}}
+.ld-brand{display:flex;align-items:baseline;overflow:hidden;height:40px;}
+.ld-word{display:flex;}
+.ldl{
+  font-size:28px;font-weight:700;letter-spacing:-.5px;display:inline-block;
+  opacity:0;transform:translateY(36px);
+  animation:ldlRise .45s cubic-bezier(.16,1,.3,1) var(--ld) forwards;
+}
+.ldl.w{color:#ffffff;}
+.ldl.a{color:#5cc8ff;}
+@keyframes ldlRise{to{opacity:1;transform:translateY(0);}}
+.ld-word-gap{width:3px;}
 
 /* ══ SIDEBAR ══ */
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:var(--bg-card);border-right:1px solid var(--border);z-index:200;display:flex;flex-direction:column;overflow:hidden;transition:transform .3s,background .3s,border-color .3s;}
@@ -316,8 +373,37 @@ button,input{font-family:inherit;}
 
 <!-- LOADER -->
 <div id="loader">
-  <div class="loader-ring"></div>
-  <div class="loader-label">Club De Stars</div>
+  <div class="ld-particles" id="ldParticles"></div>
+  <div class="ld-glow"></div>
+
+  <div class="ld-center">
+    <div class="ld-ring-wrap">
+      <svg class="ld-ring-svg" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle class="ld-ring-orbit" cx="29" cy="29" r="26"/>
+        <circle class="ld-ring-bg"    cx="29" cy="29" r="20"/>
+        <circle class="ld-ring-arc"   cx="29" cy="29" r="20" transform="rotate(-90 29 29)"/>
+        <circle class="ld-ring-dot"   cx="29" cy="9"/>
+      </svg>
+      <div class="ld-ring-letter">C</div>
+    </div>
+
+    <div class="ld-brand">
+      <div class="ld-word">
+        <span class="ldl w" style="--ld:1.05s">C</span>
+        <span class="ldl w" style="--ld:1.13s">l</span>
+        <span class="ldl w" style="--ld:1.21s">o</span>
+        <span class="ldl w" style="--ld:1.29s">u</span>
+        <span class="ldl w" style="--ld:1.37s">d</span>
+      </div>
+      <div class="ld-word-gap"></div>
+      <div class="ld-word">
+        <span class="ldl a" style="--ld:1.48s">B</span>
+        <span class="ldl a" style="--ld:1.56s">A</span>
+        <span class="ldl a" style="--ld:1.64s">A</span>
+        <span class="ldl a" style="--ld:1.72s">M</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <%
@@ -325,6 +411,10 @@ button,input{font-family:inherit;}
     ? user.guarantorRequests.filter(r => r.status === "pending").length : 0;
   const signatureSrc = user.signature
     ? user.signature.replace('public\\', '/').replace(/\\/g, '/')
+    : null;
+  const chairmanName = chairman ? `${chairman.firstName} ${chairman.lastName}` : "Authorized Signatory";
+  const chairmanSignatureSrc = (chairman && chairman.officialSignature && chairman.officialSignature.url)
+    ? chairman.officialSignature.url
     : null;
 %>
 
@@ -1118,28 +1208,20 @@ button,input{font-family:inherit;}
 
         <p class="sig-intro">By signing below, all parties acknowledge that they have read, understood, and agreed to the terms outlined in this document, including the Memorandum of Understanding, Bylaws, Terms &amp; Conditions of Use, and Privacy Policy above.</p>
 
-        <!-- Cooperative + Operating Company -->
-        <div class="sig-grid" style="margin-bottom:14px;">
+        <!-- Cooperative Chairman -->
+        <div class="sig-grid" style="grid-template-columns:1fr;margin-bottom:14px;">
           <div class="sig-card">
             <div class="sig-role">For the Cooperative</div>
             <div class="sig-img-wrap">
-              <img src="/images/staff-signatures/cooperative-sign.png" alt="Cooperative Signature"
-                   onerror="this.style.display='none'">
+              <% if (chairmanSignatureSrc) { %>
+                <img src="<%= chairmanSignatureSrc %>" alt="Chairman Signature">
+              <% } else { %>
+                <span style="font-size:12px;color:var(--muted);">Signature on file</span>
+              <% } %>
             </div>
             <hr class="sig-divider">
-            <div class="sig-detail">Name: <span>Adi Stanilus Duniya</span></div>
-            <div class="sig-detail">Position: <span>Director</span></div>
-            <div class="sig-detail">Date: <span>16/03/2025</span></div>
-          </div>
-          <div class="sig-card">
-            <div class="sig-role">For the Operating Company</div>
-            <div class="sig-img-wrap">
-              <img src="/images/staff-signatures/operating-sign.png" alt="Operating Signature"
-                   onerror="this.style.display='none'">
-            </div>
-            <hr class="sig-divider">
-            <div class="sig-detail">Name: <span>Eraer Paul Kulugh</span></div>
-            <div class="sig-detail">Position: <span>Manager</span></div>
+            <div class="sig-detail">Name: <span><%= chairmanName %></span></div>
+            <div class="sig-detail">Position: <span>Coop Chairman</span></div>
             <div class="sig-detail">Date: <span>16/03/2025</span></div>
           </div>
         </div>
@@ -1231,9 +1313,36 @@ document.addEventListener('click', e => {
 });
 
 /* ── Loader ── */
-window.addEventListener('load', () => {
-  const l = document.getElementById('loader');
-  setTimeout(() => { l.style.opacity = '0'; setTimeout(() => l.style.display = 'none', 500); }, 400);
+/* ── Loader — short form, reveal at 2.8 s ── */
+(function(){
+  const c = document.getElementById('ldParticles');
+  for(let i = 0; i < 20; i++){
+    const p = document.createElement('div');
+    p.className = 'ldp';
+    p.style.cssText =
+      'left:' + (Math.random()*100).toFixed(1) + '%;' +
+      'top:'  + (Math.random()*100).toFixed(1) + '%;' +
+      '--tx:' + ((Math.random()-.5)*120).toFixed(0) + 'px;' +
+      '--ty:' + ((Math.random()-.5)*120).toFixed(0) + 'px;' +
+      '--dur:' + (2.5 + Math.random()*3).toFixed(1) + 's;' +
+      '--delay:' + (Math.random()*4).toFixed(1) + 's;';
+    c.appendChild(p);
+  }
+})();
+
+window.addEventListener('load', function(){
+  const loader = document.getElementById('loader');
+  const MIN_MS = 2800;
+  const t0 = Date.now();
+  function dismiss(){
+    const wait = Math.max(0, MIN_MS - (Date.now() - t0));
+    setTimeout(function(){
+      loader.style.opacity    = '0';
+      loader.style.transition = 'opacity 0.5s ease';
+      setTimeout(function(){ loader.style.display = 'none'; }, 500);
+    }, wait);
+  }
+  dismiss();
 });
 </script>
 </body>

@@ -523,13 +523,27 @@ router.get("/cds-cooperative/transaction", async (req, res) => {
       return res.redirect("/login");
     }
 
-    const user = req.user;
+    const user = await User.findById(req.user._id)
+      .populate({
+        path: "account",
+        populate: { path: "accountType", model: "MemberType" }
+      })
+      .populate("referredUsers")
+      .exec();
+
+    if (!user) {
+      console.error("User not found");
+      return res.redirect("/login");
+    }
+
+    // Merge role from req.user (already populated by Passport)
+    user.role = req.user.role;
 
     // Fetch transactions, latest first
     const transactions = await Transaction.find({ user: user._id }).sort({ createdAt: -1 });
 
     // Fetch user account
-    const account = await Account.findOne({ user: user._id });
+    const account = user.account;
 
     // --- Calculate dynamic statistics ---
     let totalDeposits = 0;
@@ -544,7 +558,6 @@ router.get("/cds-cooperative/transaction", async (req, res) => {
 
     const roiEarned = account?.accumulativeROI || 0;
 
-    // Render template with statistics
     res.render("dashboard/user/transaction", {
       user,
       account,
@@ -560,7 +573,6 @@ router.get("/cds-cooperative/transaction", async (req, res) => {
     res.status(500).send("Error fetching transactions.");
   }
 });
-
 // ENDS 
 
 
@@ -790,17 +802,26 @@ router.get("/cds-cooperative/memberContract", async (req, res) => {
 
     if (!user) return res.redirect("/login");
 
+    // Merge role from req.user (already populated by Passport)
+    user.role = req.user.role;
+
+    // ── Fetch chairman's official signature, same as admin loan offer letter ──
+    const chairmanRole = await Role.findOne({ name: /^chairman$/i }).select("_id");
+    const chairman = chairmanRole
+      ? await User.findOne({ role: chairmanRole._id }).select("firstName lastName officialSignature")
+      : null;
+
     // Render the contract page
     res.render("dashboard/user/member-contract", {
-      user
+      user,
+      chairman
     });
 
   } catch (err) {
     console.error("Member Contract page error:", err);
-    res.redirect("/club-de-star-cooperative/dashboard");
+    res.redirect("/cds-cooperative/dashboard");
   }
 });
-
 // ENDS 
 
 // UPDATE NEXT OF KIN DETAILS
