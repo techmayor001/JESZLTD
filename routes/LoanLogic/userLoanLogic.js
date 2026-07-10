@@ -10,6 +10,7 @@ const Payment = require("../../models/Payment");
 const Transaction = require("../../models/Transaction");
 const CompanyLedger = require("../../models/CompanyLedger");
 const CompanyAccount = require("../../models/companyRoiSchema");
+const Role = require("../../models/Role");
 
 
 
@@ -90,6 +91,12 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       rolloverPending = !!pendingRollover;
     }
 
+    // ── Fetch chairman's official signature, same as admin loan offer letter ──
+    const chairmanRole = await Role.findOne({ name: /^chairman$/i }).select("_id");
+    const chairman = chairmanRole
+      ? await User.findOne({ role: chairmanRole._id }).select("firstName lastName officialSignature")
+      : null;
+
     res.render("dashboard/user/loan", {
       user,
       users,
@@ -102,6 +109,7 @@ router.get("/cds-cooperative/loan", async (req, res) => {
       companyAccount,
       pendingGuarantorCount,
       rolloverPending,
+      chairman,
     });
 
   } catch (err) {

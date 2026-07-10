@@ -1398,6 +1398,10 @@ function printLoanOffer(){
   const userPhone      = <%- JSON.stringify(user.phone || '') %>;
   const userEmail      = <%- JSON.stringify(user.email || '') %>;
 
+  const chairmanData = <%- JSON.stringify(chairman ? {
+    name: `${chairman.firstName} ${chairman.lastName}`,
+    signatureUrl: (chairman.officialSignature && chairman.officialSignature.url) || null
+  } : null) %>;
   const fmtMoney = n => '₦' + Number(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtDate  = d => d ? new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : '—';
   const today    = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
@@ -1415,6 +1419,13 @@ function printLoanOffer(){
   const signatureBlock = userSignature
     ? `<img src="${userSignature}" alt="Signature" style="height:60px;max-width:220px;object-fit:contain;border-bottom:1px solid #1e293b;padding-bottom:4px;">`
     : `<div style="height:60px;display:flex;align-items:flex-end;color:#94a3b8;font-size:12px;border-bottom:1px solid #1e293b;padding-bottom:4px;">Signature on file</div>`;
+
+
+    const chairmanSignatureBlock = (chairmanData && chairmanData.signatureUrl)
+    ? `<img src="${chairmanData.signatureUrl}" alt="Chairman Signature" style="height:50px;max-width:180px;object-fit:contain;">`
+    : `<div style="height:60px;border-bottom:1px solid #1e293b;"></div>`;
+
+  const chairmanNameLine = chairmanData ? chairmanData.name : 'Authorized Signatory';
 
   const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>Loan Offer Letter — ${userFullName}</title>
@@ -1502,8 +1513,10 @@ thead th{background:#f1f5f9;text-align:left;padding:6px 10px;font-size:11px;text
     <div class="label">${userFullName}<br>Borrower</div>
   </div>
   <div class="sign-box">
-    <div style="height:60px;border-bottom:1px solid #1e293b;"></div>
-    <div class="label">Authorized Signatory<br>Club De Stars Cooperative</div>
+    <div style="height:60px;display:flex;align-items:flex-end;border-bottom:1px solid #1e293b;padding-bottom:4px;">
+      ${chairmanSignatureBlock}
+    </div>
+    <div class="label">${chairmanNameLine}<br>COOP CHAIRMAN</div>
   </div>
 </div>
 
