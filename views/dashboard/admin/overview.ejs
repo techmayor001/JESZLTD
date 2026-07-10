@@ -486,7 +486,7 @@
             <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
             <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
             <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
-            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/manage-deposit"><i class="fas fa-coins"></i>Deposits</a>
             <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
             <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
         </div>
@@ -555,7 +555,7 @@
                 <div class="col-md-5">
                     <div class="hero-stats">
                         <div class="hero-portfolio">
-                            <small>Total Portfolio</small>
+                            <small>Total Members Balance</small>
                             <strong>₦<%= totalPortfolio.toLocaleString() %></strong>
                         </div>
                         <div class="hero-badges">
@@ -602,18 +602,18 @@
     </div>
 
     <!-- KPI ROW 1 -->
-    <div class="kpi-row r3">
-        <div class="kpi-card">
-            <div class="kpi-icon" style="background:rgba(30,58,138,.1);color:#1e3a8a;"><i class="fas fa-wallet"></i></div>
-            <div class="kpi-label">Member Balances</div>
-            <div class="kpi-value">₦<%= stats.finance.totalMemberBalance.toLocaleString() %></div>
-            <div class="kpi-sub neutral"><i class="fas fa-users"></i> User accounts</div>
-        </div>
+    <%
+        /* Net Position computed directly here: current member balances minus total withdrawals.
+           This replaces whatever stats.finance.netPosition the backend was sending, which was inaccurate. */
+        const netPositionAccurate = stats.finance.totalMemberBalance - stats.finance.totalWithdrawals;
+    %>
+    <div class="kpi-row r3" style="grid-template-columns:repeat(3, 1fr);">
         <div class="kpi-card">
             <div class="kpi-icon" style="background:rgba(16,185,129,.1);color:#059669;"><i class="fas fa-arrow-circle-down"></i></div>
-            <div class="kpi-label">Total Deposits</div>
-            <div class="kpi-value">₦<%= stats.finance.totalDeposits.toLocaleString() %></div>
-            <div class="kpi-sub up"><i class="fas fa-arrow-up"></i><%= stats.finance.depositsInPeriod %> transactions</div>
+            <!-- Balance + Members ROI: sum of member balances + sum of accumulativeROI across member accounts -->
+            <div class="kpi-label">Balance + ROI</div>
+            <div class="kpi-value">₦<%= stats.finance.balancePlusROI.toLocaleString() %></div>
+            <div class="kpi-sub neutral"><i class="fas fa-percentage"></i> ROI: ₦<%= stats.finance.membersROI.toLocaleString() %></div>
         </div>
         <div class="kpi-card">
             <div class="kpi-icon" style="background:rgba(239,68,68,.1);color:#dc2626;"><i class="fas fa-arrow-circle-up"></i></div>
@@ -624,10 +624,10 @@
         <div class="kpi-card">
             <div class="kpi-icon" style="background:rgba(16,185,129,.1);color:#059669;"><i class="fas fa-balance-scale"></i></div>
             <div class="kpi-label">Net Position</div>
-            <div class="kpi-value" style="color:<%= stats.finance.netPosition >= 0 ? '#059669' : '#dc2626' %>;">₦<%= Math.abs(stats.finance.netPosition).toLocaleString() %></div>
-            <div class="kpi-sub <%= stats.finance.netPosition >= 0 ? 'up' : 'down' %>">
-                <i class="fas fa-<%= stats.finance.netPosition >= 0 ? 'arrow-up' : 'arrow-down' %>"></i>
-                <%= stats.finance.netPosition >= 0 ? 'Positive' : 'Negative' %>
+            <div class="kpi-value" style="color:<%= netPositionAccurate >= 0 ? '#059669' : '#dc2626' %>;">₦<%= Math.abs(netPositionAccurate).toLocaleString() %></div>
+            <div class="kpi-sub <%= netPositionAccurate >= 0 ? 'up' : 'down' %>">
+                <i class="fas fa-<%= netPositionAccurate >= 0 ? 'arrow-up' : 'arrow-down' %>"></i>
+                <%= netPositionAccurate >= 0 ? 'Positive' : 'Negative' %>
             </div>
         </div>
     </div>
@@ -636,13 +636,18 @@
     <div class="kpi-row r3" style="margin-bottom:1.5rem;">
         <div class="kpi-card">
             <div class="kpi-icon" style="background:rgba(245,158,11,.1);color:#d97706;"><i class="fas fa-hand-holding-usd"></i></div>
+            <!-- TODO (backend): stats.loans.totalDisbursed currently sums approved loans only.
+                 Needs to sum loans with status in ['approved','paid'] (or your equivalent statuses)
+                 in the aggregation query, e.g. Loan.find({ status: { $in: ['approved','paid'] } })
+                 Send me the controller that builds `stats.loans` and I'll fix the aggregation. -->
             <div class="kpi-label">Loans Disbursed</div>
             <div class="kpi-value">₦<%= stats.loans.totalDisbursed.toLocaleString() %></div>
             <div class="kpi-sub neutral"><i class="fas fa-circle" style="font-size:.5rem;"></i><%= stats.loans.totalCount %> loans</div>
         </div>
         <div class="kpi-card">
             <div class="kpi-icon" style="background:rgba(239,68,68,.1);color:#dc2626;"><i class="fas fa-exclamation-circle"></i></div>
-            <div class="kpi-label">Outstanding Balance</div>
+            <!-- Updated: approved loans only -->
+            <div class="kpi-label">Outstanding Balance (Approved)</div>
             <div class="kpi-value">₦<%= stats.loans.outstandingBalance.toLocaleString() %></div>
             <div class="kpi-sub <%= stats.loans.overdueCount > 0 ? 'down' : 'neutral' %>">
                 <i class="fas fa-<%= stats.loans.overdueCount > 0 ? 'exclamation-triangle' : 'check-circle' %>"></i>

@@ -170,7 +170,7 @@ router.post("/deposit/cooperative", async (req, res) => {
       return res.status(400).json({ success: false, message: "Payer name is required." });
     }
 
-    const reference = `COOP-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+    const reference = `DEPOSIT-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
     await Payment.create({
       user: user._id,

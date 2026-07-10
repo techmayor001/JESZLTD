@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const multer = require("multer");
+const path = require("path");
 
 const Admin = require("../models/Admin");
 const User = require("../models/User");
@@ -118,8 +119,6 @@ function ensureAdmin(requiredPermission = null) {
 }
 
 // ENDS HERE 
-
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function timeAgo(date) {
     const s = Math.floor((Date.now() - new Date(date)) / 1000);
@@ -192,7 +191,6 @@ function parseDateRange(query) {
 }
 
 
-
 const { PutObjectCommand } = require('@aws-sdk/client-s3');
 const { v4: uuidv4 } = require('uuid');
 const { r2, R2_BUCKET, R2_PUBLIC_BASE, deleteR2Object } = require('../config/r2');
@@ -235,6 +233,78 @@ async function uploadToR2(file, folder = 'kyc') {
 
  
 // ── Route ────────────────────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function timeAgo(date) {
+    const s = Math.floor((Date.now() - new Date(date)) / 1000);
+    if (s < 60)    return `${s}s ago`;
+    if (s < 3600)  return `${Math.floor(s / 60)}m ago`;
+    if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+    return `${Math.floor(s / 86400)}d ago`;
+}
+
+function greeting() {
+    const h = new Date().getHours();
+    if (h < 12) return "morning";
+    if (h < 17) return "afternoon";
+    return "evening";
+}
+
+function parseDateRange(query) {
+    const { from, to, period } = query;
+    const now      = new Date();
+    const todayEnd = new Date(now); todayEnd.setHours(23, 59, 59, 999);
+    const fmtLabel = d => d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+    if (period && period !== "all") {
+        let start;
+        let label;
+        switch (period) {
+            case "today":
+                start = new Date(now); start.setHours(0, 0, 0, 0);
+                label = "Today";
+                break;
+            case "7d":
+                start = new Date(now); start.setDate(start.getDate() - 6); start.setHours(0,0,0,0);
+                label = "Last 7 Days";
+                break;
+            case "30d":
+                start = new Date(now); start.setDate(start.getDate() - 29); start.setHours(0,0,0,0);
+                label = "Last 30 Days";
+                break;
+            case "this_month":
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                label = now.toLocaleString("en-US", { month: "long", year: "numeric" });
+                break;
+            case "last_month": {
+                const s = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                const e = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+                return { dateFilter: { $gte: s, $lte: e }, fromDate: s, toDate: e,
+                         periodLabel: s.toLocaleString("en-US", { month: "long", year: "numeric" }) };
+            }
+            case "this_year":
+                start = new Date(now.getFullYear(), 0, 1);
+                label = `Year ${now.getFullYear()}`;
+                break;
+            default:
+                return { dateFilter: {}, fromDate: null, toDate: null, periodLabel: "All Time" };
+        }
+        return { dateFilter: { $gte: start, $lte: todayEnd }, fromDate: start, toDate: todayEnd, periodLabel: label };
+    }
+
+    if (from || to) {
+        const fd = from ? new Date(from + "T00:00:00.000Z") : new Date(0);
+        const td = to   ? new Date(to   + "T23:59:59.999Z") : todayEnd;
+        return {
+            dateFilter: { $gte: fd, $lte: td },
+            fromDate: fd, toDate: td,
+            periodLabel: `${fmtLabel(fd)} – ${fmtLabel(td)}`,
+        };
+    }
+
+    return { dateFilter: {}, fromDate: null, toDate: null, periodLabel: "All Time" };
+}
+
+// ── Route ────────────────────────────────────────────────────────────────────
 router.get(
     "/admin/dashboard",
     ensureAdmin("view_dashboard"),
@@ -255,7 +325,7 @@ router.get(
                 ]);
 
             // ── 2. ACCOUNT BALANCES (always live — not date-filtered) ─────────
-            const [memberBalAgg, kiddiesBalAgg] = await Promise.all([
+            const [memberBalAgg, kiddiesBalAgg, memberRoiAgg] = await Promise.all([
                 Account.aggregate([
                     { $match: { ownerType: "User" } },
                     { $group: { _id: null, total: { $sum: "$balance" } } },
@@ -264,11 +334,25 @@ router.get(
                     { $match: { ownerType: "KiddiesAccount" } },
                     { $group: { _id: null, total: { $sum: "$balance" } } },
                 ]),
+                // Members ROI: sum of accumulativeROI across all User-owned accounts.
+                // This is the same field the loan-approval route writes to
+                // (accountDoc.accumulativeROI) each time ROI is distributed, and
+                // it's the same field the per-user dashboard uses to build
+                // totalBalance (memberSavings + accumulativeROI). Scoped to
+                // ownerType "User" only, to match totalMemberBalance above —
+                // kiddies ROI is excluded here since kiddiesBalance is also
+                // tracked separately.
+                Account.aggregate([
+                    { $match: { ownerType: "User" } },
+                    { $group: { _id: null, total: { $sum: "$accumulativeROI" } } },
+                ]),
             ]);
             const totalMemberBalance = memberBalAgg[0]?.total  || 0;
             const kiddiesBalance     = kiddiesBalAgg[0]?.total || 0;
+            const membersROI         = memberRoiAgg[0]?.total  || 0;
 
             // ── 3. DEPOSITS ───────────────────────────────────────────────────
+            // "Approved" deposits = successfully completed payments (paid/success).
             const depositMatch = {
                 paymentType: { $exists: false },
                 status:      { $in: ["paid", "success"] },
@@ -283,7 +367,7 @@ router.get(
                 ]),
                 Payment.countDocuments(depositMatch),
             ]);
-            const totalDeposits    = depositAgg[0]?.total || 0;
+            const totalDeposits    = depositAgg[0]?.total || 0; // kept for period tx count / breakdowns
             const depositsInPeriod = depositCountPeriod;
 
             // ── 4. WITHDRAWALS ────────────────────────────────────────────────
@@ -324,9 +408,25 @@ router.get(
                 Loan.find({}).lean(),
             ]);
 
-            const totalLoansDisbursed = loansInPeriod.reduce((s, l) => s + (l.amount || 0), 0);
+            // "Loans Disbursed" = loans that were actually paid out to the member,
+            // which includes both loans still being repaid ("approved") and loans
+            // that have since been fully repaid ("paid"). Fixed: this used to only
+            // count "approved", which under-reported anything that had since been
+            // paid off in full.
+            const DISBURSED_STATUSES = ["approved", "paid"];
+
+            const disbursedLoansInPeriod = loansInPeriod.filter(l => DISBURSED_STATUSES.includes(l.status));
+            const disbursedLoansLive     = allLoansLive.filter(l => DISBURSED_STATUSES.includes(l.status));
+
+            // Outstanding balance stays scoped to loans still open ("approved") —
+            // fully "paid" loans have no remaining balance by definition, so
+            // including them here wouldn't change the total, but we keep the
+            // filter explicit and separate from the disbursed figure above.
+            const approvedLoansLive = allLoansLive.filter(l => l.status === "approved");
+
+            const totalLoansDisbursed = disbursedLoansInPeriod.reduce((s, l) => s + (l.amount || 0), 0);
             const totalLoansRepaid    = allLoansLive.reduce((s, l) => s + (l.paidAmount || 0), 0);
-            const outstandingBalance  = allLoansLive.reduce((s, l) => {
+            const outstandingBalance  = approvedLoansLive.reduce((s, l) => {
                 const b = (l.totalRepay || l.amount || 0) - (l.paidAmount || 0);
                 return s + Math.max(b, 0);
             }, 0);
@@ -485,7 +585,8 @@ router.get(
             res.render("dashboard/admin/overview", {
                 admin:          req.user,
                 timeGreeting:   greeting(),
-                totalPortfolio: totalMemberBalance + kiddiesBalance + outstandingBalance,
+                // Portfolio = total members balance only (per accuracy update)
+                totalPortfolio: totalMemberBalance,
                 periodLabel,
                 filterValues: {
                     period: req.query.period || "",
@@ -503,11 +604,16 @@ router.get(
                     finance: {
                         totalMemberBalance,
                         kiddiesBalance,
+                        membersROI,                                   // TODO: real source pending
+                        balancePlusROI: totalMemberBalance + membersROI,
                         totalDeposits,
                         depositsInPeriod,
                         totalWithdrawals,
                         withdrawalsInPeriod,
-                        netPosition:             totalDeposits - totalWithdrawals,
+                        // Net Position = current member balances - total withdrawals
+                        // (fixed: was previously totalDeposits - totalWithdrawals,
+                        // which didn't reflect what members currently hold)
+                        netPosition:             totalMemberBalance - totalWithdrawals,
                         pendingWithdrawalsAmount,
                         companyRevenue,
                         revenueBreakdown,
@@ -516,7 +622,7 @@ router.get(
                         finalExtraCharges,
                     },
                     loans: {
-                        totalCount:        loansInPeriod.length,
+                        totalCount:        disbursedLoansInPeriod.length,
                         totalDisbursed:    totalLoansDisbursed,
                         totalRepaid:       totalLoansRepaid,
                         outstandingBalance,
@@ -553,9 +659,73 @@ router.get(
     }
 );
 
-
-
 // HANDLING MEMBERS ONBOARDING, MEMBER TYPES MANAGEMENT - TECHMAYOR COMPANY LIMITED
+
+async function sendWelcomeEmail({ email, firstName, membershipID, memberTypeName, dashboardUrl, whatsappGroupUrl }) {
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": process.env.BREVO_API_KEY,
+    },
+    body: JSON.stringify({
+      sender: {
+        name: process.env.BREVO_SENDER_NAME || "Club De Stars Cooperative",
+        email: process.env.BREVO_SENDER_EMAIL,
+      },
+      to: [{ email }],
+      subject: `🎉 Welcome to Club De Stars — Your Membership is Approved!`,
+      htmlContent: `
+        <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#f8fafc;">
+          <div style="background:linear-gradient(135deg,#15803d,#22c55e);border-radius:16px;padding:28px;text-align:center;">
+            <h1 style="color:#fff;font-size:20px;margin:0;">CLUB DE STARS</h1>
+            <p style="color:#dcfce7;font-size:12px;margin:4px 0 0;">Multipurpose Cooperative Society Ltd</p>
+          </div>
+          <div style="background:#fff;border-radius:16px;padding:28px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <h2 style="color:#111827;font-size:18px;margin:0 0 12px;">
+              🎉 Welcome, ${firstName || "there"}!
+            </h2>
+            <p style="color:#4b5563;font-size:14px;line-height:1.6;">
+              Congratulations — your registration with Club De Stars Cooperative has been approved. You're now officially a member and can start enjoying all member benefits.
+            </p>
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:18px;margin:20px 0;">
+              <table style="width:100%;font-size:13px;color:#374151;border-collapse:collapse;">
+                <tr><td style="padding:4px 0;">Membership ID</td><td style="text-align:right;font-weight:700;color:#15803d;">${membershipID || 'N/A'}</td></tr>
+                <tr><td style="padding:4px 0;">Membership Type</td><td style="text-align:right;font-weight:700;">${memberTypeName || 'N/A'}</td></tr>
+                <tr><td style="padding:4px 0;">Status</td><td style="text-align:right;font-weight:700;color:#15803d;">Active</td></tr>
+              </table>
+            </div>
+            <p style="color:#4b5563;font-size:14px;line-height:1.6;">
+              Log in to your dashboard to view your account, track savings, and manage your membership.
+            </p>
+            <div style="text-align:center;margin:24px 0;">
+              <a href="${dashboardUrl}" style="display:inline-block;background:#15803d;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 28px;border-radius:8px;">
+                Go to Dashboard
+              </a>
+            </div>
+            ${whatsappGroupUrl ? `
+            <div style="background:#f0fdf4;border:1px dashed #86efac;border-radius:10px;padding:16px;text-align:center;margin-top:12px;">
+              <p style="color:#374151;font-size:13px;margin:0 0 10px;">Stay updated — join our official members' WhatsApp group:</p>
+              <a href="${whatsappGroupUrl}" style="display:inline-block;background:#25D366;color:#fff;text-decoration:none;font-weight:700;font-size:13px;padding:10px 22px;border-radius:8px;">
+                Join WhatsApp Group
+              </a>
+            </div>
+            ` : ''}
+          </div>
+          <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:16px;">
+            Club De Stars Multipurpose Cooperative Society Ltd · Powered by JESZ LTD
+          </p>
+        </div>
+      `,
+    }),
+  });
+
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`Brevo send failed: ${res.status} ${errBody}`);
+  }
+}
+
 router.get(
   '/admin/manage-members',
   ensureAdmin("view_members"),
@@ -802,6 +972,20 @@ router.post(
         await account.save();
       }
 
+      // ── 7. Send welcome email (non-blocking failure) ───────────────────────
+      try {
+        await sendWelcomeEmail({
+          email:            user.email,
+          firstName:        user.firstName,
+          membershipID:     newMembershipID,
+          memberTypeName:   type.name,
+          dashboardUrl:     process.env.DASHBOARD_URL || "https://yourapp.com/login",
+          whatsappGroupUrl: "https://chat.whatsapp.com/DQmJT4G3D2F165uibkunjr",
+        });
+      } catch (mailErr) {
+        console.error("Welcome email failed to send:", mailErr);
+      }
+
       console.log(
         `[APPROVE MEMBER] ${user._id} | ${oldMembershipID} → ${newMembershipID} | ${type.name} | registrationStatus: ${user.registrationStatus}`
       );
@@ -1045,6 +1229,93 @@ router.post(
     }
   }
 );
+
+
+// ─────────────────────────────────────────────
+// Deactivate an active member
+// ─────────────────────────────────────────────
+router.post(
+  "/admin/members/deactivate/:id",
+  ensureAdmin("edit_members"), // adjust to a dedicated permission if you have one, e.g. "manage_member_status"
+  async (req, res) => {
+    try {
+      const memberId = req.params.id;
+
+      const user = await User.findById(memberId);
+      if (!user) {
+        return res.status(404).json({ status: false, message: "Member not found" });
+      }
+
+      if (!["active", "suspended"].includes(user.status)) {
+        return res.status(400).json({
+          status: false,
+          message: `Cannot deactivate a member with status "${user.status}".`,
+        });
+      }
+
+      user.status = "deactivated";
+      await user.save();
+
+      return res.json({
+        status: true,
+        message: "Member has been deactivated successfully.",
+        newStatus: user.status,
+      });
+    } catch (err) {
+      console.error("Error deactivating member:", err);
+      res.status(500).json({ status: false, message: "Error deactivating member" });
+    }
+  }
+);
+
+// ─────────────────────────────────────────────
+// Reactivate a deactivated/suspended member
+// ─────────────────────────────────────────────
+router.post(
+  "/admin/members/activate/:id",
+  ensureAdmin("edit_members"), // adjust to a dedicated permission if you have one
+  async (req, res) => {
+    try {
+      const memberId = req.params.id;
+
+      const user = await User.findById(memberId);
+      if (!user) {
+        return res.status(404).json({ status: false, message: "Member not found" });
+      }
+
+      if (!["deactivated", "suspended"].includes(user.status)) {
+        return res.status(400).json({
+          status: false,
+          message:
+            user.status === "pending"
+              ? "This member is still pending approval. Use the approve action instead."
+              : `Cannot activate a member with status "${user.status}".`,
+        });
+      }
+
+      user.status = "active";
+      await user.save();
+
+      return res.json({
+        status: true,
+        message: "Member has been activated successfully.",
+        newStatus: user.status,
+      });
+    } catch (err) {
+      console.error("Error activating member:", err);
+      res.status(500).json({ status: false, message: "Error activating member" });
+    }
+  }
+);
+
+
+
+
+
+
+
+
+
 
 // POST /admin/members/change-type/:id
 router.post('/admin/members/change-type/:id', ensureAdmin('edit_members'), async (req, res) => {
@@ -1413,66 +1684,12 @@ router.get("/api/memberType/byCode/:shortCode", async (req, res) => {
 
 // HANDLING PAYMENTS MANAGEMENT -------------- TECHMAYOR COMPANY LIMITED 
 
-
-function resolveDateRange(query) {
-  const { range = "all", from, to } = query;
-  const now = new Date();
-
-  const startOfDay = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
-  const endOfDay   = (d) => { const x = new Date(d); x.setHours(23, 59, 59, 999); return x; };
-
-  let start = null, end = null;
-
-  switch (range) {
-    case "today":
-      start = startOfDay(now); end = endOfDay(now);
-      break;
-    case "yesterday": {
-      const y = new Date(now); y.setDate(y.getDate() - 1);
-      start = startOfDay(y); end = endOfDay(y);
-      break;
-    }
-    case "7days":
-      start = startOfDay(new Date(now.getTime() - 6 * 86400000));
-      end   = endOfDay(now);
-      break;
-    case "thismonth":
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-      end   = endOfDay(now);
-      break;
-    case "lastmonth": {
-      const firstOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      end   = new Date(firstOfThisMonth.getTime() - 1);
-      start = new Date(end.getFullYear(), end.getMonth(), 1);
-      break;
-    }
-    case "custom":
-      if (from) start = startOfDay(new Date(from));
-      if (to)   end   = endOfDay(new Date(to));
-      break;
-    case "all":
-    default:
-      return null;
-  }
-
-  if (!start || !end) return null;
-  return { $gte: start, $lte: end };
-}
-
-
-// ═══════════════════════════════════════════════════════════════
-//  UNIFIED PAYMENT PAGE — replaces manage-payment + manage-deposits
-// ═══════════════════════════════════════════════════════════════
 router.get(
   "/admin/manage-payment",
   ensureAdmin("view_transactions"),
   async (req, res) => {
     try {
-      const dateFilter = resolveDateRange(req.query);
-      const dateMatch   = dateFilter ? { createdAt: dateFilter } : {};
-
-      /* ── 1. Approval-workflow transactions (deposit/withdrawal/loan-repay/direct-debit/reversal) ── */
-      const adminPayments = await AdminPayment.find(dateMatch)
+      const adminPayments = await AdminPayment.find()
         .populate({ path: "admin", select: "firstName lastName email membershipID" })
         .populate({
           path: "member",
@@ -1480,7 +1697,11 @@ router.get(
           populate: {
             path: "account",
             select: "accountType balance",
-            populate: { path: "accountType", model: "MemberType", select: "name" },
+            populate: {
+              path: "accountType",
+              model: "MemberType",
+              select: "name",
+            },
           },
         })
         .populate({
@@ -1491,87 +1712,49 @@ router.get(
             { path: "parent", select: "firstName lastName email phone membershipID" },
           ],
         })
-        .populate({ path: "loan", select: "amount balance duration", populate: { path: "duration", model: "LoanSettings" } })
-        .populate({ path: "reversalTransaction", select: "reference status createdAt" })
+        .populate({
+          path: "loan",
+          select: "amount balance duration",
+          populate: { path: "duration", model: "LoanSettings" },
+        })
         .sort({ createdAt: -1 });
 
-      const adminPaymentIds = adminPayments.map((p) => p._id);
+      // ── Pull approval data from TransactionApproval using adminPayment ref ──
+      const adminPaymentIds = adminPayments.map(p => p._id);
 
       const approvalRecords = await TransactionApproval.find({
         adminPayment: { $in: adminPaymentIds },
       })
         .populate({ path: "selectedApprovers", select: "firstName lastName email" })
-        .populate({ path: "approvals.user", select: "firstName lastName" })
-        .select("adminPayment selectedApprovers approvals finalizedAt action");
+        .populate({ path: "approvals.user",    select: "firstName lastName" })
+        .select("adminPayment selectedApprovers approvals finalizedAt");
 
+      // Build a map: adminPaymentId → approvalRecord
       const approvalMap = {};
-      approvalRecords.forEach((rec) => {
-        if (rec.adminPayment) approvalMap[rec.adminPayment.toString()] = rec;
+      approvalRecords.forEach(rec => {
+        if (rec.adminPayment) {
+          approvalMap[rec.adminPayment.toString()] = rec;
+        }
       });
 
-      const workflowTxns = adminPayments.map((payment) => {
+      // Attach approval data to each adminPayment as a plain property
+      const paymentsWithApprovers = adminPayments.map(payment => {
         const plain    = payment.toObject();
         const approval = approvalMap[payment._id.toString()];
-        plain.selectedApprovers = approval?.selectedApprovers || [];
-        plain.approvals         = approval?.approvals || [];
-        plain.finalizedAt       = approval?.finalizedAt || null;
-        plain.source            = "workflow";
+        if (approval) {
+          plain.selectedApprovers = approval.selectedApprovers || [];
+          plain.approvals         = approval.approvals         || [];
+          plain.finalizedAt       = approval.finalizedAt       || null;
+        } else {
+          plain.selectedApprovers = [];
+          plain.approvals         = [];
+          plain.finalizedAt       = null;
+        }
         return plain;
       });
 
-      /* ── 2. Self-service deposits: manual + Paystack, from the OLD deposits page ──
-         Excludes "APPR-" refs because those are already represented above
-         (finalizeTransaction() creates a mirror Payment record on approval). */
-      const selfServicePayments = await Payment.find({
-        ...dateMatch,
-        reference: { $not: /^APPR-/ },
-      })
-        .populate({
-          path: "user",
-          select: "firstName lastName membershipID email account",
-          populate: { path: "account", select: "balance" },
-        })
-        .sort({ createdAt: -1 });
-
-      const MANUAL_PREFIXES = [
-        "COOP-", "LOAN-MANUAL-", "LOAN-INT-", "EXT-LOAN-",
-        "MANUAL-REG-", "KD-NEW-", "KD-REG-MANUAL-", "SUPERADMIN-",
-      ];
-
-      const selfServiceTxns = selfServicePayments.map((p) => {
-        const isManual = MANUAL_PREFIXES.some((pre) => p.reference.startsWith(pre))
-          || p.method === "Manual" || p.method === "Cash";
-
-        return {
-          _id:            p._id,
-          createdAt:      p.createdAt,
-          source:         "self-service",
-          paymentType:    p.type || p.paymentType || "deposit",
-          amount:         p.amount,
-          chargeAmount:   0,
-          totalAmount:    p.amount,
-          reference:      p.reference,
-          paymentMethod:  isManual ? (p.method || "manual") : "paystack",
-          status:         p.status === "paid" || p.status === "success" ? "successful"
-                         : p.status === "failed" ? "rejected" : "pending",
-          notes:          p.paystackResponse?.adminNote || p.paystackResponse?.message || "Member-initiated deposit",
-          member:         p.user || null,
-          kiddiesMember:  null,
-          memberType:     "member",
-          balanceBefore:  null,
-          balanceAfter:   p.user?.account?.balance ?? null,
-          isReversed:     false,
-          selectedApprovers: [],
-          approvals:      [],
-          finalizedAt:    null,
-        };
-      });
-
-      /* ── 3. Merge + sort newest first ── */
-      const allTxns = [...workflowTxns, ...selfServiceTxns]
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
       const memberRole = await Role.findOne({ name: /^member$/i }).select("_id");
+
       const availableApprovers = await User.find({
         role:   { $ne: memberRole?._id },
         status: "active",
@@ -1581,282 +1764,16 @@ router.get(
         .select("firstName lastName email membershipID role");
 
       res.render("dashboard/admin/payment", {
-        admin:          req.user,
-        adminPayments:  allTxns,
+        admin:        req.user,
+        adminPayments: paymentsWithApprovers,  // now includes selectedApprovers + approvals
         availableApprovers,
-        currentRange:   req.query.range || "all",
-        currentFrom:    req.query.from  || "",
-        currentTo:      req.query.to    || "",
       });
     } catch (error) {
-      console.error("Error fetching payments:", error);
+      console.error("Error fetching admin direct payments:", error);
       res.status(500).send("Internal Server Error");
     }
   }
 );
-
-// Retire the standalone deposits page — everything now lives on /admin/manage-payment
-router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), (req, res) => {
-  res.redirect(301, "/admin/manage-payment");
-});
-
-
-
-
-// ═══════════════════════════════════════════════════════════════
-//  TRANSACTION REVERSAL — mirrors the submit-for-approval flow
-// ═══════════════════════════════════════════════════════════════
-router.post(
-  "/admin/reverse-transaction/:adminPaymentId",
-  ensureAdmin("authorize_transactions"),
-  async (req, res) => {
-    try {
-      const { adminPaymentId } = req.params;
-      const { selectedApprovers, notes } = req.body;
-
-      if (!selectedApprovers || !Array.isArray(selectedApprovers) || selectedApprovers.length < 3) {
-        return res.status(400).json({ success: false, message: "You must select at least 3 approvers" });
-      }
-      if (!notes || !notes.trim()) {
-        return res.status(400).json({ success: false, message: "A reason for the reversal is required" });
-      }
-
-      const original = await AdminPayment.findById(adminPaymentId);
-      if (!original) {
-        return res.status(404).json({ success: false, message: "Original transaction not found" });
-      }
-      if (original.status !== "successful") {
-        return res.status(400).json({ success: false, message: "Only successful transactions can be reversed" });
-      }
-      if (original.isReversed) {
-        return res.status(400).json({ success: false, message: "This transaction has already been reversed" });
-      }
-      if (original.paymentType === "loan-repayment") {
-        return res.status(400).json({
-          success: false,
-          message: "Loan repayment reversals must be processed via Loan Management (loan balance needs restoring too).",
-        });
-      }
-
-      const memberRole    = await Role.findOne({ name: /^member$/i }).select("_id");
-      const approverUsers = await User.find({ _id: { $in: selectedApprovers } }).populate("role", "name");
-      const invalidApprovers = approverUsers.filter(
-        (u) => u.role?._id?.toString() === memberRole?._id?.toString()
-      );
-      if (invalidApprovers.length > 0) {
-        return res.status(400).json({ success: false, message: "Selected approvers must have non-member roles" });
-      }
-
-      const approval = await TransactionApproval.create({
-        initiatedBy:       req.user._id,
-        member:            original.member       || undefined,
-        kiddiesMember:     original.kiddiesMember || undefined,
-        memberType:        original.memberType,
-        paymentType:       original.paymentType,
-        amount:            original.amount,
-        chargeAmount:      original.chargeAmount || 0,
-        totalAmount:       original.totalAmount,
-        paymentMethod:     original.paymentMethod,
-        reference:         `REV-${original.reference}-${Date.now()}`,
-        notes:             notes.trim(),
-        loan:              original.loan || null,
-        chargeType:        original.chargeType || null,
-        selectedApprovers,
-        status:            "pending",
-        approvalsRequired: 3,
-        approvalCount:      0,
-        action:             "reversal",
-        reversalTarget:      original._id,
-      });
-
-      res.json({ success: true, message: "Reversal submitted for approval.", approvalId: approval._id });
-    } catch (err) {
-      console.error("Reverse transaction error:", err);
-      res.status(500).json({ success: false, message: "Failed to submit reversal for approval" });
-    }
-  }
-);
-
-
-// ═══════════════════════════════════════════════════════════════
-//  APPROVE / DECLINE — branch to reversal finalizer when needed
-// ═══════════════════════════════════════════════════════════════
-router.post(
-  "/admin/approve-transaction/:approvalId",
-  ensureAdmin("authorize_transactions"),
-  async (req, res) => {
-    try {
-      const { approvalId } = req.params;
-      const { comment }    = req.body;
-      const userId         = req.user._id;
-
-      const approval = await TransactionApproval.findById(approvalId);
-      if (!approval) return res.status(404).json({ message: "Approval request not found" });
-      if (approval.status !== "pending") {
-        return res.status(400).json({ message: `Transaction is already ${approval.status}` });
-      }
-
-      const isSelected = approval.selectedApprovers.map((id) => id.toString()).includes(userId.toString());
-      if (!isSelected) return res.status(403).json({ message: "You are not authorised to approve this transaction" });
-
-      const alreadyVoted = approval.approvals.some((a) => a.user.toString() === userId.toString());
-      if (alreadyVoted) return res.status(400).json({ message: "You have already responded to this transaction" });
-
-      approval.approvals.push({ user: userId, action: "approved", comment: comment || "", respondedAt: new Date() });
-      approval.approvalCount = approval.approvals.filter((a) => a.action === "approved").length;
-
-      if (approval.approvalCount >= approval.approvalsRequired) {
-        approval.status = "approved";
-        await approval.save();
-
-        const result = approval.action === "reversal"
-          ? await finalizeReversal(approval, req.user)
-          : await finalizeTransaction(approval, req.user);
-
-        if (!result.success) {
-          approval.status = "pending";
-          await approval.save();
-          return res.status(400).json({ message: result.message });
-        }
-
-        return res.json({ success: true, message: `Transaction ${approval.action === "reversal" ? "reversed" : "approved"} and processed successfully!`, finalized: true, transaction: result.transaction });
-      }
-
-      await approval.save();
-      const remaining = approval.approvalsRequired - approval.approvalCount;
-      return res.json({ success: true, message: `Approval recorded. ${remaining} more approval(s) needed.`, finalized: false, approvalCount: approval.approvalCount, approvalsRequired: approval.approvalsRequired });
-    } catch (err) {
-      console.error("Approve transaction error:", err);
-      res.status(500).json({ message: "Failed to process approval" });
-    }
-  }
-);
-
-
-// ═══════════════════════════════════════════════════════════════
-//  FINALIZE REVERSAL — inverts the original balance effect
-// ═══════════════════════════════════════════════════════════════
-async function finalizeReversal(approval, processingUser) {
-  try {
-    const original = await AdminPayment.findById(approval.reversalTarget);
-    if (!original) return { success: false, message: "Original transaction no longer exists" };
-    if (original.isReversed) return { success: false, message: "Transaction was already reversed" };
-
-    const isKiddies = original.memberType === "kiddies";
-    let account, memberRef, memberDisplay = {};
-
-    if (isKiddies) {
-      const kiddiesDoc = await KiddiesAccount.findById(original.kiddiesMember)
-        .populate("account")
-        .populate("parent", "firstName lastName email phone membershipID");
-      if (!kiddiesDoc || !kiddiesDoc.account) return { success: false, message: "Kiddies account not found" };
-      account = kiddiesDoc.account; memberRef = kiddiesDoc;
-      memberDisplay = {
-        name: `${kiddiesDoc.childFirstName} ${kiddiesDoc.childLastName}`,
-        membershipID: kiddiesDoc.accountID || "N/A",
-        email: kiddiesDoc.parent?.email || "N/A",
-        phone: kiddiesDoc.parent?.phone || "N/A",
-      };
-    } else {
-      const member = await User.findById(original.member).populate("account");
-      if (!member || !member.account) return { success: false, message: "Member account not found" };
-      account = member.account; memberRef = member;
-      memberDisplay = { name: `${member.firstName} ${member.lastName}`, membershipID: member.membershipID, email: member.email, phone: member.phone };
-    }
-
-    const balanceBefore = account.balance;
-    let   balanceAfter  = balanceBefore;
-    const totalAmount   = original.totalAmount;
-
-    /* ── Invert the original effect ── */
-    switch (original.paymentType) {
-      case "deposit":
-        if (balanceBefore < totalAmount) return { success: false, message: "Insufficient balance to reverse this deposit" };
-        balanceAfter -= totalAmount;
-        break;
-      case "withdrawal":
-      case "direct-debit":
-        balanceAfter += totalAmount;
-        break;
-      default:
-        return { success: false, message: "Unsupported payment type for reversal" };
-    }
-
-    account.balance = balanceAfter;
-    await account.save();
-
-    const reversalPayment = await AdminPayment.create({
-      admin:         approval.initiatedBy,
-      member:        isKiddies ? undefined : memberRef._id,
-      kiddiesMember: isKiddies ? memberRef._id : undefined,
-      memberType:    original.memberType,
-      paymentType:   original.paymentType,
-      amount:        original.amount,
-      chargeAmount:  original.chargeAmount,
-      totalAmount:   original.totalAmount,
-      paymentMethod: original.paymentMethod,
-      reference:     approval.reference,
-      notes:         approval.notes,
-      balanceBefore,
-      balanceAfter,
-      status:        "successful",
-      isReversalOf:  original._id,
-    });
-
-    original.isReversed          = true;
-    original.reversalTransaction = reversalPayment._id;
-    await original.save();
-
-    const ledgerTypeMap      = { deposit: "deposit_reversal", withdrawal: "withdrawal_reversal", "direct-debit": "direct_debit_reversal" };
-    const ledgerDirectionMap = { deposit: "out", withdrawal: "in", "direct-debit": "in" };
-
-    await CompanyLedger.create({
-      type:      ledgerTypeMap[original.paymentType] || "reversal",
-      direction: ledgerDirectionMap[original.paymentType] || "in",
-      amount:    totalAmount,
-      relatedUser: isKiddies ? (memberRef.parent?._id || memberRef.parent) : memberRef._id,
-      description: `Reversal of ${original.paymentType.replace(/-/g, " ")} — ${memberDisplay.name}${isKiddies ? " [Kiddies]" : ""} (orig ref ${original.reference})`,
-      recordedBy: processingUser?._id,
-      meta: { originalAdminPaymentId: original._id, reversalAdminPaymentId: reversalPayment._id, reference: approval.reference },
-    });
-
-    await AdminActionLog.create({
-      admin: processingUser?._id,
-      adminRole: processingUser?.role?.name || "admin",
-      actionType: "transaction_reversal",
-      targetUser: isKiddies ? undefined : memberRef._id,
-      targetModel: "AdminPayment",
-      targetId: reversalPayment._id,
-      description: `Reversed ${original.paymentType} (orig ref ${original.reference}) for ${memberDisplay.email}`,
-      changes: { amount: totalAmount, balanceBefore, balanceAfter, reference: approval.reference },
-      status: "success",
-    });
-
-    approval.adminPayment = reversalPayment._id;
-    approval.status       = "processed";
-    approval.finalizedAt  = new Date();
-    await approval.save();
-
-    return {
-      success: true,
-      transaction: {
-        id: reversalPayment._id, reference: approval.reference,
-        type: `${original.paymentType}-reversal`, amount: original.amount,
-        totalAmount, balanceBefore, balanceAfter, member: memberDisplay,
-        processedBy: processingUser ? `${processingUser.firstName} ${processingUser.lastName}` : "System",
-      },
-    };
-  } catch (err) {
-    console.error("Finalize reversal error:", err);
-    return { success: false, message: "Reversal finalization failed" };
-  }
-}
-
-
-
-
-
-
 
 
 // ═══════════════════════════════════════════════════════════════
@@ -2679,8 +2596,10 @@ async function finalizeTransaction(approval, processingUser) {
   }
 }
 
+
+
 // DEPOSITS ROUTE STARTS HERE 
-router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, res) => {
+router.get("/admin/manage-deposit", ensureAdmin("view_deposits"), async (req, res) => {
   try {
     const payments = await Payment.find()
       .populate({
@@ -2694,17 +2613,50 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
       .sort({ createdAt: -1 });
 
     const MANUAL_PREFIXES = [
-      "COOP-",
-      "LOAN-MANUAL-",
-      "LOAN-INT-",
-      "EXT-LOAN-",
+      "DEPOSIT-",
       "MANUAL-REG-",
       "KD-NEW-",
       "KD-REG-MANUAL-",
       "SUPERADMIN-",
     ];
 
-    const deposits = payments.map((payment) => {
+    // Loan repayments carry a loanId reference — that's the reliable signal,
+    // not `type` (which is often null on Paystack-initiated records) and not
+    // reference prefixes (raw Paystack refs like "eyokzwpwqa" have no prefix).
+    const LOAN_PREFIXES = ["LOAN-MANUAL-", "LOAN-INT-", "EXT-LOAN-"];
+
+    const filteredPayments = payments.filter((payment) => {
+      // Exclude loans
+      if (payment.loanId) return false;
+
+      const isLoanByPrefix = LOAN_PREFIXES.some((prefix) =>
+        payment.reference.startsWith(prefix)
+      );
+      if (isLoanByPrefix) return false;
+
+      // Determine manual vs Paystack
+      const hasManualPrefix = MANUAL_PREFIXES.some((prefix) =>
+        payment.reference.startsWith(prefix)
+      );
+      const isManual =
+        hasManualPrefix ||
+        payment.method === "Manual" ||
+        payment.method === "Cash";
+
+      // Paystack payments must be successful to count as a deposit —
+      // a failed/abandoned/rejected Paystack transaction never moved money.
+      // Manual entries keep their pending/rejected states since those are
+      // admin-controlled approval states, not payment-gateway outcomes.
+      if (!isManual) {
+        const isSuccessful =
+          payment.status === "paid" || payment.status === "success";
+        if (!isSuccessful) return false;
+      }
+
+      return true;
+    });
+
+    const deposits = filteredPayments.map((payment) => {
       const dateObj = new Date(payment.createdAt);
       const memberFullName = payment.user
         ? `${payment.user.firstName} ${payment.user.lastName}`
@@ -2719,11 +2671,7 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
         payment.method === "Manual" ||
         payment.method === "Cash";
 
-      // Both Paystack and Manual routes store amount in full Naira.
-      // Paystack init saves `depositAmount` (Naira) — not the kobo value
-      // sent to Paystack API. No conversion needed for either method.
       const amount = payment.amount;
-
       const balance = payment.user?.account?.balance || 0;
 
       return {
@@ -2764,7 +2712,7 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
           payment.paystackResponse?.adminNote ||
           payment.paystackResponse?.message ||
           payment.notes ||
-          "Deposit / Loan payment",
+          "Deposit",
       };
     });
 
@@ -2777,7 +2725,7 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const approvedToday = payments.filter((p) => {
+    const approvedToday = filteredPayments.filter((p) => {
       const created = new Date(p.createdAt);
       return (
         (p.status === "paid" || p.status === "success") &&
@@ -2786,7 +2734,7 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
     }).length;
 
     const activeMembers = new Set(
-      payments.filter((p) => p.user).map((p) => p.user._id.toString())
+      filteredPayments.filter((p) => p.user).map((p) => p.user._id.toString())
     ).size;
 
     res.render("dashboard/admin/deposits", {
@@ -2805,7 +2753,6 @@ router.get("/admin/manage-deposits", ensureAdmin("view_deposits"), async (req, r
     res.status(500).send("Internal Server Error");
   }
 });
-
 
 router.post(
   "/admin/deposits/:id/approve",
@@ -4156,9 +4103,16 @@ router.get("/admin/settings", ensureAdmin("manage_settings"), async (req, res) =
   try {
     const settings = await Settings.getSettings();
 
+    // Find the chairman (if any) to show their signature
+    const chairmanRole = await Role.findOne({ name: /^chairman$/i }).select("_id");
+    const chairman = chairmanRole
+      ? await User.findOne({ role: chairmanRole._id }).select("firstName lastName officialSignature")
+      : null;
+
     res.render("dashboard/admin/settings", {
       admin: req.user,
-      settings
+      settings,
+      chairman
     });
   } catch (error) {
     console.error("Error fetching settings:", error);
@@ -4166,6 +4120,59 @@ router.get("/admin/settings", ensureAdmin("manage_settings"), async (req, res) =
   }
 });
 
+
+router.post(
+  "/admin/settings/chairman-signature",
+  ensureAdmin(),
+  upload.single("signature"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: "No file uploaded." });
+      }
+
+      // Only allow users whose role is literally "chairman" to set this
+      const roleName = req.user.role?.name?.toLowerCase();
+      if (roleName !== "chairman") {
+        return res.status(403).json({
+          success: false,
+          message: "Only the chairman can upload the official signature.",
+        });
+      }
+
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found." });
+      }
+
+      const oldUrl = user.officialSignature && user.officialSignature.url;
+
+      const url = await uploadToR2(req.file, "signatures");
+
+      user.officialSignature = {
+        url,
+        updatedAt: new Date(),
+      };
+
+      await user.save();
+
+      // best-effort cleanup of the old file, don't fail the request if it errors
+      if (oldUrl) {
+        try {
+          const oldKey = oldUrl.split(`${process.env.R2_PUBLIC_BASE || ""}/`).pop();
+          if (oldKey) await deleteR2Object(oldKey);
+        } catch (cleanupErr) {
+          console.error("Failed to delete old signature from R2:", cleanupErr);
+        }
+      }
+
+      res.json({ success: true, message: "Chairman signature updated successfully!" });
+    } catch (err) {
+      console.error("Error uploading chairman signature:", err);
+      res.status(500).json({ success: false, message: "Failed to upload signature" });
+    }
+  }
+);
 
 
 
@@ -4309,18 +4316,7 @@ router.post("/admin/settings/maintenance-mode", ensureAdmin("manage_settings"), 
 });
 
 
-// ══════════════════════════════════════════════════════════════════
-// POST /admin/settings/clear-database
-//
-// DANGER: Wipes every collection in the database.
-// Requires:
-//   1. Admin must have manage_settings permission (enforced by ensureAdmin)
-//   2. A secret admin code sent in the request body must match the
-//      value in process.env.ADMIN_CLEAR_CODE
-//
-// The Settings document is preserved and reset to defaults so the
-// application keeps working after the wipe.
-// ══════════════════════════════════════════════════════════════════
+
 router.post("/admin/settings/clear-database", ensureAdmin("manage_settings"), async (req, res) => {
   try {
     const { adminCode } = req.body;
@@ -5579,6 +5575,14 @@ const opPopulateOpts = [
   { path: "recordedBy",  select: "firstName lastName", model: "User" },
 ];
 
+// Fuller population used only for the single-entry "view source" modal —
+// deliberately heavier than the list-page populate so we don't slow the table down.
+const opDetailPopulateOpts = [
+  { path: "relatedUser", select: "firstName lastName membershipID email phoneNumber" },
+  { path: "relatedLoan", select: "_id amount interestRate status createdAt roi" },
+  { path: "recordedBy",  select: "firstName lastName email", model: "User" },
+];
+
 // ── GET /admin/operating-earnings ────────────────────────────────────────────
 
 router.get(
@@ -5701,6 +5705,29 @@ router.get(
   }
 );
 
+// ── GET /admin/operating-earnings/entry/:id ──────────────────────────────────
+//    Powers the "View Source" modal — returns the full picture of where an
+//    entry came from: the member/loan behind an income line, the staff member
+//    behind a salary line, and which admin recorded it.
+router.get(
+  "/admin/operating-earnings/entry/:id",
+  ensureAdmin("view_finance"),
+  async (req, res) => {
+    try {
+      const entry = await OperatingLedger.findById(req.params.id)
+        .populate(opDetailPopulateOpts);
+
+      if (!entry) {
+        return res.status(404).json({ status: false, message: "Entry not found." });
+      }
+
+      return res.json({ status: true, entry });
+    } catch (err) {
+      console.error("Get operating entry detail error:", err);
+      return res.status(500).json({ status: false, message: "Server error. Please try again." });
+    }
+  }
+);
 
 // ── POST /admin/operating-earnings/income ────────────────────────────────────
 router.post(
@@ -5718,7 +5745,7 @@ router.post(
         return res.status(400).json({ status: false, message: "Invalid income type." });
 
       const amt = parseFloat(amount);
-      if (!amt || amt <= 0)
+      if (!amt || amt <= 0 || !isFinite(amt))
         return res.status(400).json({ status: false, message: "Amount must be greater than zero." });
 
       if (!description || !description.trim())
@@ -5730,7 +5757,7 @@ router.post(
       ]);
       const runningBalance = totalIn - totalOut + amt;
 
-      await OperatingLedger.create({
+      const entry = await OperatingLedger.create({
         type,
         direction:      "in",
         amount:         amt,
@@ -5740,7 +5767,11 @@ router.post(
         meta:           {},
       });
 
-      return res.json({ status: true, message: "Income recorded successfully." });
+      return res.json({
+        status: true,
+        message: "Income recorded successfully.",
+        entryId: entry._id,
+      });
     } catch (err) {
       console.error("Add income error:", err);
       return res.status(500).json({ status: false, message: "Server error. Please try again." });
@@ -5764,7 +5795,7 @@ router.post(
         return res.status(400).json({ status: false, message: "Invalid expense type." });
 
       const amt = parseFloat(amount);
-      if (!amt || amt <= 0)
+      if (!amt || amt <= 0 || !isFinite(amt))
         return res.status(400).json({ status: false, message: "Amount must be greater than zero." });
 
       if (!description || !description.trim())
@@ -5787,7 +5818,7 @@ router.post(
       ]);
       const runningBalance = totalIn - totalOut - amt;
 
-      await OperatingLedger.create({
+      const entry = await OperatingLedger.create({
         type,
         direction:      "out",
         amount:         amt,
@@ -5797,12 +5828,15 @@ router.post(
         meta,
       });
 
-      return res.json({ status: true, message: "Expense recorded successfully." });
+      return res.json({
+        status: true,
+        message: "Expense recorded successfully.",
+        entryId: entry._id,
+      });
     } catch (err) {
       console.error("Record expense error:", err);
       return res.status(500).json({ status: false, message: "Server error. Please try again." });
     }
   }
 );
-
 module.exports = router;

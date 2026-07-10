@@ -273,7 +273,7 @@
             <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
             <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
             <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
-            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/manage-deposit"><i class="fas fa-coins"></i>Deposits</a>
             <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
             <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
         </div>
@@ -371,6 +371,8 @@
                         <option value="pending">Pending</option>
                         <option value="rejected">Rejected</option>
                         <option value="locked">Locked (Kiddies)</option>
+                        <option value="deactivated">Deactivated</option>
+                        <option value="suspended">Suspended</option>
                     </select>
                 </div>
                 <div class="col-lg-2 col-md-6">
@@ -474,6 +476,7 @@
                                 <button class="btn btn-primary btn-sm" id="editMemberBtn"><i class="fas fa-edit me-2"></i>Edit Member</button>
                                 <button class="btn btn-sm fw-semibold text-white" id="changeTypeBtnView" style="background:linear-gradient(135deg,#312e81 0%,#6366f1 100%);border:none;"><i class="fas fa-exchange-alt me-2"></i>Change Member Type</button>
                                 <button class="btn btn-sm fw-semibold text-white" id="printMouBtnView" style="background:linear-gradient(135deg,#0f1e4a 0%,#1e3a8a 100%);border:none;"><i class="fas fa-file-contract me-2"></i>Print MOU</button>
+                                <button class="btn btn-sm" id="statusToggleBtnView" style="display:none;"></button>
                                 <button class="btn btn-danger btn-sm" id="deleteMemberBtn"><i class="fas fa-trash me-2"></i>Delete Member</button>
                             </div>
                         </div>
@@ -832,15 +835,26 @@
         pageData.forEach(member => {
             const row = document.createElement('tr');
             if (member.entityType === 'kiddies') row.classList.add('kiddies-row');
-            const statusColors = { active:'<span class="badge bg-success">Active</span>', pending:'<span class="badge bg-warning">Pending</span>', rejected:'<span class="badge bg-danger">Rejected</span>', locked:'<span class="badge" style="background:rgba(236,72,153,.15);color:#db2777;border:1px solid rgba(236,72,153,.3);">Locked</span>', closed:'<span class="badge bg-secondary">Closed</span>' };
+            const statusColors = {
+                active:      '<span class="badge bg-success">Active</span>',
+                pending:     '<span class="badge bg-warning">Pending</span>',
+                rejected:    '<span class="badge bg-danger">Rejected</span>',
+                locked:      '<span class="badge" style="background:rgba(236,72,153,.15);color:#db2777;border:1px solid rgba(236,72,153,.3);">Locked</span>',
+                closed:      '<span class="badge bg-secondary">Closed</span>',
+                deactivated: '<span class="badge" style="background:rgba(107,114,128,.15);color:#4b5563;border:1px solid rgba(107,114,128,.3);">Deactivated</span>',
+                suspended:   '<span class="badge" style="background:rgba(217,119,6,.15);color:#92400e;border:1px solid rgba(217,119,6,.3);">Suspended</span>',
+            };            
             const statusBadge = statusColors[member.status] || '<span class="badge bg-secondary">Unknown</span>';
+            
             let actionButtons;
             if (member.entityType === 'kiddies') {
                 actionButtons = `<button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button><a class="action-btn btn btn-sm" href="/admin/kiddies-accounts" title="Manage Kiddies" style="background:linear-gradient(135deg,#ec4899,#db2777);color:white;"><i class="fas fa-baby"></i></a>`;
             } else if (member.status === 'pending') {
                 actionButtons = `<button class="action-btn btn btn-sm btn-success" onclick="showApprovalModal('${member.id}')" title="Approve"><i class="fas fa-check"></i></button><button class="action-btn btn btn-sm btn-danger" onclick="rejectMember('${member.id}')" title="Reject"><i class="fas fa-times"></i></button><button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button><button class="action-btn btn btn-sm text-white" onclick="openChangeTypeModal('${member.id}')" title="Change Type" style="background:linear-gradient(135deg,#312e81,#6366f1);"><i class="fas fa-exchange-alt"></i></button>`;
+            } else if (member.status === 'deactivated' || member.status === 'suspended') {
+                actionButtons = `<button class="action-btn btn btn-sm btn-success" onclick="activateMember('${member.id}')" title="Activate"><i class="fas fa-toggle-on"></i></button><button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button><button class="action-btn btn btn-sm btn-warning" onclick="editMember('${member.id}')" title="Edit"><i class="fas fa-edit"></i></button><button class="action-btn btn btn-sm btn-danger" onclick="deleteMember('${member.id}')" title="Delete"><i class="fas fa-trash"></i></button>`;
             } else {
-                actionButtons = `<button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button><button class="action-btn btn btn-sm btn-warning" onclick="editMember('${member.id}')" title="Edit"><i class="fas fa-edit"></i></button><button class="action-btn btn btn-sm text-white" onclick="openChangeTypeModal('${member.id}')" title="Change Type" style="background:linear-gradient(135deg,#312e81,#6366f1);"><i class="fas fa-exchange-alt"></i></button><button class="action-btn btn btn-sm btn-danger" onclick="deleteMember('${member.id}')" title="Delete"><i class="fas fa-trash"></i></button>`;
+                actionButtons = `<button class="action-btn btn btn-sm btn-primary" onclick="viewMember('${member.id}')" title="View"><i class="fas fa-eye"></i></button><button class="action-btn btn btn-sm btn-warning" onclick="editMember('${member.id}')" title="Edit"><i class="fas fa-edit"></i></button><button class="action-btn btn btn-sm text-white" onclick="openChangeTypeModal('${member.id}')" title="Change Type" style="background:linear-gradient(135deg,#312e81,#6366f1);"><i class="fas fa-exchange-alt"></i></button><button class="action-btn btn btn-sm" style="background:#6b7280;color:white;" onclick="deactivateMember('${member.id}')" title="Deactivate"><i class="fas fa-toggle-off"></i></button><button class="action-btn btn btn-sm btn-danger" onclick="deleteMember('${member.id}')" title="Delete"><i class="fas fa-trash"></i></button>`;
             }
             let avatarHtml;
             if (member.entityType === 'kiddies') {
@@ -1000,10 +1014,21 @@
         document.getElementById('view_fullname').innerText = `${m.firstName} ${m.lastName}`.trim()||'No name';
         document.getElementById('view_membershipId').innerText = m.memberID||'No ID';
         const sb = document.getElementById('view_status_badge');
-        const statusMap = { active:['bg-success','Active'], pending:['bg-warning','Pending'], rejected:['bg-danger','Rejected'], locked:['','Locked'], closed:['bg-secondary','Closed'] };
+        const statusMap = {
+            active:      ['bg-success','Active'],
+            pending:     ['bg-warning','Pending'],
+            rejected:    ['bg-danger','Rejected'],
+            locked:      ['','Locked'],
+            closed:      ['bg-secondary','Closed'],
+            deactivated: ['','Deactivated'],
+            suspended:   ['','Suspended'],
+        };
         const [cls, lbl] = statusMap[m.status]||['bg-secondary',m.status||'Unknown'];
         sb.className='badge '+cls;
-        if (m.status==='locked') sb.style.cssText='background:rgba(236,72,153,.15);color:#db2777;border:1px solid rgba(236,72,153,.3);'; else sb.style.cssText='';
+        if (m.status==='locked') sb.style.cssText='background:rgba(236,72,153,.15);color:#db2777;border:1px solid rgba(236,72,153,.3);';
+        else if (m.status==='deactivated') sb.style.cssText='background:rgba(107,114,128,.15);color:#4b5563;border:1px solid rgba(107,114,128,.3);';
+        else if (m.status==='suspended') sb.style.cssText='background:rgba(217,119,6,.15);color:#92400e;border:1px solid rgba(217,119,6,.3);';
+        else sb.style.cssText='';
         sb.innerText=lbl;
         document.getElementById('view_type_badge_wrap').innerHTML = getMemberTypeBadge(m);
         const banner = document.getElementById('view_kiddies_banner');
@@ -1046,6 +1071,23 @@
             document.getElementById('editMemberBtn').onclick     = () => editMember(id);
             document.getElementById('changeTypeBtnView').onclick = () => openChangeTypeModal(id);
             document.getElementById('deleteMemberBtn').onclick   = () => deleteMember(id);
+            const statusToggleBtn = document.getElementById('statusToggleBtnView');
+            if (statusToggleBtn) {
+                if (m.status === 'deactivated' || m.status === 'suspended') {
+                    statusToggleBtn.style.display = '';
+                    statusToggleBtn.innerHTML = '<i class="fas fa-toggle-on me-2"></i>Activate Member';
+                    statusToggleBtn.className = 'btn btn-success btn-sm';
+                    statusToggleBtn.onclick = () => activateMember(id);
+                } else if (m.status === 'active') {
+                    statusToggleBtn.style.display = '';
+                    statusToggleBtn.innerHTML = '<i class="fas fa-toggle-off me-2"></i>Deactivate Member';
+                    statusToggleBtn.className = 'btn btn-sm text-white';
+                    statusToggleBtn.style.background = '#6b7280';
+                    statusToggleBtn.onclick = () => deactivateMember(id);
+                } else {
+                    statusToggleBtn.style.display = 'none';
+                }
+            }
             const mouBtn = document.getElementById('printMouBtnView');
             if (mouBtn) { mouBtn.style.display=''; mouBtn.onclick = () => printMemberMOU(id); }
         } else {
@@ -1140,6 +1182,58 @@
         if (result.data.status) { const m=members.find(m=>m.id===id); if(m) m.status='rejected'; updateStats(); renderMembers(_currentFilteredMembers, currentPage); await showNotify({type:'success',title:'Member Rejected',message:'The member status has been set to rejected.'}); }
         else { await showNotify({type:'error',title:'Rejection Failed',message:result.data.message||'Failed to reject member.'}); }
     }
+
+    async function deactivateMember(id) {
+    const confirmed = await showNotify({
+        type: 'warning',
+        title: 'Confirm Deactivation',
+        message: 'This member will lose access to their dashboard until reactivated. Continue?',
+        confirmLabel: 'Yes, Deactivate',
+        cancelLabel: 'Cancel'
+    });
+    if (!confirmed) return;
+
+    const result = await permFetch(`/admin/members/deactivate/${id}`, { method: 'POST' });
+    if (!result.ok) return;
+
+    if (result.data.status) {
+        const m = members.find(m => m.id === id);
+        if (m) m.status = 'deactivated';
+        updateStats();
+        renderMembers(_currentFilteredMembers, currentPage);
+        const modalInstance = bootstrap.Modal.getInstance(document.getElementById('viewMemberModal'));
+        if (modalInstance) modalInstance.hide();
+        await showNotify({ type: 'success', title: 'Member Deactivated', message: 'The member has been deactivated.' });
+    } else {
+        await showNotify({ type: 'error', title: 'Deactivation Failed', message: result.data.message || 'Failed to deactivate member.' });
+    }
+}
+
+async function activateMember(id) {
+    const confirmed = await showNotify({
+        type: 'info',
+        title: 'Confirm Activation',
+        message: 'This member will regain access to their dashboard. Continue?',
+        confirmLabel: 'Yes, Activate',
+        cancelLabel: 'Cancel'
+    });
+    if (!confirmed) return;
+
+    const result = await permFetch(`/admin/members/activate/${id}`, { method: 'POST' });
+    if (!result.ok) return;
+
+    if (result.data.status) {
+        const m = members.find(m => m.id === id);
+        if (m) m.status = 'active';
+        updateStats();
+        renderMembers(_currentFilteredMembers, currentPage);
+        const modalInstance = bootstrap.Modal.getInstance(document.getElementById('viewMemberModal'));
+        if (modalInstance) modalInstance.hide();
+        await showNotify({ type: 'success', title: 'Member Activated', message: 'The member has been reactivated.' });
+    } else {
+        await showNotify({ type: 'error', title: 'Activation Failed', message: result.data.message || 'Failed to activate member.' });
+    }
+}
 
     async function bulkApprove() {
         if (!selectedMembers.length) { await showNotify({type:'warning',title:'No Selection',message:'Please select at least one member.'}); return; }

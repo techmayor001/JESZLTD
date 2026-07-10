@@ -802,12 +802,12 @@ button,input,select,textarea{font-family:inherit;}
     <% if (typeof ROI !== "undefined" && totalBalance) { %>
     <div class="balance-roi">
       <i class="fas fa-chart-line" style="font-size:12px;"></i>
-      ₦<%= totalBalance.toLocaleString() %> incl. ROI
+      ₦<%= totalBalance.toLocaleString() %> SAVINGS + ROI
     </div>
     <% } %>
     <div class="hero-grid">
       <div class="hero-stat">
-        <div class="hero-stat-label">Monthly ROI</div>
+        <div class="hero-stat-label"><%= new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) %> ROI</div>
         <div class="hero-stat-value" style="color:var(--green);">₦<%= monthlyROI.toLocaleString(undefined,{maximumFractionDigits:2}) %></div>
         <div class="hero-stat-sub"><%= sharePercentage %>% Shares</div>
       </div>
@@ -1698,10 +1698,10 @@ loadLoans();
 
 <script>
 (function () {
-    const TIMEOUT_MS  = 5 * 60 * 1000;
+    const TIMEOUT_MS  = 60 * 60 * 1000;
     const WARNING_MS  = 20 * 1000;
     const LOGOUT_URL  = '/logout';
-    const PING_URL    = '/api/ping';     // keeps session alive on activity
+    const PING_URL    = '/api/ping';
 
     let logoutTimer, warningTimer, warningEl;
 

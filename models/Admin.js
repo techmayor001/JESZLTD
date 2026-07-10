@@ -18,8 +18,13 @@ const adminSchema = mongoose.Schema({
 
   role: {
     type: String,
-    enum: ["admin", "staff", "superadmin"],
+    enum: ["admin", "staff", "superadmin", "chairman"],
     default: "admin",
+  },
+
+  signatureUrl: {
+    type: String,
+    default: null,
   },
 
   createdAt: {

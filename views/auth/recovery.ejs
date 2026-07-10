@@ -10,12 +10,6 @@
         .gradient-bg {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
         }
-        .gradient-text {
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -25,131 +19,115 @@
             10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
             20%, 40%, 60%, 80% { transform: translateX(10px); }
         }
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        .shake {
-            animation: shake 0.5s ease-in-out;
-        }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .shake { animation: shake 0.5s ease-in-out; }
         .alert {
-            border-radius: 0.75rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            border-radius: 0.75rem; padding: 1rem; margin-bottom: 1rem;
+            display: flex; align-items: center; gap: 0.75rem;
             animation: fadeIn 0.3s ease-out;
         }
-        .alert-error {
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
-        }
-        .alert-success {
-            background-color: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-        }
-        .alert-info {
-            background-color: #eff6ff;
-            border: 1px solid #bfdbfe;
-            color: #1e40af;
-        }
-        .btn-loading {
-            position: relative;
-            pointer-events: none;
-        }
+        .alert-error   { background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+        .alert-success { background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+        .alert-info    { background-color: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+        .btn-loading { position: relative; pointer-events: none; color: transparent !important; }
         .btn-loading::after {
-            content: "";
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            top: 50%;
-            left: 50%;
-            margin-left: -8px;
-            margin-top: -8px;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
+            content: ""; position: absolute; width: 18px; height: 18px;
+            top: 50%; left: 50%; margin: -9px 0 0 -9px;
+            border: 2px solid #ffffff; border-radius: 50%;
             border-top-color: transparent;
             animation: spin 0.6s linear infinite;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+
+        /* step indicator */
+        .step-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 1.6rem; }
+        .step { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 600; color: #9ca3af; }
+        .step.active { color: #1e40af; }
+        .step.done { color: #16a34a; }
+        .step-num {
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 1.5px solid currentColor;
+            display: grid; place-items: center;
+            font-size: 0.65rem; font-weight: 700; flex-shrink: 0;
         }
-        @keyframes fadeOut { 
-            to { opacity: 0; transform: translateY(-10px); } 
+        .step-line { flex: 1; height: 1px; background: #e5e7eb; }
+
+        /* otp input group */
+        .otp-group { display: flex; gap: 8px; justify-content: center; margin-bottom: 1.2rem; }
+        .otp-group input {
+            width: 48px; height: 56px;
+            border: 1.5px solid #d1d5db; border-radius: 10px;
+            font-size: 1.3rem; font-weight: 700; text-align: center;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s;
         }
-    </style>
-    
-    <style>
-        .hidden {
-  display: none;
-}
+        .otp-group input:focus { border-color: #1e40af; box-shadow: 0 0 0 3px rgba(30,64,175,0.1); }
+        .otp-group input.filled { border-color: #3b82f6; background: #eff6ff; }
 
-.loader-screen {
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(135deg, #0a1a2f, #102a44);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
+        .resend-row { text-align: center; font-size: 0.85rem; color: #6b7280; margin-bottom: 1.4rem; }
+        .resend-btn { background: none; border: none; cursor: pointer; color: #1e40af; font-weight: 600; font-size: 0.85rem; padding: 0; }
+        .resend-btn:disabled { color: #9ca3af; cursor: default; }
 
-.logo span {
-  font-size: 52px;
-  font-weight: 600;
-  color: #5cc8ff;
-  display: inline-block;
-  animation: float 1.5s infinite ease-in-out;
-  letter-spacing: 1px;
-}
+        .hidden { display: none; }
 
-.logo span:nth-child(n) {
-  animation-delay: calc(var(--i) * 0.1s);
-}
+        .loader-screen {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #0a1a2f, #102a44);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999;
+        }
+        .logo span {
+            font-size: 52px; font-weight: 600; color: #5cc8ff;
+            display: inline-block; animation: float 1.5s infinite ease-in-out;
+            letter-spacing: 1px;
+        }
+        .logo span:nth-child(1) { animation-delay: 0s; }
+        .logo span:nth-child(2) { animation-delay: 0.1s; }
+        .logo span:nth-child(3) { animation-delay: 0.2s; }
+        .logo span:nth-child(4) { animation-delay: 0.3s; }
+        .logo span:nth-child(5) { animation-delay: 0.4s; }
+        .logo span:nth-child(6) { animation-delay: 0.5s; }
+        .logo span:nth-child(7) { animation-delay: 0.6s; }
+        .logo span:nth-child(8) { animation-delay: 0.7s; }
+        .logo span:nth-child(9) { animation-delay: 0.8s; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); opacity: 0.4; }
+            50% { transform: translateY(-14px); opacity: 1; }
+        }
 
-.logo span:nth-child(1) { --i: 0; }
-.logo span:nth-child(2) { --i: 1; }
-.logo span:nth-child(3) { --i: 2; }
-.logo span:nth-child(4) { --i: 3; }
-.logo span:nth-child(5) { --i: 4; }
-.logo span:nth-child(6) { --i: 5; }
-.logo span:nth-child(7) { --i: 6; }
-.logo span:nth-child(8) { --i: 7; }
-.logo span:nth-child(9) { --i: 8; }
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); opacity: 0.4; }
-  50% { transform: translateY(-14px); opacity: 1; }
-}
+        .success-state { display: none; text-align: center; padding: 1rem 0; }
+        .success-state.show { display: block; }
+        .success-icon {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25);
+            display: grid; place-items: center; margin: 0 auto 1.2rem;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
-        <div id="loader-screen" class="loader-screen">
+    <div id="loader-screen" class="loader-screen">
         <div class="logo">
             <span>C</span><span>l</span><span>o</span><span>u</span><span>d</span><span>B</span><span>a</span><span>a</span><span>m</span>
         </div>
     </div>
 
     <div id="main-content" class="hidden">
-        
+
         <!-- Header -->
         <header class="bg-white shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <img src="log.png" alt="" width="10%" height="10%">
-                        <h1 class="text-1xl font-bold text-gray-900">CLUB DE STARS</h1>
-                        <p class="text-sm text-gray-600">Multipurpose Cooperative Society Ltd</p>
-                    </div>
+                <div>
+                    <img src="log.png" alt="" width="10%" height="10%">
+                    <h1 class="text-1xl font-bold text-gray-900">CLUB DE STARS</h1>
+                    <p class="text-sm text-gray-600">Multipurpose Cooperative Society Ltd</p>
                 </div>
             </div>
         </header>
-    
+
         <!-- Main Content -->
         <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
             <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+
                 <!-- Left Side - Info -->
                 <div class="fade-in order-2 lg:order-1">
                     <div class="gradient-bg rounded-3xl p-6 md:p-8 text-white mb-6 md:mb-8">
@@ -162,7 +140,7 @@
                         </div>
                         <h2 class="text-2xl md:text-3xl font-bold mb-4 text-center">Password Recovery</h2>
                         <p class="text-blue-50 mb-6 text-center">
-                            Don't worry! It happens to the best of us. Enter your email and we'll send you instructions to reset your password.
+                            Don't worry! It happens to the best of us. Enter your email and we'll send you a 6-digit code to reset your password.
                         </p>
                         <div class="space-y-4">
                             <div class="flex items-start">
@@ -179,8 +157,8 @@
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
                                 <div>
-                                    <h4 class="font-semibold mb-1">Secure Link</h4>
-                                    <p class="text-blue-50 text-sm">Password reset link expires in 1 hour for your security</p>
+                                    <h4 class="font-semibold mb-1">Secure OTP</h4>
+                                    <p class="text-blue-50 text-sm">Your 6-digit code expires in 10 minutes for your security</p>
                                 </div>
                             </div>
                             <div class="flex items-start">
@@ -189,12 +167,12 @@
                                 </svg>
                                 <div>
                                     <h4 class="font-semibold mb-1">Email Verification</h4>
-                                    <p class="text-blue-50 text-sm">Check your inbox and spam folder for the reset email</p>
+                                    <p class="text-blue-50 text-sm">Check your inbox and spam folder for the code</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-    
+
                     <div class="bg-blue-50 rounded-2xl p-4 md:p-6 border border-blue-100">
                         <h3 class="font-bold text-gray-900 text-lg mb-3">Still Need Help?</h3>
                         <ul class="space-y-2 text-sm md:text-base text-gray-700">
@@ -214,65 +192,145 @@
                         </ul>
                     </div>
                 </div>
-    
+
                 <!-- Right Side - Forgot Password Form -->
                 <div class="fade-in order-1 lg:order-2">
                     <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Reset Your Password</h2>
-                        <p class="text-gray-600 mb-6">Enter your email address and we'll send you a link to reset your password</p>
-    
+
+                        <!-- STEP INDICATOR -->
+                        <div class="step-indicator" id="stepIndicator">
+                            <div class="step active" id="step1">
+                                <div class="step-num">1</div><span>Email</span>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step" id="step2">
+                                <div class="step-num">2</div><span>Verify OTP</span>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step" id="step3">
+                                <div class="step-num">3</div><span>New Password</span>
+                            </div>
+                        </div>
+
                         <!-- Alert Messages -->
                         <div id="alertContainer"></div>
-    
-                        <form id="forgotPasswordForm" method="POST" action="/forgot-password" class="space-y-5">
-                            <div>
-                                <label for="email" class="block text-gray-700 font-medium mb-2">
-                                    Email Address <span class="text-red-500">*</span>
-                                </label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-                                        </svg>
+
+                        <!-- ── STEP 1: EMAIL ── -->
+                        <div id="formStep1">
+                            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Reset Your Password</h2>
+                            <p class="text-gray-600 mb-6">Enter your email address and we'll send you a 6-digit OTP</p>
+
+                            <form id="emailForm" class="space-y-5">
+                                <div>
+                                    <label for="email" class="block text-gray-700 font-medium mb-2">
+                                        Email Address <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                                            </svg>
+                                        </div>
+                                        <input type="email" id="email" name="email" required autocomplete="email"
+                                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition"
+                                            placeholder="your@email.com">
                                     </div>
-                                    <input 
-                                        type="email" 
-                                        id="email"
-                                        name="email" 
-                                        required 
-                                        autocomplete="email"
-                                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition" 
-                                        placeholder="your@email.com">
+                                    <p class="text-red-600 text-sm mt-1 hidden" id="emailError"></p>
                                 </div>
-                                <p class="text-red-600 text-sm mt-1 hidden" id="emailError"></p>
+
+                                <button type="submit" id="emailBtn"
+                                    class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg hover:shadow-xl transition transform hover:scale-105 active:scale-95">
+                                    Send OTP
+                                </button>
+
+                                <div class="text-center pt-4 border-t border-gray-200">
+                                    <p class="text-gray-600 mb-3">
+                                        Remember your password?
+                                        <a href="/login" class="text-blue-900 hover:underline font-semibold">Login Here</a>
+                                    </p>
+                                    <p class="text-gray-600">
+                                        Don't have an account?
+                                        <a href="/onboard/club-de-star-cooperative" class="text-blue-900 hover:underline font-semibold">Register Here</a>
+                                    </p>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- ── STEP 2: OTP ── -->
+                        <div id="formStep2" class="hidden">
+                            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Enter OTP</h2>
+                            <p class="text-gray-600 mb-6">
+                                We sent a 6-digit code to <strong id="emailDisplay" class="text-gray-900"></strong>. It expires in 10 minutes.
+                            </p>
+
+                            <div class="otp-group" id="otpGroup">
+                                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                                <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
                             </div>
-    
-                            <button 
-                                type="submit" 
-                                id="resetButton"
+                            <p class="text-red-600 text-sm mb-4 hidden text-center" id="otpError"></p>
+
+                            <div class="resend-row">
+                                Didn't receive it?
+                                <button class="resend-btn" id="resendBtn" disabled>Resend in <span id="resendTimer">60</span>s</button>
+                            </div>
+
+                            <button type="button" id="otpBtn"
                                 class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg hover:shadow-xl transition transform hover:scale-105 active:scale-95">
-                                Send Reset Link
+                                Verify OTP
                             </button>
-    
-                            <div class="text-center pt-4 border-t border-gray-200">
-                                <p class="text-gray-600 mb-3">
-                                    Remember your password? 
-                                    <a href="/login" class="text-blue-900 hover:underline font-semibold">Login Here</a>
-                                </p>
-                                <p class="text-gray-600">
-                                    Don't have an account? 
-                                    <a href="/onboard/club-de-star-cooperative" class="text-blue-900 hover:underline font-semibold">Register Here</a>
-                                </p>
+                        </div>
+
+                        <!-- ── STEP 3: NEW PASSWORD ── -->
+                        <div id="formStep3" class="hidden">
+                            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">New Password</h2>
+                            <p class="text-gray-600 mb-6">Choose a strong password you haven't used before</p>
+
+                            <form id="passwordForm" class="space-y-5">
+                                <div>
+                                    <label for="newPassword" class="block text-gray-700 font-medium mb-2">New Password</label>
+                                    <input type="password" id="newPassword" placeholder="Min. 8 characters"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition">
+                                    <p class="text-red-600 text-sm mt-1 hidden" id="newPasswordError"></p>
+                                </div>
+                                <div>
+                                    <label for="confirmPassword" class="block text-gray-700 font-medium mb-2">Confirm Password</label>
+                                    <input type="password" id="confirmPassword" placeholder="Repeat your password"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 focus:border-transparent transition">
+                                    <p class="text-red-600 text-sm mt-1 hidden" id="confirmPasswordError"></p>
+                                </div>
+
+                                <button type="submit" id="passwordBtn"
+                                    class="w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg hover:shadow-xl transition transform hover:scale-105 active:scale-95">
+                                    Reset Password
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- ── SUCCESS ── -->
+                        <div class="success-state" id="successState">
+                            <div class="success-icon">
+                                <svg width="32" height="32" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
                             </div>
-                        </form>
-    
+                            <h2 class="text-xl font-bold text-gray-900 mb-2">Password Reset!</h2>
+                            <p class="text-gray-600 mb-6">Your password has been updated successfully. You can now sign in with your new password.</p>
+                            <a href="/login" class="block w-full gradient-bg text-white py-4 rounded-lg font-bold text-lg text-center hover:shadow-xl transition">
+                                Go to Sign In
+                            </a>
+                        </div>
+
                         <!-- Help Text -->
-                        <div class="mt-6 bg-gray-50 rounded-lg p-4">
+                        <div class="mt-6 bg-gray-50 rounded-lg p-4" id="helpText">
                             <h4 class="font-semibold text-gray-900 mb-2 text-sm">What happens next?</h4>
                             <ol class="text-sm text-gray-600 space-y-1 list-decimal list-inside">
-                                <li>You'll receive an email with a password reset link</li>
-                                <li>Click the link in the email (valid for 1 hour)</li>
+                                <li>You'll receive an email with a 6-digit OTP</li>
+                                <li>Enter the code (valid for 10 minutes)</li>
                                 <li>Create a new secure password</li>
                                 <li>Login with your new password</li>
                             </ol>
@@ -280,14 +338,14 @@
                     </div>
                 </div>
             </div>
-    
+
             <div class="text-center mt-8">
                 <a href="/" class="text-blue-900 hover:text-blue-700 font-medium inline-flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Back to Home
                 </a>
             </div>
         </main>
-    
+
         <!-- Footer -->
         <footer class="bg-gray-900 text-white py-8 px-4 sm:px-6 lg:px-8 mt-16">
             <div class="max-w-7xl mx-auto text-center">
@@ -303,6 +361,20 @@
     </div>
 
     <script>
+        /* ── LOADER ── */
+        window.addEventListener("load", () => {
+            const loader = document.getElementById("loader-screen");
+            const main = document.getElementById("main-content");
+            setTimeout(() => {
+                loader.style.opacity = "0";
+                loader.style.transition = "opacity 0.6s ease";
+                setTimeout(() => {
+                    loader.style.display = "none";
+                    main.classList.remove("hidden");
+                }, 600);
+            }, 1500);
+        });
+
         function showAlert(message, type = 'info') {
             const alertContainer = document.getElementById('alertContainer');
             const icons = {
@@ -310,88 +382,234 @@
                 success: '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>',
                 info: '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>'
             };
-
-            const alertHTML = `
+            alertContainer.innerHTML = `
                 <div class="alert alert-${type}" id="alertBox">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        ${icons[type]}
-                    </svg>
+                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">${icons[type]}</svg>
                     <span>${message}</span>
-                </div>
-            `;
-
-            alertContainer.innerHTML = alertHTML;
-
+                </div>`;
             setTimeout(() => {
-                const alertBox = document.getElementById('alertBox');
-                if (alertBox) {
-                    alertBox.style.animation = 'fadeOut 0.3s ease-out';
-                    setTimeout(() => alertBox.remove(), 300);
-                }
+                const box = document.getElementById('alertBox');
+                if (box) { box.style.animation = 'fadeOut 0.3s ease-out'; setTimeout(() => box.remove(), 300); }
             }, 5000);
         }
 
-        // Client-side validation
-        document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
+        function shakeEl(el) {
+            el.classList.add('shake');
+            setTimeout(() => el.classList.remove('shake'), 500);
+        }
+
+        /* ── STATE ── */
+        let currentEmail = '';
+
+        function setStep(n) {
+            document.getElementById('formStep1').classList.toggle('hidden', n !== 1);
+            document.getElementById('formStep2').classList.toggle('hidden', n !== 2);
+            document.getElementById('formStep3').classList.toggle('hidden', n !== 3);
+            document.getElementById('successState').classList.toggle('show', n === 4);
+            document.getElementById('stepIndicator').classList.toggle('hidden', n === 4);
+            document.getElementById('helpText').classList.toggle('hidden', n === 4);
+
+            ['step1','step2','step3'].forEach((id, i) => {
+                const el = document.getElementById(id);
+                el.classList.remove('active','done');
+                if (i + 1 < n)  el.classList.add('done');
+                if (i + 1 === n) el.classList.add('active');
+            });
+        }
+
+        /* ── STEP 1: SEND OTP ── */
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             const email = document.getElementById('email').value.trim();
-            const emailError = document.getElementById('emailError');
-            const resetButton = document.getElementById('resetButton');
-            
-            // Reset errors
-            emailError.classList.add('hidden');
-            
-            let isValid = true;
-            
-            // Email validation
+            const errEl = document.getElementById('emailError');
+            const btn   = document.getElementById('emailBtn');
+            errEl.classList.add('hidden');
+
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email) {
-                emailError.textContent = 'Email address is required';
-                emailError.classList.remove('hidden');
-                document.getElementById('email').classList.add('shake');
-                setTimeout(() => document.getElementById('email').classList.remove('shake'), 500);
-                isValid = false;
-            } else if (!emailRegex.test(email)) {
-                emailError.textContent = 'Please enter a valid email address';
-                emailError.classList.remove('hidden');
-                document.getElementById('email').classList.add('shake');
-                setTimeout(() => document.getElementById('email').classList.remove('shake'), 500);
-                isValid = false;
+            if (!email || !emailRegex.test(email)) {
+                errEl.textContent = email ? 'Please enter a valid email address' : 'Email address is required';
+                errEl.classList.remove('hidden');
+                shakeEl(document.getElementById('email'));
+                return;
             }
-            
-            if (isValid) {
-                // Show loading state
-                resetButton.classList.add('btn-loading');
-                resetButton.textContent = '';
-                
-                // Simulate form submission (replace with actual backend call)
-                setTimeout(() => {
-                    resetButton.classList.remove('btn-loading');
-                    resetButton.textContent = 'Send Reset Link';
-                    showAlert('Password reset link has been sent to your email. Please check your inbox and spam folder.', 'success');
-                    document.getElementById('forgotPasswordForm').reset();
-                }, 2000);
+
+            btn.classList.add('btn-loading'); btn.disabled = true;
+            try {
+                const res = await fetch('/forgot-password/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    currentEmail = email;
+                    document.getElementById('emailDisplay').textContent = email;
+                    setStep(2);
+                    startResendTimer();
+                } else {
+                    showAlert(data.message || 'Could not send OTP. Please try again.', 'error');
+                }
+            } catch {
+                showAlert('Network error. Please try again.', 'error');
+            } finally {
+                btn.classList.remove('btn-loading'); btn.disabled = false;
+            }
+        });
+
+        /* ── OTP INPUT BEHAVIOUR ── */
+        const otpInputs = Array.from(document.querySelectorAll('#otpGroup input'));
+        otpInputs.forEach((inp, i) => {
+            inp.addEventListener('input', () => {
+                inp.value = inp.value.replace(/\D/g, '').slice(0,1);
+                inp.classList.toggle('filled', inp.value !== '');
+                if (inp.value && i < otpInputs.length - 1) otpInputs[i+1].focus();
+            });
+            inp.addEventListener('keydown', e => {
+                if (e.key === 'Backspace' && !inp.value && i > 0) {
+                    otpInputs[i-1].focus();
+                    otpInputs[i-1].value = '';
+                    otpInputs[i-1].classList.remove('filled');
+                }
+            });
+            inp.addEventListener('paste', e => {
+                e.preventDefault();
+                const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+                pasted.split('').forEach((ch, j) => {
+                    if (otpInputs[j]) { otpInputs[j].value = ch; otpInputs[j].classList.add('filled'); }
+                });
+                const next = otpInputs[Math.min(pasted.length, otpInputs.length - 1)];
+                if (next) next.focus();
+            });
+        });
+
+        /* ── STEP 2: VERIFY OTP ── */
+        document.getElementById('otpBtn').addEventListener('click', async function() {
+            const otp   = otpInputs.map(i => i.value).join('');
+            const errEl = document.getElementById('otpError');
+            const btn   = this;
+            errEl.classList.add('hidden');
+
+            if (otp.length < 6) {
+                errEl.textContent = 'Please enter all 6 digits.';
+                errEl.classList.remove('hidden');
+                shakeEl(document.getElementById('otpGroup'));
+                return;
+            }
+
+            btn.classList.add('btn-loading'); btn.disabled = true;
+            try {
+                const res = await fetch('/forgot-password/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentEmail, otp }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setStep(3);
+                } else {
+                    errEl.textContent = data.message || 'Invalid or expired OTP.';
+                    errEl.classList.remove('hidden');
+                    otpInputs.forEach(i => { i.value=''; i.classList.remove('filled'); });
+                    otpInputs[0].focus();
+                }
+            } catch {
+                errEl.textContent = 'Network error. Please try again.';
+                errEl.classList.remove('hidden');
+            } finally {
+                btn.classList.remove('btn-loading'); btn.disabled = false;
+            }
+        });
+
+        /* ── RESEND TIMER ── */
+        function startResendTimer() {
+            let secs = 60;
+            const btn = document.getElementById('resendBtn');
+            const timerEl = document.getElementById('resendTimer');
+            btn.disabled = true;
+            btn.innerHTML = 'Resend in <span id="resendTimer">60</span>s';
+            const iv = setInterval(() => {
+                secs--;
+                const t = document.getElementById('resendTimer');
+                if (t) t.textContent = secs;
+                if (secs <= 0) {
+                    clearInterval(iv);
+                    btn.disabled = false;
+                    btn.textContent = 'Resend OTP';
+                }
+            }, 1000);
+        }
+
+        document.getElementById('resendBtn').addEventListener('click', async function() {
+            this.disabled = true;
+            this.textContent = 'Sending…';
+            try {
+                const res = await fetch('/forgot-password/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentEmail }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    otpInputs.forEach(i => { i.value=''; i.classList.remove('filled'); });
+                    otpInputs[0].focus();
+                    showAlert('A new OTP has been sent to your email.', 'success');
+                    startResendTimer();
+                } else {
+                    showAlert(data.message || 'Failed to resend OTP.', 'error');
+                    this.disabled = false;
+                    this.textContent = 'Resend OTP';
+                }
+            } catch {
+                showAlert('Network error. Please try again.', 'error');
+                this.disabled = false;
+                this.textContent = 'Resend OTP';
+            }
+        });
+
+        /* ── STEP 3: RESET PASSWORD ── */
+        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const newPw   = document.getElementById('newPassword').value;
+            const confPw  = document.getElementById('confirmPassword').value;
+            const newErr  = document.getElementById('newPasswordError');
+            const confErr = document.getElementById('confirmPasswordError');
+            const btn     = document.getElementById('passwordBtn');
+            newErr.classList.add('hidden'); confErr.classList.add('hidden');
+
+            let valid = true;
+            if (!newPw || newPw.length < 8) {
+                newErr.textContent = 'Password must be at least 8 characters.';
+                newErr.classList.remove('hidden');
+                shakeEl(document.getElementById('newPassword'));
+                valid = false;
+            }
+            if (newPw !== confPw) {
+                confErr.textContent = 'Passwords do not match.';
+                confErr.classList.remove('hidden');
+                shakeEl(document.getElementById('confirmPassword'));
+                valid = false;
+            }
+            if (!valid) return;
+
+            btn.classList.add('btn-loading'); btn.disabled = true;
+            try {
+                const res = await fetch('/forgot-password/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentEmail, password: newPw }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setStep(4);
+                } else {
+                    showAlert(data.message || 'Reset failed. Please try again.', 'error');
+                }
+            } catch {
+                showAlert('Network error. Please try again.', 'error');
+            } finally {
+                btn.classList.remove('btn-loading'); btn.disabled = false;
             }
         });
     </script>
-
-    <script>
-window.addEventListener("load", () => {
-  const loader = document.getElementById("loader-screen");
-  const main = document.getElementById("main-content");
-
-  setTimeout(() => {
-    loader.style.opacity = "0";
-    loader.style.transition = "opacity 0.6s ease";
-
-    setTimeout(() => {
-      loader.style.display = "none";
-      main.classList.remove("hidden");
-    }, 600);
-
-  }, 2500); // adjust duration
-});
-</script>
 </body>
 </html>

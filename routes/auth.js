@@ -23,6 +23,11 @@ const fs = require('fs');
 const path = require('path')
 const fetch = require("node-fetch");
 
+const crypto = require("crypto");
+
+// In-memory OTP store — same pattern as Techmayor
+const otpStore = new Map();
+
 
 // MULTER CONFIGURATIONs
 
@@ -663,9 +668,7 @@ router.post("/paystack/webhook", express.json(), async (req, res) => {
 
 // USER SIGN-UP LOGIC 
 
-router.get("/forgot-password", (req, res) => {
-  res.render("auth/recovery");
-});
+
 
 router.get("/login", async (req, res) => {
   try {
@@ -1245,6 +1248,226 @@ router.post(
 // Keeps session alive — just needs to be an authenticated touch
 router.get('/api/ping', (req, res) => {
     res.json({ ok: true });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Send OTP email via Brevo HTTP API
+ */
+async function sendOtpEmail(email, otp) {
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": process.env.BREVO_API_KEY,
+    },
+    body: JSON.stringify({
+      sender: {
+        name: process.env.BREVO_SENDER_NAME || "Club De Stars Cooperative",
+        email: process.env.BREVO_SENDER_EMAIL,
+      },
+      to: [{ email }],
+      subject: "Your Password Reset OTP — Club De Stars",
+      htmlContent: `
+        <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#f8fafc;">
+          <div style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:16px;padding:28px;text-align:center;">
+            <h1 style="color:#fff;font-size:20px;margin:0;">CLUB DE STARS</h1>
+            <p style="color:#dbeafe;font-size:12px;margin:4px 0 0;">Multipurpose Cooperative Society Ltd</p>
+          </div>
+          <div style="background:#fff;border-radius:16px;padding:28px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <h2 style="color:#111827;font-size:18px;margin:0 0 12px;">Password Reset Request</h2>
+            <p style="color:#4b5563;font-size:14px;line-height:1.6;">
+              We received a request to reset your password. Use the OTP below to continue. It expires in 10 minutes.
+            </p>
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:18px;text-align:center;margin:20px 0;">
+              <span style="font-size:32px;font-weight:800;letter-spacing:8px;color:#1e40af;">${otp}</span>
+            </div>
+            <p style="color:#9ca3af;font-size:12px;line-height:1.6;">
+              If you didn't request this, you can safely ignore this email. Never share this code with anyone, including Club De Stars staff.
+            </p>
+          </div>
+          <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:16px;">
+            Club De Stars Multipurpose Cooperative Society Ltd · Powered by JESZ LTD
+          </p>
+        </div>
+      `,
+    }),
+  });
+
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`Brevo send failed: ${res.status} ${errBody}`);
+  }
+}
+
+/**
+ * Send password reset success confirmation email via Brevo HTTP API
+ */
+async function sendPasswordResetSuccessEmail(email, firstName) {
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": process.env.BREVO_API_KEY,
+    },
+    body: JSON.stringify({
+      sender: {
+        name: process.env.BREVO_SENDER_NAME || "Club De Stars Cooperative",
+        email: process.env.BREVO_SENDER_EMAIL,
+      },
+      to: [{ email }],
+      subject: "Your Password Was Reset — Club De Stars",
+      htmlContent: `
+        <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#f8fafc;">
+          <div style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:16px;padding:28px;text-align:center;">
+            <h1 style="color:#fff;font-size:20px;margin:0;">CLUB DE STARS</h1>
+          </div>
+          <div style="background:#fff;border-radius:16px;padding:28px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <h2 style="color:#111827;font-size:18px;margin:0 0 12px;">Password Changed Successfully</h2>
+            <p style="color:#4b5563;font-size:14px;line-height:1.6;">
+              Hi ${firstName || "there"}, this confirms your Club De Stars account password was just changed.
+            </p>
+            <p style="color:#4b5563;font-size:14px;line-height:1.6;">
+              If you did not make this change, please contact support immediately at
+              <a href="mailto:support@clubdestars.com" style="color:#1e40af;">support@clubdestars.com</a>.
+            </p>
+          </div>
+          <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:16px;">
+            Club De Stars Multipurpose Cooperative Society Ltd · Powered by JESZ LTD
+          </p>
+        </div>
+      `,
+    }),
+  });
+
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`Brevo send failed: ${res.status} ${errBody}`);
+  }
+}
+
+
+
+
+// ── GET /forgot-password ────────────────────────────────────────────────
+router.get("/forgot-password", (req, res) => {
+  res.render("auth/recovery");
+});
+
+// ── POST /forgot-password/send-otp ──────────────────────────────────────
+router.post("/forgot-password/send-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: "Email is required." });
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    // Always return success to avoid email enumeration
+    if (!user) return res.json({ success: true });
+
+    const otp       = crypto.randomInt(100000, 999999).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 min
+
+    otpStore.set(email.toLowerCase(), { otp, expiresAt, verified: false });
+
+    await sendOtpEmail(email, otp);
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("[Send OTP]", err);
+    return res.status(500).json({ success: false, message: "Failed to send OTP. Please try again." });
+  }
+});
+
+// ── POST /forgot-password/verify-otp ────────────────────────────────────
+router.post("/forgot-password/verify-otp", (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp)
+      return res.status(400).json({ success: false, message: "Email and OTP are required." });
+
+    const record = otpStore.get(email.toLowerCase());
+
+    if (!record)
+      return res.status(400).json({ success: false, message: "No OTP found. Please request a new one." });
+
+    if (Date.now() > record.expiresAt)
+      return res.status(400).json({ success: false, message: "OTP has expired. Please request a new one." });
+
+    if (record.otp !== otp.toString())
+      return res.status(400).json({ success: false, message: "Incorrect OTP. Please try again." });
+
+    record.verified = true;
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("[Verify OTP]", err);
+    return res.status(500).json({ success: false, message: "Verification failed." });
+  }
+});
+
+// ── POST /forgot-password/reset ─────────────────────────────────────────
+router.post("/forgot-password/reset", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password)
+      return res.status(400).json({ success: false, message: "Email and password are required." });
+
+    if (password.length < 8)
+      return res.status(400).json({ success: false, message: "Password must be at least 8 characters." });
+
+    const record = otpStore.get(email.toLowerCase());
+
+    if (!record || !record.verified)
+      return res.status(403).json({ success: false, message: "OTP not verified. Please complete verification first." });
+
+    if (Date.now() > record.expiresAt)
+      return res.status(400).json({ success: false, message: "Session expired. Please start over." });
+
+    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+    if (!user)
+      return res.status(404).json({ success: false, message: "Account not found." });
+
+    user.password = await bcrypt.hash(password, saltRounds);
+    await user.save();
+
+    otpStore.delete(email.toLowerCase());
+
+    sendPasswordResetSuccessEmail(email, user.firstName).catch(err =>
+      console.error("[Reset Success Email]", err)
+    );
+
+    return res.json({ success: true });
+
+  } catch (err) {
+    console.error("[Reset Password]", err);
+    return res.status(500).json({ success: false, message: "Reset failed. Please try again." });
+  }
 });
 
 module.exports = router;

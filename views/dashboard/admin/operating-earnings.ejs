@@ -92,7 +92,7 @@
 
         /* ══ TABLE ══ */
         .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-        table.earn-table{width:100%;min-width:720px;border-collapse:separate;border-spacing:0;}
+        table.earn-table{width:100%;min-width:790px;border-collapse:separate;border-spacing:0;}
         table.earn-table thead th{background:#f8faff;color:var(--primary);font-weight:700;font-size:.73rem;text-transform:uppercase;letter-spacing:.04em;padding:.75rem .85rem;border-bottom:2px solid rgba(30,58,138,.1);white-space:nowrap;position:sticky;top:0;z-index:2;}
         table.earn-table tbody td{padding:.75rem .85rem;font-size:.875rem;vertical-align:middle;border-bottom:1px solid #f1f5f9;}
         table.earn-table tbody tr:last-child td{border-bottom:none;}
@@ -117,6 +117,9 @@
         .row-charge:hover td{background:#fef9c3 !important;}
         .charge-source-tag{display:inline-flex;align-items:center;gap:4px;background:#fef3c7;border:1px solid #fde68a;color:#92400e;padding:.18rem .5rem;border-radius:5px;font-size:.68rem;font-weight:700;}
 
+        .btn-view-entry{width:32px;height:32px;border-radius:8px;border:1px solid rgba(30,58,138,.15);background:#fff;color:var(--primary);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-size:.8rem;}
+        .btn-view-entry:hover{background:var(--primary);color:#fff;border-color:var(--primary);transform:translateY(-1px);}
+
         .btn-primary{background:var(--primary);border:none;padding:.5rem 1.2rem;border-radius:9px;font-weight:600;}
         .btn-primary:hover{background:var(--primary-dark);}
         .form-control,.form-select{border-radius:8px;border:1.5px solid #e2e8f0;font-size:.875rem;}
@@ -126,6 +129,21 @@
         .modal-header{border-radius:14px 14px 0 0;border-bottom:1px solid #e2e8f0;}
         .modal-header.credit{background:#ecfdf5;} .modal-header.credit h5{color:#065f46;}
         .modal-header.expense-hdr{background:#fef9c3;} .modal-header.expense-hdr h5{color:#92400e;}
+        .modal-header.view-hdr{background:#eff6ff;} .modal-header.view-hdr h5{color:var(--primary);}
+
+        /* ══ View Entry modal ══ */
+        .view-amount-block{background:#f8faff;border-radius:12px;padding:1.1rem;text-align:center;margin-bottom:1rem;}
+        .view-amount-block .amt{font-size:1.9rem;font-weight:800;letter-spacing:-.5px;}
+        .view-source-card{background:#f8faff;border:1px solid rgba(30,58,138,.08);border-radius:12px;padding:.9rem 1.05rem;margin-bottom:.75rem;}
+        .view-source-card .vs-label{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:.35rem;}
+        .view-source-card .vs-name{font-size:.95rem;font-weight:700;color:#1e293b;}
+        .view-source-card .vs-sub{font-size:.78rem;color:#64748b;margin-top:.1rem;}
+        .view-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid #f1f5f9;font-size:.85rem;}
+        .view-row:last-child{border-bottom:none;}
+        .view-row .vr-label{color:#64748b;font-weight:600;}
+        .view-row .vr-value{color:#1e293b;font-weight:700;text-align:right;}
+        .view-loading{text-align:center;padding:2.5rem 1rem;color:#94a3b8;}
+        .view-loading i{font-size:1.8rem;margin-bottom:.6rem;display:block;}
 
         .powered-by{position:fixed;bottom:15px;right:15px;background:#fff;padding:9px 15px;border-radius:25px;box-shadow:0 4px 15px rgba(30,58,138,.12);font-size:.78rem;font-weight:600;color:var(--primary);z-index:1000;}
         .toast-container{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:9999;}
@@ -179,7 +197,7 @@
             <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
             <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
             <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
-            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/manage-deposit"><i class="fas fa-coins"></i>Deposits</a>
             <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
             <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
         </div>
@@ -394,15 +412,16 @@
                         <tr>
                             <th>#</th><th>Date</th><th>Type</th><th>Dir</th>
                             <th>Amount</th><th>Balance</th><th>Source / Staff</th>
-                            <th>Description</th><th>Recorded By</th>
+                            <th>Description</th><th>Recorded By</th><th>Source</th>
                         </tr>
                     </thead>
                     <tbody>
                     <% if(entries.length === 0) { %>
-                        <tr><td colspan="9"><div class="empty-state"><i class="fas fa-chart-line"></i><p class="fw-semibold mb-1">No entries found</p><small>Try adjusting your filters or add a new entry</small></div></td></tr>
+                        <tr><td colspan="10"><div class="empty-state"><i class="fas fa-chart-line"></i><p class="fw-semibold mb-1">No entries found</p><small>Try adjusting your filters or add a new entry</small></div></td></tr>
                     <% } else { %>
                     <% entries.forEach((e, i) => { %>
                         <tr class="<%= e.type==='operating_charge' ? 'row-charge' : '' %>"
+                            data-id="<%= e._id %>"
                             data-type="<%= e.type %>"
                             data-direction="<%= e.direction %>"
                             data-amount="<%= e.amount %>"
@@ -453,6 +472,11 @@
                                         <%= e.recordedBy.fullName || [e.recordedBy.firstName, e.recordedBy.lastName].filter(Boolean).join(' ') || '—' %>
                                     </span>
                                 <% } else { %><span style="font-size:.78rem;color:#94a3b8;">System</span><% } %>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn-view-entry" title="View source of this entry" onclick="viewEntryDetails('<%= e._id %>')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
                             </td>
                         </tr>
                     <% }) %>
@@ -507,7 +531,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Amount (₦) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" name="amount" min="1" placeholder="e.g. 50000" required>
+                        <input type="number" class="form-control" name="amount" min="1" step="0.01" placeholder="e.g. 50000" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Description <span class="text-danger">*</span></label>
@@ -556,7 +580,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Amount (₦) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" name="amount" min="1" placeholder="e.g. 80000" required>
+                        <input type="number" class="form-control" name="amount" min="1" step="0.01" placeholder="e.g. 80000" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Description <span class="text-danger">*</span></label>
@@ -572,6 +596,27 @@
                     <button type="submit" class="btn btn-warning fw-semibold text-white" id="expenseSubmitBtn"><i class="fas fa-paper-plane me-1"></i>Confirm Expense</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- ── View Source / Entry Detail Modal ── -->
+<div class="modal fade" id="viewEntryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header view-hdr">
+                <h5 class="modal-title fw-bold"><i class="fas fa-receipt me-2"></i>Entry Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="viewEntryBody">
+                <div class="view-loading">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    Loading entry details…
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>
@@ -820,6 +865,112 @@ function setupForm(formId, url, btnId, errId, modalId, defaultLabel) {
 
 setupForm('incomeForm',  '/admin/operating-earnings/income',  'incomeSubmitBtn',  'incomeError',  'incomeModal',  '<i class="fas fa-check-circle me-1"></i>Confirm Income');
 setupForm('expenseForm', '/admin/operating-earnings/expense', 'expenseSubmitBtn', 'expenseError', 'expenseModal', '<i class="fas fa-paper-plane me-1"></i>Confirm Expense');
+
+/* ══ View Source / Entry Details ══ */
+const viewEntryModalEl = document.getElementById('viewEntryModal');
+const viewEntryModal   = new bootstrap.Modal(viewEntryModalEl);
+const TYPE_LABELS = {
+    operating_charge: 'Loan Operating Charge', staff_payment: 'Staff Payment / Salary',
+    expense: 'General Expense', external_income: 'External Income', manual_credit: 'Manual Credit',
+    manual_debit: 'Manual Debit', interest_income: 'Interest Income', other_income: 'Other Income',
+    other_expense: 'Other Expense',
+};
+function fmtNaira(n) { return '₦' + Number(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 }); }
+function fmtDateTime(d) {
+    if (!d) return '—';
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en-NG', { day: '2-digit', month: 'short', year: 'numeric' }) +
+           ' · ' + dt.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
+}
+
+async function viewEntryDetails(id) {
+    const body = document.getElementById('viewEntryBody');
+    body.innerHTML = `<div class="view-loading"><i class="fas fa-circle-notch fa-spin"></i>Loading entry details…</div>`;
+    viewEntryModal.show();
+
+    try {
+        const res  = await fetch(`/admin/operating-earnings/entry/${id}`);
+        const data = await res.json();
+
+        if (!data.status) {
+            body.innerHTML = `<div class="view-loading"><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>${data.message || 'Could not load this entry.'}</div>`;
+            return;
+        }
+
+        const e       = data.entry;
+        const isIn    = e.direction === 'in';
+        const typeLbl = TYPE_LABELS[e.type] || e.type.replace(/_/g, ' ');
+
+        /* Build the "source" block depending on entry type */
+        let sourceHTML = '';
+        if (e.type === 'staff_payment' && e.meta && e.meta.staffName) {
+            sourceHTML = `
+                <div class="view-source-card">
+                    <div class="vs-label"><i class="fas fa-user-tie me-1"></i>Paid To</div>
+                    <div class="vs-name">${e.meta.staffName}</div>
+                    ${e.meta.staffRole ? `<div class="vs-sub">${e.meta.staffRole}</div>` : ''}
+                    ${e.meta.paymentPeriod ? `<div class="vs-sub">Period: ${e.meta.paymentPeriod}</div>` : ''}
+                </div>`;
+        } else if (e.relatedUser) {
+            const u = e.relatedUser;
+            sourceHTML = `
+                <div class="view-source-card">
+                    <div class="vs-label"><i class="fas fa-user me-1"></i>${isIn ? 'Money Came From' : 'Related Member'}</div>
+                    <div class="vs-name">${u.firstName || ''} ${u.lastName || ''}</div>
+                    <div class="vs-sub">Membership ID: ${u.membershipID || '—'}</div>
+                    ${u.email ? `<div class="vs-sub">${u.email}</div>` : ''}
+                    ${u.phoneNumber ? `<div class="vs-sub">${u.phoneNumber}</div>` : ''}
+                </div>`;
+        } else if (e.type === 'operating_charge') {
+            sourceHTML = `
+                <div class="view-source-card">
+                    <div class="vs-label"><i class="fas fa-percentage me-1"></i>Source</div>
+                    <div class="vs-name">Auto-recorded from loan interest</div>
+                    <div class="vs-sub">Captured automatically when a loan was approved</div>
+                </div>`;
+        } else {
+            sourceHTML = `
+                <div class="view-source-card">
+                    <div class="vs-label"><i class="fas fa-info-circle me-1"></i>Source</div>
+                    <div class="vs-name">Manually recorded entry</div>
+                    <div class="vs-sub">No linked member or staff record</div>
+                </div>`;
+        }
+
+        if (e.relatedLoan && e.relatedLoan._id) {
+            sourceHTML += `
+                <div class="view-source-card">
+                    <div class="vs-label"><i class="fas fa-hand-holding-usd me-1"></i>Linked Loan</div>
+                    <div class="vs-name">Loan #${e.relatedLoan._id.toString().slice(-6).toUpperCase()}</div>
+                    ${e.relatedLoan.amount ? `<div class="vs-sub">Principal: ${fmtNaira(e.relatedLoan.amount)}</div>` : ''}
+                    ${e.relatedLoan.status ? `<div class="vs-sub">Status: ${e.relatedLoan.status}</div>` : ''}
+                </div>`;
+        }
+
+        const recordedByName = e.recordedBy
+            ? (e.recordedBy.fullName || [e.recordedBy.firstName, e.recordedBy.lastName].filter(Boolean).join(' ') || '—')
+            : 'System (Automated)';
+
+        body.innerHTML = `
+            <div class="view-amount-block">
+                <span class="type-chip chip-${e.type}">${typeLbl}</span>
+                <div class="amt ${isIn ? 'amount-in' : 'amount-out'}">${isIn ? '+' : '-'}${fmtNaira(e.amount)}</div>
+                <div style="font-size:.78rem;color:#94a3b8;">${isIn ? 'Income · money coming in' : 'Expense · money going out'}</div>
+            </div>
+            ${sourceHTML}
+            <div class="view-source-card" style="background:#fff;">
+                <div class="vs-label"><i class="fas fa-align-left me-1"></i>Description</div>
+                <div style="font-size:.85rem;color:#334155;">${e.description || '—'}</div>
+            </div>
+            <div class="view-row"><span class="vr-label">Date &amp; Time</span><span class="vr-value">${fmtDateTime(e.createdAt)}</span></div>
+            <div class="view-row"><span class="vr-label">Running Balance After Entry</span><span class="vr-value">${fmtNaira(e.runningBalance)}</span></div>
+            <div class="view-row"><span class="vr-label">Recorded By</span><span class="vr-value">${recordedByName}</span></div>
+            <div class="view-row"><span class="vr-label">Entry ID</span><span class="vr-value" style="font-size:.72rem;color:#94a3b8;">${e._id}</span></div>
+        `;
+    } catch (ex) {
+        body.innerHTML = `<div class="view-loading"><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>Network error. Please try again.</div>`;
+    }
+}
 
 document.addEventListener('DOMContentLoaded', loadSidebarPendingCount);
 </script>

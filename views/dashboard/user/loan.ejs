@@ -597,7 +597,7 @@ button,input,select,textarea{font-family:inherit;}
             <span>Active Loan</span>
             <% if (loan && ['approved','overdue','rolled_over'].includes(loan.status)) { %>
               <button onclick="printLoanOffer()" title="Print Loan Offer Letter"
-                      style="background:none;border:none;color:var(--accent);cursor:pointer;padding:0;font-size:12px;display:flex;align-items:center;gap:4px;">
+                      style="background:none;border:none;color:var(--amber);cursor:pointer;padding:0;font-size:12px;display:flex;align-items:center;gap:4px;">
                 <i class="fas fa-print"></i>
               </button>
             <% } %>
@@ -1696,7 +1696,7 @@ window.addEventListener('load', () => {
 
 <script>
 (function () {
-    const TIMEOUT_MS  = 1 * 60 * 1000;
+    const TIMEOUT_MS  = 60 * 60 * 1000;
     const WARNING_MS  = 20 * 1000;
     const LOGOUT_URL  = '/logout';
     const PING_URL    = '/api/ping';     // keeps session alive on activity

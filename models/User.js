@@ -86,6 +86,12 @@ const userSchema = new mongoose.Schema(
     signature: String,
     displayPicture: String,
 
+    // ── Official signature (used when this user holds the "chairman" role) ──
+    officialSignature: {
+      url: { type: String, default: null },
+      updatedAt: { type: Date, default: null },
+    },
+
     /* ============================================================
        RBAC: ROLE REFERENCE (NEW)
     ============================================================ */

@@ -339,7 +339,7 @@
             <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
             <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
             <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
-            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/manage-deposit"><i class="fas fa-coins"></i>Deposits</a>
             <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
             <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
         </div>
@@ -498,6 +498,7 @@
                             <th>Outstanding</th>
                             <th>Interest</th>
                             <th>Duration</th>
+                            <th>Due In</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -561,6 +562,25 @@
                             <td><span class="badge bg-info-subtle text-info"><%= loan.interestRate %>%</span></td>
 
                             <td><%= loan.duration ? loan.duration.duration : (loan.externalDuration || 'N/A') %> mo</td>
+
+                            <td>
+                                <% 
+                                let dueBadge = '<span class="text-muted">—</span>';
+                                if (loan.dueDate && ['approved','overdue','rolled_over'].includes(statusLower)) {
+                                    const daysLeft = Math.ceil((new Date(loan.dueDate) - new Date()) / (1000*60*60*24));
+                                    if (daysLeft < 0) {
+                                    dueBadge = `<span class="badge bg-danger">${Math.abs(daysLeft)}d overdue</span>`;
+                                    } else if (daysLeft === 0) {
+                                    dueBadge = `<span class="badge bg-danger">Due today</span>`;
+                                    } else if (daysLeft <= 3) {
+                                    dueBadge = `<span class="badge bg-warning text-dark">${daysLeft}d left</span>`;
+                                    } else {
+                                    dueBadge = `<span class="badge bg-info-subtle text-info">${daysLeft}d left</span>`;
+                                    }
+                                }
+                                %>
+                                <%- dueBadge %>
+                            </td>
 
                             <td>
                                 <span class="badge <%= statusBadgeClass %>">
@@ -651,6 +671,7 @@
                 <div class="loan-details-grid">
                     <div class="detail-item"><div class="detail-label">Application Date</div><div class="detail-value" id="loanCreatedAt" style="font-size:.9rem;"></div></div>
                     <div class="detail-item"><div class="detail-label">Disbursement Date</div><div class="detail-value" id="loanDisbursementDate" style="font-size:.9rem;"></div></div>
+                    <div class="detail-item"><div class="detail-label">Days Remaining</div><div class="detail-value" id="loanCountdown" style="font-size:.9rem;"></div></div>
                     <div class="detail-item"><div class="detail-label">Due Date</div><div class="detail-value" id="loanDueDate" style="font-size:.9rem;"></div></div>
                     <div class="detail-item"><div class="detail-label">Approved At</div><div class="detail-value" id="loanApprovedAt" style="font-size:.9rem;"></div></div>
                     <div class="detail-item"><div class="detail-label">Paid At</div><div class="detail-value" id="loanPaidAt" style="font-size:.9rem;"></div></div>
@@ -932,6 +953,11 @@ const loansData = <%- JSON.stringify(loans.map(l => ({
     }))
 }))) %>;
 
+const chairmanData = <%- JSON.stringify(chairman ? {
+    name: `${chairman.firstName} ${chairman.lastName}`,
+    signatureUrl: (chairman.officialSignature && chairman.officialSignature.url) || null
+} : null) %>;
+
 let selectedLoan  = null;
 let currentFilter = 'all';
 let currentSearch = '';
@@ -939,6 +965,9 @@ let currentSearch = '';
 document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
     weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
 });
+
+
+
 
 /* ── Helpers ── */
 function fmt(n)   { return '₦' + Number(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
@@ -1089,19 +1118,35 @@ function viewLoan(loan) {
         rbContainer.style.display = 'none';
     }
 
-    document.getElementById('loanAmount').textContent             = fmt(loan.amount);
-    document.getElementById('loanTotalRepay').textContent         = fmt(loan.totalRepay);
-    document.getElementById('loanOutstanding').textContent        = loan.outstandingBalance > 0 ? fmt(loan.outstandingBalance) : '₦0.00';
-    document.getElementById('loanPaidAmount').textContent         = fmt(loan.paidAmount);
-    document.getElementById('loanInterest').textContent           = loan.interestRate + '%';
-    document.getElementById('loanInterestAmount').textContent     = fmt(loan.interestAmount);
-    document.getElementById('loanDuration').textContent           = (loan.duration ? loan.duration.duration : (loan.externalDuration || 'N/A')) + ' Months';
-    document.getElementById('loanDisbursementMethod').textContent = loan.disbursementMethod ? capSt(loan.disbursementMethod) : '—';
-    document.getElementById('loanCreatedAt').textContent          = fmtD(loan.createdAt);
-    document.getElementById('loanDisbursementDate').textContent   = fmtD(loan.disbursementDate);
-    document.getElementById('loanDueDate').textContent            = fmtD(loan.dueDate);
-    document.getElementById('loanApprovedAt').textContent         = fmtD(loan.approvedAt);
-    document.getElementById('loanPaidAt').textContent             = fmtD(loan.paidAt);
+document.getElementById('loanAmount').textContent             = fmt(loan.amount);
+document.getElementById('loanTotalRepay').textContent         = fmt(loan.totalRepay);
+document.getElementById('loanOutstanding').textContent        = loan.outstandingBalance > 0 ? fmt(loan.outstandingBalance) : '₦0.00';
+document.getElementById('loanPaidAmount').textContent         = fmt(loan.paidAmount);
+document.getElementById('loanInterest').textContent           = loan.interestRate + '%';
+document.getElementById('loanInterestAmount').textContent     = fmt(loan.interestAmount);
+document.getElementById('loanDuration').textContent           = (loan.duration ? loan.duration.duration : (loan.externalDuration || 'N/A')) + ' Months';
+document.getElementById('loanDisbursementMethod').textContent = loan.disbursementMethod ? capSt(loan.disbursementMethod) : '—';
+document.getElementById('loanCreatedAt').textContent          = fmtD(loan.createdAt);
+document.getElementById('loanDisbursementDate').textContent   = fmtD(loan.disbursementDate);
+document.getElementById('loanDueDate').textContent            = fmtD(loan.dueDate);
+
+// ── Countdown ──
+const countdownEl = document.getElementById('loanCountdown');
+if (loan.dueDate && ['approved', 'overdue', 'rolled_over'].includes(loan.status)) {
+    const daysLeft = Math.ceil((new Date(loan.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+    if (daysLeft < 0) {
+        countdownEl.innerHTML = `<span class="text-danger fw-bold">${Math.abs(daysLeft)} day(s) overdue</span>`;
+    } else if (daysLeft === 0) {
+        countdownEl.innerHTML = `<span class="text-danger fw-bold">Due today</span>`;
+    } else {
+        countdownEl.innerHTML = `<span class="${daysLeft <= 3 ? 'text-warning' : 'text-success'} fw-bold">${daysLeft} day(s) left</span>`;
+    }
+} else {
+    countdownEl.textContent = '—';
+}
+
+document.getElementById('loanApprovedAt').textContent         = fmtD(loan.approvedAt);
+document.getElementById('loanPaidAt').textContent             = fmtD(loan.paidAt);
 
     const stBadge  = document.getElementById('loanStatusBadge');
     const stColors = { pending:'bg-warning', approved:'bg-success', rejected:'bg-danger', overdue:'bg-danger', paid:'bg-primary', rolled_over:'bg-secondary' };
@@ -1401,6 +1446,9 @@ async function confirmApproval() {
 /* ══════════════════════════════════════
    PRINT LOAN OFFER LETTER (admin)
 ══════════════════════════════════════ */
+/* ══════════════════════════════════════
+   PRINT LOAN OFFER LETTER (admin)
+══════════════════════════════════════ */
 function printLoanOffer() {
     if (!selectedLoan) { showToast('No loan selected.', 'danger'); return; }
     const loan  = selectedLoan;
@@ -1430,6 +1478,13 @@ function printLoanOffer() {
                 </tr>`;
         }).join('')
         : `<tr><td colspan="4" style="padding:8px 10px;color:#94a3b8;">No guarantors on record.</td></tr>`;
+
+    // ── Chairman signature block ──
+    const chairmanSignatureBlock = (chairmanData && chairmanData.signatureUrl)
+        ? `<img src="${chairmanData.signatureUrl}" alt="Chairman Signature" style="height:50px;max-width:180px;object-fit:contain;">`
+        : `<div style="height:60px;border-bottom:1px solid #1e293b;"></div>`;
+
+    const chairmanNameLine = chairmanData ? chairmanData.name : 'Authorized Signatory';
 
     const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>Loan Offer Letter — ${borrowerName}</title>
@@ -1520,8 +1575,10 @@ thead th{background:#f1f5f9;text-align:left;padding:6px 10px;font-size:11px;text
     <div class="label">${borrowerName}<br>Borrower</div>
   </div>
   <div class="sign-box">
-    <div style="height:60px;border-bottom:1px solid #1e293b;"></div>
-    <div class="label">Authorized Signatory<br>Club De Stars Cooperative</div>
+    <div style="height:60px;display:flex;align-items:flex-end;border-bottom:1px solid #1e293b;padding-bottom:4px;">
+      ${chairmanSignatureBlock}
+    </div>
+    <div class="label">${chairmanNameLine}<br>COOP CHAIRMAN</div>
   </div>
 </div>
 
@@ -1634,6 +1691,19 @@ function getFilteredData(useFilter) {
     });
 }
 
+function getDueInfo(l) {
+    const st = (l.status || '').toLowerCase();
+    if (!l.dueDate || !['approved', 'overdue', 'rolled_over'].includes(st)) {
+        return { days: '', label: '—' };
+    }
+    const daysLeft = Math.ceil((new Date(l.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+    let label;
+    if (daysLeft < 0)      label = `${Math.abs(daysLeft)} days overdue`;
+    else if (daysLeft === 0) label = 'Due today';
+    else                   label = `${daysLeft} days left`;
+    return { days: daysLeft, label };
+}
+
 function buildExportRows(data) {
     return data.map((l, i) => {
         const isInt   = !!l.user;
@@ -1650,6 +1720,7 @@ function buildExportRows(data) {
         const createdDate = new Date(l.createdAt);
         const repayDate   = new Date(createdDate);
         repayDate.setMonth(repayDate.getMonth() + (l.duration?.duration || l.externalDuration || 0));
+        const dueInfo = getDueInfo(l);
         return {
             '#': i + 1,
             'Borrower Name':           name,
@@ -1670,6 +1741,8 @@ function buildExportRows(data) {
             'Application Date':        createdDate.toDateString(),
             'Disbursement Date':       fmtD(l.disbursementDate),
             'Due Date':                fmtD(l.dueDate),
+            'Due In (Days)':           dueInfo.days,
+            'Due Status':              dueInfo.label,
             'Approved At':             fmtD(l.approvedAt),
             'Paid At':                 fmtD(l.paidAt),
             'Overdue At':              fmtD(l.overdueAt),
@@ -1697,9 +1770,9 @@ function exportToExcel(useFilter) {
     ws['!cols'] = [
         {wch:4},{wch:24},{wch:16},{wch:28},{wch:16},{wch:26},{wch:18},
         {wch:16},{wch:14},{wch:16},{wch:18},{wch:16},{wch:20},{wch:16},
-        {wch:14},{wch:18},{wch:18},{wch:18},{wch:16},{wch:18},{wch:18},
-        {wch:18},{wch:16},{wch:24},{wch:24},{wch:14},{wch:16},{wch:22},
-        {wch:14},{wch:14},{wch:20},{wch:20},{wch:40},{wch:16}
+        {wch:14},{wch:18},{wch:18},{wch:18},{wch:16},{wch:14},{wch:16},
+        {wch:18},{wch:18},{wch:18},{wch:16},{wch:24},{wch:24},{wch:14},
+        {wch:16},{wch:22},{wch:14},{wch:14},{wch:20},{wch:20},{wch:40},{wch:16}
     ];
     const range = XLSX.utils.decode_range(ws['!ref']);
     for (let C = range.s.c; C <= range.e.c; C++) {
@@ -1707,7 +1780,7 @@ function exportToExcel(useFilter) {
         if (!ws[addr]) continue;
         ws[addr].s = { fill: { fgColor: { rgb: '1E3A8A' } }, font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 10 }, alignment: { horizontal: 'center', vertical: 'center', wrapText: true } };
     }
-    const numCols = [7, 9, 10, 11, 12, 26, 28];
+    const numCols = [7, 9, 10, 11, 12, 28, 30];
     for (let R = 1; R <= range.e.r; R++) {
         const fill = R % 2 === 0 ? 'EEF2FF' : 'FFFFFF';
         for (let C = range.s.c; C <= range.e.c; C++) {
@@ -1773,6 +1846,8 @@ function exportToPDF(useFilter) {
         const penalties = l.totalPenalty > 0 ? `<br><span style="color:#dc2626;font-size:9px;">Penalty: ₦${l.totalPenalty.toLocaleString()}</span>` : '';
         const rollovers = l.rolloverCount > 0 ? `<br><span style="color:#7c3aed;font-size:9px;">Rollovers: ${l.rolloverCount}</span>` : '';
         const blockTag  = (isInt && l.user.rolloverBlocked) ? `<br><span style="color:#dc2626;font-size:9px;font-weight:700;">⛔ Rollover Blocked</span>` : '';
+        const dueInfo   = getDueInfo(l);
+        const dueColor  = dueInfo.days !== '' && dueInfo.days < 0 ? '#dc2626' : (dueInfo.days !== '' && dueInfo.days <= 3 ? '#d97706' : '#6b7280');
         return `<tr style="background:${rowBg};">
             <td style="text-align:center;color:#9ca3af;font-size:11px;">${i+1}</td>
             <td><strong style="font-size:12px;">${name}</strong><br><span style="color:#9ca3af;font-size:10px;">${id}</span><br><span style="font-size:10px;color:#1e3a8a;">${accType}</span>${blockTag}</td>
@@ -1784,6 +1859,7 @@ function exportToPDF(useFilter) {
             <td style="text-align:center;"><span style="background:${sb};color:${sc};padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;">${capSt(l.status)}</span></td>
             <td style="font-size:10px;color:#6b7280;">${new Date(l.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
             <td style="font-size:10px;color:#6b7280;">${fmtD(l.dueDate)}</td>
+            <td style="font-size:10px;color:${dueColor};font-weight:700;">${dueInfo.label}</td>
         </tr>`;
     }).join('');
     const html = `<!DOCTYPE html>
@@ -1828,7 +1904,7 @@ tbody td{padding:7px 9px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
     <th>#</th><th>Borrower</th><th style="text-align:right;">Amount</th>
     <th style="text-align:right;">Outstanding</th><th style="text-align:right;">Paid</th>
     <th style="text-align:center;">Rate</th><th style="text-align:center;">Duration</th>
-    <th style="text-align:center;">Status</th><th>Date Applied</th><th>Due Date</th>
+    <th style="text-align:center;">Status</th><th>Date Applied</th><th>Due Date</th><th>Due In</th>
 </tr></thead>
 <tbody>${rows}</tbody>
 </table>

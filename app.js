@@ -9,12 +9,14 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
+
 app.use((req, res, next) => {
   if (req.headers.host === 'jeszltd.com') {
     return res.redirect(301, 'https://www.jeszltd.com' + req.url);
   }
   next();
 });
+
 const globalData = require("./globalData");
 const initSystem = require("./seed");
 
@@ -32,7 +34,7 @@ app.use(session({
     saveUninitialized: false,
     rolling: true,
     cookie: {
-        maxAge:   5 * 60 * 1000,
+        maxAge:   60 * 60 * 1000,
         httpOnly: true,
         sameSite: 'lax',
         // secure: true,
@@ -54,17 +56,6 @@ mongoose
     console.log("✅ DB connected");
 
     await initSystem();
-
-    // ── ONE-TIME BACKFILL — remove after first successful deploy ──
-    try {
-      const backfill = require("./backfillOperatingLedger");
-      await backfill();
-      console.log("✅ Backfill complete");
-    } catch (err) {
-      console.error("❌ Backfill failed:", err);
-      // non-fatal — server still starts
-    }
-    // ─────────────────────────────────────────────────────────────
 
     const port = process.env.PORT || 3000;
 
@@ -93,6 +84,6 @@ app.use(require("./routes/KiddiesLogic/kiddies"));
 
 
 app.use((req, res) => {
-  const previousPage = req.get('Referrer') || '/';
-  res.redirect(previousPage);
+  console.warn(`404: ${req.method} ${req.originalUrl}`);
+  res.status(404).send(`Cannot ${req.method} ${req.originalUrl}`);
 });

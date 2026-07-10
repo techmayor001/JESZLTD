@@ -443,7 +443,7 @@
             <div class="nav-category"><i class="fas fa-exchange-alt" style="font-size:.6rem;"></i>Transactions</div>
             <a href="/admin/manage-payment"><i class="fas fa-credit-card"></i>Payments</a>
             <a href="/admin/transaction-approvals"><i class="fas fa-tasks"></i>Approvals<span id="sidebarPendingBadge" class="nav-badge" style="display:none;">0</span></a>
-            <a href="/admin/manage-deposits"><i class="fas fa-coins"></i>Deposits</a>
+            <a href="/admin/manage-deposit"><i class="fas fa-coins"></i>Deposits</a>
             <a href="/admin/kiddies-deposits"><i class="fas fa-piggy-bank"></i>Kiddies Deposits</a>
             <a href="/admin/manage-withdrawals"><i class="fas fa-money-check-alt"></i>Withdrawals</a>
         </div>
@@ -875,6 +875,60 @@
                 </div>
             </div>
 
+<!-- ── CHAIRMAN SIGNATURE ────────────────────────────────── -->
+<div class="settings-section">
+    <div class="section-title">
+        <div class="icon-badge" style="background:linear-gradient(135deg,#0891b2 0%,#0e7490 100%);">
+            <i class="fas fa-signature"></i>
+        </div>
+        Chairman Signature
+    </div>
+
+    <div class="settings-card">
+        <div class="card-header-custom">
+            <h5>
+                <div class="icon-box" style="background:linear-gradient(135deg,#0891b2 0%,#22d3ee 100%);color:white;"><i class="fas fa-file-signature"></i></div>
+                Official Signature
+            </h5>
+            <p>Uploaded signature used on official cooperative documents and statements.</p>
+        </div>
+
+        <% if (chairman && chairman.officialSignature && chairman.officialSignature.url) { %>
+        <div class="account-display d-flex align-items-center gap-3">
+            <img src="<%= chairman.officialSignature.url %>" alt="Chairman signature"
+                style="max-height:80px;max-width:220px;background:white;border-radius:8px;padding:8px;border:1px solid rgba(30,58,138,0.1);">
+            <div class="text-muted" style="font-size:0.85rem;">
+                Chairman: <strong><%= chairman.firstName %> <%= chairman.lastName %></strong><br>
+                Uploaded: <strong><%= new Date(chairman.officialSignature.updatedAt).toLocaleString() %></strong>
+            </div>
+        </div>
+        <% } else { %>
+        <div class="alert-info-custom mb-3">
+            <i class="fas fa-info-circle"></i>
+            <div>No signature uploaded yet<% if (chairman) { %> for <%= chairman.firstName %> <%= chairman.lastName %><% } %>.</div>
+        </div>
+        <% } %>
+
+        <% if (admin.role && admin.role.name === 'chairman') { %>
+        <div class="form-group">
+            <label class="form-label"><i class="fas fa-upload"></i>Upload New Signature</label>
+            <input type="file" class="form-control" id="signatureFile" accept=".jpg,.jpeg,.png,.pdf">
+            <div class="help-text"><i class="fas fa-info-circle"></i><span>JPEG, PNG, or PDF — max 5MB. This replaces your existing signature immediately.</span></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" id="signatureUploadBtn" onclick="uploadChairmanSignature()">
+                <i class="fas fa-save me-2"></i>Upload Signature
+            </button>
+        </div>
+        <% } else { %>
+        <div class="help-text mt-2"><i class="fas fa-lock"></i><span>Only the chairman can upload this signature.</span></div>
+        <% } %>
+    </div>
+</div>
+
             <!-- ── DANGER ZONE ───────────────────────────────────────── -->
             <div class="settings-section">
                 <div class="section-title" style="color:#dc2626;">
@@ -1017,6 +1071,43 @@
         hideModal('resetOtherFeesModal');
         showToast('Additional fees reset to defaults.', 'warning');
     }
+
+
+    async function uploadChairmanSignature() {
+    const fileInput = document.getElementById('signatureFile');
+    const file = fileInput.files[0];
+    if (!file) { showToast('Please choose a file first.', 'error'); return; }
+
+    const btn = document.getElementById('signatureUploadBtn');
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Uploading…';
+
+    try {
+        const formData = new FormData();
+        formData.append('signature', file);
+
+        const res = await fetch('/admin/settings/chairman-signature', {
+            method: 'POST',
+            body: formData // no Content-Type header — browser sets multipart boundary
+        });
+        const result = await res.json();
+
+        if (result.success) {
+            showToast(result.message || 'Signature updated successfully!');
+            setTimeout(() => location.reload(), 1400);
+        } else {
+            showToast(result.message || 'Failed to upload signature.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('Error uploading signature.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+    }
+}
 
     // ══════════════════════════════════════════════════════════════
     // MAINTENANCE MODE

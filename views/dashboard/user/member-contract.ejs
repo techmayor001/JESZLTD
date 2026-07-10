@@ -32,6 +32,7 @@
   --party-b-bg:rgba(34,199,138,.06);--party-b-border:rgba(34,199,138,.2);
   --sig-bg:rgba(79,142,247,.05);--sig-border:rgba(79,142,247,.15);
   --divider:rgba(255,255,255,.06);
+  --part-bg:rgba(124,90,244,.08);--part-border:rgba(124,90,244,.2);--part-color:#a48cf8;
 }
 [data-theme="light"]{
   --bg:#f4f6fb;--bg-card:#ffffff;--bg-card2:#f0f3fa;
@@ -49,6 +50,7 @@
   --party-b-bg:#f0fdf4;--party-b-border:#bbf7d0;
   --sig-bg:#eff6ff;--sig-border:#bfdbfe;
   --divider:rgba(0,0,0,.06);
+  --part-bg:#f1edfe;--part-border:#ddd3fb;--part-color:#5b3fc4;
 }
 
 /* ══ BASE ══ */
@@ -153,6 +155,15 @@ button,input{font-family:inherit;}
   color:rgba(255,255,255,.8);
 }
 
+/* ══ QUICK-JUMP ══ */
+.doc-toc{display:flex;flex-wrap:wrap;gap:8px;padding:16px 36px 0;}
+.doc-toc a{
+  font-size:11px;font-weight:600;padding:6px 12px;border-radius:20px;
+  background:var(--bg-card3);border:1px solid var(--border);color:var(--muted);
+  transition:var(--tr);
+}
+.doc-toc a:hover{color:var(--accent);border-color:var(--accent);}
+
 /* ══ DOC BODY ══ */
 .doc-body{padding:32px 36px;}
 
@@ -171,8 +182,21 @@ button,input{font-family:inherit;}
 .party-ref.b{background:rgba(34,199,138,.1);color:var(--green);}
 .parties-and{text-align:center;padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}
 
+/* ══ PART DIVIDER ══ */
+.part-divider{
+  display:flex;align-items:center;gap:12px;margin:36px 0 22px;
+}
+.part-divider .line{flex:1;height:1px;background:var(--divider);}
+.part-label{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:7px 16px;border-radius:20px;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;
+  background:var(--part-bg);border:1px solid var(--part-border);color:var(--part-color);
+  white-space:nowrap;
+}
+
 /* ══ SECTIONS ══ */
-.doc-section{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--divider);}
+.doc-section{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--divider);scroll-margin-top:80px;}
 .doc-section:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0;}
 .section-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
 .section-num{
@@ -185,14 +209,15 @@ button,input{font-family:inherit;}
 .section-body{padding-left:40px;}
 .section-body p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:8px;}
 .section-body p:last-child{margin-bottom:0;}
-.clause-list{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:6px;}
-.clause-list li{display:flex;gap:10px;font-size:13px;color:var(--text2);line-height:1.6;}
+.clause-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+.clause-list li{display:flex;gap:10px;font-size:13px;color:var(--text2);line-height:1.65;}
 .clause-marker{
   flex-shrink:0;width:20px;height:20px;border-radius:5px;
   background:var(--section-num-bg);color:var(--section-num-color);
   display:flex;align-items:center;justify-content:center;
   font-size:10px;font-weight:700;margin-top:2px;
 }
+.clause-list strong{color:var(--text);}
 
 /* ══ SIGNATURES ══ */
 .signatures-section{margin-top:28px;}
@@ -260,6 +285,7 @@ button,input{font-family:inherit;}
   .sig-grid{grid-template-columns:1fr;}
   .member-details-grid{grid-template-columns:1fr 1fr;}
   .doc-body{padding:20px;}
+  .doc-toc{padding:14px 20px 0;}
 }
 @media(max-width:600px){
   .main{padding:14px;}
@@ -271,9 +297,10 @@ button,input{font-family:inherit;}
   .topnav{padding:0 12px;gap:8px;}
   .topnav-greeting h2{font-size:13px;}
   .topnav-greeting p{display:none;}
+  .doc-toc{padding:12px 16px 0;}
 }
 @media print{
-  .sidebar,.topnav,.powered-by,.doc-actions,.breadcrumb-row{display:none!important;}
+  .sidebar,.topnav,.powered-by,.doc-actions,.breadcrumb-row,.doc-toc{display:none!important;}
   .main{margin:0;padding:0;}
   .doc-wrapper{border:none;max-width:100%;}
   body{background:white;}
@@ -365,7 +392,7 @@ button,input{font-family:inherit;}
   </button>
   <div class="topnav-greeting">
     <h2>Membership Agreement</h2>
-    <p>Terms &amp; Conditions · MOU</p>
+    <p>Terms &amp; Conditions · MOU · Bylaws · Privacy</p>
   </div>
   <div class="topnav-right">
     <div class="status-row">
@@ -406,7 +433,7 @@ button,input{font-family:inherit;}
     <div class="doc-header">
       <div class="doc-header-icon"><i class="fas fa-file-contract"></i></div>
       <h1>MEMORANDUM OF UNDERSTANDING</h1>
-      <p>Membership Agreement &amp; Cooperative Bylaws</p>
+      <p>Membership Agreement · Bylaws · Terms of Use · Privacy Policy</p>
       <div class="doc-meta-row">
         <span class="doc-meta-chip">
           <i class="fas fa-registered" style="font-size:10px;"></i>
@@ -423,11 +450,20 @@ button,input{font-family:inherit;}
       </div>
     </div>
 
+    <!-- Quick jump -->
+    <div class="doc-toc">
+      <a href="#part-mou">MOU</a>
+      <a href="#part-bylaws">Bylaws</a>
+      <a href="#part-terms">Terms of Use</a>
+      <a href="#part-privacy">Privacy Policy</a>
+      <a href="#part-signatures">Signatures</a>
+    </div>
+
     <!-- Document Body -->
     <div class="doc-body">
 
       <!-- Parties -->
-      <div style="margin-bottom:28px;">
+      <div style="margin-bottom:28px;" id="part-mou">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px;">Parties to this Agreement</div>
 
         <div class="parties-grid">
@@ -445,6 +481,8 @@ button,input{font-family:inherit;}
           </div>
         </div>
       </div>
+
+      <!-- ═══════════ PART I — MOU ═══════════ -->
 
       <!-- Section 1 -->
       <div class="doc-section">
@@ -559,14 +597,526 @@ button,input{font-family:inherit;}
         </div>
       </div>
 
-      <!-- Section 9: Signatures -->
-      <div class="doc-section signatures-section">
+      <!-- ═══════════ PART II — BYLAWS ═══════════ -->
+      <div class="part-divider" id="part-bylaws">
+        <div class="line"></div>
+        <span class="part-label"><i class="fas fa-book" style="font-size:10px;"></i> Part II — Bylaws of the Cooperative</span>
+        <div class="line"></div>
+      </div>
+
+      <!-- Section 9 -->
+      <div class="doc-section">
         <div class="section-header">
           <div class="section-num">9</div>
+          <div class="section-title">Membership</div>
+        </div>
+        <div class="section-body">
+          <p>Membership shall be opened to Club and Non-club members:</p>
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span><strong>Club Members</strong> — Registered members of Club De Stars Worldwide.</span></li>
+            <li><div class="clause-marker">b</div><span><strong>Non-Club Members</strong> — Family, friends and associates of members of Club De Stars Worldwide.</span></li>
+            <li><div class="clause-marker">c</div><span><strong>Registration Fee</strong> — Membership registration shall be ₦5,000 for all categories of members.</span></li>
+            <li><div class="clause-marker">d</div><span><strong>Account Categories</strong> — <strong>Adult:</strong> members must be 18 years and above. <strong>Kiddies:</strong> for minors aged 1 month to 17 years, with the account opened and managed by a parent or guardian. Withdrawal tenure is a minimum of five (5) years, except in cases of death, permanent insanity, or a critical medical condition supported by a medical report from a registered hospital. The ROI on Kiddies Accounts is calculated using the same formula as other accounts, and the account may be upgraded to an adult account once the holder turns 18, upon submission of an upgrade application with a valid birth certificate or declaration of age. No loans shall be advanced on Kiddies Accounts.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 10 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">10</div>
+          <div class="section-title">Contributions</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>Savings shall be made at any time, with a minimum of ₦1,000.</span></li>
+            <li><div class="clause-marker">b</div><span>Savings shall be deposited into the Cooperative's designated account provided by the operating company with proper narration.</span></li>
+            <li><div class="clause-marker">c</div><span>The Cooperative's financial year shall run from December 1st to November 30th.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 11 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">11</div>
+          <div class="section-title">Withdrawals</div>
+        </div>
+        <div class="section-body">
+          <p><strong>On Demand Withdrawal</strong> — withdrawal outside the statutory window period set aside by the Cooperative.</p>
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>Applications for withdrawal of savings shall be processed within thirty (30) days of submission.</span></li>
+            <li><div class="clause-marker">b</div><span>Withdrawals shall be limited to two batches per financial year: a <strong>first withdrawal</strong> of up to 50% of total savings (subject to a 2.5% service charge), and a <strong>second withdrawal</strong> of the balance of savings after 30 days (also subject to a 2.5% service charge).</span></li>
+          </ul>
+          <p style="margin-top:12px;"><strong>Open-Window Withdrawal</strong> — withdrawal within the statutory window period (December 1st – December 10th). Members shall send their application from the 1st day of December to the 10th of December.</p>
+        </div>
+      </div>
+
+      <!-- Section 12 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">12</div>
+          <div class="section-title">Loans</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span><strong>Eligibility</strong> — An applicant must have been a member for at least one (1) month. Loans shall be advanced up to a maximum of three (3) times the applicant's total savings. Two guarantors are required for the loan to be approved.</span></li>
+            <li><div class="clause-marker">b</div><span><strong>Loan Tenor and Interest Rates</strong> — One Month Loan: 3% for Club Members, 7% for Non-Club Members.</span></li>
+            <li><div class="clause-marker">c</div><span><strong>Loan Rollover</strong> — Upon expiration of loan tenor, members may roll over to the next month (unlimited) if a fresh loan application is submitted for the same amount. Official rollovers attract an extra 1%, applicable only once irrespective of the number of rollovers.</span></li>
+            <li><div class="clause-marker">d</div><span><strong>Default Penalties</strong> — Loans not refunded within 30 days attract 0.5% of the outstanding amount for each extra day. Management may liquidate a member's savings to offset outstanding loans. Upon notification, part of a guarantor's savings may be used to settle an outstanding loan, and at year-end management reserves the right to deduct from guarantors' savings without prior approval if loans remain unpaid.</span></li>
+            <li><div class="clause-marker">e</div><span><strong>Disbursement</strong> — Loans shall be disbursed only into accounts bearing the applicant's full name.</span></li>
+            <li><div class="clause-marker">f</div><span><strong>Priority</strong> — Loans shall be granted on a first-come, first-served basis, subject to funds availability.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 13 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">13</div>
+          <div class="section-title">Profit and Surplus Distribution</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span><strong>Service Fee</strong> — Fifteen percent (15%) of total profit generated annually shall be paid to the operating company as service fee, remitted monthly on a pro-rata basis upon submission of invoice and approval by Cooperative management.</span></li>
+            <li><div class="clause-marker">b</div><span><strong>Operating Surplus</strong> — At the end of each financial year, all surplus funds shall be remitted to Club De Stars Worldwide, with 15% of the surplus given to the operating company.</span></li>
+            <li><div class="clause-marker">c</div><span><strong>Profit Sharing</strong> — Profit shall be calculated monthly but distributed only at the end of each financial year, based on total savings.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 14 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">14</div>
+          <div class="section-title">Investments</div>
+        </div>
+        <div class="section-body">
+          <p>The Cooperative shall invest in low-risk, profit-generating portfolios to ensure sustainability and growth.</p>
+        </div>
+      </div>
+
+      <!-- Section 15 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">15</div>
+          <div class="section-title">General Provisions</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>Members may instruct management to liquidate their savings to offset outstanding loan balances.</span></li>
+            <li><div class="clause-marker">b</div><span>The Cooperative reserves the right to review interest rates, service fees, and investment policies periodically at an AGM.</span></li>
+            <li><div class="clause-marker">c</div><span>Every member shall maintain a minimum share capital of ₦10,000. Should a member decide to liquidate their savings below the minimum share capital, such account will be considered closed and the member will be required to re-register.</span></li>
+            <li><div class="clause-marker">d</div><span>Newly registered members are mandated to fund their accounts with the minimum share capital of ₦10,000 within one month of registration, else such account will be deactivated or re-assigned.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 16 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">16</div>
+          <div class="section-title">Annual General Meeting / Special General Meeting</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>The Annual General Meeting shall hold once a year in the last week of November (Management shall determine the actual day).</span></li>
+            <li><div class="clause-marker">b</div><span>A Special General Meeting shall be held when the need arises.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ═══════════ PART III — TERMS OF USE ═══════════ -->
+      <div class="part-divider" id="part-terms">
+        <div class="line"></div>
+        <span class="part-label"><i class="fas fa-file-contract" style="font-size:10px;"></i> Part III — Terms &amp; Conditions of Use</span>
+        <div class="line"></div>
+      </div>
+
+      <!-- Section 17 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">17</div>
+          <div class="section-title">Acceptance of Terms</div>
+        </div>
+        <div class="section-body">
+          <p>By accessing and using the Club De Stars Multipurpose Cooperative Society Limited website and services, the Member acknowledges that they have read, understood, and agree to be bound by these Terms and Conditions and the Bylaws above. Continued use of the platform after any changes constitutes acceptance of the updated terms.</p>
+        </div>
+      </div>
+
+      <!-- Section 18 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">18</div>
+          <div class="section-title">Membership Agreement</div>
+        </div>
+        <div class="section-body">
+          <p>Upon registration, the Member agrees to:</p>
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>Provide accurate, current, and complete information during registration.</span></li>
+            <li><div class="clause-marker">b</div><span>Maintain and update their information to keep it accurate and current.</span></li>
+            <li><div class="clause-marker">c</div><span>Be responsible for maintaining the confidentiality of their account credentials.</span></li>
+            <li><div class="clause-marker">d</div><span>Notify the Cooperative immediately of any unauthorized access to their account.</span></li>
+            <li><div class="clause-marker">e</div><span>Comply with all applicable bylaws and Cooperative policies.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 19 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">19</div>
+          <div class="section-title">Registration and Account Activation</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>Registration requires payment of a one-time fee of ₦5,000.</span></li>
+            <li><div class="clause-marker">b</div><span>The account will be subject to administrative approval before activation.</span></li>
+            <li><div class="clause-marker">c</div><span>The Member must fund their account with a minimum share capital of ₦10,000 within one month of approval, or the account will be deactivated.</span></li>
+            <li><div class="clause-marker">d</div><span>The Member must be at least 18 years old to register for an adult account.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 20 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">20</div>
+          <div class="section-title">Financial Transactions</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>All payments processed through the platform are handled securely via the Paystack payment gateway.</span></li>
+            <li><div class="clause-marker">b</div><span>The Member is responsible for ensuring sufficient funds in their designated account for loan repayments and other obligations.</span></li>
+            <li><div class="clause-marker">c</div><span>Service charges apply to certain transactions as outlined in the Bylaws above.</span></li>
+            <li><div class="clause-marker">d</div><span>The Cooperative reserves the right to adjust fees with prior notice to members.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 21 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">21</div>
+          <div class="section-title">Loans and Guarantorship</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>By accepting to be a guarantor for another member, the Member agrees that their savings may be used to offset defaulted loans.</span></li>
+            <li><div class="clause-marker">b</div><span>Loan defaults are subject to the penalties outlined in the Loans article of the Bylaws.</span></li>
+            <li><div class="clause-marker">c</div><span>The Cooperative reserves the right to report persistent defaulters to credit bureaus.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 22 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">22</div>
+          <div class="section-title">Use of Platform</div>
+        </div>
+        <div class="section-body">
+          <p>The Member agrees not to:</p>
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>Use the platform for any illegal or unauthorized purpose.</span></li>
+            <li><div class="clause-marker">b</div><span>Attempt to gain unauthorized access to any part of the platform.</span></li>
+            <li><div class="clause-marker">c</div><span>Transmit any viruses, malware, or harmful code.</span></li>
+            <li><div class="clause-marker">d</div><span>Interfere with the proper functioning of the platform.</span></li>
+            <li><div class="clause-marker">e</div><span>Impersonate another person or entity.</span></li>
+            <li><div class="clause-marker">f</div><span>Harass, abuse, or harm other members.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 23 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">23</div>
+          <div class="section-title">Data and Document Submission</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>The Member warrants that all documents and information submitted are genuine, accurate, and legally obtained.</span></li>
+            <li><div class="clause-marker">b</div><span>Submission of fraudulent documents will result in immediate account termination and possible legal action.</span></li>
+            <li><div class="clause-marker">c</div><span>The Cooperative reserves the right to verify all submitted documents with relevant authorities.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 24 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">24</div>
+          <div class="section-title">Intellectual Property</div>
+        </div>
+        <div class="section-body">
+          <p>All content on the platform, including text, graphics, logos, and software, is the property of Club De Stars Multipurpose Cooperative Society Limited or its licensors and is protected by intellectual property laws. Reproduction, distribution, or creation of derivative works requires express written permission.</p>
+        </div>
+      </div>
+
+      <!-- Section 25 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">25</div>
+          <div class="section-title">Limitation of Liability</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>The Cooperative shall not be liable for any indirect, incidental, special, or consequential damages arising from use of the platform.</span></li>
+            <li><div class="clause-marker">b</div><span>Uninterrupted or error-free service is not guaranteed, and the Cooperative is not liable for technical failures.</span></li>
+            <li><div class="clause-marker">c</div><span>Investment returns are not guaranteed, and members bear the risk of investment losses within acceptable risk parameters.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 26 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">26</div>
+          <div class="section-title">Account Termination</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>A Member may close their account at any time, subject to settlement of all outstanding obligations.</span></li>
+            <li><div class="clause-marker">b</div><span>The Cooperative reserves the right to suspend or terminate accounts that violate these terms or engage in fraudulent activity.</span></li>
+            <li><div class="clause-marker">c</div><span>Upon termination, the Member remains liable for any outstanding debts or obligations.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 27 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">27</div>
+          <div class="section-title">Modifications to Terms</div>
+        </div>
+        <div class="section-body">
+          <p>The Cooperative reserves the right to modify these Terms and Conditions at any time. Changes take effect upon posting to the website, and continued use of the services after changes constitutes acceptance of the modified terms.</p>
+        </div>
+      </div>
+
+      <!-- Section 28 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">28</div>
+          <div class="section-title">Governing Law</div>
+        </div>
+        <div class="section-body">
+          <p>These Terms and Conditions are governed by and construed in accordance with the laws of the Federal Republic of Nigeria. Any disputes shall be subject to the exclusive jurisdiction of Nigerian courts.</p>
+        </div>
+      </div>
+
+      <!-- Section 29 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">29</div>
+          <div class="section-title">Contact Information</div>
+        </div>
+        <div class="section-body">
+          <p>Questions about these Terms and Conditions may be directed to the Cooperative through the official channels provided on the website or to Cooperative management directly.</p>
+        </div>
+      </div>
+
+      <!-- ═══════════ PART IV — PRIVACY POLICY ═══════════ -->
+      <div class="part-divider" id="part-privacy">
+        <div class="line"></div>
+        <span class="part-label"><i class="fas fa-shield-alt" style="font-size:10px;"></i> Part IV — Privacy Policy</span>
+        <div class="line"></div>
+      </div>
+
+      <!-- Section 30 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">30</div>
+          <div class="section-title">Introduction</div>
+        </div>
+        <div class="section-body">
+          <p>Club De Stars Multipurpose Cooperative Society Limited ("we," "our," or "us") is committed to protecting Member privacy. This Privacy Policy explains how information is collected, used, disclosed, and safeguarded in connection with the website and services.</p>
+        </div>
+      </div>
+
+      <!-- Section 31 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">31</div>
+          <div class="section-title">Information We Collect</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span><strong>Personal Information</strong> — full name, email address, phone number, date of birth, state and LGA of residence, residential address, and encrypted password.</span></li>
+            <li><div class="clause-marker">b</div><span><strong>KYC Documentation</strong> — proof of address, passport photograph, government-issued identification (NIN, International Passport, Driver's License, Voter's Card), ID number, and digital signature.</span></li>
+            <li><div class="clause-marker">c</div><span><strong>Financial Information</strong> — savings and transaction history, loan applications and repayment records, bank account details for disbursements, and payment information processed securely through Paystack.</span></li>
+            <li><div class="clause-marker">d</div><span><strong>Technical Data</strong> — IP address, browser type and version, device information, operating system, access times and dates, and navigation patterns.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 32 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">32</div>
+          <div class="section-title">How We Use Your Information</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span><strong>Account Management</strong> — to create, maintain, and manage the Member's account.</span></li>
+            <li><div class="clause-marker">b</div><span><strong>Identity Verification</strong> — to verify identity and comply with KYC regulations.</span></li>
+            <li><div class="clause-marker">c</div><span><strong>Transaction Processing</strong> — to process savings deposits, withdrawals, and loan applications.</span></li>
+            <li><div class="clause-marker">d</div><span><strong>Communication</strong> — to send important updates, notifications, and respond to inquiries.</span></li>
+            <li><div class="clause-marker">e</div><span><strong>Security</strong> — to monitor and prevent fraudulent activities and unauthorized access.</span></li>
+            <li><div class="clause-marker">f</div><span><strong>Compliance</strong> — to comply with legal obligations and regulatory requirements.</span></li>
+            <li><div class="clause-marker">g</div><span><strong>Service Improvement</strong> — to analyze usage patterns and improve the platform.</span></li>
+            <li><div class="clause-marker">h</div><span><strong>Record Keeping</strong> — to maintain accurate financial records as required by cooperative regulations.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 33 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">33</div>
+          <div class="section-title">Information Sharing and Disclosure</div>
+        </div>
+        <div class="section-body">
+          <p>We do not sell, trade, or rent personal information to third parties. Information may be shared only in the following circumstances:</p>
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span><strong>With Service Providers</strong> — trusted third parties who assist in operating the platform (e.g. Paystack, hosting providers, email services), contractually bound to protect Member information.</span></li>
+            <li><div class="clause-marker">b</div><span><strong>Legal Requirements</strong> — disclosure if required by law, court order, or government regulation, or to protect the Cooperative's rights, property, or safety.</span></li>
+            <li><div class="clause-marker">c</div><span><strong>Business Transfers</strong> — in the event of a merger, acquisition, or sale of assets, information may be transferred to the acquiring entity.</span></li>
+            <li><div class="clause-marker">d</div><span><strong>With Consent</strong> — information may be shared with third parties when the Member has given explicit consent.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 34 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">34</div>
+          <div class="section-title">Data Security</div>
+        </div>
+        <div class="section-body">
+          <p>Appropriate technical and organizational measures are used to protect personal information, including:</p>
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span>Encryption of sensitive data in transit and at rest.</span></li>
+            <li><div class="clause-marker">b</div><span>Secure password hashing using industry-standard algorithms.</span></li>
+            <li><div class="clause-marker">c</div><span>Regular security audits and vulnerability assessments.</span></li>
+            <li><div class="clause-marker">d</div><span>Access controls limiting employee access to personal data.</span></li>
+            <li><div class="clause-marker">e</div><span>Secure payment processing through PCI-DSS compliant providers.</span></li>
+            <li><div class="clause-marker">f</div><span>Regular backups to prevent data loss.</span></li>
+          </ul>
+          <p style="margin-top:10px;">No method of transmission over the internet is 100% secure. While we strive to protect Member information, we cannot guarantee absolute security.</p>
+        </div>
+      </div>
+
+      <!-- Section 35 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">35</div>
+          <div class="section-title">Data Retention</div>
+        </div>
+        <div class="section-body">
+          <p>Personal information is retained for as long as necessary to fulfill the purposes outlined in this Privacy Policy, in accordance with Nigerian cooperative society regulations and tax laws. After account closure, certain information may be retained for legal, regulatory, or legitimate business purposes.</p>
+        </div>
+      </div>
+
+      <!-- Section 36 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">36</div>
+          <div class="section-title">Your Rights and Choices</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span><strong>Access</strong> — request access to the personal information held.</span></li>
+            <li><div class="clause-marker">b</div><span><strong>Correction</strong> — update or correct inaccurate information through account settings.</span></li>
+            <li><div class="clause-marker">c</div><span><strong>Deletion</strong> — request deletion of the account, subject to settlement of all obligations.</span></li>
+            <li><div class="clause-marker">d</div><span><strong>Objection</strong> — object to certain processing of data.</span></li>
+            <li><div class="clause-marker">e</div><span><strong>Portability</strong> — request a copy of data in a structured, machine-readable format.</span></li>
+            <li><div class="clause-marker">f</div><span><strong>Withdrawal of Consent</strong> — withdraw consent for processing where the Cooperative relies on consent.</span></li>
+          </ul>
+          <p style="margin-top:10px;">To exercise these rights, contact the Cooperative through the official channels provided on the website.</p>
+        </div>
+      </div>
+
+      <!-- Section 37 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">37</div>
+          <div class="section-title">Cookies and Tracking Technologies</div>
+        </div>
+        <div class="section-body">
+          <ul class="clause-list">
+            <li><div class="clause-marker">a</div><span><strong>Essential Cookies</strong> — necessary for the platform to function (e.g. session management, security).</span></li>
+            <li><div class="clause-marker">b</div><span><strong>Performance Cookies</strong> — help us understand how visitors use the website.</span></li>
+            <li><div class="clause-marker">c</div><span><strong>Functionality Cookies</strong> — remember preferences and settings.</span></li>
+          </ul>
+          <p style="margin-top:10px;">Cookies can be controlled through browser settings, though disabling certain cookies may limit functionality.</p>
+        </div>
+      </div>
+
+      <!-- Section 38 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">38</div>
+          <div class="section-title">Children's Privacy</div>
+        </div>
+        <div class="section-body">
+          <p>Services are not directed to individuals under 18 years of age, except for Kiddies Accounts managed by parents or guardians. Personal information from minors is not knowingly collected without parental consent. Where unauthorized collection of a minor's data becomes known, steps will be taken to delete it.</p>
+        </div>
+      </div>
+
+      <!-- Section 39 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">39</div>
+          <div class="section-title">Third-Party Links</div>
+        </div>
+        <div class="section-body">
+          <p>The platform may contain links to third-party websites. The Cooperative is not responsible for the privacy practices of these external sites and encourages Members to review their privacy policies before providing any personal information.</p>
+        </div>
+      </div>
+
+      <!-- Section 40 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">40</div>
+          <div class="section-title">International Data Transfers</div>
+        </div>
+        <div class="section-body">
+          <p>Information is primarily stored and processed in Nigeria. Where information is transferred internationally, appropriate safeguards are applied to protect it in accordance with this Privacy Policy.</p>
+        </div>
+      </div>
+
+      <!-- Section 41 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">41</div>
+          <div class="section-title">Changes to This Privacy Policy</div>
+        </div>
+        <div class="section-body">
+          <p>This Privacy Policy may be updated from time to time to reflect changes in practices or legal requirements. Material changes will be posted on the website with an updated "Last Updated" date, and continued use of the services after changes constitutes acceptance of the updated policy.</p>
+        </div>
+      </div>
+
+      <!-- Section 42 -->
+      <div class="doc-section">
+        <div class="section-header">
+          <div class="section-num">42</div>
+          <div class="section-title">Contact Us</div>
+        </div>
+        <div class="section-body">
+          <p>Questions, concerns, or requests regarding this Privacy Policy or data practices may be directed to Club De Stars Multipurpose Cooperative Society Limited through the official channels provided on the website.</p>
+        </div>
+      </div>
+
+      <!-- ═══════════ SIGNATURES ═══════════ -->
+      <div class="doc-section signatures-section" id="part-signatures">
+        <div class="section-header">
+          <div class="section-num">43</div>
           <div class="section-title">Signatures</div>
         </div>
 
-        <p class="sig-intro">By signing below, all parties acknowledge that they have read, understood, and agreed to the terms outlined in this document.</p>
+        <p class="sig-intro">By signing below, all parties acknowledge that they have read, understood, and agreed to the terms outlined in this document, including the Memorandum of Understanding, Bylaws, Terms &amp; Conditions of Use, and Privacy Policy above.</p>
 
         <!-- Cooperative + Operating Company -->
         <div class="sig-grid" style="margin-bottom:14px;">

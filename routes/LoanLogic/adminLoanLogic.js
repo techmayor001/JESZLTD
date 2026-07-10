@@ -142,7 +142,7 @@ function computeDueDate(startDate, duration, durationUnit = "months") {
 router.get("/admin/manage-loan", ensureAdmin("view_loans"), async (req, res) => {
   try {
     const loans = await Loan.find()
- 
+
       // ── Borrower (internal member) ──
       .populate({
         path: "user",
@@ -157,11 +157,11 @@ router.get("/admin/manage-loan", ensureAdmin("view_loans"), async (req, res) => 
           }
         }
       })
-      
- 
+
+
       // ── Loan duration settings ──
       .populate("duration", "duration label")
- 
+
       // ── Guarantors with their account balances ──
       .populate({
         path: "guarantors.guarantor",
@@ -171,15 +171,21 @@ router.get("/admin/manage-loan", ensureAdmin("view_loans"), async (req, res) => 
           select: "balance"
         }
       })
- 
+
       // ── Admin who initiated the loan (optional, for audit) ──
       .populate("initiatedBy", "firstName lastName email")
- 
+
       // ── Rollover: the replacement loan this was rolled into ──
       .populate("rolledIntoLoan", "amount status createdAt")
- 
+
       .sort({ createdAt: -1 });
- 
+
+    // ── Fetch chairman's official signature for the offer letter ──
+    const chairmanRole = await Role.findOne({ name: /^chairman$/i }).select("_id");
+    const chairman = chairmanRole
+      ? await User.findOne({ role: chairmanRole._id }).select("firstName lastName officialSignature")
+      : null;
+
     // ── Compute stats server-side ──────────────────────────────
     // "Active" = approved + rolled_over (both are live/disbursed loans)
     const stats = {
@@ -190,7 +196,7 @@ router.get("/admin/manage-loan", ensureAdmin("view_loans"), async (req, res) => 
       paidCount:      0,
       rolledOverCount: 0,  // status === 'rolled_over'
       activeCount:    0,   // approved + rolled_over
- 
+
       // Financial sums
       activeTotalAmount:    0,   // approved + rolled_over amounts
       overdueTotalAmount:   0,
@@ -200,64 +206,64 @@ router.get("/admin/manage-loan", ensureAdmin("view_loans"), async (req, res) => 
       totalPenaltiesCharged:0,
       grandTotal:           0,   // all loan amounts combined
     };
- 
+
     loans.forEach(loan => {
       const status = (loan.status || "").toLowerCase();
       const amount = Number(loan.amount)             || 0;
       const outBal = Number(loan.outstandingBalance) || 0;
       const paid   = Number(loan.paidAmount)         || 0;
       const pen    = Number(loan.totalPenalty)        || 0;
- 
+
       stats.grandTotal           += amount;
       stats.outstandingTotal     += outBal;
       stats.paidBackTotal        += paid;
       stats.totalPenaltiesCharged+= pen;
- 
+
       switch (status) {
         case "pending":
           stats.pendingCount++;
           stats.pendingTotalAmount += amount;
           break;
- 
+
         case "approved":
           stats.approvedCount++;
           stats.activeCount++;
           stats.activeTotalAmount += amount;
           break;
- 
+
         case "rolled_over":
           stats.rolledOverCount++;
           stats.activeCount++;               // counts as active
           stats.activeTotalAmount += amount;
           break;
- 
+
         case "overdue":
           stats.overdueCount++;
           stats.overdueTotalAmount += amount;
           break;
- 
+
         case "rejected":
           stats.rejectedCount++;
           break;
- 
+
         case "paid":
           stats.paidCount++;
           break;
       }
     });
- 
+
     res.render("dashboard/admin/loan", {
       admin: req.user,
       loans,
       stats,  // available in template via <%= stats.activeCount %> etc.
+      chairman,
     });
- 
+
   } catch (error) {
     console.error("Error fetching loans:", error);
     res.status(500).send("Internal Server Error");
   }
 });
-
 
 // PATCH /api/admin/members/:userId/rollover-block
 router.patch("/api/admin/members/:userId/rollover-block", ensureAdmin("approve_loans"), async (req, res) => {
@@ -967,6 +973,128 @@ router.get("/api/loans/:loanId/penalty-history", ensureAdmin("view_loans"), asyn
   }
 });
 
+
+
+
+
+/**
+ * Send loan repayment reminder email via Brevo HTTP API
+ */
+async function sendLoanReminderEmail({ email, firstName, loanAmount, outstandingBalance, dueDate, daysLeft, membershipID }) {
+  const isOverdue = daysLeft < 0;
+  const daysText = isOverdue
+    ? `${Math.abs(daysLeft)} day(s) overdue`
+    : daysLeft === 0
+      ? "due today"
+      : `${daysLeft} day(s) remaining`;
+
+  const fmtMoney = n => '₦' + Number(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+  const fmtDate  = d => new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": process.env.BREVO_API_KEY,
+    },
+    body: JSON.stringify({
+      sender: {
+        name: process.env.BREVO_SENDER_NAME || "Club De Stars Cooperative",
+        email: process.env.BREVO_SENDER_EMAIL,
+      },
+      to: [{ email }],
+      subject: isOverdue
+        ? `URGENT: Your loan repayment is overdue — Club De Stars`
+        : `Reminder: Loan repayment due ${daysText} — Club De Stars`,
+      htmlContent: `
+        <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#f8fafc;">
+          <div style="background:linear-gradient(135deg,${isOverdue ? '#dc2626,#991b1b' : '#1e3a8a,#3b82f6'});border-radius:16px;padding:28px;text-align:center;">
+            <h1 style="color:#fff;font-size:20px;margin:0;">CLUB DE STARS</h1>
+            <p style="color:${isOverdue ? '#fecaca' : '#dbeafe'};font-size:12px;margin:4px 0 0;">Multipurpose Cooperative Society Ltd</p>
+          </div>
+          <div style="background:#fff;border-radius:16px;padding:28px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <h2 style="color:${isOverdue ? '#991b1b' : '#111827'};font-size:18px;margin:0 0 12px;">
+              ${isOverdue ? '⚠️ Loan Repayment Overdue' : 'Loan Repayment Reminder'}
+            </h2>
+            <p style="color:#4b5563;font-size:14px;line-height:1.6;">
+              Hi ${firstName || "there"}, this is a reminder regarding your active loan with Club De Stars Cooperative (Membership ID: ${membershipID || 'N/A'}).
+            </p>
+            <div style="background:${isOverdue ? '#fef2f2' : '#eff6ff'};border:1px solid ${isOverdue ? '#fecaca' : '#bfdbfe'};border-radius:10px;padding:18px;margin:20px 0;">
+              <table style="width:100%;font-size:13px;color:#374151;border-collapse:collapse;">
+                <tr><td style="padding:4px 0;">Loan Amount</td><td style="text-align:right;font-weight:700;">${fmtMoney(loanAmount)}</td></tr>
+                <tr><td style="padding:4px 0;">Outstanding Balance</td><td style="text-align:right;font-weight:700;color:${isOverdue ? '#dc2626' : '#1e40af'};">${fmtMoney(outstandingBalance)}</td></tr>
+                <tr><td style="padding:4px 0;">Due Date</td><td style="text-align:right;font-weight:700;">${fmtDate(dueDate)}</td></tr>
+                <tr><td style="padding:4px 0;">Status</td><td style="text-align:right;font-weight:700;color:${isOverdue ? '#dc2626' : '#d97706'};">${daysText}</td></tr>
+              </table>
+            </div>
+            <p style="color:#4b5563;font-size:14px;line-height:1.6;">
+              ${isOverdue
+                ? 'Please settle your outstanding balance as soon as possible to avoid further penalties. Contact the cooperative office if you need assistance.'
+                : 'Please ensure your repayment is made on or before the due date to avoid late penalties.'}
+            </p>
+          </div>
+          <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:16px;">
+            Club De Stars Multipurpose Cooperative Society Ltd · Powered by JESZ LTD
+          </p>
+        </div>
+      `,
+    }),
+  });
+
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`Brevo send failed: ${res.status} ${errBody}`);
+  }
+}
+
+
+
+
+
+// ─────────────────────────────────────────────
+// Send Loan Repayment Reminder
+// ─────────────────────────────────────────────
+router.post("/api/loans/:id/reminder", ensureAdmin("view_loans"), async (req, res) => {
+  try {
+    const loan = await Loan.findById(req.params.id).populate("user", "firstName email membershipID");
+
+    if (!loan) {
+      return res.status(404).json({ message: "Loan not found." });
+    }
+
+    if (!loan.user) {
+      return res.status(400).json({ message: "This loan has no internal member to notify (external/company loan)." });
+    }
+
+    if (!loan.user.email) {
+      return res.status(400).json({ message: "Member has no email on file." });
+    }
+
+    if (!loan.dueDate) {
+      return res.status(400).json({ message: "Loan has no due date set yet." });
+    }
+
+    const daysLeft = Math.ceil((new Date(loan.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+
+    await sendLoanReminderEmail({
+      email: loan.user.email,
+      firstName: loan.user.firstName,
+      loanAmount: loan.amount,
+      outstandingBalance: loan.outstandingBalance || loan.totalRepay || loan.amount,
+      dueDate: loan.dueDate,
+      daysLeft,
+      membershipID: loan.user.membershipID,
+    });
+
+    res.json({
+      success: true,
+      message: `Reminder sent to ${loan.user.email} successfully.`,
+    });
+  } catch (err) {
+    console.error("Send loan reminder error:", err);
+    res.status(500).json({ message: "Failed to send reminder email." });
+  }
+});
 
 
 
