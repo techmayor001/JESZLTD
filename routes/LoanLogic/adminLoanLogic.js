@@ -1682,10 +1682,10 @@ router.get(
         else if (ptype === "loan_penalty"     || ref.startsWith("PENALTY-"))                              transactionType = "penalty";
 
         // ── Status normalisation ─────────────────────────────────────────
-        const status =
-          payment.status === "paid" || payment.status === "success" ? "approved"
-          : payment.status === "failed"                             ? "rejected"
-          : "pending";
+       const status =
+        payment.status === "paid" || payment.status === "success" ? "approved"
+        : payment.status === "failed" || payment.status === "rejected" ? "rejected"
+        : "pending";
 
         // ── Breakdown — prefer top-level fields, fall back to meta ────────
         // Some payment types (e.g. rollover_request) store breakdown inside
@@ -2501,4 +2501,100 @@ router.post(
 );
 
 
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /admin/loans/:id/reject-payment
+// Reject a pending loan payment OR a pending rollover request.
+// Rejecting never mutates the Loan document — it just declines the request.
+// ─────────────────────────────────────────────────────────────────────────────
+router.post(
+  "/admin/loans/:id/reject-payment",
+  ensureAdmin("process_deposits"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 1. ATOMIC REJECTION — only touch payments that haven't been processed
+      // ═══════════════════════════════════════════════════════════════════════
+      const payment = await Payment.findOneAndUpdate(
+        {
+          _id: id,
+          status: { $nin: ["success", "paid", "rejected", "failed"] },
+        },
+        {
+          $set: {
+            status: "rejected",
+            "paystackResponse.adminNote": reason || "Rejected by admin",
+            "paystackResponse.rejectedAt": new Date(),
+          },
+        },
+        { new: true }
+      ).populate({ path: "user", populate: { path: "account" } });
+
+      if (!payment) {
+        return res.status(400).json({ message: "Payment already processed or not found" });
+      }
+
+      if (!payment.loanId) {
+        return res.status(400).json({ message: "This payment is not a loan payment." });
+      }
+
+      const isRollover =
+        payment.type === "rollover_request" || payment.paymentType === "rollover_request";
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 2. LINKED TRANSACTION — mark it declined so it doesn't sit as "pending"
+      // ═══════════════════════════════════════════════════════════════════════
+      await Transaction.findOneAndUpdate(
+        { reference: payment.reference },
+        {
+          status: "declined",
+          description: isRollover
+            ? `Rollover request rejected by admin: ${reason || "No reason provided"}`
+            : `Loan payment rejected by admin: ${reason || "No reason provided"}`,
+        }
+      );
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 3. NOTE: no Loan document is touched here.
+      //    - Regular repayment reject → loan balance stays exactly as it was.
+      //    - Rollover reject → the original loan stays "approved"/"overdue",
+      //      no new loan is created, oldLoan.status is never flipped to
+      //      "rolled_over". This is the mirror-opposite of the rollover
+      //      branch in /approve-payment, which is the only place that logic
+      //      lives — so rejecting here is simply "do nothing to the loan".
+      // ═══════════════════════════════════════════════════════════════════════
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 4. ADMIN ACTION LOG
+      // ═══════════════════════════════════════════════════════════════════════
+      await AdminActionLog.create({
+        admin:       req.user._id,
+        adminRole:   req.user.role?.name || "admin",
+        actionType:  isRollover ? "loan_rollover_reject" : "deposit_reject",
+        targetUser:  payment.user?._id || null,
+        targetModel: "Payment",
+        targetId:    payment._id,
+        description: isRollover
+          ? `Rejected loan rollover request ${payment.reference}: ${reason || "No reason provided"}`
+          : `Rejected loan payment ${payment.reference}: ${reason || "No reason provided"}`,
+        ipAddress:  req.ip,
+        userAgent:  req.headers["user-agent"],
+        status:     "success",
+      });
+
+      return res.json({
+        success: true,
+        message: isRollover
+          ? "Rollover request rejected. The original loan is unchanged."
+          : "Loan payment rejected. Loan balance is unchanged.",
+      });
+
+    } catch (error) {
+      console.error("Reject loan payment error:", error);
+      res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+  }
+);
 module.exports = router;

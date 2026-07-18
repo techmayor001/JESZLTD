@@ -536,6 +536,7 @@ const adminActionLogSchema = new mongoose.Schema(
         "withdrawal_reject",
         "loan_approve",
         "loan_reject",
+        "loan_rollover_reject",
         "loan_disburse",
         "roi_distribute",
         "extra_charge_add",

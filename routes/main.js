@@ -277,10 +277,6 @@ router.post("/withdraw", async (req, res) => {
     if (!["regular", "ondemand"].includes(type)) {
       return res.status(400).json({ message: "Invalid withdrawal type" });
     }
-
-    /* ═══════════════════════════════════════════════════════════════════════
-       2. FETCH USER + ACCOUNT (with memberType) + ACTIVE LOANS
-    ═══════════════════════════════════════════════════════════════════════ */
     const user = await User.findById(userId)
       .populate({
         path: "account",
@@ -300,9 +296,6 @@ router.post("/withdraw", async (req, res) => {
     const balance    = Number(account.balance || 0);
     const halfBalance = parseFloat((balance / 2).toFixed(2));
 
-    /* ═══════════════════════════════════════════════════════════════════════
-       3. ACTIVE LOAN CHECK — blocks ALL withdrawal types
-    ═══════════════════════════════════════════════════════════════════════ */
     if (user.loans && user.loans.length > 0) {
       return res.status(403).json({
         message: "You cannot withdraw while you have an active loan",
