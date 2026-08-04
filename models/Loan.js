@@ -107,6 +107,45 @@ const loanSchema = new mongoose.Schema({
     }
   ],
 
+  // ─── Penalty Waiver Tracking ─────────────────────────────────────────────
+  penaltyWaived: {
+    type: Boolean,
+    default: false
+  },
+
+  penaltyWaivedAmount: {
+    type: Number,
+    default: 0
+  },
+
+  penaltyWaivedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null
+  },
+
+  penaltyWaivedByName: {
+    type: String,
+    default: null
+  },
+
+  penaltyWaivedAt: {
+    type: Date,
+    default: null
+  },
+
+  penaltyWaiverHistory: [
+    {
+      waivedAt:      { type: Date, default: Date.now },
+      waivedAmount:  { type: Number },
+      waivedBy:      { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      waivedByName:  { type: String },
+      balanceBefore: { type: Number },
+      balanceAfter:  { type: Number },
+      reason:        { type: String }
+    }
+  ],
+  
   // ─── Rollover Tracking ───────────────────────────────────────────────────
   rolloverPercentage: {
     type: Number,

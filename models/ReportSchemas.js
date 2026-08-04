@@ -551,6 +551,7 @@ const adminActionLogSchema = new mongoose.Schema(
         "admin_login",
         "admin_logout",
         "password_reset",
+        "loan_penalty_waive",
         "other",
       ],
       index: true,

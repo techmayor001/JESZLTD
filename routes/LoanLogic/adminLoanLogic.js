@@ -2597,4 +2597,93 @@ router.post(
     }
   }
 );
+
+
+
+
+// POST /api/loans/:loanId/waive-penalty
+router.post("/api/loans/:loanId/waive-penalty", ensureAdmin("approve_loans"), async (req, res) => {
+  try {
+    const { loanId } = req.params;
+    const { reason } = req.body;
+
+    const waivedBy = req.user?._id;
+    if (!waivedBy) return res.status(401).json({ success: false, message: "Unauthorized." });
+
+    const loan = await Loan.findById(loanId);
+    if (!loan) {
+      return res.status(404).json({ success: false, message: "Loan not found." });
+    }
+
+    if (!loan.totalPenalty || loan.totalPenalty <= 0) {
+      return res.status(400).json({ success: false, message: "This loan has no penalty to waive." });
+    }
+
+    const waivedAmount  = loan.totalPenalty;
+    const balanceBefore = loan.outstandingBalance || 0;
+    const balanceAfter  = Math.max(0, balanceBefore - waivedAmount);
+
+    const adminName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Admin';
+
+    loan.outstandingBalance  = balanceAfter;
+    loan.totalPenalty        = 0;
+    loan.penaltyWaived       = true;
+    loan.penaltyWaivedAmount = waivedAmount;
+    loan.penaltyWaivedBy     = waivedBy;
+    loan.penaltyWaivedByName = adminName;
+    loan.penaltyWaivedAt     = new Date();
+
+    loan.penaltyWaiverHistory.push({
+      waivedAt: new Date(),
+      waivedAmount,
+      waivedBy,
+      waivedByName: adminName,
+      balanceBefore,
+      balanceAfter,
+      reason: reason || "Waived by admin"
+    });
+
+    loan.updatedAt = new Date();
+    await loan.save();
+
+    // ── Admin action log — matches the pattern used across approve/reject/rollover ──
+    await AdminActionLog.create({
+      admin:       waivedBy,
+      adminRole:   req.user.role?.name || "admin",
+      actionType:  "loan_penalty_waive",
+      targetUser:  loan.user || null,
+      targetModel: "Loan",
+      targetId:    loan._id,
+      description: `Waived penalty of ₦${waivedAmount.toLocaleString()} on loan ${loan._id}`,
+      ipAddress:   req.ip,
+      userAgent:   req.headers["user-agent"],
+      status:      "success",
+      meta: {
+        loanId: loan._id,
+        waivedAmount,
+        balanceBefore,
+        balanceAfter,
+        reason: reason || "Waived by admin"
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: `Penalty of ₦${waivedAmount.toLocaleString()} waived successfully.`,
+      loan: {
+        _id:                 loan._id,
+        totalPenalty:        loan.totalPenalty,
+        outstandingBalance:  loan.outstandingBalance,
+        penaltyWaived:       loan.penaltyWaived,
+        penaltyWaivedAmount: loan.penaltyWaivedAmount,
+        penaltyWaivedByName: loan.penaltyWaivedByName,
+        penaltyWaivedAt:     loan.penaltyWaivedAt
+      }
+    });
+  } catch (err) {
+    console.error("Waive penalty error:", err);
+    return res.status(500).json({ success: false, message: "Server error while waiving penalty." });
+  }
+});
+
 module.exports = router;

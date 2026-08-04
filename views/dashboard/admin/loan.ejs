@@ -259,6 +259,17 @@
             text-transform: uppercase; letter-spacing: .04em; margin-left: 6px; vertical-align: middle;
         }
 
+        .penalty-waived-badge-inline {
+            display: inline-flex; align-items: center; gap: 4px; font-size: .65rem; font-weight: 800;
+            padding: 2px 8px; border-radius: 8px; background: rgba(16,185,129,.14); color: #059669;
+            text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; vertical-align: middle;
+        }
+        .waive-penalty-box {
+            background: linear-gradient(135deg, rgba(16,185,129,.06), rgba(5,150,105,.06));
+            border: 1.5px solid rgba(16,185,129,.25); border-radius: 10px; padding: .75rem 1rem;
+            margin-top: .75rem; font-size: .82rem;
+        }
+
         /* ══════════ RESPONSIVE ══════════ */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); }
@@ -557,6 +568,12 @@
                                 <% } else { %>
                                     <span class="text-muted">—</span>
                                 <% } %>
+                                <% if (loan.penaltyWaived) { %>
+                                    <br>
+                                    <span class="penalty-waived-badge-inline" title="Waived by <%= loan.penaltyWaivedByName || 'Admin' %> on <%= loan.penaltyWaivedAt ? new Date(loan.penaltyWaivedAt).toDateString() : '' %>">
+                                        <i class="fas fa-hand-holding-heart"></i>Penalty Waived
+                                    </span>
+                                <% } %>
                             </td>
 
                             <td><span class="badge bg-info-subtle text-info"><%= loan.interestRate %>%</span></td>
@@ -683,6 +700,19 @@
                         <div class="detail-item"><div class="detail-label">Penalty Rate</div><div class="detail-value text-danger" id="loanPenaltyRate"></div></div>
                         <div class="detail-item"><div class="detail-label">Total Penalty</div><div class="detail-value text-danger" id="loanTotalPenalty"></div></div>
                         <div class="detail-item"><div class="detail-label">Last Penalty Applied</div><div class="detail-value" id="loanLastPenalty" style="font-size:.85rem;"></div></div>
+                    </div>
+
+                    <button type="button" class="btn btn-sm btn-outline-success mt-1" id="waivePenaltyBtn" onclick="waivePenalty()">
+                        <i class="fas fa-hand-holding-heart me-1"></i>Waive Penalty
+                    </button>
+
+                    <div class="waive-penalty-box" id="penaltyWaivedInfo" style="display:none;">
+                        <div class="d-flex align-items-center gap-2 mb-1" style="color:#059669;font-weight:700;">
+                            <i class="fas fa-hand-holding-heart"></i>Penalty Waived
+                        </div>
+                        <div>Amount Waived: <strong id="waivedAmountText">—</strong></div>
+                        <div>Waived By: <strong id="waivedByText">—</strong></div>
+                        <div>Waived On: <strong id="waivedAtText">—</strong></div>
                     </div>
                 </div>
                 <div id="rolloverSection" style="display:none;">
@@ -903,6 +933,10 @@ const loansData = <%- JSON.stringify(loans.map(l => ({
     paidAt:             l.paidAt             || null,
     overdueAt:          l.overdueAt          || null,
     lastPenaltyAppliedAt: l.lastPenaltyAppliedAt || null,
+    penaltyWaived:         !!l.penaltyWaived,
+    penaltyWaivedAmount:   l.penaltyWaivedAmount   || 0,
+    penaltyWaivedByName:   l.penaltyWaivedByName   || null,
+    penaltyWaivedAt:       l.penaltyWaivedAt        || null,
     rejectionReason:    l.rejectionReason    || '',
     rejectionDetails:   l.rejectionDetails   || '',
     externalDuration:   l.externalDuration   || null,
@@ -1153,13 +1187,30 @@ document.getElementById('loanPaidAt').textContent             = fmtD(loan.paidAt
     stBadge.className   = 'badge fs-6 ' + (stColors[loan.status] || 'bg-secondary');
     stBadge.textContent = capSt(loan.status);
 
-    const penSec = document.getElementById('penaltySection');
-    if (loan.totalPenalty > 0 || loan.penaltyPercentage > 0) {
-        penSec.style.display = '';
-        document.getElementById('loanPenaltyRate').textContent  = loan.penaltyPercentage + '%';
-        document.getElementById('loanTotalPenalty').textContent = fmt(loan.totalPenalty);
-        document.getElementById('loanLastPenalty').textContent  = fmtD(loan.lastPenaltyAppliedAt);
-    } else { penSec.style.display = 'none'; }
+const penSec = document.getElementById('penaltySection');
+if (loan.totalPenalty > 0 || loan.penaltyPercentage > 0 || loan.penaltyWaived) {
+    penSec.style.display = '';
+    document.getElementById('loanPenaltyRate').textContent  = loan.penaltyPercentage + '%';
+    document.getElementById('loanTotalPenalty').textContent = fmt(loan.totalPenalty);
+    document.getElementById('loanLastPenalty').textContent  = fmtD(loan.lastPenaltyAppliedAt);
+
+    const waiveBtn   = document.getElementById('waivePenaltyBtn');
+    const waivedInfo = document.getElementById('penaltyWaivedInfo');
+
+    if (loan.penaltyWaived) {
+        waiveBtn.style.display   = 'none';
+        waivedInfo.style.display = '';
+        document.getElementById('waivedAmountText').textContent = fmt(loan.penaltyWaivedAmount);
+        document.getElementById('waivedByText').textContent     = loan.penaltyWaivedByName || 'Admin';
+        document.getElementById('waivedAtText').textContent     = fmtD(loan.penaltyWaivedAt);
+    } else if (loan.totalPenalty > 0) {
+        waiveBtn.style.display   = 'inline-block';
+        waivedInfo.style.display = 'none';
+    } else {
+        waiveBtn.style.display   = 'none';
+        waivedInfo.style.display = 'none';
+    }
+} else { penSec.style.display = 'none'; }
 
     const rolSec = document.getElementById('rolloverSection');
     if (loan.rolloverCount > 0 || loan.status === 'rolled_over') {
@@ -1646,6 +1697,34 @@ async function sendReminder(loanId) {
         const data = await res.json();
         alert(data.message || 'Reminder sent successfully.');
     } catch { alert('Failed to send reminder.'); }
+}
+
+async function waivePenalty() {
+    if (!selectedLoan) return;
+    if (!selectedLoan.totalPenalty || selectedLoan.totalPenalty <= 0) {
+        alert('No penalty to waive for this loan.');
+        return;
+    }
+    if (!confirm(`Waive penalty of ${fmt(selectedLoan.totalPenalty)} for this loan? This action cannot be undone.`)) return;
+
+    const btn = document.getElementById('waivePenaltyBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Waiving...';
+
+    try {
+        const res = await fetch(`/api/loans/${selectedLoan._id}/waive-penalty`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Failed to waive penalty.');
+        alert(data.message || 'Penalty waived successfully.');
+        location.reload();
+    } catch (err) {
+        alert(`Error: ${err.message}`);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-hand-holding-heart me-1"></i>Waive Penalty';
+    }
 }
 
 /* ══════════════════════════════════════
