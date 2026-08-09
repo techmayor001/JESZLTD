@@ -912,6 +912,7 @@ router.post("/api/loans/mark-paid", ensureAdmin("approve_loans"), async (req, re
 
     loan.status             = "paid";
     loan.outstandingBalance = 0;
+    loan.amount              = 0;
     loan.updatedAt          = new Date();
     await loan.save();
 
@@ -2297,7 +2298,7 @@ router.post(
 
       const hasOverpayment = overpayment > 0 && !isExternalLoan && !!memberAccount;
 
-      // ═══════════════════════════════════════════════════════════════════════
+          // ═══════════════════════════════════════════════════════════════════════
       // 6. UPDATE LOAN BALANCES
       // ═══════════════════════════════════════════════════════════════════════
       loan.totalRepay = parseFloat((loan.totalRepay - loanPortion).toFixed(2));
@@ -2305,6 +2306,9 @@ router.post(
         Math.max((loan.outstandingBalance || 0) - loanPortion, 0).toFixed(2)
       );
       loan.paidAmount = parseFloat(((loan.paidAmount || 0) + loanPortion).toFixed(2));
+      loan.amount = parseFloat(
+        Math.max((loan.amount || 0) - loanPortion, 0).toFixed(2)
+      );
 
       // ═══════════════════════════════════════════════════════════════════════
       // 7. TRANSACTION RECORD

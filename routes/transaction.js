@@ -317,7 +317,9 @@ router.get("/loan/verify", async (req, res) => {
 
     // Reduce balances
     loan.totalRepay         = parseFloat((loan.totalRepay - loanPortion).toFixed(2));
-    loan.outstandingBalance = Math.max(parseFloat(((loan.outstandingBalance || 0) - paidAmount).toFixed(2)), 0);
+    loan.outstandingBalance = Math.max(parseFloat(((loan.outstandingBalance || 0) - loanPortion).toFixed(2)), 0);
+    loan.paidAmount         = parseFloat(((loan.paidAmount || 0) + loanPortion).toFixed(2));
+    loan.amount              = Math.max(parseFloat(((loan.amount || 0) - loanPortion).toFixed(2)), 0);
 
     // =========================================================
     // COMPANY LEDGER — loan portion only (base repayment)
